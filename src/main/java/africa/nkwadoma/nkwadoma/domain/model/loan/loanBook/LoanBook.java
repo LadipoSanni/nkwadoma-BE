@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.model.loan.loanBook;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.*;
 
@@ -21,6 +22,8 @@ public class LoanBook {
     private Cohort cohort;
     private String loanProductId;
     private String actorId;
+    private MeedlNotification meedlNotification;
+    private List<RepaymentHistory> repaymentHistories;
     private List<Loanee> loanees;
 
     public void validateRepaymentRecord() throws MeedlException {

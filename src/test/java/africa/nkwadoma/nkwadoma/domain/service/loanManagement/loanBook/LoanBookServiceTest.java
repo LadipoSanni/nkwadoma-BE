@@ -149,32 +149,32 @@ public class LoanBookServiceTest {
     }
     @Test
     void uploadLoanBookWithNull(){
-        assertThrows(MeedlException.class,() -> loanBookUseCase.upLoadFile(null));
+        assertThrows(MeedlException.class,() -> loanBookUseCase.upLoadUserData(null));
     }
     @Test
     void uploadLoanBookWithNullCohort(){
         loanBook.setCohort(null);
-        assertThrows(MeedlException.class,() -> loanBookUseCase.upLoadFile(null));
+        assertThrows(MeedlException.class,() -> loanBookUseCase.upLoadUserData(null));
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "", "288b3cf9-7106-4405-9061-7cd92aceb474"})
     void uploadLoanBookWithInvalidCohortId(String id){
         Cohort cohort = Cohort.builder().id(id).build();
         loanBook.setCohort(cohort);
-        assertThrows(MeedlException.class,() -> loanBookUseCase.upLoadFile(loanBook));
+        assertThrows(MeedlException.class,() -> loanBookUseCase.upLoadUserData(loanBook));
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "", "288b3cf9-7106-4405-9061-7cd92aceb474"})
     void uploadLoanBookWithInvalidActorId(String id){
         Cohort cohort = Cohort.builder().createdBy(id).build();
         loanBook.setCohort(cohort);
-        assertThrows(MeedlException.class,() -> loanBookUseCase.upLoadFile(loanBook));
+        assertThrows(MeedlException.class,() -> loanBookUseCase.upLoadUserData(loanBook));
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "", "288b3cf9-7106-4405-9061-7cd92aceb474"})
     void uploadLoanBookWithInvalidLoanProductId(String id){
         loanBook.setLoanProductId(id);
-        assertThrows(MeedlException.class,() -> loanBookUseCase.upLoadFile(loanBook));
+        assertThrows(MeedlException.class,() -> loanBookUseCase.upLoadUserData(loanBook));
     }
 
     @Test

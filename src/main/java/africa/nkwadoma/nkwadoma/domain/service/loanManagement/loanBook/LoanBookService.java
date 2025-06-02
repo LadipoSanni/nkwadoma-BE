@@ -23,21 +23,19 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
+import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Component;
 
+import javax.management.Notification;
 import java.io.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -59,11 +57,12 @@ public class LoanBookService implements LoanBookUseCase {
     private final RepaymentHistoryUseCase repaymentHistoryUseCase;
 
     @Override
-    public LoanBook upLoadFile(LoanBook loanBook) throws MeedlException {
+    public LoanBook upLoadUserData(LoanBook loanBook) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanBook, "Loan book cannot be empty.");
         loanBook.validateLoanBook();
 
-        List<String[]> data = readFile(loanBook.getFile());
+        List<String> requiredHeaders = List.of("firstName", "lastName", "email", "phoneNumber", "dob", "initialDeposit", "amountRequested", "amountReceived");
+        List<Map<String, String>> data = readFile(loanBook.getFile(), requiredHeaders);
         log.info("Loan book read is {}", data);
 
         Cohort savedCohort = findCohort(loanBook.getCohort());
@@ -77,20 +76,22 @@ public class LoanBookService implements LoanBookUseCase {
     public void uploadRepaymentRecord(LoanBook repaymentRecordBook) throws MeedlException {
         MeedlValidator.validateObjectInstance(repaymentRecordBook, "Repayment record book cannot be empty.");
         repaymentRecordBook.validateRepaymentRecord();
-        List<String[]> data = readFile(repaymentRecordBook.getFile());
+        List<String> requiredHeaders = List.of("firstName", "lastName", "email", "paymentDate", "amountPaid", "modeOfPayment");
+
+        List<Map<String, String>>  data = readFile(repaymentRecordBook.getFile(), requiredHeaders);
+        repaymentRecordBook.setMeedlNotification(new MeedlNotification());
+//        List<String[]> data = readFile(repaymentRecordBook.getFile());
         log.info("Repayment record book read is {}", data);
 
-//        RepaymentHistory repaymentHistory =
 
         Cohort savedCohort = findCohort(repaymentRecordBook.getCohort());
-        List<RepaymentHistory> convertedRepaymentHistories = convertToRepaymentHistory(data, savedCohort);
-        List<RepaymentHistory> savedRepaymentHistories = saveRepaymentHistory(convertedRepaymentHistories, repaymentRecordBook.getActorId(), repaymentRecordBook.getCohort().getId());
+        repaymentRecordBook.setCohort(savedCohort);
+//        List<RepaymentHistory> convertedRepaymentHistories = convertToRepaymentHistory(data);
+//        repaymentRecordBook.setRepaymentHistories(convertedRepaymentHistories);
+        List<RepaymentHistory> savedRepaymentHistories = repaymentHistoryUseCase.saveCohortRepaymentHistory(repaymentRecordBook);
         log.info("Repayment record uploaded..");
     }
 
-    private List<RepaymentHistory> saveRepaymentHistory(List<RepaymentHistory> repaymentHistories, String actorId, String cohortId) throws MeedlException {
-        return repaymentHistoryUseCase.saveCohortRepaymentHistory(repaymentHistories, actorId, cohortId);
-    }
 
     private void completeLoanProcessing(LoanBook loanBook) {
         loanBook.getLoanees()
@@ -133,7 +134,6 @@ public class LoanBookService implements LoanBookUseCase {
         log.info("Loan Amount Approved is {}", loanee.getLoaneeLoanDetail().getAmountApproved());
         log.info("Amount received by this loanee {}", loanee.getLoaneeLoanDetail().getAmountReceived());
         LoanRequest loanRequest = LoanRequest.builder()
-                //TODO Amount received should be changed to amount approved. Not currently been collected.
                 .loanAmountApproved(loanee.getLoaneeLoanDetail().getAmountReceived())
                 .loanAmountRequested(loanee.getLoaneeLoanDetail().getAmountRequested())
                 .loanRequestDecision(LoanDecision.ACCEPTED)
@@ -175,51 +175,47 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
         MeedlValidator.validateObjectInstance(cohort, CohortMessages.COHORT_CANNOT_BE_EMPTY.getMessage());
         return cohortUseCase.viewCohortDetails(cohort.getCreatedBy(), cohort.getId());
     }
-    private List<RepaymentHistory> convertToRepaymentHistory(List<String[]> data, Cohort cohort) {
-        List<RepaymentHistory> repaymentHistories = new ArrayList<>();
+//    private List<RepaymentHistory> convertToRepaymentHistory(List<Map<String, String>>  data) {
+//        List<RepaymentHistory> repaymentHistories = new ArrayList<>();
+//
+//        log.info("Started creating Repayment record from data gotten from file upload {}, size {}",data, data.size());
+//        for (String[] row : data) {
+//            RepaymentHistory repaymentHistory = RepaymentHistory.builder()
+//                    .firstName(row[0].trim())
+//                    .lastName(row[1].trim())
+//                    .userIdentity(UserIdentity.builder().email(row[2].trim()).build())
+//                    .paymentDate(row[3].trim())
+//                    .amountPaid(new BigDecimal(row[4].trim()))
+//                    .modeOfPayment(ModeOfPayment.valueOf(row[5].trim()))
+//                    .build();
+//            log.info("Repayment history model created from file {}", repaymentHistory);
+//            repaymentHistories.add(repaymentHistory);
+//        }
+//        return repaymentHistories;
+//    }
 
-        log.info("Started creating Repayment record from data gotten from file upload {}, size {}",data, data.size());
-        for (String[] row : data) {
-            RepaymentHistory repaymentHistory = RepaymentHistory.builder()
-                    .firstName(row[0].trim())
-                    .lastName(row[1].trim())
-                    .userIdentity(UserIdentity.builder().email(row[2].trim()).build())
-                    .paymentDate(row[3].trim())
-                    .amountPaid(new BigDecimal(row[4].trim()))
-                    .modeOfPayment(ModeOfPayment.valueOf(row[5].trim()))
-                    .build();
-            log.info("Repayment history model created from file {}", repaymentHistory);
-            repaymentHistories.add(repaymentHistory);
-        }
-        return repaymentHistories;
-    }
 
-
-    private List<Loanee> convertToLoanees(List<String[]> data, Cohort cohort) {
+    List<Loanee> convertToLoanees(List<Map<String, String>> data, Cohort cohort) {
         List<Loanee> loanees = new ArrayList<>();
 
-        log.info("Started creating loanee data gotten from file upload {}, size {}",data, data.size());
-        for (String[] row : data) {
-
+        for (Map<String, String> row : data) {
             UserIdentity userIdentity = UserIdentity.builder()
-                    .firstName(row[0].trim())
-                    .lastName(row[1].trim())
-                    .email(row[2].trim())
-                    .phoneNumber(row[3].trim())
-                    .dateOfBirth(row[4].trim())
+                    .firstName(row.get("firstName"))
+                    .lastName(row.get("lastName"))
+                    .email(row.get("email"))
+                    .phoneNumber(row.get("phoneNumber"))
+                    .dateOfBirth(row.get("dob"))
                     .role(IdentityRole.LOANEE)
                     .createdAt(LocalDateTime.now())
                     .createdBy("73de0343-be48-4967-99ea-10be007e4347")
                     .build();
-            log.info("Built user identity object with email {}", userIdentity.getEmail());
 
             LoaneeLoanDetail loaneeLoanDetail = LoaneeLoanDetail.builder()
-                    .initialDeposit(new BigDecimal(row[5].trim()))
-                    .amountRequested(new BigDecimal(row[6].trim()))
-                    .amountReceived(new BigDecimal(row[7].trim()))
+                    .initialDeposit(new BigDecimal(row.get("initialDeposit")))
+                    .amountRequested(new BigDecimal(row.get("amountRequested")))
+                    .amountReceived(new BigDecimal(row.get("amountReceived")))
                     .build();
 
-            log.info("Test values in the file {}", loaneeLoanDetail);
             Loanee loanee = Loanee.builder()
                     .userIdentity(userIdentity)
                     .loaneeLoanDetail(loaneeLoanDetail)
@@ -227,13 +223,13 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
                     .onboardingMode(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)
                     .cohortId(cohort.getId())
                     .build();
-            log.info("Built loanee object with onboarding status {}", loanee.getOnboardingMode());
-            log.info("Loanee object detail loan after creating loanee object {}", loanee.getLoaneeLoanDetail());
 
             loanees.add(loanee);
         }
+
         return savedData(loanees);
     }
+
     private List<Loanee> savedData(List<Loanee> loanees){
         List<Loanee> savedLoanees = new ArrayList<>();
         log.info("Started saving converted data of loanees");
@@ -260,18 +256,18 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
         log.info("Done saving loanee data from file to db. loanees size {}", savedLoanees.size());
         return savedLoanees;
     }
-    private List<String[]> readFile(File file) throws MeedlException {
-        List<String[]> data;
+    private List<Map<String, String>> readFile(File file, List<String> requiredHeaders) throws MeedlException {
+        List<Map<String, String>> data;
         if (file.getName().endsWith(".csv")) {
             try {
-                data = readCSV(file);
+                data = validateAndReadCSV(file, requiredHeaders);
             }catch (IOException e){
                 log.error("Error occurred reading csv",e);
                 throw new MeedlException(e.getMessage());
             }
         } else if (file.getName().endsWith(".xlsx")) {
             try{
-                data = readExcel(file);
+                data = validateAndReadExcel(file);
             }catch (IOException e){
                 log.error("Error occurred reading excel",e);
                 throw new MeedlException(e.getMessage());
@@ -283,37 +279,134 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
         return data;
     }
 
-    private List<String[]> readCSV(File file) throws IOException {
-        List<String[]> rows = new ArrayList<>();
+    private List<Map<String, String>> validateAndReadCSV(File file, List<String> requiredHeaders) throws IOException, MeedlException {
+        List<Map<String, String>> records = new ArrayList<>();
+
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String headerLine = br.readLine();
+
+            Map<String, Integer> headerIndexMap = getStringIntegerMap(requiredHeaders, headerLine);
+
             String line;
-            br.readLine();
             while ((line = br.readLine()) != null) {
-                rows.add(line.split(","));
+                if (line.trim().isEmpty()) continue;
+
+                String[] values = line.split(",");
+                Map<String, String> rowMap = new HashMap<>();
+
+                for (String header : requiredHeaders) {
+                    int index = headerIndexMap.get(header);
+                    if (index >= values.length) {
+                        throw new MeedlException("Missing value for column: " + header);
+                    }
+                    rowMap.put(header, values[index].trim());
+                }
+
+                records.add(rowMap);
             }
         }
-        return rows;
+
+        if (records.isEmpty()) {
+            throw new MeedlException("CSV file has no data rows.");
+        }
+
+        return records;
     }
 
-    private List<String[]> readExcel(File file) throws IOException {
-        List<String[]> rows = new ArrayList<>();
+    private static Map<String, Integer> getStringIntegerMap(List<String> requiredHeaders, String headerLine) throws MeedlException {
+        if (headerLine == null) {
+            throw new MeedlException("CSV file is empty or missing headers.");
+        }
+
+        String[] headers = headerLine.split(",");
+        Map<String, Integer> headerIndexMap = new HashMap<>();
+
+        for (int i = 0; i < headers.length; i++) {
+            headerIndexMap.put(headers[i].trim(), i);
+        }
+
+        // Check for missing headers
+        for (String required : requiredHeaders) {
+            if (!headerIndexMap.containsKey(required)) {
+                throw new MeedlException("Missing required column: " + required);
+            }
+        }
+        return headerIndexMap;
+    }
+
+
+    private List<Map<String, String>> validateAndReadExcel(File file) throws IOException, MeedlException {
+        List<Map<String, String>> records = new ArrayList<>();
+        List<String> requiredHeaders = List.of("firstName", "lastName", "email", "phoneNumber", "DON", "initialDeposit", "amountRequested", "amountReceived");
+
         try (FileInputStream fis = new FileInputStream(file);
              Workbook workbook = new XSSFWorkbook(fis)) {
 
             Sheet sheet = workbook.getSheetAt(0);
-            boolean headerSkipped = false;
-            for (Row row : sheet) {
-                if (!headerSkipped) {
-                    headerSkipped = true;
-                    continue; // skip header
+            Iterator<Row> rowIterator = sheet.iterator();
+
+            if (!rowIterator.hasNext()) {
+                throw new MeedlException("Excel file is empty.");
+            }
+
+            // Read header row
+            Row headerRow = rowIterator.next();
+            Map<String, Integer> headerIndexMap = new HashMap<>();
+
+            for (Cell cell : headerRow) {
+                String header = cell.getStringCellValue().trim();
+                headerIndexMap.put(header, cell.getColumnIndex());
+            }
+
+            // Validate required headers
+            for (String required : requiredHeaders) {
+                if (!headerIndexMap.containsKey(required)) {
+                    throw new MeedlException("Missing required column: " + required);
                 }
-                String[] values = new String[3];
-                values[0] = row.getCell(0).getStringCellValue();
-                values[1] = String.valueOf((int) row.getCell(1).getNumericCellValue());
-                values[2] = row.getCell(2).getStringCellValue();
-                rows.add(values);
+            }
+
+            // Read and map data rows
+            while (rowIterator.hasNext()) {
+                Row row = rowIterator.next();
+                if (isRowEmpty(row)) continue;
+
+                Map<String, String> rowMap = new HashMap<>();
+                for (String header : requiredHeaders) {
+                    int colIndex = headerIndexMap.get(header);
+                    Cell cell = row.getCell(colIndex, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+                    if (cell == null) {
+                        throw new MeedlException("Missing value for column: " + header);
+                    }
+                    rowMap.put(header, getCellValueAsString(cell));
+                }
+
+                records.add(rowMap);
             }
         }
-        return rows;
+
+        if (records.isEmpty()) {
+            throw new MeedlException("Excel file has no data rows.");
+        }
+
+        return records;
     }
+    private boolean isRowEmpty(Row row) {
+        for (Cell cell : row) {
+            if (cell != null && cell.getCellType() != CellType.BLANK) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private String getCellValueAsString(Cell cell) {
+        return switch (cell.getCellType()) {
+            case STRING -> cell.getStringCellValue().trim();
+            case NUMERIC -> String.valueOf(cell.getNumericCellValue()).replaceAll("\\.0$", "");
+            case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
+            case FORMULA -> cell.getCellFormula();
+            default -> "";
+        };
+    }
+
 }

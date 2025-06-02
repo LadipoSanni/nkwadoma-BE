@@ -52,7 +52,7 @@ public class LoanBookController {
 //        LoanBook loanBook = loanBookRestMapper.map(convertToTempFile(file));
         LoanBook loanBook = mapLoanBookRequest(meedlUser, file, cohortId);
         loanBook.setLoanProductId(loanProductId);
-        LoanBook loanBookReturned = loanBookUseCase.upLoadFile(loanBook);
+        LoanBook loanBookReturned = loanBookUseCase.upLoadUserData(loanBook);
         LoanBookResponse loanBookResponse = new LoanBookResponse();
         loanBookResponse.setCohort(loanBookReturned.getCohort());
         loanBookResponse.setLoanees(loanBookReturned.getLoanees());
