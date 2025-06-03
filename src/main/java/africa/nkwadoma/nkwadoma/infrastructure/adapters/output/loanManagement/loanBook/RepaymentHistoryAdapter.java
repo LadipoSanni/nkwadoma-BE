@@ -44,14 +44,12 @@ public class RepaymentHistoryAdapter implements RepaymentHistoryOutputPort {
     }
 
     @Override
-    public Page<RepaymentHistory> findAllRepaymentHistoryAttachedToLoanee(String id, int pageSize, int pageNumber) throws MeedlException {
-        MeedlValidator.validateUUID(id, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+    public Page<RepaymentHistory> findRepaymentHistoryAttachedToALoaneeOrAll(String loaneeId, int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validatePageNumber(pageNumber);
 
-
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("paymentDateTime"));
-        Page<RepaymentHistoryEntity> repaymentHistoryEntities = repaymentHistoryRepository.findAllByLoaneeId(id,pageable);
+        Page<RepaymentHistoryEntity> repaymentHistoryEntities = repaymentHistoryRepository.findRepaymentHistoryByLoaneeIdOrAll(loaneeId,pageable);
         return repaymentHistoryEntities.map(repaymentHistoryMapper::map);
     }
 

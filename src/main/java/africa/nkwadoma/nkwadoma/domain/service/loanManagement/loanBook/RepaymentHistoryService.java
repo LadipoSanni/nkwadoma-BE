@@ -5,19 +5,19 @@ import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.loanBook.
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.loanBook.RepaymentHistoryOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoanRequest;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
-import javax.management.Notification;
 import java.util.List;
 
 @Slf4j
@@ -39,6 +39,17 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
         log.info("Cohort found when trying to save repayment record in service {}", cohort);
         loanBook.setCohort(cohort);
         return verifyUserByEmailAndAddCohort(loanBook);
+    }
+
+    @Override
+    public Page<RepaymentHistory> findAllRepaymentHistory(RepaymentHistory repaymentHistory, int pageSize, int pageNumber) throws MeedlException {
+        UserIdentity userIdentity = userIdentityOutputPort.findById(repaymentHistory.getActorId());
+        if (userIdentity.getRole().equals(IdentityRole.PORTFOLIO_MANAGER)){
+            return repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(repaymentHistory.getLoaneeId(),
+                    pageSize, pageNumber);
+        }
+        Loanee loanee = loaneeOutputPort.findByUserId(userIdentity.getId()).get();
+        return repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(loanee.getId(), pageSize, pageNumber);
     }
 
     private List<RepaymentHistory> verifyUserByEmailAndAddCohort(LoanBook loanBook) {

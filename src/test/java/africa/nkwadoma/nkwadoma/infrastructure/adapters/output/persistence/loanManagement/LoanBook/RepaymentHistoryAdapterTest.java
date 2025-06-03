@@ -103,7 +103,7 @@ public class RepaymentHistoryAdapterTest {
     void findAllLoaneeRepaymentHistory(){
         Page<RepaymentHistory> repaymentHistories = Page.empty();
         try {
-            repaymentHistories = repaymentHistoryOutputPort.findAllRepaymentHistoryAttachedToLoanee(loanee.getId(),pageSize,pageNumber);
+            repaymentHistories = repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(loanee.getId(),pageSize,pageNumber);
         }catch (MeedlException meedlException){
             log.info("RepaymentHistoryAdapterTest.findAllLoaneeRepaymentHistory(): {}", meedlException.getMessage());
         }
