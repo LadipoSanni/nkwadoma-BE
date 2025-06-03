@@ -39,4 +39,8 @@ public class LoaneeEntity {
     private String setReasonForDropOut;
     private LocalDateTime deferredDateAndTime;
     private String deferReason;
+    private boolean deferralRequested;
+    private boolean deferralApproved;
+    private boolean dropoutRequested;
+    private boolean dropoutApproved;
 }

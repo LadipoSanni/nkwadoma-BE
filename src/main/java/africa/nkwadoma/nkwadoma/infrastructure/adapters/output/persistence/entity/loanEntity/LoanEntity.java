@@ -23,4 +23,5 @@ public class LoanEntity {
     private LocalDateTime lastUpdatedDate;
     @Enumerated(EnumType.STRING)
     private LoanStatus loanStatus;
+
 }

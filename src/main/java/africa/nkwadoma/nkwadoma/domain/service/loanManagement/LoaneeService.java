@@ -433,10 +433,15 @@ public class LoaneeService implements LoaneeUseCase {
         }
         loanee.setDeferredDateAndTime(LocalDateTime.now());
         loanee.setDeferReason(reasonForDeferral);
-        loaneeOutputPort.save(loanee);
+        loanee.setDeferralRequested(true);
+        loanee = loaneeOutputPort.save(loanee);
+
+        if (loanee.isDeferralRequested() && loanee.isDeferralApproved()){
+            loan.setLoanStatus(LoanStatus.DEFERRED);
+            loanOutputPort.save(loan);
+        }
 
         asynchronousNotificationOutputPort.sendDeferralNotificationToEmployee(loanee, loan.getId(), NotificationFlag.LOAN_DEFERRAL);
-        loanOutputPort.save(loan);
         return "Deferral request sent";
     }
 
@@ -500,8 +505,11 @@ public class LoaneeService implements LoaneeUseCase {
         if (loan.get().getLoanStatus().equals(LoanStatus.DEFERRED)){
             throw new MeedlException("Loan already deferred");
         }
-
-        loan.get().setLoanStatus(LoanStatus.DEFERRED);
+        loanee.setDeferralApproved(true);
+        loanee = loaneeOutputPort.save(loanee);
+        if (loanee.isDeferralRequested() && loanee.isDeferralApproved()){
+            loan.get().setLoanStatus(LoanStatus.DEFERRED);
+        }
         loanOutputPort.save(loan.get());
         return loan;
     }

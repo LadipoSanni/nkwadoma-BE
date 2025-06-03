@@ -50,6 +50,10 @@ public class Loanee {
     private LocalDateTime deferredDateAndTime;
     private String loaneeName;
     private LoanStatus loanStatus;
+    private boolean deferralRequested;
+    private boolean deferralApproved;
+    private boolean dropoutRequested;
+    private boolean dropoutApproved;
 
 
     public void validate() throws MeedlException {
