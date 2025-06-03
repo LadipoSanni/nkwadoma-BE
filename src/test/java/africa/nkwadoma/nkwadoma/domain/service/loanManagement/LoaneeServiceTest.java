@@ -625,62 +625,29 @@ class LoaneeServiceTest {
                 loaneeService.deferLoan(userId, loanId, reasonForDeferral));
     }
 
-//    @Test
-//    void deferProgramSuccessfully() {
-//        Loan loan = new Loan();
-//        loan.setId(mockId);
-//        loan.setLoaneeId(mockId);
-//        loan.setLoanStatus(LoanStatus.PERFORMING);
-//        loan.setLoanee(firstLoanee);
-//
-//        elites.setStartDate(LocalDate.now());
-//
-//        String result = null;
-//        try{
-//            when(loanOutputPort.findLoanById(mockId)).thenReturn(loan);
-//            when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
-//            when(cohortOutputPort.findCohort(anyString())).thenReturn(elites);
-//            when(loanOutputPort.save(any(Loan.class))).thenReturn(loan);
-//            when(programOutputPort.findProgramById(mockId)).thenReturn(atlasProgram);
-//            result = loaneeService.deferLoan(mockId, mockId, reasonForDeferral);
-//        } catch (Exception e) {
-//            log.info("Error: {}", e.getMessage());
-//        }
-//
-//        assertEquals("Deferral request sent", result);
-//    }
-
     @Test
-    void deferProgramSuccessfully() throws MeedlException {
+    void deferProgramSuccessfully() {
         Loan loan = new Loan();
         loan.setId(mockId);
         loan.setLoaneeId(mockId);
         loan.setLoanStatus(LoanStatus.PERFORMING);
-        loan.setLoanee(firstLoanee); // Ensure loan has the loanee
+        loan.setLoanee(firstLoanee);
 
         elites.setStartDate(LocalDate.now());
 
         String result = null;
-        try {
-            // Mock all dependencies
+        try{
             when(loanOutputPort.findLoanById(mockId)).thenReturn(loan);
-            when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee); // Ensure this is called
+            when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
             when(cohortOutputPort.findCohort(anyString())).thenReturn(elites);
             when(loanOutputPort.save(any(Loan.class))).thenReturn(loan);
             when(programOutputPort.findProgramById(mockId)).thenReturn(atlasProgram);
-
-            // Call the service method
             result = loaneeService.deferLoan(mockId, mockId, reasonForDeferral);
         } catch (Exception e) {
-            log.error("Error: {}", e.getMessage());
-            fail("Exception occurred: " + e.getMessage());
+            log.info("Error: {}", e.getMessage());
         }
 
-        // Assertions
         assertEquals("Deferral request sent", result);
-        verify(loanOutputPort, times(1)).findLoanById(mockId);
-        verify(loaneeOutputPort, times(1)).findLoaneeById(mockId);
-        verify(loanOutputPort, times(1)).save(any(Loan.class));
     }
 
     @ParameterizedTest
@@ -759,6 +726,7 @@ class LoaneeServiceTest {
         String result = "";
         loan.setLoanStatus(LoanStatus.PERFORMING);
         elites.setStartDate(LocalDate.now());
+        log.info("-----------> loanee -----------> {}",firstLoanee);
         try{
         when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
         when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId()))

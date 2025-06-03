@@ -508,7 +508,8 @@ public class LoaneeService implements LoaneeUseCase {
             throw new MeedlException("Loan already deferred");
         }
         loanee.setDeferralApproved(true);
-        loanee = loaneeOutputPort.save(loanee);
+        loaneeOutputPort.save(loanee);
+        Loanee searchLoanee = loaneeOutputPort.findLoaneeById(loan.get().getLoaneeId());
         if (loanee.isDeferralRequested() && loanee.isDeferralApproved()){
             loan.get().setLoanStatus(LoanStatus.DEFERRED);
         }
