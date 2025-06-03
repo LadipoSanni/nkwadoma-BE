@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
 
   postgres:
@@ -9,11 +11,11 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_USER: postgres
     volumes:
-      - pg_data:/var/lib/postgresql/data  # Correctly placed volume
+      - pg_data:/var/lib/postgresql/data
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest
-    command: [ 'start-dev' ]
+    command: ['start-dev']
     ports:
       - "8090:8080"
     environment:
@@ -31,5 +33,22 @@ services:
     depends_on:
       - postgres
 
+  nkwadoma-app:
+    image: ${DOCKER_USERNAME}/nkwadoma:alpha
+    restart: unless-stopped
+    ports:
+      - "8768:8768"
+    env_file:
+      - /home/cloud-group/nkwadoma-systest.env
+    networks:
+      - meedl-network
+    depends_on:
+      - postgres
+      - keycloak
+
 volumes:
   pg_data:
+
+networks:
+  meedl-network:
+    driver: bridge
