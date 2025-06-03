@@ -121,7 +121,7 @@ public class RepaymentHistoryAdapterTest {
             log.info("RepaymentHistoryAdapterTest.findLoaneeRepaymentHistory(): {}", meedlException.getMessage());
         }
         assertNotNull(foundRepaymentHistory);
-        assertEquals(foundRepaymentHistory.getId(), repaymentHistory.getId());
+        assertEquals(foundRepaymentHistory.getId(), repaymentId);
     }
 
     @Test
