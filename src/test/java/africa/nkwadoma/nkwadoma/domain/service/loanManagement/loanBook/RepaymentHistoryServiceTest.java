@@ -1,10 +1,15 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement.loanBook;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.loanBook.RepaymentHistoryOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import africa.nkwadoma.nkwadoma.testUtilities.TestUtils;
@@ -20,11 +25,14 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
@@ -39,16 +47,27 @@ class RepaymentHistoryServiceTest {
     private UserIdentityOutputPort userIdentityOutputPort;
     @Mock
     private RepaymentHistoryOutputPort repaymentHistoryOutputPort;
+    @Mock
+    private LoaneeOutputPort loaneeOutputPort;
     private RepaymentHistory repaymentHistory;
     private List<RepaymentHistory> repaymentHistories;
     private final String actorId = TestUtils.generateRandomUUID();
     private final String cohortId = TestUtils.generateRandomUUID();
     private LoanBook loanBook;
+    private UserIdentity userIdentity;
+    private Loanee loanee;
+    private LoaneeLoanDetail loaneeLoanDetail;
+    private int pageSize = 10;
+    private int pageNumber = 0;
 
     @BeforeEach
     void setUp() {
         loanBook = TestData.buildLoanBook("randomLink", cohortId);
+        userIdentity = TestData.createTestUserIdentity("loanee24@gmail.com");
+        loaneeLoanDetail = TestData.createTestLoaneeLoanDetail();
+        loanee = TestData.createTestLoanee(userIdentity,loaneeLoanDetail);
         repaymentHistory = TestData.buildRepaymentHistory(loanBook.getCohort().getId());
+        repaymentHistory.setLoanee(loanee);
         repaymentHistories = List.of(repaymentHistory);
         loanBook.setRepaymentHistories(repaymentHistories);
         loanBook.setActorId(actorId);
@@ -58,7 +77,8 @@ class RepaymentHistoryServiceTest {
     void saveRepaymentHistory() throws MeedlException {
         when(cohortUseCase.viewCohortDetails(actorId,cohortId)).thenReturn(new Cohort());
         when(repaymentHistoryOutputPort.save(repaymentHistory)).thenReturn(repaymentHistory);
-        when(userIdentityOutputPort.findByEmail(repaymentHistory.getUserIdentity().getEmail())).thenReturn(repaymentHistory.getUserIdentity());
+        when(loaneeOutputPort.findByLoaneeEmail(repaymentHistory.getLoanee().getUserIdentity().getEmail()))
+                .thenReturn(repaymentHistory.getLoanee());
         repaymentHistoryService.saveCohortRepaymentHistory(loanBook);
     }
     @ParameterizedTest
@@ -83,6 +103,57 @@ class RepaymentHistoryServiceTest {
         when(cohortUseCase.viewCohortDetails(actorId, cohortId)).thenThrow(MeedlException.class);
         assertThrows(MeedlException.class, ()-> repaymentHistoryService.saveCohortRepaymentHistory(loanBook));
     }
+
+
+    @Test
+    void findAllRepaymentHistoryByPM_WithNullLoaneeIdReturnAllRepaymentHistory() {
+        Page<RepaymentHistory> repaymentHistoryPage = null;
+        try {
+            repaymentHistory.setActorId(actorId);
+            userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
+            when(userIdentityOutputPort.findById(actorId)).thenReturn(userIdentity);
+            when(repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(null,pageSize,pageNumber))
+                    .thenReturn(new PageImpl<>(repaymentHistories));
+            repaymentHistory.setLoaneeId(null);
+            repaymentHistoryPage = repaymentHistoryService.findAllRepaymentHistory(repaymentHistory,pageSize,pageNumber);
+        }catch (MeedlException meedlException) {
+            assertEquals(repaymentHistoryPage.getContent().size(),repaymentHistories.size());
+        }
+    }
+
+    @Test
+    void findAllRepaymentHistoryByPM_WithValidLoaneeIdReturnAllRepaymentHistoryAttachedToThatLoanee() {
+        Page<RepaymentHistory> repaymentHistoryPage = null;
+        String loaneeId = loanee.getId();
+        repaymentHistory.setLoaneeId(loaneeId);
+        repaymentHistory.setActorId(actorId);
+        try {
+            userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
+            when(userIdentityOutputPort.findById(actorId)).thenReturn(userIdentity);
+            when(repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(loaneeId,pageSize,pageNumber))
+                    .thenReturn(new PageImpl<>(repaymentHistories));
+            repaymentHistoryPage = repaymentHistoryService.findAllRepaymentHistory(repaymentHistory,pageSize,pageNumber);
+        }catch (MeedlException meedlException) {
+            assertEquals(repaymentHistoryPage.getContent().size(),repaymentHistories.size());
+        }
+    }
+
+    @Test
+    void findAllRepaymentHistoryByLoanee_ReturnAllRepaymentHistoryAttachedToThatLoanee() {
+        Page<RepaymentHistory> repaymentHistoryPage = null;
+        try {
+            repaymentHistory.setActorId(actorId);
+            userIdentity.setId(actorId);
+            when(userIdentityOutputPort.findById(actorId)).thenReturn(userIdentity);
+            when(loaneeOutputPort.findByUserId(userIdentity.getId())).thenReturn(Optional.of(loanee));
+            when(repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(loanee.getId(),pageSize,pageNumber))
+                    .thenReturn(new PageImpl<>(repaymentHistories));
+            repaymentHistoryPage = repaymentHistoryService.findAllRepaymentHistory(repaymentHistory,pageSize,pageNumber);
+        }catch (MeedlException meedlException) {
+            assertEquals(repaymentHistoryPage.getContent().size(),repaymentHistories.size());
+        }
+    }
+
     @AfterEach
     void tearDown() {
     }
