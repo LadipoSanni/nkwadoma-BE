@@ -1,15 +1,20 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.notification.meedlNotification;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +32,8 @@ import java.util.List;
 public class AsynchronousNotificationAdapter implements AsynchronousNotificationOutputPort {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final MeedlNotificationUsecase meedlNotificationUsecase;
+    private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
+    private final CohortOutputPort cohortOutputPort;
     private List<MeedlNotification> notificationsToSend;
 
     @Override
@@ -63,6 +70,27 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                     .senderMail(organizationIdentity.getEmail())
                     .senderFullName(organizationIdentity.getName())
                     .title("New organization with the name " + organizationIdentity.getName() + " has been invited.")
+                    .notificationFlag(notificationFlag)
+                    .build();
+            meedlNotificationUsecase.sendNotification(notification);
+        }
+    }
+
+    @Async
+    @Override
+    public void sendDeferralNotificationToEmployee(Loanee loanee, String loanId, NotificationFlag notificationFlag) throws MeedlException {
+        Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
+        List<OrganizationEmployeeIdentity> organizationEmployeeIdentities = organizationEmployeeIdentityOutputPort
+                .findAllByOrganization(cohort.getOrganizationId());
+        for (OrganizationEmployeeIdentity organizationEmployeeIdentity : organizationEmployeeIdentities){
+            MeedlNotification notification = MeedlNotification.builder()
+                    .user(organizationEmployeeIdentity.getMeedlUser())
+                    .timestamp(LocalDateTime.now())
+                    .contentId(loanId)
+                    .contentDetail(loanee.getUserIdentity().getFirstName() + " " + loanee.getUserIdentity().getLastName() + " requested to defer loan")
+                    .senderMail(loanee.getUserIdentity().getEmail())
+                    .senderFullName(loanee.getUserIdentity().getFirstName() + " " + loanee.getUserIdentity().getLastName())
+                    .title("Defer Loan Request")
                     .notificationFlag(notificationFlag)
                     .build();
             meedlNotificationUsecase.sendNotification(notification);

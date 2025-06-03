@@ -11,6 +11,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEm
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
@@ -76,6 +77,7 @@ public class LoaneeService implements LoaneeUseCase {
     private final LoanOutputPort loanOutputPort;
     private final MeedlNotificationOutputPort meedlNotificationOutputPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
+    private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
 
     @Override
     public Loanee addLoaneeToCohort(Loanee loanee) throws MeedlException {
@@ -407,31 +409,42 @@ public class LoaneeService implements LoaneeUseCase {
     }
 
     @Override
-    public String deferProgram(Loanee loanee, String userId) throws MeedlException {
-        MeedlValidator.validateUUID(loanee.getLoanId(), LoanMessages.INVALID_LOAN_ID.getMessage());
-        MeedlValidator.validateDataElement(loanee.getDeferReason(), "Reason cannot be empty");
+    public String deferLoan(String userId, String loanId, String reasonForDeferral) throws MeedlException {
+        MeedlValidator.validateUUID(userId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+        MeedlValidator.validateUUID(loanId, LoanMessages.LOAN_ID_REQUIRED.getMessage());
+        MeedlValidator.validateDataElement(reasonForDeferral, "Reason cannot be empty");
+
         Loan loan =
-                loanOutputPort.findLoanById(loanee.getLoanId());
-        Loanee foundLoanee = loaneeOutputPort.findLoaneeById(loan.getLoaneeId());
-        if (!userId.equals(foundLoanee.getUserIdentity().getId())) {
+                loanOutputPort.findLoanById(loanId);
+        Loanee loanee = loaneeOutputPort.findLoaneeById(loan.getLoaneeId());
+        log.info("-----> found loanee ------> {}", loanee);
+        if (!loanee.getUserIdentity().getId().equals(userId)) {
             throw new MeedlException("Access denied: A loanee cannot defer another loanee");
         }
-
-        Cohort cohort = cohortOutputPort.findCohort(foundLoanee.getCohortId());
+        Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
         if (!cohort.getCohortStatus().equals(CohortStatus.CURRENT)){
             throw new MeedlException("Deferral is only allowed for 'CURRENT' cohorts. This cohort's status is "+ cohort.getCohortStatus());
         }
         if (loan.getLoanStatus().equals(LoanStatus.DEFERRED)){
             throw new MeedlException("Loanee is already deferred");
         }
+        Program program = programOutputPort.findProgramById(cohort.getProgramId());
+        if(programDurationIsStillWithinFirstQuarter(cohort, program)){
+            throw new LoaneeException(LoaneeMessages.LOANEE_CANNOT_DEFER_LOAN.getMessage());
+        }
+        loanee.setDeferredDateAndTime(LocalDateTime.now());
+        loanee.setDeferReason(reasonForDeferral);
+        loanee.setDeferralRequested(true);
+        Loanee savedLoanee = loaneeOutputPort.save(loanee);
+        log.info("-----> saved loanee ------> {}", savedLoanee);
 
-        foundLoanee.setDeferredDateAndTime(LocalDateTime.now());
-        foundLoanee.setDeferReason(loanee.getDeferReason());
-        loaneeOutputPort.save(foundLoanee);
+        if (loanee.isDeferralRequested() && loanee.isDeferralApproved()){
+            loan.setLoanStatus(LoanStatus.DEFERRED);
+            loanOutputPort.save(loan);
+        }
 
-        loan.setLoanStatus(LoanStatus.DEFERRED);
-        loanOutputPort.save(loan);
-        return "Successfully deferred";
+        asynchronousNotificationOutputPort.sendDeferralNotificationToEmployee(loanee, loan.getId(), NotificationFlag.LOAN_DEFERRAL);
+        return "Deferral request sent";
     }
 
     @Override
@@ -469,14 +482,18 @@ public class LoaneeService implements LoaneeUseCase {
 
         boolean cohortExistInOrganization =
                 loaneeOutputPort.checkIfLoaneeCohortExistInOrganization(loanee.getId(),organizationEmployeeIdentity.get().getOrganization());
-        if (! cohortExistInOrganization) {
+        if (!cohortExistInOrganization) {
             throw new LoaneeException(LoaneeMessages.LOANEE_NOT_ASSOCIATE_WITH_ORGANIZATION.getMessage());
         }
 
+        Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
+        Program program = programOutputPort.findProgramById(cohort.getProgramId());
+        if (programDurationIsStillWithinFirstQuarter(cohort, program)){
+            throw new MeedlException(LoaneeMessages.LOANEE_CANNOT_DEFER_LOAN.getMessage());
+        }
+
         Optional<Loan> loan = findLoaneeLoanAndDeferLoan(loanee);
-
         sendLoaneeNotification(loan, loanee, userIdentity);
-
         sendPortfolioManagersNotification(loan, userIdentity);
 
         return "Loanee has been Deferred";
@@ -487,8 +504,15 @@ public class LoaneeService implements LoaneeUseCase {
         if (loan.isEmpty()){
             throw new LoanException(LoanMessages.LOANEE_LOAN_NOT_FOUND.getMessage());
         }
-
-        loan.get().setLoanStatus(LoanStatus.DEFERRED);
+        if (loan.get().getLoanStatus().equals(LoanStatus.DEFERRED)){
+            throw new MeedlException("Loan already deferred");
+        }
+        loanee.setDeferralApproved(true);
+        loaneeOutputPort.save(loanee);
+        Loanee searchLoanee = loaneeOutputPort.findLoaneeById(loan.get().getLoaneeId());
+        if (loanee.isDeferralRequested() && loanee.isDeferralApproved()){
+            loan.get().setLoanStatus(LoanStatus.DEFERRED);
+        }
         loanOutputPort.save(loan.get());
         return loan;
     }
@@ -566,7 +590,9 @@ public class LoaneeService implements LoaneeUseCase {
 
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
 
-        checkIfProgramDurationIsStillWithinFirstQuarter(cohort, program);
+        if(programDurationIsStillWithinFirstQuarter(cohort, program)){
+            throw new LoaneeException(LoaneeMessages.LOANEE_CANNOT_DROP_FROM_COHORT.getMessage());
+        }
 
         terminateLoaneeLoan(loanee);
 
@@ -611,14 +637,12 @@ public class LoaneeService implements LoaneeUseCase {
         loanOutputPort.save(loan.get());
     }
 
-    private static void checkIfProgramDurationIsStillWithinFirstQuarter(Cohort cohort, Program program) throws LoaneeException {
+    private boolean programDurationIsStillWithinFirstQuarter(Cohort cohort, Program program) {
         LocalDate cohortEndDate = cohort.getStartDate().plusMonths(program.getDuration());
         long totalDays = ChronoUnit.DAYS.between(cohort.getStartDate(), cohortEndDate);
         long quarterDays = totalDays / 4;
         LocalDate firstQuarterEnd = cohort.getStartDate().plusDays(quarterDays);
-        if (firstQuarterEnd.isBefore(LocalDate.now())) {
-            throw new LoaneeException(LoaneeMessages.LOANEE_CANNOT_DROP_FROM_COHORT.getMessage());
-        }
+        return firstQuarterEnd.isBefore(LocalDate.now());
     }
 
     private static void checkIfLoaneeExistInCohort(boolean existInCohort) throws LoaneeException {
