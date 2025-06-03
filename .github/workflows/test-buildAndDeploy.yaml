@@ -4,7 +4,6 @@ on:
   pull_request:
     branches:
       - 'dev'
-
   push:
     branches:
       - 'dev'
@@ -37,9 +36,8 @@ jobs:
           docker build -t nkwadoma:$GITHUB_SHA -f Dockerfile .
           docker tag nkwadoma:$GITHUB_SHA $IMAGE_TAG
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
-
       - name: Push Docker image to Docker Hub
-        run: docker push $IMAGE_TAG
+        run: docker push ${{ env.IMAGE_TAG }}
 
   deploy-to-local:
     runs-on: self-hosted
@@ -51,35 +49,25 @@ jobs:
         run: |
           ENV_FILE_PATH="/home/cloud-group/nkwadoma-systest.env"
           aws s3 cp s3://semicolon-delivery/nkwadoma/backend/systest/nkwadoma.env $ENV_FILE_PATH --region eu-west-1
-
       - name: Free port 8768 if in use
         run: |
           sudo fuser -k 8768/tcp || true
-
       - name: Restart container with auto-restart policy
         run: |
           CONTAINER_NAME=nkwadoma_container
           ENV_FILE_PATH="/home/cloud-group/nkwadoma-systest.env"
           IMAGE_TAG=${{ secrets.DOCKER_USERNAME }}/nkwadoma:alpha
-          
           if [ "$(docker ps -aq -f name=$CONTAINER_NAME)" ]; then
             docker stop $CONTAINER_NAME || true
             docker rm $CONTAINER_NAME || true
           fi
-
           docker network inspect meedl-network >/dev/null 2>&1 || docker network create meedl-network
-
           docker pull $IMAGE_TAG
-
           nohup docker run -d --env-file $ENV_FILE_PATH --network meedl-network --name $CONTAINER_NAME -p 8768:8768 \
             --restart unless-stopped \
             $IMAGE_TAG > /dev/null 2>&1 &
-
       - name: Confirm Deployment Success
         run: |
           sleep 10
           if docker ps --format '{{.Names}}' | grep -q "nkwadoma_container"; then
             echo "✅ Deployment to local machine successful!"
-          else
-            echo "❌ Deployment failed!"
-            exit 1
