@@ -417,6 +417,7 @@ public class LoaneeService implements LoaneeUseCase {
         Loan loan =
                 loanOutputPort.findLoanById(loanId);
         Loanee loanee = loaneeOutputPort.findLoaneeById(loan.getLoaneeId());
+        log.info("-----> found loanee ------> {}", loanee);
         if (!loanee.getUserIdentity().getId().equals(userId)) {
             throw new MeedlException("Access denied: A loanee cannot defer another loanee");
         }
@@ -434,7 +435,8 @@ public class LoaneeService implements LoaneeUseCase {
         loanee.setDeferredDateAndTime(LocalDateTime.now());
         loanee.setDeferReason(reasonForDeferral);
         loanee.setDeferralRequested(true);
-        loanee = loaneeOutputPort.save(loanee);
+        Loanee savedLoanee = loaneeOutputPort.save(loanee);
+        log.info("-----> saved loanee ------> {}", savedLoanee);
 
         if (loanee.isDeferralRequested() && loanee.isDeferralApproved()){
             loan.setLoanStatus(LoanStatus.DEFERRED);

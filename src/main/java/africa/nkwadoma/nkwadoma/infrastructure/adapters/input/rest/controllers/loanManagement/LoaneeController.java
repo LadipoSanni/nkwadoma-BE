@@ -43,8 +43,6 @@ public class LoaneeController {
 
     private final LoaneeRestMapper loaneeRestMapper;
     private final LoaneeUseCase loaneeUseCase;
-    private final LoanOutputPort loanOutputPort;
-
 
     @PostMapping("cohort")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
@@ -188,7 +186,6 @@ public class LoaneeController {
                                                        @RequestParam String loanId,
                                                        @RequestParam String reasonForDeferral) throws MeedlException {
         String userId = meedlUser.getClaimAsString("sub");
-//        Loanee loanee = loaneeRestMapper.toLoanee(deferProgramRequest);
         String response = loaneeUseCase.deferLoan(userId, loanId, reasonForDeferral);
 
         ApiResponse<String> apiResponse = ApiResponse.<String>builder()
