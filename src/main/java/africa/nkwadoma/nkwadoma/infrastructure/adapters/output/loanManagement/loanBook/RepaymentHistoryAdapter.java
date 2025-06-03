@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement.l
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.loanBook.RepaymentHistoryOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.loan.RepaymentHIstoryException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.loanBook.RepaymentHistoryMapper;
@@ -52,5 +53,13 @@ public class RepaymentHistoryAdapter implements RepaymentHistoryOutputPort {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("paymentDateTime"));
         Page<RepaymentHistoryEntity> repaymentHistoryEntities = repaymentHistoryRepository.findAllByLoaneeId(id,pageable);
         return repaymentHistoryEntities.map(repaymentHistoryMapper::map);
+    }
+
+    @Override
+    public RepaymentHistory findRepaymentHistoryById(String repaymentId) throws MeedlException {
+        MeedlValidator.validateUUID(repaymentId,"Repayment History Id cannot be null");
+        RepaymentHistoryEntity repaymentHistoryEntity = repaymentHistoryRepository.findById(repaymentId)
+                .orElseThrow(()-> new RepaymentHIstoryException("Repayment History Not Found"));
+        return repaymentHistoryMapper.map(repaymentHistoryEntity);
     }
 }

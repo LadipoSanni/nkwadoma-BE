@@ -10,4 +10,6 @@ public interface RepaymentHistoryOutputPort {
     void delete(String repaymentId) throws MeedlException;
 
     Page<RepaymentHistory> findAllRepaymentHistoryAttachedToLoanee(String id, int pageSize, int pageNumber) throws MeedlException;
+
+    RepaymentHistory findRepaymentHistoryById(String repaymentId) throws MeedlException;
 }

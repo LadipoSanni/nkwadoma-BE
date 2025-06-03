@@ -100,15 +100,33 @@ public class RepaymentHistoryAdapterTest {
 
     @Order(2)
     @Test
-    void findLoaneeRepaymentHistory(){
+    void findAllLoaneeRepaymentHistory(){
         Page<RepaymentHistory> repaymentHistories = Page.empty();
         try {
             repaymentHistories = repaymentHistoryOutputPort.findAllRepaymentHistoryAttachedToLoanee(loanee.getId(),pageSize,pageNumber);
         }catch (MeedlException meedlException){
-            log.info("RepaymentHistoryAdapterTest.findLoaneeRepaymentHistory(): {}", meedlException.getMessage());
+            log.info("RepaymentHistoryAdapterTest.findAllLoaneeRepaymentHistory(): {}", meedlException.getMessage());
         }
         assertNotNull(repaymentHistories);
         assertTrue(repaymentHistories.hasContent());
+    }
+
+    @Order(3)
+    @Test
+    void findLoaneeRepaymentHistoryByRepaymentId(){
+        RepaymentHistory foundRepaymentHistory = null;
+        try{
+            foundRepaymentHistory = repaymentHistoryOutputPort.findRepaymentHistoryById(repaymentId);
+        }catch (MeedlException meedlException){
+            log.info("RepaymentHistoryAdapterTest.findLoaneeRepaymentHistory(): {}", meedlException.getMessage());
+        }
+        assertNotNull(foundRepaymentHistory);
+        assertEquals(foundRepaymentHistory.getId(), repaymentHistory.getId());
+    }
+
+    @Test
+    void trowExceptionIfFindingRepaymentHistoryWithNullId(){
+        assertThrows(MeedlException.class, () ->repaymentHistoryOutputPort.findRepaymentHistoryById(null));
     }
 
 
