@@ -39,7 +39,7 @@ public class Loanee {
     private OnboardingMode onboardingMode;
     private LocalDateTime referralDateTime;
     private String referredBy;
-    private String setReasonForDropOut;
+    private String reasonForDropout;
     private List<RepaymentHistory> repaymentHistories;
     private String cohortName;
     private LocalDate cohortStartDate;

@@ -762,26 +762,30 @@ class LoaneeServiceTest {
 
     @Test
     void indicateDropOutLoanee() throws MeedlException {
-        String response = "";
-        try{
-            when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
-            when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId()))
-                    .thenReturn(Optional.of(organizationEmployeeIdentity));
-            when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
-            when(loaneeOutputPort.checkIfLoaneeCohortExistInOrganization(firstLoanee.getId(), organizationEmployeeIdentity.getOrganization()))
-                    .thenReturn(true);
-            firstLoanee.setLoaneeStatus(LoaneeStatus.DROPOUT);
-            when(loaneeOutputPort.save(firstLoanee)).thenReturn(firstLoanee);
-            when(userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER))
-                    .thenReturn(Collections.singletonList(userIdentity));
-            response = loaneeService.indicateDropOutLoanee(mockId,mockId);
-        }catch (MeedlException meedlException){
-            log.error(meedlException.getMessage());
-        }
-        verify(meedlNotificationOutputPort, times(2)).save(any(MeedlNotification.class));
-        assertEquals("Loanee has been dropped out", response);
-    }
+        String loanId = mockId;
+        Loan loan = new Loan();
+        loan.setLoaneeId(loanId);
+        firstLoanee.setId(loanId);
+        firstLoanee.setDropoutRequested(true);
 
+        when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
+        when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId()))
+                .thenReturn(Optional.of(organizationEmployeeIdentity));
+        when(loaneeOutputPort.findLoaneeById(loanId)).thenReturn(firstLoanee);
+        when(loaneeOutputPort.checkIfLoaneeCohortExistInOrganization(loanId, organizationEmployeeIdentity.getOrganization()))
+                .thenReturn(true);
+        when(userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER))
+                .thenReturn(Collections.singletonList(userIdentity));
+        when(loanOutputPort.findLoanById(loanId)).thenReturn(loan);
+        when(loaneeOutputPort.save(firstLoanee)).thenReturn(firstLoanee);
+        when(loanOutputPort.save(loan)).thenReturn(loan);
+
+        String response = loaneeService.indicateDropOutLoanee(mockId, loanId);
+        assertEquals("Loanee has been dropped out", response);
+        verify(meedlNotificationOutputPort, times(2)).save(any(MeedlNotification.class));
+        verify(loanOutputPort).save(argThat(l ->
+                l.getLoanStatus() == LoanStatus.DROPOUT));
+    }
 
     @Test
     void dropOutFromCohortByLoanee() throws MeedlException {
@@ -795,13 +799,11 @@ class LoaneeServiceTest {
             elites.setProgramId(atlasProgram.getId());
             atlasProgram.setDuration(4);
             when(programOutputPort.findProgramById(elites.getProgramId())).thenReturn(atlasProgram);
-            when(loanOutputPort.viewLoanByLoaneeId(firstLoanee.getId())).thenReturn(Optional.of(loan));
-            when(loanOutputPort.save(loan)).thenReturn(loan);
             when(organizationEmployeeIdentityOutputPort
                     .findAllEmployeesInOrganizationByOrganizationIdAndRole(
                             atlasProgram.getOrganizationId(), IdentityRole.ORGANIZATION_ADMIN))
                     .thenReturn(List.of(organizationEmployeeIdentity));
-
+            when(loanOutputPort.findLoanById(mockId)).thenReturn(loan);
             when(userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER))
                     .thenReturn(List.of(userIdentity));
             response = loaneeService.dropOutFromCohort(mockId, mockId, reason);
@@ -811,7 +813,34 @@ class LoaneeServiceTest {
         }
 
         verify(meedlNotificationOutputPort, times(2)).save(any(MeedlNotification.class));
-        assertEquals("loanee drop out from cohort", response); // Match method's return value
+        assertEquals("Dropout request sent", response);
+    }
+
+    @Test
+    void indicateDropOutLoanee_WhenDropoutIsNotRequested_ShouldNotChangeLoanStatus() throws MeedlException {
+        String loanId = mockId;
+        Loan loan = new Loan();
+        loan.setLoaneeId(loanId);
+        loan.setLoanStatus(LoanStatus.PERFORMING);
+
+        firstLoanee.setId(loanId);
+        firstLoanee.setDropoutRequested(false);
+        firstLoanee.setDropoutApproved(false);
+
+        when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
+        when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId()))
+                .thenReturn(Optional.of(organizationEmployeeIdentity));
+        when(loaneeOutputPort.findLoaneeById(loanId)).thenReturn(firstLoanee);
+        when(loaneeOutputPort.checkIfLoaneeCohortExistInOrganization(loanId, organizationEmployeeIdentity.getOrganization()))
+                .thenReturn(true);
+        when(loanOutputPort.findLoanById(loanId)).thenReturn(loan);
+        when(loaneeOutputPort.save(firstLoanee)).thenReturn(firstLoanee);
+        assertFalse(firstLoanee.isDropoutApproved());
+        String response = loaneeService.indicateDropOutLoanee(mockId, loanId);
+        assertEquals("Loanee has been dropped out", response);
+        assertTrue(firstLoanee.isDropoutApproved());
+        verify(loanOutputPort, never()).save(any());
+        verify(meedlNotificationOutputPort, times(1)).save(any(MeedlNotification.class));
     }
 
     @Test
@@ -821,6 +850,7 @@ class LoaneeServiceTest {
             when(loaneeOutputPort.findLoaneeById(any())).thenReturn(firstLoanee);
             elites.setStartDate(LocalDate.now().minusMonths(6));
             when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
+            when(loanOutputPort.findLoanById(mockId)).thenReturn(loan);
             firstLoanee.setCohortId(elites.getId());
             elites.setProgramId(atlasProgram.getId());
             atlasProgram.setDuration(12);

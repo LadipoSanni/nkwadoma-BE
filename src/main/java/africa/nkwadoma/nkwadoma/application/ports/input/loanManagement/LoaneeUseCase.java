@@ -31,9 +31,9 @@ public interface LoaneeUseCase {
 
     String deferLoan(String userId, String loanId, String reasonForDeferral) throws MeedlException;
 
-    String indicateDropOutLoanee(String actorId, String loaneeID) throws MeedlException;
+    String indicateDropOutLoanee(String userId, String loanId) throws MeedlException;
 
-    String dropOutFromCohort(String loaneeId, String cohortId, String reasonForDropOut) throws MeedlException;
+    String dropOutFromCohort(String userId, String cohortId, String reasonForDropout) throws MeedlException;
 
     String resumeProgram(String loanId, String cohortId, String userId) throws MeedlException;
 

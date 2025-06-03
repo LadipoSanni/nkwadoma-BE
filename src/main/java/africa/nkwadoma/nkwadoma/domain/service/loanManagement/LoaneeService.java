@@ -417,26 +417,28 @@ public class LoaneeService implements LoaneeUseCase {
         Loan loan =
                 loanOutputPort.findLoanById(loanId);
         Loanee loanee = loaneeOutputPort.findLoaneeById(loan.getLoaneeId());
-        log.info("-----> found loanee ------> {}", loanee);
         if (!loanee.getUserIdentity().getId().equals(userId)) {
+            log.info("Access denied: A loanee cannot defer another loanee");
             throw new MeedlException("Access denied: A loanee cannot defer another loanee");
         }
         Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
         if (!cohort.getCohortStatus().equals(CohortStatus.CURRENT)){
+            log.info("\"Deferral is only allowed for 'CURRENT' cohorts. This cohort's status is \"+ cohort.getCohortStatus()");
             throw new MeedlException("Deferral is only allowed for 'CURRENT' cohorts. This cohort's status is "+ cohort.getCohortStatus());
         }
         if (loan.getLoanStatus().equals(LoanStatus.DEFERRED)){
+            log.info("Loanee is already deferred");
             throw new MeedlException("Loanee is already deferred");
         }
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
         if(programDurationIsStillWithinFirstQuarter(cohort, program)){
+            log.info("Program duration is not within first quarter");
             throw new LoaneeException(LoaneeMessages.LOANEE_CANNOT_DEFER_LOAN.getMessage());
         }
         loanee.setDeferredDateAndTime(LocalDateTime.now());
         loanee.setDeferReason(reasonForDeferral);
         loanee.setDeferralRequested(true);
-        Loanee savedLoanee = loaneeOutputPort.save(loanee);
-        log.info("-----> saved loanee ------> {}", savedLoanee);
+        loaneeOutputPort.save(loanee);
 
         if (loanee.isDeferralRequested() && loanee.isDeferralApproved()){
             loan.setLoanStatus(LoanStatus.DEFERRED);
@@ -489,6 +491,7 @@ public class LoaneeService implements LoaneeUseCase {
         Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
         if (programDurationIsStillWithinFirstQuarter(cohort, program)){
+            log.info("Program duration is not within first quarter");
             throw new MeedlException(LoaneeMessages.LOANEE_CANNOT_DEFER_LOAN.getMessage());
         }
 
@@ -509,7 +512,6 @@ public class LoaneeService implements LoaneeUseCase {
         }
         loanee.setDeferralApproved(true);
         loaneeOutputPort.save(loanee);
-        Loanee searchLoanee = loaneeOutputPort.findLoaneeById(loan.get().getLoaneeId());
         if (loanee.isDeferralRequested() && loanee.isDeferralApproved()){
             loan.get().setLoanStatus(LoanStatus.DEFERRED);
         }
@@ -552,64 +554,66 @@ public class LoaneeService implements LoaneeUseCase {
     }
 
     @Override
-    public String indicateDropOutLoanee(String actorId, String loaneeId) throws MeedlException {
+    public String indicateDropOutLoanee(String userId, String loanId) throws MeedlException {
+        MeedlValidator.validateUUID(userId,UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateUUID(loanId, LoanMessages.INVALID_LOAN_ID.getMessage());
 
-        MeedlValidator.validateUUID(actorId,UserMessages.INVALID_USER_ID.getMessage());
-        MeedlValidator.validateUUID(loaneeId,LoaneeMessages.INVALID_LOANEE_ID.getMessage());
-
-        UserIdentity userIdentity = identityOutputPort.findById(actorId);
+        UserIdentity userIdentity = identityOutputPort.findById(userId);
         Optional<OrganizationEmployeeIdentity> organizationEmployeeIdentity =
                 organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId());
 
-        Loanee loanee = loaneeOutputPort.findLoaneeById(loaneeId);
-
+        Loan loan = loanOutputPort.findLoanById(loanId);
+        Loanee loanee = loaneeOutputPort.findLoaneeById(loan.getLoaneeId());
         boolean cohortExistInOrganization =
                 loaneeOutputPort.checkIfLoaneeCohortExistInOrganization(loanee.getId(),organizationEmployeeIdentity.get().getOrganization());
         if (! cohortExistInOrganization) {
             throw new LoaneeException(LoaneeMessages.LOANEE_NOT_ASSOCIATE_WITH_ORGANIZATION.getMessage());
         }
 
-        loanee.setLoaneeStatus(LoaneeStatus.DROPOUT);
+        loanee.setDropoutApproved(true);
         loaneeOutputPort.save(loanee);
+        if (loanee.isDropoutRequested() && loanee.isDropoutApproved()){
+            loan.setLoanStatus(LoanStatus.DROPOUT);
+            loanOutputPort.save(loan);
+        }
+
         sendLoaneeDropOutNotification(loanee, userIdentity);
-
         sendPortfolioManagerDropOutNotification(loanee, userIdentity);
-
         return "Loanee has been dropped out";
     }
 
     @Override
-    public String dropOutFromCohort(String loaneeId, String cohortId, String reasonForDropOut) throws MeedlException {
-        MeedlValidator.validateUUID(loaneeId,LoaneeMessages.INVALID_LOANEE_ID.getMessage());
-        MeedlValidator.validateUUID(cohortId,CohortMessages.INVALID_COHORT_ID.getMessage());
-        MeedlValidator.validateObjectInstance(reasonForDropOut,"Reason for drop out cannot be empty");
+    public String dropOutFromCohort(String userId, String loanId, String reasonForDropout) throws MeedlException {
+        MeedlValidator.validateUUID(loanId,LoanMessages.INVALID_LOAN_ID.getMessage());
+        MeedlValidator.validateUUID(userId, IdentityMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateObjectInstance(reasonForDropout,"Reason for drop out cannot be empty");
 
-        Loanee loanee = loaneeOutputPort.findLoaneeById(loaneeId);
-        Cohort cohort = cohortOutputPort.findCohort(cohortId);
-        checkIfLoaneeExistInCohort(loanee.getCohortId().equals(cohort.getId()));
-
+        Loan loan = loanOutputPort.findLoanById(loanId);
+        Loanee loanee = loaneeOutputPort.findLoaneeById(loan.getLoaneeId());
+        if (!loanee.getUserIdentity().getId().equals(userId)){
+            log.info("Loanee cannot dropout on behalf of another loanee");
+            throw new MeedlException("Loanee cannot dropout on behalf of another loanee");
+        }
+        Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
 
         if(programDurationIsStillWithinFirstQuarter(cohort, program)){
+            log.info("Program duration is not within the first quarter");
             throw new LoaneeException(LoaneeMessages.LOANEE_CANNOT_DROP_FROM_COHORT.getMessage());
         }
+        log.info("------------------> loanee status -----> {}", loanee);
+        loanee.setDropoutRequested(true);
+        loanee.setReasonForDropout(reasonForDropout);
+        Loanee savedLoanee = loaneeOutputPort.save(loanee);
+        log.info("------------------> Check loanee status -----> {}", savedLoanee);
 
-        terminateLoaneeLoan(loanee);
-
-        //Meedl refunds loanee initial deposit to organization
-
+        if (loanee.isDropoutRequested() && loanee.isDropoutApproved()){
+            loan.setLoanStatus(LoanStatus.DROPOUT);
+            loanOutputPort.save(loan);
+        }
         notifyOrganizationAdmin(program, loanee);
         sendPortfolioManagerDropOutNotification(loanee,loanee.getUserIdentity());
-
-        dropOutLoanee(reasonForDropOut, loanee);
-
-        return "loanee drop out from cohort";
-    }
-
-    private void dropOutLoanee(String reasonForDropOut, Loanee loanee) throws MeedlException {
-        loanee.setLoaneeStatus(LoaneeStatus.DROPOUT);
-        loanee.setSetReasonForDropOut(reasonForDropOut);
-        loaneeOutputPort.save(loanee);
+        return "Dropout request sent";
     }
 
     private void notifyOrganizationAdmin(Program program, Loanee loanee) throws MeedlException {
@@ -629,12 +633,6 @@ public class LoaneeService implements LoaneeUseCase {
             meedlNotification.setUser(organizationEmployee.getMeedlUser());
             meedlNotificationOutputPort.save(meedlNotification);
         }
-    }
-
-    private void terminateLoaneeLoan(Loanee loanee) throws MeedlException {
-        Optional<Loan> loan = loanOutputPort.viewLoanByLoaneeId(loanee.getId());
-        loan.get().setLoanStatus(LoanStatus.TERMINATED);
-        loanOutputPort.save(loan.get());
     }
 
     private boolean programDurationIsStillWithinFirstQuarter(Cohort cohort, Program program) {

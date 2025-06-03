@@ -5,6 +5,7 @@ import lombok.*;
 @Getter
 public enum IdentityMessages {
 
+    INVALID_USER_ID("User id cannot be empty"),
     USER_NOT_FOUND("User not found!"),
     CLIENT_NOT_FOUND("Client not found!"),
     USER_NOT_VERIFIED("User not verified."),
