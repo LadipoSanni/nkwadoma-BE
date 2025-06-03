@@ -4,7 +4,7 @@ on:
   pull_request:
     branches:
       - 'dev'
- 
+
   push:
     branches:
       - 'dev'
@@ -14,7 +14,7 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' || github.ref == 'refs/heads/dev'
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -28,17 +28,24 @@ jobs:
       - name: Build the application
         run: mvn clean package -DskipTests
 
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
       - name: Build and Tag Docker image
         run: |
-          IMAGE_TAG=nkwadoma:alpha
+          IMAGE_TAG=${{ secrets.DOCKER_USERNAME }}/nkwadoma:alpha
           docker build -t nkwadoma:$GITHUB_SHA -f Dockerfile .
           docker tag nkwadoma:$GITHUB_SHA $IMAGE_TAG
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+
+      - name: Push Docker image to Docker Hub
+        run: docker push $IMAGE_TAG
 
   deploy-to-local:
     runs-on: self-hosted
     needs: build-and-push
     if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+
     steps:
       - name: Download env file from S3
         run: |
@@ -53,17 +60,20 @@ jobs:
         run: |
           CONTAINER_NAME=nkwadoma_container
           ENV_FILE_PATH="/home/cloud-group/nkwadoma-systest.env"
+          IMAGE_TAG=${{ secrets.DOCKER_USERNAME }}/nkwadoma:alpha
           
           if [ "$(docker ps -aq -f name=$CONTAINER_NAME)" ]; then
             docker stop $CONTAINER_NAME || true
             docker rm $CONTAINER_NAME || true
           fi
-          
+
           docker network inspect meedl-network >/dev/null 2>&1 || docker network create meedl-network
-          
+
+          docker pull $IMAGE_TAG
+
           nohup docker run -d --env-file $ENV_FILE_PATH --network meedl-network --name $CONTAINER_NAME -p 8768:8768 \
             --restart unless-stopped \
-            nkwadoma:alpha > /dev/null 2>&1 &
+            $IMAGE_TAG > /dev/null 2>&1 &
 
       - name: Confirm Deployment Success
         run: |
