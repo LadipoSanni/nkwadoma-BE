@@ -29,16 +29,21 @@ jobs:
 
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
+        
       - name: Build and Tag Docker image
         run: |
           IMAGE_TAG=${{ secrets.DOCKER_USERNAME }}/nkwadoma:alpha
-          docker build -t nkwadoma:$GITHUB_SHA -f Dockerfile .
+          echo "Using image tag: $IMAGE_TAG"
+          docker build -t nkwadoma:$GITHUB_SHA -f Dockerfile .  # add --build-arg if needed
           docker tag nkwadoma:$GITHUB_SHA $IMAGE_TAG
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+          echo "Username: ${{ secrets.DOCKER_USERNAME }}" #to be removed
       - name: Push Docker image to Docker Hub
-        run: docker push ${{ env.IMAGE_TAG }}
+        run: docker push "$IMAGE_TAG"
+        env:
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
 
+      
   deploy-to-local:
     runs-on: self-hosted
     needs: build-and-push
