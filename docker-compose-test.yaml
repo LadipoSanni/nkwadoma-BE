@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
 
   postgres:
@@ -15,7 +13,7 @@ services:
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest
-    command: ['start-dev']
+    command: [ 'start-dev' ]
     ports:
       - "8090:8080"
     environment:
@@ -34,21 +32,18 @@ services:
       - postgres
 
   nkwadoma-app:
-    image: ${DOCKER_USERNAME}/nkwadoma:alpha
-    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: nkwadoma:alpha
     ports:
       - "8768:8768"
     env_file:
-      - /home/cloud-group/nkwadoma-systest.env
-    networks:
-      - meedl-network
+      - ./nkwadoma.env
     depends_on:
       - postgres
-      - keycloak
+    networks:
+      - default
 
 volumes:
   pg_data:
-
-networks:
-  meedl-network:
-    driver: bridge

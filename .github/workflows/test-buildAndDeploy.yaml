@@ -1,77 +1,77 @@
 name: Deploy Systest to Local
 
 on:
-  pull_request:
-    branches:
-      - 'dev'
-
   push:
-    branches:
-      - 'dev'
+    branches: [dev]
+  pull_request:
+    branches: [dev]
 
 jobs:
 
   build-and-push:
+    name: Build and Push Docker Image
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' || github.ref == 'refs/heads/dev'
 
     steps:
-      - name: Checkout code
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Set up JDK 17
+      - name: Set up Java 17
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Build the application
+      - name: Build Application (Skip Tests)
         run: mvn clean package -DskipTests
 
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      - name: Build and Tag Docker image
+      - name: Build and Push Docker Image
         run: |
           IMAGE_TAG=${{ secrets.DOCKER_USERNAME }}/nkwadoma:alpha
-          docker build -t nkwadoma:$GITHUB_SHA -f Dockerfile .
-          docker tag nkwadoma:$GITHUB_SHA $IMAGE_TAG
-          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
-
-      - name: Push Docker image to Docker Hub
-        run: docker push $IMAGE_TAG
+          docker build -t $IMAGE_TAG .
+          docker push $IMAGE_TAG
 
   deploy-to-local:
+    name: Deploy to Local Systest
     runs-on: self-hosted
     needs: build-and-push
     if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
 
     steps:
-      - name: Download env file from S3
+      - name: Download Environment File
         run: |
           ENV_FILE_PATH="/home/cloud-group/nkwadoma-systest.env"
           aws s3 cp s3://semicolon-delivery/nkwadoma/backend/systest/nkwadoma.env $ENV_FILE_PATH --region eu-west-1
 
-      - name: Free port 8768 if in use
-        run: |
-          sudo fuser -k 8768/tcp || true
+      - name: Free Port 8768 If In Use
+        run: sudo fuser -k 8768/tcp || true
 
-      - name: Restart container with auto-restart policy
+      - name: Restart Docker Container
         run: |
           CONTAINER_NAME=nkwadoma_container
           ENV_FILE_PATH="/home/cloud-group/nkwadoma-systest.env"
           IMAGE_TAG=${{ secrets.DOCKER_USERNAME }}/nkwadoma:alpha
-          
+
+          # Stop and remove container if it exists
           if [ "$(docker ps -aq -f name=$CONTAINER_NAME)" ]; then
             docker stop $CONTAINER_NAME || true
             docker rm $CONTAINER_NAME || true
           fi
 
+          # Ensure network exists
           docker network inspect meedl-network >/dev/null 2>&1 || docker network create meedl-network
 
+          # Pull and run new container
           docker pull $IMAGE_TAG
-
-          nohup docker run -d --env-file $ENV_FILE_PATH --network meedl-network --name $CONTAINER_NAME -p 8768:8768 \
+          nohup docker run -d \
+            --env-file $ENV_FILE_PATH \
+            --network meedl-network \
+            --name $CONTAINER_NAME \
+            -p 8768:8768 \
             --restart unless-stopped \
             $IMAGE_TAG > /dev/null 2>&1 &
 
@@ -81,5 +81,4 @@ jobs:
           if docker ps --format '{{.Names}}' | grep -q "nkwadoma_container"; then
             echo "✅ Deployment to local machine successful!"
           else
-            echo "❌ Deployment failed!"
-            exit 1
+            echo "❌ Deployment failed." && exit 1
