@@ -1,0 +1,61 @@
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.loanManagement.loanBook;
+
+
+import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.loanBook.RepaymentHistoryUseCase;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanBook.RepaymentHistoryResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loanManagement.loanBook.RepaymentHistoryRestMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.REPAYMENT_HISTORY;
+
+
+@RequestMapping(BASE_URL +  REPAYMENT_HISTORY)
+@RestController
+@RequiredArgsConstructor
+public class RepaymentHistoryController {
+
+
+    private final RepaymentHistoryUseCase repaymentHistoryUseCase;
+    private final RepaymentHistoryRestMapper repaymentHistoryRestMapper;
+
+    @GetMapping("all")
+    public ResponseEntity<ApiResponse<?>> viewAllRepaymentHistory(@AuthenticationPrincipal Jwt meedlUser,
+                                                                  @RequestParam(name = "loaneeId", required = false) String loaneeId,
+                                                                  @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                                  @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
+
+        RepaymentHistory repaymentHistory =
+                RepaymentHistory.builder().actorId(meedlUser.getClaimAsString("sub")).loaneeId(loaneeId).build();
+        Page<RepaymentHistory> repaymentHistories =
+                repaymentHistoryUseCase.findAllRepaymentHistory(repaymentHistory,pageSize,pageNumber);
+        List<RepaymentHistoryResponse> repaymentHistoryResponse = repaymentHistories.stream()
+                .map(repaymentHistoryRestMapper::toRepaymentResponse).toList();
+        PaginatedResponse<RepaymentHistoryResponse> paginatedResponse = new PaginatedResponse<>(
+                repaymentHistoryResponse,repaymentHistories.hasNext(),repaymentHistories.getTotalPages(),pageNumber,pageSize
+        );
+        ApiResponse<PaginatedResponse<RepaymentHistoryResponse>> apiResponse = ApiResponse.<PaginatedResponse<RepaymentHistoryResponse>>builder()
+                .data(paginatedResponse)
+                .message(SuccessMessages.ALL_PAYMENT_HISTORY)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+}
