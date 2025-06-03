@@ -10,4 +10,5 @@ public class UrlConstant {
     public static final String LOAN_BOOK = "loan/book";
     public static final String IDENTITY_VERIFICATION = "identity/verification";
     public static final String VIEW_LOAN_OFFER_URL = "/auth/login?loanOfferId=";
+    public static final String REPAYMENT_HISTORY = "repayment/history/";
 }
