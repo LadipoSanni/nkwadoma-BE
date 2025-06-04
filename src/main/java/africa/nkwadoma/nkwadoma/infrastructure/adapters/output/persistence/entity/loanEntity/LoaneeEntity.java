@@ -36,7 +36,7 @@ public class LoaneeEntity {
     private OnboardingMode onboardingMode;
     private LocalDateTime referralDateTime;
     private String referredBy;
-    private String setReasonForDropOut;
+    private String reasonForDropout;
     private LocalDateTime deferredDateAndTime;
     private String deferReason;
     private boolean deferralRequested;
