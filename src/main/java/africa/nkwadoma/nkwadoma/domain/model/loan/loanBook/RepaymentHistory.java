@@ -24,6 +24,8 @@ public class RepaymentHistory {
     private String lastName;
     private Loanee loanee;
     private LocalDateTime paymentDateTime;
+    private Integer month;
+    private Integer year;
     private BigDecimal amountPaid;
     private ModeOfPayment modeOfPayment;
     private BigDecimal totalAmountRepaid;

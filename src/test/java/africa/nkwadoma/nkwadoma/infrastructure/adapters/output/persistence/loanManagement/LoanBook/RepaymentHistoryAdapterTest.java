@@ -16,6 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 
+import java.time.LocalDateTime;
+import java.time.Month;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -102,8 +105,9 @@ public class RepaymentHistoryAdapterTest {
     @Test
     void findAllLoaneeRepaymentHistory(){
         Page<RepaymentHistory> repaymentHistories = Page.empty();
+        repaymentHistory.setLoaneeId(loanee.getId());
         try {
-            repaymentHistories = repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(loanee.getId(),pageSize,pageNumber);
+            repaymentHistories = repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(repaymentHistory,pageSize,pageNumber);
         }catch (MeedlException meedlException){
             log.info("RepaymentHistoryAdapterTest.findAllLoaneeRepaymentHistory(): {}", meedlException.getMessage());
         }
@@ -112,6 +116,34 @@ public class RepaymentHistoryAdapterTest {
     }
 
     @Order(3)
+    @Test
+    void findAllLoaneeRepaymentHistoryByMonth(){
+        Page<RepaymentHistory> repaymentHistories = Page.empty();
+        repaymentHistory.setMonth(LocalDateTime.now().getMonthValue());
+        try {
+            repaymentHistories = repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(repaymentHistory,pageSize,pageNumber);
+        }catch (MeedlException meedlException){
+            log.info("RepaymentHistoryAdapterTest.findAllLoaneeRepaymentHistory(): {}", meedlException.getMessage());
+        }
+        assertNotNull(repaymentHistories);
+        assertTrue(repaymentHistories.hasContent());
+    }
+
+    @Order(4)
+    @Test
+    void findAllLoaneeRepaymentHistoryByYear(){
+        Page<RepaymentHistory> repaymentHistories = Page.empty();
+        repaymentHistory.setYear(LocalDateTime.now().getYear());
+        try {
+            repaymentHistories = repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(repaymentHistory,pageSize,pageNumber);
+        }catch (MeedlException meedlException){
+            log.info("RepaymentHistoryAdapterTest.findAllLoaneeRepaymentHistory(): {}", meedlException.getMessage());
+        }
+        assertNotNull(repaymentHistories);
+        assertTrue(repaymentHistories.hasContent());
+    }
+
+    @Order(5)
     @Test
     void findLoaneeRepaymentHistoryByRepaymentId(){
         RepaymentHistory foundRepaymentHistory = null;
