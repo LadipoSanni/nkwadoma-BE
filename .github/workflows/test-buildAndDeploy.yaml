@@ -35,50 +35,50 @@ jobs:
           docker build -t $IMAGE_TAG .
           docker push $IMAGE_TAG
 
-  deploy-to-local:
-    name: Deploy to Local Systest
-    runs-on: self-hosted
-    needs: build-and-push
-    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+  # deploy-to-local:
+  #   name: Deploy to Local Systest
+  #   runs-on: self-hosted
+  #   needs: build-and-push
+  #   if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
 
-    steps:
-      - name: Download Environment File
-        run: |
-          ENV_FILE_PATH="/home/cloud-group/nkwadoma-systest.env"
-          aws s3 cp s3://semicolon-delivery/nkwadoma/backend/systest/nkwadoma.env $ENV_FILE_PATH --region eu-west-1
+  #   steps:
+  #     - name: Download Environment File
+  #       run: |
+  #         ENV_FILE_PATH="/home/cloud-group/nkwadoma-systest.env"
+  #         aws s3 cp s3://semicolon-delivery/nkwadoma/backend/systest/nkwadoma.env $ENV_FILE_PATH --region eu-west-1
 
-      - name: Free Port 8768 If In Use
-        run: sudo fuser -k 8768/tcp || true
+  #     - name: Free Port 8768 If In Use
+  #       run: sudo fuser -k 8768/tcp || true
 
-      - name: Restart Docker Container
-        run: |
-          CONTAINER_NAME=nkwadoma_container
-          ENV_FILE_PATH="/home/cloud-group/nkwadoma-systest.env"
-          IMAGE_TAG=${{ secrets.DOCKER_USERNAME }}/nkwadoma:alpha
+  #     - name: Restart Docker Container
+  #       run: |
+  #         CONTAINER_NAME=nkwadoma_container
+  #         ENV_FILE_PATH="/home/cloud-group/nkwadoma-systest.env"
+  #         IMAGE_TAG=${{ secrets.DOCKER_USERNAME }}/nkwadoma:alpha
 
-          # Stop and remove container if it exists
-          if [ "$(docker ps -aq -f name=$CONTAINER_NAME)" ]; then
-            docker stop $CONTAINER_NAME || true
-            docker rm $CONTAINER_NAME || true
-          fi
+  #         # Stop and remove container if it exists
+  #         if [ "$(docker ps -aq -f name=$CONTAINER_NAME)" ]; then
+  #           docker stop $CONTAINER_NAME || true
+  #           docker rm $CONTAINER_NAME || true
+  #         fi
 
-          # Ensure network exists
-          docker network inspect meedl-network >/dev/null 2>&1 || docker network create meedl-network
+  #         # Ensure network exists
+  #         docker network inspect meedl-network >/dev/null 2>&1 || docker network create meedl-network
 
-          # Pull and run new container
-          docker pull $IMAGE_TAG
-          nohup docker run -d \
-            --env-file $ENV_FILE_PATH \
-            --network meedl-network \
-            --name $CONTAINER_NAME \
-            -p 8768:8768 \
-            --restart unless-stopped \
-            $IMAGE_TAG > /dev/null 2>&1 &
+  #         # Pull and run new container
+  #         docker pull $IMAGE_TAG
+  #         nohup docker run -d \
+  #           --env-file $ENV_FILE_PATH \
+  #           --network meedl-network \
+  #           --name $CONTAINER_NAME \
+  #           -p 8768:8768 \
+  #           --restart unless-stopped \
+  #           $IMAGE_TAG > /dev/null 2>&1 &
 
-      - name: Confirm Deployment Success
-        run: |
-          sleep 10
-          if docker ps --format '{{.Names}}' | grep -q "nkwadoma_container"; then
-            echo "✅ Deployment to local machine successful!"
-          else
-            echo "❌ Deployment failed." && exit 1
+  #     - name: Confirm Deployment Success
+  #       run: |
+  #         sleep 10
+  #         if docker ps --format '{{.Names}}' | grep -q "nkwadoma_container"; then
+  #           echo "✅ Deployment to local machine successful!"
+  #         else
+  #           echo "❌ Deployment failed." && exit 1
