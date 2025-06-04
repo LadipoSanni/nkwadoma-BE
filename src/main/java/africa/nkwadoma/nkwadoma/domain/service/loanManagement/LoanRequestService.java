@@ -153,7 +153,6 @@ public class LoanRequestService implements LoanRequestUseCase {
                 .user(updatedLoanRequest.getLoanee().getUserIdentity())
                 .senderFullName(userIdentity.getFirstName()+" "+userIdentity.getLastName())
                 .senderMail(userIdentity.getEmail())
-                .read(Boolean.FALSE)
                 .notificationFlag(NotificationFlag.LOAN_OFFER)
                 .read(Boolean.FALSE)
                 .contentDetail(LOAN_OFFER_CONTENT.getMessage()).build();

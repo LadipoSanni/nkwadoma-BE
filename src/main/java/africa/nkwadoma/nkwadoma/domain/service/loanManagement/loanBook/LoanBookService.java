@@ -24,6 +24,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
+import africa.nkwadoma.nkwadoma.domain.validation.LoanBookValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,10 +32,11 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Component;
 
-import javax.management.Notification;
 import java.io.*;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 @Slf4j
@@ -61,8 +63,9 @@ public class LoanBookService implements LoanBookUseCase {
         MeedlValidator.validateObjectInstance(loanBook, "Loan book cannot be empty.");
         loanBook.validateLoanBook();
 
-        List<String> requiredHeaders = List.of("firstName", "lastName", "email", "phoneNumber", "dob", "initialDeposit", "amountRequested", "amountReceived");
+        List<String> requiredHeaders = List.of("firstname", "lastname", "email", "phonenumber", "dob", "initialdeposit", "amountrequested", "amountreceived");
         List<Map<String, String>> data = readFile(loanBook.getFile(), requiredHeaders);
+        LoanBookValidator.validateUserDataUploadFile(loanBook, data, requiredHeaders);
         log.info("Loan book read is {}", data);
 
         Cohort savedCohort = findCohort(loanBook.getCohort());
@@ -76,18 +79,17 @@ public class LoanBookService implements LoanBookUseCase {
     public void uploadRepaymentRecord(LoanBook repaymentRecordBook) throws MeedlException {
         MeedlValidator.validateObjectInstance(repaymentRecordBook, "Repayment record book cannot be empty.");
         repaymentRecordBook.validateRepaymentRecord();
-        List<String> requiredHeaders = List.of("firstName", "lastName", "email", "paymentDate", "amountPaid", "modeOfPayment");
+        List<String> requiredHeaders = List.of("firstname", "lastname", "email", "paymentdate", "amountpaid", "modeofpayment");
 
         List<Map<String, String>>  data = readFile(repaymentRecordBook.getFile(), requiredHeaders);
         repaymentRecordBook.setMeedlNotification(new MeedlNotification());
-//        List<String[]> data = readFile(repaymentRecordBook.getFile());
         log.info("Repayment record book read is {}", data);
 
 
         Cohort savedCohort = findCohort(repaymentRecordBook.getCohort());
         repaymentRecordBook.setCohort(savedCohort);
-//        List<RepaymentHistory> convertedRepaymentHistories = convertToRepaymentHistory(data);
-//        repaymentRecordBook.setRepaymentHistories(convertedRepaymentHistories);
+        List<RepaymentHistory> convertedRepaymentHistories = convertToRepaymentHistory(data);
+        repaymentRecordBook.setRepaymentHistories(convertedRepaymentHistories);
         List<RepaymentHistory> savedRepaymentHistories = repaymentHistoryUseCase.saveCohortRepaymentHistory(repaymentRecordBook);
         log.info("Repayment record uploaded..");
     }
@@ -175,24 +177,76 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
         MeedlValidator.validateObjectInstance(cohort, CohortMessages.COHORT_CANNOT_BE_EMPTY.getMessage());
         return cohortUseCase.viewCohortDetails(cohort.getCreatedBy(), cohort.getId());
     }
-//    private List<RepaymentHistory> convertToRepaymentHistory(List<Map<String, String>>  data) {
-//        List<RepaymentHistory> repaymentHistories = new ArrayList<>();
-//
-//        log.info("Started creating Repayment record from data gotten from file upload {}, size {}",data, data.size());
-//        for (String[] row : data) {
-//            RepaymentHistory repaymentHistory = RepaymentHistory.builder()
-//                    .firstName(row[0].trim())
-//                    .lastName(row[1].trim())
-//                    .userIdentity(UserIdentity.builder().email(row[2].trim()).build())
-//                    .paymentDate(row[3].trim())
-//                    .amountPaid(new BigDecimal(row[4].trim()))
-//                    .modeOfPayment(ModeOfPayment.valueOf(row[5].trim()))
-//                    .build();
-//            log.info("Repayment history model created from file {}", repaymentHistory);
-//            repaymentHistories.add(repaymentHistory);
-//        }
-//        return repaymentHistories;
-//    }
+    private List<RepaymentHistory> convertToRepaymentHistory(List<Map<String, String>>  data) {
+        List<RepaymentHistory> repaymentHistories = new ArrayList<>();
+
+        log.info("Started creating Repayment record from data gotten from file upload {}, size {}",data, data.size());
+        for (Map<String, String> row  : data) {
+
+            RepaymentHistory repaymentHistory = RepaymentHistory.builder()
+                    .firstName(row.get("firstname").trim())
+                    .lastName(row.get("lastname").trim())
+                    .loanee(Loanee.builder().userIdentity(UserIdentity.builder().email(validateUseEmail(row.get("email").trim())).build()).build())
+                    .amountPaid(validateMoney(row.get("amountpaid").trim(), "Amount repaid should be properly indicated"))
+                    .paymentDateTime(parseFlexibleDateTime(row.get("paymentdate").trim()))
+                    .modeOfPayment(validateModeOfPayment(row.get("modeofpayment").trim()))
+                    .build();
+            log.info("Repayment history model created from file {}", repaymentHistory);
+            repaymentHistories.add(repaymentHistory);
+        }
+        return repaymentHistories;
+    }
+
+    private String validateUseEmail(String email) {
+        try{
+            MeedlValidator.validateEmail(email);
+        }catch (MeedlException e){
+
+        }
+        return email;
+    }
+
+    private LocalDateTime parseFlexibleDateTime(String dateStr) {
+        LocalDateTime localDateTime = null;
+        try {
+            localDateTime = LocalDateTime.parse(dateStr.trim());
+        } catch (DateTimeParseException e) {
+            try {
+                log.warn("The date passed wasn't a local date with time. ", e);
+                localDateTime = LocalDate.parse(dateStr.trim()).atStartOfDay();
+            } catch (DateTimeParseException ex) {
+                log.error("The date format was invalid ", ex);
+            }
+        }
+        return localDateTime;
+    }
+
+    private ModeOfPayment validateModeOfPayment(String modeOfRepaymentToConvert) {
+        if (MeedlValidator.isEmptyString(modeOfRepaymentToConvert)) {
+            log.error("Mode of repayment as a string to be converted is empty {}", modeOfRepaymentToConvert);
+            //Todo create notification of this error
+        }
+        ModeOfPayment modeOfPayment = null;
+        try {
+            modeOfPayment = ModeOfPayment.valueOf(modeOfRepaymentToConvert);
+        } catch (Exception e) {
+            log.error("Error converting mode of repayment from string to enum.", e);
+            //Todo create notification on error
+        }
+        return modeOfPayment;
+    }
+
+    private BigDecimal validateMoney(String amountTobeConverted, String message) {
+        BigDecimal amount = null;
+        try {
+            amount = new BigDecimal(amountTobeConverted);
+            MeedlValidator.validateBigDecimalDataElement(amount);
+        } catch (Exception e) {
+            log.error("An error occurred while converting string to money {} ", message,e);
+            //TODO notification should be made here
+        }
+        return amount;
+    }
 
 
     List<Loanee> convertToLoanees(List<Map<String, String>> data, Cohort cohort) {
@@ -200,10 +254,10 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
 
         for (Map<String, String> row : data) {
             UserIdentity userIdentity = UserIdentity.builder()
-                    .firstName(row.get("firstName"))
-                    .lastName(row.get("lastName"))
+                    .firstName(row.get("firstname"))
+                    .lastName(row.get("lastname"))
                     .email(row.get("email"))
-                    .phoneNumber(row.get("phoneNumber"))
+                    .phoneNumber(row.get("phonenumber"))
                     .dateOfBirth(row.get("dob"))
                     .role(IdentityRole.LOANEE)
                     .createdAt(LocalDateTime.now())
@@ -211,9 +265,9 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
                     .build();
 
             LoaneeLoanDetail loaneeLoanDetail = LoaneeLoanDetail.builder()
-                    .initialDeposit(new BigDecimal(row.get("initialDeposit")))
-                    .amountRequested(new BigDecimal(row.get("amountRequested")))
-                    .amountReceived(new BigDecimal(row.get("amountReceived")))
+                    .initialDeposit(new BigDecimal(row.get("initialdeposit")))
+                    .amountRequested(new BigDecimal(row.get("amountrequested")))
+                    .amountReceived(new BigDecimal(row.get("amountreceived")))
                     .build();
 
             Loanee loanee = Loanee.builder()
@@ -285,7 +339,7 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String headerLine = br.readLine();
 
-            Map<String, Integer> headerIndexMap = getStringIntegerMap(requiredHeaders, headerLine);
+            Map<String, Integer> headerIndexMap = getAndVAlidateFileHeaderMap(requiredHeaders, headerLine);
 
             String line;
             while ((line = br.readLine()) != null) {
@@ -313,25 +367,41 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
         return records;
     }
 
-    private static Map<String, Integer> getStringIntegerMap(List<String> requiredHeaders, String headerLine) throws MeedlException {
+    private static Map<String, Integer> getAndVAlidateFileHeaderMap(List<String> requiredHeaders, String headerLine) throws MeedlException {
         if (headerLine == null) {
+            log.info("CSV file is empty or missing headers.");
             throw new MeedlException("CSV file is empty or missing headers.");
         }
 
         String[] headers = headerLine.split(",");
         Map<String, Integer> headerIndexMap = new HashMap<>();
 
-        for (int i = 0; i < headers.length; i++) {
-            headerIndexMap.put(headers[i].trim(), i);
-        }
+        extractFileHeaderMap(headers, headerIndexMap);
 
-        // Check for missing headers
+        validateFileHeader(requiredHeaders, headerIndexMap);
+        return headerIndexMap;
+    }
+
+    private static void extractFileHeaderMap(String[] headers, Map<String, Integer> headerIndexMap) {
+        for (int i = 0; i < headers.length; i++) {
+            String formattedFileHeader = formatFileHeader(headers[i].trim());
+            headerIndexMap.put(formattedFileHeader, i);
+        }
+    }
+
+    private static String formatFileHeader(String header) {
+        if (header == null) {
+            return null;
+        }
+        return header.replaceAll("\\s+", "").toLowerCase();
+    }
+
+    private static void validateFileHeader(List<String> requiredHeaders, Map<String, Integer> headerIndexMap) throws MeedlException {
         for (String required : requiredHeaders) {
             if (!headerIndexMap.containsKey(required)) {
                 throw new MeedlException("Missing required column: " + required);
             }
         }
-        return headerIndexMap;
     }
 
 
@@ -358,12 +428,7 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
                 headerIndexMap.put(header, cell.getColumnIndex());
             }
 
-            // Validate required headers
-            for (String required : requiredHeaders) {
-                if (!headerIndexMap.containsKey(required)) {
-                    throw new MeedlException("Missing required column: " + required);
-                }
-            }
+            validateFileHeader(requiredHeaders, headerIndexMap);
 
             // Read and map data rows
             while (rowIterator.hasNext()) {
