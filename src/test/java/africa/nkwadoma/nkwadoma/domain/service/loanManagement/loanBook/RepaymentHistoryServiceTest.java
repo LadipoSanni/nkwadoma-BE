@@ -187,6 +187,19 @@ class RepaymentHistoryServiceTest {
         }
     }
 
+    @Test
+    void searchRepaymentHistoryByLoaneeName() {
+        Page<RepaymentHistory> repaymentHistoryPage = null;
+        try {
+            repaymentHistory.setLoaneeName("d");
+            when(repaymentHistoryOutputPort.searchRepaymemtHistoryByLoaneeName(repaymentHistory,pageSize,pageNumber))
+                    .thenReturn(new PageImpl<>(repaymentHistories));
+            repaymentHistoryPage = repaymentHistoryService.searchRepaymentHistory(repaymentHistory,pageSize,pageNumber);
+        }catch (MeedlException meedlException) {
+            assertEquals(repaymentHistoryPage.getContent().size(),repaymentHistories.size());
+        }
+    }
+
     @AfterEach
     void tearDown() {
     }
