@@ -11,4 +11,6 @@ public interface RepaymentHistoryUseCase {
     List<RepaymentHistory> saveCohortRepaymentHistory(LoanBook loanBook) throws MeedlException;
 
     Page<RepaymentHistory> findAllRepaymentHistory(RepaymentHistory repaymentHistory, int pageSize, int pageNumber) throws MeedlException;
+
+    Page<RepaymentHistory> searchRepaymentHistory(RepaymentHistory repaymentHistory, int pageSize, int pageNumber) throws MeedlException;
 }

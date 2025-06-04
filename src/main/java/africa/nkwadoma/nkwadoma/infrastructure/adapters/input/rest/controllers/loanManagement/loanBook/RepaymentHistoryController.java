@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,6 +38,7 @@ public class RepaymentHistoryController {
     private final RepaymentHistoryRestMapper repaymentHistoryRestMapper;
 
     @GetMapping("all")
+    @PreAuthorize("hasRole('LOANEE') or hasRole('PORTFOLIO_MANAGER') ")
     public ResponseEntity<ApiResponse<?>> viewAllRepaymentHistory(@AuthenticationPrincipal Jwt meedlUser,
                                                                   @RequestParam(name = "loaneeId", required = false) String loaneeId,
                                                                   @RequestParam(name = "month", required = false) Integer month,
@@ -49,6 +51,33 @@ public class RepaymentHistoryController {
                         .month(month).year(year).build();
         Page<RepaymentHistory> repaymentHistories =
                 repaymentHistoryUseCase.findAllRepaymentHistory(repaymentHistory,pageSize,pageNumber);
+        List<RepaymentHistoryResponse> repaymentHistoryResponse = repaymentHistories.stream()
+                .map(repaymentHistoryRestMapper::toRepaymentResponse).toList();
+        PaginatedResponse<RepaymentHistoryResponse> paginatedResponse = new PaginatedResponse<>(
+                repaymentHistoryResponse,repaymentHistories.hasNext(),repaymentHistories.getTotalPages(),pageNumber,pageSize
+        );
+        ApiResponse<PaginatedResponse<RepaymentHistoryResponse>> apiResponse = ApiResponse.<PaginatedResponse<RepaymentHistoryResponse>>builder()
+                .data(paginatedResponse)
+                .message(SuccessMessages.ALL_PAYMENT_HISTORY)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("search")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') ")
+    public ResponseEntity<ApiResponse<?>> searchRepaymentHistory(@AuthenticationPrincipal Jwt meedlUser,
+                                                                  @RequestParam(name = "name", required = false) String name,
+                                                                  @RequestParam(name = "month", required = false) Integer month,
+                                                                  @RequestParam(name = "year", required = false) Integer year,
+                                                                  @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                                  @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
+
+        RepaymentHistory repaymentHistory =
+                RepaymentHistory.builder().actorId(meedlUser.getClaimAsString("sub")).loaneeName(name)
+                        .month(month).year(year).build();
+        Page<RepaymentHistory> repaymentHistories =
+                repaymentHistoryUseCase.searchRepaymentHistory(repaymentHistory,pageSize,pageNumber);
         List<RepaymentHistoryResponse> repaymentHistoryResponse = repaymentHistories.stream()
                 .map(repaymentHistoryRestMapper::toRepaymentResponse).toList();
         PaginatedResponse<RepaymentHistoryResponse> paginatedResponse = new PaginatedResponse<>(
