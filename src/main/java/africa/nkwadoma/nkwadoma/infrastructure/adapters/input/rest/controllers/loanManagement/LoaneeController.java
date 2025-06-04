@@ -2,15 +2,11 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.
 
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.*;
-import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.LoaneeDropOutRequest;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DeferProgramRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeDeferRequest;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.IndicateLoaneeDropOutRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeStatusRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
@@ -43,8 +39,6 @@ public class LoaneeController {
 
     private final LoaneeRestMapper loaneeRestMapper;
     private final LoaneeUseCase loaneeUseCase;
-    private final LoanOutputPort loanOutputPort;
-
 
     @PostMapping("cohort")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
@@ -182,13 +176,13 @@ public class LoaneeController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @PutMapping("defer/program")
+    @PutMapping("defer/loan")
     @PreAuthorize("hasRole('LOANEE')")
-    public ResponseEntity<ApiResponse<?>> deferProgram(@AuthenticationPrincipal Jwt meedlUser,
-                                                       @RequestBody DeferProgramRequest deferProgramRequest) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> deferLoan(@AuthenticationPrincipal Jwt meedlUser,
+                                                       @RequestParam String loanId,
+                                                       @RequestParam String reasonForDeferral) throws MeedlException {
         String userId = meedlUser.getClaimAsString("sub");
-        Loanee loanee = loaneeRestMapper.toLoanee(deferProgramRequest);
-        String response = loaneeUseCase.deferProgram(loanee, userId);
+        String response = loaneeUseCase.deferLoan(userId, loanId, reasonForDeferral);
 
         ApiResponse<String> apiResponse = ApiResponse.<String>builder()
                 .data(response)
@@ -233,8 +227,9 @@ public class LoaneeController {
     @PostMapping("indicate/dropout")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
     public ResponseEntity<ApiResponse<?>> indicateDropOutLoanee(@AuthenticationPrincipal Jwt meedlUser,
-                                                                @RequestBody IndicateLoaneeDropOutRequest indicateLoaneeDropOutRequest) throws MeedlException {
-        String response = loaneeUseCase.indicateDropOutLoanee(meedlUser.getClaimAsString("sub"), indicateLoaneeDropOutRequest.getLoaneeId());
+                                                                @RequestParam String loanId) throws MeedlException {
+        String userId = meedlUser.getClaimAsString("sub");
+        String response = loaneeUseCase.indicateDropOutLoanee(userId, loanId);
         ApiResponse<String> apiResponse = ApiResponse.<String>builder()
                 .data(response)
                 .message(LOANEE_DROPOUT)
@@ -245,13 +240,16 @@ public class LoaneeController {
 
     @PostMapping("self/dropout")
     @PreAuthorize("hasRole('LOANEE')")
-    public ResponseEntity<ApiResponse<?>> dropOutFromCohort(@RequestBody LoaneeDropOutRequest loaneeDropOutRequest) throws MeedlException{
+    public ResponseEntity<ApiResponse<?>> dropOutFromCohort(@AuthenticationPrincipal Jwt meedlUser,
+                                                            @RequestParam String loanId,
+                                                            @RequestParam String reasonForDropout
+                                                            ) throws MeedlException{
 
-        String response = loaneeUseCase.dropOutFromCohort(loaneeDropOutRequest.getLoaneeId(),
-                loaneeDropOutRequest.getCohortId(),loaneeDropOutRequest.getReasonForDropOut());
+        String userId = meedlUser.getClaimAsString("sub");
+        String response = loaneeUseCase.dropOutFromCohort(userId, loanId, reasonForDropout);
         ApiResponse<String> apiResponse = ApiResponse.<String>builder()
                 .data(response)
-                .message(LOANEE_DROPOUT)
+                .message(LOANEE_DROPOUT_REQUEST_SENT)
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);

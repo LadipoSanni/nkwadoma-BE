@@ -39,7 +39,7 @@ public class Loanee {
     private OnboardingMode onboardingMode;
     private LocalDateTime referralDateTime;
     private String referredBy;
-    private String setReasonForDropOut;
+    private String reasonForDropout;
     private List<RepaymentHistory> repaymentHistories;
     private String cohortName;
     private LocalDate cohortStartDate;
@@ -50,6 +50,10 @@ public class Loanee {
     private LocalDateTime deferredDateAndTime;
     private String loaneeName;
     private LoanStatus loanStatus;
+    private boolean deferralRequested;
+    private boolean deferralApproved;
+    private boolean dropoutRequested;
+    private boolean dropoutApproved;
 
 
     public void validate() throws MeedlException {

@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 public class RepaymentHistoryResponse {
 
     private String id;
+    private String firstName;
+    private String lastName;
     private LocalDateTime paymentDateTime;
     private BigDecimal amountPaid;
     private ModeOfPayment modeOfPayment;

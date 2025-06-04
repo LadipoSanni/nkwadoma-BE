@@ -24,6 +24,8 @@ public class RepaymentHistory {
     private String lastName;
     private Loanee loanee;
     private LocalDateTime paymentDateTime;
+    private Integer month;
+    private Integer year;
     private BigDecimal amountPaid;
     private ModeOfPayment modeOfPayment;
     private BigDecimal totalAmountRepaid;
@@ -31,6 +33,7 @@ public class RepaymentHistory {
     private Cohort cohort;
     private String actorId;
     private String loaneeId;
+    private String loaneeName;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(paymentDateTime,"Payment date cannot be empty");

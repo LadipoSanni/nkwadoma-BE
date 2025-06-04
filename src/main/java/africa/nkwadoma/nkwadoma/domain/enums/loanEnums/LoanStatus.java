@@ -3,5 +3,6 @@ package africa.nkwadoma.nkwadoma.domain.enums.loanEnums;
 public enum LoanStatus {
     PERFORMING,
     AWAITING_DISBURSAL,
-    TERMINATED, DEFERRED
+    DEFERRED,
+    DROPOUT
 }

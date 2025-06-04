@@ -45,11 +45,17 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
     public Page<RepaymentHistory> findAllRepaymentHistory(RepaymentHistory repaymentHistory, int pageSize, int pageNumber) throws MeedlException {
         UserIdentity userIdentity = userIdentityOutputPort.findById(repaymentHistory.getActorId());
         if (userIdentity.getRole().equals(IdentityRole.PORTFOLIO_MANAGER)){
-            return repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(repaymentHistory.getLoaneeId(),
+            return repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(repaymentHistory,
                     pageSize, pageNumber);
         }
         Loanee loanee = loaneeOutputPort.findByUserId(userIdentity.getId()).get();
-        return repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(loanee.getId(), pageSize, pageNumber);
+        repaymentHistory.setLoaneeId(loanee.getId());
+        return repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(repaymentHistory, pageSize, pageNumber);
+    }
+
+    @Override
+    public Page<RepaymentHistory> searchRepaymentHistory(RepaymentHistory repaymentHistory, int pageSize, int pageNumber) throws MeedlException {
+        return repaymentHistoryOutputPort.searchRepaymemtHistoryByLoaneeName(repaymentHistory,pageSize,pageNumber);
     }
 
     private List<RepaymentHistory> verifyUserByEmailAndAddCohort(LoanBook loanBook) {
