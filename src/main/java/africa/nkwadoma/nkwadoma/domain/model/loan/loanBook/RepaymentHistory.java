@@ -33,6 +33,7 @@ public class RepaymentHistory {
     private Cohort cohort;
     private String actorId;
     private String loaneeId;
+    private String loaneeName;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(paymentDateTime,"Payment date cannot be empty");

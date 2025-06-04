@@ -53,6 +53,11 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
         return repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(repaymentHistory, pageSize, pageNumber);
     }
 
+    @Override
+    public Page<RepaymentHistory> searchRepaymentHistory(RepaymentHistory repaymentHistory, int pageSize, int pageNumber) throws MeedlException {
+        return repaymentHistoryOutputPort.searchRepaymemtHistoryByLoaneeName(repaymentHistory,pageSize,pageNumber);
+    }
+
     private List<RepaymentHistory> verifyUserByEmailAndAddCohort(LoanBook loanBook) {
         log.info("Verifying loanees exist before saving their repayment records:\n {}", loanBook.getRepaymentHistories());
         return loanBook.getRepaymentHistories().stream()

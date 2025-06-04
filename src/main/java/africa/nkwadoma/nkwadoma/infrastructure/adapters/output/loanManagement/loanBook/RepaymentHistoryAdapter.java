@@ -61,4 +61,16 @@ public class RepaymentHistoryAdapter implements RepaymentHistoryOutputPort {
                 .orElseThrow(()-> new RepaymentHIstoryException("Repayment History Not Found"));
         return repaymentHistoryMapper.map(repaymentHistoryEntity);
     }
+
+    @Override
+    public Page<RepaymentHistory> searchRepaymemtHistoryByLoaneeName(RepaymentHistory repaymentHistory, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("paymentDateTime"));
+        Page<RepaymentHistoryEntity> repaymentHistoryEntities =
+                repaymentHistoryRepository.searchRepaymentHistory(repaymentHistory.getMonth(),repaymentHistory.getYear(),
+                        repaymentHistory.getLoaneeName(),pageable);
+        return repaymentHistoryEntities.map(repaymentHistoryMapper::map);
+    }
 }

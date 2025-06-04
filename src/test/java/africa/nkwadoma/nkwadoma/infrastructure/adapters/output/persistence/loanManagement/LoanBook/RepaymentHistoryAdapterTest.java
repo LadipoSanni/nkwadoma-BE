@@ -156,6 +156,20 @@ public class RepaymentHistoryAdapterTest {
         assertEquals(foundRepaymentHistory.getId(), repaymentId);
     }
 
+    @Order(6)
+    @Test
+    void searchRepaymentHistoryByLoaneeName(){
+        Page<RepaymentHistory> repaymentHistories = Page.empty();
+        repaymentHistory.setLoaneeName("d");
+        try {
+            repaymentHistories = repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(repaymentHistory,pageSize,pageNumber);
+        }catch (MeedlException meedlException){
+            log.info("RepaymentHistoryAdapterTest.findAllLoaneeRepaymentHistory(): {}", meedlException.getMessage());
+        }
+        assertNotNull(repaymentHistories);
+        assertTrue(repaymentHistories.hasContent());
+    }
+
     @Test
     void trowExceptionIfFindingRepaymentHistoryWithNullId(){
         assertThrows(MeedlException.class, () ->repaymentHistoryOutputPort.findRepaymentHistoryById(null));
