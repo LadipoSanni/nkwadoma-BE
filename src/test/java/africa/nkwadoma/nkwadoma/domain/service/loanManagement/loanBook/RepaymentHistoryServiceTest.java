@@ -28,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -110,9 +111,40 @@ class RepaymentHistoryServiceTest {
         Page<RepaymentHistory> repaymentHistoryPage = null;
         try {
             repaymentHistory.setActorId(actorId);
+            repaymentHistory.setLoaneeId(null);
             userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
             when(userIdentityOutputPort.findById(actorId)).thenReturn(userIdentity);
-            when(repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(null,pageSize,pageNumber))
+            when(repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(repaymentHistory,pageSize,pageNumber))
+                    .thenReturn(new PageImpl<>(repaymentHistories));
+            repaymentHistory.setLoaneeId(null);
+            repaymentHistoryPage = repaymentHistoryService.findAllRepaymentHistory(repaymentHistory,pageSize,pageNumber);
+        }catch (MeedlException meedlException) {
+            assertEquals(repaymentHistoryPage.getContent().size(),repaymentHistories.size());
+        }
+    }   @Test
+    void findAllRepaymentHistoryByMonth() {
+        Page<RepaymentHistory> repaymentHistoryPage = null;
+        try {
+            repaymentHistory.setActorId(actorId);
+            repaymentHistory.setMonth(LocalDateTime.now().getMonthValue());
+            userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
+            when(userIdentityOutputPort.findById(actorId)).thenReturn(userIdentity);
+            when(repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(repaymentHistory,pageSize,pageNumber))
+                    .thenReturn(new PageImpl<>(repaymentHistories));
+            repaymentHistory.setLoaneeId(null);
+            repaymentHistoryPage = repaymentHistoryService.findAllRepaymentHistory(repaymentHistory,pageSize,pageNumber);
+        }catch (MeedlException meedlException) {
+            assertEquals(repaymentHistoryPage.getContent().size(),repaymentHistories.size());
+        }
+    }   @Test
+    void findAllRepaymentHistoryByYear() {
+        Page<RepaymentHistory> repaymentHistoryPage = null;
+        try {
+            repaymentHistory.setActorId(actorId);
+            repaymentHistory.setYear(LocalDateTime.now().getYear());
+            userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
+            when(userIdentityOutputPort.findById(actorId)).thenReturn(userIdentity);
+            when(repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(repaymentHistory,pageSize,pageNumber))
                     .thenReturn(new PageImpl<>(repaymentHistories));
             repaymentHistory.setLoaneeId(null);
             repaymentHistoryPage = repaymentHistoryService.findAllRepaymentHistory(repaymentHistory,pageSize,pageNumber);
@@ -130,7 +162,7 @@ class RepaymentHistoryServiceTest {
         try {
             userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
             when(userIdentityOutputPort.findById(actorId)).thenReturn(userIdentity);
-            when(repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(loaneeId,pageSize,pageNumber))
+            when(repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(repaymentHistory,pageSize,pageNumber))
                     .thenReturn(new PageImpl<>(repaymentHistories));
             repaymentHistoryPage = repaymentHistoryService.findAllRepaymentHistory(repaymentHistory,pageSize,pageNumber);
         }catch (MeedlException meedlException) {
@@ -146,7 +178,8 @@ class RepaymentHistoryServiceTest {
             userIdentity.setId(actorId);
             when(userIdentityOutputPort.findById(actorId)).thenReturn(userIdentity);
             when(loaneeOutputPort.findByUserId(userIdentity.getId())).thenReturn(Optional.of(loanee));
-            when(repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(loanee.getId(),pageSize,pageNumber))
+            repaymentHistory.setLoaneeId(loanee.getId());
+            when(repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(repaymentHistory,pageSize,pageNumber))
                     .thenReturn(new PageImpl<>(repaymentHistories));
             repaymentHistoryPage = repaymentHistoryService.findAllRepaymentHistory(repaymentHistory,pageSize,pageNumber);
         }catch (MeedlException meedlException) {

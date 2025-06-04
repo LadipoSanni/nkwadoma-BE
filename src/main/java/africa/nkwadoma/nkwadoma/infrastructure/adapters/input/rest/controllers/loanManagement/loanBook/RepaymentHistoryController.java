@@ -39,11 +39,14 @@ public class RepaymentHistoryController {
     @GetMapping("all")
     public ResponseEntity<ApiResponse<?>> viewAllRepaymentHistory(@AuthenticationPrincipal Jwt meedlUser,
                                                                   @RequestParam(name = "loaneeId", required = false) String loaneeId,
+                                                                  @RequestParam(name = "month", required = false) Integer month,
+                                                                  @RequestParam(name = "year", required = false) Integer year,
                                                                   @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                                                   @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
 
         RepaymentHistory repaymentHistory =
-                RepaymentHistory.builder().actorId(meedlUser.getClaimAsString("sub")).loaneeId(loaneeId).build();
+                RepaymentHistory.builder().actorId(meedlUser.getClaimAsString("sub")).loaneeId(loaneeId)
+                        .month(month).year(year).build();
         Page<RepaymentHistory> repaymentHistories =
                 repaymentHistoryUseCase.findAllRepaymentHistory(repaymentHistory,pageSize,pageNumber);
         List<RepaymentHistoryResponse> repaymentHistoryResponse = repaymentHistories.stream()

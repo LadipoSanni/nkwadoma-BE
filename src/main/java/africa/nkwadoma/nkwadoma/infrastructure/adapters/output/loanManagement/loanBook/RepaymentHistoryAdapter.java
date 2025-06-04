@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement.loanBook;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.loanBook.RepaymentHistoryOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.RepaymentHIstoryException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
@@ -44,12 +43,14 @@ public class RepaymentHistoryAdapter implements RepaymentHistoryOutputPort {
     }
 
     @Override
-    public Page<RepaymentHistory> findRepaymentHistoryAttachedToALoaneeOrAll(String loaneeId, int pageSize, int pageNumber) throws MeedlException {
+    public Page<RepaymentHistory> findRepaymentHistoryAttachedToALoaneeOrAll(RepaymentHistory repaymentHistory, int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validatePageNumber(pageNumber);
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("paymentDateTime"));
-        Page<RepaymentHistoryEntity> repaymentHistoryEntities = repaymentHistoryRepository.findRepaymentHistoryByLoaneeIdOrAll(loaneeId,pageable);
+        Page<RepaymentHistoryEntity> repaymentHistoryEntities =
+                repaymentHistoryRepository.findRepaymentHistoryByLoaneeIdOrAll(repaymentHistory.getLoaneeId(),
+                        repaymentHistory.getMonth(),repaymentHistory.getYear(),pageable);
         return repaymentHistoryEntities.map(repaymentHistoryMapper::map);
     }
 
