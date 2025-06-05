@@ -26,8 +26,10 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.validation.LoanBookValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.utilities.TokenUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Component;
@@ -57,29 +59,32 @@ public class LoanBookService implements LoanBookUseCase {
     private final LoanRequestUseCase loanRequestUseCase;
     private final LoanOfferUseCase loanOfferUseCase;
     private final RepaymentHistoryUseCase repaymentHistoryUseCase;
+    private final TokenUtils tokenUtils;
 
     @Override
     public LoanBook upLoadUserData(LoanBook loanBook) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanBook, "Loan book cannot be empty.");
         loanBook.validateLoanBook();
 
-        List<String> requiredHeaders = List.of("firstname", "lastname", "email", "phonenumber", "dob", "initialdeposit", "amountrequested", "amountreceived");
+        List<String> requiredHeaders = getUserDataUploadHeaders();
+
         List<Map<String, String>> data = readFile(loanBook.getFile(), requiredHeaders);
         LoanBookValidator.validateUserDataUploadFile(loanBook, data, requiredHeaders);
         log.info("Loan book read is {}", data);
 
         Cohort savedCohort = findCohort(loanBook.getCohort());
-        List<Loanee> convertedLoanees = convertToLoanees(data, savedCohort);
+        List<Loanee> convertedLoanees = convertToLoanees(data, savedCohort, loanBook.getActorId());
         loanBook.setLoanees(convertedLoanees);
         referCohort(loanBook);
         completeLoanProcessing(loanBook);
         return loanBook;
     }
+
     @Override
     public void uploadRepaymentRecord(LoanBook repaymentRecordBook) throws MeedlException {
         MeedlValidator.validateObjectInstance(repaymentRecordBook, "Repayment record book cannot be empty.");
         repaymentRecordBook.validateRepaymentRecord();
-        List<String> requiredHeaders = List.of("firstname", "lastname", "email", "paymentdate", "amountpaid", "modeofpayment");
+        List<String> requiredHeaders = getRepaymentRecordUploadRequiredHeaders();
 
         List<Map<String, String>>  data = readFile(repaymentRecordBook.getFile(), requiredHeaders);
         repaymentRecordBook.setMeedlNotification(new MeedlNotification());
@@ -93,7 +98,6 @@ public class LoanBookService implements LoanBookUseCase {
         List<RepaymentHistory> savedRepaymentHistories = repaymentHistoryUseCase.saveCohortRepaymentHistory(repaymentRecordBook);
         log.info("Repayment record uploaded..");
     }
-
 
     private void completeLoanProcessing(LoanBook loanBook) {
         loanBook.getLoanees()
@@ -249,7 +253,7 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
     }
 
 
-    List<Loanee> convertToLoanees(List<Map<String, String>> data, Cohort cohort) {
+    List<Loanee> convertToLoanees(List<Map<String, String>> data, Cohort cohort, String actorId) {
         List<Loanee> loanees = new ArrayList<>();
 
         for (Map<String, String> row : data) {
@@ -261,7 +265,9 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
                     .dateOfBirth(row.get("dob"))
                     .role(IdentityRole.LOANEE)
                     .createdAt(LocalDateTime.now())
-                    .createdBy("73de0343-be48-4967-99ea-10be007e4347")
+                    .bvn(encryptValue(row.get("bvn")))
+                    .nin(encryptValue(row.get("nin")))
+                    .createdBy(actorId)
                     .build();
 
             LoaneeLoanDetail loaneeLoanDetail = LoaneeLoanDetail.builder()
@@ -282,6 +288,16 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
         }
 
         return savedData(loanees);
+    }
+
+    private String encryptValue(String value) {
+        try {
+            MeedlValidator.validateBvn(value);
+            return tokenUtils.encryptAES(value);
+        } catch (MeedlException e) {
+            log.error("Unable to encrypt value {}", value);
+        }
+        return StringUtils.EMPTY;
     }
 
     private List<Loanee> savedData(List<Loanee> loanees){
@@ -472,6 +488,18 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
             case FORMULA -> cell.getCellFormula();
             default -> "";
         };
+    }
+    private List<String> getUserDataUploadHeaders() {
+        return List.of("firstname", "lastname",
+                "email", "phonenumber",
+                "dob", "initialdeposit",
+                "amountrequested", "amountreceived",
+                "bvn", "nin");
+    }
+    private List<String> getRepaymentRecordUploadRequiredHeaders() {
+        return List.of("firstname", "lastname",
+                "email", "paymentdate",
+                "amountpaid", "modeofpayment");
     }
 
 }
