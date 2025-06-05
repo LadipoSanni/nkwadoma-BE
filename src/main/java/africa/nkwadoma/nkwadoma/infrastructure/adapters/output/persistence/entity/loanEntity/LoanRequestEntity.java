@@ -20,6 +20,7 @@ public class LoanRequestEntity {
     private String referredBy;
     private BigDecimal loanAmountRequested;
     private BigDecimal loanAmountApproved;
+    @Enumerated(EnumType.STRING)
     private LoanDecision loanRequestDecision;
     private String declineReason;
     private LocalDateTime dateTimeApproved;

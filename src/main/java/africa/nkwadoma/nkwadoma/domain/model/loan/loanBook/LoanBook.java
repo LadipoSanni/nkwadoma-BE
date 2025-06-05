@@ -29,12 +29,11 @@ public class LoanBook {
     public void validateRepaymentRecord() throws MeedlException {
         MeedlValidator.validateObjectInstance(this.getCohort(), "Cohort details can not be empty.");
         MeedlValidator.validateUUID(this.getCohort().getId(), "Cohort id cannot be null.");
-        MeedlValidator.validateObjectInstance(this.getFile(), "Please Provide file to upload");
+        MeedlValidator.validateObjectInstance(this.file, "Please provide file to upload");
 
     }
     public void validateLoanBook() throws MeedlException {
         validateRepaymentRecord();
-        MeedlValidator.validateObjectInstance(file, "Empty record can not be sent.");
        MeedlValidator.validateUUID(this.loanProductId, "Loan product id is required.");
     }
 }
