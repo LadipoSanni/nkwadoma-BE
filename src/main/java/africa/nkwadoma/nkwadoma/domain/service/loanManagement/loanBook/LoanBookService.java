@@ -51,6 +51,7 @@ public class LoanBookService implements LoanBookUseCase {
     private final IdentityManagerOutputPort identityManagerOutputPort;
     private final RepaymentHistoryOutputPort repaymentHistoryOutputPort;
     private final CohortUseCase cohortUseCase;
+    private final LoanBookValidator loanBookValidator;
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
     private final LoaneeUseCase loaneeUseCase;
     private final RespondToLoanReferralUseCase respondToLoanReferralUseCase;
@@ -69,7 +70,7 @@ public class LoanBookService implements LoanBookUseCase {
         List<String> requiredHeaders = getUserDataUploadHeaders();
 
         List<Map<String, String>> data = readFile(loanBook.getFile(), requiredHeaders);
-        LoanBookValidator.validateUserDataUploadFile(loanBook, data, requiredHeaders);
+        loanBookValidator.validateUserDataUploadFile(loanBook, data, requiredHeaders);
         log.info("Loan book read is {}", data);
 
         Cohort savedCohort = findCohort(loanBook.getCohort());

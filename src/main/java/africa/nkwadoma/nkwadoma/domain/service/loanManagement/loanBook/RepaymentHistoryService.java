@@ -12,6 +12,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
+import africa.nkwadoma.nkwadoma.domain.validation.LoanBookValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +29,9 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
     private final CohortUseCase cohortUseCase;
     private final RepaymentHistoryOutputPort repaymentHistoryOutputPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
+    private LoanBookValidator loanBookValidator;
     private final LoaneeOutputPort loaneeOutputPort;
+
 
     @Override
     public List<RepaymentHistory> saveCohortRepaymentHistory(LoanBook loanBook) throws MeedlException {
@@ -38,6 +41,7 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
         Cohort cohort = cohortUseCase.viewCohortDetails(loanBook.getActorId(), loanBook.getCohort().getId());
         log.info("Cohort found when trying to save repayment record in service {}", cohort);
         loanBook.setCohort(cohort);
+
         return verifyUserByEmailAndAddCohort(loanBook);
     }
 
