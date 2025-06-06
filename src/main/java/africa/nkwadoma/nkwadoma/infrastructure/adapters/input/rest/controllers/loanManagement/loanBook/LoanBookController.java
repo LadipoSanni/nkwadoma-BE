@@ -39,19 +39,18 @@ public class LoanBookController {
     private LoanBookRestMapper loanBookRestMapper;
     @Autowired
     private LoanBookUseCase loanBookUseCase;
-    @PostMapping(value = "/upload/{cohortId}/{loanProductId}/file/loanee/data", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/upload/{cohortId}/file/loanee/data", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = LOAN_BOOK_USER_DATA_CREATION_VIA_FILE_UPLOAD,description = LOAN_BOOK_USER_DATA_CREATION_DESCRIPTION)
-    public ResponseEntity<ApiResponse<?>> uploadLoanBook(@AuthenticationPrincipal Jwt meedlUser,
+    public ResponseEntity<ApiResponse<?>> uploadLoanBookUserData(@AuthenticationPrincipal Jwt meedlUser,
                                                          @RequestPart("file") MultipartFile file,
-                                                         @PathVariable String cohortId,
-                                                         @PathVariable String loanProductId
+                                                         @PathVariable String cohortId
                                                             ) throws MeedlException {
         log.info("Upload loan book. Api called .... ");
 //        LoanBook loanBook = loanBookRestMapper.map(cohortId, convertToTempFile(file), meedlUser.getClaimAsString("sub") );
 //        LoanBook loanBook = loanBookRestMapper.map(convertToTempFile(file));
         LoanBook loanBook = mapLoanBookRequest(meedlUser, file, cohortId);
-        loanBook.setLoanProductId(loanProductId);
+//        loanBook.setLoanProductId(loanProductId);
         LoanBook loanBookReturned = loanBookUseCase.upLoadUserData(loanBook);
         LoanBookResponse loanBookResponse = new LoanBookResponse();
         loanBookResponse.setCohort(loanBookReturned.getCohort());
@@ -67,7 +66,7 @@ public class LoanBookController {
     @PostMapping(value = "/upload/{cohortId}/file/loanee/repayment/record", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = LOAN_BOOK_REPAYMENT_RECORD_CREATION_VIA_FILE_UPLOAD,description = LOAN_BOOK_REPAYMENT_RECORD_CREATION_DESCRIPTION)
-    public ResponseEntity<ApiResponse<?>> uploadLoanBook(@AuthenticationPrincipal Jwt meedlUser,
+    public ResponseEntity<ApiResponse<?>> uploadLoanBookRepaymentRecord(@AuthenticationPrincipal Jwt meedlUser,
                                                          @RequestPart("file") MultipartFile file,
                                                          @PathVariable String cohortId
                                                         ) throws MeedlException {
