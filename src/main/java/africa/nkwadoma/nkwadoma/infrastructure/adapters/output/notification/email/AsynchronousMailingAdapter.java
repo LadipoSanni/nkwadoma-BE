@@ -94,6 +94,18 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
     public void sendEmailToInvitedOrganization(UserIdentity userIdentity) throws MeedlException {
         sendOrganizationEmployeeEmailUseCase.sendEmail(userIdentity);
     }
+    @Async
+    @Override
+    public void sendLoaneeInvite(List<Loanee> loanees) {
+        loanees.forEach(loanee -> {
+            try {
+                refer(loanee);
+                notifyAllPortfolioManager();
+            } catch (MeedlException e) {
+                log.warn("Error sending actor email on loan referral {}", e.getMessage());
+            }
+        });
+    }
 
     private void emailInviteNonExistingFinancierToVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
         financierEmailUseCase.inviteFinancierToVehicle(financier.getUserIdentity(), investmentVehicle);
