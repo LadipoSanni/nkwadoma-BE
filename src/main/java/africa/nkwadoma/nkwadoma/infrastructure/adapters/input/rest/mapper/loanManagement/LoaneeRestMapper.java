@@ -10,6 +10,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanBreakdownResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoaneeReferralResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoaneeResponse;
+import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
@@ -37,6 +38,8 @@ public interface LoaneeRestMapper {
     @Mapping(target = "loaneeLoanDetail.tuitionAmount", source = "loaneeLoanDetail.tuitionAmount")
     @Mapping(target = "cohortStartDate", source = "cohortStartDate")
     LoaneeResponse toLoaneeResponse(Loanee loanee);
+    List<LoaneeResponse> toLoaneeResponse(List<Loanee> loanees);
+
 
     @Mapping(target = "loanBreakdownId", source = "loaneeLoanBreakdownId")
     @Mapping(target = "itemName", source = "itemName")
@@ -55,4 +58,10 @@ public interface LoaneeRestMapper {
     @Mapping(target = "lastName", source = "userIdentity.lastName")
     @Mapping(target = "instituteName", source = "referredBy")
     LoanBeneficiaryResponse toLoanBeneficiaryResponse(Loanee loanee);
+
+    @Mapping(target = "userIdentity.email", source = "email")
+    @Mapping(target = "userIdentity.createdBy",  expression = "java(createdBy)")
+    Loanee map(String email, @Context String createdBy);
+
+    List<Loanee> map(List<String> emails, @Context String createdBy);
 }

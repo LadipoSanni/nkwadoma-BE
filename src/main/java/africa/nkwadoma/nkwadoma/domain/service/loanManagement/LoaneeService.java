@@ -80,6 +80,35 @@ public class LoaneeService implements LoaneeUseCase {
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
 
     @Override
+    public List<Loanee> inviteLoanees(List<Loanee> loanees){
+        loanees.stream()
+                .map(loanee -> {
+                    String email = null;
+                    try {
+                        email = loanee.getUserIdentity().getEmail();
+                        loanee = loaneeOutputPort.findByLoaneeEmail(email);
+                        if (!loanee.getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)) {
+                            UserIdentity userIdentity = identityManagerOutputPort.getUserByEmail(email)
+                                    .orElseThrow(()-> new MeedlException("Loanee does not exist on the platform"));
+                            if (userIdentity.isEnabled()){
+                                log.error("User with email {} is already active on th platform", email);
+                                throw new MeedlException("User with email "+email +" is already active on the platform.");
+                            }
+                        }
+                    } catch (MeedlException e) {
+                        log.error("Loanee with email doesn't exist");
+                        notifyPmLoaneeDoesNotExist(e.getMessage(), email);
+                    }
+                    return loanee;
+                }).toList();
+
+        return sendLoaneesEmail;
+    }
+
+    private void notifyPmLoaneeDoesNotExist(String message, String email) {
+    }
+
+    @Override
     public Loanee addLoaneeToCohort(Loanee loanee) throws MeedlException {
         log.info("Validating loanee before adding");
         MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());

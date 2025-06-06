@@ -40,6 +40,25 @@ public class LoaneeController {
     private final LoaneeRestMapper loaneeRestMapper;
     private final LoaneeUseCase loaneeUseCase;
 
+    @PostMapping("/invite")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> inviteLoanees(
+                                                    @AuthenticationPrincipal Jwt meedlUser,
+                                                    @RequestBody List<String> emails) {
+
+        List<Loanee> loanees = loaneeRestMapper.map(emails, meedlUser.getClaimAsString("sub"));
+        loanees = loaneeUseCase.inviteLoanees(loanees);
+        List<LoaneeResponse> loaneeResponse =
+                loaneeRestMapper.toLoaneeResponse(loanees);
+        ApiResponse<List<LoaneeResponse>> apiResponse = ApiResponse.<List<LoaneeResponse>>builder()
+                .data(loaneeResponse)
+                .message(LOANEE_INVITED_TO_PLATFORM)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+
+
     @PostMapping("cohort")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
     public ResponseEntity<ApiResponse<?>> addLoaneeToCohort(@AuthenticationPrincipal Jwt meedlUser,
