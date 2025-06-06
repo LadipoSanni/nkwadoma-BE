@@ -7,8 +7,8 @@ import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.loanBook.
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoaneeLoanDetailsOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.loanBook.RepaymentHistoryOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
@@ -49,7 +49,6 @@ public class LoanBookService implements LoanBookUseCase {
     private final LoaneeOutputPort loaneeOutputPort;
     private final LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
     private final IdentityManagerOutputPort identityManagerOutputPort;
-    private final RepaymentHistoryOutputPort repaymentHistoryOutputPort;
     private final CohortUseCase cohortUseCase;
     private final LoanBookValidator loanBookValidator;
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
@@ -61,6 +60,7 @@ public class LoanBookService implements LoanBookUseCase {
     private final LoanOfferUseCase loanOfferUseCase;
     private final RepaymentHistoryUseCase repaymentHistoryUseCase;
     private final TokenUtils tokenUtils;
+    private final LoanProductOutputPort loanProductOutputPort;
 
     @Override
     public LoanBook upLoadUserData(LoanBook loanBook) throws MeedlException {
@@ -69,7 +69,7 @@ public class LoanBookService implements LoanBookUseCase {
 
         List<String> requiredHeaders = getUserDataUploadHeaders();
 
-        List<Map<String, String>> data = readFile(loanBook.getFile(), requiredHeaders);
+        List<Map<String, String>> data = readFile(loanBook, requiredHeaders);
         loanBookValidator.validateUserDataUploadFile(loanBook, data, requiredHeaders);
         log.info("Loan book read is {}", data);
 
@@ -87,7 +87,7 @@ public class LoanBookService implements LoanBookUseCase {
         repaymentRecordBook.validateRepaymentRecord();
         List<String> requiredHeaders = getRepaymentRecordUploadRequiredHeaders();
 
-        List<Map<String, String>>  data = readFile(repaymentRecordBook.getFile(), requiredHeaders);
+        List<Map<String, String>>  data = readFile(repaymentRecordBook, requiredHeaders);
         repaymentRecordBook.setMeedlNotification(new MeedlNotification());
         log.info("Repayment record book read is {}", data);
 
@@ -104,6 +104,7 @@ public class LoanBookService implements LoanBookUseCase {
         loanBook.getLoanees()
                 .forEach(loanee -> {
                     try {
+                        log.info("Loanee with cohort name but is loan product name {}", loanee.getCohortName());
                         LoanReferral loanReferral = acceptLoanReferral(loanee);
                         LoanRequest loanRequest = acceptLoanRequest(loanee, loanReferral, loanBook);
                         acceptLoanOffer(loanRequest);
@@ -145,13 +146,26 @@ public class LoanBookService implements LoanBookUseCase {
                 .loanAmountRequested(loanee.getLoaneeLoanDetail().getAmountRequested())
                 .loanRequestDecision(LoanDecision.ACCEPTED)
                 .id(loanReferral.getId())
-                .loanProductId(loanBook.getLoanProductId())
+                .loanProductId(findLoanProductIdByName(loanee.getCohortName()))
                 .loanee(loanee)
                 .actorId(loanBook.getActorId())
                 .referredBy(loanee.getReferredBy())
                 .build();
         log.info("Accepting loan request for uploaded loanee {}", loanRequest);
         return loanRequestUseCase.respondToLoanRequest(loanRequest);
+    }
+
+    private String findLoanProductIdByName(String loanProductName) {
+        LoanProduct loanProduct = null;
+        try {
+            log.info("Loan product name being searched for in upload user data {}", loanProductName);
+            loanProduct = loanProductOutputPort.findByName(loanProductName);
+        } catch (MeedlException e) {
+            log.error("Loan product does not exist by this name {}", loanProductName);
+            throw new RuntimeException(e);
+        }
+
+        return loanProduct.getId();
     }
 
 
@@ -276,13 +290,14 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
                     .amountRequested(new BigDecimal(row.get("amountrequested")))
                     .amountReceived(new BigDecimal(row.get("amountreceived")))
                     .build();
-
+            log.info("loan product name found from csv {}", row.get("loanproduct"));
             Loanee loanee = Loanee.builder()
                     .userIdentity(userIdentity)
                     .loaneeLoanDetail(loaneeLoanDetail)
                     .loaneeStatus(LoaneeStatus.ADDED)
                     .onboardingMode(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)
                     .cohortId(cohort.getId())
+                    .cohortName(row.get("loanproduct"))
                     .build();
 
             loanees.add(loanee);
@@ -315,6 +330,7 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
                 loanee.setLoaneeLoanDetail(loanee.getLoaneeLoanDetail());
 
                 Loanee savedLoanee = loaneeOutputPort.save(loanee);
+                savedLoanee.setCohortName(loanee.getCohortName());
                 savedLoanee.getLoaneeLoanDetail().setAmountApproved(loanee.getLoaneeLoanDetail().getAmountApproved());
                 log.info("Loanee's amount approved in file upload: {}", savedLoanee.getLoaneeLoanDetail());
                 log.info("Loanee's actual loan details in file upload: {}", loanee.getLoaneeLoanDetail());
@@ -327,18 +343,18 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
         log.info("Done saving loanee data from file to db. loanees size {}", savedLoanees.size());
         return savedLoanees;
     }
-    private List<Map<String, String>> readFile(File file, List<String> requiredHeaders) throws MeedlException {
+    private List<Map<String, String>> readFile(LoanBook loanBoook, List<String> requiredHeaders) throws MeedlException {
         List<Map<String, String>> data;
-        if (file.getName().endsWith(".csv")) {
+        if (loanBoook.getFile().getName().endsWith(".csv")) {
             try {
-                data = validateAndReadCSV(file, requiredHeaders);
+                data = validateAndReadCSV(loanBoook, requiredHeaders);
             }catch (IOException e){
                 log.error("Error occurred reading csv",e);
                 throw new MeedlException(e.getMessage());
             }
-        } else if (file.getName().endsWith(".xlsx")) {
+        } else if (loanBoook.getFile().getName().endsWith(".xlsx")) {
             try{
-                data = validateAndReadExcel(file);
+                data = validateAndReadExcel(loanBoook.getFile());
             }catch (IOException e){
                 log.error("Error occurred reading excel",e);
                 throw new MeedlException(e.getMessage());
@@ -350,10 +366,10 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
         return data;
     }
 
-    private List<Map<String, String>> validateAndReadCSV(File file, List<String> requiredHeaders) throws IOException, MeedlException {
+    private List<Map<String, String>> validateAndReadCSV(LoanBook loanBook, List<String> requiredHeaders) throws IOException, MeedlException {
         List<Map<String, String>> records = new ArrayList<>();
 
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(loanBook.getFile()))) {
             String headerLine = br.readLine();
 
             Map<String, Integer> headerIndexMap = getAndVAlidateFileHeaderMap(requiredHeaders, headerLine);
@@ -495,7 +511,7 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
                 "email", "phonenumber",
                 "dob", "initialdeposit",
                 "amountrequested", "amountreceived",
-                "bvn", "nin");
+                "bvn", "nin", "loanproduct");
     }
     private List<String> getRepaymentRecordUploadRequiredHeaders() {
         return List.of("firstname", "lastname",

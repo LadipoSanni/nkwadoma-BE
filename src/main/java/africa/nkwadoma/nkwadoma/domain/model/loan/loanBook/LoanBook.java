@@ -34,6 +34,6 @@ public class LoanBook {
     }
     public void validateLoanBook() throws MeedlException {
         validateRepaymentRecord();
-       MeedlValidator.validateUUID(this.loanProductId, "Loan product id is required.");
+//       MeedlValidator.validateUUID(this.loanProductId, "Loan product id is required.");
     }
 }
