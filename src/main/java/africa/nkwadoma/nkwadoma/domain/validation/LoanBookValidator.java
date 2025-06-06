@@ -15,7 +15,6 @@ public class LoanBookValidator {
 
     public void validateUserDataUploadFile(LoanBook loanBook, List<Map<String, String>> data, List<String> requiredHeaders) {
 
-
     }
     public void validateUserDataFileHeader(LoanBook loanBook, List<String> requiredHeaders, Map<String, Integer> headerIndexMap){
         for (String required : requiredHeaders) {
