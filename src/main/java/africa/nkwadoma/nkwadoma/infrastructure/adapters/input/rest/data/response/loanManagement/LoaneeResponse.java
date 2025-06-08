@@ -32,7 +32,7 @@ public class LoaneeResponse {
     private String fitnessToWorkRating;
     private BigDecimal loanAmount;
     private Double interestRate;
-    private String paymentMoratoriumPeriod;
+    private int paymentMoratoriumPeriod;
     private String termsAndConditions;
     private int tenor;
 }

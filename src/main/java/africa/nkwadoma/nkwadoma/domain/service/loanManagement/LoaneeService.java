@@ -169,18 +169,15 @@ public class LoaneeService implements LoaneeUseCase {
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
         loanee.setProgramName(program.getName());
 
-        Optional<Loan> loan = loanOutputPort.viewLoanByLoaneeId(loanee.getLoanId());
-        log.info("-----------> LOanee ------> {}", loanee);
+        Optional<Loan> loan = loanOutputPort.viewLoanByLoaneeId(loanee.getId());
         if (loan.isPresent()) {
             loanee.setLoanId(loan.get().getId());
         }
-        log.info("-----------> LOanee after addding loan id ------> {}", loanee);
-
-
-        log.info("Loanee id to get loan offer ---------> {}", loanee.getId());
         LoanOffer loanOffer = loanOfferOutputPort.findLoanOfferByLoaneeId(loanee.getId());
-        log.info("--------------> Loan offer --------> {}", loanOffer);
-        log.info("Loanee id from loan offer ---------> {}", loanOffer.getLoaneeId());
+        loanee.setTenor(loanOffer.getLoanProduct().getTenor());
+        loanee.setTermsAndConditions(loanOffer.getLoanProduct().getTermsAndCondition());
+        loanee.setInterestRate(loanOffer.getLoanProduct().getInterestRate());
+        loanee.setPaymentMoratoriumPeriod(loanOffer.getLoanProduct().getMoratorium());
         return loanee;
     }
 
