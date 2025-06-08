@@ -101,6 +101,7 @@ class LoaneeServiceTest {
     private AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
     @Mock
     private LoanOfferOutputPort loanOfferOutputPort;
+
     private int pageSize = 2;
     private int pageNumber = 1;
 
@@ -157,6 +158,7 @@ class LoaneeServiceTest {
         firstLoanee.setLoaneeLoanDetail(loaneeLoanDetails);
         firstLoanee.setCreatedAt(LocalDateTime.now());
         firstLoanee.setLoanBreakdowns(List.of(loanBreakdown));
+        firstLoanee.setInstitutionName("Meedl");
 
         elites = new Cohort();
         elites.setId(mockId);
@@ -167,6 +169,7 @@ class LoaneeServiceTest {
         elites.setCohortStatus(CohortStatus.CURRENT);
         elites.setTuitionAmount(BigDecimal.valueOf(700));
         elites.setTotalCohortFee(BigDecimal.valueOf(800));
+        elites.setOrganizationId(mockId);
 
         programCohort = new ProgramCohort();
         programCohort.setCohort(elites);
@@ -383,6 +386,7 @@ class LoaneeServiceTest {
             when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
             when(programOutputPort.findProgramById(mockId)).thenReturn(atlasProgram);
             when(loanOfferOutputPort.findLoanOfferByLoaneeId(mockId)).thenReturn(loanOffer);
+            when(organizationIdentityOutputPort.findById(anyString())).thenReturn(organizationIdentity);
 
             loanee = loaneeService.viewLoaneeDetails(null, firstLoanee.getUserIdentity().getId());
         } catch (MeedlException exception) {
@@ -411,6 +415,7 @@ class LoaneeServiceTest {
         firstLoanee.getUserIdentity().setBvn("12345678900");
         firstLoanee.getUserIdentity().setRole(IdentityRole.LOANEE);
 
+
         Loanee loanee = null;
         try{
             when(loaneeOutputPort.findByUserId(mockId)).thenReturn(Optional.ofNullable(firstLoanee));
@@ -422,6 +427,8 @@ class LoaneeServiceTest {
             when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
             when(programOutputPort.findProgramById(mockId)).thenReturn(atlasProgram);
             when(loanOfferOutputPort.findLoanOfferByLoaneeId(mockId)).thenReturn(loanOffer);
+            when(organizationIdentityOutputPort.findById(anyString()))
+                    .thenReturn(organizationIdentity);
 
             loanee = loaneeService.viewLoaneeDetails(null, firstLoanee.getUserIdentity().getId());
         } catch (MeedlException exception) {
@@ -443,6 +450,7 @@ class LoaneeServiceTest {
         when(programOutputPort.findProgramById(mockId)).thenReturn(atlasProgram);
         when(loanOfferOutputPort.findLoanOfferByLoaneeId(mockId)).thenReturn(loanOffer);
         when(loanOutputPort.viewLoanByLoaneeId(mockId)).thenReturn(Optional.empty());
+        when(organizationIdentityOutputPort.findById(mockId)).thenReturn(organizationIdentity);
         Loanee result = loaneeService.viewLoaneeDetails(null, mockId);
 
         assertNotNull(result);
@@ -464,6 +472,7 @@ class LoaneeServiceTest {
             when(programOutputPort.findProgramById(mockId)).thenReturn(atlasProgram);
             when(loanOfferOutputPort.findLoanOfferByLoaneeId(mockId)).thenReturn(loanOffer);
             when(loanOutputPort.viewLoanByLoaneeId(mockId)).thenReturn(Optional.empty());
+            when(organizationIdentityOutputPort.findById(mockId)).thenReturn(organizationIdentity);
             loanee = loaneeService.viewLoaneeDetails(null, firstLoanee.getUserIdentity().getId());
         } catch (MeedlException exception) {
             log.info("Error: {}", exception.getMessage());
