@@ -78,6 +78,7 @@ public class LoaneeService implements LoaneeUseCase {
     private final MeedlNotificationOutputPort meedlNotificationOutputPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
+    private final LoanOfferOutputPort loanOfferOutputPort;
 
     @Override
     public Loanee addLoaneeToCohort(Loanee loanee) throws MeedlException {
@@ -168,8 +169,18 @@ public class LoaneeService implements LoaneeUseCase {
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
         loanee.setProgramName(program.getName());
 
-//        Loan loan = loanOutputPort.findLoanById(loanee.getLoaneeLoanDetail().getId());
-//        LoanProduct loanProduct = loanProductOutputPort.findById(loanee.);
+        Optional<Loan> loan = loanOutputPort.viewLoanByLoaneeId(loanee.getLoanId());
+        log.info("-----------> LOanee ------> {}", loanee);
+        if (loan.isPresent()) {
+            loanee.setLoanId(loan.get().getId());
+        }
+        log.info("-----------> LOanee after addding loan id ------> {}", loanee);
+
+
+        log.info("Loanee id to get loan offer ---------> {}", loanee.getId());
+        LoanOffer loanOffer = loanOfferOutputPort.findLoanOfferByLoaneeId(loanee.getId());
+        log.info("--------------> Loan offer --------> {}", loanOffer);
+        log.info("Loanee id from loan offer ---------> {}", loanOffer.getLoaneeId());
         return loanee;
     }
 

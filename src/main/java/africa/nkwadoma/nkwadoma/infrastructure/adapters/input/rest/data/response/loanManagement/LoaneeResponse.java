@@ -14,6 +14,7 @@ import java.util.List;
 public class LoaneeResponse {
     private String id;
     private String cohortId;
+    private String loanId;
     private String createdBy;
     private int creditScore;
     private LocalDateTime createdAt;
