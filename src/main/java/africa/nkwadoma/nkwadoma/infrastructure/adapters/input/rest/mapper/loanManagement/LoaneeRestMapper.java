@@ -42,6 +42,7 @@ public interface LoaneeRestMapper {
     @Mapping(target = "paymentMoratoriumPeriod", source = "paymentMoratoriumPeriod")
     @Mapping(target = "tenor", source = "tenor")
     @Mapping(target = "termsAndConditions", source = "termsAndConditions")
+    @Mapping(target = "institutionName", source = "institutionName")
     LoaneeResponse toLoaneeResponse(Loanee loanee);
 
     @Mapping(target = "loanBreakdownId", source = "loaneeLoanBreakdownId")

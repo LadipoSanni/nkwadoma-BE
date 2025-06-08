@@ -58,6 +58,7 @@ public class Loanee {
     private int paymentMoratoriumPeriod;
     private String termsAndConditions;
     private int tenor;
+    private String institutionName;
 
 
     public void validate() throws MeedlException {
