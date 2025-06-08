@@ -149,4 +149,6 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
     Page<LoanOfferProjection> filterLoanOfferByProgramIdAndOrganization(@Param("programId") String programId,
                                                                         @Param("organizationId") String organizationId,
                                                                         Pageable pageRequest);
+
+    LoanOfferEntity findLoanOfferByLoaneeId(String loaneeId);
 }
