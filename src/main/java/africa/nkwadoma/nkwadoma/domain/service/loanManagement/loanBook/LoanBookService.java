@@ -382,6 +382,11 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
                 Map<String, String> rowMap = new HashMap<>();
 
                 for (String header : requiredHeaders) {
+                    log.info("The header to get its value : {}", header);
+                    if (!headerIndexMap.containsKey(header)) {
+                        log.warn("Skipping missing header: {}", header);
+                        continue;
+                    }
                     int index = headerIndexMap.get(header);
                     if (index >= values.length) {
                         throw new MeedlException("Missing value for column: " + header);
@@ -431,6 +436,9 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
 
     private static void validateFileHeader(List<String> requiredHeaders, Map<String, Integer> headerIndexMap) throws MeedlException {
         for (String required : requiredHeaders) {
+            if (required.equals("bvn") || required.equals("nin")){
+                continue;
+            }
             if (!headerIndexMap.containsKey(required)) {
                 throw new MeedlException("Missing required column: " + required);
             }
