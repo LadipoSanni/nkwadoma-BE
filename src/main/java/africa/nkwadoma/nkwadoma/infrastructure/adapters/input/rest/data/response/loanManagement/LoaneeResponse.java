@@ -14,6 +14,7 @@ import java.util.List;
 public class LoaneeResponse {
     private String id;
     private String cohortId;
+    private String loanId;
     private String createdBy;
     private int creditScore;
     private LocalDateTime createdAt;
@@ -31,7 +32,7 @@ public class LoaneeResponse {
     private String fitnessToWorkRating;
     private BigDecimal loanAmount;
     private Double interestRate;
-    private String paymentMoratoriumPeriod;
+    private int paymentMoratoriumPeriod;
     private String termsAndConditions;
     private int tenor;
 }

@@ -195,7 +195,7 @@ public class LoaneeController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @PutMapping("defer/loan")
+    @PostMapping("defer/loan")
     @PreAuthorize("hasRole('LOANEE')")
     public ResponseEntity<ApiResponse<?>> deferLoan(@AuthenticationPrincipal Jwt meedlUser,
                                                        @RequestParam String loanId,
@@ -209,7 +209,6 @@ public class LoaneeController {
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
-
     }
 
     @PutMapping("resume/program")

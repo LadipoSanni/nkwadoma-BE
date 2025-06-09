@@ -9,7 +9,7 @@ import java.util.List;
 @Setter
 @Getter
 public class LoaneeLoanDetailResponse {
-
+    private String id;
     private BigDecimal tuitionAmount;
     private BigDecimal initialDeposit;
     private BigDecimal amountRequested;

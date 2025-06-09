@@ -102,4 +102,11 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
                         loanOffer.getOrganizationId(),pageRequest);
         return loanOfferProjections.map(loanOfferMapper::mapProjectionToLoanOffer);
     }
+
+    @Override
+    public LoanOffer findLoanOfferByLoaneeId(String loaneeId) throws MeedlException {
+        MeedlValidator.validateUUID(loaneeId, LoanMessages.INVALID_LOANEE_ID.getMessage());
+        LoanOfferEntity loanOfferEntity = loanOfferEntityRepository.findLoanOfferByLoaneeId(loaneeId);
+        return loanOfferMapper.toLoanOffer(loanOfferEntity);
+    }
 }

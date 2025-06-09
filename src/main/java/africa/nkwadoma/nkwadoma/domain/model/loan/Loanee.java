@@ -54,6 +54,11 @@ public class Loanee {
     private boolean deferralApproved;
     private boolean dropoutRequested;
     private boolean dropoutApproved;
+    private Double interestRate;
+    private int paymentMoratoriumPeriod;
+    private String termsAndConditions;
+    private int tenor;
+    private String institutionName;
 
 
     public void validate() throws MeedlException {
