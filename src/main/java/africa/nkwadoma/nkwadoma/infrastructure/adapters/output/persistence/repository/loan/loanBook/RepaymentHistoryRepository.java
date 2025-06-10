@@ -9,24 +9,64 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface RepaymentHistoryRepository extends JpaRepository<RepaymentHistoryEntity,String> {
-    @Query("SELECT r FROM RepaymentHistoryEntity r WHERE " +
-            "(:loaneeId IS NULL OR r.loanee.id = :loaneeId) AND " +
-            "(:month IS NULL OR MONTH(r.paymentDateTime) = :month) AND " +
-            "(:year IS NULL OR YEAR(r.paymentDateTime) = :year)")
-    Page<RepaymentHistoryEntity> findRepaymentHistoryByLoaneeIdOrAll(@Param("loaneeId") String loaneeId,
-                                                                     @Param("month") Integer month,
-                                                                     @Param("year") Integer year,Pageable pageable);
 
+    @Query("""
+            SELECT
+                u.firstName as firstName,
+                u.lastName as lastName,
+                r.paymentDateTime as paymentDateTime,
+                l.cohortId as cohortId,
+                r.amountPaid as amountPaid,
+                r.totalAmountRepaid as totalAmountRepaid,
+                r.amountOutstanding as amountOutstanding,
+                r.modeOfPayment as modeOfPayment,
+                r.id as id,
+                (CASE WHEN :loaneeId IS NULL THEN
+                    (SELECT MIN(YEAR(r2.paymentDateTime)) FROM RepaymentHistoryEntity r2)
+                 ELSE
+                    (SELECT MIN(YEAR(r2.paymentDateTime)) FROM RepaymentHistoryEntity r2 WHERE r2.loanee.id = l.id)
+                 END) as firstYear,
+                (CASE WHEN :loaneeId IS NULL THEN
+                    (SELECT MAX(YEAR(r2.paymentDateTime)) FROM RepaymentHistoryEntity r2)
+                 ELSE
+                    (SELECT MAX(YEAR(r2.paymentDateTime)) FROM RepaymentHistoryEntity r2 WHERE r2.loanee.id = l.id)
+                 END) as lastYear
+            FROM RepaymentHistoryEntity r
+            JOIN r.loanee l
+            JOIN l.userIdentity u
+            WHERE (:loaneeId IS NULL OR l.id = :loaneeId) AND
+                  (:month IS NULL OR MONTH(r.paymentDateTime) = :month) AND
+                  (:year IS NULL OR YEAR(r.paymentDateTime) = :year)
+            """)
+    Page<RepaymentHistoryProjection> findRepaymentHistoryByLoaneeIdOrAll(
+            @Param("loaneeId") String loaneeId,
+            @Param("month") Integer month,
+            @Param("year") Integer year,
+            Pageable pageable);
 
-    @Query("SELECT r FROM RepaymentHistoryEntity r " +
-            "JOIN r.loanee l " +
-            "JOIN l.userIdentity u " +
-            "WHERE (:month IS NULL OR MONTH(r.paymentDateTime) = :month) AND " +
-            "(:year IS NULL OR YEAR(r.paymentDateTime) = :year) AND " +
-            "(:name IS NULL OR " +
-            "LOWER(u.firstName) LIKE LOWER(CONCAT('%', :name, '%')) OR " +
-            "LOWER(u.lastName) LIKE LOWER(CONCAT('%', :name, '%')))")
-    Page<RepaymentHistoryEntity> searchRepaymentHistory(
+    @Query("""
+            SELECT
+                u.firstName as firstName,
+                u.lastName as lastName,
+                r.paymentDateTime as paymentDateTime,
+                l.cohortId as cohortId,
+                r.amountPaid as amountPaid,
+                r.totalAmountRepaid as totalAmountRepaid,
+                r.amountOutstanding as amountOutstanding,
+                r.modeOfPayment as modeOfPayment,
+                r.id as id,
+                (SELECT MIN(YEAR(r2.paymentDateTime)) FROM RepaymentHistoryEntity r2 WHERE r2.loanee.id = l.id) as firstYear,
+                (SELECT MAX(YEAR(r2.paymentDateTime)) FROM RepaymentHistoryEntity r2 WHERE r2.loanee.id = l.id) as lastYear
+            FROM RepaymentHistoryEntity r
+            JOIN r.loanee l
+            JOIN l.userIdentity u
+            WHERE (:month IS NULL OR MONTH(r.paymentDateTime) = :month) AND
+                  (:year IS NULL OR YEAR(r.paymentDateTime) = :year) AND
+                  (:name IS NULL OR
+                   LOWER(u.firstName) LIKE LOWER(CONCAT('%', :name, '%')) OR
+                   LOWER(u.lastName) LIKE LOWER(CONCAT('%', :name, '%')))
+            """)
+    Page<RepaymentHistoryProjection> searchRepaymentHistory(
             @Param("month") Integer month,
             @Param("year") Integer year,
             @Param("name") String name,
