@@ -49,6 +49,9 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
     public Page<RepaymentHistory> findAllRepaymentHistory(RepaymentHistory repaymentHistory, int pageSize, int pageNumber) throws MeedlException {
         log.info("request that got into service, actor =  {}, pageSize = {} , pageNumber = {}",repaymentHistory.getActorId()
         , pageSize, pageNumber);
+        if (repaymentHistory.getMonth() <= 0 || repaymentHistory.getMonth() > 12){
+            repaymentHistory.setMonth(null);
+        }
         UserIdentity userIdentity = userIdentityOutputPort.findById(repaymentHistory.getActorId());
         if (userIdentity.getRole().equals(IdentityRole.PORTFOLIO_MANAGER)){
             Page<RepaymentHistory> repaymentHistories = repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(repaymentHistory,
