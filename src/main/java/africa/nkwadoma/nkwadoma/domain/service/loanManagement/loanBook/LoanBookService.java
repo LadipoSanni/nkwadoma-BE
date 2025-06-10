@@ -33,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -62,6 +63,7 @@ public class LoanBookService implements LoanBookUseCase {
     private final TokenUtils tokenUtils;
     private final LoanProductOutputPort loanProductOutputPort;
 
+//    @Transactional
     @Override
     public LoanBook upLoadUserData(LoanBook loanBook) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanBook, "Loan book cannot be empty.");
@@ -436,7 +438,7 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
 
     private static void validateFileHeader(List<String> requiredHeaders, Map<String, Integer> headerIndexMap) throws MeedlException {
         for (String required : requiredHeaders) {
-            if (required.equals("bvn") || required.equals("nin")){
+            if (required.equals("bvn") || required.equals("nin") || required.equals("modeofpayment")){
                 continue;
             }
             if (!headerIndexMap.containsKey(required)) {
