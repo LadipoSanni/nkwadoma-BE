@@ -54,6 +54,7 @@ public class RepaymentHistoryController {
                         .month(month).year(year).build();
         Page<RepaymentHistory> repaymentHistories =
                 repaymentHistoryUseCase.findAllRepaymentHistory(repaymentHistory,pageSize,pageNumber);
+        log.info("repayment histories size gotten from service : {}", repaymentHistories.getSize());
         List<RepaymentHistoryResponse> repaymentHistoryResponse = repaymentHistories.stream()
                 .map(repaymentHistoryRestMapper::toRepaymentResponse).toList();
         RepaymentHistoryPaginatedResponse<RepaymentHistoryResponse> paginatedResponse;
@@ -92,10 +93,18 @@ public class RepaymentHistoryController {
                 repaymentHistoryUseCase.searchRepaymentHistory(repaymentHistory,pageSize,pageNumber);
         List<RepaymentHistoryResponse> repaymentHistoryResponse = repaymentHistories.stream()
                 .map(repaymentHistoryRestMapper::toRepaymentResponse).toList();
-        RepaymentHistoryPaginatedResponse<RepaymentHistoryResponse> paginatedResponse = new RepaymentHistoryPaginatedResponse<>(
-                repaymentHistoryResponse,repaymentHistories.hasNext(),repaymentHistories.getTotalPages(),pageNumber,pageSize,
-                repaymentHistories.get().toList().get(0).getFirstYear(),repaymentHistories.get().toList().get(0).getLastYear()
-        );
+        RepaymentHistoryPaginatedResponse<RepaymentHistoryResponse> paginatedResponse;
+        if (repaymentHistoryResponse.isEmpty()) {
+            paginatedResponse = new RepaymentHistoryPaginatedResponse<>(
+                    repaymentHistoryResponse,repaymentHistories.hasNext(),repaymentHistories.getTotalPages(),pageNumber,pageSize,
+                    0,0
+            );
+        }else {
+            paginatedResponse = new RepaymentHistoryPaginatedResponse<>(
+                    repaymentHistoryResponse, repaymentHistories.hasNext(), repaymentHistories.getTotalPages(), pageNumber, pageSize,
+                    repaymentHistories.get().toList().get(0).getFirstYear(), repaymentHistories.get().toList().get(0).getLastYear()
+            );
+        }
         ApiResponse<RepaymentHistoryPaginatedResponse<RepaymentHistoryResponse>> apiResponse = ApiResponse.<RepaymentHistoryPaginatedResponse<RepaymentHistoryResponse>>builder()
                 .data(paginatedResponse)
                 .message(SuccessMessages.ALL_PAYMENT_HISTORY)
