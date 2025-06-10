@@ -80,6 +80,8 @@ public class LoaneeService implements LoaneeUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
+    private final LoanOfferOutputPort loanOfferOutputPort;
+
 
     @Override
     public List<Loanee> inviteLoanees(List<Loanee> loanees){
@@ -119,7 +121,6 @@ public class LoaneeService implements LoaneeUseCase {
 
     private void notifyPmLoaneeDoesNotExist(String message, String email) {
     }
-    private final LoanOfferOutputPort loanOfferOutputPort;
 
     @Override
     public Loanee addLoaneeToCohort(Loanee loanee) throws MeedlException {
