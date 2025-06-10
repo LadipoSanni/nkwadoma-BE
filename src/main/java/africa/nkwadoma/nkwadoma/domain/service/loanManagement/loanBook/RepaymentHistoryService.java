@@ -67,6 +67,7 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
         return loanBook.getRepaymentHistories().stream()
                 .peek(repaymentHistory -> {
                     try {
+                        log.info("Email of the loanee being searched for {}", repaymentHistory.getLoanee().getUserIdentity().getEmail());
                         Loanee loanee = loaneeOutputPort.findByLoaneeEmail(repaymentHistory.getLoanee().getUserIdentity().getEmail());
                         log.info("loanee found in repayment history : {}",loanee);
                         if (loanee != null) {
