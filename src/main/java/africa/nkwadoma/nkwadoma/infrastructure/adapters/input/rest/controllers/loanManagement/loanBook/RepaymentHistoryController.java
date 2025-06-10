@@ -49,6 +49,7 @@ public class RepaymentHistoryController {
                                                                   @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                                                   @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
 
+        log.info("request that came in = pageSize = {}, pageNumber = {}, actor {}",pageSize,pageNumber,meedlUser.getClaimAsString("sub"));
         RepaymentHistory repaymentHistory =
                 RepaymentHistory.builder().actorId(meedlUser.getClaimAsString("sub")).loaneeId(loaneeId)
                         .month(month).year(year).build();
