@@ -63,7 +63,7 @@ public class LoanBookService implements LoanBookUseCase {
     private final TokenUtils tokenUtils;
     private final LoanProductOutputPort loanProductOutputPort;
 
-    @Transactional
+//    @Transactional
     @Override
     public LoanBook upLoadUserData(LoanBook loanBook) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanBook, "Loan book cannot be empty.");
