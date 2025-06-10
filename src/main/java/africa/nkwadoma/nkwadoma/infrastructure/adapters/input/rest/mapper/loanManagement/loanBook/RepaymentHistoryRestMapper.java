@@ -10,7 +10,5 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 public interface RepaymentHistoryRestMapper {
 
 
-    @Mapping(target = "firstName"  , source = "repaymentHistory.loanee.userIdentity.firstName")
-    @Mapping(target = "lastName"  , source = "repaymentHistory.loanee.userIdentity.lastName")
     RepaymentHistoryResponse toRepaymentResponse(RepaymentHistory repaymentHistory);
 }

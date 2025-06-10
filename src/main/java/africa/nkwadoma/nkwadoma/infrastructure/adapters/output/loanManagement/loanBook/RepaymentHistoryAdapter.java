@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.loanBook.RepaymentHistoryMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.RepaymentHistoryEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.loanBook.RepaymentHistoryProjection;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.loanBook.RepaymentHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,10 +49,12 @@ public class RepaymentHistoryAdapter implements RepaymentHistoryOutputPort {
         MeedlValidator.validatePageNumber(pageNumber);
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("paymentDateTime"));
-        Page<RepaymentHistoryEntity> repaymentHistoryEntities =
+        Page<RepaymentHistoryProjection> repaymentHistoryEntities =
                 repaymentHistoryRepository.findRepaymentHistoryByLoaneeIdOrAll(repaymentHistory.getLoaneeId(),
                         repaymentHistory.getMonth(),repaymentHistory.getYear(),pageable);
-        return repaymentHistoryEntities.map(repaymentHistoryMapper::map);
+        log.info("Repayment history entities content {}", repaymentHistoryEntities.map(repaymentHistoryMapper::mapProjecttionToRepaymentHistory).getContent());
+        return repaymentHistoryEntities.map(repaymentHistoryMapper::mapProjecttionToRepaymentHistory);
+
     }
 
     @Override
@@ -68,9 +71,9 @@ public class RepaymentHistoryAdapter implements RepaymentHistoryOutputPort {
         MeedlValidator.validatePageNumber(pageNumber);
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("paymentDateTime"));
-        Page<RepaymentHistoryEntity> repaymentHistoryEntities =
+        Page<RepaymentHistoryProjection> repaymentHistoryEntities =
                 repaymentHistoryRepository.searchRepaymentHistory(repaymentHistory.getMonth(),repaymentHistory.getYear(),
                         repaymentHistory.getLoaneeName(),pageable);
-        return repaymentHistoryEntities.map(repaymentHistoryMapper::map);
+        return repaymentHistoryEntities.map(repaymentHistoryMapper::mapProjecttionToRepaymentHistory);
     }
 }

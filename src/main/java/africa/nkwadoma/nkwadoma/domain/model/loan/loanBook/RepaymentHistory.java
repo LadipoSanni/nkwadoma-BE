@@ -34,6 +34,8 @@ public class RepaymentHistory {
     private String actorId;
     private String loaneeId;
     private String loaneeName;
+    private Integer firstYear;
+    private Integer lastYear;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(paymentDateTime,"Payment date cannot be empty");

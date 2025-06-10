@@ -6,10 +6,12 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.RepaymentHistoryPaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanBook.RepaymentHistoryResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loanManagement.loanBook.RepaymentHistoryRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -28,6 +30,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.REPAYMENT_HISTORY;
 
 
+@Slf4j
 @RequestMapping(BASE_URL +  REPAYMENT_HISTORY)
 @RestController
 @RequiredArgsConstructor
@@ -51,12 +54,22 @@ public class RepaymentHistoryController {
                         .month(month).year(year).build();
         Page<RepaymentHistory> repaymentHistories =
                 repaymentHistoryUseCase.findAllRepaymentHistory(repaymentHistory,pageSize,pageNumber);
+        log.info("payment histories === {}",repaymentHistories.getContent().stream().toList());
         List<RepaymentHistoryResponse> repaymentHistoryResponse = repaymentHistories.stream()
                 .map(repaymentHistoryRestMapper::toRepaymentResponse).toList();
-        PaginatedResponse<RepaymentHistoryResponse> paginatedResponse = new PaginatedResponse<>(
-                repaymentHistoryResponse,repaymentHistories.hasNext(),repaymentHistories.getTotalPages(),pageNumber,pageSize
-        );
-        ApiResponse<PaginatedResponse<RepaymentHistoryResponse>> apiResponse = ApiResponse.<PaginatedResponse<RepaymentHistoryResponse>>builder()
+        RepaymentHistoryPaginatedResponse<RepaymentHistoryResponse> paginatedResponse;
+        if (repaymentHistoryResponse.isEmpty()) {
+            paginatedResponse = new RepaymentHistoryPaginatedResponse<>(
+                    repaymentHistoryResponse,repaymentHistories.hasNext(),repaymentHistories.getTotalPages(),pageNumber,pageSize,
+                    0,0
+            );
+        }else {
+            paginatedResponse = new RepaymentHistoryPaginatedResponse<>(
+                    repaymentHistoryResponse, repaymentHistories.hasNext(), repaymentHistories.getTotalPages(), pageNumber, pageSize,
+                    repaymentHistories.get().toList().get(0).getFirstYear(), repaymentHistories.get().toList().get(0).getLastYear()
+            );
+        }
+        ApiResponse<RepaymentHistoryPaginatedResponse<RepaymentHistoryResponse>> apiResponse = ApiResponse.<RepaymentHistoryPaginatedResponse<RepaymentHistoryResponse>>builder()
                 .data(paginatedResponse)
                 .message(SuccessMessages.ALL_PAYMENT_HISTORY)
                 .statusCode(HttpStatus.OK.toString())
@@ -80,10 +93,11 @@ public class RepaymentHistoryController {
                 repaymentHistoryUseCase.searchRepaymentHistory(repaymentHistory,pageSize,pageNumber);
         List<RepaymentHistoryResponse> repaymentHistoryResponse = repaymentHistories.stream()
                 .map(repaymentHistoryRestMapper::toRepaymentResponse).toList();
-        PaginatedResponse<RepaymentHistoryResponse> paginatedResponse = new PaginatedResponse<>(
-                repaymentHistoryResponse,repaymentHistories.hasNext(),repaymentHistories.getTotalPages(),pageNumber,pageSize
+        RepaymentHistoryPaginatedResponse<RepaymentHistoryResponse> paginatedResponse = new RepaymentHistoryPaginatedResponse<>(
+                repaymentHistoryResponse,repaymentHistories.hasNext(),repaymentHistories.getTotalPages(),pageNumber,pageSize,
+                repaymentHistories.get().toList().get(0).getFirstYear(),repaymentHistories.get().toList().get(0).getLastYear()
         );
-        ApiResponse<PaginatedResponse<RepaymentHistoryResponse>> apiResponse = ApiResponse.<PaginatedResponse<RepaymentHistoryResponse>>builder()
+        ApiResponse<RepaymentHistoryPaginatedResponse<RepaymentHistoryResponse>> apiResponse = ApiResponse.<RepaymentHistoryPaginatedResponse<RepaymentHistoryResponse>>builder()
                 .data(paginatedResponse)
                 .message(SuccessMessages.ALL_PAYMENT_HISTORY)
                 .statusCode(HttpStatus.OK.toString())
