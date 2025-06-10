@@ -143,6 +143,7 @@ public class LoanRequestService implements LoanRequestUseCase {
     private void sendNotification(LoanRequest loanRequest, LoanOffer loanOffer, LoanRequest updatedLoanRequest) throws MeedlException {
         UserIdentity userIdentity = userIdentityOutputPort.findById(loanRequest.getActorId());
         MeedlNotification meedlNotification = buildUpLoanOfferNotification(loanOffer, updatedLoanRequest, userIdentity);
+        log.info("is read before after building notification {}",meedlNotification.isRead());
         meedlNotificationUsecase.sendNotification(meedlNotification);
     }
 

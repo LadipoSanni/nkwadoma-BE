@@ -35,6 +35,9 @@ public class MeedlNotificationAdapter implements MeedlNotificationOutputPort {
         meedlNotification.validate();
         MeedlNotificationEntity meedlNotificationEntity =
                 meedlNotificationMapper.toMeedlNotificationEntity(meedlNotification);
+        log.info("is read after mapping notification {}",meedlNotification.isRead());
+        meedlNotificationEntity.setRead(meedlNotification.isRead());
+        log.info("is read mapping manually {}",meedlNotification.isRead());
         meedlNotificationEntity = meedlNotificationRepository.save(meedlNotificationEntity);
         return meedlNotificationMapper.toMeedlNotification(meedlNotificationEntity);
     }

@@ -210,6 +210,7 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
         if (ObjectUtils.isEmpty(userIdentity)) {
             throw new MeedlNotificationException("Un-Existing user cannot receive notification");
         }
+        log.info("is read at the point of sending notification {}",meedlNotification.isRead());
         return meedlNotificationOutputPort.save(meedlNotification);
     }
 
