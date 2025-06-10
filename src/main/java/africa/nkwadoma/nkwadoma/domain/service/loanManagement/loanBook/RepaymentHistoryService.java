@@ -69,9 +69,11 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
                     try {
                         Loanee loanee = loaneeOutputPort.findByLoaneeEmail(repaymentHistory.getLoanee().getUserIdentity().getEmail());
                         log.info("loanee found in repayment history : {}",loanee);
-                        repaymentHistory.setLoanee(loanee);
-                        repaymentHistory.setCohort(loanBook.getCohort());
-                        repaymentHistoryOutputPort.save(repaymentHistory);
+                        if (loanee != null) {
+                            repaymentHistory.setLoanee(loanee);
+                            repaymentHistory.setCohort(loanBook.getCohort());
+                            repaymentHistoryOutputPort.save(repaymentHistory);
+                        }
                     } catch (MeedlException e) {
                         //TODO notify user doesn't exist on the platform.
 //                        updateFailureNotification(loanBook);
