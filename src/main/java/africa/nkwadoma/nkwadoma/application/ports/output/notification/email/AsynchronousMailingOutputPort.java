@@ -27,4 +27,5 @@ public interface AsynchronousMailingOutputPort {
     @Async
     void sendEmailToInvitedOrganization(UserIdentity userIdentity) throws MeedlException;
 
+    void sendLoaneeInvite(List<Loanee> loanees);
 }

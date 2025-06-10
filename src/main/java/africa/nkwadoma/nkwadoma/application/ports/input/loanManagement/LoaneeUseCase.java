@@ -1,6 +1,5 @@
 package africa.nkwadoma.nkwadoma.application.ports.input.loanManagement;
 
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
@@ -10,6 +9,7 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 public interface LoaneeUseCase {
+    List<Loanee> inviteLoanees(List<Loanee> loanees);
 
     Loanee addLoaneeToCohort(Loanee loanee) throws MeedlException;
 
@@ -38,4 +38,5 @@ public interface LoaneeUseCase {
     String resumeProgram(String loanId, String cohortId, String userId) throws MeedlException;
 
     String archiveOrUnArchiveByIds(String actorId, List<String> loaneeIds, LoaneeStatus loaneeStatus) throws MeedlException;
+
 }

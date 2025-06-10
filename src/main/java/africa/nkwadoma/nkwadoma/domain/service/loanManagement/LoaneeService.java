@@ -11,6 +11,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEm
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
@@ -78,6 +79,46 @@ public class LoaneeService implements LoaneeUseCase {
     private final MeedlNotificationOutputPort meedlNotificationOutputPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
+    private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
+
+    @Override
+    public List<Loanee> inviteLoanees(List<Loanee> loanees){
+        List<Loanee> loaneesVerified = loanees.stream()
+                .map(loanee -> {
+                    String email = null;
+                    try {
+                        email = loanee.getUserIdentity().getEmail();
+                        loanee = loaneeOutputPort.findByLoaneeEmail(email);
+                        if (!loanee.getUserIdentity().getRole().equals(IdentityRole.LOANEE)){
+                            log.warn("The user is not a loanee but {}",loanee.getUserIdentity().getRole());
+                            throw new MeedlException("User with email "+email+" is not a loanee");
+                        }
+                        UserIdentity userIdentity = identityManagerOutputPort.getUserByEmail(email)
+                                .orElseThrow(()-> new MeedlException("Loanee does not exist on the platform"));
+                        if (userIdentity.isEnabled()){
+                            log.error("User with email {} is already active on th platform", email);
+                            throw new MeedlException("User with email "+email +" is already active on the platform.");
+                        }
+                        if (!loanee.getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)) {
+                            log.info("The loanee being invited is not from file upload {}", email);
+                        }
+                    } catch (MeedlException e) {
+                        log.error("Loanee with email doesn't exist");
+                        notifyPmLoaneeDoesNotExist(e.getMessage(), email);
+                    }
+                    return loanee;
+                }).toList();
+
+         sendLoaneesEmail(loaneesVerified);
+         return loaneesVerified;
+    }
+
+    private void sendLoaneesEmail(List<Loanee> loanees) {
+        asynchronousMailingOutputPort.sendLoaneeInvite(loanees);
+    }
+
+    private void notifyPmLoaneeDoesNotExist(String message, String email) {
+    }
     private final LoanOfferOutputPort loanOfferOutputPort;
 
     @Override
