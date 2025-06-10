@@ -54,7 +54,6 @@ public class RepaymentHistoryController {
                         .month(month).year(year).build();
         Page<RepaymentHistory> repaymentHistories =
                 repaymentHistoryUseCase.findAllRepaymentHistory(repaymentHistory,pageSize,pageNumber);
-        log.info("payment histories === {}",repaymentHistories.getContent().stream().toList());
         List<RepaymentHistoryResponse> repaymentHistoryResponse = repaymentHistories.stream()
                 .map(repaymentHistoryRestMapper::toRepaymentResponse).toList();
         RepaymentHistoryPaginatedResponse<RepaymentHistoryResponse> paginatedResponse;

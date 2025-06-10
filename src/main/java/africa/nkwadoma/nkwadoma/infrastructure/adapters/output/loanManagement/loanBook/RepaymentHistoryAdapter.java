@@ -52,7 +52,6 @@ public class RepaymentHistoryAdapter implements RepaymentHistoryOutputPort {
         Page<RepaymentHistoryProjection> repaymentHistoryEntities =
                 repaymentHistoryRepository.findRepaymentHistoryByLoaneeIdOrAll(repaymentHistory.getLoaneeId(),
                         repaymentHistory.getMonth(),repaymentHistory.getYear(),pageable);
-        log.info("Repayment history entities content {}", repaymentHistoryEntities.map(repaymentHistoryMapper::mapProjecttionToRepaymentHistory).getContent());
         return repaymentHistoryEntities.map(repaymentHistoryMapper::mapProjecttionToRepaymentHistory);
 
     }
