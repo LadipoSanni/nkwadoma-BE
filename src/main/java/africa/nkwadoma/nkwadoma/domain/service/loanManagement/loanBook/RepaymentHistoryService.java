@@ -51,14 +51,14 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
         , pageSize, pageNumber);
         if(repaymentHistory.getMonth() != null) {
             if (repaymentHistory.getMonth() <= 0 || repaymentHistory.getMonth() > 12) {
-                repaymentHistory.setMonth(null);
+                 repaymentHistory.setMonth(null);
             }
         }
         UserIdentity userIdentity = userIdentityOutputPort.findById(repaymentHistory.getActorId());
         if (userIdentity.getRole().equals(IdentityRole.PORTFOLIO_MANAGER)){
             Page<RepaymentHistory> repaymentHistories = repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(repaymentHistory,
-                    pageSize, pageNumber);
-            log.info("repayment histories gotten from adapter == {}",repaymentHistories.getContent().stream().toList());
+                     pageSize, pageNumber);
+             log.info("repayment histories gotten from adapter == {}",repaymentHistories.getContent().stream().toList());
             return repaymentHistories;
         }
         Loanee loanee = loaneeOutputPort.findByUserId(userIdentity.getId()).get();
@@ -70,7 +70,7 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
     public Page<RepaymentHistory> searchRepaymentHistory(RepaymentHistory repaymentHistory, int pageSize, int pageNumber) throws MeedlException {
         if(repaymentHistory.getMonth() != null) {
             if (repaymentHistory.getMonth() <= 0 || repaymentHistory.getMonth() > 12) {
-                repaymentHistory.setMonth(null);
+                 repaymentHistory.setMonth(null);
             }
         }
         return repaymentHistoryOutputPort.searchRepaymemtHistoryByLoaneeName(repaymentHistory,pageSize,pageNumber);
