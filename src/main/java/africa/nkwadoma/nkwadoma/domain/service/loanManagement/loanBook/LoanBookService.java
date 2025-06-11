@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.loanBook.LoanBookUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.loanBook.RepaymentHistoryUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
@@ -62,8 +63,9 @@ public class LoanBookService implements LoanBookUseCase {
     private final RepaymentHistoryUseCase repaymentHistoryUseCase;
     private final TokenUtils tokenUtils;
     private final LoanProductOutputPort loanProductOutputPort;
+    private final CohortOutputPort cohortOutputPort;
 
-//    @Transactional
+    //    @Transactional
     @Override
     public LoanBook upLoadUserData(LoanBook loanBook) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanBook, "Loan book cannot be empty.");
@@ -79,8 +81,18 @@ public class LoanBookService implements LoanBookUseCase {
         List<Loanee> convertedLoanees = convertToLoanees(data, savedCohort, loanBook.getActorId());
         loanBook.setLoanees(convertedLoanees);
         referCohort(loanBook);
+        updateLoaneeCount(savedCohort);
         completeLoanProcessing(loanBook);
         return loanBook;
+    }
+
+    private void updateLoaneeCount(Cohort savedCohort) throws MeedlException {
+         savedCohort = findCohort(savedCohort);
+
+        savedCohort.setNumberOfLoanees(savedCohort.getNumberOfLoanees() + 1);
+        cohortOutputPort.save(savedCohort);
+        loaneeUseCase.increaseNumberOfLoaneesInOrganization(savedCohort);
+        loaneeUseCase.increaseNumberOfLoaneesInProgram(savedCohort);
     }
 
     @Override
