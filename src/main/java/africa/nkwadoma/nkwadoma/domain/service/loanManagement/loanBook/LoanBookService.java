@@ -41,6 +41,7 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 
@@ -127,34 +128,53 @@ public class LoanBookService implements LoanBookUseCase {
     }
 
     private LocalDateTime parseFlexibleDateTime(String dateStr) {
-        LocalDateTime localDateTime = null;
-        try {
-            localDateTime = LocalDateTime.parse(dateStr.trim());
-        } catch (DateTimeParseException e) {
+        log.info("Repayment date before formating {}", dateStr);
+        if (dateStr == null || dateStr.isBlank()) {
+            return null;
+        }
+
+        dateStr = dateStr.trim().replace("/", "-");
+        log.info("Repayment date after formating {}", dateStr);
+        List<DateTimeFormatter> formatters = List.of(
+                DateTimeFormatter.ISO_LOCAL_DATE_TIME,                    // yyyy-MM-ddTHH:mm:ss
+                DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"),       // 10-12-2024 15:30:00
+                DateTimeFormatter.ofPattern("dd-MM-yyyy")                 // 10-12-2024
+        );
+
+        for (DateTimeFormatter formatter : formatters) {
             try {
-                log.warn("The date passed wasn't a local date with time. ", e);
-                localDateTime = LocalDate.parse(dateStr.trim()).atStartOfDay();
-            } catch (DateTimeParseException ex) {
-                log.error("The date format was invalid ", ex);
+                log.info("The formatter is {} for {}", formatter, dateStr);
+                if (formatter == DateTimeFormatter.ISO_LOCAL_DATE_TIME) {
+                    return LocalDateTime.parse(dateStr, formatter);
+                } else {
+                    return LocalDate.parse(dateStr, formatter).atStartOfDay();
+                }
+            } catch (DateTimeParseException ignored) {
+                log.error("Error occurRed while converting the format.");
             }
         }
-        return localDateTime;
+
+        log.error("The date format was invalid: {}", dateStr);
+        return null;
     }
 
     private ModeOfPayment validateModeOfPayment(String modeOfRepaymentToConvert) {
         if (MeedlValidator.isEmptyString(modeOfRepaymentToConvert)) {
             log.error("Mode of repayment as a string to be converted is empty {}", modeOfRepaymentToConvert);
             //Todo create notification of this error
+            modeOfRepaymentToConvert = ModeOfPayment.TRANSFER.name();
         }
         ModeOfPayment modeOfPayment = null;
         try {
-            modeOfPayment = ModeOfPayment.valueOf(modeOfRepaymentToConvert);
+            log.info("The mode of repayment uploaded is {}", modeOfRepaymentToConvert);
+            modeOfPayment = ModeOfPayment.valueOf(modeOfRepaymentToConvert.toUpperCase());
         } catch (Exception e) {
             log.error("Error converting mode of repayment from string to enum.", e);
             //Todo create notification on error
         }
         return modeOfPayment;
     }
+
 
     private BigDecimal validateMoney(String amountTobeConverted, String message) {
         BigDecimal amount = null;
