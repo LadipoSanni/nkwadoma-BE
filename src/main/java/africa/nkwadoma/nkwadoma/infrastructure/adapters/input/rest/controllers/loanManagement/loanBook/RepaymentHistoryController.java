@@ -49,11 +49,14 @@ public class RepaymentHistoryController {
                                                                   @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                                                   @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
 
+        log.info("request that came in = pageSize = {}, pageNumber = {}, actor {}",pageSize,pageNumber,meedlUser.getClaimAsString("sub"));
         RepaymentHistory repaymentHistory =
                 RepaymentHistory.builder().actorId(meedlUser.getClaimAsString("sub")).loaneeId(loaneeId)
                         .month(month).year(year).build();
         Page<RepaymentHistory> repaymentHistories =
                 repaymentHistoryUseCase.findAllRepaymentHistory(repaymentHistory,pageSize,pageNumber);
+        log.info("repayment histories gotten from service {} , total element gotten  : {}",
+                repaymentHistories.getContent().stream().toList(),repaymentHistories.getTotalElements());
         List<RepaymentHistoryResponse> repaymentHistoryResponse = repaymentHistories.stream()
                 .map(repaymentHistoryRestMapper::toRepaymentResponse).toList();
         RepaymentHistoryPaginatedResponse<RepaymentHistoryResponse> paginatedResponse;
@@ -92,10 +95,18 @@ public class RepaymentHistoryController {
                 repaymentHistoryUseCase.searchRepaymentHistory(repaymentHistory,pageSize,pageNumber);
         List<RepaymentHistoryResponse> repaymentHistoryResponse = repaymentHistories.stream()
                 .map(repaymentHistoryRestMapper::toRepaymentResponse).toList();
-        RepaymentHistoryPaginatedResponse<RepaymentHistoryResponse> paginatedResponse = new RepaymentHistoryPaginatedResponse<>(
-                repaymentHistoryResponse,repaymentHistories.hasNext(),repaymentHistories.getTotalPages(),pageNumber,pageSize,
-                repaymentHistories.get().toList().get(0).getFirstYear(),repaymentHistories.get().toList().get(0).getLastYear()
-        );
+        RepaymentHistoryPaginatedResponse<RepaymentHistoryResponse> paginatedResponse;
+        if (repaymentHistoryResponse.isEmpty()) {
+            paginatedResponse = new RepaymentHistoryPaginatedResponse<>(
+                    repaymentHistoryResponse,repaymentHistories.hasNext(),repaymentHistories.getTotalPages(),pageNumber,pageSize,
+                    0,0
+            );
+        }else {
+            paginatedResponse = new RepaymentHistoryPaginatedResponse<>(
+                    repaymentHistoryResponse, repaymentHistories.hasNext(), repaymentHistories.getTotalPages(), pageNumber, pageSize,
+                    repaymentHistories.get().toList().get(0).getFirstYear(), repaymentHistories.get().toList().get(0).getLastYear()
+            );
+        }
         ApiResponse<RepaymentHistoryPaginatedResponse<RepaymentHistoryResponse>> apiResponse = ApiResponse.<RepaymentHistoryPaginatedResponse<RepaymentHistoryResponse>>builder()
                 .data(paginatedResponse)
                 .message(SuccessMessages.ALL_PAYMENT_HISTORY)
