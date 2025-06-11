@@ -53,7 +53,7 @@ public class RepaymentHistoryController {
         RepaymentHistory repaymentHistory =
                 RepaymentHistory.builder().actorId(meedlUser.getClaimAsString("sub")).loaneeId(loaneeId)
                         .month(month).year(year).build();
-        Page<RepaymentHistory> repaymentHistories =
+        Page<RepaymentHistory>  repaymentHistories =
                 repaymentHistoryUseCase.findAllRepaymentHistory(repaymentHistory,pageSize,pageNumber);
         log.info("repayment histories gotten from service {} , total element gotten  : {}",
                 repaymentHistories.getContent().stream().toList(),repaymentHistories.getTotalElements());
