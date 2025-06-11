@@ -93,7 +93,10 @@ public class LoaneeService implements LoaneeUseCase {
                     try {
                         email = loanee.getUserIdentity().getEmail();
                         loanee = loaneeOutputPort.findByLoaneeEmail(email);
-                        if (!loanee.getUserIdentity().getRole().equals(IdentityRole.LOANEE)){
+                        if (loanee == null){
+                            log.error("Loanee with email {} was not found. There email cannot be sent ", email);
+                        }
+                        if (loanee != null && !loanee.getUserIdentity().getRole().equals(IdentityRole.LOANEE)){
                             log.warn("The user is not a loanee but {}",loanee.getUserIdentity().getRole());
                             throw new MeedlException("User with email "+email+" is not a loanee");
                         }
