@@ -14,4 +14,5 @@ public class SuccessMessages {
     public static final String LOANEE_DROPOUT = "Loanee has been dropped out";
     public static final String LOANEE_DROPOUT_REQUEST_SENT = "Loanee dropout request sent";
     public static final String ALL_PAYMENT_HISTORY = "Repayment history retrieved successfully";
+    public static final String YEAR_RANGE_RETRIEVED = "Repayment history year range retrieved";
 }

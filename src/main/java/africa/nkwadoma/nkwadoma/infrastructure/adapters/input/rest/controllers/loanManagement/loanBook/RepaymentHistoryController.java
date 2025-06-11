@@ -5,14 +5,13 @@ import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.loanBook.
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.RepaymentHistoryPaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanBook.RepaymentHistoryResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanBook.YearRangeResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loanManagement.loanBook.RepaymentHistoryRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +27,7 @@ import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.REPAYMENT_HISTORY;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.YEAR_RANGE_RETRIEVED;
 
 
 @Slf4j
@@ -110,6 +110,25 @@ public class RepaymentHistoryController {
         ApiResponse<RepaymentHistoryPaginatedResponse<RepaymentHistoryResponse>> apiResponse = ApiResponse.<RepaymentHistoryPaginatedResponse<RepaymentHistoryResponse>>builder()
                 .data(paginatedResponse)
                 .message(SuccessMessages.ALL_PAYMENT_HISTORY)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("years")
+    @PreAuthorize("hasRole('LOANEE') or hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> getFirstAndLastYear(
+            @AuthenticationPrincipal Jwt meedlUser,
+            @RequestParam(name = "loaneeId", required = false) String loaneeId) throws MeedlException {
+        log.info("Request to get first and last year for loaneeId : {}, actorId : {}", loaneeId, meedlUser.getClaimAsString("sub"));
+
+        RepaymentHistory repaymentHistory = repaymentHistoryUseCase
+                .getFirstRepaymentYearAndLastRepaymentYear(meedlUser.getClaimAsString("sub"), loaneeId);
+        YearRangeResponse yearRangeResponse = repaymentHistoryRestMapper.toYearRange(repaymentHistory);
+
+        ApiResponse<YearRangeResponse> apiResponse = ApiResponse.<YearRangeResponse>builder()
+                .data(yearRangeResponse)
+                .message(YEAR_RANGE_RETRIEVED)
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);

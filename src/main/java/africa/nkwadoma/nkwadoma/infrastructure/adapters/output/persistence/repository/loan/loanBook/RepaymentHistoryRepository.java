@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Map;
+
 public interface RepaymentHistoryRepository extends JpaRepository<RepaymentHistoryEntity,String> {
 
     @Query("""
@@ -43,6 +45,25 @@ public interface RepaymentHistoryRepository extends JpaRepository<RepaymentHisto
             @Param("month") Integer month,
             @Param("year") Integer year,
             Pageable pageable);
+
+    @Query("""
+        SELECT
+            COALESCE((
+                SELECT CAST(EXTRACT(YEAR FROM r.paymentDateTime) AS INTEGER)
+                FROM RepaymentHistoryEntity r
+                WHERE (:loaneeId IS NULL OR r.loanee.id = :loaneeId)
+                ORDER BY r.paymentDateTime ASC
+                LIMIT 1
+            ), 0) as firstYear,
+            COALESCE((
+                SELECT CAST(EXTRACT(YEAR FROM r.paymentDateTime) AS INTEGER)
+                FROM RepaymentHistoryEntity r
+                WHERE (:loaneeId IS NULL OR r.loanee.id = :loaneeId)
+                ORDER BY r.paymentDateTime DESC
+                LIMIT 1
+            ), 0) as lastYear
+    """)
+    Map<String, Integer> getFirstAndLastYear(@Param("loaneeId") String loaneeId);
 
     @Query("""
             SELECT

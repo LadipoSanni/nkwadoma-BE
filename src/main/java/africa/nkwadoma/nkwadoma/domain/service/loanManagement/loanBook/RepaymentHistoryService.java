@@ -16,6 +16,7 @@ import africa.nkwadoma.nkwadoma.domain.validation.LoanBookValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.common.util.ObjectUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -66,6 +67,9 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
         return repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(repaymentHistory, pageSize, pageNumber);
     }
 
+
+
+
     @Override
     public Page<RepaymentHistory> searchRepaymentHistory(RepaymentHistory repaymentHistory, int pageSize, int pageNumber) throws MeedlException {
         if(repaymentHistory.getMonth() != null) {
@@ -74,6 +78,16 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
             }
         }
         return repaymentHistoryOutputPort.searchRepaymemtHistoryByLoaneeName(repaymentHistory,pageSize,pageNumber);
+    }
+
+    @Override
+    public RepaymentHistory getFirstRepaymentYearAndLastRepaymentYear(String actorId,String loaneeId) throws MeedlException {
+        UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
+        if (userIdentity.getRole().equals(IdentityRole.PORTFOLIO_MANAGER)){
+            return repaymentHistoryOutputPort.getFirstAndLastYear(loaneeId);
+        }
+        Loanee loanee = loaneeOutputPort.findByUserId(userIdentity.getId()).get();
+        return repaymentHistoryOutputPort.getFirstAndLastYear(loanee.getId());
     }
 
     private List<RepaymentHistory> verifyUserByEmailAndAddCohort(LoanBook loanBook) {
