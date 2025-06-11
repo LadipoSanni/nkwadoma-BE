@@ -327,7 +327,7 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
         } catch (MeedlException e) {
             log.error("Unable to encrypt value {}", value);
         }
-        return StringUtils.EMPTY;
+        return null;
     }
 
     private List<Loanee> savedData(List<Loanee> loanees){
