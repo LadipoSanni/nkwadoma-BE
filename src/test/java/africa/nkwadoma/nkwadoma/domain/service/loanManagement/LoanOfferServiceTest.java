@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferStatus;
@@ -35,6 +36,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @Slf4j
@@ -72,6 +74,8 @@ public class LoanOfferServiceTest {
     private LoaneeLoanAccount loaneeLoanAccount;
     @Mock
     private LoanOfferMapper loanOfferMapper;
+    @Mock
+    private AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
     @Mock
     private LoaneeLoanAccountOutputPort loaneeLoanAccountOutputPort;
     @Mock
@@ -157,6 +161,7 @@ public class LoanOfferServiceTest {
             when(loanProductOutputPort.findById(loanOffer.getLoanProduct().getId())).thenReturn(loanProduct);
             when(loanOfferOutputPort.save(loanOffer)).thenReturn(loanOffer);
             when(loaneeLoanAccountOutputPort.save(any())).thenReturn(loaneeLoanAccount);
+            doNothing().when(asynchronousNotificationOutputPort).notifyPortfolioManagerOfNewLoanOfferWithDecision(any(), any());
             when(loaneeLoanAccountOutputPort.findByLoaneeId(any())).thenReturn(null);
             loaneeLoanAccount = loanService.acceptLoanOffer(loanOffer2);
         }catch (MeedlException exception){
@@ -177,6 +182,7 @@ public class LoanOfferServiceTest {
             loanOffer.setLoanRequestReferredBy("referredBy");
             when(organizationIdentityOutputPort.findOrganizationByName(loanOffer.getLoanRequestReferredBy()))
                     .thenReturn(organizationIdentity);
+            doNothing().when(asynchronousNotificationOutputPort).notifyPortfolioManagerOfNewLoanOfferWithDecision(any(), any());
             when(loanMetricsOutputPort.findByOrganizationId(organizationIdentity.get().getId()))
                     .thenReturn(Optional.of(loanMetrics));
             when(loanMetricsOutputPort.save(loanMetrics)).thenReturn(loanMetrics);
