@@ -152,7 +152,8 @@ public class LoaneeService implements LoaneeUseCase {
         return loanee;
     }
 
-    private void increaseNumberOfLoaneesInOrganization(Cohort cohort) throws MeedlException {
+    @Override
+    public void increaseNumberOfLoaneesInOrganization(Cohort cohort) throws MeedlException {
         OrganizationIdentity organizationIdentity =
                 organizationIdentityOutputPort.findById(cohort.getOrganizationId());
         organizationIdentity.setNumberOfLoanees(organizationIdentity.getNumberOfLoanees() + 1);
@@ -161,10 +162,9 @@ public class LoaneeService implements LoaneeUseCase {
         organizationIdentityOutputPort.save(organizationIdentity);
         log.info("Total number of loanees in an organization has been increased to : {}, in organization with id : {}", organizationIdentity.getNumberOfLoanees(), organizationIdentity.getId());
     }
-    private void increaseNumberOfLoaneesInProgram(Cohort cohort) throws MeedlException {
+    @Override
+    public void increaseNumberOfLoaneesInProgram(Cohort cohort) throws MeedlException {
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
-//        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(program.getOrganizationId());
-//        program.setOrganizationIdentity(organizationIdentity);
         program.setNumberOfLoanees(program.getNumberOfLoanees() + 1);
         program = programOutputPort.saveProgram(program);
         log.info("Total number of loanees in a program has been increased to : {}, in program with id : {}", program.getNumberOfLoanees(), program.getId());
