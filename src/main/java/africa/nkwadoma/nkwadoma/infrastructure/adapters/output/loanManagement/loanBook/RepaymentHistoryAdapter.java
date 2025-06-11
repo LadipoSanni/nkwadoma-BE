@@ -17,6 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -57,6 +59,14 @@ public class RepaymentHistoryAdapter implements RepaymentHistoryOutputPort {
         log.info("repayment history mapped  {}",repaymentHistoryEntities.map(repaymentHistoryMapper::mapProjecttionToRepaymentHistory).getContent().stream().toList());
         return repaymentHistoryEntities.map(repaymentHistoryMapper::mapProjecttionToRepaymentHistory);
 
+    }
+
+    @Override
+    public RepaymentHistory getFirstAndLastYear(String loaneeId) {
+        log.info("Fetching first and last year for loaneeId: {}", loaneeId);
+        Map<String, Integer> years = repaymentHistoryRepository.getFirstAndLastYear(loaneeId);
+        log.info("Retrieved years: firstYear = {}, lastYear = {}", years.get("firstYear"), years.get("lastYear"));
+        return RepaymentHistory.builder().firstYear(years.get("firstYear")).lastYear(years.get("lastYear")).build();
     }
 
     @Override
