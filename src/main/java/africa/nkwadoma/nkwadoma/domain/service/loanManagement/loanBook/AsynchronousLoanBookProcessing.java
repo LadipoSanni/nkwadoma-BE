@@ -3,7 +3,6 @@ package africa.nkwadoma.nkwadoma.domain.service.loanManagement.loanBook;
 import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.loanBook.AsynchronousLoanBookProcessingUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.loanBook.LoanBookUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.loanBook.RepaymentHistoryUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
@@ -29,12 +28,12 @@ import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.validation.LoanBookValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.TokenUtils;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
@@ -46,15 +45,15 @@ import java.util.*;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
-public class LoanBookService implements LoanBookUseCase {
+@AllArgsConstructor
+public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProcessingUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final LoaneeOutputPort loaneeOutputPort;
     private final LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
     private final IdentityManagerOutputPort identityManagerOutputPort;
     private final CohortUseCase cohortUseCase;
     private final LoanBookValidator loanBookValidator;
-    private final AsynchronousLoanBookProcessingUseCase asynchronousLoanBookProcessingUseCase;
+    private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
     private final LoaneeUseCase loaneeUseCase;
     private final RespondToLoanReferralUseCase respondToLoanReferralUseCase;
     private final ViewLoanReferralsUseCase viewLoanReferralsUseCase;
@@ -65,16 +64,35 @@ public class LoanBookService implements LoanBookUseCase {
     private final TokenUtils tokenUtils;
     private final LoanProductOutputPort loanProductOutputPort;
     private final CohortOutputPort cohortOutputPort;
-
-//    @Async
     @Override
-    public LoanBook upLoadUserData(LoanBook loanBook) throws MeedlException {
-        asynchronousLoanBookProcessingUseCase.upLoadUserData(loanBook);
-        return loanBook;
+    public void upLoadUserData(LoanBook loanBook) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanBook, "Loan book cannot be empty.");
+        loanBook.validateLoanBook();
+
+        List<String> requiredHeaders = getUserDataUploadHeaders();
+
+        List<Map<String, String>> data = readFile(loanBook, requiredHeaders);
+        loanBookValidator.validateUserDataUploadFile(loanBook, data, requiredHeaders);
+        log.info("Loan book read is {}", data);
+
+        Cohort savedCohort = findCohort(loanBook.getCohort());
+        List<Loanee> convertedLoanees = convertToLoanees(data, savedCohort, loanBook.getActorId());
+        loanBook.setLoanees(convertedLoanees);
+        referCohort(loanBook);
+        updateLoaneeCount(savedCohort);
+        completeLoanProcessing(loanBook);
     }
 
+    private void updateLoaneeCount(Cohort savedCohort) throws MeedlException {
+        savedCohort = findCohort(savedCohort);
 
-    @Override
+        savedCohort.setNumberOfLoanees(savedCohort.getNumberOfLoanees() + 1);
+        cohortOutputPort.save(savedCohort);
+        loaneeUseCase.increaseNumberOfLoaneesInOrganization(savedCohort);
+        loaneeUseCase.increaseNumberOfLoaneesInProgram(savedCohort);
+    }
+
+//    @Override
     public void uploadRepaymentRecord(LoanBook repaymentRecordBook) throws MeedlException {
         MeedlValidator.validateObjectInstance(repaymentRecordBook, "Repayment record book cannot be empty.");
         repaymentRecordBook.validateRepaymentRecord();
@@ -92,6 +110,98 @@ public class LoanBookService implements LoanBookUseCase {
         List<RepaymentHistory> savedRepaymentHistories = repaymentHistoryUseCase.saveCohortRepaymentHistory(repaymentRecordBook);
         log.info("Repayment record uploaded..");
     }
+
+    private void completeLoanProcessing(LoanBook loanBook) {
+        loanBook.getLoanees()
+                .forEach(loanee -> {
+                    try {
+                        log.info("Loanee with cohort name but is loan product name {}", loanee.getCohortName());
+                        LoanReferral loanReferral = acceptLoanReferral(loanee);
+                        LoanRequest loanRequest = acceptLoanRequest(loanee, loanReferral, loanBook);
+                        acceptLoanOffer(loanRequest);
+                        startLoan(loanRequest);
+                    } catch (MeedlException e) {
+                        log.error("Error accepting loan referral.",e);
+                    }
+                });
+    }
+
+    private void startLoan(LoanRequest loanRequest) throws MeedlException {
+        Loan loan = Loan.builder().loaneeId(loanRequest.getLoanee().getId()).loanOfferId(loanRequest.getId()).build();
+        createLoanProductUseCase.startLoan(loan);
+        log.info("Loan started for loanee {}", loanRequest.getLoanee().getUserIdentity().getEmail());
+    }
+
+    private void acceptLoanOffer(LoanRequest loanRequest) throws MeedlException {
+        LoanOffer loanOffer = new LoanOffer();
+        loanOffer.setId(loanRequest.getId());
+        loanOffer.setLoaneeResponse(LoanDecision.ACCEPTED);
+        loanOffer.setUserId(loanRequest.getLoanee().getUserIdentity().getId());
+        loanOfferUseCase.acceptLoanOffer(loanOffer);
+    }
+
+    private LoanReferral acceptLoanReferral(Loanee loanee) throws MeedlException {
+        LoanReferral loanReferral = LoanReferral.builder()
+                .loanee(loanee)
+                .build();
+        loanReferral = viewLoanReferralsUseCase.viewLoanReferral(loanReferral);
+        loanReferral.setLoanReferralStatus(LoanReferralStatus.ACCEPTED);
+        respondToLoanReferralUseCase.respondToLoanReferral(loanReferral);
+        return loanReferral;
+    }
+    private LoanRequest acceptLoanRequest(Loanee loanee, LoanReferral loanReferral, LoanBook loanBook) throws MeedlException {
+        log.info("Loan Amount Approved is {}", loanee.getLoaneeLoanDetail().getAmountApproved());
+        log.info("Amount received by this loanee {}", loanee.getLoaneeLoanDetail().getAmountReceived());
+        LoanRequest loanRequest = LoanRequest.builder()
+                .loanAmountApproved(loanee.getLoaneeLoanDetail().getAmountReceived())
+                .loanAmountRequested(loanee.getLoaneeLoanDetail().getAmountRequested())
+                .loanRequestDecision(LoanDecision.ACCEPTED)
+                .id(loanReferral.getId())
+                .loanProductId(findLoanProductIdByName(loanee.getCohortName()))
+                .loanee(loanee)
+                .actorId(loanBook.getActorId())
+                .referredBy(loanee.getReferredBy())
+                .build();
+        log.info("Accepting loan request for uploaded loanee {}", loanRequest);
+        return loanRequestUseCase.respondToLoanRequest(loanRequest);
+    }
+
+    private String findLoanProductIdByName(String loanProductName) {
+        LoanProduct loanProduct = null;
+        try {
+            log.info("Loan product name being searched for in upload user data {}", loanProductName);
+            loanProduct = loanProductOutputPort.findByName(loanProductName);
+        } catch (MeedlException e) {
+            log.error("Loan product does not exist by this name {}", loanProductName);
+            throw new RuntimeException(e);
+        }
+
+        return loanProduct.getId();
+    }
+
+
+    private void referCohort(LoanBook loanBook) {
+        Iterator<Loanee> iterator = loanBook.getLoanees().iterator();
+        while (iterator.hasNext()) {
+            Loanee loanee = iterator.next();
+            log.info("About to refer loanee with details {}", loanee);
+            log.info("About to refer loanee in cohort with loan details {}", loanee.getLoaneeLoanDetail());
+            try {
+                inviteTrainee(loanee);
+            } catch (MeedlException e) {
+                log.error("Failed to invite trainee with id: {}", loanee.getId(), e);
+                iterator.remove();
+            }
+        }
+
+        log.info("Number of referable loanees :{} ",  loanBook.getLoanees().size());
+//        asynchronousMailingOutputPort.notifyLoanReferralActors(loanBook.getLoanees());
+    }
+    private void inviteTrainee (Loanee loanee) throws MeedlException {
+        log.info("Single loanee is being referred...");
+        loaneeUseCase.referLoanee(loanee);
+    }
+
 
     private Cohort findCohort(Cohort cohort) throws MeedlException {
         MeedlValidator.validateObjectInstance(cohort, CohortMessages.COHORT_CANNOT_BE_EMPTY.getMessage());
@@ -166,6 +276,83 @@ public class LoanBookService implements LoanBookUseCase {
             //TODO notification should be made here
         }
         return amount;
+    }
+
+
+    List<Loanee> convertToLoanees(List<Map<String, String>> data, Cohort cohort, String actorId) {
+        List<Loanee> loanees = new ArrayList<>();
+
+        for (Map<String, String> row : data) {
+            UserIdentity userIdentity = UserIdentity.builder()
+                    .firstName(row.get("firstname"))
+                    .lastName(row.get("lastname"))
+                    .email(row.get("email"))
+                    .phoneNumber(row.get("phonenumber"))
+                    .dateOfBirth(row.get("dob"))
+                    .role(IdentityRole.LOANEE)
+                    .createdAt(LocalDateTime.now())
+                    .bvn(encryptValue(row.get("bvn")))
+                    .nin(encryptValue(row.get("nin")))
+                    .createdBy(actorId)
+                    .build();
+
+            LoaneeLoanDetail loaneeLoanDetail = LoaneeLoanDetail.builder()
+                    .initialDeposit(new BigDecimal(row.get("initialdeposit")))
+                    .amountRequested(new BigDecimal(row.get("amountrequested")))
+                    .amountReceived(new BigDecimal(row.get("amountreceived")))
+                    .build();
+            log.info("loan product name found from csv {}", row.get("loanproduct"));
+            Loanee loanee = Loanee.builder()
+                    .userIdentity(userIdentity)
+                    .loaneeLoanDetail(loaneeLoanDetail)
+                    .loaneeStatus(LoaneeStatus.ADDED)
+                    .onboardingMode(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)
+                    .cohortId(cohort.getId())
+                    .cohortName(row.get("loanproduct"))
+                    .build();
+
+            loanees.add(loanee);
+        }
+
+        return savedData(loanees);
+    }
+
+    private String encryptValue(String value) {
+        try {
+            MeedlValidator.validateBvn(value);
+            return tokenUtils.encryptAES(value);
+        } catch (MeedlException e) {
+            log.error("Unable to encrypt value {}", value);
+        }
+        return StringUtils.EMPTY;
+    }
+
+    private List<Loanee> savedData(List<Loanee> loanees){
+        List<Loanee> savedLoanees = new ArrayList<>();
+        log.info("Started saving converted data of loanees");
+        for (Loanee loanee : loanees){
+            try {
+                UserIdentity userIdentity = identityManagerOutputPort.createUser(loanee.getUserIdentity());
+                userIdentityOutputPort.save(userIdentity);
+                LoaneeLoanDetail savedLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loanee.getLoaneeLoanDetail());
+                loanee.getLoaneeLoanDetail().setId(savedLoaneeLoanDetail.getId());
+                log.info("Loanee's loan details after saving in file upload {}", savedLoaneeLoanDetail);
+                loanee.setUserIdentity(userIdentity);
+                loanee.setLoaneeLoanDetail(loanee.getLoaneeLoanDetail());
+
+                Loanee savedLoanee = loaneeOutputPort.save(loanee);
+                savedLoanee.setCohortName(loanee.getCohortName());
+                savedLoanee.getLoaneeLoanDetail().setAmountApproved(loanee.getLoaneeLoanDetail().getAmountApproved());
+                log.info("Loanee's amount approved in file upload: {}", savedLoanee.getLoaneeLoanDetail());
+                log.info("Loanee's actual loan details in file upload: {}", loanee.getLoaneeLoanDetail());
+                savedLoanees.add(savedLoanee);
+            } catch (MeedlException e) {
+                log.info("Error occurred while saving data .", e);
+                throw new RuntimeException(e);
+            }
+        }
+        log.info("Done saving loanee data from file to db. loanees size {}", savedLoanees.size());
+        return savedLoanees;
     }
     private List<Map<String, String>> readFile(LoanBook loanBoook, List<String> requiredHeaders) throws MeedlException {
         List<Map<String, String>> data;
