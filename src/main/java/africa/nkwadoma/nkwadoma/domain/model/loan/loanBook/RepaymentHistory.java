@@ -38,7 +38,7 @@ public class RepaymentHistory {
     private Integer lastYear;
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateObjectInstance(paymentDateTime,"Payment date cannot be empty");
+//        MeedlValidator.validateObjectInstance(paymentDateTime,"Payment date cannot be empty");
         MeedlValidator.validateBigDecimalDataElement(amountPaid, "Amount paid cannot be empty");
 //        MeedlValidator.validateBigDecimalDataElement(amountOutstanding, "Amount outstanding cannot be empty");
     }
