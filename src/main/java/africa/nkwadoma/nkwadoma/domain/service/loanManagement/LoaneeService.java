@@ -198,7 +198,7 @@ public class LoaneeService implements LoaneeUseCase {
         MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateObjectInstance(loanee.getUserIdentity(), UserMessages.USER_IDENTITY_CANNOT_BE_EMPTY.getMessage());
 
-        if (loanee.getUserIdentity().getBvn() != null) {
+        if (MeedlValidator.isNotEmptyString(loanee.getUserIdentity().getBvn())) {
             if (ObjectUtils.isEmpty(loanee.getCreditScoreUpdatedAt()) ||
                     creditScoreIsAboveOrEqualOneMonth(loanee)) {
                 loanee = updateCreditScore(loanee);

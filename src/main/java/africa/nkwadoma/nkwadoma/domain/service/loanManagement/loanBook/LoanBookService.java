@@ -167,6 +167,83 @@ public class LoanBookService implements LoanBookUseCase {
         }
         return amount;
     }
+
+
+    List<Loanee> convertToLoanees(List<Map<String, String>> data, Cohort cohort, String actorId) {
+        List<Loanee> loanees = new ArrayList<>();
+
+        for (Map<String, String> row : data) {
+            UserIdentity userIdentity = UserIdentity.builder()
+                    .firstName(row.get("firstname"))
+                    .lastName(row.get("lastname"))
+                    .email(row.get("email"))
+                    .phoneNumber(row.get("phonenumber"))
+                    .dateOfBirth(row.get("dob"))
+                    .role(IdentityRole.LOANEE)
+                    .createdAt(LocalDateTime.now())
+                    .bvn(encryptValue(row.get("bvn")))
+                    .nin(encryptValue(row.get("nin")))
+                    .createdBy(actorId)
+                    .build();
+
+            LoaneeLoanDetail loaneeLoanDetail = LoaneeLoanDetail.builder()
+                    .initialDeposit(new BigDecimal(row.get("initialdeposit")))
+                    .amountRequested(new BigDecimal(row.get("amountrequested")))
+                    .amountReceived(new BigDecimal(row.get("amountreceived")))
+                    .build();
+            log.info("loan product name found from csv {}", row.get("loanproduct"));
+            Loanee loanee = Loanee.builder()
+                    .userIdentity(userIdentity)
+                    .loaneeLoanDetail(loaneeLoanDetail)
+                    .loaneeStatus(LoaneeStatus.ADDED)
+                    .onboardingMode(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)
+                    .cohortId(cohort.getId())
+                    .cohortName(row.get("loanproduct"))
+                    .build();
+
+            loanees.add(loanee);
+        }
+
+        return savedData(loanees);
+    }
+
+    private String encryptValue(String value) {
+        try {
+            MeedlValidator.validateBvn(value);
+            return tokenUtils.encryptAES(value);
+        } catch (MeedlException e) {
+            log.error("Unable to encrypt value {}", value);
+        }
+        return null;
+    }
+
+    private List<Loanee> savedData(List<Loanee> loanees){
+        List<Loanee> savedLoanees = new ArrayList<>();
+        log.info("Started saving converted data of loanees");
+        for (Loanee loanee : loanees){
+            try {
+                UserIdentity userIdentity = identityManagerOutputPort.createUser(loanee.getUserIdentity());
+                userIdentityOutputPort.save(userIdentity);
+                LoaneeLoanDetail savedLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loanee.getLoaneeLoanDetail());
+                loanee.getLoaneeLoanDetail().setId(savedLoaneeLoanDetail.getId());
+                log.info("Loanee's loan details after saving in file upload {}", savedLoaneeLoanDetail);
+                loanee.setUserIdentity(userIdentity);
+                loanee.setLoaneeLoanDetail(loanee.getLoaneeLoanDetail());
+
+                Loanee savedLoanee = loaneeOutputPort.save(loanee);
+                savedLoanee.setCohortName(loanee.getCohortName());
+                savedLoanee.getLoaneeLoanDetail().setAmountApproved(loanee.getLoaneeLoanDetail().getAmountApproved());
+                log.info("Loanee's amount approved in file upload: {}", savedLoanee.getLoaneeLoanDetail());
+                log.info("Loanee's actual loan details in file upload: {}", loanee.getLoaneeLoanDetail());
+                savedLoanees.add(savedLoanee);
+            } catch (MeedlException e) {
+                log.info("Error occurred while saving data .", e);
+                throw new RuntimeException(e);
+            }
+        }
+        log.info("Done saving loanee data from file to db. loanees size {}", savedLoanees.size());
+        return savedLoanees;
+    }
     private List<Map<String, String>> readFile(LoanBook loanBoook, List<String> requiredHeaders) throws MeedlException {
         List<Map<String, String>> data;
         if (loanBoook.getFile().getName().endsWith(".csv")) {

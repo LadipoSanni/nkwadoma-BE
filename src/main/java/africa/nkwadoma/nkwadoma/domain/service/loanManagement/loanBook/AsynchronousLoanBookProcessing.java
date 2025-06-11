@@ -278,7 +278,6 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         return amount;
     }
 
-
     List<Loanee> convertToLoanees(List<Map<String, String>> data, Cohort cohort, String actorId) {
         List<Loanee> loanees = new ArrayList<>();
 
