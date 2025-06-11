@@ -43,6 +43,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -58,6 +59,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierT
 
 @AllArgsConstructor
 @Service
+@EnableAsync
 @Slf4j
 public class FinancierService implements FinancierUseCase {
     private final FinancierOutputPort financierOutputPort;

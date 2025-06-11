@@ -1,6 +1,5 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
@@ -8,6 +7,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutput
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
@@ -28,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
@@ -36,6 +37,7 @@ import java.util.*;
 
 @RequiredArgsConstructor
 @Slf4j
+@EnableAsync
 @Service
 public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUseCase, ViewLoanReferralsUseCase,
         RespondToLoanReferralUseCase, LoanOfferUseCase {
@@ -60,7 +62,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final ProgramOutputPort programOutputPort;
     private final LoanMetricsMapper loanMetricsMapper;
     private final LoanMetricsOutputPort loanMetricsOutputPort;
-    private final SendColleagueEmailUseCase sendColleagueEmailUseCase;
+    private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
 
     @Override
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
@@ -367,13 +369,14 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         log.info("Loan offer identity validated : {}", loanOffer);
         LoanOffer offer = loanOfferOutputPort.findLoanOfferById(loanOffer.getId());
         log.info("found Loan offer : {}", loanOffer);
-        Optional<Loanee> loanee = loaneeOutputPort.findByUserId(loanOffer.getUserId());
+        Optional<Loanee> optionalLoanee = loaneeOutputPort.findByUserId(loanOffer.getUserId());
         log.info("Loan offer: {}", loanOffer);
-        if (loanee.isEmpty()) {
+        if (optionalLoanee.isEmpty()) {
             log.info("Loanee is empty : {}", loanOffer);
             throw new LoanException(LoanMessages.LOANEE_NOT_FOUND.getMessage());
         }
-        if (!offer.getLoanee().getId().equals(loanee.get().getId())) {
+        Loanee loanee = optionalLoanee.get();
+        if (!offer.getLoanee().getId().equals(loanee.getId())) {
             log.info("offer not assigned to loanee: {}", loanOffer);
             throw new LoanException(LoanMessages.LOAN_OFFER_NOT_ASSIGNED_TO_LOANEE.getMessage());
         }
@@ -381,24 +384,23 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             log.info("decision made previously : {}", loanOffer);
             throw new LoanException(LoanMessages.LOAN_OFFER_DECISION_MADE.getMessage());
         }
-        List<UserIdentity> portfolioManagers = userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
-        log.info("found all pm : {}", portfolioManagers);
+
         if (loanOffer.getLoaneeResponse().equals(LoanDecision.ACCEPTED)){
             log.info("accept offer abt to start : {}", loanOffer);
-            return acceptLoanOffer(loanOffer, offer, portfolioManagers);
+            return acceptLoanOffer(loanee.getUserIdentity(), loanOffer, offer);
         }
         decreaseLoanOfferOnLoanMetrics(offer);
-        declineLoanOffer(loanOffer, offer, portfolioManagers);
+        declineLoanOffer(loanee.getUserIdentity(), loanOffer, offer);
         return null;
     }
 
-    private void declineLoanOffer(LoanOffer loanOffer, LoanOffer offer, List<UserIdentity> portfolioManagers) throws MeedlException {
+    private void declineLoanOffer(UserIdentity userIdentity, LoanOffer loanOffer, LoanOffer offer) throws MeedlException {
         loanOfferMapper.updateLoanOffer(offer, loanOffer);
         loanOfferOutputPort.save(offer);
-        notifyPortfolioManager(portfolioManagers, offer);
+        notifyPortfolioManager(offer, userIdentity);
     }
 
-    private LoaneeLoanAccount acceptLoanOffer(LoanOffer loanOffer, LoanOffer offer, List<UserIdentity> portfolioManagers) throws MeedlException {
+    private LoaneeLoanAccount acceptLoanOffer(UserIdentity userIdentity, LoanOffer loanOffer, LoanOffer offer) throws MeedlException {
         log.info("got into accept method: {}", loanOffer);
         //Loanee Wallet would be Created
         loanOfferMapper.updateLoanOffer(offer, loanOffer);
@@ -408,7 +410,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         offer.setLoanProduct(loanProduct);
         loanOfferOutputPort.save(offer);
         log.info("after saving offer : {}", offer);
-        notifyPortfolioManager(portfolioManagers, offer);
+        notifyPortfolioManager(offer, userIdentity);
         log.info("Loanee account abt to create : {}", loanOffer);
         LoaneeLoanAccount loaneeLoanAccount = loaneeLoanAccountOutputPort.findByLoaneeId(offer.getLoaneeId());
         log.info("Loanee account is found : {}", loaneeLoanAccount);
@@ -448,8 +450,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
 
-    private void notifyPortfolioManager(List<UserIdentity> portfolioManagers, LoanOffer loanOffer) {
-        portfolioManagers.forEach(portfolioManager -> sendColleagueEmailUseCase.sendPortforlioManagerEmail(portfolioManager,loanOffer));
+    private void notifyPortfolioManager(LoanOffer loanOffer, UserIdentity userIdentity) throws MeedlException {
+        asynchronousNotificationOutputPort.notifyPortfolioManagerOfNewLoanOfferWithDecision(loanOffer, userIdentity);
     }
 
 

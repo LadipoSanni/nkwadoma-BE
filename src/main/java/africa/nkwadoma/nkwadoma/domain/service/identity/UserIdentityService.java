@@ -38,6 +38,7 @@ import java.util.List;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 
 @Slf4j
+@EnableAsync
 @RequiredArgsConstructor
 public class UserIdentityService implements CreateUserUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;

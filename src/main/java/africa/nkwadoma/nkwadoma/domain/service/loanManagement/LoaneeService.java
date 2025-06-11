@@ -43,6 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -58,6 +59,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.notification.Meedl
 
 @Slf4j
 @AllArgsConstructor
+@EnableAsync
 @Service
 public class LoaneeService implements LoaneeUseCase {
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
