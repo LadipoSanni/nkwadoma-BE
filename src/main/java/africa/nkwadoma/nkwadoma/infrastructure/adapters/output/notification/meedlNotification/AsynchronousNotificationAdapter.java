@@ -14,6 +14,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdenti
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import lombok.RequiredArgsConstructor;
@@ -96,11 +97,15 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
             meedlNotificationUsecase.sendNotification(notification);
         }
     }
+    @Async
+    @Override
+    public void notifyPortfolioManagerOfNewLoanOfferWithDecision(LoanOffer loanOffer, UserIdentity userIdentity) throws MeedlException {
+        MeedlNotification meedlNotification = buildLoanOfferPortfolioManagerNotification(loanOffer, userIdentity );
+        notifyPortfolioManagers(meedlNotification);
+        
+    }
 
     private void notifyPortfolioManagers(MeedlNotification meedlNotification) throws MeedlException {
-        notifyAllPortfolioManager(meedlNotification);
-    }
-    private void notifyAllPortfolioManager(MeedlNotification meedlNotification) throws MeedlException {
         for (UserIdentity userIdentity : userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER)) {
             meedlNotification.setUser(userIdentity);
             meedlNotification.setNotificationFlag(NotificationFlag.INVITE_FINANCIER);
@@ -139,6 +144,18 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                 .callToAction(true)
                 .callToActionRoute("view/financier/details/not merge during this implementation. Should be updated")
                 .notificationFlag(NotificationFlag.INVITE_FINANCIER)
+                .build();
+    }
+    private MeedlNotification buildLoanOfferPortfolioManagerNotification(LoanOffer loanOffer, UserIdentity sender) {
+        return MeedlNotification.builder()
+                .title("Loan Offer Decision Made.")
+                .contentId(loanOffer.getId())
+                .contentDetail("A Loan Offer has been "+ loanOffer.getLoaneeResponse())
+                .senderFullName(sender.getFirstName() +" "+ sender.getFirstName())
+                .senderMail(sender.getEmail())
+                .callToAction(true)
+                .callToActionRoute("view/loan/offer/not merge during this implementation. Should be updated")
+                .notificationFlag(NotificationFlag.LOAN_OFFER_DECISION)
                 .build();
     }
 }
