@@ -128,11 +128,13 @@ public class LoanBookService implements LoanBookUseCase {
     }
 
     private LocalDateTime parseFlexibleDateTime(String dateStr) {
+        log.info("Repayment date before formating {}", dateStr);
         if (dateStr == null || dateStr.isBlank()) {
             return null;
         }
 
         dateStr = dateStr.trim().replace("/", "-");
+        log.info("Repayment date after formating {}", dateStr);
         List<DateTimeFormatter> formatters = List.of(
                 DateTimeFormatter.ISO_LOCAL_DATE_TIME,                    // yyyy-MM-ddTHH:mm:ss
                 DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"),       // 10-12-2024 15:30:00
@@ -141,13 +143,14 @@ public class LoanBookService implements LoanBookUseCase {
 
         for (DateTimeFormatter formatter : formatters) {
             try {
+                log.info("The formatter is {} for {}", formatter, dateStr);
                 if (formatter == DateTimeFormatter.ISO_LOCAL_DATE_TIME) {
                     return LocalDateTime.parse(dateStr, formatter);
                 } else {
                     return LocalDate.parse(dateStr, formatter).atStartOfDay();
                 }
             } catch (DateTimeParseException ignored) {
-                log.error("Error occured while converting the format");
+                log.error("Error occurRed while converting the format.");
             }
         }
 
