@@ -57,7 +57,7 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
         }
         UserIdentity userIdentity = userIdentityOutputPort.findById(repaymentHistory.getActorId());
         if (userIdentity.getRole().equals(IdentityRole.PORTFOLIO_MANAGER)){
-            Page<RepaymentHistory> repaymentHistories = repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(repaymentHistory,
+            Page<RepaymentHistory>  repaymentHistories = repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(repaymentHistory,
                      pageSize, pageNumber);
              log.info("repayment histories gotten from adapter == {}",repaymentHistories.getContent().stream().toList());
             return repaymentHistories;

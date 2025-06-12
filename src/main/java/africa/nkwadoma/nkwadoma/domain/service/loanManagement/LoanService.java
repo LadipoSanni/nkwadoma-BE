@@ -321,7 +321,27 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanRequest.setCreatedDate(LocalDateTime.now());
         LoanRequest request = loanRequestOutputPort.save(loanRequest);
         log.info("Saved loan request: {}", request);
+        log.info("About to increase loan request count on metrics : {}", request);
+        increaseLoanRequestOnLoanMetrics(loanRequest);
         return request;
+    }
+
+    private void increaseLoanRequestOnLoanMetrics(LoanRequest loanRequest) throws MeedlException {
+        log.info("org name ====  {}",loanRequest.getLoanee().getReferredBy());
+        Optional<OrganizationIdentity> organization =
+                organizationIdentityOutputPort.findOrganizationByName(loanRequest.getLoanee().getReferredBy());
+        if (organization.isEmpty()) {
+            throw new EducationException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
+        }
+        Optional<LoanMetrics> loanMetrics =
+                loanMetricsOutputPort.findByOrganizationId(organization.get().getId());
+        if (loanMetrics.isEmpty()) {
+            throw new LoanException("Organization has no loan metrics");
+        }
+        loanMetrics.get().setLoanRequestCount(
+                loanMetrics.get().getLoanRequestCount() + 1
+        );
+        loanMetricsOutputPort.save(loanMetrics.get());
     }
 
     @Override
