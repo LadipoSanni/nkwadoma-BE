@@ -151,26 +151,27 @@ public class LoaneeService implements LoaneeUseCase {
         loanBreakdowns = loaneeLoanBreakDownOutputPort.saveAll(loanBreakdowns,loanee);
         loanee.setLoanBreakdowns(loanBreakdowns);
         cohort.setNumberOfLoanees(cohort.getNumberOfLoanees() + 1);
-        increaseNumberOfLoaneesInProgram(cohort);
-        increaseNumberOfLoaneesInOrganization(cohort);
+        increaseNumberOfLoaneesInProgram(cohort, 1);
+        increaseNumberOfLoaneesInOrganization(cohort, 1);
         cohortOutputPort.save(cohort);
         return loanee;
     }
 
     @Override
-    public void increaseNumberOfLoaneesInOrganization(Cohort cohort) throws MeedlException {
+    public void increaseNumberOfLoaneesInOrganization(Cohort cohort, int size) throws MeedlException {
         OrganizationIdentity organizationIdentity =
                 organizationIdentityOutputPort.findById(cohort.getOrganizationId());
-        organizationIdentity.setNumberOfLoanees(organizationIdentity.getNumberOfLoanees() + 1);
+        organizationIdentity.setNumberOfLoanees(organizationIdentity.getNumberOfLoanees() + size);
         organizationIdentity.setOrganizationEmployees(
                 organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId()));
         organizationIdentityOutputPort.save(organizationIdentity);
         log.info("Total number of loanees in an organization has been increased to : {}, in organization with id : {}", organizationIdentity.getNumberOfLoanees(), organizationIdentity.getId());
     }
     @Override
-    public void increaseNumberOfLoaneesInProgram(Cohort cohort) throws MeedlException {
+    public void increaseNumberOfLoaneesInProgram(Cohort cohort, int size) throws MeedlException {
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
-        program.setNumberOfLoanees(program.getNumberOfLoanees() + 1);
+        log.info("Number of loanees in program found is :: {}", program.getNumberOfLoanees());
+        program.setNumberOfLoanees(program.getNumberOfLoanees() + size);
         program = programOutputPort.saveProgram(program);
         log.info("Total number of loanees in a program has been increased to : {}, in program with id : {}", program.getNumberOfLoanees(), program.getId());
     }

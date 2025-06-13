@@ -84,12 +84,10 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
 
     private void updateLoaneeCount(Cohort savedCohort, List<Loanee> loanees) throws MeedlException {
         savedCohort = findCohort(savedCohort);
-        for (Loanee eachLoanee : loanees) {
-            savedCohort.setNumberOfLoanees(savedCohort.getNumberOfLoanees() + 1);
-            cohortOutputPort.save(savedCohort);
-            loaneeUseCase.increaseNumberOfLoaneesInOrganization(savedCohort);
-            loaneeUseCase.increaseNumberOfLoaneesInProgram(savedCohort);
-        }
+        savedCohort.setNumberOfLoanees(savedCohort.getNumberOfLoanees() + loanees.size());
+        cohortOutputPort.save(savedCohort);
+        loaneeUseCase.increaseNumberOfLoaneesInOrganization(savedCohort, loanees.size());
+        loaneeUseCase.increaseNumberOfLoaneesInProgram(savedCohort, loanees.size());
     }
 
 //    @Override
