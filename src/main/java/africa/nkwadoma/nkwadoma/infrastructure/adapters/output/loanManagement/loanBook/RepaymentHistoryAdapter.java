@@ -50,7 +50,7 @@ public class RepaymentHistoryAdapter implements RepaymentHistoryOutputPort {
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validatePageNumber(pageNumber);
 
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("paymentDateTime"));
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("paymentDateTime").descending());
         Page<RepaymentHistoryProjection> repaymentHistoryEntities =
                 repaymentHistoryRepository.findRepaymentHistoryByLoaneeIdOrAll(repaymentHistory.getLoaneeId(),
                         repaymentHistory.getMonth(),repaymentHistory.getYear(),pageable);
@@ -82,7 +82,7 @@ public class RepaymentHistoryAdapter implements RepaymentHistoryOutputPort {
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validatePageNumber(pageNumber);
 
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("paymentDateTime"));
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("paymentDateTime").descending());
         Page<RepaymentHistoryProjection> repaymentHistoryEntities =
                 repaymentHistoryRepository.searchRepaymentHistory(repaymentHistory.getMonth(),repaymentHistory.getYear(),
                         repaymentHistory.getLoaneeName(),pageable);

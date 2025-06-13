@@ -33,7 +33,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
@@ -79,17 +78,18 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         List<Loanee> convertedLoanees = convertToLoanees(data, savedCohort, loanBook.getActorId());
         loanBook.setLoanees(convertedLoanees);
         referCohort(loanBook);
-        updateLoaneeCount(savedCohort);
+        updateLoaneeCount(savedCohort,convertedLoanees);
         completeLoanProcessing(loanBook);
     }
 
-    private void updateLoaneeCount(Cohort savedCohort) throws MeedlException {
+    private void updateLoaneeCount(Cohort savedCohort, List<Loanee> loanees) throws MeedlException {
         savedCohort = findCohort(savedCohort);
-
-        savedCohort.setNumberOfLoanees(savedCohort.getNumberOfLoanees() + 1);
+        savedCohort.setNumberOfLoanees(savedCohort.getNumberOfLoanees() + loanees.size());
         cohortOutputPort.save(savedCohort);
-        loaneeUseCase.increaseNumberOfLoaneesInOrganization(savedCohort);
-        loaneeUseCase.increaseNumberOfLoaneesInProgram(savedCohort);
+        loaneeUseCase.increaseNumberOfLoaneesInOrganization(savedCohort, loanees.size());
+        loaneeUseCase.increaseNumberOfLoaneesInProgram(savedCohort,);
+        for (Loanee eachLoanee : loanees) {
+        }
     }
 
 //    @Override

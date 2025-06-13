@@ -103,7 +103,7 @@ public class LoanBookService implements LoanBookUseCase {
 
         log.info("Started creating Repayment record from data gotten from file upload {}, size {}",data, data.size());
         for (Map<String, String> row  : data) {
-
+        log.info("Payment date extracted {}", row.get("paymentdate").trim());
             RepaymentHistory repaymentHistory = RepaymentHistory.builder()
                     .firstName(row.get("firstname").trim())
                     .lastName(row.get("lastname").trim())
@@ -113,6 +113,7 @@ public class LoanBookService implements LoanBookUseCase {
                     .modeOfPayment(validateModeOfPayment(row.get("modeofpayment").trim()))
                     .build();
             log.info("Repayment history model created from file {}", repaymentHistory);
+            log.info("Payment date maped from file {}", repaymentHistory.getPaymentDateTime());
             repaymentHistories.add(repaymentHistory);
         }
         return repaymentHistories;
@@ -129,28 +130,33 @@ public class LoanBookService implements LoanBookUseCase {
 
     private LocalDateTime parseFlexibleDateTime(String dateStr) {
         log.info("Repayment date before formating {}", dateStr);
-        if (dateStr == null || dateStr.isBlank()) {
+        if (dateStr == null || MeedlValidator.isEmptyString(dateStr)) {
             return null;
         }
 
         dateStr = dateStr.trim().replace("/", "-");
         log.info("Repayment date after formating {}", dateStr);
         List<DateTimeFormatter> formatters = List.of(
-                DateTimeFormatter.ISO_LOCAL_DATE_TIME,                    // yyyy-MM-ddTHH:mm:ss
-                DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"),       // 10-12-2024 15:30:00
-                DateTimeFormatter.ofPattern("dd-MM-yyyy")                 // 10-12-2024
-        );
+                DateTimeFormatter.ISO_LOCAL_DATE_TIME,
+                DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"),
+                DateTimeFormatter.ofPattern("dd-MM-yyyy"),
+                DateTimeFormatter.ofPattern("yyyy-M-d"),
+                DateTimeFormatter.ofPattern("d-M-yyyy"),
+                DateTimeFormatter.ofPattern("yyyy-M-d")
+                );
 
         for (DateTimeFormatter formatter : formatters) {
             try {
                 log.info("The formatter is {} for {}", formatter, dateStr);
                 if (formatter == DateTimeFormatter.ISO_LOCAL_DATE_TIME) {
+                    log.info("In ISO_LOCAL_DATE_TIME {}",dateStr);
                     return LocalDateTime.parse(dateStr, formatter);
                 } else {
                     return LocalDate.parse(dateStr, formatter).atStartOfDay();
                 }
             } catch (DateTimeParseException ignored) {
-                log.error("Error occurRed while converting the format.");
+                log.error("Error occurred while converting the format.");
+//                return LocalDate.parse(dateStr, formatter).atStartOfDay();
             }
         }
 

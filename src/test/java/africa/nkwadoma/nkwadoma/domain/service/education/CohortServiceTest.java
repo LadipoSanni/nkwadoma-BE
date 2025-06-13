@@ -120,6 +120,7 @@ class CohortServiceTest {
             when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
             when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             when(cohortOutputPort.save(elites)).thenReturn(elites);
+            when(organizationIdentityOutputPort.findById(program.getOrganizationId())).thenReturn(organizationIdentity);
             Cohort cohort = cohortService.createCohort(elites);
             assertEquals(cohort.getName(), elites.getName());
             assertEquals(LocalDate.of(2025,6,29),cohort.getExpectedEndDate());
@@ -157,6 +158,7 @@ class CohortServiceTest {
             xplorers.setLoanBreakdowns(List.of(loanBreakdown));
             when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             when(cohortOutputPort.save(xplorers)).thenReturn(xplorers);
+            when(organizationIdentityOutputPort.findById(program.getOrganizationId())).thenReturn(organizationIdentity);
             Cohort cohort = cohortService.createCohort(xplorers);
             assertEquals(cohort.getName(), xplorers.getName());
             verify(cohortOutputPort, times(2)).save(any());

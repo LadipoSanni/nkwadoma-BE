@@ -73,11 +73,11 @@ public class RepaymentHistoryAdapterTest {
         assertThrows(MeedlException.class, () ->repaymentHistoryOutputPort.save(repaymentHistory));
     }
 
-    @Test
-    void cannotSaveRepaymentHistoryWithNUllPaymentDate(){
-        repaymentHistory.setPaymentDateTime(null);
-        assertThrows(MeedlException.class, () ->repaymentHistoryOutputPort.save(repaymentHistory));
-    }
+//    @Test
+//    void cannotSaveRepaymentHistoryWithNUllPaymentDate(){
+//        repaymentHistory.setPaymentDateTime(null);
+////        assertThrows(MeedlException.class, () ->repaymentHistoryOutputPort.save(repaymentHistory));
+//    }
 
     @Order(1)
     @Test

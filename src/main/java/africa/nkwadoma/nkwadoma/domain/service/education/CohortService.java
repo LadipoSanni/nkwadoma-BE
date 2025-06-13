@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.service.education;
 import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.LoaneeUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanBreakdownOutputPort;
@@ -17,6 +18,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
@@ -81,8 +83,15 @@ public class CohortService implements CohortUseCase {
         savedCohort = cohortOutputPort.save(savedCohort);
         savedCohort.setLoanBreakdowns(savedLoanBreakdowns);
         savedCohort.setProgramName(program.getName());
-        organizationIdentityOutputPort.updateNumberOfCohortInOrganization(program.getOrganizationId());
+        updateNumberOfCohortInOrganization(program.getOrganizationId());
+
         return savedCohort;
+    }
+
+    public void updateNumberOfCohortInOrganization(String organizationId) throws MeedlException {
+        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
+        organizationIdentity.setNumberOfCohort(organizationIdentity.getNumberOfCohort() + 1);
+        organizationIdentityOutputPort.save(organizationIdentity);
     }
 
     private Program checkifCohortNameExistInProgram(Cohort cohort, String cohortName) throws MeedlException {
