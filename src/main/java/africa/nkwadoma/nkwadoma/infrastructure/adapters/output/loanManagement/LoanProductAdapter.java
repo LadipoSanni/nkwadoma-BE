@@ -107,19 +107,21 @@ public class LoanProductAdapter implements LoanProductOutputPort {
     public Page<LoanProduct> findAllLoanProduct(LoanProduct loanProduct) {
         int defaultPageSize = BigInteger.TEN.intValue();
         int size = loanProduct.getPageSize() <= BigInteger.ZERO.intValue() ? defaultPageSize : loanProduct.getPageSize();
-        Pageable pageRequest = PageRequest.of(loanProduct.getPageNumber(), size, Sort.by(Sort.Order.asc("createdAt")));
+        Pageable pageRequest = PageRequest.of(loanProduct.getPageNumber(), size, Sort.by(Sort.Order.desc("createdAt")));
         Page<LoanProductEntity> loanProductEntities = loanProductEntityRepository.findAll(pageRequest);
         return loanProductEntities.map(loanProductMapper::mapEntityToLoanProduct);
     }
 
     @Override
-    public List<LoanProduct> search(String loanProductName) throws MeedlException {
+    public Page<LoanProduct> search(String loanProductName, int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validateDataElement(loanProductName, LoanMessages.LOAN_PRODUCT_NAME_REQUIRED.getMessage());
-        List<LoanProductEntity> loanProductEntities = loanProductEntityRepository.findByNameContainingIgnoreCase(loanProductName);
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize,Sort.by(Sort.Order.desc("createdAt")));
+        Page<LoanProductEntity> loanProductEntities =
+                loanProductEntityRepository.findByNameContainingIgnoreCase(loanProductName,pageRequest);
         if (loanProductEntities.isEmpty()){
-            return List.of();
+            return Page.empty();
         }
-        return loanProductEntities.stream().map(loanProductMapper::mapEntityToLoanProduct).toList();
+        return loanProductEntities.map(loanProductMapper::mapEntityToLoanProduct);
     }
 
 }

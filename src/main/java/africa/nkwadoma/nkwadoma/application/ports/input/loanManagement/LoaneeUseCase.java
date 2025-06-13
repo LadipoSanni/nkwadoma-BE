@@ -14,9 +14,9 @@ public interface LoaneeUseCase {
 
     Loanee addLoaneeToCohort(Loanee loanee) throws MeedlException;
 
-    void increaseNumberOfLoaneesInOrganization(Cohort cohort) throws MeedlException;
+    void increaseNumberOfLoaneesInOrganization(Cohort cohort, int size) throws MeedlException;
 
-    void increaseNumberOfLoaneesInProgram(Cohort cohort) throws MeedlException;
+    void increaseNumberOfLoaneesInProgram(Cohort cohort, int size) throws MeedlException;
 
     Loanee viewLoaneeDetails(String loaneeId, String userId) throws MeedlException;
 

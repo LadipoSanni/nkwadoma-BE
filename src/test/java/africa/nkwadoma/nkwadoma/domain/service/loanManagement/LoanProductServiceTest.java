@@ -54,6 +54,8 @@ class LoanProductServiceTest {
     private LoaneeLoanBreakdown loaneeLoanBreakdown;
     @Mock
     private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
+    private int pageSize = 10;
+    private int pageNumber = 10;
 
     @BeforeEach
     void setUp() {
@@ -240,22 +242,22 @@ class LoanProductServiceTest {
     @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY })
     void searchForLoanProductWithInvalidName(String name) {
         loanProduct.setName(name);
-        assertThrows(MeedlException.class, ()-> loanService.search(loanProduct.getName()));
+        assertThrows(MeedlException.class, ()-> loanService.search(loanProduct.getName(),pageSize,pageNumber));
     }
     @Test
     void searchLoanProduct() {
-        List<LoanProduct> loanProducts = new ArrayList<>();
+        Page<LoanProduct> loanProducts = Page.empty();
         try{
-            when(loanProductOutputPort.search(loanProduct.getName()))
-                    .thenReturn(List.of(loanProduct, loanProduct));
+            when(loanProductOutputPort.search(loanProduct.getName(),pageSize,pageNumber))
+                    .thenReturn(new PageImpl<>(List.of(loanProduct, loanProduct)));
 
-            loanProducts = loanService.search(loanProduct.getName());
+            loanProducts = loanService.search(loanProduct.getName(),pageSize,pageNumber);
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
 
         assertNotNull(loanProducts);
-        assertEquals(2, loanProducts.size());
+        assertEquals(2, loanProducts.getContent().size());
     }
 
     @ParameterizedTest
