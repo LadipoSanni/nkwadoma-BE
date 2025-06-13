@@ -87,9 +87,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         savedCohort.setNumberOfLoanees(savedCohort.getNumberOfLoanees() + loanees.size());
         cohortOutputPort.save(savedCohort);
         loaneeUseCase.increaseNumberOfLoaneesInOrganization(savedCohort, loanees.size());
-        loaneeUseCase.increaseNumberOfLoaneesInProgram(savedCohort,);
-        for (Loanee eachLoanee : loanees) {
-        }
+        loaneeUseCase.increaseNumberOfLoaneesInProgram(savedCohort, loanees.size());
     }
 
 //    @Override
