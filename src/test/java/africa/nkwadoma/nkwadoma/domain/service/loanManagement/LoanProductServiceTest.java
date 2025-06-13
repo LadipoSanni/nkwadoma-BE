@@ -249,7 +249,7 @@ class LoanProductServiceTest {
         Page<LoanProduct> loanProducts = Page.empty();
         try{
             when(loanProductOutputPort.search(loanProduct.getName(),pageSize,pageNumber))
-                    .thenReturn(new PageImpl<>(List.of(loanProduct)));
+                    .thenReturn(new PageImpl<>(List.of(loanProduct, loanProduct)));
 
             loanProducts = loanService.search(loanProduct.getName(),pageSize,pageNumber);
         } catch (MeedlException exception) {
