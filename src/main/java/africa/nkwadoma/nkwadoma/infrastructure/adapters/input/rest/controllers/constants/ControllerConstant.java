@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.enums.constants;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.constants;
 
 import lombok.*;
 

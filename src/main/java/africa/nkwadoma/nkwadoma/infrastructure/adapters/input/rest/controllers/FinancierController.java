@@ -4,7 +4,6 @@ import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.Financ
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -26,13 +25,9 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesm
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.swaggerAnnotationDoc.FinancierDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.swaggerAnnotationDoc.FinancierInvestmentDetailDocs;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.InvestmentVehicleFinancierMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
-import africa.nkwadoma.nkwadoma.infrastructure.utilities.CustomSwaggerDoc;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.constants.ControllerConstant;
 import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

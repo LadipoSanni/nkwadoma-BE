@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.enums.prembly;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerificationManager.prembly;
 
 import lombok.Getter;
 

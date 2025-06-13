@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.enums;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.creditRegistry;
 
 import lombok.Getter;
 

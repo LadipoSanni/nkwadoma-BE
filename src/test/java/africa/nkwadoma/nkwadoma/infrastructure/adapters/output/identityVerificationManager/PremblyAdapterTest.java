@@ -8,8 +8,8 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.pre
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyLivelinessResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyNinResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.enums.prembly.PremblyResponseCode;
-import africa.nkwadoma.nkwadoma.infrastructure.enums.prembly.PremblyVerificationMessage;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerificationManager.prembly.PremblyResponseCode;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerificationManager.prembly.PremblyVerificationMessage;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.ImageConverter;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;

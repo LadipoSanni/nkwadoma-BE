@@ -10,7 +10,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.pre
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyLivelinessResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyNinResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.enums.prembly.PremblyParameter;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerificationManager.prembly.PremblyParameter;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

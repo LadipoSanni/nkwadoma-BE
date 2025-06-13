@@ -19,7 +19,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static africa.nkwadoma.nkwadoma.infrastructure.enums.CreditRegistryConstant.*;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.output.creditRegistry.CreditRegistryConstant.*;
 
 @Slf4j
 @Component
