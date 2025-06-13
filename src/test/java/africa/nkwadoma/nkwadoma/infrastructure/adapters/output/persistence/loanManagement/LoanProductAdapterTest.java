@@ -3,8 +3,6 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loan
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
-import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
-import africa.nkwadoma.nkwadoma.domain.service.identity.UserIdentityService;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.VendorEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanProductVendorRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.VendorEntityRepository;
@@ -37,6 +35,8 @@ class LoanProductAdapterTest {
     private VendorEntityRepository vendorEntityRepository;
     private LoanProduct gemsLoanProduct;
     private LoanProduct goldLoanProduct;
+    private int pageSize = 10;
+    private int pageNumber = 0;
 
     @BeforeAll
     void setUp() {
@@ -230,19 +230,19 @@ class LoanProductAdapterTest {
     @ParameterizedTest
     @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
     void searchLoanProductWithInValidName(String name) {
-        assertThrows(MeedlException.class, () -> loanProductOutputPort.search(name));
+        assertThrows(MeedlException.class, () -> loanProductOutputPort.search(name,pageSize,pageNumber));
     }
     @Order(7)
     @Test
     void searchLoanProduct(){
-        List<LoanProduct> loanProducts  = new ArrayList<>();
+        Page<LoanProduct> loanProducts  = Page.empty();
         try{
             loanProducts  =
-                    loanProductOutputPort.search("test");
+                    loanProductOutputPort.search("test",pageSize,pageNumber);
         }catch (MeedlException exception){
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-        assertEquals(2,loanProducts.size());
+        assertEquals(2,loanProducts.getContent().size());
     }
     @Test
     @Order(8)

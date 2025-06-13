@@ -111,12 +111,18 @@ public class LoanController {
     @GetMapping("/loan-product/search")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> searchLoanProduct(
-            @RequestParam @NotBlank(message = "Loan product name is required") String loanProductName) throws MeedlException {
-        List<LoanProduct> loanProducts = viewLoanProductUseCase.search(loanProductName);
-        List<LoanProductResponse> loanProductResponses =
-                 loanProductMapper.mapToLoanProductResponses(loanProducts);
-        ApiResponse<List<LoanProductResponse>> apiResponse = ApiResponse.<List<LoanProductResponse>>builder()
-                .data(loanProductResponses)
+            @RequestParam @NotBlank(message = "Loan product name is required") String loanProductName,
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
+        Page<LoanProduct> loanProducts = viewLoanProductUseCase.search(loanProductName,pageSize,pageNumber);
+        List<LoanProductResponse> loanProductResponses = loanProducts.stream().map(
+                 loanProductMapper::mapToLoanProductResponse).toList();
+        PaginatedResponse<LoanProductResponse> paginatedResponse = new PaginatedResponse<>(
+                loanProductResponses, loanProducts.hasNext(),
+                loanProducts.getTotalPages(), pageNumber, pageSize
+        );
+        ApiResponse<PaginatedResponse<LoanProductResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoanProductResponse>>builder()
+                .data(paginatedResponse)
                 .message(COHORT_RETRIEVED)
                 .statusCode(HttpStatus.OK.toString())
                 .build();
