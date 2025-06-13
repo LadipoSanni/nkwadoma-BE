@@ -245,8 +245,11 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanReferral = loanReferralOutputPort.findLoanReferralById(loanReferral.getId())
                 .orElseThrow(()->  new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage()));
         log.info("Found Loan referral by it's ID: {}, is verified : {}", loanReferral.getId(), loanReferral.getLoanee().getUserIdentity().isIdentityVerified());
-        loanReferral.setLoaneeLoanBreakdowns
-                (loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByLoaneeId(loanReferral.getLoanee().getId()));
+        List<LoaneeLoanBreakdown> loaneeLoanBreakdowns =
+                loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByLoaneeId(loanReferral.getLoanee().getId());
+        log.info("Loanee loan breakdowns found from the DB : {}", loaneeLoanBreakdowns);
+        loanReferral.setLoaneeLoanBreakdowns(loaneeLoanBreakdowns);
+        log.info("Loanee loan breakdowns set to be returned: {}", loanReferral.getLoaneeLoanBreakdowns());
         return loanReferral;
     }
 
