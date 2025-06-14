@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.model.financier;
 
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentSummary;
+import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentSummary;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;

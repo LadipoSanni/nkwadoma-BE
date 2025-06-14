@@ -1,11 +1,11 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.meedlPortfolio.PortfolioUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.meedlportfolio.PortfolioUseCase;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.meedlPortfolio.PortfolioResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.meedlPortfolio.PortfolioRestMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.meedlportfolio.PortfolioRestMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

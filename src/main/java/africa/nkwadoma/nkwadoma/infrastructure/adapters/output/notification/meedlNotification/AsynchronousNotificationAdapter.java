@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.notification.meedlNotification;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
+import africa.nkwadoma.nkwadoma.application.ports.input.meedlnotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
@@ -13,7 +13,7 @@ import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
+import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
@@ -68,9 +68,11 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                     .user(portfolioManager)
                     .timestamp(LocalDateTime.now())
                     .contentId(organizationIdentity.getId())
+                    .title("Organization has been invited.")
+                    .callToAction(Boolean.TRUE)
                     .senderMail(organizationIdentity.getEmail())
                     .senderFullName(organizationIdentity.getName())
-                    .title("New organization with the name " + organizationIdentity.getName() + " has been invited.")
+                    .contentDetail("New organization with the name " + organizationIdentity.getName() + " has been invited to the platform.")
                     .notificationFlag(notificationFlag)
                     .build();
             meedlNotificationUsecase.sendNotification(notification);
