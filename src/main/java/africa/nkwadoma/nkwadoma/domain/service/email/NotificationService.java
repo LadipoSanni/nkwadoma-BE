@@ -4,7 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.email.FinancierEmailUseC
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.LoaneeEmailUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.OrganizationEmployeeEmailUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
+import africa.nkwadoma.nkwadoma.application.ports.input.meedlnotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
@@ -17,7 +17,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.meedlException.MeedlNotificati
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.notification.Email;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
+import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
@@ -27,7 +27,6 @@ import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.scheduling.annotation.Async;
 import org.thymeleaf.context.*;
 
 import java.time.LocalDateTime;

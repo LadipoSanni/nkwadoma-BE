@@ -1,14 +1,14 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 
-import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
+import africa.nkwadoma.nkwadoma.application.ports.input.meedlnotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.meedlResponse.MeedlNotificationCountResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.meedlResponse.MeedlNotificationReponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.meedlNotification.MeedlNotificationRestMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.meedlnotification.MeedlNotificationRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.constants.ControllerConstant;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;

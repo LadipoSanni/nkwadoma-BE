@@ -2,7 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.service;
 
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.LoanMetricsUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.LoanMetricsUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;

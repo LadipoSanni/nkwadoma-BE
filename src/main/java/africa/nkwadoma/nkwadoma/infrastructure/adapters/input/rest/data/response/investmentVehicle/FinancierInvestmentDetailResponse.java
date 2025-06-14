@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle;
 
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentSummary;
+import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentSummary;
 import lombok.Getter;
 import lombok.Setter;
 

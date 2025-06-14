@@ -4,7 +4,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
+import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.*;
 import org.springframework.data.domain.*;
 
 import java.util.List;

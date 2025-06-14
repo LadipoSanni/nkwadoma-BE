@@ -1,15 +1,13 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.email;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.EmailResendUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.ViewLoanReferralsUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.ViewLoanReferralsUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanReferralOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
