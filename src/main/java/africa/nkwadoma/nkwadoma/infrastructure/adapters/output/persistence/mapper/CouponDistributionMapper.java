@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper;
 
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.CouponDistribution;
+import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.CouponDistribution;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.CouponDistributionEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.NullValuePropertyMappingStrategy;

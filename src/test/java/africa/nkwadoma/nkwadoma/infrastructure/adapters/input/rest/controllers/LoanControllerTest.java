@@ -1,10 +1,10 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.CreateLoanProductUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.ViewLoanProductUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.CreateLoanProductUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.ViewLoanProductUseCase;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.loanManagement.LoanController;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.loanmanagement.LoanController;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoanProductRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanProductResponse;

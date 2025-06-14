@@ -1,0 +1,116 @@
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement;
+
+import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanReferralStatus;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.domain.validation.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
+import lombok.*;
+import lombok.extern.slf4j.*;
+import org.springframework.stereotype.*;
+
+import java.util.*;
+
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class LoanReferralAdapter implements LoanReferralOutputPort {
+    private final LoanReferralRepository loanReferralRepository;
+    private final LoanReferralMapper loanReferralMapper;
+
+    @Override
+    public LoanReferral save(LoanReferral loanReferral) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanReferral, "Loan referral cannot be empty.");
+        LoanReferralEntity loanReferralEntity = loanReferralMapper.toLoanReferralEntity(loanReferral);
+        LoanReferralEntity savedLoanReferralEntity = loanReferralRepository.save(loanReferralEntity);
+        return loanReferralMapper.toLoanReferral(savedLoanReferralEntity);
+    }
+
+    @Override
+    public Optional<LoanReferral> findLoanReferralById(String loanReferralId) throws MeedlException {
+        MeedlValidator.validateUUID(loanReferralId, "Please provide a valid loan referral identification.");
+        Optional<LoanReferralProjection> loanReferralProjection = loanReferralRepository.findLoanReferralById(loanReferralId);
+        if (loanReferralProjection.isEmpty()) {
+            log.info("Empty Loan referral projection: {}", loanReferralProjection);
+            return Optional.empty();
+        }
+        LoanReferral loanReferral = loanReferralMapper.mapProjectionToLoanReferralEntity(loanReferralProjection.get());
+        log.info("Mapped LoanReferral: {}", loanReferral);
+        return Optional.of(loanReferral);
+    }
+
+    @Override
+    public LoanReferral findById(String loanReferralId) throws MeedlException {
+        MeedlValidator.validateUUID(loanReferralId, LoanMessages.LOAN_REFERRAL_ID_MUST_NOT_BE_EMPTY.getMessage());
+        LoanReferralEntity loanReferralEntity = loanReferralRepository
+                .findById(loanReferralId).orElseThrow(()-> new LoanException("Loan referral not found"));
+        return loanReferralMapper.toLoanReferral(loanReferralEntity);
+    }
+
+    @Override
+    public void deleteLoanReferral(String loanReferralId) throws MeedlException {
+        MeedlValidator.validateUUID(loanReferralId, "Please provide a valid loan referral identification.");
+        Optional<LoanReferralEntity> loanReferralEntity = loanReferralRepository.findById(loanReferralId);
+        if (loanReferralEntity.isPresent()) {
+            log.info("Found loan referral: {}", loanReferralEntity.get());
+            loanReferralRepository.delete(loanReferralEntity.get());
+        }
+        else log.info("Loan referral not found");
+    }
+
+    @Override
+    public LoanReferral createLoanReferral(Loanee loanee) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
+        LoanReferral loanReferral = new LoanReferral();
+        loanReferral.setLoanee(loanee);
+        loanReferral.setLoanReferralStatus(LoanReferralStatus.PENDING);
+        loanReferral.validateForCreate();
+        LoanReferralEntity loanReferralEntity =
+                loanReferralMapper.toLoanReferralEntity(loanReferral);
+        loanReferralEntity = loanReferralRepository.save(loanReferralEntity);
+        log.info("Created loan referral entity: {}", loanReferralEntity);
+        loanReferral = loanReferralMapper.toLoanReferral(loanReferralEntity);
+        log.info("Mapped loan referral: {}", loanReferral);
+        return loanReferral;
+    }
+
+    @Override
+    public List<LoanReferral> findLoanReferralByUserId(String userId) throws MeedlException {
+        MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
+        List<LoanReferralEntity> loanReferralEntities = loanReferralRepository.findAllByLoaneeEntityUserIdentityId(userId);
+        return loanReferralMapper.toLoanReferrals(loanReferralEntities);
+    }
+
+    @Override
+    public LoanReferral findLoanReferralByLoaneeIdAndCohortId(String id, String cohortId) throws MeedlException {
+        MeedlValidator.validateUUID(id,"Loanee id cannot be null or empty");
+        MeedlValidator.validateUUID(cohortId,"Cohort id cannot be null or empty");
+        LoanReferralEntity loanReferral =
+                loanReferralRepository.findByLoaneeEntityIdAndLoaneeEntityCohortId(id,cohortId);
+        return loanReferralMapper.toLoanReferral(loanReferral);
+    }
+
+    @Override
+    public List<LoanReferral> viewAll() {
+        List<LoanReferralEntity> loanReferrals =
+                loanReferralRepository.findAll();
+        log.info("All loan referral entities found {}", loanReferrals);
+        return loanReferrals.stream().map(loanReferralMapper::toLoanReferral).toList();
+    }
+
+    @Override
+    public LoanReferral findByEmail(String loaneeEmail) throws MeedlException {
+        LoanReferralEntity loanReferral = loanReferralRepository.findByLoaneeEntity_UserIdentity_Email(loaneeEmail)
+                .orElseThrow(()-> new MeedlException("Loan referral not found by loanee email: "+loaneeEmail));
+        log.info("Loan referral entity found {}",loanReferral);
+        return loanReferralMapper.toLoanReferral(loanReferral);
+    }
+}
+
