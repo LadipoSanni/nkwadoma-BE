@@ -107,6 +107,8 @@ public class TokenUtils {
     public String decryptAES(String encryptedData, String message) throws MeedlException {
         log.info("Decryption of data started {}", encryptedData);
         MeedlValidator.validateDataElement(encryptedData, "Please provide a valid data.");
+        printLastTwoCharactersOfScretValues(AESSecretKey, "AES Secret key");
+        printLastTwoCharactersOfScretValues(ivAESKey, "IV AES Key");
         String key = String.format("%-16s", AESSecretKey).substring(0, 16);
 
         SecretKeySpec keySpec = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "AES");
@@ -127,7 +129,19 @@ public class TokenUtils {
         return new String(decryptedValue);
     }
 
-
+    private void printLastTwoCharactersOfScretValues(String input, String message) {
+        if (MeedlValidator.isEmptyString(input)){
+            log.warn("{} not provided", message);
+            return;
+        }
+        int length = input.length();
+        if (length == 1) {
+            log.warn("{} has only one character: {}", message, input);
+        } else {
+            String lastTwo = input.substring(length - 2, length);
+            log.info("{} last two characters: {}. The size {}", message, lastTwo, input.length());
+        }
+    }
     public String encryptAES(String plainText) throws MeedlException {
         try {
             MeedlValidator.validateDataElement(plainText, "Please provide a valid data.");
