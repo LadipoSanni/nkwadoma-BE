@@ -121,7 +121,7 @@ public class FinancierService implements FinancierUseCase {
             return userIdentityOutputPort.findById(financiers.get(0).getUserIdentity().getCreatedBy());
         } catch (MeedlException e) {
             if (e.getMessage().equals(IdentityMessages.USER_NOT_FOUND.getMessage())){
-                throw new MeedlException("Actor performing this action (i.e invite financier) is unknown. please contact admin.");
+                throw new MeedlException("Actor performing this action (i.e invite financier) is unknown. Please contact admin.");
             }
             throw new MeedlException(e);
         }
