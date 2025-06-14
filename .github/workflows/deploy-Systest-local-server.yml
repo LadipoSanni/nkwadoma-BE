@@ -1,42 +1,27 @@
-name: Deploy Systest to Amazon EC2 and Local
+name: Deploy Nkwadoma Service to Systest and Systest-2 environments
 
 on:
-  pull_request:
-    branches:
-      - 'dev'
- 
   push:
     branches:
       - 'dev'
 
-# on:
-#   push:
-#     branches:
-#       - 'dev'
-#       - 'systest'
-#   pull_request:
-#     branches:
-#       - 'dev' 
-#       - 'systest'
-
 env:
-  REPO_URL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma
+  REPO_URL: 357586184453.dkr.ecr.us-east-1.amazonaws.com/nkwadoma
   ECR_REPOSITORY: nkwadoma
   AWS_REGION: us-east-1
+  CONTAINER_PORT: 8768
+  EMAILS: 'sam@semicolon.africa,joshua.o@semicolon.africa,abigail@semicolon.africa,chukwunenyeebuka@gmail.com,henry@semicolon.africa,augustineezekiel763@gmail.com,paulineyahla@gmail.com,adioldmj@gmail.com,precious@semicolon.africa,emmanuel.e@semicolon.africa,aj@semicolon.africa'
 
 jobs:
   # ======================= BUILD AND PUSH =======================
   build-and-push:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/dev'
-    # if: github.event_name == 'pull_request' 
-    
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v2
         with:
           distribution: 'temurin'
           java-version: '17'
@@ -45,7 +30,7 @@ jobs:
         run: mvn clean package -DskipTests
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -55,122 +40,123 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build and Tag Docker image
+      - name: Build Docker image
+        run: docker build -t nkwadoma:$GITHUB_SHA -f Dockerfile .
+
+      - name: Tag Docker image
         run: |
-          IMAGE_TAG=${{ env.REPO_URL }}:alpha
-          docker build -t nkwadoma:$GITHUB_SHA -f Dockerfile .
-          docker tag nkwadoma:$GITHUB_SHA $IMAGE_TAG
-          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+          DOCKER_TAG=${{ env.REPO_URL }}:alpha
+          docker tag nkwadoma:$GITHUB_SHA $DOCKER_TAG
+          echo "DOCKER_TAG=$DOCKER_TAG" >> $GITHUB_ENV
 
       - name: Push Docker image to Amazon ECR
-        run: docker push $IMAGE_TAG
+        run: docker push $DOCKER_TAG
 
-  # ======================= DEPLOY TO EC2 =======================
-  # deploy-to-ec2:
-  #   runs-on: ubuntu-latest
-  #   needs: build-and-push
-  #   if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
-  #   # if: github.event_name == 'pull_request' 
-    
-  #   steps:
-  #     - name: SSH into EC2 and Deploy Container
-  #       env:
-  #         EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
-  #         EC2_USER: ${{ secrets.EC2_USER }}
-  #         EC2_HOST: ${{ secrets.EC2_HOST }}
-  #         S3_BUCKET_NAME: semicolon-delivery
-  #         S3_REGION: eu-west-1
-  #       run: |
-  #         echo "$EC2_SSH_KEY" > QA-KP.pem
-  #         chmod 600 QA-KP.pem
-  #         ssh -t -o StrictHostKeyChecking=no -i "QA-KP.pem" $EC2_USER@$EC2_HOST << 'EOF'
-  #         set -e
-          
-  #         echo "✅ SSH connection established!"
+  # ======================= DEPLOY TO SYSTEST =======================
+  deploy-to-systest:
+    runs-on: self-hosted
+    needs: build-and-push
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-  #         # Login to Amazon ECR
-  #         aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.REPO_URL }}
+      - name: Authenticate with Amazon ECR
+        run: |
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${{ env.REPO_URL }}
 
-  #         # Fetch latest environment file from S3
-  #         echo "📥 Downloading environment file from S3..."
-  #         aws s3 cp s3://${{ env.S3_BUCKET_NAME }}/nkwadoma/backend/dev/nkwadoma.env nkwadoma.env --region ${{ env.S3_REGION }}
+      - name: Pull latest Docker image
+        run: |
+          docker pull ${{ env.REPO_URL }}:alpha
 
-  #         if [ ! -f "nkwadoma.env" ]; then
-  #           echo "❌ ERROR: nkwadoma.env file not found!"
-  #           exit 1
-  #         fi
+      - name: Download .env file from S3
+        run: |
+          ENV_FILE_PATH="/tmp/nkwadoma.env"
+          aws s3 cp s3://semicolon-delivery/nkwadoma/backend/systest/nkwadoma.env $ENV_FILE_PATH --region eu-west-1
 
-  #         # Pull latest Docker image
-  #         echo "📦 Pulling latest Docker image..."
-  #         docker pull ${{ env.REPO_URL }}:alpha
+      - name: Free port if in use
+        run: |
+          sudo fuser -k ${{ env.CONTAINER_PORT }}/tcp || true
 
-  #         # Stop any running container on port 8768
-  #         sudo fuser -k 8768/tcp || true
+      - name: Restart container with auto-restart policy
+        run: |
+          CONTAINER_NAME=nkwadoma_container
+          if [ "$(docker ps -aq -f name=$CONTAINER_NAME)" ]; then
+            docker stop $CONTAINER_NAME || true
+            docker rm $CONTAINER_NAME || true
+          fi
+          docker network inspect downloads_pulsar >/dev/null 2>&1 || docker network create downloads_pulsar
+          nohup docker run -d --env-file /tmp/nkwadoma.env --network downloads_pulsar --name $CONTAINER_NAME -p ${{ env.CONTAINER_PORT }}:${{ env.CONTAINER_PORT }} \
+            --restart unless-stopped \
+            ${{ env.REPO_URL }}:alpha > /dev/null 2>&1 &
 
-  #         # Remove existing container if exists
-  #         CONTAINER_NAME="nkwadoma-container"
-  #         if [ "$(docker ps -aq -f name=${CONTAINER_NAME})" ]; then
-  #            docker stop ${CONTAINER_NAME} || true
-  #            docker rm ${CONTAINER_NAME} || true
-  #         fi
+      - name: Confirm Deployment Success
+        run: |
+          sleep 10
+          if docker ps --format '{{.Names}}' | grep -q "nkwadoma_container"; then
+            echo "✅ Deployment to systest successful!"
+            exit 0
+          else
+            echo "❌ Deployment failed!"
+            exit 1
+          fi
 
-  #         # Run the container
-  #         echo "🚀 Running the container..."
-  #         docker run -d --name ${CONTAINER_NAME} -p 8768:8768 \
-  #             --env-file nkwadoma.env \
-  #             --restart unless-stopped \
-  #             "${{ env.REPO_URL }}:alpha"
+      - name: Prune unused images (systest)
+        run: docker image prune -af
 
-  #         # Clean up old unused Docker images
-  #         docker system prune -f
-  #         EOF
+  # ======================= DEPLOY TO SYSTEST-2 =======================
+  deploy-to-systest2:
+    runs-on: [ovh]
+    needs: build-and-push
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-  # ======================= DEPLOY TO LOCAL =======================
-  deploy-to-local:
-   runs-on: self-hosted
-   needs: build-and-push
-   if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
-   steps:
-    - name: Authenticate with Amazon ECR
-      run: |
-        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com
+      - name: Authenticate with Amazon ECR
+        run: |
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${{ env.REPO_URL }}
 
-    - name: Pull latest Docker image
-      run: |
-        docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:alpha
+      - name: Pull latest Docker image
+        run: |
+          docker pull ${{ env.REPO_URL }}:alpha
 
-    - name: Download env file from S3
-      run: |
-        ENV_FILE_PATH="/home/cloud-group/nkwadoma-systest.env"
-        aws s3 cp s3://semicolon-delivery/nkwadoma/backend/systest/nkwadoma.env $ENV_FILE_PATH --region eu-west-1
+      - name: Download .env file from S3 (Systest-2)
+        run: |
+          whoami
+          sudo -u ubuntu bash << 'EOF'
+            mkdir -p /home/ubuntu/semicolon/meedl/systest
+            aws s3 cp s3://semicolon-delivery/nkwadoma/backend/systest/nkwadoma.env /home/ubuntu/semicolon/meedl/systest/nkwadoma.env --region eu-west-1
+            chown ubuntu:ubuntu /home/ubuntu/semicolon/meedl/systest/nkwadoma.env
+          EOF
 
-    - name: Free port 8768 if in use
-      run: |
-        sudo fuser -k 8768/tcp || true
+      - name: Free port if in use
+        run: |
+          sudo fuser -k ${{ env.CONTAINER_PORT }}/tcp || true
 
-    - name: Restart container with auto-restart policy
-      run: |
-        CONTAINER_NAME=nkwadoma_container
-        ENV_FILE_PATH="/home/cloud-group/nkwadoma-systest.env"
-        
-        if [ "$(docker ps -aq -f name=$CONTAINER_NAME)" ]; then
-          docker stop $CONTAINER_NAME || true
-          docker rm $CONTAINER_NAME || true
-        fi
-        
-        docker network inspect meedl-network >/dev/null 2>&1 || docker network create meedl-network
-        
-        nohup docker run -d --env-file $ENV_FILE_PATH --network meedl-network --name $CONTAINER_NAME -p 8768:8768 \
-          --restart unless-stopped \
-          ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:alpha > /dev/null 2>&1 &
+      - name: Restart container with auto-restart policy
+        run: |
+          CONTAINER_NAME=nkwadoma_container
+          if [ "$(docker ps -aq -f name=$CONTAINER_NAME)" ]; then
+            sudo docker stop $CONTAINER_NAME || true
+            sudo docker rm $CONTAINER_NAME || true
+          fi
+          sudo docker network inspect pulser_pulsar >/dev/null 2>&1 || docker network create pulser_pulsar
+          sudo docker run -d --env-file /home/ubuntu/semicolon/meedl/systest/nkwadoma.env \
+            --network pulser_pulsar --name $CONTAINER_NAME -p ${{ env.CONTAINER_PORT }}:${{ env.CONTAINER_PORT }} \
+            --restart unless-stopped \
+            ${{ env.REPO_URL }}:alpha
 
-    - name: Confirm Deployment Success
-      run: |
-        sleep 10
-        if docker ps --format '{{.Names}}' | grep -q "nkwadoma_container"; then
-          echo "✅ Deployment to local machine successful!"
-        else
-          echo "❌ Deployment failed!"
-          exit 1
-        fi
+      - name: Confirm container is running
+        run: |
+          sudo docker ps -a
+          sudo docker logs nkwadoma_container || true
 
+      - name: Prune unused images (Systest-2)
+        run: docker image prune -af
