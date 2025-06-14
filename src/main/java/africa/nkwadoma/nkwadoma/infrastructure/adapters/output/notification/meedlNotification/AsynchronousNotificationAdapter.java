@@ -68,9 +68,11 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                     .user(portfolioManager)
                     .timestamp(LocalDateTime.now())
                     .contentId(organizationIdentity.getId())
+                    .title("Organization has been invited.")
+                    .callToAction(Boolean.TRUE)
                     .senderMail(organizationIdentity.getEmail())
                     .senderFullName(organizationIdentity.getName())
-                    .title("New organization with the name " + organizationIdentity.getName() + " has been invited.")
+                    .contentDetail("New organization with the name " + organizationIdentity.getName() + " has been invited to the platform.")
                     .notificationFlag(notificationFlag)
                     .build();
             meedlNotificationUsecase.sendNotification(notification);
