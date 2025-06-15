@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
+import org.springframework.scheduling.annotation.Async;
 
 public interface AsynchronousLoanBookProcessingUseCase {
     @Async
