@@ -215,6 +215,7 @@ public class OrganizationController {
 
     @GetMapping("organization/all")
     @Operation(summary = "View all Organizations", description = "Fetch all organizations ")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewAllOrganization(@RequestParam int pageNumber, @RequestParam int pageSize)
             throws MeedlException {
         Page<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase
@@ -240,6 +241,7 @@ public class OrganizationController {
 
     @GetMapping("organization/all/status")
     @Operation(summary = "View all Organizations with status", description = "Fetch all organizations with status")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewAllOrganizationByStatus(@RequestParam int pageNumber, @RequestParam int pageSize, @RequestParam ActivationStatus status)
             throws MeedlException {
         Page<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase
