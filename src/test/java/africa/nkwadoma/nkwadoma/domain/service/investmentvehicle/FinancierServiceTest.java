@@ -185,7 +185,7 @@ public class FinancierServiceTest {
             throw new RuntimeException(e);
         }
         assertNotNull(response);
-        assertEquals("Financier has been added to investment vehicle", response);
+        assertEquals("Financier has been added to an investment vehicle", response);
         assertEquals(ActivationStatus.INVITED, foundFinancier.getActivationStatus());
         foundFinancier.setActivationStatus(ActivationStatus.ACTIVE);
         Page<Financier> financiers;
@@ -870,7 +870,7 @@ public class FinancierServiceTest {
             throw new RuntimeException(e);
         }
         assertNotNull(response);
-        assertEquals("Financier has been added to investment vehicle", response);
+        assertEquals("Financier has been added to an investment vehicle", response);
         Page<Financier> financiers;
         try {
             financiers = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(investmentVehicle.getId(), null, pageRequest);
@@ -1191,7 +1191,7 @@ public class FinancierServiceTest {
             throw new RuntimeException(e);
         }
         assertNotNull(response);
-        assertEquals("Financier has been added to investment vehicle", response);
+        assertEquals("Financier has been added to an investment vehicle", response);
         Page<Financier> financiers;
         try {
             financiers = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(investmentVehicle.getId(), null ,pageRequest);
