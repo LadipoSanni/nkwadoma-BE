@@ -72,7 +72,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                     .callToAction(Boolean.TRUE)
                     .senderMail(organizationIdentity.getEmail())
                     .senderFullName(organizationIdentity.getName())
-                    .contentDetail("New organization with the name " + organizationIdentity.getName() + " has been invited to the platform.")
+                    .contentDetail("New organization with the name " + organizationIdentity.getName())
                     .notificationFlag(notificationFlag)
                     .build();
             meedlNotificationUsecase.sendNotification(notification);

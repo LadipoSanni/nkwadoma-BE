@@ -71,7 +71,7 @@ public class OrganizationController {
 
     @PatchMapping("organization/update")
     @Operation(summary = "Update an existing organization")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') and hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> updateOrganization(@RequestBody @Valid OrganizationUpdateRequest organizationUpdateRequest,
                                                              @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
         OrganizationIdentity organizationIdentity = organizationRestMapper.maptoOrganizationIdentity(organizationUpdateRequest);
@@ -86,6 +86,7 @@ public class OrganizationController {
 
     @GetMapping("organization/search")
     @Operation(summary = "Search for organization(s) by similar or precise name")
+     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> searchOrganizationByName(
                                                                        @RequestParam(name = "name") String name,
                                                                        @RequestParam(name = "status" , required = false) ActivationStatus status,
@@ -147,7 +148,7 @@ public class OrganizationController {
         return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.name()).
                 data(organizationRestMapper.toOrganizationResponse(organizationIdentity)).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
-                HttpStatus.OK
+                 HttpStatus.OK
         );
     }
 
@@ -166,7 +167,7 @@ public class OrganizationController {
     }
 
     @GetMapping("organization/details")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
+     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
     public ResponseEntity<ApiResponse<?>> viewOrganizationDetails(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
         String adminId = meedlUser.getClaimAsString("sub");
         OrganizationIdentity organizationIdentity =
@@ -215,6 +216,7 @@ public class OrganizationController {
 
     @GetMapping("organization/all")
     @Operation(summary = "View all Organizations", description = "Fetch all organizations ")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewAllOrganization(@RequestParam int pageNumber, @RequestParam int pageSize)
             throws MeedlException {
         Page<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase
@@ -240,6 +242,7 @@ public class OrganizationController {
 
     @GetMapping("organization/all/status")
     @Operation(summary = "View all Organizations with status", description = "Fetch all organizations with status")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewAllOrganizationByStatus(@RequestParam int pageNumber, @RequestParam int pageSize, @RequestParam ActivationStatus status)
             throws MeedlException {
         Page<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase
