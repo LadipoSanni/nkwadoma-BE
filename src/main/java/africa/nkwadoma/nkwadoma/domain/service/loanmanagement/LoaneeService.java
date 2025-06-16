@@ -113,6 +113,7 @@ public class LoaneeService implements LoaneeUseCase {
                         log.error("Loanee with email doesn't exist");
                         notifyPmLoaneeDoesNotExist(e.getMessage(), email);
                     }
+
                     return loanee;
                 }).toList();
 
