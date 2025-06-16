@@ -38,6 +38,7 @@ import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
+import jakarta.servlet.Filter;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -52,6 +53,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages.DROP_OUT;
@@ -113,9 +115,9 @@ public class LoaneeService implements LoaneeUseCase {
                         log.error("Loanee with email doesn't exist");
                         notifyPmLoaneeDoesNotExist(e.getMessage(), email);
                     }
-
                     return loanee;
-                }).toList();
+                })
+                .filter(Objects::nonNull).toList();
 
          sendLoaneesEmail(loaneesVerified);
          return loaneesVerified;
