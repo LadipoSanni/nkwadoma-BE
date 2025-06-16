@@ -7,9 +7,9 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.meedlexception.MeedlNotificati
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.meedlNotification.MeedlNotificationMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.meedlNotification.MeedlNotificationEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.meedlNotification.MeedlNotificationRepository;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.meedlNotification.NotificationProjection;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.meedlnotification.MeedlNotificationEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.meedlnotification.MeedlNotificationRepository;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.meedlnotification.NotificationProjection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
