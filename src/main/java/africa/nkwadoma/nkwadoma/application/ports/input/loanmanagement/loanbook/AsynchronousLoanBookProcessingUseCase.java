@@ -5,7 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
 import org.springframework.scheduling.annotation.Async;
 
 public interface AsynchronousLoanBookProcessingUseCase {
-    @Async
+//    @Async
     void upLoadUserData(LoanBook loanBook) throws MeedlException;
 
 }

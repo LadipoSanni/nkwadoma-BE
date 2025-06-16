@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanmanagement.loanBook;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.AsynchronousLoanBookProcessingUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.LoanBookUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
@@ -41,6 +42,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class LoanBookServiceTest {
     @Autowired
     private LoanBookUseCase loanBookUseCase;
+    @Autowired
+    private AsynchronousLoanBookProcessingUseCase asynchronousLoanBookProcessingUseCase;
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
     private OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
@@ -149,32 +152,32 @@ public class LoanBookServiceTest {
     }
     @Test
     void uploadLoanBookWithNull(){
-        assertThrows(MeedlException.class,() -> loanBookUseCase.upLoadUserData(null));
+        assertThrows(MeedlException.class,() -> asynchronousLoanBookProcessingUseCase.upLoadUserData(null));
     }
     @Test
     void uploadLoanBookWithNullCohort(){
         loanBook.setCohort(null);
-        assertThrows(MeedlException.class,() -> loanBookUseCase.upLoadUserData(null));
+        assertThrows(MeedlException.class,() -> asynchronousLoanBookProcessingUseCase.upLoadUserData(null));
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "", "288b3cf9-7106-4405-9061-7cd92aceb474"})
     void uploadLoanBookWithInvalidCohortId(String id){
         Cohort cohort = Cohort.builder().id(id).build();
         loanBook.setCohort(cohort);
-        assertThrows(MeedlException.class,() -> loanBookUseCase.upLoadUserData(loanBook));
+        assertThrows(MeedlException.class,() -> asynchronousLoanBookProcessingUseCase.upLoadUserData(loanBook));
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "", "288b3cf9-7106-4405-9061-7cd92aceb474"})
     void uploadLoanBookWithInvalidActorId(String id){
         Cohort cohort = Cohort.builder().createdBy(id).build();
         loanBook.setCohort(cohort);
-        assertThrows(MeedlException.class,() -> loanBookUseCase.upLoadUserData(loanBook));
+        assertThrows(MeedlException.class,() -> asynchronousLoanBookProcessingUseCase.upLoadUserData(loanBook));
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "", "288b3cf9-7106-4405-9061-7cd92aceb474"})
     void uploadLoanBookWithInvalidLoanProductId(String id){
         loanBook.setLoanProductId(id);
-        assertThrows(MeedlException.class,() -> loanBookUseCase.upLoadUserData(loanBook));
+        assertThrows(MeedlException.class,() -> asynchronousLoanBookProcessingUseCase.upLoadUserData(loanBook));
     }
 
     @Test
