@@ -71,7 +71,7 @@ public class OrganizationController {
 
     @PatchMapping("organization/update")
     @Operation(summary = "Update an existing organization")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') and hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> updateOrganization(@RequestBody @Valid OrganizationUpdateRequest organizationUpdateRequest,
                                                              @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
         OrganizationIdentity organizationIdentity = organizationRestMapper.maptoOrganizationIdentity(organizationUpdateRequest);
@@ -86,6 +86,7 @@ public class OrganizationController {
 
     @GetMapping("organization/search")
     @Operation(summary = "Search for organization(s) by similar or precise name")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> searchOrganizationByName(
                                                                        @RequestParam(name = "name") String name,
                                                                        @RequestParam(name = "status" , required = false) ActivationStatus status,
