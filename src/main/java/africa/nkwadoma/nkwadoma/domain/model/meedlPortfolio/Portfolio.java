@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio;
 
 
-import africa.nkwadoma.nkwadoma.domain.enums.meedlPortfolio.PortfolioRiskLevel;
+import africa.nkwadoma.nkwadoma.domain.enums.meedlportfolio.PortfolioRiskLevel;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;

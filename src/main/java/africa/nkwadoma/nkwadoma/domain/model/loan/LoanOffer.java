@@ -1,9 +1,9 @@
 package africa.nkwadoma.nkwadoma.domain.model.loan;
 
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanDecision;
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanType;
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanDecision;
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanOfferStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;

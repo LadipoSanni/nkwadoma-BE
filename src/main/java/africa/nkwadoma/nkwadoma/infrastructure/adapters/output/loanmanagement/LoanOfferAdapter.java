@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement;
 
-import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanOfferOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOfferOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;

@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity;
 
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.AccountStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.AccountStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanStatus;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

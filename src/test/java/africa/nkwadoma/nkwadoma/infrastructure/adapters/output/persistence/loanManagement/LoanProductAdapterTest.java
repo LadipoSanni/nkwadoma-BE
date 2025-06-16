@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loanManagement;
 
-import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanProductOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.VendorEntity;
@@ -17,7 +17,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;

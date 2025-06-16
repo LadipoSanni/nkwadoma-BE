@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.model.investmentvehicle;
 
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.*;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;

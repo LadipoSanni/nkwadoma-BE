@@ -3,7 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.notification.mee
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.meedlException.MeedlNotificationException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.meedlexception.MeedlNotificationException;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.meedlNotification.MeedlNotificationMapper;

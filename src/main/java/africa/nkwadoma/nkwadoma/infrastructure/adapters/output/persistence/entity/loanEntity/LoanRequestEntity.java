@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity;
 
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.*;
 import jakarta.persistence.*;
 import lombok.*;
 

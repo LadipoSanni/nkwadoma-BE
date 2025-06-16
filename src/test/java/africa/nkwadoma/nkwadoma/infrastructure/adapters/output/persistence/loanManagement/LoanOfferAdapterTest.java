@@ -2,13 +2,13 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loan
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanOfferOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanReferralOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanRequestOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoaneeLoanDetailsOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanReferralStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanRequestStatus;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOfferOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanReferralOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanRequestOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanOfferStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanReferralStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanRequestStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;

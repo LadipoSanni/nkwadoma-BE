@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement;
 
-import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;

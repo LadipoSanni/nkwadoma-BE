@@ -1,11 +1,11 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.investmentvehicle;
 
 
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.CouponDistributionOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.VehicleOperationOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.CouponDistributionStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleMode;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.OperationStatus;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.CouponDistributionOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.VehicleOperationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.CouponDistributionStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicleMode;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.OperationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.CouponDistribution;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.VehicleOperation;

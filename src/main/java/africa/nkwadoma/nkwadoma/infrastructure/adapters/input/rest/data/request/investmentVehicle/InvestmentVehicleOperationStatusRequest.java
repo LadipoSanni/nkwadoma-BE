@@ -1,8 +1,8 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle;
 
 
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.CouponDistributionStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleMode;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.CouponDistributionStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicleMode;
 import lombok.Getter;
 import lombok.Setter;
 

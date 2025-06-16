@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.bankdetail;
 
-import africa.nkwadoma.nkwadoma.application.ports.output.bankDetail.BankDetailOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.bankdetail.BankDetailOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;

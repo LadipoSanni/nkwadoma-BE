@@ -1,22 +1,23 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanmanagement;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.email.LoaneeEmailUsecase;
+import africa.nkwadoma.nkwadoma.application.ports.input.notification.LoaneeEmailUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
-import africa.nkwadoma.nkwadoma.application.ports.output.creditRegistry.CreditRegistryOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.creditregistry.CreditRegistryOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoaneeLoanDetailsOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanReferralOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanReferralOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanReferralStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
@@ -25,7 +26,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DeferProgramRequest;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
-import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.aes.TokenUtils;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -86,7 +87,7 @@ class LoaneeServiceTest {
     @Mock
     private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
     @Mock
-    private TokenUtils tokenUtils;
+    private AesOutputPort tokenUtils;
     @Mock
     private LoanMetricsOutputPort loanMetricsOutputPort;
     @Mock

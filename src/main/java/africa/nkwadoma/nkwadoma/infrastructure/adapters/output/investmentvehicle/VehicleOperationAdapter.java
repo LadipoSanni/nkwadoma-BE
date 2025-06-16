@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.investmentvehicle;
 
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.VehicleOperationOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.VehicleOperationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.VehicleOperation;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;

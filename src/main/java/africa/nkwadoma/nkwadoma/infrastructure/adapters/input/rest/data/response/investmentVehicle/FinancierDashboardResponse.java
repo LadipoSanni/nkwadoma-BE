@@ -2,7 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.respons
 
 import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.model.loan.NextOfKin;
 import lombok.Getter;
 import lombok.Setter;

@@ -6,7 +6,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotif
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.service.email.NotificationService;
+import africa.nkwadoma.nkwadoma.domain.service.notification.NotificationService;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

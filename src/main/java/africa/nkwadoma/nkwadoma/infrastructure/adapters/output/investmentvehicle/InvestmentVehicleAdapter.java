@@ -1,13 +1,13 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.investmentvehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleMode;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FundRaisingStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicleMode;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicleStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages.*;
-import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus.DRAFT;
+import static africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicleStatus.DRAFT;
 
 
 @Slf4j

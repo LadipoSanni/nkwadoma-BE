@@ -5,10 +5,10 @@ import africa.nkwadoma.nkwadoma.application.ports.input.meedlnotification.MeedlN
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.CooperationOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.meedlPortfolio.PortfolioOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.CooperationOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleFinancierOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
@@ -20,8 +20,8 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicleVisibility;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.*;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
@@ -51,7 +51,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType.COOPERATE;
+import static africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType.COOPERATE;
 
 @AllArgsConstructor
 @Service

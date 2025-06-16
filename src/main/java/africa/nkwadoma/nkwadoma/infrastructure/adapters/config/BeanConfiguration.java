@@ -1,19 +1,22 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.config;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.email.OrganizationEmployeeEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.notification.SendColleagueEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.notification.OrganizationEmployeeEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.EmailTokenOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.meedlPortfolio.PortfolioOutputPort;
-import africa.nkwadoma.nkwadoma.domain.service.email.NotificationService;
+import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
+import africa.nkwadoma.nkwadoma.domain.service.notification.NotificationService;
 import africa.nkwadoma.nkwadoma.domain.service.identity.UserIdentityService;
 import africa.nkwadoma.nkwadoma.domain.service.investmentvehicle.InvestmentVehicleService;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.StringTrimMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.aes.TokenUtils;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.notification.email.EmailAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identitymanager.KeycloakAdapter;
@@ -37,7 +40,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanBreakdownRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeLoanDetailRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeRepository;
-import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortRepository;
 import org.keycloak.admin.client.Keycloak;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -58,7 +60,7 @@ public class BeanConfiguration {
     public UserIdentityService userIdentityService(UserIdentityOutputPort userIdentityOutputPort,
                                                    IdentityManagerOutputPort identityManagerOutPutPort,
                                                    OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort,
-                                                   TokenUtils tokenUtils,
+                                                   AesOutputPort tokenUtils, EmailTokenOutputPort emailTokenOutputPort,
                                                    OrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase,
                                                    PasswordEncoder passwordEncoder,
                                                    SendColleagueEmailUseCase sendColleagueEmailUseCase,
@@ -68,7 +70,7 @@ public class BeanConfiguration {
                                                    AsynchronousMailingOutputPort asynchronousMailingOutputPort
                                                    ){
         return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,sendOrganizationEmployeeEmailUseCase,
-                tokenUtils,passwordEncoder,sendColleagueEmailUseCase, userIdentityMapper, blackListedTokenAdapter, organizationIdentityOutputPort, asynchronousMailingOutputPort);
+                tokenUtils, emailTokenOutputPort, passwordEncoder,sendColleagueEmailUseCase, userIdentityMapper, blackListedTokenAdapter, organizationIdentityOutputPort, asynchronousMailingOutputPort);
     }
 
     @Bean
@@ -154,10 +156,10 @@ public class BeanConfiguration {
 
 
     @Bean
-    public NotificationService emailService(EmailOutputPort emailOutputPort, TokenUtils tokenUtils,
+    public NotificationService emailService(EmailOutputPort emailOutputPort, AesOutputPort tokenUtils, EmailTokenOutputPort emailTokenOutputPort,
                                             UserIdentityOutputPort userIdentityOutputPort,
                                             MeedlNotificationOutputPort meedlNotificationOutputPort){
-        return new NotificationService(emailOutputPort,tokenUtils,userIdentityOutputPort,meedlNotificationOutputPort);
+        return new NotificationService(emailOutputPort,tokenUtils, emailTokenOutputPort, userIdentityOutputPort,meedlNotificationOutputPort);
     }
 
     @Bean

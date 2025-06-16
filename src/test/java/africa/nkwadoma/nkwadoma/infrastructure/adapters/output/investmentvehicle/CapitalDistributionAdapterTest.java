@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.investmentvehicle;
 
 
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.CapitalDistributionOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.CapitalDistributionOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.CapitalDistribution;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;

@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement;
 
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanDecision;
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanDecision;
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanOfferStatus;
 import lombok.Getter;
 import lombok.Setter;
 
