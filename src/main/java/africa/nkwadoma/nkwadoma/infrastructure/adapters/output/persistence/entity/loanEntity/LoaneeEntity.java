@@ -3,7 +3,6 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.enti
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.UserDatafileLoadedStatus;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoaneeLoanDetailResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.UserEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -37,7 +36,7 @@ public class LoaneeEntity {
     @Enumerated(EnumType.STRING)
     private OnboardingMode onboardingMode;
     @Enumerated(EnumType.STRING)
-    private UserDatafileLoadedStatus userDatafileLoadedStatus;
+    private UserDatafileLoadedStatus userDataFileLoadedStatus;
     private LocalDateTime referralDateTime;
     private String referredBy;
     private String reasonForDropout;

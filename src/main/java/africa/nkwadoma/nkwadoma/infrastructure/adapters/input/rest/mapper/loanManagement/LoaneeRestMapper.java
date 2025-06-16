@@ -44,6 +44,8 @@ public interface LoaneeRestMapper {
     @Mapping(target = "tenor", source = "tenor")
     @Mapping(target = "termsAndConditions", source = "termsAndConditions")
     @Mapping(target = "institutionName", source = "institutionName")
+    @Mapping(target = "userDataFileLoadedStatus", source = "userDataFileLoadedStatus")
+    @Mapping(target = "onboardingMode", source = "onboardingMode")
     LoaneeResponse toLoaneeResponse(Loanee loanee);
     List<LoaneeResponse> toLoaneeResponse(List<Loanee> loanees);
 

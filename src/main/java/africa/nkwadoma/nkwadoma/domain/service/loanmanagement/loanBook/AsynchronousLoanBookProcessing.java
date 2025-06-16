@@ -305,7 +305,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                     .loaneeLoanDetail(loaneeLoanDetail)
                     .loaneeStatus(LoaneeStatus.ADDED)
                     .onboardingMode(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)
-                    .userDatafileLoadedStatus(UserDatafileLoadedStatus.ADDED)
+                    .userDataFileLoadedStatus(UserDatafileLoadedStatus.ADDED)
                     .cohortId(cohort.getId())
                     .cohortName(row.get("loanproduct"))
                     .build();

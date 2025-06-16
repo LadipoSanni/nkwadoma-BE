@@ -24,7 +24,7 @@ public class LoaneeResponse {
     private UserIdentityResponse userIdentity;
     private LoaneeLoanDetailResponse loaneeLoanDetail;
     private OnboardingMode onboardingMode;
-    private UserDatafileLoadedStatus userDatafileLoadedStatus;
+    private UserDatafileLoadedStatus userDataFileLoadedStatus;
     private LoaneeStatus loaneeStatus;
     private String highestLevelOfEducation;
     private String nameOfPreviousInstitution;

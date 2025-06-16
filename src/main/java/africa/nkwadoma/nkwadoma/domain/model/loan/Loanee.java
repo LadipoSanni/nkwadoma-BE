@@ -38,7 +38,7 @@ public class Loanee {
     private List<LoaneeLoanBreakdown> loanBreakdowns;
     private LoaneeStatus loaneeStatus;
     private OnboardingMode onboardingMode;
-    private UserDatafileLoadedStatus userDatafileLoadedStatus;
+    private UserDatafileLoadedStatus userDataFileLoadedStatus;
     private LocalDateTime referralDateTime;
     private String referredBy;
     private String reasonForDropout;
