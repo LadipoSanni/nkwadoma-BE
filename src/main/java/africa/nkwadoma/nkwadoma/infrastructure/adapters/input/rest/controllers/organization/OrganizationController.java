@@ -86,7 +86,7 @@ public class OrganizationController {
 
     @GetMapping("organization/search")
     @Operation(summary = "Search for organization(s) by similar or precise name")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> searchOrganizationByName(
                                                                        @RequestParam(name = "name") String name,
                                                                        @RequestParam(name = "status" , required = false) ActivationStatus status,
@@ -148,7 +148,7 @@ public class OrganizationController {
         return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.name()).
                 data(organizationRestMapper.toOrganizationResponse(organizationIdentity)).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
-                HttpStatus.OK
+                 HttpStatus.OK
         );
     }
 
@@ -167,7 +167,7 @@ public class OrganizationController {
     }
 
     @GetMapping("organization/details")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
+     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
     public ResponseEntity<ApiResponse<?>> viewOrganizationDetails(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
         String adminId = meedlUser.getClaimAsString("sub");
         OrganizationIdentity organizationIdentity =
