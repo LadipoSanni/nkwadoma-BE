@@ -166,12 +166,12 @@ public class FinancierService implements FinancierUseCase {
         if (ObjectUtils.isEmpty(investmentVehicle)){
             return "Financier has been invited to the platform";
         }else {
-            return "Financier has been added to investment vehicle";
+            return "Financier has been added to an investment vehicle";
         }
     }
     private static String getMessageForMultipleFinanciers(InvestmentVehicle investmentVehicle) {
         if (ObjectUtils.isEmpty(investmentVehicle)){
-            return "Financiers have been added to investment vehicle";
+            return "Financiers have been added to an investment vehicle";
         }else {
             return "Financiers have been invited to the platform";
         }
