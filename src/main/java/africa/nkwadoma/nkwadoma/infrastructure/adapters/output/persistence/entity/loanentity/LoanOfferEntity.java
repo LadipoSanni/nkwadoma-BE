@@ -30,5 +30,6 @@ public class LoanOfferEntity {
     private LocalDateTime dateTimeOffered;
     private LocalDateTime dateTimeAccepted;
     private BigDecimal amountApproved;
+    @Enumerated(EnumType.STRING)
     private LoanDecision loaneeResponse;
 }

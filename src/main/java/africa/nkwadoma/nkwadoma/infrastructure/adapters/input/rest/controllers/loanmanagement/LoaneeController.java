@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.
 
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.UploadedStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -44,9 +45,9 @@ public class LoaneeController {
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> inviteLoanees(
                                                     @AuthenticationPrincipal Jwt meedlUser,
-                                                    @RequestBody List<String> emails) {
+                                                    @RequestBody List<String> ids) {
 
-        List<Loanee> loanees = loaneeRestMapper.map(emails, meedlUser.getClaimAsString("sub"));
+        List<Loanee> loanees = loaneeRestMapper.map(ids, meedlUser.getClaimAsString("sub"));
         loanees = loaneeUseCase.inviteLoanees(loanees);
         List<LoaneeResponse> loaneeResponse =
                 loaneeRestMapper.toLoaneeResponse(loanees);
@@ -100,10 +101,11 @@ public class LoaneeController {
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
             @RequestParam(name = "status" , required = false )LoaneeStatus loaneeStatus,
-            @RequestParam(name= "loanStatus", required = false) LoanStatus loanStatus
+            @RequestParam(name= "loanStatus", required = false) LoanStatus loanStatus,
+            @RequestParam(name = "uploadedStatus", required = false) UploadedStatus uploadedStatus
             ) throws MeedlException {
         Loanee loanee = Loanee.builder().cohortId(cohortId).loaneeStatus(loaneeStatus)
-                .loanStatus(loanStatus).build();
+                .loanStatus(loanStatus).uploadedStatus(uploadedStatus).build();
         Page<Loanee> loanees = loaneeUseCase.viewAllLoaneeInCohort(loanee, pageSize, pageNumber);
         List<LoaneeResponse> loaneeResponses = loanees.stream()
                 .map(loaneeRestMapper::toLoaneeResponse).toList();
@@ -124,9 +126,11 @@ public class LoaneeController {
     public ResponseEntity<ApiResponse<?>> searchForLoaneeInCohort(@RequestParam("loaneeName")String loaneeName,
                                                                   @RequestParam("cohortId")String cohortId,
                                                                   @RequestParam(name = "status" , required = false ) LoaneeStatus status,
+                                                                  @RequestParam(name = "uploadedStatus", required = false) UploadedStatus uploadedStatus,
                                                                   @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                                                   @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber)throws MeedlException {
-        Loanee loanee = Loanee.builder().cohortId(cohortId).loaneeStatus(status).loaneeName(loaneeName).build();
+        Loanee loanee = Loanee.builder().cohortId(cohortId).loaneeStatus(status)
+                .loaneeName(loaneeName).uploadedStatus(uploadedStatus).build();
        Page<Loanee> loanees = loaneeUseCase.searchForLoaneeInCohort(loanee,pageSize,pageNumber);
        List<LoaneeResponse> loaneeResponse = loanees.stream()
                .map(loaneeRestMapper::toLoaneeResponse).toList();

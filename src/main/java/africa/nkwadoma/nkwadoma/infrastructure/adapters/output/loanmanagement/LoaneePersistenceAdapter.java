@@ -63,7 +63,7 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
         MeedlValidator.validateUUID(loanee.getCohortId(), CohortMessages.INVALID_COHORT_ID.getMessage());
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize,Sort.by(Sort.Order.desc("createdAt")));
         Page<LoaneeEntity> loaneeEntities = loaneeRepository
-                .findAllByCohortId(loanee.getCohortId(), loanee.getLoaneeStatus(), loanee.getLoanStatus(), pageRequest);
+                .findAllByCohortId(loanee.getCohortId(), loanee.getLoaneeStatus(), loanee.getLoanStatus(), loanee.getUploadedStatus(), pageRequest);
         log.info("Loanees {} == ", loaneeEntities.getContent());
         return loaneeEntities.map(loaneeMapper::toLoanee);
     }
@@ -79,9 +79,11 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
     public Page<Loanee> searchForLoaneeInCohort(Loanee loanee, int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validateUUID(loanee.getCohortId(),CohortMessages.INVALID_COHORT_ID.getMessage());
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize,Sort.by(Sort.Order.desc("createdAt")));
+        log.debug("Searching for loanees with params: cohortId={}, nameFragment={}, status={}, uploadedStatus={}",
+                loanee.getCohortId(), loanee.getLoaneeName(), loanee.getLoaneeStatus(), loanee.getUploadedStatus());
         Page<LoaneeEntity> loaneeEntities =
                 loaneeRepository.findByCohortIdAndNameFragment(loanee.getCohortId(),
-                        loanee.getLoaneeName(),loanee.getLoaneeStatus(),pageRequest);
+                        loanee.getLoaneeName(),loanee.getLoaneeStatus(), loanee.getUploadedStatus(),pageRequest);
         if (loaneeEntities.isEmpty()){
             return Page.empty();
         }

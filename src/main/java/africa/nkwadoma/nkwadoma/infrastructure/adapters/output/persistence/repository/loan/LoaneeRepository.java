@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan;
 
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.UploadedStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoaneeEntity;
@@ -25,10 +26,12 @@ public interface LoaneeRepository extends JpaRepository<LoaneeEntity,String> {
         AND (:status IS NULL AND l.loaneeStatus != 'ARCHIVE' OR l.loaneeStatus = :status)
     AND (:status IS NULL OR l.loaneeStatus = :status)
     AND (:loanStatus IS NULL OR loan.loanStatus = :loanStatus)
+    AND (:uploadedStatus IS NULL OR l.uploadedStatus = :uploadedStatus)
     """)
     Page<LoaneeEntity> findAllByCohortId(@Param("cohortId") String cohortId,
                                          @Param("status")LoaneeStatus status,
                                          @Param("loanStatus") LoanStatus loanStatus,
+                                         @Param("uploadedStatus") UploadedStatus uploadedStatus,
                                          Pageable pageable);
 
     @Query("SELECT l FROM LoaneeEntity l WHERE l.cohortId = :cohortId AND l.id IN :loaneeIds")
@@ -39,18 +42,20 @@ public interface LoaneeRepository extends JpaRepository<LoaneeEntity,String> {
 
     List<LoaneeEntity> findAllLoaneesByCohortId(String id);
 
-
     @Query("""
         SELECT l FROM LoaneeEntity l
         WHERE l.cohortId = :cohortId
         AND (upper(concat(l.userIdentity.firstName, ' ', l.userIdentity.lastName)) LIKE upper(concat('%', :nameFragment, '%'))
         OR upper(concat(l.userIdentity.lastName, ' ', l.userIdentity.firstName)) LIKE upper(concat('%', :nameFragment, '%')))
-        AND (:status IS NULL AND l.loaneeStatus != 'ARCHIVE' OR l.loaneeStatus = :status)
-        """)
+        AND (:status IS NULL OR l.loaneeStatus = :status)
+        AND (:uploadedStatus IS NULL OR l.uploadedStatus = :uploadedStatus)
+        AND l.loaneeStatus != 'ARCHIVE'
+    """)
     Page<LoaneeEntity> findByCohortIdAndNameFragment(@Param("cohortId") String cohortId,
                                                      @Param("nameFragment") String nameFragment,
                                                      @Param("status") LoaneeStatus status,
-                                                     Pageable pageable)  ;
+                                                     @Param("uploadedStatus") UploadedStatus uploadedStatus,
+                                                     Pageable pageable);
 
     @Query("""
         SELECT l.id as id,
