@@ -1,6 +1,9 @@
 package africa.nkwadoma.nkwadoma.infrastructure.utilities;
 
+import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.EmailTokenOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.aes.TokenUtils;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
@@ -15,14 +18,16 @@ import static org.junit.jupiter.api.Assertions.*;
 @Slf4j
 class TokenUtilsTest {
     @Autowired
-    private TokenUtils tokenUtils;
+    private AesOutputPort tokenUtils;
     public static final String ENCRYPTED_DATA = "etlGGJ4BSGNxBkqfv3rPqw==";
     public static final String DECRYPTED_DATA = "93289238223";
+    @Autowired
+    private EmailTokenOutputPort emailTokenManager;
 
     @Test
     void generateToken(){
         try {
-            String generatedToken = tokenUtils.generateToken("test@gmail.com");
+            String generatedToken = emailTokenManager.generateToken("test@gmail.com");
             log.info("{}",generatedToken);
             assertNotNull(generatedToken);
         }catch (MeedlException exception){
@@ -30,15 +35,15 @@ class TokenUtilsTest {
     }
     @Test
     void generateTokenWithInvalidEmail(){
-        assertThrows(MeedlException.class,()-> tokenUtils.generateToken("invalid"));
+        assertThrows(MeedlException.class,()-> emailTokenManager.generateToken("invalid"));
     }
     @Test
     void generateTokenWithEmptyEmail(){
-        assertThrows(MeedlException.class,()-> tokenUtils.generateToken(StringUtils.EMPTY));
+        assertThrows(MeedlException.class,()-> emailTokenManager.generateToken(StringUtils.EMPTY));
     }
     @Test
     void generateTokenWithNullEmail(){
-        assertThrows(MeedlException.class,()-> tokenUtils.generateToken(StringUtils.EMPTY));
+        assertThrows(MeedlException.class,()-> emailTokenManager.generateToken(StringUtils.EMPTY));
     }
     @Test
     void testValidDecryption() throws Exception {

@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.email.OrganizationEmployeeEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.notification.SendColleagueEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.notification.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
@@ -9,8 +9,9 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.aes.TokenUtils;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identitymanager.BlackListedTokenAdapter;
-import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.notification.email.EmailTokenManager;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -55,6 +56,9 @@ class UserIdentityServiceTest {
     @Mock
     private BlackListedTokenAdapter blackListedTokenAdapter;
     private UserIdentity favour;
+    @Mock
+    private EmailTokenManager emailTokenManager;
+
 //    private String password;
     private String newPassword;
     private final String generatedToken = "generatedToken";
@@ -173,7 +177,7 @@ class UserIdentityServiceTest {
             favour.setEmail(favour.getEmail());
             assertNotNull(generatedToken);
             when(tokenUtils.decryptAES(eq(password), any())).thenReturn(password);
-            when(tokenUtils.decodeJWTGetEmail(generatedToken)).thenReturn(favour.getEmail());
+            when(emailTokenManager.decodeJWTGetEmail(generatedToken)).thenReturn(favour.getEmail());
             when(identityManagerOutPutPort.createPassword(any())).thenReturn(favour);
             when(userIdentityOutputPort.findByEmail(favour.getEmail())).thenReturn(favour);
             userIdentityService.createPassword(generatedToken,favour.getPassword());
@@ -328,7 +332,7 @@ class UserIdentityServiceTest {
     void createPasswordWithEmptyPassword(){
         try {
             favour.setPassword(StringUtils.EMPTY);
-            String generatedToken = tokenUtils.generateToken(favour.getEmail());
+            String generatedToken = emailTokenManager.generateToken(favour.getEmail());
             assertThrows(MeedlException.class,()-> userIdentityService.createPassword(generatedToken,favour.getPassword()));
         }catch (MeedlException meedlException){
             log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
@@ -339,7 +343,7 @@ class UserIdentityServiceTest {
     void createPasswordAgain(){
         try {
             favour.setPassword("passwoRd@123");
-            String generatedToken = tokenUtils.generateToken(favour.getEmail());
+            String generatedToken = emailTokenManager.generateToken(favour.getEmail());
             assertThrows(MeedlException.class,()-> userIdentityService.createPassword(generatedToken,favour.getPassword()));
         }catch (MeedlException meedlException){
             log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
@@ -392,7 +396,7 @@ class UserIdentityServiceTest {
         String password = "Passkey90@";
         try {
             assertNotNull(generatedToken);
-            when(tokenUtils.decodeJWTGetEmail(generatedToken)).thenReturn(favour.getEmail());
+            when(emailTokenManager.decodeJWTGetEmail(generatedToken)).thenReturn(favour.getEmail());
             when(tokenUtils.decryptAES(eq(password), eq("Password provided is not valid. Contact admin.")))
                     .thenReturn(password);
             doNothing().when(identityManagerOutPutPort).resetPassword(any());

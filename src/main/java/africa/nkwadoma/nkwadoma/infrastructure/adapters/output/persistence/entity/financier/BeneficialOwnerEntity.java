@@ -2,14 +2,13 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.enti
 
 import africa.nkwadoma.nkwadoma.domain.enums.identity.Country;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.UserRelationship;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter

@@ -1,12 +1,8 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan;
 
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanDecision;
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferStatus;
-import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanDecision;
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanOfferStatus;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanBreakdown;
-import lombok.Getter;
-import org.apache.james.mime4j.dom.datetime.DateTime;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

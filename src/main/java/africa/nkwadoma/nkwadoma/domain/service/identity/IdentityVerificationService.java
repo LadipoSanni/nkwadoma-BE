@@ -1,13 +1,14 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.IdentityVerificationUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationFailureRecordOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanMetricsOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanReferralOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanRequestOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanMetricsOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanReferralOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanRequestOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ServiceProvider;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
@@ -29,7 +30,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanM
 import africa.nkwadoma.nkwadoma.infrastructure.commons.IdentityVerificationMessage;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
-import africa.nkwadoma.nkwadoma.infrastructure.utilities.TokenUtils;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.aes.TokenUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +57,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     @Qualifier("premblyAdapter")
     private IdentityVerificationOutputPort identityVerificationOutputPort;
     @Autowired
-    private TokenUtils tokenUtils;
+    private AesOutputPort tokenUtils;
     @Autowired
     private IdentityManagerOutputPort identityManagerOutputPort;
     @Autowired
