@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.
 
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.UploadedStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -100,10 +101,11 @@ public class LoaneeController {
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
             @RequestParam(name = "status" , required = false )LoaneeStatus loaneeStatus,
-            @RequestParam(name= "loanStatus", required = false) LoanStatus loanStatus
+            @RequestParam(name= "loanStatus", required = false) LoanStatus loanStatus,
+            @RequestParam(name = "uploadedStatus", required = false) UploadedStatus uploadedStatus
             ) throws MeedlException {
         Loanee loanee = Loanee.builder().cohortId(cohortId).loaneeStatus(loaneeStatus)
-                .loanStatus(loanStatus).build();
+                .loanStatus(loanStatus).uploadedStatus(uploadedStatus).build();
         Page<Loanee> loanees = loaneeUseCase.viewAllLoaneeInCohort(loanee, pageSize, pageNumber);
         List<LoaneeResponse> loaneeResponses = loanees.stream()
                 .map(loaneeRestMapper::toLoaneeResponse).toList();

@@ -21,6 +21,7 @@ public class UserEntity {
     private String email;
     private String firstName;
     private String lastName;
+    private String otherName;
     private String image;
     private String phoneNumber;
     @Column(columnDefinition = "BOOLEAN DEFAULT false")
