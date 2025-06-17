@@ -98,7 +98,7 @@ public class LoanController {
         Page<LoanProduct> loanProductPage = viewLoanProductUseCase.viewAllLoanProduct(loanProduct);
         List<LoanProductResponse> loanProductResponses = loanProductPage.stream().map(loanProductMapper::mapToLoanProductResponse).toList();
         PaginatedResponse<LoanProductResponse> paginatedResponse = new PaginatedResponse<>(
-                loanProductResponses, loanProductPage.hasNext(), loanProductPage.getTotalPages(), pageNumber,pageSize);
+                loanProductResponses, loanProductPage.hasNext(), loanProductPage.getTotalPages(),loanProductPage.getTotalElements() , pageNumber,pageSize);
         log.info("View all loan products called successfully.");
 
         return new ResponseEntity<>(ApiResponse.builder().
@@ -119,7 +119,7 @@ public class LoanController {
                  loanProductMapper::mapToLoanProductResponse).toList();
         PaginatedResponse<LoanProductResponse> paginatedResponse = new PaginatedResponse<>(
                 loanProductResponses, loanProducts.hasNext(),
-                loanProducts.getTotalPages(), pageNumber, pageSize
+                loanProducts.getTotalPages(),loanProducts.getTotalElements() ,pageNumber, pageSize
         );
         ApiResponse<PaginatedResponse<LoanProductResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoanProductResponse>>builder()
                 .data(paginatedResponse)
@@ -249,7 +249,7 @@ public class LoanController {
         Page<LoanOffer> loanOffers = loanOfferUseCase.viewAllLoanOffers(meedlUser.getClaimAsString("sub"),pageSize,pageNumber);
         List<AllLoanOfferResponse> loanOfferResponses =  loanOfferRestMapper.toLoanOfferResponses(loanOffers);
         PaginatedResponse<AllLoanOfferResponse> paginatedResponse = new PaginatedResponse<>(
-                loanOfferResponses,loanOffers.hasNext(),loanOffers.getTotalPages(),pageNumber,pageSize
+                loanOfferResponses,loanOffers.hasNext(),loanOffers.getTotalPages(),loanOffers.getTotalElements() ,pageNumber,pageSize
         );
         ApiResponse<PaginatedResponse<AllLoanOfferResponse>> apiResponse = ApiResponse.<PaginatedResponse<AllLoanOfferResponse>>builder()
                 .data(paginatedResponse)
@@ -283,7 +283,7 @@ public class LoanController {
         Page<LoanOffer> loanOffers = loanOfferUseCase.viewAllLoanOffersInOrganization(organizationId,pageSize,pageNumber);
         List<AllLoanOfferResponse> loanOfferResponses =  loanOfferRestMapper.toLoanOfferResponses(loanOffers);
         PaginatedResponse<AllLoanOfferResponse> paginatedResponse = new PaginatedResponse<>(
-                loanOfferResponses,loanOffers.hasNext(),loanOffers.getTotalPages(),pageNumber,pageSize
+                loanOfferResponses,loanOffers.hasNext(),loanOffers.getTotalPages(),loanOffers.getTotalElements() ,pageNumber,pageSize
         );
         ApiResponse<PaginatedResponse<AllLoanOfferResponse>> apiResponse = ApiResponse.<PaginatedResponse<AllLoanOfferResponse>>builder()
                 .data(paginatedResponse)
@@ -311,7 +311,7 @@ public class LoanController {
         Page<LoanDetail> loanDetails = loanOfferUseCase.searchLoan(loanOffer);
         List<LoanDetailsResponse> loanDetailsResponses = loanMetricsRestMapper.toLoanLifeCycleResponses(loanDetails);
         PaginatedResponse<LoanDetailsResponse> paginatedResponse = new PaginatedResponse<>(
-                loanDetailsResponses,loanDetails.hasNext(),loanDetails.getTotalPages(),pageNumber,pageSize
+                loanDetailsResponses,loanDetails.hasNext(),loanDetails.getTotalPages(),loanDetails.getTotalElements() ,pageNumber,pageSize
         );
         ApiResponse<PaginatedResponse<LoanDetailsResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoanDetailsResponse>>builder()
                 .data(paginatedResponse)
@@ -359,7 +359,7 @@ public class LoanController {
         Page<LoanDetail> loanDetails = loanOfferUseCase.filterLoanByProgram(loanOffer);
         List<LoanDetailsResponse> loanDetailsResponses = loanMetricsRestMapper.toLoanLifeCycleResponses(loanDetails);
         PaginatedResponse<LoanDetailsResponse> paginatedResponse = new PaginatedResponse<>(
-                loanDetailsResponses,loanDetails.hasNext(),loanDetails.getTotalPages(),pageNumber,pageSize
+                loanDetailsResponses,loanDetails.hasNext(),loanDetails.getTotalPages(),loanDetails.getTotalElements() ,pageNumber,pageSize
         );
         ApiResponse<PaginatedResponse<LoanDetailsResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoanDetailsResponse>>builder()
                 .data(paginatedResponse)

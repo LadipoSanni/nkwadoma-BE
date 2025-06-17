@@ -133,7 +133,7 @@ public class CohortController {
         Page<Cohort> cohorts = cohortUseCase.searchForCohort(meedl.getClaimAsString("sub"),cohort);
         List<CohortResponse> cohortResponses =  cohorts.stream().map(cohortMapper::toCohortResponse).toList();
         PaginatedResponse<CohortResponse> paginatedResponse = new PaginatedResponse<>(
-                cohortResponses, cohorts.hasNext(), cohorts.getTotalPages(), pageNumber, pageSize);
+                cohortResponses, cohorts.hasNext(), cohorts.getTotalPages(),cohorts.getTotalElements(), pageNumber, pageSize);
         ApiResponse<PaginatedResponse<CohortResponse>> apiResponse = ApiResponse.<PaginatedResponse<CohortResponse>>builder()
                 .data(paginatedResponse)
                 .message(COHORT_RETRIEVED)
@@ -155,7 +155,7 @@ public class CohortController {
         Page<Cohort> cohorts = cohortUseCase.viewAllCohortInAProgram(cohort);
         List<CohortResponse> cohortResponses = cohorts.stream().map(cohortMapper::toCohortResponse).toList();
         PaginatedResponse<CohortResponse> paginatedResponse = new PaginatedResponse<>(
-                cohortResponses, cohorts.hasNext(), cohorts.getTotalPages(), pageNumber, pageSize);
+                cohortResponses, cohorts.hasNext(), cohorts.getTotalPages(),cohorts.getTotalElements(), pageNumber, pageSize);
         ApiResponse<PaginatedResponse<CohortResponse>> apiResponse = ApiResponse.<PaginatedResponse<CohortResponse>>builder()
                 .data(paginatedResponse)
                 .message(String.format("Cohorts %s", ControllerConstant.RETURNED_SUCCESSFULLY.getMessage()))
@@ -178,7 +178,7 @@ public class CohortController {
         Page<Cohort> cohorts = cohortUseCase.viewAllCohortInOrganization(meedl.getClaimAsString("sub"),cohort);
         List<CohortsResponse> cohortResponses = cohorts.stream().map(cohortMapper::toCohortsResponse).toList();
         PaginatedResponse<CohortsResponse> paginatedResponse = new PaginatedResponse<>(
-                cohortResponses, cohorts.hasNext(), cohorts.getTotalPages(), pageNumber,pageSize);
+                cohortResponses, cohorts.hasNext(), cohorts.getTotalPages(),cohorts.getTotalElements(), pageNumber,pageSize);
         ApiResponse<PaginatedResponse<CohortsResponse>> apiResponse = ApiResponse.<PaginatedResponse<CohortsResponse>>builder()
                 .data(paginatedResponse)
                 .message(String.format("Cohorts %s", ControllerConstant.RETURNED_SUCCESSFULLY.getMessage()))

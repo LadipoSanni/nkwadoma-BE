@@ -1,5 +1,5 @@
 package africa.nkwadoma.nkwadoma.domain.enums.loanee;
 
-public enum UserDatafileLoadedStatus {
+public enum UploadedStatus {
     ADDED, INVITED
 }

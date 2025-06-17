@@ -13,7 +13,7 @@ public interface LoaneeMapper {
     @Mapping(target = "userIdentity", source = "userIdentity")
     @Mapping(target = "deferredDateAndTime", source = "deferredDateAndTime")
     @Mapping(target = "deferReason", source = "deferReason")
-    @Mapping(target = "userDataFileLoadedStatus", source = "userDataFileLoadedStatus")
+    @Mapping(target = "uploadedStatus", source = "uploadedStatus")
     LoaneeEntity toLoaneeEntity(Loanee loanee);
 
     @InheritInverseConfiguration

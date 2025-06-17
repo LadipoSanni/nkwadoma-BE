@@ -44,6 +44,7 @@ public class ProgramService implements AddProgramUseCase {
     public Program updateProgram(Program program) throws MeedlException {
         MeedlValidator.validateObjectInstance(program, ProgramMessages.PROGRAM_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(program.getId(), ProgramMessages.INVALID_PROGRAM_ID.getMessage());
+        program.validateUpdateProgram();
         Program foundProgram = programOutputPort.findProgramById(program.getId());
         if (ObjectUtils.isNotEmpty(foundProgram)) {
             log.info("Program at service layer update program: ========>{}", foundProgram);

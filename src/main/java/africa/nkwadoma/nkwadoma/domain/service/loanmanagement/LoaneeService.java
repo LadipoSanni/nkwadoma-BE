@@ -25,7 +25,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotific
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
-import africa.nkwadoma.nkwadoma.domain.enums.loanee.UserDatafileLoadedStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.UploadedStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
@@ -117,7 +117,7 @@ public class LoaneeService implements LoaneeUseCase {
                         if (!loanee.getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)) {
                             log.warn("The loanee being invited is not from file upload {}", email);
                         }
-                        loanee.setUserDataFileLoadedStatus(UserDatafileLoadedStatus.INVITED);
+                        loanee.setUploadedStatus(UploadedStatus.INVITED);
                         loanee = loaneeOutputPort.save(loanee);
                     } catch (MeedlException e) {
                         log.error("Loanee with email doesn't exist");

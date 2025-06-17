@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.model.education;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import jakarta.validation.constraints.Size;
@@ -81,5 +82,11 @@ public class Program {
 
     public BigDecimal getTotalAmountOutstanding() {
         return totalAmountOutstanding == null ? BigDecimal.ZERO : totalAmountOutstanding;
+    }
+
+    public void validateUpdateProgram() throws EducationException {
+        if(duration <= 0){
+            throw new EducationException(ProgramMessages.PROGRAM_DURATION_CANNOT_BE_NEGATIVE.getMessage());
+        }
     }
 }

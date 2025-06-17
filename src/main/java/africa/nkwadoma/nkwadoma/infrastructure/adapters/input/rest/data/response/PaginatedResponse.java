@@ -12,6 +12,7 @@ public class PaginatedResponse<T> {
     private List<T> body;
     private boolean hasNextPage;
     private long totalPages;
+    private long totalElement;
     public int pageNumber;
     public int pageSize;
 }
