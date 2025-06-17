@@ -45,9 +45,9 @@ public class LoaneeController {
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> inviteLoanees(
                                                     @AuthenticationPrincipal Jwt meedlUser,
-                                                    @RequestBody List<String> emails) {
+                                                    @RequestBody List<String> ids) {
 
-        List<Loanee> loanees = loaneeRestMapper.map(emails, meedlUser.getClaimAsString("sub"));
+        List<Loanee> loanees = loaneeRestMapper.map(ids, meedlUser.getClaimAsString("sub"));
         loanees = loaneeUseCase.inviteLoanees(loanees);
         List<LoaneeResponse> loaneeResponse =
                 loaneeRestMapper.toLoaneeResponse(loanees);
