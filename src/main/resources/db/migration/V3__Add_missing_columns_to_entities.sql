@@ -1,11 +1,17 @@
--- Create cooperation_entity (needed for financier_entity foreign key)
+-- Create all tables first to avoid missing relation errors
+CREATE TABLE IF NOT EXISTS bank_detail_entity (
+    id VARCHAR(255) NOT NULL,
+    bank_name VARCHAR(255),
+    bank_number VARCHAR(255),
+    CONSTRAINT bank_detail_entity_pkey PRIMARY KEY (id)
+);
+
 CREATE TABLE IF NOT EXISTS cooperation_entity (
     id VARCHAR(255) NOT NULL,
     name VARCHAR(255),
     CONSTRAINT cooperation_entity_pkey PRIMARY KEY (id)
 );
 
--- Create financier_entity (needed for early UPDATE statements)
 CREATE TABLE IF NOT EXISTS financier_entity (
     id VARCHAR(255) NOT NULL,
     activation_status VARCHAR(255),
@@ -20,40 +26,52 @@ CREATE TABLE IF NOT EXISTS financier_entity (
     CONSTRAINT financier_entity_pkey PRIMARY KEY (id)
 );
 
-DO $$
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1
-        FROM information_schema.table_constraints
-        WHERE constraint_name = 'fk_user_identity'
-        AND table_name = 'financier_entity'
-    ) THEN
-        ALTER TABLE financier_entity
-            ADD CONSTRAINT fk_user_identity
-            FOREIGN KEY (user_identity_id) REFERENCES meedl_user(id);
-    END IF;
-
-    IF NOT EXISTS (
-        SELECT 1
-        FROM information_schema.table_constraints
-        WHERE constraint_name = 'fk_cooperation'
-        AND table_name = 'financier_entity'
-    ) THEN
-        ALTER TABLE financier_entity
-            ADD CONSTRAINT fk_cooperation
-            FOREIGN KEY (cooperation_id) REFERENCES cooperation_entity(id);
-    END IF;
-END $$;
-
--- Create bank_detail_entity (needed for meedl_user and investment_vehicle_entity)
-CREATE TABLE IF NOT EXISTS bank_detail_entity (
-    id VARCHAR(255) NOT NULL,
-    bank_name VARCHAR(255),
-    bank_number VARCHAR(255),
-    CONSTRAINT bank_detail_entity_pkey PRIMARY KEY (id)
+CREATE TABLE IF NOT EXISTS financier_entity_source_of_funds (
+    financier_entity_id VARCHAR(255) NOT NULL,
+    source_of_funds VARCHAR(255),
+    CONSTRAINT fk_financier_entity FOREIGN KEY (financier_entity_id) REFERENCES financier_entity(id)
 );
 
--- Create coupon_distribution_entity (needed for vehicle_operation_entity)
+CREATE TABLE IF NOT EXISTS beneficial_owner_entity (
+    id VARCHAR(255) NOT NULL,
+    beneficial_owner_type VARCHAR(255),
+    entity_name VARCHAR(255),
+    beneficial_rc_number VARCHAR(255),
+    country_of_incorporation VARCHAR(255),
+    beneficial_owner_first_name VARCHAR(255),
+    beneficial_owner_last_name VARCHAR(255),
+    beneficial_owner_relationship VARCHAR(255),
+    beneficial_owner_date_of_birth TIMESTAMP WITHOUT TIME ZONE,
+    percentage_ownership_or_share DOUBLE PRECISION DEFAULT 0.0,
+    voters_card VARCHAR(255),
+    national_id_card VARCHAR(255),
+    driver_license VARCHAR(255),
+    CONSTRAINT beneficial_owner_entity_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS financier_beneficial_owner_entity (
+    id VARCHAR(255) NOT NULL,
+    financier_entity_id VARCHAR(255),
+    beneficial_owner_entity_id VARCHAR(255),
+    CONSTRAINT financier_beneficial_owner_entity_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS politically_exposed_person_entity (
+    id VARCHAR(255) NOT NULL,
+    position_held VARCHAR(255),
+    country VARCHAR(255),
+    relationship VARCHAR(255),
+    additional_information VARCHAR(255),
+    CONSTRAINT politically_exposed_person_entity_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS financier_politically_exposed_person_entity (
+    id VARCHAR(255) NOT NULL,
+    financier_id VARCHAR(255),
+    politically_exposed_person_id VARCHAR(255),
+    CONSTRAINT financier_politically_exposed_person_entity_pkey PRIMARY KEY (id)
+);
+
 CREATE TABLE IF NOT EXISTS coupon_distribution_entity (
     id VARCHAR(255) NOT NULL,
     due INTEGER,
@@ -63,7 +81,6 @@ CREATE TABLE IF NOT EXISTS coupon_distribution_entity (
     CONSTRAINT coupon_distribution_entity_pkey PRIMARY KEY (id)
 );
 
--- Create capital_distribution_entity (needed for vehicle_closure_entity)
 CREATE TABLE IF NOT EXISTS capital_distribution_entity (
     id VARCHAR(255) NOT NULL,
     due INTEGER,
@@ -71,7 +88,6 @@ CREATE TABLE IF NOT EXISTS capital_distribution_entity (
     CONSTRAINT capital_distribution_entity_pkey PRIMARY KEY (id)
 );
 
--- Create vehicle_operation_entity (needed for investment_vehicle_entity)
 CREATE TABLE IF NOT EXISTS vehicle_operation_entity (
     id VARCHAR(255) NOT NULL,
     coupon_distribution_status VARCHAR(255),
@@ -82,21 +98,6 @@ CREATE TABLE IF NOT EXISTS vehicle_operation_entity (
     CONSTRAINT vehicle_operation_entity_pkey PRIMARY KEY (id)
 );
 
-DO $$
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1
-        FROM information_schema.table_constraints
-        WHERE constraint_name = 'fk_coupon_distribution'
-        AND table_name = 'vehicle_operation_entity'
-    ) THEN
-        ALTER TABLE vehicle_operation_entity
-            ADD CONSTRAINT fk_coupon_distribution
-            FOREIGN KEY (coupon_distribution_id) REFERENCES coupon_distribution_entity(id);
-    END IF;
-END $$;
-
--- Create vehicle_closure_entity (needed for investment_vehicle_entity)
 CREATE TABLE IF NOT EXISTS vehicle_closure_entity (
     id VARCHAR(255) NOT NULL,
     recollection_status VARCHAR(255),
@@ -105,21 +106,104 @@ CREATE TABLE IF NOT EXISTS vehicle_closure_entity (
     CONSTRAINT vehicle_closure_entity_pkey PRIMARY KEY (id)
 );
 
-DO $$
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1
-        FROM information_schema.table_constraints
-        WHERE constraint_name = 'fk_capital_distribution'
-        AND table_name = 'vehicle_closure_entity'
-    ) THEN
-        ALTER TABLE vehicle_closure_entity
-            ADD CONSTRAINT fk_capital_distribution
-            FOREIGN KEY (capital_distribution_id) REFERENCES capital_distribution_entity(id);
-    END IF;
-END $$;
+CREATE TABLE IF NOT EXISTS meedl_notification_entity (
+    id VARCHAR(255) NOT NULL,
+    title VARCHAR(255),
+    content_id VARCHAR(255),
+    meedl_user VARCHAR(255) NOT NULL,
+    read BOOLEAN,
+    timestamp TIMESTAMP WITHOUT TIME ZONE,
+    call_to_action BOOLEAN,
+    sender_email VARCHAR(255),
+    sender_full_name VARCHAR(255),
+    content_detail VARCHAR(255),
+    notification_flag VARCHAR(255),
+    CONSTRAINT meedl_notification_entity_pkey PRIMARY KEY (id)
+);
 
--- Cleanup invalid foreign key data (now safe after creating financier_entity)
+CREATE TABLE IF NOT EXISTS portfolio_entity (
+    id VARCHAR(255) NOT NULL,
+    portfolio_name VARCHAR(255),
+    total_number_of_investment_vehicle INTEGER DEFAULT 0,
+    total_number_of_commercial_funds_investment_vehicle INTEGER DEFAULT 0,
+    total_number_of_endowment_funds_investment_vehicle INTEGER DEFAULT 0,
+    total_number_of_financier INTEGER DEFAULT 0,
+    total_number_of_individual_financier INTEGER DEFAULT 0,
+    total_number_of_institutional_financier INTEGER DEFAULT 0,
+    total_number_of_loans INTEGER DEFAULT 0,
+    loan_referral_percentage DOUBLE PRECISION DEFAULT 0.0,
+    loan_request_percentage DOUBLE PRECISION DEFAULT 0.0,
+    loan_disbursal_percentage DOUBLE PRECISION DEFAULT 0.0,
+    CONSTRAINT portfolio_entity_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS repayment_history_entity (
+    id VARCHAR(255) NOT NULL,
+    loanee_id VARCHAR(255),
+    payment_date_time TIMESTAMP WITHOUT TIME ZONE,
+    cohort_id VARCHAR(255),
+    amount_paid numeric(38,2),
+    total_amount_repaid numeric(38,2),
+    amount_outstanding numeric(38,2),
+    mode_of_payment VARCHAR(255),
+    CONSTRAINT repayment_history_entity_pkey PRIMARY KEY (id)
+);
+
+-- Add all missing columns to existing tables
+ALTER TABLE meedl_user
+    ADD COLUMN IF NOT EXISTS tax_id VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS bank_detail_entity_id VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS next_of_kin_entity_id VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS address VARCHAR(255);
+
+ALTER TABLE loanee_entity
+    ADD COLUMN IF NOT EXISTS deferral_approved BOOLEAN DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS defer_reason VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS deferral_requested BOOLEAN DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS deferred_date_and_time TIMESTAMP WITHOUT TIME ZONE,
+    ADD COLUMN IF NOT EXISTS dropout_approved BOOLEAN DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS dropout_requested BOOLEAN DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS reason_for_dropout VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS onboarding_mode VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS uploaded_status VARCHAR(255);
+
+ALTER TABLE investment_vehicle_entity
+    ADD COLUMN IF NOT EXISTS created_date TIMESTAMP WITHOUT TIME ZONE,
+    ADD COLUMN IF NOT EXISTS investment_vehicle_status VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS investment_vehicle_link VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS operation_id VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS closure_id VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS main_account_id VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS syncing_account_id VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS last_updated_date TIMESTAMP WITHOUT TIME ZONE,
+    ADD COLUMN IF NOT EXISTS investment_vehicle_visibility VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS talent_funded INTEGER DEFAULT 0;
+
+ALTER TABLE investment_vehicle_financier_entity
+    ADD COLUMN IF NOT EXISTS amount_invested numeric(38,2),
+    ADD COLUMN IF NOT EXISTS financier_id VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS investment_vehicle_id VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS date_invested date;
+
+ALTER TABLE loanee_loan_detail_entity
+    ADD COLUMN IF NOT EXISTS amount_received numeric(38,2),
+    ADD COLUMN IF NOT EXISTS amount_repaid numeric(38,2),
+    ADD COLUMN IF NOT EXISTS amount_outstanding numeric(38,2);
+
+ALTER TABLE loan_entity
+    ADD COLUMN IF NOT EXISTS loan_status VARCHAR(255);
+
+ALTER TABLE loan_product
+    ADD COLUMN IF NOT EXISTS investment_vehicle_id VARCHAR(255);
+
+-- Create designation table after investment_vehicle_financier_entity columns are added
+CREATE TABLE IF NOT EXISTS investment_vehicle_financier_entity_designation (
+    investment_vehicle_financier_entity_id VARCHAR(255) NOT NULL,
+    investment_vehicle_designation VARCHAR(255),
+    CONSTRAINT fk_investment_vehicle_financier_entity FOREIGN KEY (investment_vehicle_financier_entity_id) REFERENCES investment_vehicle_financier_entity(id)
+);
+
+-- Cleanup invalid foreign key data (after all tables and columns exist)
 UPDATE investment_vehicle_entity
 SET leads_id = NULL
 WHERE leads_id IS NOT NULL AND leads_id NOT IN (SELECT id FROM financier_entity);
@@ -168,54 +252,35 @@ UPDATE vehicle_closure_entity
 SET capital_distribution_id = NULL
 WHERE capital_distribution_id IS NOT NULL AND capital_distribution_id NOT IN (SELECT id FROM capital_distribution_entity);
 
--- Update meedl_notification_entity, using meedl_user
+UPDATE meedl_notification_entity
+SET meedl_user = NULL
+WHERE meedl_user IS NOT NULL AND meedl_user NOT IN (SELECT id FROM meedl_user);
+
+-- Add foreign key constraints (after all tables and columns exist)
 DO $$
 BEGIN
-    IF EXISTS (
+    IF NOT EXISTS (
         SELECT 1
-        FROM information_schema.columns
-        WHERE table_name = 'meedl_notification_entity'
-        AND column_name = 'meedl_user'
+        FROM information_schema.table_constraints
+        WHERE constraint_name = 'fk_user_identity'
+        AND table_name = 'financier_entity'
     ) THEN
-        UPDATE meedl_notification_entity
-        SET meedl_user = NULL
-        WHERE meedl_user IS NOT NULL AND meedl_user NOT IN (SELECT id FROM meedl_user);
+        ALTER TABLE financier_entity
+            ADD CONSTRAINT fk_user_identity
+            FOREIGN KEY (user_identity_id) REFERENCES meedl_user(id);
     END IF;
-END $$;
 
--- Create other required tables
-CREATE TABLE IF NOT EXISTS financier_entity_source_of_funds (
-    financier_entity_id VARCHAR(255) NOT NULL,
-    source_of_funds VARCHAR(255),
-    CONSTRAINT fk_financier_entity FOREIGN KEY (financier_entity_id) REFERENCES financier_entity(id)
-);
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.table_constraints
+        WHERE constraint_name = 'fk_cooperation'
+        AND table_name = 'financier_entity'
+    ) THEN
+        ALTER TABLE financier_entity
+            ADD CONSTRAINT fk_cooperation
+            FOREIGN KEY (cooperation_id) REFERENCES cooperation_entity(id);
+    END IF;
 
-CREATE TABLE IF NOT EXISTS beneficial_owner_entity (
-    id VARCHAR(255) NOT NULL,
-    beneficial_owner_type VARCHAR(255),
-    entity_name VARCHAR(255),
-    beneficial_rc_number VARCHAR(255),
-    country_of_incorporation VARCHAR(255),
-    beneficial_owner_first_name VARCHAR(255),
-    beneficial_owner_last_name VARCHAR(255),
-    beneficial_owner_relationship VARCHAR(255),
-    beneficial_owner_date_of_birth TIMESTAMP WITHOUT TIME ZONE,
-    percentage_ownership_or_share DOUBLE PRECISION DEFAULT 0.0,
-    voters_card VARCHAR(255),
-    national_id_card VARCHAR(255),
-    driver_license VARCHAR(255),
-    CONSTRAINT beneficial_owner_entity_pkey PRIMARY KEY (id)
-);
-
-CREATE TABLE IF NOT EXISTS financier_beneficial_owner_entity (
-    id VARCHAR(255) NOT NULL,
-    financier_entity_id VARCHAR(255),
-    beneficial_owner_entity_id VARCHAR(255),
-    CONSTRAINT financier_beneficial_owner_entity_pkey PRIMARY KEY (id)
-);
-
-DO $$
-BEGIN
     IF NOT EXISTS (
         SELECT 1
         FROM information_schema.table_constraints
@@ -237,26 +302,7 @@ BEGIN
             ADD CONSTRAINT fk_beneficial_owner
             FOREIGN KEY (beneficial_owner_entity_id) REFERENCES beneficial_owner_entity(id);
     END IF;
-END $$;
 
-CREATE TABLE IF NOT EXISTS politically_exposed_person_entity (
-    id VARCHAR(255) NOT NULL,
-    position_held VARCHAR(255),
-    country VARCHAR(255),
-    relationship VARCHAR(255),
-    additional_information VARCHAR(255),
-    CONSTRAINT politically_exposed_person_entity_pkey PRIMARY KEY (id)
-);
-
-CREATE TABLE IF NOT EXISTS financier_politically_exposed_person_entity (
-    id VARCHAR(255) NOT NULL,
-    financier_id VARCHAR(255),
-    politically_exposed_person_id VARCHAR(255),
-    CONSTRAINT financier_politically_exposed_person_entity_pkey PRIMARY KEY (id)
-);
-
-DO $$
-BEGIN
     IF NOT EXISTS (
         SELECT 1
         FROM information_schema.table_constraints
@@ -278,131 +324,29 @@ BEGIN
             ADD CONSTRAINT fk_politically_exposed_person
             FOREIGN KEY (politically_exposed_person_id) REFERENCES politically_exposed_person_entity(id);
     END IF;
-END $$;
 
--- Create or update meedl_notification_entity with meedl_user
-CREATE TABLE IF NOT EXISTS meedl_notification_entity (
-    id VARCHAR(255) NOT NULL,
-    title VARCHAR(255),
-    content_id VARCHAR(255),
-    meedl_user VARCHAR(255) NOT NULL,
-    read BOOLEAN,
-    timestamp TIMESTAMP WITHOUT TIME ZONE,
-    call_to_action BOOLEAN,
-    sender_email VARCHAR(255),
-    sender_full_name VARCHAR(255),
-    content_detail VARCHAR(255),
-    notification_flag VARCHAR(255),
-    CONSTRAINT meedl_notification_entity_pkey PRIMARY KEY (id)
-);
-
-DO $$
-BEGIN
     IF NOT EXISTS (
         SELECT 1
         FROM information_schema.table_constraints
-        WHERE constraint_name = 'fk_meedl_user'
-        AND table_name = 'meedl_notification_entity'
+        WHERE constraint_name = 'fk_coupon_distribution'
+        AND table_name = 'vehicle_operation_entity'
     ) THEN
-        ALTER TABLE meedl_notification_entity
-            ADD CONSTRAINT fk_meedl_user
-            FOREIGN KEY (meedl_user) REFERENCES meedl_user(id);
-    END IF;
-END $$;
-
--- Create portfolio_entity
-CREATE TABLE IF NOT EXISTS portfolio_entity (
-    id VARCHAR(255) NOT NULL,
-    portfolio_name VARCHAR(255),
-    total_number_of_investment_vehicle INTEGER DEFAULT 0,
-    total_number_of_commercial_funds_investment_vehicle INTEGER DEFAULT 0,
-    total_number_of_endowment_funds_investment_vehicle INTEGER DEFAULT 0,
-    total_number_of_financier INTEGER DEFAULT 0,
-    total_number_of_individual_financier INTEGER DEFAULT 0,
-    total_number_of_institutional_financier INTEGER DEFAULT 0,
-    total_number_of_loans INTEGER DEFAULT 0,
-    loan_referral_percentage DOUBLE PRECISION DEFAULT 0.0,
-    loan_request_percentage DOUBLE PRECISION DEFAULT 0.0,
-    loan_disbursal_percentage DOUBLE PRECISION DEFAULT 0.0,
-    CONSTRAINT portfolio_entity_pkey PRIMARY KEY (id)
-);
-
--- Create repayment_history_entity
-CREATE TABLE IF NOT EXISTS repayment_history_entity (
-    id VARCHAR(255) NOT NULL,
-    loanee_id VARCHAR(255),
-    payment_date_time TIMESTAMP WITHOUT TIME ZONE,
-    cohort_id VARCHAR(255),
-    amount_paid numeric(38,2),
-    total_amount_repaid numeric(38,2),
-    amount_outstanding numeric(38,2),
-    mode_of_payment VARCHAR(255),
-    CONSTRAINT repayment_history_entity_pkey PRIMARY KEY (id)
-);
-
--- Add missing columns to meedl_user
-ALTER TABLE meedl_user
-    ADD COLUMN IF NOT EXISTS tax_id VARCHAR(255),
-    ADD COLUMN IF NOT EXISTS bank_detail_entity_id VARCHAR(255),
-    ADD COLUMN IF NOT EXISTS next_of_kin_entity_id VARCHAR(255),
-    ADD COLUMN IF NOT EXISTS address VARCHAR(255);
-
-DO $$
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1
-        FROM information_schema.table_constraints
-        WHERE constraint_name = 'fk_bank_detail'
-        AND table_name = 'meedl_user'
-    ) THEN
-        ALTER TABLE meedl_user
-            ADD CONSTRAINT fk_bank_detail
-            FOREIGN KEY (bank_detail_entity_id) REFERENCES bank_detail_entity(id);
+        ALTER TABLE vehicle_operation_entity
+            ADD CONSTRAINT fk_coupon_distribution
+            FOREIGN KEY (coupon_distribution_id) REFERENCES coupon_distribution_entity(id);
     END IF;
 
     IF NOT EXISTS (
         SELECT 1
         FROM information_schema.table_constraints
-        WHERE constraint_name = 'fk_next_of_kin'
-        AND table_name = 'meedl_user'
+        WHERE constraint_name = 'fk_capital_distribution'
+        AND table_name = 'vehicle_closure_entity'
     ) THEN
-        ALTER TABLE meedl_user
-            ADD CONSTRAINT fk_next_of_kin
-            FOREIGN KEY (next_of_kin_entity_id) REFERENCES next_of_kin_entity(id);
+        ALTER TABLE vehicle_closure_entity
+            ADD CONSTRAINT fk_capital_distribution
+            FOREIGN KEY (capital_distribution_id) REFERENCES capital_distribution_entity(id);
     END IF;
-END $$;
 
--- Add missing columns to loanee_entity
-ALTER TABLE loanee_entity
-    ADD COLUMN IF NOT EXISTS deferral_approved BOOLEAN DEFAULT FALSE,
-    ADD COLUMN IF NOT EXISTS defer_reason VARCHAR(255),
-    ADD COLUMN IF NOT EXISTS deferral_requested BOOLEAN DEFAULT FALSE,
-    ADD COLUMN IF NOT EXISTS deferred_date_and_time TIMESTAMP WITHOUT TIME ZONE,
-    ADD COLUMN IF NOT EXISTS dropout_approved BOOLEAN DEFAULT FALSE,
-    ADD COLUMN IF NOT EXISTS dropout_requested BOOLEAN DEFAULT FALSE,
-    ADD COLUMN IF NOT EXISTS reason_for_dropout VARCHAR(255),
-    ADD COLUMN IF NOT EXISTS onboarding_mode VARCHAR(255),
-    ADD COLUMN IF NOT EXISTS uploaded_status VARCHAR(255);
-
--- Add investment_vehicle_id to loan_product
-ALTER TABLE loan_product
-    ADD COLUMN IF NOT EXISTS investment_vehicle_id VARCHAR(255);
-
--- Add missing columns to investment_vehicle_entity
-ALTER TABLE investment_vehicle_entity
-    ADD COLUMN IF NOT EXISTS created_date TIMESTAMP WITHOUT TIME ZONE,
-    ADD COLUMN IF NOT EXISTS investment_vehicle_status VARCHAR(255),
-    ADD COLUMN IF NOT EXISTS investment_vehicle_link VARCHAR(255),
-    ADD COLUMN IF NOT EXISTS operation_id VARCHAR(255),
-    ADD COLUMN IF NOT EXISTS closure_id VARCHAR(255),
-    ADD COLUMN IF NOT EXISTS main_account_id VARCHAR(255),
-    ADD COLUMN IF NOT EXISTS syncing_account_id VARCHAR(255),
-    ADD COLUMN IF NOT EXISTS last_updated_date TIMESTAMP WITHOUT TIME ZONE,
-    ADD COLUMN IF NOT EXISTS investment_vehicle_visibility VARCHAR(255),
-    ADD COLUMN IF NOT EXISTS talent_funded INTEGER DEFAULT 0;
-
-DO $$
-BEGIN
     IF NOT EXISTS (
         SELECT 1
         FROM information_schema.table_constraints
@@ -468,17 +412,29 @@ BEGIN
             ADD CONSTRAINT fk_contributors
             FOREIGN KEY (contributors_id) REFERENCES financier_entity(id);
     END IF;
-END $$;
 
--- Add missing columns to investment_vehicle_financier_entity
-ALTER TABLE investment_vehicle_financier_entity
-    ADD COLUMN IF NOT EXISTS amount_invested numeric(38,2),
-    ADD COLUMN IF NOT EXISTS financier_id VARCHAR(255),
-    ADD COLUMN IF NOT EXISTS investment_vehicle_id VARCHAR(255),
-    ADD COLUMN IF NOT EXISTS date_invested date;
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.table_constraints
+        WHERE constraint_name = 'fk_bank_detail'
+        AND table_name = 'meedl_user'
+    ) THEN
+        ALTER TABLE meedl_user
+            ADD CONSTRAINT fk_bank_detail
+            FOREIGN KEY (bank_detail_entity_id) REFERENCES bank_detail_entity(id);
+    END IF;
 
-DO $$
-BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.table_constraints
+        WHERE constraint_name = 'fk_next_of_kin'
+        AND table_name = 'meedl_user'
+    ) THEN
+        ALTER TABLE meedl_user
+            ADD CONSTRAINT fk_next_of_kin
+            FOREIGN KEY (next_of_kin_entity_id) REFERENCES next_of_kin_entity(id);
+    END IF;
+
     IF NOT EXISTS (
         SELECT 1
         FROM information_schema.table_constraints
@@ -500,23 +456,18 @@ BEGIN
             ADD CONSTRAINT fk_investment_vehicle
             FOREIGN KEY (investment_vehicle_id) REFERENCES investment_vehicle_entity(id);
     END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.table_constraints
+        WHERE constraint_name = 'fk_meedl_user'
+        AND table_name = 'meedl_notification_entity'
+    ) THEN
+        ALTER TABLE meedl_notification_entity
+            ADD CONSTRAINT fk_meedl_user
+            FOREIGN KEY (meedl_user) REFERENCES meedl_user(id);
+    END IF;
 END $$;
-
-CREATE TABLE IF NOT EXISTS investment_vehicle_financier_entity_designation (
-    investment_vehicle_financier_entity_id VARCHAR(255) NOT NULL,
-    investment_vehicle_designation VARCHAR(255),
-    CONSTRAINT fk_investment_vehicle_financier_entity FOREIGN KEY (investment_vehicle_financier_entity_id) REFERENCES investment_vehicle_financier_entity(id)
-);
-
--- Add missing columns to loanee_loan_detail_entity
-ALTER TABLE loanee_loan_detail_entity
-    ADD COLUMN IF NOT EXISTS amount_received numeric(38,2),
-    ADD COLUMN IF NOT EXISTS amount_repaid numeric(38,2),
-    ADD COLUMN IF NOT EXISTS amount_outstanding numeric(38,2);
-
--- Add loan_status to loan_entity
-ALTER TABLE loan_entity
-    ADD COLUMN IF NOT EXISTS loan_status VARCHAR(255);
 
 -- Modify loanee_response in loan_offer_entity
 DO $$
