@@ -58,6 +58,11 @@ public class Loan {
         MeedlValidator.validateObjectInstance(startDate, LoanMessages.LOAN_START_DATE_MUST_NOT_BE_EMPTY.getMessage());
     }
 
+    public Loan buildLoan(Loanee foundLoanee, String loanAccountId, String loanOfferId, LocalDateTime startDate) {
+        log.info("Loan start date {} while building loan with start date provided for loanee with id {} ", startDate,foundLoanee.getId() );
+        return Loan.builder().loanee(foundLoanee).loanAccountId(loanAccountId).loanOfferId(loanOfferId).
+                startDate(startDate).loanStatus(LoanStatus.PERFORMING).build();
+    }
     public Loan buildLoan(Loanee foundLoanee, String loanAccountId, String loanOfferId) {
         return Loan.builder().loanee(foundLoanee).loanAccountId(loanAccountId).loanOfferId(loanOfferId).
                 startDate(LocalDateTime.now()).loanStatus(LoanStatus.PERFORMING).build();

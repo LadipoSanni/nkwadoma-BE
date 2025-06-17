@@ -15,8 +15,6 @@ public interface RepaymentHistoryMapper {
 
     RepaymentHistory map(RepaymentHistoryEntity repaymentHistoryEntity);
 
-    @Mapping(target = "firstName" , source = "firstName")
-    @Mapping(target = "lastName" , source = "lastName")
     @Mapping(target = "paymentDateTime" , source = "paymentDateTime")
     @Mapping(target = "amountPaid", source = "amountPaid")
     @Mapping(target = "modeOfPayment", source = "modeOfPayment")

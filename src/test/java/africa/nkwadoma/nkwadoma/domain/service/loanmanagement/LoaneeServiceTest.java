@@ -440,7 +440,6 @@ class LoaneeServiceTest {
 //        verify(aesOutputPort, times(1)).decryptAES(bvnValue, "Error processing identity verification");
     }
 
-
     @Test
     void skipLoaneeCreditScoreUpdateWhenNotDue() throws MeedlException {
         firstLoanee.setCreditScoreUpdatedAt(LocalDateTime.now().minusDays(15));
