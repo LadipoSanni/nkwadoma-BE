@@ -353,7 +353,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                     .onboardingMode(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)
                     .uploadedStatus(UploadedStatus.ADDED)
                     .cohortId(cohort.getId())
-                    .cohortName(row.get("loanproduct"))
+                    .cohortName(row.get("loanproduct").trim())
                     .updatedAt(parseFlexibleDateTime(row.get("loanstartdate")))
                     .build();
 
