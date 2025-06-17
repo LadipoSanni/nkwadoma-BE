@@ -10,8 +10,6 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface RepaymentHistoryRestMapper {
 
-    @Mapping(target = "firstName", source = "loanee.userIdentity.firstName")
-    @Mapping(target = "lastName", source = "loanee.userIdentity.lastName")
     RepaymentHistoryResponse toRepaymentResponse(RepaymentHistory repaymentHistory);
 
     YearRangeResponse toYearRange(RepaymentHistory repaymentHistory);
