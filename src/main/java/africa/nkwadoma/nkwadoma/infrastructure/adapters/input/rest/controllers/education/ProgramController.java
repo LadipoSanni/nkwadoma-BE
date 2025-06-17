@@ -71,7 +71,7 @@ public class ProgramController {
         log.info("Programs mapped: {}", programResponses);
         PaginatedResponse<ProgramResponse> response = new PaginatedResponse<>(
                 programResponses, programs.hasNext(),
-                programs.getTotalPages(), pageNumber, pageSize
+                programs.getTotalPages(), programs.getTotalElements(),pageNumber, pageSize
         );
         return new ResponseEntity<>(ApiResponse.builder().
                 statusCode(HttpStatus.OK.toString()).

@@ -47,6 +47,7 @@ public class OrganizationEmployeeController {
                         .hasNextPage(employeeIdentities.hasNext())
                         .pageSize(pageSize)
                         .totalPages(employeeIdentities.getTotalPages())
+                        .totalElement(employeeIdentities.getTotalElements())
                         .pageNumber(pageNumber).build();
         return ResponseEntity.ok(ApiResponse
                 .buildApiResponse(paginatedResponse,
@@ -81,7 +82,8 @@ public class OrganizationEmployeeController {
         List<OrganizationEmployeeResponse> organizationEmployeeResponses =
                 organizationEmployeeIdentities.stream().map(organizationEmployeeRestMapper::toOrganizationEmployeeResponse).toList();
         PaginatedResponse<OrganizationEmployeeResponse> paginatedResponse =new PaginatedResponse<>(
-                organizationEmployeeResponses,organizationEmployeeIdentities.hasNext(),organizationEmployeeIdentities.getTotalPages(),pageNumber,pageSize
+                organizationEmployeeResponses,organizationEmployeeIdentities.hasNext(),
+                organizationEmployeeIdentities.getTotalPages(), organizationEmployeeIdentities.getTotalElements() ,pageNumber,pageSize
         );
         ApiResponse<PaginatedResponse<OrganizationEmployeeResponse>> apiResponse = ApiResponse.<PaginatedResponse
                         <OrganizationEmployeeResponse>>builder()
@@ -104,7 +106,8 @@ public class OrganizationEmployeeController {
         List<OrganizationEmployeeResponse> organizationEmployeeResponses =
                 organizationEmployeeIdentities.stream().map(organizationEmployeeRestMapper::toOrganizationEmployeeResponse).toList();
         PaginatedResponse<OrganizationEmployeeResponse> paginatedResponse =new PaginatedResponse<>(
-                organizationEmployeeResponses,organizationEmployeeIdentities.hasNext(),organizationEmployeeIdentities.getTotalPages(),pageNumber,pageSize
+                organizationEmployeeResponses,organizationEmployeeIdentities.hasNext(),
+                organizationEmployeeIdentities.getTotalPages(), organizationEmployeeIdentities.getTotalElements() ,pageNumber,pageSize
         );
         ApiResponse<PaginatedResponse<OrganizationEmployeeResponse>> apiResponse = ApiResponse.<PaginatedResponse
                         <OrganizationEmployeeResponse>>builder()

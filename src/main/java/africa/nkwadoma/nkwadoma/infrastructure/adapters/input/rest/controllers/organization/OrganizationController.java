@@ -100,7 +100,8 @@ public class OrganizationController {
         List<OrganizationResponse> organizationResponses =
                 organizationIdentities.stream().map(organizationRestMapper::toOrganizationResponse).collect(Collectors.toList());
         PaginatedResponse<OrganizationResponse> paginatedResponse = new PaginatedResponse<>(
-                organizationResponses,organizationIdentities.hasNext(),organizationIdentities.getTotalPages(),pageNumber,pageSize
+                organizationResponses,organizationIdentities.hasNext(),organizationIdentities.getTotalPages(),
+                organizationIdentities.getTotalElements() ,pageNumber,pageSize
         );
 
         log.info("Organization {}", organizationIdentities);
@@ -128,7 +129,8 @@ public class OrganizationController {
         List<OrganizationResponse> organizationResponses =
                 organizationIdentities.stream().map(organizationRestMapper::toOrganizationResponse).collect(Collectors.toList());
         PaginatedResponse<OrganizationResponse> paginatedResponse = new PaginatedResponse<>(
-                organizationResponses,organizationIdentities.hasNext(),organizationIdentities.getTotalPages(),pageNumber,pageSize
+                organizationResponses,organizationIdentities.hasNext(),organizationIdentities.getTotalPages(),
+                organizationIdentities.getTotalElements() ,pageNumber,pageSize
         );
         log.info("Organization response mapped: {}", organizationResponses);
         return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.name()).
@@ -228,7 +230,8 @@ public class OrganizationController {
         List<OrganizationResponse> organizationResponses = organizationIdentities.stream().map(organizationRestMapper::toOrganizationResponse).toList();
         PaginatedResponse<OrganizationResponse> response = new PaginatedResponse<>(
                 organizationResponses, organizationIdentities.hasNext(),
-                organizationIdentities.getTotalPages(), pageNumber,
+                organizationIdentities.getTotalPages(),
+                organizationIdentities.getTotalElements(),pageNumber,
                 pageSize
         );
 
@@ -253,7 +256,7 @@ public class OrganizationController {
         List<OrganizationResponse> organizationResponses = organizationIdentities.stream().map(organizationRestMapper::toOrganizationResponse).toList();
         PaginatedResponse<OrganizationResponse> response = new PaginatedResponse<>(
                 organizationResponses, organizationIdentities.hasNext(),
-                organizationIdentities.getTotalPages(), pageNumber,
+                organizationIdentities.getTotalPages(), organizationIdentities.getTotalElements(), pageNumber,
                 pageSize
         );
 
