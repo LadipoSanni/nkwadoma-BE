@@ -15,6 +15,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanRefe
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.UploadedStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanReferralStatus;
@@ -26,7 +27,6 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DeferProgramRequest;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.aes.TokenUtils;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -895,4 +895,21 @@ class LoaneeServiceTest {
             log.error(meedlException.getMessage());
         }
     }
+
+    @Test
+    void viewAllLoaneeInCohortWithUploadedStatus() throws MeedlException {
+        cohortLoanee.setUploadedStatus(UploadedStatus.ADDED);
+        Page<Loanee> expectedPage = new PageImpl<>(List.of(cohortLoanee));
+        when(loaneeOutputPort.findAllLoaneeByCohortId(cohortLoanee, pageSize, pageNumber))
+                .thenReturn(expectedPage);
+
+        Page<Loanee> result = loaneeService.viewAllLoaneeInCohort(cohortLoanee, pageSize, pageNumber);
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+        assertEquals(cohortLoanee, result.getContent().get(0));
+        assertEquals(cohortLoanee.getUploadedStatus(), UploadedStatus.ADDED);
+        verify(loaneeOutputPort, times(1)).findAllLoaneeByCohortId(cohortLoanee, pageSize, pageNumber);
+    }
+
+
 }
