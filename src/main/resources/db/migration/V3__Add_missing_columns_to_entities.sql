@@ -443,7 +443,6 @@ ALTER TABLE meedl_user
     ADD COLUMN IF NOT EXISTS bank_detail_entity_id VARCHAR(255),
     ADD COLUMN IF NOT EXISTS next_of_kin_entity_id VARCHAR(255),
     ADD COLUMN IF NOT EXISTS address VARCHAR(255);
-    ADD COLUMN IF NOT EXISTS otherName VARCHAR(255);
 
 DO $$
 BEGIN
