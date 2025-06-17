@@ -18,6 +18,8 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class RepaymentHistory {
     private String id;
+    private String firstName;
+    private String lastName;
     private Loanee loanee;
     private LocalDateTime paymentDateTime;
     private Integer month;
