@@ -328,7 +328,6 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                     .middleName(row.get("middlename"))
                     .email(row.get("email"))
                     .phoneNumber(row.get("phonenumber"))
-                    .dateOfBirth(row.get("dob"))
                     .role(IdentityRole.LOANEE)
                     .createdAt(LocalDateTime.now())
                     .bvn(encryptValue(row.get("bvn")))
@@ -581,8 +580,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     }
     private List<String> getUserDataUploadHeaders() {
         return List.of("firstname", "lastname", "middlename",
-                "email", "phonenumber",
-                "dob", "initialdeposit",
+                "email", "phonenumber", "initialdeposit",
                 "loanstartdate",
                 "amountrequested", "amountreceived",
                 "bvn", "nin", "loanproduct");
