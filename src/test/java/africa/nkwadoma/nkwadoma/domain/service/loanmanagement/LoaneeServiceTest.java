@@ -417,7 +417,6 @@ class LoaneeServiceTest {
         firstLoanee.getUserIdentity().setBvn(bvnValue);
         firstLoanee.getUserIdentity().setRole(IdentityRole.LOANEE);
 
-
         Loanee loanee = null;
         try{
             when(aesOutputPort.decryptAES("12345678900", "Error processing identity verification")).thenReturn("12345678900");
@@ -441,6 +440,7 @@ class LoaneeServiceTest {
         verify(loaneeOutputPort, times(1)).save(firstLoanee);
 //        verify(aesOutputPort, times(1)).decryptAES(bvnValue, "Error processing identity verification");
     }
+
 
     @Test
     void skipLoaneeCreditScoreUpdateWhenNotDue() throws MeedlException {
@@ -897,7 +897,7 @@ class LoaneeServiceTest {
     }
 
     @Test
-    void viewAllLoaneeInCohortWithUploadedStatus() throws MeedlException {
+    void viewAllLoaneeInCohortWithUploadedStatusAdded() throws MeedlException {
         cohortLoanee.setUploadedStatus(UploadedStatus.ADDED);
         Page<Loanee> expectedPage = new PageImpl<>(List.of(cohortLoanee));
         when(loaneeOutputPort.findAllLoaneeByCohortId(cohortLoanee, pageSize, pageNumber))
@@ -908,6 +908,21 @@ class LoaneeServiceTest {
         assertEquals(1, result.getContent().size());
         assertEquals(cohortLoanee, result.getContent().get(0));
         assertEquals(cohortLoanee.getUploadedStatus(), UploadedStatus.ADDED);
+        verify(loaneeOutputPort, times(1)).findAllLoaneeByCohortId(cohortLoanee, pageSize, pageNumber);
+    }
+
+    @Test
+    void viewAllLoaneeInCohortWithUploadedInvited() throws MeedlException {
+        cohortLoanee.setUploadedStatus(UploadedStatus.INVITED);
+        Page<Loanee> expectedPage = new PageImpl<>(List.of(cohortLoanee));
+        when(loaneeOutputPort.findAllLoaneeByCohortId(cohortLoanee, pageSize, pageNumber))
+                .thenReturn(expectedPage);
+
+        Page<Loanee> result = loaneeService.viewAllLoaneeInCohort(cohortLoanee, pageSize, pageNumber);
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+        assertEquals(cohortLoanee, result.getContent().get(0));
+        assertEquals(cohortLoanee.getUploadedStatus(), UploadedStatus.INVITED);
         verify(loaneeOutputPort, times(1)).findAllLoaneeByCohortId(cohortLoanee, pageSize, pageNumber);
     }
 
