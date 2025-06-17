@@ -7,7 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
-import africa.nkwadoma.nkwadoma.domain.enums.loanee.UserDatafileLoadedStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.UploadedStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
@@ -38,7 +38,7 @@ public class Loanee {
     private List<LoaneeLoanBreakdown> loanBreakdowns;
     private LoaneeStatus loaneeStatus;
     private OnboardingMode onboardingMode;
-    private UserDatafileLoadedStatus userDataFileLoadedStatus;
+    private UploadedStatus uploadedStatus;
     private LocalDateTime referralDateTime;
     private String referredBy;
     private String reasonForDropout;

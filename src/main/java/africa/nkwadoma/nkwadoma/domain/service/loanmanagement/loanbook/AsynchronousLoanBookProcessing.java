@@ -18,7 +18,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.ModeOfPayment;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
-import africa.nkwadoma.nkwadoma.domain.enums.loanee.UserDatafileLoadedStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.UploadedStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -305,7 +305,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                     .loaneeLoanDetail(loaneeLoanDetail)
                     .loaneeStatus(LoaneeStatus.ADDED)
                     .onboardingMode(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)
-                    .userDataFileLoadedStatus(UserDatafileLoadedStatus.ADDED)
+                    .uploadedStatus(UploadedStatus.ADDED)
                     .cohortId(cohort.getId())
                     .cohortName(row.get("loanproduct"))
                     .build();
