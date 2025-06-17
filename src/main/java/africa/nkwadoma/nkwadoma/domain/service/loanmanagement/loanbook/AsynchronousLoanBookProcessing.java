@@ -91,7 +91,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         loaneeUseCase.increaseNumberOfLoaneesInProgram(savedCohort, loanees.size());
     }
 
-//    @Override
+    @Override
     public void uploadRepaymentRecord(LoanBook repaymentRecordBook) throws MeedlException {
         MeedlValidator.validateObjectInstance(repaymentRecordBook, "Repayment record book cannot be empty.");
         repaymentRecordBook.validateRepaymentRecord();
@@ -213,12 +213,11 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         for (Map<String, String> row  : data) {
 
             RepaymentHistory repaymentHistory = RepaymentHistory.builder()
-                    .firstName(row.get("firstname").trim())
-                    .lastName(row.get("lastname").trim())
                     .loanee(Loanee.builder().userIdentity(UserIdentity.builder().email(validateUseEmail(row.get("email").trim())).build()).build())
                     .amountPaid(validateMoney(row.get("amountpaid").trim(), "Amount repaid should be properly indicated"))
                     .paymentDateTime(parseFlexibleDateTime(row.get("paymentdate").trim()))
-                    .modeOfPayment(validateModeOfPayment(row.get("modeofpayment").trim()))
+//                    .modeOfPayment(validateModeOfPayment(row.get("modeofpayment").trim()))
+                    .modeOfPayment(ModeOfPayment.TRANSFER)
                     .build();
             log.info("Repayment history model created from file {}", repaymentHistory);
             repaymentHistories.add(repaymentHistory);
@@ -399,6 +398,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                     }
                     int index = headerIndexMap.get(header);
                     if (index >= values.length) {
+                        log.error("Missing value for column: {}", header);
                         throw new MeedlException("Missing value for column: " + header);
                     }
                     rowMap.put(header, values[index].trim());
@@ -532,9 +532,9 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                 "bvn", "nin", "loanproduct");
     }
     private List<String> getRepaymentRecordUploadRequiredHeaders() {
-        return List.of("firstname", "lastname",
+        return List.of(
                 "email", "paymentdate",
-                "amountpaid", "modeofpayment");
+                "amountpaid");
     }
 
 }

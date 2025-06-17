@@ -8,4 +8,5 @@ public interface AsynchronousLoanBookProcessingUseCase {
 //    @Async
 void upLoadUserData(LoanBook loanBook) throws MeedlException;
 
+    void uploadRepaymentRecord(LoanBook repaymentRecordBook) throws MeedlException;
 }

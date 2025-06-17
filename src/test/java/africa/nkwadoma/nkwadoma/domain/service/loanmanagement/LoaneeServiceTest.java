@@ -417,7 +417,6 @@ class LoaneeServiceTest {
         firstLoanee.getUserIdentity().setBvn(bvnValue);
         firstLoanee.getUserIdentity().setRole(IdentityRole.LOANEE);
 
-
         Loanee loanee = null;
         try{
             when(aesOutputPort.decryptAES("12345678900", "Error processing identity verification")).thenReturn("12345678900");
