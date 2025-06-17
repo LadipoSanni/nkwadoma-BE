@@ -232,6 +232,7 @@ CREATE TABLE IF NOT EXISTS investment_vehicle_financier_entity_designation (
     CONSTRAINT fk_investment_vehicle_financier_entity FOREIGN KEY (investment_vehicle_financier_entity_id) REFERENCES investment_vehicle_financier_entity(id)
     );
 
+
 -- Add missing columns to loanee_loan_detail_entity
 ALTER TABLE loanee_loan_detail_entity
     ADD COLUMN amount_received numeric(38,2),
