@@ -1,8 +1,8 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.meedlNotification;
 
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.meedlNotification.MeedlNotificationEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.meedlNotification.NotificationProjection;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.meedlnotification.MeedlNotificationEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.meedlnotification.NotificationProjection;
 import org.mapstruct.Mapper;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 

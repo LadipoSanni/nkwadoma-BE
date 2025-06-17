@@ -1,9 +1,9 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.notification.email;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.email.FinancierEmailUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.email.LoaneeEmailUsecase;
-import africa.nkwadoma.nkwadoma.application.ports.input.email.OrganizationEmployeeEmailUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.notification.FinancierEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.notification.LoaneeEmailUsecase;
+import africa.nkwadoma.nkwadoma.application.ports.input.notification.OrganizationEmployeeEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.notification.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlnotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;

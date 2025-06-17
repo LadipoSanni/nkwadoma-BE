@@ -1,8 +1,8 @@
 package africa.nkwadoma.nkwadoma.domain.model.investmentvehicle;
 
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.CouponDistributionStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleMode;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.OperationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.CouponDistributionStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicleMode;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.OperationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.Builder;
