@@ -117,7 +117,7 @@ public class ProgramController {
         );
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/edit")
     @Operation(summary = "Update an existing program")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
     public ResponseEntity<ApiResponse<?>> updateProgram(@RequestBody @Valid ProgramUpdateRequest programUpdateRequest,
