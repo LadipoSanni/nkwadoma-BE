@@ -78,6 +78,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
 
         Cohort savedCohort = findCohort(loanBook.getCohort());
         List<Loanee> convertedLoanees = convertToLoanees(data, savedCohort, loanBook.getActorId());
+//        validateStartDates(convertedLoanees, savedCohort);
         loanBook.setLoanees(convertedLoanees);
         referCohort(loanBook);
         updateLoaneeCount(savedCohort,convertedLoanees);
@@ -116,18 +117,20 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                 .forEach(loanee -> {
                     try {
                         log.info("Loanee with cohort name but is loan product name {}", loanee.getCohortName());
+                        log.info("Loan start date before processing start loan before accepting loan referral {}", loanee.getReferralDateTime());
                         LoanReferral loanReferral = acceptLoanReferral(loanee);
                         LoanRequest loanRequest = acceptLoanRequest(loanee, loanReferral, loanBook);
                         acceptLoanOffer(loanRequest);
-                        startLoan(loanRequest);
+                        startLoan(loanRequest,loanee.getUpdatedAt() );
                     } catch (MeedlException e) {
                         log.error("Error accepting loan referral.",e);
                     }
                 });
     }
 
-    private void startLoan(LoanRequest loanRequest) throws MeedlException {
-        Loan loan = Loan.builder().loaneeId(loanRequest.getLoanee().getId()).loanOfferId(loanRequest.getId()).build();
+    private void startLoan(LoanRequest loanRequest, LocalDateTime loanStartDate) throws MeedlException {
+        log.info("The loan start date is {} for user with email {}", loanStartDate, loanRequest.getLoanee().getUserIdentity().getEmail());
+        Loan loan = Loan.builder().loaneeId(loanRequest.getLoanee().getId()).startDate(loanStartDate).loanOfferId(loanRequest.getId()).build();
         createLoanProductUseCase.startLoan(loan);
         log.info("Loan started for loanee {}", loanRequest.getLoanee().getUserIdentity().getEmail());
     }
@@ -306,6 +309,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
             UserIdentity userIdentity = UserIdentity.builder()
                     .firstName(row.get("firstname"))
                     .lastName(row.get("lastname"))
+                    .middleName(row.get("middlename"))
                     .email(row.get("email"))
                     .phoneNumber(row.get("phonenumber"))
                     .dateOfBirth(row.get("dob"))
@@ -330,6 +334,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                     .uploadedStatus(UploadedStatus.ADDED)
                     .cohortId(cohort.getId())
                     .cohortName(row.get("loanproduct"))
+                    .updatedAt(parseFlexibleDateTime(row.get("loanstartdate")))
                     .build();
 
             loanees.add(loanee);
@@ -375,20 +380,20 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         log.info("Done saving loanee data from file to db. loanees size {}", savedLoanees.size());
         return savedLoanees;
     }
-    private List<Map<String, String>> readFile(LoanBook loanBoook, List<String> requiredHeaders) throws MeedlException {
+    private List<Map<String, String>> readFile(LoanBook loanBook, List<String> requiredHeaders) throws MeedlException {
         List<Map<String, String>> data;
-        if (loanBoook.getFile().getName().endsWith(".csv")) {
+        if (loanBook.getFile().getName().endsWith(".csv")) {
             log.info("the file type is .csv");
             try {
-                data = validateAndReadCSV(loanBoook, requiredHeaders);
+                data = validateAndReadCSV(loanBook, requiredHeaders);
             }catch (IOException e){
                 log.error("Error occurred reading csv",e);
                 throw new MeedlException(e.getMessage());
             }
-        } else if (loanBoook.getFile().getName().endsWith(".xlsx")) {
+        } else if (loanBook.getFile().getName().endsWith(".xlsx")) {
             try{
                 log.info("the file is a .xlsx file");
-                data = validateAndReadExcel(loanBoook.getFile());
+                data = validateAndReadExcel(loanBook.getFile());
             }catch (IOException e){
                 log.error("Error occurred reading excel",e);
                 throw new MeedlException(e.getMessage());
@@ -406,7 +411,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         try (BufferedReader br = new BufferedReader(new FileReader(loanBook.getFile()))) {
             String headerLine = br.readLine();
 
-            Map<String, Integer> headerIndexMap = getAndVAlidateFileHeaderMap(requiredHeaders, headerLine);
+            Map<String, Integer> headerIndexMap = getAndValidateFileHeaderMap(requiredHeaders, headerLine);
 
             String line;
             while ((line = br.readLine()) != null) {
@@ -443,7 +448,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         return records;
     }
 
-    private static Map<String, Integer> getAndVAlidateFileHeaderMap(List<String> requiredHeaders, String headerLine) throws MeedlException {
+    private static Map<String, Integer> getAndValidateFileHeaderMap(List<String> requiredHeaders, String headerLine) throws MeedlException {
         if (headerLine == null) {
             log.info("CSV file is empty or missing headers.");
             throw new MeedlException("CSV file is empty or missing headers.");
@@ -478,7 +483,8 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     private static void validateFileHeader(List<String> requiredHeaders, Map<String, Integer> headerIndexMap) throws MeedlException {
         log.info("Validation file headers with the required headers which are : {}", requiredHeaders);
         for (String required : requiredHeaders) {
-            if (required.equals("bvn") || required.equals("nin") || required.equals("modeofpayment")){
+            if (required.equals("bvn") || required.equals("nin")
+                    || required.equals("modeofpayment") || required.equals("middlename")){
                 continue;
             }
             if (!headerIndexMap.containsKey(required)) {
@@ -558,9 +564,10 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         };
     }
     private List<String> getUserDataUploadHeaders() {
-        return List.of("firstname", "lastname",
+        return List.of("firstname", "lastname", "middlename",
                 "email", "phonenumber",
                 "dob", "initialdeposit",
+                "loanstartdate",
                 "amountrequested", "amountreceived",
                 "bvn", "nin", "loanproduct");
     }
