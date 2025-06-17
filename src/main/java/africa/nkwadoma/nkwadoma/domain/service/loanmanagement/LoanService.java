@@ -75,7 +75,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }
         log.info("Searching for investment vehicle with id {} ", loanProduct.getInvestmentVehicleId());
         InvestmentVehicle investmentVehicle = checkProductSizeNotMoreThanAvailableInvestmentAmount(loanProduct);
-        investmentVehicle.setTotalAvailableAmount(investmentVehicle.getTotalAvailableAmount().subtract(loanProduct.getLoanProductSize()));
+//        investmentVehicle.setTotalAvailableAmount(investmentVehicle.getTotalAvailableAmount().subtract(loanProduct.getLoanProductSize()));
         //Coming back to add restriction for available amount
         loanProduct.addInvestmentVehicleValues(investmentVehicle);
         loanProduct.setTotalAmountAvailable(loanProduct.getLoanProductSize());
