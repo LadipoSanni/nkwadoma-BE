@@ -131,7 +131,7 @@ public class InvestmentVehicleController {
                 investmentVehicles.stream().map(investmentVehicleRestMapper::toInvestmentVehicleResponse).toList();
 
         PaginatedResponse<InvestmentVehicleResponse> paginatedResponse = new PaginatedResponse<>(
-                investmentVehicleResponse, investmentVehicles.hasNext(), investmentVehicles.getTotalPages(), pageNumber, pageSize);
+                investmentVehicleResponse, investmentVehicles.hasNext(), investmentVehicles.getTotalPages(),investmentVehicles.getTotalElements(), pageNumber, pageSize);
         ApiResponse<PaginatedResponse<InvestmentVehicleResponse>> apiResponse = ApiResponse.<PaginatedResponse<InvestmentVehicleResponse>>builder()
                 .data(paginatedResponse)
                 .message(String.format("Investment vehicle %s", ControllerConstant.RETURNED_SUCCESSFULLY.getMessage()))
@@ -157,7 +157,7 @@ public class InvestmentVehicleController {
         List<InvestmentVehicleResponse> investmentVehicleResponses =
                 investmentVehicles.stream().map(investmentVehicleRestMapper::toInvestmentVehicleResponse).toList();
         PaginatedResponse<InvestmentVehicleResponse> paginatedResponse = new PaginatedResponse<>(
-                investmentVehicleResponses, investmentVehicles.hasNext(), investmentVehicles.getTotalPages(), pageNumber, pageSize);
+                investmentVehicleResponses, investmentVehicles.hasNext(), investmentVehicles.getTotalPages(),investmentVehicles.getTotalElements(), pageNumber, pageSize);
         ApiResponse<PaginatedResponse<InvestmentVehicleResponse>> apiResponse = ApiResponse.<PaginatedResponse<InvestmentVehicleResponse>>builder()
                 .data(paginatedResponse)
                 .message(SEARCH_INVESTMENT_VEHICLE)
@@ -227,7 +227,7 @@ public class InvestmentVehicleController {
         List<InvestmentVehicleResponse> investmentVehicleResponses =
                 investmentVehicles.stream().map(investmentVehicleRestMapper::toInvestmentVehicleResponse).toList();
         PaginatedResponse<InvestmentVehicleResponse> paginatedResponse = new PaginatedResponse<>(
-                investmentVehicleResponses, investmentVehicles.hasNext(), investmentVehicles.getTotalPages(), pageNumber, pageSize);
+                investmentVehicleResponses, investmentVehicles.hasNext(), investmentVehicles.getTotalPages(),investmentVehicles.getTotalElements(), pageNumber, pageSize);
         ApiResponse<PaginatedResponse<InvestmentVehicleResponse>> apiResponse = ApiResponse.<PaginatedResponse<InvestmentVehicleResponse>>builder()
                 .data(paginatedResponse)
                 .message(VIEW_ALL_INVESTMENT_VEHICLE)
@@ -254,7 +254,7 @@ public class InvestmentVehicleController {
         List<InvestmentVehicleResponse> investmentVehicleResponses =
                 investmentVehicles.stream().map(investmentVehicleRestMapper::toInvestmentVehicleResponse).toList();
         PaginatedResponse<InvestmentVehicleResponse> paginatedResponse = new PaginatedResponse<>(
-                investmentVehicleResponses, investmentVehicles.hasNext(), investmentVehicles.getTotalPages(), pageNumber, pageSize);
+                investmentVehicleResponses, investmentVehicles.hasNext(), investmentVehicles.getTotalPages(),investmentVehicles.getTotalElements(), pageNumber, pageSize);
         ApiResponse<PaginatedResponse<InvestmentVehicleResponse>> apiResponse = ApiResponse.<PaginatedResponse<InvestmentVehicleResponse>>builder()
                 .data(paginatedResponse)
                 .message(SEARCH_INVESTMENT_VEHICLE)

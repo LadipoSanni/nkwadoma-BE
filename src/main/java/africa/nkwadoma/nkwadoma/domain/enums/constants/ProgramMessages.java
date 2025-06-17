@@ -11,7 +11,8 @@ public enum ProgramMessages {
     PROGRAM_ALREADY_EXISTS("A program with this name already exists"),
     WRONG_INDUSTRY("Organization's industry must be education"),
     COHORT_EXISTS("Program with cohort cannot be deleted"),
-    INVALID_SERVICE_OFFERING("Service Offering must be TRAINING");
+    INVALID_SERVICE_OFFERING("Service Offering must be TRAINING"),
+    PROGRAM_DURATION_CANNOT_BE_NEGATIVE("Program duration cannot be negative");
     private final String message;
 
     ProgramMessages(String message) {

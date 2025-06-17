@@ -185,7 +185,7 @@ public class FinancierController {
         log.info("financiers mapped for view all financiers on the platform: {}", financierResponses);
         PaginatedResponse<FinancierResponse> response = new PaginatedResponse<>(
                 financierResponses, financiers.hasNext(),
-                financiers.getTotalPages(), pageNumber, pageSize
+                financiers.getTotalPages(),financiers.getTotalElements(), pageNumber, pageSize
         );
         return new ResponseEntity<>(ApiResponse.builder().
                 statusCode(HttpStatus.OK.toString()).
@@ -210,7 +210,7 @@ public class FinancierController {
         log.info("Found financiers for search financier: {}", financiers);
         PaginatedResponse<FinancierResponse> response = new PaginatedResponse<>(
                 financierResponses, financiers.hasNext(),
-                financiers.getTotalPages(), pageNumber, pageSize
+                financiers.getTotalPages(),financiers.getTotalElements(), pageNumber, pageSize
         );
 
         return new ResponseEntity<>(ApiResponse.builder().
@@ -253,7 +253,7 @@ public class FinancierController {
         log.info("View all financier in investment vehicle. Financiers mapped: {} in ", financierResponses);
         PaginatedResponse<FinancierResponse> response = new PaginatedResponse<>(
                 financierResponses, financiers.hasNext(),
-                financiers.getTotalPages(), pageNumber, pageSize
+                financiers.getTotalPages(),financiers.getTotalElements(), pageNumber, pageSize
         );
         return new ResponseEntity<>(ApiResponse.builder().
                 statusCode(HttpStatus.OK.toString()).
@@ -275,7 +275,7 @@ public class FinancierController {
         log.info("financiers investment mapped for view all financiers investment on the platform: {}", financierResponses);
         PaginatedResponse<FinancierInvestmentResponse> response = new PaginatedResponse<>(
                 financierResponses, financierInvestments.hasNext(),
-                financierInvestments.getTotalPages(), pageNumber, pageSize
+                financierInvestments.getTotalPages(),financierInvestments.getTotalElements(), pageNumber, pageSize
         );
         return new ResponseEntity<>(ApiResponse.builder().
                 statusCode(HttpStatus.OK.toString()).
@@ -300,7 +300,7 @@ public class FinancierController {
         log.info("financiers investment mapped for search financiers investment on the platform: {}", financierResponses);
         PaginatedResponse<FinancierInvestmentResponse> response = new PaginatedResponse<>(
                 financierResponses, financierInvestments.hasNext(),
-                financierInvestments.getTotalPages(), pageNumber, pageSize
+                financierInvestments.getTotalPages(),financierInvestments.getTotalElements(), pageNumber, pageSize
         );
         return new ResponseEntity<>(ApiResponse.builder().
                 statusCode(HttpStatus.OK.toString()).

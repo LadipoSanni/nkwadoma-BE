@@ -12,6 +12,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.meedln
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.constants.ControllerConstant;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @RestController
 @RequestMapping(BASE_URL)
 @RequiredArgsConstructor
+@Slf4j
 public class MeedlNotificationController {
 
 
@@ -63,7 +65,7 @@ public class MeedlNotificationController {
                         .collect(Collectors.toList());
         PaginatedResponse<MeedlNotificationReponse> response = new PaginatedResponse<>(
                 meedlNotificationReponse, meedlNotifications.hasNext(),
-                meedlNotifications.getTotalPages(),pageNumber,pageSize
+                meedlNotifications.getTotalPages(),meedlNotifications.getTotalElements(),pageNumber,pageSize
         );
         ApiResponse<PaginatedResponse<MeedlNotificationReponse>> apiResponse =
                 ApiResponse.<PaginatedResponse<MeedlNotificationReponse>>builder()
@@ -75,10 +77,10 @@ public class MeedlNotificationController {
     }
 
     @GetMapping("search-notification")
-    private ResponseEntity<ApiResponse<?>> viewAllNotification(@AuthenticationPrincipal Jwt meedlUser,
-                                                               @RequestParam(name = "title") String title,
-                                                               @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
-                                                               @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
+    private ResponseEntity<ApiResponse<?>> searchNotification(@AuthenticationPrincipal Jwt meedlUser,
+                                                              @RequestParam(name = "title") String title,
+                                                              @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                              @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
         Page<MeedlNotification> meedlNotifications =
                 meedlNotificationUsecase.searchNotification(meedlUser.getClaimAsString("sub"),title,pageSize,pageNumber);
         List<MeedlNotificationReponse> meedlNotificationReponse =
@@ -86,7 +88,7 @@ public class MeedlNotificationController {
                         .collect(Collectors.toList());
         PaginatedResponse<MeedlNotificationReponse> response = new PaginatedResponse<>(
                 meedlNotificationReponse, meedlNotifications.hasNext(),
-                meedlNotifications.getTotalPages(),pageNumber,pageSize
+                meedlNotifications.getTotalPages(),meedlNotifications.getTotalElements(),pageNumber,pageSize
         );
         ApiResponse<PaginatedResponse<MeedlNotificationReponse>> apiResponse =
                 ApiResponse.<PaginatedResponse<MeedlNotificationReponse>>builder()

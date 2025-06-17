@@ -60,7 +60,8 @@ public class RepaymentHistoryController {
         List<RepaymentHistoryResponse> repaymentHistoryResponse = repaymentHistories.stream()
                 .map(repaymentHistoryRestMapper::toRepaymentResponse).toList();
         PaginatedResponse<RepaymentHistoryResponse> paginatedResponse = new PaginatedResponse<>(
-                repaymentHistoryResponse,repaymentHistories.hasNext(),repaymentHistories.getTotalPages(),pageNumber,pageSize
+                repaymentHistoryResponse,repaymentHistories.hasNext(),repaymentHistories.getTotalPages(),
+                repaymentHistories.getTotalElements() ,pageNumber,pageSize
         );
         ApiResponse<PaginatedResponse<RepaymentHistoryResponse>> apiResponse = ApiResponse.<PaginatedResponse<RepaymentHistoryResponse>>builder()
                 .data(paginatedResponse)
@@ -87,7 +88,8 @@ public class RepaymentHistoryController {
         List<RepaymentHistoryResponse> repaymentHistoryResponse = repaymentHistories.stream()
                 .map(repaymentHistoryRestMapper::toRepaymentResponse).toList();
         PaginatedResponse<RepaymentHistoryResponse> paginatedResponse = new PaginatedResponse<>(
-                repaymentHistoryResponse,repaymentHistories.hasNext(),repaymentHistories.getTotalPages(),pageNumber,pageSize
+                repaymentHistoryResponse,repaymentHistories.hasNext(),repaymentHistories.getTotalPages(),
+                repaymentHistories.getTotalElements() ,pageNumber,pageSize
         );
         ApiResponse<PaginatedResponse<RepaymentHistoryResponse>> apiResponse = ApiResponse.<PaginatedResponse<RepaymentHistoryResponse>>builder()
                 .data(paginatedResponse)

@@ -50,7 +50,7 @@ public class LoanRequestController {
         log.info("Loan request responses: {}", loanRequestResponses);
         PaginatedResponse<LoanRequestResponse> paginatedResponse = new PaginatedResponse<>(
                 loanRequestResponses, loanRequests.hasNext(),
-                loanRequests.getTotalPages(), pageNumber, pageSize
+                loanRequests.getTotalPages(),loanRequests.getTotalElements() , pageNumber, pageSize
         );
         ApiResponse<PaginatedResponse<LoanRequestResponse>> apiResponse = ApiResponse.
                 <PaginatedResponse<LoanRequestResponse>>builder()
@@ -85,7 +85,7 @@ public class LoanRequestController {
         log.info("Loan request response: {}", loanRequestResponses);
         PaginatedResponse<LoanRequestResponse> paginatedResponse = new PaginatedResponse<>(
                 loanRequestResponses, loanRequests.hasNext(),
-                loanRequests.getTotalPages(), pageNumber, pageSize
+                loanRequests.getTotalPages(),loanRequests.getTotalElements() , pageNumber, pageSize
         );
         ApiResponse<PaginatedResponse<LoanRequestResponse>> apiResponse = ApiResponse.
                 <PaginatedResponse<LoanRequestResponse>>builder()
