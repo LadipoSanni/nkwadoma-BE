@@ -355,6 +355,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     private List<Map<String, String>> readFile(LoanBook loanBoook, List<String> requiredHeaders) throws MeedlException {
         List<Map<String, String>> data;
         if (loanBoook.getFile().getName().endsWith(".csv")) {
+            log.info("the file type is .csv");
             try {
                 data = validateAndReadCSV(loanBoook, requiredHeaders);
             }catch (IOException e){
@@ -363,6 +364,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
             }
         } else if (loanBoook.getFile().getName().endsWith(".xlsx")) {
             try{
+                log.info("the file is a .xlsx file");
                 data = validateAndReadExcel(loanBoook.getFile());
             }catch (IOException e){
                 log.error("Error occurred reading excel",e);
@@ -388,6 +390,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                 if (line.trim().isEmpty()) continue;
 
                 String[] values = line.split(",");
+                log.info("The row line to get has {}", Arrays.toString(values));
                 Map<String, String> rowMap = new HashMap<>();
 
                 for (String header : requiredHeaders) {
@@ -403,8 +406,10 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                     }
                     rowMap.put(header, values[index].trim());
                 }
+                log.info("The row map is :{}", rowMap);
 
                 records.add(rowMap);
+                log.info("The records with row map is : {}", records);
             }
         }
 
@@ -421,7 +426,9 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
             throw new MeedlException("CSV file is empty or missing headers.");
         }
 
+        log.info("Header line first read {}", headerLine);
         String[] headers = headerLine.split(",");
+        log.info("Headers splited into a list {}", Arrays.toString(headers));
         Map<String, Integer> headerIndexMap = new HashMap<>();
 
         extractFileHeaderMap(headers, headerIndexMap);
@@ -432,6 +439,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
 
     private static void extractFileHeaderMap(String[] headers, Map<String, Integer> headerIndexMap) {
         for (int i = 0; i < headers.length; i++) {
+            log.info("Header in loop each value : {}", headers[i]);
             String formattedFileHeader = formatFileHeader(headers[i].trim());
             headerIndexMap.put(formattedFileHeader, i);
         }
@@ -445,6 +453,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     }
 
     private static void validateFileHeader(List<String> requiredHeaders, Map<String, Integer> headerIndexMap) throws MeedlException {
+        log.info("Validation file headers with the required headers which are : {}", requiredHeaders);
         for (String required : requiredHeaders) {
             if (required.equals("bvn") || required.equals("nin") || required.equals("modeofpayment")){
                 continue;
@@ -488,6 +497,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
 
                 Map<String, String> rowMap = new HashMap<>();
                 for (String header : requiredHeaders) {
+                    log.info("Header for excel to get the actual cell : {}", header);
                     int colIndex = headerIndexMap.get(header);
                     Cell cell = row.getCell(colIndex, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
                     if (cell == null) {
