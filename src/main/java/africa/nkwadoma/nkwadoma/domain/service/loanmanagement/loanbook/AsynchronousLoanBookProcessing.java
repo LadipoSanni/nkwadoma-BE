@@ -40,6 +40,7 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 
@@ -234,19 +235,41 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         return email;
     }
 
+
     private LocalDateTime parseFlexibleDateTime(String dateStr) {
-        LocalDateTime localDateTime = null;
-        try {
-            localDateTime = LocalDateTime.parse(dateStr.trim());
-        } catch (DateTimeParseException e) {
+        log.info("Repayment date before formating {}", dateStr);
+        if (dateStr == null || MeedlValidator.isEmptyString(dateStr)) {
+            return null;
+        }
+
+        dateStr = dateStr.trim().replace("/", "-");
+        log.info("Repayment date after formating {}", dateStr);
+        List<DateTimeFormatter> formatters = List.of(
+                DateTimeFormatter.ISO_LOCAL_DATE_TIME,
+                DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"),
+                DateTimeFormatter.ofPattern("dd-MM-yyyy"),
+                DateTimeFormatter.ofPattern("yyyy-M-d"),
+                DateTimeFormatter.ofPattern("d-M-yyyy"),
+                DateTimeFormatter.ofPattern("yyyy-M-d")
+        );
+
+        for (DateTimeFormatter formatter : formatters) {
             try {
-                log.warn("The date passed wasn't a local date with time. ", e);
-                localDateTime = LocalDate.parse(dateStr.trim()).atStartOfDay();
-            } catch (DateTimeParseException ex) {
-                log.error("The date format was invalid ", ex);
+                log.info("The formatter is {} for {}", formatter, dateStr);
+                if (formatter == DateTimeFormatter.ISO_LOCAL_DATE_TIME) {
+                    log.info("In ISO_LOCAL_DATE_TIME {}",dateStr);
+                    return LocalDateTime.parse(dateStr, formatter);
+                } else {
+                    return LocalDate.parse(dateStr, formatter).atStartOfDay();
+                }
+            } catch (DateTimeParseException ignored) {
+                log.error("Error occurred while converting the format.");
+//                return LocalDate.parse(dateStr, formatter).atStartOfDay();
             }
         }
-        return localDateTime;
+
+        log.error("The date format was invalid: {}", dateStr);
+        return null;
     }
 
     private ModeOfPayment validateModeOfPayment(String modeOfRepaymentToConvert) {
