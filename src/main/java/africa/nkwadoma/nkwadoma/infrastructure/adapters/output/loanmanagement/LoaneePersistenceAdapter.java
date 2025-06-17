@@ -33,6 +33,7 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
     public Loanee save(Loanee loanee) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
         loanee.validate();
+        log.info("Loanee value's to save before mapping {}", loanee);
         LoaneeEntity loaneeEntity =
                 loaneeMapper.toLoaneeEntity(loanee);
         log.info("Loanee Entity: " + loaneeEntity);

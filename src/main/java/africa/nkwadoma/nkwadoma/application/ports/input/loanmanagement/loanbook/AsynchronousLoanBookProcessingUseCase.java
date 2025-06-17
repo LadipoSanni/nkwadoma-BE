@@ -6,6 +6,6 @@ import org.springframework.scheduling.annotation.Async;
 
 public interface AsynchronousLoanBookProcessingUseCase {
 //    @Async
-    void upLoadUserData(LoanBook loanBook) throws MeedlException;
+void upLoadUserData(LoanBook loanBook) throws MeedlException;
 
 }

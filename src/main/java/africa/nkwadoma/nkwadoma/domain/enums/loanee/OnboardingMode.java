@@ -1,8 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.enums.loanee;
 
 public enum OnboardingMode {
-    FILE_UPLOADED_FOR_DISBURSED_LOANS_ADDED,
-    FILE_UPLOADED_FOR_DISBURSED_LOANS_PENDING,
     FILE_UPLOADED_FOR_DISBURSED_LOANS,
     FILE_UPLOADED_FOR_LOANS_TO_PROCESS,
     EMAIL_REFERRED

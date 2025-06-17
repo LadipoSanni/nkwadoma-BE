@@ -25,6 +25,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotific
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.UserDatafileLoadedStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
@@ -53,6 +54,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages.DROP_OUT;
@@ -108,15 +110,22 @@ public class LoaneeService implements LoaneeUseCase {
                             log.error("User with email {} is already active on th platform", email);
                             throw new MeedlException("User with email "+email +" is already active on the platform.");
                         }
-                        if (!loanee.getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)) {
-                            log.info("The loanee being invited is not from file upload {}", email);
+                        if (loanee == null){
+                            log.error("Loanee not found with email {}", email);
+                            throw new MeedlException("Loanee not found with email "+email);
                         }
+                        if (!loanee.getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)) {
+                            log.warn("The loanee being invited is not from file upload {}", email);
+                        }
+                        loanee.setUserDataFileLoadedStatus(UserDatafileLoadedStatus.INVITED);
+                        loanee = loaneeOutputPort.save(loanee);
                     } catch (MeedlException e) {
                         log.error("Loanee with email doesn't exist");
                         notifyPmLoaneeDoesNotExist(e.getMessage(), email);
                     }
                     return loanee;
-                }).toList();
+                })
+                .filter(Objects::nonNull).toList();
 
          sendLoaneesEmail(loaneesVerified);
          return loaneesVerified;
