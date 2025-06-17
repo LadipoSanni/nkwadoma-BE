@@ -24,7 +24,7 @@ public interface LoaneeUseCase {
 
     LoanReferral referLoanee(Loanee loanee) throws MeedlException;
 
-    void notifyLoanReferralActors(List<Loanee> loanees) throws MeedlException;
+//    void notifyLoanReferralActors(List<Loanee> loanees) throws MeedlException;
 
     Page<Loanee> searchForLoaneeInCohort(Loanee loanee, int pageSize, int pageNumber) throws MeedlException;
 

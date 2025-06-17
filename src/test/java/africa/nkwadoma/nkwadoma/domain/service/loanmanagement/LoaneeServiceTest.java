@@ -210,7 +210,6 @@ class LoaneeServiceTest {
 
     }
 
-
     @Test
     void addLoaneeToCohort() throws MeedlException {
         OrganizationEmployeeIdentity mockEmployeeIdentity = new OrganizationEmployeeIdentity();
