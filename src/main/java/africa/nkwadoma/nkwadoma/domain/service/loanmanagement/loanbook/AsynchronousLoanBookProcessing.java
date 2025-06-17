@@ -85,6 +85,11 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         completeLoanProcessing(loanBook);
     }
 
+    private void validateAllFileLoanProductExist(List<Loanee> convertedLoanees) throws MeedlException {
+        log.info("Validating the loan product name.");
+        loanBookValidator.validateAllLoanProductExist(convertedLoanees);
+    }
+
     private void validateStartDates(List<Loanee> convertedLoanees, Cohort savedCohort) throws MeedlException {
         for (Loanee loanee : convertedLoanees) {
             validateStartDate(loanee.getUpdatedAt(), savedCohort.getStartDate());
@@ -318,7 +323,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         return amount;
     }
 
-    List<Loanee> convertToLoanees(List<Map<String, String>> data, Cohort cohort, String actorId) {
+    List<Loanee> convertToLoanees(List<Map<String, String>> data, Cohort cohort, String actorId) throws MeedlException {
         List<Loanee> loanees = new ArrayList<>();
 
         for (Map<String, String> row : data) {
@@ -354,6 +359,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
 
             loanees.add(loanee);
         }
+        validateAllFileLoanProductExist(loanees);
 
         return savedData(loanees);
     }
@@ -510,55 +516,56 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
 
 
     private List<Map<String, String>> validateAndReadExcel(File file) throws IOException, MeedlException {
-        List<Map<String, String>> records = new ArrayList<>();
-        List<String> requiredHeaders = List.of("firstName", "lastName", "email", "phoneNumber", "DON", "initialDeposit", "amountRequested", "amountReceived");
+//        List<Map<String, String>> records = new ArrayList<>();
+        throw new MeedlException("Please convert file to csv ");
+//        List<String> requiredHeaders = List.of("firstName", "lastName", "email", "phoneNumber", "DON", "initialDeposit", "amountRequested", "amountReceived");
+//
+//        try (FileInputStream fis = new FileInputStream(file);
+//             Workbook workbook = new XSSFWorkbook(fis)) {
+//
+//            Sheet sheet = workbook.getSheetAt(0);
+//            Iterator<Row> rowIterator = sheet.iterator();
+//
+//            if (!rowIterator.hasNext()) {
+//                throw new MeedlException("Excel file is empty.");
+//            }
+//
+//            // Read header row
+//            Row headerRow = rowIterator.next();
+//            Map<String, Integer> headerIndexMap = new HashMap<>();
+//
+//            for (Cell cell : headerRow) {
+//                String header = cell.getStringCellValue().trim();
+//                headerIndexMap.put(header, cell.getColumnIndex());
+//            }
 
-        try (FileInputStream fis = new FileInputStream(file);
-             Workbook workbook = new XSSFWorkbook(fis)) {
-
-            Sheet sheet = workbook.getSheetAt(0);
-            Iterator<Row> rowIterator = sheet.iterator();
-
-            if (!rowIterator.hasNext()) {
-                throw new MeedlException("Excel file is empty.");
-            }
-
-            // Read header row
-            Row headerRow = rowIterator.next();
-            Map<String, Integer> headerIndexMap = new HashMap<>();
-
-            for (Cell cell : headerRow) {
-                String header = cell.getStringCellValue().trim();
-                headerIndexMap.put(header, cell.getColumnIndex());
-            }
-
-            validateFileHeader(requiredHeaders, headerIndexMap);
+//            validateFileHeader(requiredHeaders, headerIndexMap);
 
             // Read and map data rows
-            while (rowIterator.hasNext()) {
-                Row row = rowIterator.next();
-                if (isRowEmpty(row)) continue;
+//            while (rowIterator.hasNext()) {
+//                Row row = rowIterator.next();
+//                if (isRowEmpty(row)) continue;
+//
+//                Map<String, String> rowMap = new HashMap<>();
+//                for (String header : requiredHeaders) {
+//                    log.info("Header for excel to get the actual cell : {}", header);
+//                    int colIndex = headerIndexMap.get(header);
+//                    Cell cell = row.getCell(colIndex, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+//                    if (cell == null) {
+//                        throw new MeedlException("Missing value for column: " + header);
+//                    }
+//                    rowMap.put(header, getCellValueAsString(cell));
+//                }
+//
+//                records.add(rowMap);
+//            }
+//        }
 
-                Map<String, String> rowMap = new HashMap<>();
-                for (String header : requiredHeaders) {
-                    log.info("Header for excel to get the actual cell : {}", header);
-                    int colIndex = headerIndexMap.get(header);
-                    Cell cell = row.getCell(colIndex, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
-                    if (cell == null) {
-                        throw new MeedlException("Missing value for column: " + header);
-                    }
-                    rowMap.put(header, getCellValueAsString(cell));
-                }
+//        if (records.isEmpty()) {
+//            throw new MeedlException("Excel file has no data rows.");
+//        }
 
-                records.add(rowMap);
-            }
-        }
-
-        if (records.isEmpty()) {
-            throw new MeedlException("Excel file has no data rows.");
-        }
-
-        return records;
+//        return records;
     }
     private boolean isRowEmpty(Row row) {
         for (Cell cell : row) {
