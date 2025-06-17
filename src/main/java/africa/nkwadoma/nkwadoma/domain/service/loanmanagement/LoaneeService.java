@@ -1,8 +1,9 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanmanagement;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.email.LoaneeEmailUsecase;
+import africa.nkwadoma.nkwadoma.application.ports.input.notification.LoaneeEmailUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
-import africa.nkwadoma.nkwadoma.application.ports.output.creditRegistry.CreditRegistryOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.creditregistry.CreditRegistryOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
@@ -10,7 +11,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
@@ -21,9 +22,10 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.UserDatafileLoadedStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
@@ -36,8 +38,8 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.aes.TokenUtils;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
-import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -52,6 +54,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages.DROP_OUT;
@@ -83,6 +86,7 @@ public class LoaneeService implements LoaneeUseCase {
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
     private final LoanOfferOutputPort loanOfferOutputPort;
+    private final AesOutputPort aesOutputPort;
 
 
     @Override
@@ -106,15 +110,22 @@ public class LoaneeService implements LoaneeUseCase {
                             log.error("User with email {} is already active on th platform", email);
                             throw new MeedlException("User with email "+email +" is already active on the platform.");
                         }
-                        if (!loanee.getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)) {
-                            log.info("The loanee being invited is not from file upload {}", email);
+                        if (loanee == null){
+                            log.error("Loanee not found with email {}", email);
+                            throw new MeedlException("Loanee not found with email "+email);
                         }
+                        if (!loanee.getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)) {
+                            log.warn("The loanee being invited is not from file upload {}", email);
+                        }
+                        loanee.setUserDataFileLoadedStatus(UserDatafileLoadedStatus.INVITED);
+                        loanee = loaneeOutputPort.save(loanee);
                     } catch (MeedlException e) {
                         log.error("Loanee with email doesn't exist");
                         notifyPmLoaneeDoesNotExist(e.getMessage(), email);
                     }
                     return loanee;
-                }).toList();
+                })
+                .filter(Objects::nonNull).toList();
 
          sendLoaneesEmail(loaneesVerified);
          return loaneesVerified;
@@ -201,7 +212,7 @@ public class LoaneeService implements LoaneeUseCase {
     private Loanee updateLoaneeCreditScore(Loanee loanee) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateObjectInstance(loanee.getUserIdentity(), UserMessages.USER_IDENTITY_CANNOT_BE_EMPTY.getMessage());
-
+        log.info("Loanee bvn before view loanee is . {}", loanee.getUserIdentity().getBvn());
         if (MeedlValidator.isNotEmptyString(loanee.getUserIdentity().getBvn())) {
             if (ObjectUtils.isEmpty(loanee.getCreditScoreUpdatedAt()) ||
                     creditScoreIsAboveOrEqualOneMonth(loanee)) {
@@ -237,7 +248,7 @@ public class LoaneeService implements LoaneeUseCase {
         MeedlValidator.validateObjectInstance(loanee.getUserIdentity().getBvn(), UserMessages.BVN_CANNOT_BE_EMPTY.getMessage());
         log.info("Updating credit score, for loanee with id {}. Last date updated was {}.", loanee.getId(), loanee.getCreditScoreUpdatedAt());
         log.info("Encrypted Loanee BVN: {}", loanee.getUserIdentity().getBvn());
-        String decryptedBVN = tokenUtils.decryptAES(loanee.getUserIdentity().getBvn(), "Error processing identity verification");
+        String decryptedBVN = aesOutputPort.decryptAES(loanee.getUserIdentity().getBvn(), "Error processing identity verification");
         log.info("Decrypted Loanee BVN: {}", decryptedBVN);
 
         try {

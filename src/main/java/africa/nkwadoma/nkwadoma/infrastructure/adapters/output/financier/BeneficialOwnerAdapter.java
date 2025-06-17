@@ -6,7 +6,6 @@ import africa.nkwadoma.nkwadoma.domain.model.financier.BeneficialOwner;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.financier.BeneficialOwnerMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.financier.BeneficialOwnerEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.CooperationEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.financier.BeneficialOwnerRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

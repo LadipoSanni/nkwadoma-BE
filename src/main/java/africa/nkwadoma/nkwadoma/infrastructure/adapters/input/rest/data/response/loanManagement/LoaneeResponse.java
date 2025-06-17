@@ -1,6 +1,8 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement;
 
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.UserDatafileLoadedStatus;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.UserIdentityResponse;
 import lombok.*;
 
@@ -21,6 +23,8 @@ public class LoaneeResponse {
     private LocalDateTime updatedAt;
     private UserIdentityResponse userIdentity;
     private LoaneeLoanDetailResponse loaneeLoanDetail;
+    private OnboardingMode onboardingMode;
+    private UserDatafileLoadedStatus userDataFileLoadedStatus;
     private LoaneeStatus loaneeStatus;
     private String highestLevelOfEducation;
     private String nameOfPreviousInstitution;

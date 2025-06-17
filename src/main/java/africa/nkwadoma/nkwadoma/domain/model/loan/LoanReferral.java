@@ -3,7 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.model.loan;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import lombok.*;
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanReferralStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.Getter;

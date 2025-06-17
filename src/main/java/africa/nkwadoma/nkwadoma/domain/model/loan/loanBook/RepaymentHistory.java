@@ -3,10 +3,8 @@ package africa.nkwadoma.nkwadoma.domain.model.loan.loanBook;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.ModeOfPayment;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoaneeEntity;
 import lombok.*;
 
 import java.math.BigDecimal;

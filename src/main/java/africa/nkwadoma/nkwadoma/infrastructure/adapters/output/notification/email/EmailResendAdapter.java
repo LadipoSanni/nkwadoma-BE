@@ -1,8 +1,8 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.email;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.email.EmailResendUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.notification.EmailResendUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.ViewLoanReferralsUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanReferralOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanReferralOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;

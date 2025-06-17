@@ -4,14 +4,14 @@ import africa.nkwadoma.nkwadoma.application.ports.input.investmentvehicle.Financ
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.CooperationOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.CooperationOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleFinancierOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.*;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierBeneficialOwner;
 import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierPoliticallyExposedPerson;
@@ -185,7 +185,7 @@ public class FinancierServiceTest {
             throw new RuntimeException(e);
         }
         assertNotNull(response);
-        assertEquals("Financier has been added to investment vehicle", response);
+        assertEquals("Financier has been added to an investment vehicle", response);
         assertEquals(ActivationStatus.INVITED, foundFinancier.getActivationStatus());
         foundFinancier.setActivationStatus(ActivationStatus.ACTIVE);
         Page<Financier> financiers;
@@ -870,7 +870,7 @@ public class FinancierServiceTest {
             throw new RuntimeException(e);
         }
         assertNotNull(response);
-        assertEquals("Financier has been added to investment vehicle", response);
+        assertEquals("Financier has been added to an investment vehicle", response);
         Page<Financier> financiers;
         try {
             financiers = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(investmentVehicle.getId(), null, pageRequest);
@@ -1191,7 +1191,7 @@ public class FinancierServiceTest {
             throw new RuntimeException(e);
         }
         assertNotNull(response);
-        assertEquals("Financier has been added to investment vehicle", response);
+        assertEquals("Financier has been added to an investment vehicle", response);
         Page<Financier> financiers;
         try {
             financiers = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(investmentVehicle.getId(), null ,pageRequest);

@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentvehicle;
 
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.CouponDistributionEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentvehicle.CouponDistributionEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CouponDistributionRepository extends JpaRepository<CouponDistributionEntity,String> {
