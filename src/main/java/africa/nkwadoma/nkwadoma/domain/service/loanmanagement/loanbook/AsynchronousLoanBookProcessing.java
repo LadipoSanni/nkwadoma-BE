@@ -85,6 +85,22 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         completeLoanProcessing(loanBook);
     }
 
+    private void validateStartDates(List<Loanee> convertedLoanees, Cohort savedCohort) throws MeedlException {
+        for (Loanee loanee : convertedLoanees) {
+            validateStartDate(loanee.getUpdatedAt(), savedCohort.getStartDate());
+        }
+
+    }
+
+    private void validateStartDate(LocalDateTime loanStartDate, LocalDate cohortStartDate) throws MeedlException {
+        LocalDate loanStartAsDate = loanStartDate.toLocalDate();
+
+        if (loanStartAsDate.isBefore(cohortStartDate)) {
+            log.info("Loan start date {} cannot be before cohort start date {}.", loanStartAsDate, cohortStartDate);
+            throw new MeedlException("Loan start date " +loanStartAsDate +" cannot be before cohort start date "+cohortStartDate );
+        }
+    }
+
     private void updateLoaneeCount(Cohort savedCohort, List<Loanee> loanees) throws MeedlException {
         savedCohort = findCohort(savedCohort);
         savedCohort.setNumberOfLoanees(savedCohort.getNumberOfLoanees() + loanees.size());
