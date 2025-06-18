@@ -12,8 +12,10 @@ END IF;
 END $$;
 
 DO $$
+DECLARE
+r RECORD;
 BEGIN
-FOR conname IN
+FOR r IN
 SELECT conname
 FROM pg_constraint
 WHERE conrelid = 'vehicle_operation_entity'::regclass
@@ -25,9 +27,10 @@ WHERE conrelid = 'vehicle_operation_entity'::regclass
               'check_operation_status'
           )
     LOOP
-        EXECUTE format('ALTER TABLE vehicle_operation_entity DROP CONSTRAINT %I', conname);
+        EXECUTE format('ALTER TABLE vehicle_operation_entity DROP CONSTRAINT %I', r.conname);
 END LOOP;
 END $$;
+
 
 -- Convert status columns to VARCHAR
 DO $$
