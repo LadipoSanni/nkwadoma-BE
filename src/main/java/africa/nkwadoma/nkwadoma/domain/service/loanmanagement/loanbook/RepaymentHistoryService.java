@@ -51,11 +51,13 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
         , pageSize, pageNumber);
         if(repaymentHistory.getMonth() != null) {
             if (repaymentHistory.getMonth() <= 0 || repaymentHistory.getMonth() > 12) {
+                log.warn("Repayment history is not within 12 month stipulation.");
                  repaymentHistory.setMonth(null);
             }
         }
         UserIdentity userIdentity = userIdentityOutputPort.findById(repaymentHistory.getActorId());
         if (userIdentity.getRole().equals(IdentityRole.PORTFOLIO_MANAGER)){
+            log.info("Portfolio manager is viewing repayment history");
             Page<RepaymentHistory>  repaymentHistories = repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(repaymentHistory,
                      pageSize, pageNumber);
              log.info("repayment histories gotten from adapter == {}",repaymentHistories.getContent().stream().toList());

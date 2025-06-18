@@ -635,8 +635,6 @@ public class TestData {
                         .userIdentity(UserIdentity.builder().email(TestUtils.generateEmail(7)).build())
                         .build())
                 .paymentDateTime(LocalDateTime.now())
-                .firstName("firstName")
-                .lastName("lastName")
                 .build();
     }
 }

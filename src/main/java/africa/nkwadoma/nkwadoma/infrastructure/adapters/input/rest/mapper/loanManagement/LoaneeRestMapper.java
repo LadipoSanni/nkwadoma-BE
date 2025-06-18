@@ -68,9 +68,9 @@ public interface LoaneeRestMapper {
     @Mapping(target = "instituteName", source = "referredBy")
     LoanBeneficiaryResponse toLoanBeneficiaryResponse(Loanee loanee);
 
-    @Mapping(target = "userIdentity.email", source = "email")
+    @Mapping(target = "id", source = "id")
     @Mapping(target = "userIdentity.createdBy",  expression = "java(createdBy)")
-    Loanee map(String email, @Context String createdBy);
+    Loanee map(String id, @Context String createdBy);
 
-    List<Loanee> map(List<String> emails, @Context String createdBy);
+    List<Loanee> map(List<String> ids, @Context String createdBy);
 }

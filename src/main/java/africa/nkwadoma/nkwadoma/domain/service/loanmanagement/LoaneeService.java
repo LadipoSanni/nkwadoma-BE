@@ -93,35 +93,35 @@ public class LoaneeService implements LoaneeUseCase {
     public List<Loanee> inviteLoanees(List<Loanee> loanees){
         List<Loanee> loaneesVerified = loanees.stream()
                 .map(loanee -> {
-                    String email = null;
+                    String id = null;
                     try {
-                        email = loanee.getUserIdentity().getEmail();
-                        loanee = loaneeOutputPort.findByLoaneeEmail(email);
+                        id = loanee.getId();
+                        loanee = loaneeOutputPort.findLoaneeById(id);
                         if (loanee == null){
-                            log.error("Loanee with email {} was not found. There email cannot be sent ", email);
+                            log.error("Loanee with id {} was not found. There email cannot be sent ", loanee.getId());
                         }
                         if (loanee != null && !loanee.getUserIdentity().getRole().equals(IdentityRole.LOANEE)){
                             log.warn("The user is not a loanee but {}",loanee.getUserIdentity().getRole());
-                            throw new MeedlException("User with email "+email+" is not a loanee");
+                            throw new MeedlException("User with id "+id+" is not a loanee");
                         }
-                        UserIdentity userIdentity = identityManagerOutputPort.getUserByEmail(email)
+                        UserIdentity userIdentity = identityManagerOutputPort.getUserByEmail(loanee.getUserIdentity().getEmail())
                                 .orElseThrow(()-> new MeedlException("Loanee does not exist on the platform"));
                         if (userIdentity.isEnabled()){
-                            log.error("User with email {} is already active on th platform", email);
-                            throw new MeedlException("User with email "+email +" is already active on the platform.");
+                            log.error("User with email {} is already active on th platform", userIdentity.getEmail());
+                            throw new MeedlException("User with email "+userIdentity.getEmail() +" is already active on the platform.");
                         }
                         if (loanee == null){
-                            log.error("Loanee not found with email {}", email);
-                            throw new MeedlException("Loanee not found with email "+email);
+                            log.error("Loanee not found with email {}", userIdentity.getEmail());
+                            throw new MeedlException("Loanee not found with email "+userIdentity.getEmail());
                         }
                         if (!loanee.getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)) {
-                            log.warn("The loanee being invited is not from file upload {}", email);
+                            log.warn("The loanee being invited is not from file upload {}", userIdentity.getEmail());
                         }
                         loanee.setUploadedStatus(UploadedStatus.INVITED);
                         loanee = loaneeOutputPort.save(loanee);
                     } catch (MeedlException e) {
-                        log.error("Loanee with email doesn't exist");
-                        notifyPmLoaneeDoesNotExist(e.getMessage(), email);
+                        log.error("Loanee with id doesn't exist");
+                        notifyPmLoaneeDoesNotExist(e.getMessage(), id);
                     }
                     return loanee;
                 })
@@ -344,18 +344,18 @@ public class LoaneeService implements LoaneeUseCase {
         }
         log.info("Loanee has not been referred to this cohort before.");
     }
-    @Override
-    @Async
-    public void notifyLoanReferralActors(List<Loanee> loanees){
-        loanees.forEach(loanee -> {
-            try {
-                refer(loanee);
-                notifyAllPortfolioManager();
-            } catch (MeedlException e) {
-                log.warn("Error sending actor email on loan referral {}", e.getMessage());
-            }
-        });
-    }
+//    @Override
+//    @Async
+//    public void notifyLoanReferralActors(List<Loanee> loanees){
+//        loanees.forEach(loanee -> {
+//            try {
+//                refer(loanee);
+//                notifyAllPortfolioManager();
+//            } catch (MeedlException e) {
+//                log.warn("Error sending actor email on loan referral {}", e.getMessage());
+//            }
+//        });
+//    }
     private void notifyAllPortfolioManager() throws MeedlException {
         for (UserIdentity userIdentity : identityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER)) {
             notifyPortfolioManager(userIdentity);

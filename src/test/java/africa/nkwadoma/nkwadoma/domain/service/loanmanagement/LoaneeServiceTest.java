@@ -210,7 +210,6 @@ class LoaneeServiceTest {
 
     }
 
-
     @Test
     void addLoaneeToCohort() throws MeedlException {
         OrganizationEmployeeIdentity mockEmployeeIdentity = new OrganizationEmployeeIdentity();
@@ -440,7 +439,6 @@ class LoaneeServiceTest {
         verify(loaneeOutputPort, times(1)).save(firstLoanee);
 //        verify(aesOutputPort, times(1)).decryptAES(bvnValue, "Error processing identity verification");
     }
-
 
     @Test
     void skipLoaneeCreditScoreUpdateWhenNotDue() throws MeedlException {

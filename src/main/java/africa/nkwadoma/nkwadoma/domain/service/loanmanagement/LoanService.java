@@ -143,7 +143,11 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (foundLoan.isPresent()) {
             throw new LoanException(LoanMessages.LOAN_ALREADY_EXISTS_FOR_THIS_LOANEE.getMessage());
         }
-        loan = loan.buildLoan(foundLoanee, getLoanAccountId(foundLoanee),loan.getLoanOfferId());
+        if (loan.getStartDate() != null){
+            loan = loan.buildLoan(foundLoanee, getLoanAccountId(foundLoanee),loan.getLoanOfferId(), loan.getStartDate());
+        }else {
+            loan = loan.buildLoan(foundLoanee, getLoanAccountId(foundLoanee), loan.getLoanOfferId());
+        }
         Loan savedLoan = loanOutputPort.save(loan);
         log.info("Saved loan: {}", savedLoan);
         updateLoanDisbursalOnLoamMatrics(foundLoanee);
