@@ -2,6 +2,9 @@
 ALTER TABLE vehicle_closure_entity DISABLE TRIGGER ALL;
 ALTER TABLE vehicle_operation_entity DISABLE TRIGGER ALL;
 
+-- Drop user_id column from next_of_kin_entity if it exists (field was removed from entity)
+ALTER TABLE next_of_kin_entity DROP COLUMN IF EXISTS user_id;
+
 -- Drop any existing check constraints
 DO $$
 BEGIN

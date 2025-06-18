@@ -9,6 +9,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import lombok.*;
 import lombok.extern.slf4j.*;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.*;
 
 import java.util.*;
@@ -26,8 +27,10 @@ public class NextOfKinService implements NextOfKinUseCase {
         nextOfKin.validate();
 
         UserIdentity foundUserIdentity = userIdentityOutputPort.findById(nextOfKin.getUserId());
-        Optional<NextOfKin> foundNextOfKin = nextOfKinOutputPort.findByUserId(foundUserIdentity.getId());
-        if (foundNextOfKin.isPresent()) {
+//        Optional<NextOfKin> foundNextOfKin = nextOfKinOutputPort.findByUserId(foundUserIdentity.getId());
+        NextOfKin foundNextOfKin = foundUserIdentity.getNextOfKin();
+        if (ObjectUtils.isNotEmpty(foundNextOfKin)) {
+            log.error("User has next of kin {}", foundNextOfKin);
             throw new MeedlException(IdentityMessages.USER_HAS_NEXT_OF_KIN.getMessage());
         }
         NextOfKin savedNextOfKin = nextOfKinOutputPort.save(nextOfKin);

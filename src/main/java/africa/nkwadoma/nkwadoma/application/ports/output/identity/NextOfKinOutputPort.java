@@ -12,5 +12,5 @@ public interface NextOfKinOutputPort {
 
     NextOfKin findByEmail(String email) throws MeedlException;
     
-    Optional<NextOfKin> findByUserId(String id) throws MeedlException;
+//    Optional<NextOfKin> findByUserId(String id) throws MeedlException;
 }

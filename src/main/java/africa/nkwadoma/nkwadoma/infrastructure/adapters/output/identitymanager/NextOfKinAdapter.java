@@ -50,11 +50,11 @@ public class NextOfKinAdapter implements NextOfKinOutputPort {
         return nextOfKin;
     }
 
-    @Override
-    public Optional<NextOfKin> findByUserId(String userId) throws MeedlException {
-        MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
-        Optional<NextOfKinEntity> nextOfKinEntity = nextOfKinRepository.findByUserId(userId);
-        log.info("Found nextOfKin optional {}", nextOfKinEntity.isPresent());
-        return nextOfKinEntity.map(nextOfKinMapper::toNextOfKin);
-    }
+//    @Override
+//    public Optional<NextOfKin> findByUserId(String userId) throws MeedlException {
+//        MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
+//        Optional<NextOfKinEntity> nextOfKinEntity = nextOfKinRepository.findByUserId(userId);
+//        log.info("Found nextOfKin optional {}", nextOfKinEntity.isPresent());
+//        return nextOfKinEntity.map(nextOfKinMapper::toNextOfKin);
+//    }
 }
