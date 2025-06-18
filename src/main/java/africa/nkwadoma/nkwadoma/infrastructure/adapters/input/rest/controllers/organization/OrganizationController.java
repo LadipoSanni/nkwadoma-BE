@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ControllerConstant.*;
@@ -227,7 +228,7 @@ public class OrganizationController {
                                                                 .pageSize(pageSize)
                                                                 .build());
 
-        List<OrganizationResponse> organizationResponses = organizationIdentities.stream().map(organizationRestMapper::toOrganizationResponse).toList();
+        List<OrganizationResponse> organizationResponses = organizationIdentities.stream().filter(organizationIdentity -> !organizationIdentity.getName().equals("Meedl")).map(organizationRestMapper::toOrganizationResponse).toList();
         PaginatedResponse<OrganizationResponse> response = new PaginatedResponse<>(
                 organizationResponses, organizationIdentities.hasNext(),
                 organizationIdentities.getTotalPages(),
