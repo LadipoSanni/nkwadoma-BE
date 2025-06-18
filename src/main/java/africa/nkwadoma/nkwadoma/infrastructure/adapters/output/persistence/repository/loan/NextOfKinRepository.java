@@ -8,5 +8,5 @@ import java.util.*;
 public interface NextOfKinRepository extends JpaRepository<NextOfKinEntity, String> {
     Optional<NextOfKinEntity> findByEmail(String email);
 
-    Optional<NextOfKinEntity> findByUserId(String userId);
+//    Optional<NextOfKinEntity> findByUserId(String userId);
 }

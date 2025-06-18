@@ -19,5 +19,5 @@ public class NextOfKinEntity {
     private String phoneNumber;
     private String nextOfKinRelationship;
     private String contactAddress;
-    private String userId;
+//    private String userId;
 }

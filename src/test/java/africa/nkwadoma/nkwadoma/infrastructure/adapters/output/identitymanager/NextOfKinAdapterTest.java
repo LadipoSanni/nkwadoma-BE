@@ -66,18 +66,18 @@ class NextOfKinAdapterTest {
         log.info("Saved next of kin in test before assertion {}", savedNextOfKin);
         assertNotNull(savedNextOfKin);
     }
-    @Test
-    @Order(2)
-    void findNextOfKinByUserId() {
-        Optional<NextOfKin> foundNextOfKin = null;
-        try {
-            log.info("Finding next of kin for user with id: {}", userId);
-            foundNextOfKin = nextOfKinOutputPort.findByUserId("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f");
-        } catch (MeedlException e) {
-            throw new RuntimeException(e);
-        }
-        assertFalse(foundNextOfKin.isEmpty());
-    }
+//    @Test
+//    @Order(2)
+//    void findNextOfKinByUserId() {
+//        Optional<NextOfKin> foundNextOfKin = null;
+//        try {
+//            log.info("Finding next of kin for user with id: {}", userId);
+//            foundNextOfKin = nextOfKinOutputPort.findByUserId("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f");
+//        } catch (MeedlException e) {
+//            throw new RuntimeException(e);
+//        }
+//        assertFalse(foundNextOfKin.isEmpty());
+//    }
 
 
     @Test
