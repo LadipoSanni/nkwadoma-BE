@@ -231,7 +231,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         MeedlValidator.validateObjectInstance(cohort, CohortMessages.COHORT_CANNOT_BE_EMPTY.getMessage());
         return cohortUseCase.viewCohortDetails(cohort.getCreatedBy(), cohort.getId());
     }
-    private List<RepaymentHistory> convertToRepaymentHistory(List<Map<String, String>>  data) {
+    private List<RepaymentHistory> convertToRepaymentHistory(List<Map<String, String>>  data) throws MeedlException {
         List<RepaymentHistory> repaymentHistories = new ArrayList<>();
 
         log.info("Started creating Repayment record from data gotten from file upload {}, size {}",data, data.size());
@@ -260,7 +260,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     }
 
 
-    private LocalDateTime parseFlexibleDateTime(String dateStr) {
+    private LocalDateTime parseFlexibleDateTime(String dateStr) throws MeedlException {
         log.info("Repayment date before formating {}", dateStr);
         if (dateStr == null || MeedlValidator.isEmptyString(dateStr)) {
             return null;
@@ -293,7 +293,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         }
 
         log.error("The date format was invalid: {}", dateStr);
-        return null;
+        throw new MeedlException("Date doesn't match format. Date: "+dateStr + " Example format : 21/10/2019");
     }
 
     private ModeOfPayment validateModeOfPayment(String modeOfRepaymentToConvert) {
