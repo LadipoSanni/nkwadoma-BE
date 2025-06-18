@@ -235,6 +235,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         List<RepaymentHistory> repaymentHistories = new ArrayList<>();
 
         log.info("Started creating Repayment record from data gotten from file upload {}, size {}",data, data.size());
+        loanBookValidator.validateDateTimeFormat(data, "paymentdate");
         for (Map<String, String> row  : data) {
 
             RepaymentHistory repaymentHistory = RepaymentHistory.builder()
