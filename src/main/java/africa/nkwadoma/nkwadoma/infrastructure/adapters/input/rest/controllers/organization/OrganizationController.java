@@ -228,7 +228,7 @@ public class OrganizationController {
                                                                 .pageSize(pageSize)
                                                                 .build());
 
-        List<OrganizationResponse> organizationResponses = organizationIdentities.stream().filter(organizationIdentity -> !organizationIdentity.getName().equals("Meedl")).map(organizationRestMapper::toOrganizationResponse).toList();
+        List<OrganizationResponse> organizationResponses = organizationIdentities.stream().filter(organizationIdentity -> !organizationIdentity.getName().equalsIgnoreCase("Meedl")).map(organizationRestMapper::toOrganizationResponse).toList();
         PaginatedResponse<OrganizationResponse> response = new PaginatedResponse<>(
                 organizationResponses, organizationIdentities.hasNext(),
                 organizationIdentities.getTotalPages(),

@@ -68,10 +68,12 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanProduct, LoanMessages.INVALID_LOAN_PRODUCT_REQUEST_DETAILS.getMessage());
         loanProduct.validateLoanProductDetails();
+        loanProduct.setName(loanProduct.getName().toLowerCase());
         UserIdentity foundUser = userIdentityOutputPort.findById(loanProduct.getCreatedBy());
         identityManagerOutPutPort.verifyUserExistsAndIsEnabled(foundUser);
         log.info("The user with {} email has been verified ", foundUser.getEmail());
         if (loanProductOutputPort.existsByName(loanProduct.getName())){
+            log.error("Loan product {} already exists", loanProduct.getName() );
             throw new ResourceAlreadyExistsException("Loan product " + loanProduct.getName() + " already exists");
         }
         log.info("Searching for investment vehicle with id {} ", loanProduct.getInvestmentVehicleId());
