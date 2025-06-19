@@ -10,6 +10,9 @@ env:
   ECR_REPOSITORY: nkwadoma
   AWS_REGION: us-east-1
   CONTAINER_PORT: 8768
+  BLUE_PORT: 8768
+  GREEN_PORT: 8769
+  NGINX_PORT: 443
   EMAILS: 'sam@semicolon.africa,joshua.o@semicolon.africa,abigail@semicolon.africa,chukwunenyeebuka@gmail.com,henry@semicolon.africa,augustineezekiel763@gmail.com,paulineyahla@gmail.com,adioldmj@gmail.com,precious@semicolon.africa,emmanuel.e@semicolon.africa,aj@semicolon.africa'
 
 jobs:
@@ -136,27 +139,59 @@ jobs:
             chown ubuntu:ubuntu /home/ubuntu/semicolon/meedl/systest/nkwadoma.env
           EOF
 
-      - name: Free port if in use
+      - name: Determine active environment
+        id: active_env
         run: |
-          sudo fuser -k ${{ env.CONTAINER_PORT }}/tcp || true
-
-      - name: Restart container with auto-restart policy
-        run: |
-          CONTAINER_NAME=nkwadoma_container
-          if [ "$(docker ps -aq -f name=$CONTAINER_NAME)" ]; then
-            sudo docker stop $CONTAINER_NAME || true
-            sudo docker rm $CONTAINER_NAME || true
+          if sudo docker ps --format '{{.Names}}' | grep -q "nkwadoma_blue"; then
+            echo "ACTIVE_ENV=blue" >> $GITHUB_ENV
+            echo "NEW_ENV=green" >> $GITHUB_ENV
+            echo "NEW_PORT=${{ env.GREEN_PORT }}" >> $GITHUB_ENV
+          else
+            echo "ACTIVE_ENV=green" >> $GITHUB_ENV
+            echo "NEW_ENV=blue" >> $GITHUB_ENV
+            echo "NEW_PORT=${{ env.BLUE_PORT }}" >> $GITHUB_ENV
           fi
-          sudo docker network inspect pulser_pulsar >/dev/null 2>&1 || docker network create pulser_pulsar
+          
+      - name: Start new container
+        run: |
+          sudo docker network inspect pulser_pulsar >/dev/null 2>&1 || sudo docker network create pulser_pulsar
           sudo docker run -d --env-file /home/ubuntu/semicolon/meedl/systest/nkwadoma.env \
-            --network pulser_pulsar --name $CONTAINER_NAME -p ${{ env.CONTAINER_PORT }}:${{ env.CONTAINER_PORT }} \
+            --network pulser_pulsar --name nkwadoma_${{ env.NEW_ENV }} -p ${{ env.NEW_PORT }}:${{ env.CONTAINER_PORT }} \
             --restart unless-stopped \
             ${{ env.REPO_URL }}:alpha
-
-      - name: Confirm container is running
+            
+      - name: Health check new container
         run: |
-          sudo docker ps -a
-          sudo docker logs nkwadoma_container || true
-
-      - name: Prune unused images (Systest-2)
-        run: docker image prune -af
+          for i in {1..30}; do
+            if curl -s http://localhost:${{ env.NEW_PORT }}/actuator/health | grep -q "UP"; then
+              echo "New container is healthy!"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Health check failed!"
+          sudo docker stop nkwadoma_${{ env.NEW_ENV }}
+          sudo docker rm nkwadoma_${{ env.NEW_ENV }}
+          exit 1
+          
+      - name: Update Nginx configuration for api-systest
+        run: |
+          sudo sed -i '/server_name api-systest.meedl.africa;/,/}/ s/proxy_pass http:\/\/localhost:[0-9]\+;/proxy_pass http:\/\/localhost:${{ env.NEW_PORT }};/' /etc/nginx/sites-available/meedl.africa
+          sudo nginx -t && sudo systemctl reload nginx || exit 1
+      - name: Stop and remove old container
+        run: |
+          if [ "${{ env.ACTIVE_ENV }}" != "${{ env.NEW_ENV }}" ]; then
+            sudo docker stop nkwadoma_${{ env.ACTIVE_ENV }} || true
+            sudo docker rm nkwadoma_${{ env.ACTIVE_ENV }} || true
+          fi
+      - name: Confirm Deployment Success
+        run: |
+          if sudo docker ps --format '{{.Names}}' | grep -q "nkwadoma_${{ env.NEW_ENV }}"; then
+            echo "✅ Blue-Green Deployment to systest successful!"
+            exit 0
+          else
+            echo "❌ Deployment failed!"
+            exit 1
+          fi
+      - name: Prune unused images
+        run: sudo docker image prune -af
