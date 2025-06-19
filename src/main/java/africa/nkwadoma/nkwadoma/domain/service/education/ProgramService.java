@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -56,7 +57,7 @@ public class ProgramService implements AddProgramUseCase {
                     programOutputPort.findProgramByName(program.getName(),foundProgram.getOrganizationId());
             for (Program p : programs) {
                 if (!p.getId().equals(program.getId())){
-                  throw new MeedlException("Program name exist");
+                  throw new EducationException("Program name exist");
                 }
             }
         }

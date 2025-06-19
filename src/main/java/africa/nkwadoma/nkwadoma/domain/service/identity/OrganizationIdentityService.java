@@ -107,7 +107,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         ClientRepresentation clientRepresentation = identityManagerOutPutPort.getClientRepresentationByName(organizationIdentity.getName());
         if (organizationIdentity.getName().equals(clientRepresentation.getName())) {
             log.error("OrganizationIdentity already exists, before trying to create organization with name {} ", organizationIdentity.getName());
-            throw new MeedlException("Organization already exists");
+            throw new EducationException("Organization already exists");
         }
     }
 
@@ -116,13 +116,13 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
                 organizationIdentityOutputPort.findByRcNumber(organizationIdentity.getRcNumber());
         if (foundOrganizationEntity.isPresent()) {
             log.info("Organization with rc number {} already exists", foundOrganizationEntity.get().getRcNumber());
-            throw new MeedlException(ORGANIZATION_RC_NUMBER_ALREADY_EXIST.getMessage());
+            throw new EducationException(ORGANIZATION_RC_NUMBER_ALREADY_EXIST.getMessage());
         }
 
         Optional<OrganizationIdentity> foundOrganizationIdentity =
                 organizationIdentityOutputPort.findByTin(organizationIdentity.getTin());
         if (foundOrganizationIdentity.isPresent()) {
-            throw new MeedlException(IdentityMessages.ORGANIZATION_TIN_ALREADY_EXIST.getMessage());
+            throw new EducationException(IdentityMessages.ORGANIZATION_TIN_ALREADY_EXIST.getMessage());
         }
     }
     @Override

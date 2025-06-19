@@ -13,6 +13,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.ServiceProvider;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
+import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
@@ -70,13 +71,13 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     private LoanRequestOutputPort loanRequestOutputPort;
 
     @Override
-    public String verifyIdentity(String loanReferralId) throws MeedlException, IdentityVerificationException {
+    public String verifyIdentity(String loanReferralId) throws IdentityException, MeedlException {
         MeedlValidator.validateUUID(loanReferralId, "Please provide a valid loan referral identification.");
         checkIfAboveThreshold(loanReferralId);
         LoanReferral loanReferral = loanReferralOutputPort.findLoanReferralById(loanReferralId)
                                     .orElseThrow(()-> new ResourceNotFoundException("Could not find loan referral"));
         if (ObjectUtils.isEmpty(loanReferral.getLoanee())){
-            throw new MeedlException("Loan referral has no loanee assigned to it.");
+            throw new IdentityException("Loan referral has no loanee assigned to it.");
         }
         UserIdentity userIdentity = loanReferral.getLoanee().getUserIdentity();
         if (userIdentity.isIdentityVerified()) {
@@ -146,25 +147,26 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         createIdentityVerificationFailureRecord(identityVerificationFailureRecord);
     }
 
-    private void checkIfAboveThreshold(String loanReferralId) throws IdentityVerificationException {
+    private void checkIfAboveThreshold(String loanReferralId) throws IdentityException {
         Long numberOfAttempts = identityVerificationFailureRecordOutputPort.countByReferralId(loanReferralId);
         if (numberOfAttempts >= 5L){
             log.error("You have reached the maximum number of verification attempts for this referral code: {}", loanReferralId);
-            throw new IdentityVerificationException(String.format("You have reached the maximum number of verification attempts for this referral code: %s", loanReferralId));
+            throw new IdentityException(String.format("You have reached the maximum number of verification attempts for this referral code: %s", loanReferralId));
         }
     }
 
     @Override
-    public String createIdentityVerificationFailureRecord(IdentityVerificationFailureRecord identityVerificationFailureRecord) throws IdentityVerificationException {
+    public String createIdentityVerificationFailureRecord(IdentityVerificationFailureRecord identityVerificationFailureRecord) throws IdentityException {
         identityVerificationFailureRecordOutputPort.createIdentityVerificationFailureRecord(identityVerificationFailureRecord);
         Long numberOfFailedVerifications = identityVerificationFailureRecordOutputPort.countByReferralId(identityVerificationFailureRecord.getReferralId());
         if (numberOfFailedVerifications >= 5){
             log.error("Number of failure verification exceeded for {}", identityVerificationFailureRecord.getReferralId());
-            throw new IdentityVerificationException(BLACKLISTED_REFERRAL.getMessage());
+            throw new IdentityException(BLACKLISTED_REFERRAL.getMessage());
         }
         log.info("Verification failure saved successfully for {}", identityVerificationFailureRecord.getReferralId());
         return IDENTITY_VERIFICATION_FAILURE_SAVED.getMessage();
     }
+
     private void validateIdentityVerification(IdentityVerification identityVerification) throws MeedlException {
         MeedlValidator.validateObjectInstance(identityVerification, IdentityVerificationMessage.IDENTITY_VERIFICATION_CANNOT_BE_NULL.getMessage());
         MeedlValidator.validateDataElement(identityVerification.getEncryptedBvn(), IdentityVerificationMessage.INVALID_BVN.getMessage());
@@ -172,19 +174,23 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         MeedlValidator.validateUUID(identityVerification.getLoanReferralId(), LoanMessages.INVALID_LOAN_REFERRAL_ID.getMessage());
         log.info("Verifying user identity. Loan referral id: {}", identityVerification.getLoanReferralId());
     }
+
     private String decrypt(String encryptedData) throws MeedlException {
         log.info("decrypting identity verification values.");
         return tokenUtils.decryptAES(encryptedData, "Error processing identity verification");
     }
+
     private LoanReferral fetchLoanReferral(String loanReferralId) throws MeedlException {
         LoanReferral loanReferral = loanReferralOutputPort.findById(loanReferralId);
         log.info("User referred : {}", loanReferral.getLoanee().getUserIdentity().getId());
         return loanReferral;
     }
+
     private boolean isVerificationRequired(UserIdentity userIdentity) {
         log.info("Checking if user was found by bvn or has previously done verification. {}", userIdentity);
         return ObjectUtils.isEmpty(userIdentity) || !userIdentity.isIdentityVerified();
     }
+
     private String processNewVerification(IdentityVerification identityVerification, LoanReferral loanReferral) throws MeedlException {
         String verificationResponse;
         try {
@@ -211,7 +217,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
                 log.warn("Identity verification not successful, failed at the nin level");
                 verificationResponse = IdentityMessages.IDENTITY_NOT_VERIFIED.getMessage();
             }
-        } catch (MeedlException exception) {
+        } catch (IdentityException exception) {
             log.error("Error verifying user's identity... {}", exception.getMessage());
             createVerificationFailure(loanReferral, exception.getMessage(), ServiceProvider.PREMBLY);
             throw new MeedlException(exception.getMessage());
@@ -223,7 +229,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         Optional<OrganizationIdentity> organization =
                 organizationIdentityOutputPort.findOrganizationByName(loanRequest.getReferredBy());
         if (organization.isEmpty()) {
-            throw new EducationException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
+            throw new ResourceNotFoundException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
         }
         Optional<LoanMetrics> loanMetrics =
                 loanMetricsOutputPort.findByOrganizationId(organization.get().getId());

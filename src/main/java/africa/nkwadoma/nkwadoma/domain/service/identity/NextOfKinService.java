@@ -28,7 +28,7 @@ public class NextOfKinService implements NextOfKinUseCase {
         UserIdentity foundUserIdentity = userIdentityOutputPort.findById(nextOfKin.getUserId());
         Optional<NextOfKin> foundNextOfKin = nextOfKinOutputPort.findByUserId(foundUserIdentity.getId());
         if (foundNextOfKin.isPresent()) {
-            throw new MeedlException(IdentityMessages.USER_HAS_NEXT_OF_KIN.getMessage());
+            throw new IdentityException(IdentityMessages.USER_HAS_NEXT_OF_KIN.getMessage());
         }
         NextOfKin savedNextOfKin = nextOfKinOutputPort.save(nextOfKin);
         log.info("Saved next of kin: {}", savedNextOfKin);
