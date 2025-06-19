@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -47,8 +48,11 @@ public class ProgramService implements AddProgramUseCase {
         program.validateUpdateProgram();
         Program foundProgram = programOutputPort.findProgramById(program.getId());
         if (ObjectUtils.isNotEmpty(foundProgram)) {
+            if (foundProgram.getNumberOfLoanees() > 0){
+                throw new EducationException(ProgramMessages.PROGRAM_WITH_LOANEE_CANNOT_BE_EDITED.getMessage());
+            }
             log.info("Program at service layer update program: ========>{}", foundProgram);
-            foundProgram = programMapper.updateProgram(program, foundProgram);
+            programMapper.updateProgram(program, foundProgram);
             OrganizationIdentity organizationIdentity = findProgramOrganization(program);
             program.setOrganizationIdentity(organizationIdentity);
 //            checkIfProgramExistByNameInOrganization(foundProgram);
