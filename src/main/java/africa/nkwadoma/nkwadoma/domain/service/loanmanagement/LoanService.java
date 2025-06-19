@@ -68,7 +68,6 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanProduct, LoanMessages.INVALID_LOAN_PRODUCT_REQUEST_DETAILS.getMessage());
         loanProduct.validateLoanProductDetails();
-        loanProduct.setName(loanProduct.getName().toLowerCase());
         UserIdentity foundUser = userIdentityOutputPort.findById(loanProduct.getCreatedBy());
         identityManagerOutPutPort.verifyUserExistsAndIsEnabled(foundUser);
         log.info("The user with {} email has been verified ", foundUser.getEmail());
