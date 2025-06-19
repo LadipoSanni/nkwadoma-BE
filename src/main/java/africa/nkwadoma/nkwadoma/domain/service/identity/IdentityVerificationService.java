@@ -134,8 +134,9 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     }
 
     private UserIdentity updateLoaneeDetail(UserIdentity userIdentity) throws MeedlException {
-        userIdentity.setEmailVerified(Boolean.TRUE);
-        userIdentity.setEnabled(Boolean.TRUE);
+        UserIdentity foundUser = identityManagerOutputPort.getUserById(userIdentity.getId());
+        userIdentity.setEmailVerified(foundUser.isEmailVerified());
+        userIdentity.setEnabled(foundUser.isEnabled());
         return identityManagerOutputPort.updateUserData(userIdentity);
     }
 
