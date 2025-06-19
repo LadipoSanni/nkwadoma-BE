@@ -9,7 +9,7 @@ public interface LoanProductOutputPort {
 
     void deleteById(String id) throws MeedlException;
 
-    boolean existsByName(String name) throws MeedlException;
+    boolean existsByNameIgnoreCase(String name) throws MeedlException;
 
     LoanProduct findById(String id) throws MeedlException;
 

@@ -113,16 +113,16 @@ class LoanProductAdapterTest {
     @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
     void existsByInvalidName(String name) {
         gemsLoanProduct.setName(name);
-        assertThrows(MeedlException.class, () -> loanProductOutputPort.existsByName(gemsLoanProduct.getName()));
+        assertThrows(MeedlException.class, () -> loanProductOutputPort.existsByNameIgnoreCase(gemsLoanProduct.getName()));
         gemsLoanProduct.setName(null);
-        assertThrows(MeedlException.class, () -> loanProductOutputPort.existsByName(gemsLoanProduct.getName()));
+        assertThrows(MeedlException.class, () -> loanProductOutputPort.existsByNameIgnoreCase(gemsLoanProduct.getName()));
     }
     @ParameterizedTest
     @ValueSource(strings = {"non-existing loan product"})
     void existsByNameWithNonExistingName(String name) {
         gemsLoanProduct.setName(name);
         try {
-            assertFalse(loanProductOutputPort.existsByName(gemsLoanProduct.getName()));
+            assertFalse(loanProductOutputPort.existsByNameIgnoreCase(gemsLoanProduct.getName()));
         } catch (MeedlException exception) {
             log.error("existsByNameFalse method failed to check if exist: {}",exception.getMessage());
         }
@@ -131,7 +131,7 @@ class LoanProductAdapterTest {
     @Order(2)
     void existsByNameWithValidName() {
         try {
-        assertTrue(loanProductOutputPort.existsByName(gemsLoanProduct.getName()));
+        assertTrue(loanProductOutputPort.existsByNameIgnoreCase(gemsLoanProduct.getName()));
         } catch (MeedlException exception) {
             log.error("{} {}", exception.getClass().getName(), exception.getMessage());
         }

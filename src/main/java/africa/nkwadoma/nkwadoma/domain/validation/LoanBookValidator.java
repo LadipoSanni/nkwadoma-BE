@@ -39,7 +39,7 @@ public class LoanBookValidator {
 
     public void validateAllLoanProductExist(List<Loanee> convertedLoanees) throws MeedlException {
         for (Loanee loanee : convertedLoanees) {
-            boolean loanProductExist = loanProductOutputPort.existsByName(loanee.getCohortName());
+            boolean loanProductExist = loanProductOutputPort.existsByNameIgnoreCase(loanee.getCohortName());
             if (!loanProductExist) {
                 throw new MeedlException("Loan product with name " + loanee.getCohortName() + " does not exist");
             }

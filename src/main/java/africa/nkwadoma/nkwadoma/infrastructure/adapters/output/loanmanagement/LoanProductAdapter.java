@@ -84,9 +84,9 @@ public class LoanProductAdapter implements LoanProductOutputPort {
     }
 
     @Override
-    public boolean existsByName(String name) throws MeedlException {
+    public boolean existsByNameIgnoreCase(String name) throws MeedlException {
         MeedlValidator.validateDataElement(name, LoanMessages.LOAN_PRODUCT_NAME_REQUIRED.getMessage());
-        return loanProductEntityRepository.existsByName(name);
+        return loanProductEntityRepository.existsByNameIgnoreCase(name);
     }
 
     @Override
