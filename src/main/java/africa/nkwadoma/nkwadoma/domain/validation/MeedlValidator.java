@@ -65,7 +65,7 @@ public class MeedlValidator {
         validateDataElement(dataElement, message.concat(StringUtils.SPACE).concat(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage()));
         if (!isValidUUID(dataElement)) {
             log.info("{}. The invalid UUID : {}", dataElement, message);
-            throw new IdentityException(message);
+            throw new MeedlException(message);
         }
     }
 
@@ -207,10 +207,10 @@ public class MeedlValidator {
         log.info("Users identity validation completed... for user {} ", userIdentities);
     }
 
-    public static void validateLoanRequest(LoanRequest foundLoanRequest) throws LoanException {
+    public static void validateLoanRequest(LoanRequest foundLoanRequest) throws MeedlException {
         if (ObjectUtils.isEmpty(foundLoanRequest)){
             log.info("Loan request: {}", foundLoanRequest);
-            throw new LoanException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage());
+            throw new MeedlException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage());
         }
     }
 
@@ -218,7 +218,7 @@ public class MeedlValidator {
         MeedlValidator.validateBigDecimalDataElement(itemAmount);
         if (itemAmount.compareTo(BigDecimal.ZERO) < 0) {
             log.info("{} --- {}",LoaneeLoanBreakdownMessages.AMOUNT_CANNOT_BE_LESS_THAN_ZERO.getMessage(),itemAmount);
-            throw new LoaneeLoanBreakdownException(message+" "+LoaneeLoanBreakdownMessages.AMOUNT_CANNOT_BE_LESS_THAN_ZERO.getMessage());
+            throw new MeedlException(message+" "+LoaneeLoanBreakdownMessages.AMOUNT_CANNOT_BE_LESS_THAN_ZERO.getMessage());
         }
     }
 
