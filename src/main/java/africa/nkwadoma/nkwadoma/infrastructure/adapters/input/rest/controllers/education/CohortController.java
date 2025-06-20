@@ -74,6 +74,7 @@ public class CohortController {
 
 
     @PostMapping("cohort/edit")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') ")
     public ResponseEntity<ApiResponse<?>> editCohort(@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid
     EditCohortRequest editCohortRequest) throws MeedlException {
         Cohort cohort = cohortMapper.mapEditCohortRequestToCohort(editCohortRequest);
@@ -91,6 +92,7 @@ public class CohortController {
 
     @DeleteMapping("/delete/{id}")
     @Operation(summary = "Delete a cohort by it's ID")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') ")
     public ResponseEntity<ApiResponse<?>> deleteCohort(@PathVariable @Valid @NotBlank(message = "Cohort id is required") String id)
             throws MeedlException {
         cohortUseCase.deleteCohort(id);
