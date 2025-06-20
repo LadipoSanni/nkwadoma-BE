@@ -91,6 +91,7 @@ public class CohortController {
 
     @DeleteMapping("/delete/{id}")
     @Operation(summary = "Delete a cohort by it's ID")
+
     public ResponseEntity<ApiResponse<?>> deleteCohort(@PathVariable @Valid @NotBlank(message = "Cohort id is required") String id)
             throws MeedlException {
         cohortUseCase.deleteCohort(id);
