@@ -46,10 +46,15 @@ public class LoanBookValidator {
         for (Loanee loanee : convertedLoanees) {
             validateFileBvn(loanee.getUserIdentity());
             validateFileNin(loanee.getUserIdentity());
+            validatePhoneNumber(loanee.getUserIdentity());
             validateLoanProductExist(loanee);
             validateAmount(loanee);
         }
 
+    }
+
+    private void validatePhoneNumber(UserIdentity userIdentity) throws MeedlException {
+        MeedlValidator.validateElevenDigits(userIdentity.getPhoneNumber(),"User with email "+userIdentity.getEmail()+ " has invalid phone number.");
     }
 
     private void validateAmount(Loanee loanee) throws MeedlException {
@@ -86,13 +91,13 @@ public class LoanBookValidator {
 
     }
     private String validateFileAndEncryptBvnOrNin(String bvnOrNin, String errorMessage) throws MeedlException {
-        MeedlValidator.validateBvnOrNin(bvnOrNin, errorMessage);
+        MeedlValidator.validateElevenDigits(bvnOrNin, errorMessage);
 
         return encryptValue(bvnOrNin, errorMessage);
     }
     private String encryptValue(String value, String errorMessage) {
         try {
-            MeedlValidator.validateBvnOrNin(value, errorMessage);
+            MeedlValidator.validateElevenDigits(value, errorMessage);
             return aesOutputPort.encryptAES(value.trim());
         } catch (MeedlException e) {
             log.error("Unable to encrypt value {}", value);
