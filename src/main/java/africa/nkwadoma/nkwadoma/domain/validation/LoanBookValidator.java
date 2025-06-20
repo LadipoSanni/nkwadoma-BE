@@ -65,7 +65,7 @@ public class LoanBookValidator {
         return bigDecimal.toString();
     }
 
-    private void validateMoneyValue(BigDecimal amount, String message) throws MeedlException {
+    public void validateMoneyValue(BigDecimal amount, String message) throws MeedlException {
         MeedlValidator.validateBigDecimalDataElement(amount, message);
         if (amount.compareTo(BigDecimal.ZERO) < 0) {
             log.warn("Negative amount detected: {} {}", amount, message);
