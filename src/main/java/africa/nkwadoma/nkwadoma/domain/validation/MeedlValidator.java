@@ -140,7 +140,7 @@ public class MeedlValidator {
 
         boolean isValid = Pattern.matches(regex, numbersToValidate.trim());
         if (!isValid) {
-            log.error("Invalid bvn/nin {}", numbersToValidate);
+            log.error(" {} - {}", numbersToValidate, errorMessage);
             throw new MeedlException(errorMessage);
         }
     }
