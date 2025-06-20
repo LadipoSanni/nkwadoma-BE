@@ -19,7 +19,7 @@ public class CreateCohortRequest {
 
     @NotBlank(message = "Program id is required")
     private String programId;
-    @Size(max = 2500, message = "cohort description must no go beyond 2500")
+    @Size( max = 2500, message = "Cohort description must not exceed 2500 characters" )
     private String cohortDescription;
     private BigDecimal tuitionAmount = BigDecimal.ZERO;
     @NotBlank(message = "Cohort name is required")
