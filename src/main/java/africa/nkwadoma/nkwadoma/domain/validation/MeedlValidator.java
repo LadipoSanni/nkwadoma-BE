@@ -9,7 +9,6 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoaneeLoanBreakdownException;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
-import africa.nkwadoma.nkwadoma.domain.model.financier.BeneficialOwner;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.*;
@@ -140,14 +139,14 @@ public class MeedlValidator {
             throw new MeedlException(MeedlMessages.PAGE_SIZE_CANNOT_BE_LESS_THAN_ONE.getMessage());
         }
     }
-    public static void validateBvn(String bvn) throws MeedlException {
-        MeedlValidator.validateDataElement(bvn, "bvn is empty");
+    public static void validateBvnOrNin(String bvnOrNin, String errorMessage) throws MeedlException {
+        MeedlValidator.validateDataElement(bvnOrNin, errorMessage);
         String regex = "^\\d{11}$";
 
-        boolean isValid = Pattern.matches(regex, bvn);
+        boolean isValid = Pattern.matches(regex, bvnOrNin.trim());
         if (!isValid) {
-            log.error("Invalid bvn {}", bvn);
-            throw new MeedlException("Invalid bvn provided");
+            log.error("Invalid bvn/nin {}", bvnOrNin);
+            throw new MeedlException(errorMessage);
         }
     }
     public static void validateDoubleDataElement(Double dataElement, String message) throws MeedlException {
