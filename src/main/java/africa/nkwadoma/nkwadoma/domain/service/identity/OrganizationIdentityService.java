@@ -157,7 +157,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     }
 
     @Override
-    public OrganizationIdentity deactivateOrganization(String organizationId, String reason) throws IdentityException {
+    public OrganizationIdentity deactivateOrganization(String organizationId, String reason) throws MeedlException {
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         log.info("Reason for deactivating organization is {}", reason);
         MeedlValidator.validateDataElement(reason, "Deactivation reason is required");
