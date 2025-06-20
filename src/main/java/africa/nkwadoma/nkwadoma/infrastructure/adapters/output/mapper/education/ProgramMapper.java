@@ -15,6 +15,6 @@ public interface ProgramMapper {
     @InheritInverseConfiguration
     Program toProgram(ProgramEntity programEntity);
 
-    Program updateProgram(Program program, @MappingTarget Program foundProgram);
+    void updateProgram(@MappingTarget Program foundProgram,Program program);
 
 }

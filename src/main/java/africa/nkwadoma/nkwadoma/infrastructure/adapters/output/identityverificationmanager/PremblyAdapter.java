@@ -5,7 +5,6 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
-import africa.nkwadoma.nkwadoma.domain.model.identity.AutomationTestData;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyBvnResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyLivelinessResponse;
@@ -70,9 +69,6 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
         MeedlValidator.validateObjectInstance(identityVerification, IdentityMessages.IDENTITY_CANNOT_BE_NULL.getMessage());
         identityVerification.validate();
         identityVerification.validateImageUrl();
-        if (isTestVerification(identityVerification)) {
-            return AutomationTestData.createPremblyNinTestResponse(identityVerification.getDecryptedNin());
-        }
         return getNinDetails(identityVerification);
     }
 
@@ -131,22 +127,7 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
         MeedlValidator.validateObjectInstance(identityVerification, IdentityMessages.IDENTITY_CANNOT_BE_NULL.getMessage());
         identityVerification.validate();
         identityVerification.validateImageUrl();
-        if (isTestVerification(identityVerification)) {
-            return AutomationTestData.createPremblyBvnTestResponse(identityVerification.getDecryptedBvn());
-        }
         return getBvnDetails(identityVerification);
-    }
-
-    private boolean isTestVerification(IdentityVerification identityVerification) {
-        return isIdentityNumbersStartingWithTestValues(identityVerification);
-    }
-
-    private boolean isIdentityNumbersStartingWithTestValues(IdentityVerification identityVerification) {
-        String bvnResult = identityVerification.getDecryptedBvn().substring(0, 2);
-        String ninResult = identityVerification.getDecryptedNin().substring(0, 2);
-        log.info("Bvn Result is : {}, and is this a test call : {}", bvnResult, bvnResult.equals("01"));
-        log.info("Nin Result is : {}, and is this a test call : {}", ninResult, ninResult.equals("01"));
-        return bvnResult.equals("01") && ninResult.equals("01") ;
     }
 
     public PremblyBvnResponse getBvnDetails(IdentityVerification identityVerification) {

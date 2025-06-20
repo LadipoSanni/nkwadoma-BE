@@ -27,8 +27,8 @@ public class NextOfKinService implements NextOfKinUseCase {
         nextOfKin.validate();
 
         UserIdentity foundUserIdentity = userIdentityOutputPort.findById(nextOfKin.getUserId());
-//        Optional<NextOfKin> foundNextOfKin = nextOfKinOutputPort.findByUserId(foundUserIdentity.getId());
         NextOfKin foundNextOfKin = foundUserIdentity.getNextOfKin();
+        log.info("Found user in add additional details-next of kin :{} ", foundUserIdentity);
         if (ObjectUtils.isNotEmpty(foundNextOfKin)) {
             log.error("User has next of kin {}", foundNextOfKin);
             throw new IdentityException(IdentityMessages.USER_HAS_NEXT_OF_KIN.getMessage());

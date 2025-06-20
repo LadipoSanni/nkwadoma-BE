@@ -286,10 +286,12 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
     public UserIdentity verifyUserExistsAndIsEnabled(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
         UserRepresentation userRepresentation = getUserRepresentation(userIdentity, Boolean.TRUE);
-        MeedlValidator.validateUUID(userRepresentation.getId(),"Please provide a valid identification for the representation of this user.");
+        MeedlValidator.validateUUID(userRepresentation.getId(),"Please provide a valid identification for the representation of this user to verify.");
         if (!(userRepresentation.isEnabled() && userRepresentation.isEmailVerified())){
+            log.error("User with email {} is not enabled {} or email is not verified {}", userRepresentation.getEmail(), userRepresentation.isEnabled(), userRepresentation.isEmailVerified());
             throw new MeedlException(MeedlMessages.USER_NOT_ENABLED.getMessage());
         }
+        log.info("User with email {} exist and is endabled.", userRepresentation.getEmail());
         userIdentity.setId(userRepresentation.getId());
         return userIdentity;
     }
@@ -446,6 +448,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
     public UserRepresentation getUserRepresentation(UserIdentity userIdentity, Boolean exactMatch) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
         MeedlValidator.validateEmail(userIdentity.getEmail());
+        log.info("Getting user representation for user with email {}", userIdentity.getEmail());
         return keycloak
                 .realm(KEYCLOAK_REALM)
                 .users()

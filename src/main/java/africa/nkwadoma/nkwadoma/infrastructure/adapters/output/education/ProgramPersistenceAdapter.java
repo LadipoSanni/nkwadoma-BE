@@ -130,7 +130,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     public boolean programExistsInOrganization(Program program) throws MeedlException {
         MeedlValidator.validateDataElement(program.getName(),ProgramMessages.PROGRAM_NAME_REQUIRED.getMessage());
         log.error("Checking if this program name : {}, exists in organization: {}", program.getName(), program.getOrganizationId());
-        return programRepository.existsByNameAndOrganizationIdentity_Id(program.getName(), program.getOrganizationId() );
+        return programRepository.existsByNameIgnoreCaseAndOrganizationIdentityId(program.getName(), program.getOrganizationId() );
     }
 
     @Override

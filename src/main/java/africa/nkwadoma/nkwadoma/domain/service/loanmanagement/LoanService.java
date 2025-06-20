@@ -71,15 +71,18 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanProduct.validateLoanProductDetails();
         UserIdentity foundUser = userIdentityOutputPort.findById(loanProduct.getCreatedBy());
         identityManagerOutPutPort.verifyUserExistsAndIsEnabled(foundUser);
-        if (loanProductOutputPort.existsByName(loanProduct.getName())){
-            throw new LoanException("Loan product " + loanProduct.getName() + " already exists");
+        log.info("The user with {} email has been verified ", foundUser.getEmail());
+        if (loanProductOutputPort.existsByNameIgnoreCase(loanProduct.getName())){
+            log.error("Loan product {} already exists", loanProduct.getName() );
+            throw new ResourceAlreadyExistsException("Loan product " + loanProduct.getName() + " already exists");
         }
         log.info("Searching for investment vehicle with id {} ", loanProduct.getInvestmentVehicleId());
         InvestmentVehicle investmentVehicle = checkProductSizeNotMoreThanAvailableInvestmentAmount(loanProduct);
-//        investmentVehicle.setTotalAvailableAmount(investmentVehicle.getTotalAvailableAmount().subtract(loanProduct.getLoanProductSize()));
-        //Coming back to add restriction for available amount
+        //TODO Coming back to add restriction for available amount
+//      TODO  investmentVehicle.setTotalAvailableAmount(investmentVehicle.getTotalAvailableAmount().subtract(loanProduct.getLoanProductSize()));
         loanProduct.addInvestmentVehicleValues(investmentVehicle);
         loanProduct.setTotalAmountAvailable(loanProduct.getLoanProductSize());
+        log.info("Loan product to be saved in create loan product service method {}", loanProduct);
         investmentVehicleOutputPort.save(investmentVehicle);
         return loanProductOutputPort.save(loanProduct);
     }

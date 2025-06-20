@@ -228,20 +228,7 @@ public class OrganizationController {
                                                                 .pageSize(pageSize)
                                                                 .build());
 
-        List<OrganizationResponse> organizationResponses = organizationIdentities.stream().filter(organizationIdentity -> !organizationIdentity.getName().equals("Meedl")).map(organizationRestMapper::toOrganizationResponse).toList();
-        PaginatedResponse<OrganizationResponse> response = new PaginatedResponse<>(
-                organizationResponses, organizationIdentities.hasNext(),
-                organizationIdentities.getTotalPages(),
-                organizationIdentities.getTotalElements(),pageNumber,
-                pageSize
-        );
-
-        return new ResponseEntity<>(ApiResponse.builder().
-                statusCode(HttpStatus.OK.toString()).
-                data(response).
-                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
-                build(), HttpStatus.OK
-        );
+        return convertAllOrganizationViewedToResponse(pageNumber, pageSize, organizationIdentities);
     }
 
     @GetMapping("organization/all/status")
@@ -254,7 +241,11 @@ public class OrganizationController {
                         .pageNumber(pageNumber)
                         .pageSize(pageSize)
                         .build(), status);
-        List<OrganizationResponse> organizationResponses = organizationIdentities.stream().map(organizationRestMapper::toOrganizationResponse).toList();
+        return convertAllOrganizationViewedToResponse(pageNumber, pageSize, organizationIdentities);
+    }
+
+    private ResponseEntity<ApiResponse<?>> convertAllOrganizationViewedToResponse(@RequestParam int pageNumber, @RequestParam int pageSize, Page<OrganizationIdentity> organizationIdentities) {
+        List<OrganizationResponse> organizationResponses = organizationIdentities.stream().filter(organizationIdentity -> !organizationIdentity.getName().equalsIgnoreCase("Meedl")).map(organizationRestMapper::toOrganizationResponse).toList();
         PaginatedResponse<OrganizationResponse> response = new PaginatedResponse<>(
                 organizationResponses, organizationIdentities.hasNext(),
                 organizationIdentities.getTotalPages(), organizationIdentities.getTotalElements(), pageNumber,

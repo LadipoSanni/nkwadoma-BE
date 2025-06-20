@@ -134,7 +134,7 @@ class ProgramServiceTest {
             addedProgram.setDeliveryType(DeliveryType.ONLINE);
 
             when(programOutputPort.findProgramById(program.getId())).thenReturn(program);
-            when(programMapper.updateProgram(addedProgram, program)).thenReturn(program);
+//            when(programMapper.updateProgram(addedProgram, program)).thenReturn(void);
             when(programOutputPort.saveProgram(program)).thenReturn(program);
             Program updatedProgram = programService.updateProgram(addedProgram);
 

@@ -45,13 +45,18 @@ public class ProgramService implements AddProgramUseCase {
     public Program updateProgram(Program program) throws MeedlException {
         MeedlValidator.validateObjectInstance(program, ProgramMessages.PROGRAM_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(program.getId(), ProgramMessages.INVALID_PROGRAM_ID.getMessage());
-        program.validateUpdateProgram();
         Program foundProgram = programOutputPort.findProgramById(program.getId());
+        program.validateUpdateProgram(foundProgram);
+        log.info("Program duration after validation {}", program.getDuration());
         if (ObjectUtils.isNotEmpty(foundProgram)) {
+            if (foundProgram.getNumberOfLoanees() > 0){
+                log.warn("A programing with {} loanees can not be edited.", foundProgram.getNumberOfLoanees());
+                throw new EducationException(ProgramMessages.PROGRAM_WITH_LOANEE_CANNOT_BE_EDITED.getMessage());
+            }
             log.info("Program at service layer update program: ========>{}", foundProgram);
-            foundProgram = programMapper.updateProgram(program, foundProgram);
-            OrganizationIdentity organizationIdentity = findProgramOrganization(program);
-            program.setOrganizationIdentity(organizationIdentity);
+             programMapper.updateProgram(foundProgram, program);
+//             OrganizationIdentity organizationIdentity = findProgramOrganization(foundProgram);
+//            program.setOrganizationIdentity(organizationIdentity);
 //            checkIfProgramExistByNameInOrganization(foundProgram);
             List<Program> programs =
                     programOutputPort.findProgramByName(program.getName(),foundProgram.getOrganizationId());

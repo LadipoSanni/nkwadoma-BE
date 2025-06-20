@@ -112,9 +112,9 @@ public class SmileIdAdapter implements IdentityVerificationOutputPort {
         return headers;
     }
 
-    private void validateIdentityVerificationRequest(IdentityVerification identityVerification) throws InfrastructureException {
+    private void validateIdentityVerificationRequest(IdentityVerification identityVerification) throws IdentityException {
         if (identityVerification == null || StringUtils.isEmpty(identityVerification.getIdentityId()) || StringUtils.isEmpty(identityVerification.getImageUrl())) {
-            throw new InfrastructureException("credentials should not be empty");
+            throw new IdentityException("credentials should not be empty");
         }
 
     }

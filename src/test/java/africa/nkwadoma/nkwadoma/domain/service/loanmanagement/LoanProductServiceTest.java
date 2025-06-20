@@ -172,7 +172,7 @@ class LoanProductServiceTest {
             // Corrected line:
             when(identityManagerOutPutPort.verifyUserExistsAndIsEnabled(userIdentity)).thenReturn(userIdentity);
 
-            when(loanProductOutputPort.existsByName(loanProduct.getName())).thenReturn(Boolean.TRUE);
+            when(loanProductOutputPort.existsByNameIgnoreCase(loanProduct.getName())).thenReturn(Boolean.TRUE);
 
             assertThrows(MeedlException.class, () -> loanService.createLoanProduct(loanProduct));
         } catch (MeedlException exception) {

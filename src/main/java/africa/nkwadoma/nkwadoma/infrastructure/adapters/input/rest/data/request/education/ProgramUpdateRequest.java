@@ -16,7 +16,9 @@ public class ProgramUpdateRequest {
     private String programDescription;
     private String name;
     private DurationType durationType;
-    private int duration;
+    @Min(value = 1, message = "Program duration must be at least 1 month.")
+    @Max(value = 48, message = "Program duration must not exceed 48 months.")
+    private Integer duration;
     private ProgramMode mode;
     private DeliveryType deliveryType;
 
