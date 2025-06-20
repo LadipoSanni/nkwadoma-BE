@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanBrea
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -334,7 +335,7 @@ class CohortServiceTest {
     void deleteCohort_withLoanees_throwsException() throws MeedlException {
         List<Loanee> loanees = List.of(new Loanee());
         when(loaneeOutputPort.findAllLoaneesByCohortId(mockId)).thenReturn(loanees);
-        assertThrows(CohortException.class, () ->
+        assertThrows(EducationException.class, () ->
                 cohortService.deleteCohort(mockId));
         verify(cohortOutputPort, never()).deleteCohort(anyString());
         assertEquals(0, program.getNumberOfCohort());

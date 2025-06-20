@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityverificationmanager;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.InfrastructureException;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.ImageConverter;
@@ -34,31 +35,31 @@ public class SmileIdAdapterTest {
 
     @Test
     void verifyIdentityWithNullIdentityVerification(){
-        assertThrows(InfrastructureException.class, ()-> identityVerificationOutPutPort.verifyIdentity(null));
+        assertThrows(IdentityException.class, ()-> identityVerificationOutPutPort.verifyIdentity(null));
     }
 
     @Test
     void verifyIdentityWithNullIdentityId(){
         identityVerification.setIdentityId(null);
-        assertThrows(InfrastructureException.class, ()-> identityVerificationOutPutPort.verifyIdentity(identityVerification));
+        assertThrows(IdentityException.class, ()-> identityVerificationOutPutPort.verifyIdentity(identityVerification));
     }
 
     @Test
     void verifyIdentityWithEmptyIdentityId(){
         identityVerification.setIdentityId(StringUtils.EMPTY);
-        assertThrows(InfrastructureException.class, ()-> identityVerificationOutPutPort.verifyIdentity(identityVerification));
+        assertThrows(IdentityException.class, ()-> identityVerificationOutPutPort.verifyIdentity(identityVerification));
     }
 
     @Test
     void verifyIdentityWithNullIdentityImage(){
         identityVerification.setImageUrl(null);
-        assertThrows(InfrastructureException.class, ()-> identityVerificationOutPutPort.verifyIdentity(identityVerification));
+        assertThrows(IdentityException.class, ()-> identityVerificationOutPutPort.verifyIdentity(identityVerification));
     }
 
     @Test
     void verifyIdentityWithEmptyIdentityImage(){
         identityVerification.setImageUrl(StringUtils.EMPTY);
-        assertThrows(InfrastructureException.class, ()-> identityVerificationOutPutPort.verifyIdentity(identityVerification));
+        assertThrows(IdentityException.class, ()-> identityVerificationOutPutPort.verifyIdentity(identityVerification));
     }
 
 //    @Test

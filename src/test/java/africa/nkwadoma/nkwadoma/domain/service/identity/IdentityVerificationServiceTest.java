@@ -117,7 +117,7 @@ class IdentityVerificationServiceTest {
     void verifyIdentityOfBlacklistedReferral() throws MeedlException {
         when(loanReferralOutputPort.findById(identityVerification.getLoanReferralId())).thenReturn(loanReferral);
         when(identityVerificationFailureRecordOutputPort.countByReferralId(loanReferral.getId())).thenReturn(5L);
-        assertThrows(IdentityVerificationException.class, () -> identityVerificationService.verifyIdentity(identityVerification));
+        assertThrows(IdentityException.class, () -> identityVerificationService.verifyIdentity(identityVerification));
     }
 
     @Test
@@ -179,7 +179,7 @@ class IdentityVerificationServiceTest {
         when(identityVerificationFailureRecordOutputPort.createIdentityVerificationFailureRecord(identityVerificationFailureRecord)).thenReturn(identityVerificationFailureRecord);
         when(identityVerificationFailureRecordOutputPort.countByReferralId(identityVerificationFailureRecord.getReferralId())).thenReturn(5L);
 
-        assertThrows(IdentityVerificationException.class, ()->identityVerificationService.createIdentityVerificationFailureRecord(identityVerificationFailureRecord));
+        assertThrows(IdentityException.class, ()->identityVerificationService.createIdentityVerificationFailureRecord(identityVerificationFailureRecord));
     }
     @Test
     void failedVerificationNotBlackListed() {
