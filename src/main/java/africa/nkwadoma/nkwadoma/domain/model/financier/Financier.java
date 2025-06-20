@@ -7,6 +7,8 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.Financi
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicleDesignation;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicleType;
+import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.InvestmentException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.Cooperation;
@@ -72,7 +74,7 @@ public class Financier {
     private boolean politicallyExposed;
     private List<PoliticallyExposedPerson> politicallyExposedPeople;
 
-    private void validateUserIdentity() throws MeedlException {
+    private void validateUserIdentity() throws InvestmentException, MeedlException {
         log.info("Started validating financier user identity.");
         MeedlValidator.validateObjectInstance(userIdentity, UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
         validateFinancierEmail(userIdentity);
@@ -90,11 +92,11 @@ public class Financier {
             MeedlValidator.validateEmail(userIdentity.getEmail());
         } catch (MeedlException e) {
             log.error("validate financier email",e);
-            throw new MeedlException(e.getMessage() + " for : "+ userIdentity.getEmail());
+            throw new InvestmentException(e.getMessage() + " for : "+ userIdentity.getEmail());
         }
     }
 
-    public void validate() throws MeedlException {
+    public void validate() throws InvestmentException, MeedlException {
         log.info("Validating financier details to save.");
         if (MeedlValidator.isNotValidId(this.id)) {
             MeedlValidator.validateObjectInstance(this.financierType, FinancierMessages.INVALID_FINANCIER_TYPE.getMessage());

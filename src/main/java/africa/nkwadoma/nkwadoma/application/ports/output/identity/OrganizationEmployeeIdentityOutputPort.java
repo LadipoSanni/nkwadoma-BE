@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.application.ports.output.identity;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -15,7 +16,7 @@ public interface OrganizationEmployeeIdentityOutputPort {
 
     OrganizationEmployeeIdentity findById(String id) throws MeedlException;
 
-    OrganizationEmployeeIdentity findByEmployeeId(String employeeId) throws MeedlException;
+    OrganizationEmployeeIdentity findByEmployeeId(String employeeId) throws EducationException;
 
     Page<OrganizationEmployeeIdentity> findAllOrganizationEmployees(String organizationId, int pageNumber, int pageSize) throws MeedlException;
 

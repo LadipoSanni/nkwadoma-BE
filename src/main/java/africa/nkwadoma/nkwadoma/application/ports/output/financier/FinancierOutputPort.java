@@ -1,11 +1,12 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.financier;
 
+import africa.nkwadoma.nkwadoma.domain.exceptions.InvestmentException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import org.springframework.data.domain.Page;
 
 public interface FinancierOutputPort {
-    Financier save(Financier financier) throws MeedlException;
+    Financier save(Financier financier) throws InvestmentException;
 
     Page<Financier> viewAllFinancier(Financier financier) throws MeedlException;
 

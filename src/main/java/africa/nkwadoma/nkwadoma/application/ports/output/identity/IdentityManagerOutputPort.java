@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface IdentityManagerOutputPort {
-    UserIdentity createUser(UserIdentity userIdentity) throws MeedlException;
+    UserIdentity createUser(UserIdentity userIdentity) throws IdentityException;
     UserIdentity updateUserData(UserIdentity userIdentity) throws MeedlException;
 
     void deleteUser(UserIdentity userIdentity) throws MeedlException;
@@ -25,7 +25,7 @@ public interface IdentityManagerOutputPort {
     UserIdentity createPassword(UserIdentity userIdentity) throws MeedlException;
     void logout(UserIdentity userIdentity) throws MeedlException;
     void enableClient(OrganizationIdentity foundOrganization) throws MeedlException;
-    void disableClient(OrganizationIdentity organizationIdentity) throws MeedlException;
+    void disableClient(OrganizationIdentity organizationIdentity) throws IdentityException;
 
     ClientRepresentation getClientRepresentationByClientId(String id) throws MeedlException;
 
@@ -38,8 +38,8 @@ public interface IdentityManagerOutputPort {
 
     UserIdentity verifyUserExistsAndIsEnabled(UserIdentity userIdentity) throws MeedlException;
 
-    UserIdentity enableUserAccount(UserIdentity userIdentity) throws MeedlException;
-    UserIdentity disableUserAccount(UserIdentity userIdentity) throws MeedlException;
+    UserIdentity enableUserAccount(UserIdentity userIdentity) throws IdentityException;
+    UserIdentity disableUserAccount(UserIdentity userIdentity) throws IdentityException;
 
     UserRepresentation getUserRepresentation(UserIdentity userIdentity, Boolean exactMatch) throws MeedlException;
 

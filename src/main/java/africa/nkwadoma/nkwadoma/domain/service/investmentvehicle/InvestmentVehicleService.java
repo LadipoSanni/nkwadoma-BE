@@ -107,7 +107,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         portfolioOutputPort.save(portfolio);
     }
 
-    private void checkIfInvestmentVehicleNameExist(InvestmentVehicle investmentVehicle) throws MeedlException {
+    private void checkIfInvestmentVehicleNameExist(InvestmentVehicle investmentVehicle) throws InvestmentException {
         InvestmentVehicle existingVehicle = investmentVehicleOutputPort.findByNameExcludingDraftStatus(investmentVehicle.getName(),DRAFT);
         if (!ObjectUtils.isEmpty(existingVehicle)) {
             throw new InvestmentException(INVESTMENT_VEHICLE_NAME_EXIST.getMessage());
@@ -143,7 +143,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findByInvestmentVehicleLink(investmentVehicleLink);
         if (foundInvestmentVehicle.getInvestmentVehicleVisibility() != InvestmentVehicleVisibility.PUBLIC){
             log.info("Investment vehicle is not public therefore can not be viewed view link {}", investmentVehicleLink);
-            throw new MeedlException("Investment vehicle not found.");
+            throw new ResourceNotFoundException("Investment vehicle not found.");
         }
         return foundInvestmentVehicle;
     }
@@ -164,7 +164,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
                 return foundInvestmentVehicle;
             }
         }
-        throw new MeedlException("Investment Vehicle not found");
+        throw new ResourceNotFoundException("Investment Vehicle not found");
     }
 
 
@@ -230,7 +230,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
             return prepareInvestmentVehicleForPublishing(investmentVehicle);
         } else if (investmentVehicleVisibility.equals(InvestmentVehicleVisibility.PRIVATE)) {
             if (financiers.isEmpty()) {
-                throw new MeedlException(InvestmentVehicleMessages.CANNOT_MAKE_INVESTMENT_VEHICLE_PRIVATE_WITH_EMPTY_FINANCIER.getMessage());
+                throw new InvestmentException(InvestmentVehicleMessages.CANNOT_MAKE_INVESTMENT_VEHICLE_PRIVATE_WITH_EMPTY_FINANCIER.getMessage());
             }
             addFinancierToVehicle(financiers, investmentVehicle);
         }
@@ -245,7 +245,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
                             .investmentVehicle(investmentVehicle).financier(financier).
                     investmentVehicleDesignation(eachFinancier.getInvestmentVehicleDesignation()).build();
             if (!investmentVehicleFinancierOutputPort.findByAll(investmentVehicle.getId(),financier.getId()).isEmpty()) {
-                throw new MeedlException(InvestmentVehicleMessages.FINANCIER_ALREADY_EXIST_IN_VEHICLE.getMessage());
+                throw new InvestmentException(InvestmentVehicleMessages.FINANCIER_ALREADY_EXIST_IN_VEHICLE.getMessage());
             }
             investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
         }
@@ -259,7 +259,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
             }else if (investmentVehicleVisibility.equals(InvestmentVehicleVisibility.PRIVATE)) {
                 if (!investmentVehicleFinancierOutputPort
                         .checkIfFinancierExistInVehicle(investmentVehicle.getId()) && financiers.isEmpty()){
-                    throw new MeedlException(InvestmentVehicleMessages.CANNOT_MAKE_INVESTMENT_VEHICLE_PRIVATE_WITH_EMPTY_FINANCIER.getMessage());
+                    throw new InvestmentException(InvestmentVehicleMessages.CANNOT_MAKE_INVESTMENT_VEHICLE_PRIVATE_WITH_EMPTY_FINANCIER.getMessage());
                 };
                 addFinancierToVehicle(financiers, investmentVehicle);
                 investmentVehicle.setInvestmentVehicleVisibility(investmentVehicleVisibility);
@@ -361,7 +361,5 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         log.info("Link generated {} for investment vehicle with name {}.",uniqueSlug, name);
         return uniqueSlug;
     }
-
-
 
 }

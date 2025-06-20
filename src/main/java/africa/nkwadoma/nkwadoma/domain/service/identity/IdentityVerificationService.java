@@ -220,7 +220,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         } catch (IdentityException exception) {
             log.error("Error verifying user's identity... {}", exception.getMessage());
             createVerificationFailure(loanReferral, exception.getMessage(), ServiceProvider.PREMBLY);
-            throw new MeedlException(exception.getMessage());
+            throw new IdentityException(exception.getMessage());
         }
         return verificationResponse;
     }
@@ -234,7 +234,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         Optional<LoanMetrics> loanMetrics =
                 loanMetricsOutputPort.findByOrganizationId(organization.get().getId());
         if (loanMetrics.isEmpty()) {
-            throw new LoanException("Organization has no loan metrics");
+            throw new ResourceNotFoundException("Organization has no loan metrics");
         }
         loanMetrics.get().setLoanRequestCount(
                 loanMetrics.get().getLoanRequestCount() + 1

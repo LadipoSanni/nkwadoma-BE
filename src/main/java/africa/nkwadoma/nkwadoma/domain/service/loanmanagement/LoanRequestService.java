@@ -163,7 +163,7 @@ public class LoanRequestService implements LoanRequestUseCase {
         Optional<OrganizationIdentity> organization =
                 organizationIdentityOutputPort.findOrganizationByName(loanRequest.getReferredBy());
         if (organization.isEmpty()) {
-            throw new EducationException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
+            throw new LoanException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
         }
         Optional<LoanMetrics> loanMetrics =
                 loanMetricsOutputPort.findByOrganizationId(organization.get().getId());

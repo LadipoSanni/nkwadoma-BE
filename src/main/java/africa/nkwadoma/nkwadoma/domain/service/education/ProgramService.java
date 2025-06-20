@@ -57,7 +57,7 @@ public class ProgramService implements AddProgramUseCase {
                     programOutputPort.findProgramByName(program.getName(),foundProgram.getOrganizationId());
             for (Program p : programs) {
                 if (!p.getId().equals(program.getId())){
-                  throw new EducationException("Program name exist");
+                  throw new EducationException(PROGRAM_ALREADY_EXISTS.getMessage());
                 }
             }
         }
@@ -74,7 +74,7 @@ public class ProgramService implements AddProgramUseCase {
         log.info("Program exists {}. name {}, organization {}", programExists, program.getName(), program.getOrganizationId());
         if (programExists) {
             log.error("Program with name {} already exists in organization with id :{}", program.getName(), program.getOrganizationId());
-            throw new ResourceAlreadyExistsException(PROGRAM_ALREADY_EXISTS.getMessage());
+            throw new EducationException(PROGRAM_ALREADY_EXISTS.getMessage());
         }
         log.info("Program with name {} does not exists in organization with id :{}, therefore program can be created/updated.", program.getName(), program.getOrganizationId());
     }

@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.application.ports.output.identity;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
@@ -11,13 +12,13 @@ import org.springframework.data.domain.*;
 import java.util.*;
 
 public interface OrganizationIdentityOutputPort {
-    OrganizationIdentity save(OrganizationIdentity organizationIdentity) throws MeedlException;
+    OrganizationIdentity save(OrganizationIdentity organizationIdentity) throws IdentityException;
 
     Optional<OrganizationEntity> findByRcNumber(String rcNumber) throws MeedlException;
 
     OrganizationIdentity findByEmail(String email) throws MeedlException;
     void delete(String organizationId) throws MeedlException;
-    OrganizationIdentity findById(String id) throws MeedlException;
+    OrganizationIdentity findById(String id) throws IdentityException;
     List<ServiceOffering> getServiceOfferings(String organizationId) throws MeedlException;
     Page<OrganizationIdentity> viewAllOrganization(OrganizationIdentity organizationIdentity) throws MeedlException;
     Page<OrganizationIdentity> viewAllOrganizationByStatus(OrganizationIdentity organizationIdentity, ActivationStatus status) throws MeedlException;
@@ -35,7 +36,7 @@ public interface OrganizationIdentityOutputPort {
 
     Page<OrganizationIdentity> findByNameSortingByLoanType(String name, LoanType loanType, int pageSize, int pageNumber) throws MeedlException;
 
-    OrganizationIdentity findOrganizationByCohortId(String cohortId) throws MeedlException;
+    OrganizationIdentity findOrganizationByCohortId(String cohortId) throws EducationException;
 
     List<OrganizationIdentity> findAllOrganization();
 }

@@ -10,5 +10,5 @@ import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationEx
 public interface IdentityVerificationUseCase {
     String verifyIdentity(String loanReferralId) throws MeedlException;
     String verifyIdentity(IdentityVerification identityVerification) throws MeedlException;
-    String createIdentityVerificationFailureRecord(IdentityVerificationFailureRecord verificationFailureRecord) throws IdentityVerificationException, IdentityException;
+    String createIdentityVerificationFailureRecord(IdentityVerificationFailureRecord verificationFailureRecord) throws IdentityException;
 }

@@ -31,7 +31,7 @@ public class NextOfKinService implements NextOfKinUseCase {
         NextOfKin foundNextOfKin = foundUserIdentity.getNextOfKin();
         if (ObjectUtils.isNotEmpty(foundNextOfKin)) {
             log.error("User has next of kin {}", foundNextOfKin);
-            throw new MeedlException(IdentityMessages.USER_HAS_NEXT_OF_KIN.getMessage());
+            throw new IdentityException(IdentityMessages.USER_HAS_NEXT_OF_KIN.getMessage());
         }
         NextOfKin savedNextOfKin = nextOfKinOutputPort.save(nextOfKin);
         log.info("Saved next of kin: {}", savedNextOfKin);
