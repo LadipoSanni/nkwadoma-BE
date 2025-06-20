@@ -9,9 +9,9 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import java.util.List;
 
 public interface UserIdentityOutputPort {
-    UserIdentity save(UserIdentity userIdentity) throws IdentityException;
+    UserIdentity save(UserIdentity userIdentity) throws MeedlException;
 
-    UserIdentity findById(String id) throws InvestmentException;
+    UserIdentity findById(String id) throws MeedlException;
 
     void deleteUserById(String id) throws MeedlException;
 

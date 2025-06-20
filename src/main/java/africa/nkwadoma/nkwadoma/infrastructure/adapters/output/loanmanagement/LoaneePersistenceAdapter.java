@@ -12,6 +12,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoaneeMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeProjection;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeRepository;
+import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import lombok.extern.slf4j.*;
@@ -119,7 +120,7 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
     @Override
     public void archiveOrUnArchiveByIds(List<String> loaneesId, LoaneeStatus loaneeStatus) throws MeedlException {
         if (loaneesId.isEmpty()){
-            throw new MeedlException(LoaneeMessages.LOANEES_ID_CANNOT_BE_EMPTY.getMessage());
+            throw new LoanException(LoaneeMessages.LOANEES_ID_CANNOT_BE_EMPTY.getMessage());
         }
         loaneeRepository.updateStatusByIds(loaneesId, loaneeStatus);
     }

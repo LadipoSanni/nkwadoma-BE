@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.Emai
 import africa.nkwadoma.nkwadoma.domain.enums.constants.notification.ContextMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.meedlexception.MeedlNotificationException;
 import africa.nkwadoma.nkwadoma.domain.model.notification.Email;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -38,7 +39,7 @@ public class EmailAdapter implements EmailOutputPort {
             mailMessage.setFrom(mailSender);
             javaMailSender.send(mailMessage);
         } catch (MessagingException | MailException | UnsupportedEncodingException exception) {
-            throw new IdentityException(exception.getMessage());
+            throw new MeedlNotificationException(exception.getMessage());
         }
     }
 

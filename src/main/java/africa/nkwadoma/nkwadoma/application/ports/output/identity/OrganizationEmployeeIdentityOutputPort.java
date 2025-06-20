@@ -16,7 +16,7 @@ public interface OrganizationEmployeeIdentityOutputPort {
 
     OrganizationEmployeeIdentity findById(String id) throws MeedlException;
 
-    OrganizationEmployeeIdentity findByEmployeeId(String employeeId) throws EducationException;
+    OrganizationEmployeeIdentity findByEmployeeId(String employeeId) throws EducationException, IdentityException;
 
     Page<OrganizationEmployeeIdentity> findAllOrganizationEmployees(String organizationId, int pageNumber, int pageSize) throws MeedlException;
 

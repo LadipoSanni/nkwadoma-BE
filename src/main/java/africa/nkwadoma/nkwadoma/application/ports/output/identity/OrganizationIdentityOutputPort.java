@@ -12,13 +12,13 @@ import org.springframework.data.domain.*;
 import java.util.*;
 
 public interface OrganizationIdentityOutputPort {
-    OrganizationIdentity save(OrganizationIdentity organizationIdentity) throws IdentityException;
+    OrganizationIdentity save(OrganizationIdentity organizationIdentity) throws MeedlException;
 
     Optional<OrganizationEntity> findByRcNumber(String rcNumber) throws MeedlException;
 
     OrganizationIdentity findByEmail(String email) throws MeedlException;
     void delete(String organizationId) throws MeedlException;
-    OrganizationIdentity findById(String id) throws IdentityException;
+    OrganizationIdentity findById(String id) throws MeedlException;
     List<ServiceOffering> getServiceOfferings(String organizationId) throws MeedlException;
     Page<OrganizationIdentity> viewAllOrganization(OrganizationIdentity organizationIdentity) throws MeedlException;
     Page<OrganizationIdentity> viewAllOrganizationByStatus(OrganizationIdentity organizationIdentity, ActivationStatus status) throws MeedlException;
@@ -36,7 +36,7 @@ public interface OrganizationIdentityOutputPort {
 
     Page<OrganizationIdentity> findByNameSortingByLoanType(String name, LoanType loanType, int pageSize, int pageNumber) throws MeedlException;
 
-    OrganizationIdentity findOrganizationByCohortId(String cohortId) throws EducationException;
+    OrganizationIdentity findOrganizationByCohortId(String cohortId) throws MeedlException;
 
     List<OrganizationIdentity> findAllOrganization();
 }

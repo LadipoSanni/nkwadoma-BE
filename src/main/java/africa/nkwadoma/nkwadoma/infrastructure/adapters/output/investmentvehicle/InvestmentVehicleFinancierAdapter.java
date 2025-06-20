@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
+import africa.nkwadoma.nkwadoma.domain.exceptions.InvestmentException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicleFinancier;
@@ -160,7 +161,7 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
     public void checkIfInvestmentExist(String investmentVehicleFinancierId) throws MeedlException {
         boolean investmentExist = investmentVehicleFinancierRepository.existsById(investmentVehicleFinancierId);
         if (!investmentExist){
-            throw new MeedlException("Investment does not exist");
+            throw new InvestmentException("Investment does not exist");
         }
     }
 }

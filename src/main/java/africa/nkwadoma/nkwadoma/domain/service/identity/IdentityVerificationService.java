@@ -16,7 +16,6 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -29,9 +28,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.pre
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.identity.IdentityVerificationMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanMetricsMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.commons.IdentityVerificationMessage;
-import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
-import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.aes.TokenUtils;
+//import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -138,7 +135,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         return identityManagerOutputPort.updateUserData(userIdentity);
     }
 
-    private void createVerificationFailure(LoanReferral loanReferral, String message, ServiceProvider serviceProvider) throws MeedlException, IdentityVerificationException {
+    private void createVerificationFailure(LoanReferral loanReferral, String message, ServiceProvider serviceProvider) throws MeedlException {
         IdentityVerificationFailureRecord identityVerificationFailureRecord = new IdentityVerificationFailureRecord();
         identityVerificationFailureRecord.setEmail(loanReferral.getLoanee().getUserIdentity().getEmail());
         identityVerificationFailureRecord.setReferralId(loanReferral.getId());
