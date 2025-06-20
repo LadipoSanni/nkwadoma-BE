@@ -114,7 +114,7 @@ public class FinancierService implements FinancierUseCase {
         }
     }
 
-    private UserIdentity getActorPerformingAction(List<Financier> financiers) throws InvestmentException {
+    private UserIdentity getActorPerformingAction(List<Financier> financiers) throws MeedlException {
         try {
             return userIdentityOutputPort.findById(financiers.get(0).getUserIdentity().getCreatedBy());
         } catch (InvestmentException e) {
@@ -208,7 +208,7 @@ public class FinancierService implements FinancierUseCase {
         }
     }
 
-    private Financier inviteCooperateFinancierToPlatform(Financier financier) throws InvestmentException, IdentityException{
+    private Financier inviteCooperateFinancierToPlatform(Financier financier) throws MeedlException {
         log.info("Financier invited into the platform before getCooperateFinancierByUserIdentity is called.");
         try {
             financier = getCooperateFinancierByUserIdentity(financier);
@@ -223,7 +223,7 @@ public class FinancierService implements FinancierUseCase {
         return financier;
     }
 
-    private Financier saveNonExistingCooperateFinancier(Financier financier) throws InvestmentException, IdentityException {
+    private Financier saveNonExistingCooperateFinancier(Financier financier) throws MeedlException {
         log.info("Saving cooperate financier user identity to platform {} ",financier);
         financier.getUserIdentity().setFirstName(financier.getCooperation().getName());
         financier.getUserIdentity().setLastName(financier.getCooperation().getName());

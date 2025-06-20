@@ -107,7 +107,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         portfolioOutputPort.save(portfolio);
     }
 
-    private void checkIfInvestmentVehicleNameExist(InvestmentVehicle investmentVehicle) throws InvestmentException {
+    private void checkIfInvestmentVehicleNameExist(InvestmentVehicle investmentVehicle) throws MeedlException {
         InvestmentVehicle existingVehicle = investmentVehicleOutputPort.findByNameExcludingDraftStatus(investmentVehicle.getName(),DRAFT);
         if (!ObjectUtils.isEmpty(existingVehicle)) {
             throw new InvestmentException(INVESTMENT_VEHICLE_NAME_EXIST.getMessage());

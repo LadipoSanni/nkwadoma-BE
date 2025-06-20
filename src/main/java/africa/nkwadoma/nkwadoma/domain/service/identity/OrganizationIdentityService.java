@@ -142,7 +142,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
                         organizationEmployeeIdentity = organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
                         log.info("Updated Organization employee status: {}", organizationEmployeeIdentity.getStatus());
                         identityManagerOutPutPort.enableUserAccount(organizationEmployeeIdentity.getMeedlUser());
-                    } catch (IdentityException e) {
+                    } catch (MeedlException e) {
                         log.error("Error enabling organization user : {}", e.getMessage());
                     }
                 });
@@ -176,7 +176,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
                                 organizationEmployeeIdentity = organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
                                 log.info("Updated organization status: {}", organizationEmployeeIdentity.getStatus());
                                 identityManagerOutPutPort.disableUserAccount(userIdentity);
-                            } catch (IdentityException e) {
+                            } catch (MeedlException e) {
                                 log.error("Error disabling organization user : {}", e.getMessage());
                             }
                         });

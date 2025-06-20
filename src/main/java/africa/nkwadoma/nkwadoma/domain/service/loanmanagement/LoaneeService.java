@@ -387,11 +387,11 @@ public class LoaneeService implements LoaneeUseCase {
             throw new LoanException(LoaneeMessages.LOANEE_MUST_BE_ADDED_TO_COHORT.getMessage());
         }
     }
-    private OrganizationIdentity getLoaneeOrganization(String cohortId) throws EducationException {
+    private OrganizationIdentity getLoaneeOrganization(String cohortId) throws MeedlException {
         return organizationIdentityOutputPort.findOrganizationByCohortId(cohortId);
     }
 
-    private OrganizationIdentity getLoaneeOrganization(Loanee loanee) throws EducationException, IdentityException {
+    private OrganizationIdentity getLoaneeOrganization(Loanee loanee) throws MeedlException {
         OrganizationEmployeeIdentity organizationEmployeeIdentity =
                 organizationEmployeeIdentityOutputPort.findByEmployeeId(loanee.getUserIdentity().getCreatedBy());
         OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
