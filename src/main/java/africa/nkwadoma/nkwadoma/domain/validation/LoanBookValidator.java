@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -43,12 +44,33 @@ public class LoanBookValidator {
 
     public void validateAllFileFields(List<Loanee> convertedLoanees) throws MeedlException {
         for (Loanee loanee : convertedLoanees) {
-            boolean loanProductExist = loanProductOutputPort.existsByNameIgnoreCase(loanee.getCohortName());
             validateFileBvn(loanee.getUserIdentity());
             validateFileNin(loanee.getUserIdentity());
-            validateLoanProductExist(loanee, loanProductExist);
+            validateLoanProductExist(loanee);
+            validateAmount(loanee);
         }
 
+    }
+
+    private void validateAmount(Loanee loanee) throws MeedlException {
+        validateMoneyValue(loanee.getLoaneeLoanDetail().getInitialDeposit(), "Initial deposit for user with email "+loanee.getUserIdentity().getEmail()+" is invalid: "+ convertIfNull( loanee.getLoaneeLoanDetail().getInitialDeposit()));
+        validateMoneyValue(loanee.getLoaneeLoanDetail().getAmountRequested(), "Amount requested for user with email "+loanee.getUserIdentity().getEmail()+" is invalid: "+ convertIfNull( loanee.getLoaneeLoanDetail().getAmountRequested()));
+        validateMoneyValue(loanee.getLoaneeLoanDetail().getAmountReceived(), "Amount received for user with email "+loanee.getUserIdentity().getEmail()+" is invalid: "+ convertIfNull( loanee.getLoaneeLoanDetail().getAmountReceived()));
+    }
+
+    private String convertIfNull(BigDecimal bigDecimal) {
+        if (bigDecimal == null) {
+            return "Value not provided";
+        }
+        return bigDecimal.toString();
+    }
+
+    public void validateMoneyValue(BigDecimal amount, String message) throws MeedlException {
+        MeedlValidator.validateBigDecimalDataElement(amount, message);
+        if (amount.compareTo(BigDecimal.ZERO) < 0) {
+            log.warn("Negative amount detected: {} {}", amount, message);
+            throw new MeedlException(message);
+        }
     }
 
     private void validateFileNin(UserIdentity userIdentity) throws MeedlException {
@@ -79,7 +101,8 @@ public class LoanBookValidator {
     }
 
 
-    private static void validateLoanProductExist(Loanee loanee, boolean loanProductExist) throws MeedlException {
+    private void validateLoanProductExist(Loanee loanee) throws MeedlException {
+        boolean loanProductExist = loanProductOutputPort.existsByNameIgnoreCase(loanee.getCohortName());
         if (!loanProductExist) {
             log.error("Loan Product with name {} does not exist for user with email {}", loanee.getCohortName(), loanee.getUserIdentity().getEmail());
             throw new MeedlException("Loan product with name " + loanee.getCohortName() + " does not exist for user with email "+ loanee.getUserIdentity().getEmail());

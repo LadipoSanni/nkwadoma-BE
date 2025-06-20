@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,10 +19,6 @@ class LoanBookValidatorTest {
     @Autowired
     private LoanBookValidator loanBookValidator;
 
-    @BeforeEach
-    void setUp() {
-
-    }
     private Map<String, String> createRow(String key, String value) {
         Map<String, String> row = new HashMap<>();
         row.put(key, value);
@@ -104,5 +101,64 @@ class LoanBookValidatorTest {
         MeedlException ex = assertThrows(MeedlException.class,
                 () -> loanBookValidator.validateDateTimeFormat(data, "startDate"));
         assertTrue(ex.getMessage().contains("Date doesn't match format"));
+    }
+    @Test
+    void testValidateMoneyValueNullAmount() {
+        BigDecimal amount = null;
+        String message = "Amount cannot be null";
+
+        MeedlException exception = assertThrows(MeedlException.class, () ->
+                loanBookValidator.validateMoneyValue(amount, message)
+        );
+
+        assertEquals(message, exception.getMessage());
+    }
+
+    @Test
+    void testValidateMoneyValueZeroAmountPassesValidation() {
+        BigDecimal amount = BigDecimal.ZERO;
+        assertDoesNotThrow(() ->
+                loanBookValidator.validateMoneyValue(amount, "Zero is valid")
+        );
+    }
+
+    @Test
+    void testValidateMoneyValuePositiveAmountPassesValidation() {
+        BigDecimal amount = new BigDecimal("100.00");
+        assertDoesNotThrow(() ->
+                loanBookValidator.validateMoneyValue(amount, "Positive is valid")
+        );
+    }
+
+    @Test
+    void testValidateMoneyValueNegativeAmount() {
+        BigDecimal amount = new BigDecimal("-50.00");
+        String message = "Amount cannot be negative";
+
+        MeedlException exception = assertThrows(MeedlException.class, () ->
+                loanBookValidator.validateMoneyValue(amount, message)
+        );
+
+        assertEquals(message, exception.getMessage());
+    }
+
+    @Test
+    void testValidateMoneyValueLargePositiveAmount_passesValidation() {
+        BigDecimal amount = new BigDecimal("999999999999.99");
+        assertDoesNotThrow(() ->
+                loanBookValidator.validateMoneyValue(amount, "Large positive is valid")
+        );
+    }
+
+    @Test
+    void testValidateMoneyValueLargeNegativeAmount() {
+        BigDecimal amount = new BigDecimal("-999999999999.99");
+        String message = "Large negative not allowed";
+
+        MeedlException exception = assertThrows(MeedlException.class, () ->
+                loanBookValidator.validateMoneyValue(amount, message)
+        );
+
+        assertEquals(message, exception.getMessage());
     }
 }
