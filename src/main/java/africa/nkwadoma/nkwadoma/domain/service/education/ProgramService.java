@@ -54,9 +54,9 @@ public class ProgramService implements AddProgramUseCase {
                 throw new EducationException(ProgramMessages.PROGRAM_WITH_LOANEE_CANNOT_BE_EDITED.getMessage());
             }
             log.info("Program at service layer update program: ========>{}", foundProgram);
-             programMapper.updateProgram(program, foundProgram);
-             OrganizationIdentity organizationIdentity = findProgramOrganization(program);
-            program.setOrganizationIdentity(organizationIdentity);
+             programMapper.updateProgram(foundProgram, program);
+//             OrganizationIdentity organizationIdentity = findProgramOrganization(foundProgram);
+//            program.setOrganizationIdentity(organizationIdentity);
 //            checkIfProgramExistByNameInOrganization(foundProgram);
             List<Program> programs =
                     programOutputPort.findProgramByName(program.getName(),foundProgram.getOrganizationId());

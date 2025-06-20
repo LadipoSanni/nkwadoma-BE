@@ -90,7 +90,7 @@ public class Program {
         log.info("Validating program duration before edit");
         if(duration <= 0){
             log.info("Program duration can not be less than or equal to zero. Duration passed is : {} \n previous duration is {}", duration, foundProgram.getDuration());
-//            setDuration(foundProgram.getDuration());
+            setDuration(foundProgram.getDuration());
 //            throw new EducationException(ProgramMessages.PROGRAM_DURATION_CANNOT_BE_NEGATIVE.getMessage());
         }
     }
