@@ -85,7 +85,7 @@ public class ProgramService implements AddProgramUseCase {
     public Page<Program> viewAllPrograms(Program program) throws MeedlException {
         UserIdentity userIdentity = userIdentityOutputPort.findById(program.getCreatedBy());
         if (userIdentity.getRole().equals(IdentityRole.PORTFOLIO_MANAGER)){
-            MeedlValidator.validateUUID(program.getOrganizationId(), ProgramMessages.INVALID_PROGRAM_ID.getMessage());
+            MeedlValidator.validateUUID(program.getOrganizationId(), OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
             return programOutputPort.findAllProgramByOrganizationId(program.getOrganizationId(),program.getPageSize(),
                     program.getPageNumber());
         }
