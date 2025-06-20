@@ -152,6 +152,15 @@ jobs:
             echo "NEW_PORT=${{ env.BLUE_PORT }}" >> $GITHUB_ENV
           fi
           
+      - name: Clean up stopped conflicting container
+        run: |
+          if [ "$(docker ps -aq -f name=nkwadoma_${{ env.NEW_ENV }} -f status=exited)" ]; then
+            docker rm nkwadoma_${{ env.NEW_ENV }}
+          fi
+          if [ "$(docker ps -aq -f name=nkwadoma_${{ env.NEW_ENV }} -f status=created)" ]; then
+            docker rm nkwadoma_${{ env.NEW_ENV }}
+          fi
+          
       - name: Start new container
         run: |
           sudo docker network inspect pulser_pulsar >/dev/null 2>&1 || sudo docker network create pulser_pulsar
