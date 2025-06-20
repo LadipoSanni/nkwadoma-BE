@@ -1,12 +1,15 @@
 package africa.nkwadoma.nkwadoma.domain.validation;
 
+import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -22,6 +25,7 @@ import java.util.Map;
 public class LoanBookValidator {
     private final LoaneeOutputPort loaneeOutputPort;
     private final LoanProductOutputPort loanProductOutputPort;
+    private final AesOutputPort aesOutputPort;
 
     public void validateUserDataUploadFile(LoanBook loanBook, List<Map<String, String>> data, List<String> requiredHeaders) {
 
@@ -37,14 +41,49 @@ public class LoanBookValidator {
 
     }
 
-    public void validateAllLoanProductExist(List<Loanee> convertedLoanees) throws MeedlException {
+    public void validateAllFileFields(List<Loanee> convertedLoanees) throws MeedlException {
         for (Loanee loanee : convertedLoanees) {
             boolean loanProductExist = loanProductOutputPort.existsByNameIgnoreCase(loanee.getCohortName());
-            if (!loanProductExist) {
-                throw new MeedlException("Loan product with name " + loanee.getCohortName() + " does not exist");
-            }
+            validateFileBvn(loanee.getUserIdentity());
+            validateFileNin(loanee.getUserIdentity());
+            validateLoanProductExist(loanee, loanProductExist);
         }
 
+    }
+
+    private void validateFileNin(UserIdentity userIdentity) throws MeedlException {
+        String encryptedNin = validateFileAndEncryptBvnOrNin(userIdentity.getNin(), "User with email "+userIdentity.getEmail()+" has invalid or missing nin "+userIdentity.getNin());
+        userIdentity.setNin(encryptedNin);
+        log.info("nin successfully validated and encrypted");
+    }
+
+    private void validateFileBvn(UserIdentity userIdentity) throws MeedlException {
+        String encryptedBvn = validateFileAndEncryptBvnOrNin(userIdentity.getBvn(), "User with email "+userIdentity.getEmail()+" has invalid or missing bvn "+userIdentity.getBvn() );
+        userIdentity.setBvn(encryptedBvn);
+        log.info("Bvn successfully validated and encrypted");
+
+    }
+    private String validateFileAndEncryptBvnOrNin(String bvnOrNin, String errorMessage) throws MeedlException {
+        MeedlValidator.validateBvnOrNin(bvnOrNin, errorMessage);
+
+        return encryptValue(bvnOrNin, errorMessage);
+    }
+    private String encryptValue(String value, String errorMessage) {
+        try {
+            MeedlValidator.validateBvnOrNin(value, errorMessage);
+            return aesOutputPort.encryptAES(value.trim());
+        } catch (MeedlException e) {
+            log.error("Unable to encrypt value {}", value);
+        }
+        return StringUtils.EMPTY;
+    }
+
+
+    private static void validateLoanProductExist(Loanee loanee, boolean loanProductExist) throws MeedlException {
+        if (!loanProductExist) {
+            log.error("Loan Product with name {} does not exist for user with email {}", loanee.getCohortName(), loanee.getUserIdentity().getEmail());
+            throw new MeedlException("Loan product with name " + loanee.getCohortName() + " does not exist for user with email "+ loanee.getUserIdentity().getEmail());
+        }
     }
 
     public void validateDateTimeFormat(List<Map<String, String>> data, String dateName) throws MeedlException {

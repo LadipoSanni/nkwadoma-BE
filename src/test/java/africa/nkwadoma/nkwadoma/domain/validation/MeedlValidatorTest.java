@@ -68,14 +68,14 @@ class MeedlValidatorTest {
     @Test
     void validateBvnShouldThrowExceptionForInvalidBvn() {
         MeedlException exception = assertThrows(MeedlException.class, () ->
-                MeedlValidator.validateBvn("123456")
+                MeedlValidator.validateBvnOrNin("123456", "Invalid bvn provided")
         );
         assertEquals("Invalid bvn provided", exception.getMessage());
     }
 
     @Test
     void validateBvnShouldPassForValidBvn() {
-        assertDoesNotThrow(() -> MeedlValidator.validateBvn("12345678901"));
+        assertDoesNotThrow(() -> MeedlValidator.validateBvnOrNin("12345678901", "Invalid bvn provided"));
     }
 
     @Test
