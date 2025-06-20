@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.IdentityVerificationUseCase;
+import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerificationFailureRecord;
@@ -44,7 +45,7 @@ public class IdentityVerificationController {
                 .statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("/failure-record/create")
-    public ResponseEntity<ApiResponse<?>> identityVerificationFailed(@RequestBody @Valid IdentityVerificationFailureRecordRequest identityVerificationFailureRecordRequest) throws IdentityVerificationException {
+    public ResponseEntity<ApiResponse<?>> identityVerificationFailed(@RequestBody @Valid IdentityVerificationFailureRecordRequest identityVerificationFailureRecordRequest) throws IdentityException {
         IdentityVerificationFailureRecord identityVerificationFailureRecord = identityVerificationMapper.toIdentityVerificationFailureRecord(identityVerificationFailureRecordRequest);
         return ResponseEntity.ok(ApiResponse.<String>builder()
                 .data(identityVerificationUseCase.createIdentityVerificationFailureRecord(identityVerificationFailureRecord))

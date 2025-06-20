@@ -65,7 +65,7 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
             userEntity = userEntityRepository.findById(id).orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
         } catch (MeedlException meedlException) {
             log.error("Failed to find user with id {} to delete.", id, meedlException);
-            throw new MeedlException(UserMessages.USER_IDENTITY_CANNOT_BE_EMPTY.getMessage());
+            throw new IdentityException(UserMessages.USER_IDENTITY_CANNOT_BE_EMPTY.getMessage());
         }
         if (userEntity != null) {
             userEntityRepository.delete(userEntity);
@@ -103,11 +103,8 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
         return userEntities.stream().map(userIdentityMapper::toUserIdentity).toList();
     }
 
-
     private UserEntity getUserEntityByEmail(String email) throws IdentityException {
         return userEntityRepository.findByEmail(email).orElseThrow(()-> new IdentityException(EMAIL_NOT_FOUND.getMessage()));
     }
-
-
 
 }

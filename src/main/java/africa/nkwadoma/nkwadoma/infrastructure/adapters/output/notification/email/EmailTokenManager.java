@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.notification.ema
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.EmailTokenOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.meedlexception.MeedlNotificationException;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -90,14 +91,14 @@ public class EmailTokenManager implements EmailTokenOutputPort {
                     .getBody();
         } catch (ExpiredJwtException exception) {
             log.error("Time allocated for this action has expired. Please refresh.");
-            throw new MeedlException("Time allocated for this action has expired. Please refresh.");
+            throw new MeedlNotificationException("Time allocated for this action has expired. Please refresh.");
         } catch (SignatureException | MalformedJwtException exception) {
             log.error("You are not authorized to perform this action. Invalid signature");
-            throw new MeedlException("You are not authorized to perform this action. Invalid signature");
+            throw new MeedlNotificationException("You are not authorized to perform this action. Invalid signature");
         }
         if (expiration == null || claims.getExpiration().before(new Date())) {
             log.info("Token has expired");
-            throw new MeedlException("Token has expired");
+            throw new MeedlNotificationException("Token has expired");
         }
         return claims;
     }

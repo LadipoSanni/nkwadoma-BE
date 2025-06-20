@@ -4,7 +4,9 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.InvestmentException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoaneeLoanBreakdownException;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
@@ -34,10 +36,10 @@ public class MeedlValidator {
         }
     }
 
-    public static void validateLoanDecision(String loanReferralStatus) throws LoanException {
+    public static void validateLoanDecision(String loanReferralStatus) throws MeedlException {
         boolean matches = Pattern.matches("^(ACCEPTED|DECLINED)$", loanReferralStatus);
         if (!matches) {
-            throw new LoanException(LoanMessages.INVALID_LOAN_DECISION.getMessage());
+            throw new MeedlException(LoanMessages.INVALID_LOAN_DECISION.getMessage());
         }
     }
     public static boolean isNotValidId(String id) {
@@ -66,7 +68,7 @@ public class MeedlValidator {
         }
     }
 
-    public static void validateDataElement(String dataElement, String message) throws MeedlException {
+    public static void validateDataElement(String dataElement, String message) throws MeedlException  {
         if (isEmptyString(dataElement)) {
             log.error(message);
             throw new MeedlException(message);
@@ -162,7 +164,7 @@ public class MeedlValidator {
         validateDataElement(password, "Password can not be empty");
         Pattern pattern = Pattern.compile(PASSWORD_PATTERN.getMessage());
         if (!pattern.matcher(password).matches()) {
-            throw new IdentityException(WEAK_PASSWORD.getMessage());
+            throw new MeedlException(WEAK_PASSWORD.getMessage());
         }
     }
     public static void validateObjectName(String name,  String message, String attributeName) throws MeedlException {
@@ -180,7 +182,7 @@ public class MeedlValidator {
         MeedlValidator.validateEmail(inviterEmail);
         if (!compareEmailDomain(inviteeEmail,inviterEmail)){
             log.error("{} - {} : {}",DOMAIN_EMAIL_DOES_NOT_MATCH.getMessage(), inviteeEmail, inviterEmail);
-            throw new IdentityException(DOMAIN_EMAIL_DOES_NOT_MATCH.getMessage());
+            throw new MeedlException(DOMAIN_EMAIL_DOES_NOT_MATCH.getMessage());
         }
     }
 
@@ -195,7 +197,7 @@ public class MeedlValidator {
         log.info("validating to check for empty list : {}", CollectionUtils.isEmpty(userIdentities));
         if (CollectionUtils.isEmpty(userIdentities)){
             log.error("{} - {}", USER_IDENTITY_CANNOT_BE_NULL.getMessage(), userIdentities);
-            throw new IdentityException(USER_IDENTITY_CANNOT_BE_NULL.getMessage());
+            throw new MeedlException(USER_IDENTITY_CANNOT_BE_NULL.getMessage());
         }
         for(OrganizationEmployeeIdentity userIdentity : userIdentities){
             MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
@@ -204,10 +206,10 @@ public class MeedlValidator {
         log.info("Users identity validation completed... for user {} ", userIdentities);
     }
 
-    public static void validateLoanRequest(LoanRequest foundLoanRequest) throws LoanException {
+    public static void validateLoanRequest(LoanRequest foundLoanRequest) throws MeedlException {
         if (ObjectUtils.isEmpty(foundLoanRequest)){
             log.info("Loan request: {}", foundLoanRequest);
-            throw new LoanException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage());
+            throw new MeedlException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage());
         }
     }
 
@@ -215,7 +217,7 @@ public class MeedlValidator {
         MeedlValidator.validateBigDecimalDataElement(itemAmount);
         if (itemAmount.compareTo(BigDecimal.ZERO) < 0) {
             log.info("{} --- {}",LoaneeLoanBreakdownMessages.AMOUNT_CANNOT_BE_LESS_THAN_ZERO.getMessage(),itemAmount);
-            throw new LoaneeLoanBreakdownException(message+" "+LoaneeLoanBreakdownMessages.AMOUNT_CANNOT_BE_LESS_THAN_ZERO.getMessage());
+            throw new MeedlException(message+" "+LoaneeLoanBreakdownMessages.AMOUNT_CANNOT_BE_LESS_THAN_ZERO.getMessage());
         }
     }
 

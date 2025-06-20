@@ -14,6 +14,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotif
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanType;
+import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceAlreadyExistsException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.*;
@@ -81,12 +82,12 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     private void checkIfOrganizationAndAdminExist(OrganizationIdentity organizationIdentity) throws MeedlException {
         try {
             checkOrganizationExist(organizationIdentity);
-        }catch (MeedlException e){
+        }catch (IdentityException e){
             if (e.getMessage().equals(ORGANIZATION_NOT_FOUND.getMessage())) {
                 log.info("The organization is not previously existing with message: {} orgamization name {}", e.getMessage(), organizationIdentity.getName());
             }else {
                 log.error("An exception occurred while trying to check if it is a new organisation");
-                throw new MeedlException(e.getMessage());
+                throw new IdentityException(e.getMessage());
             }
         }
         checkIfUserAlreadyExist(organizationIdentity);
@@ -97,7 +98,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         Optional<UserIdentity> optionalUserIdentity = identityManagerOutPutPort.getUserByEmail(organizationIdentity.getOrganizationEmployees().get(0).getMeedlUser().getEmail());
         if (optionalUserIdentity.isPresent()) {
             log.error("Before creating organization : {}, for user with id {} ", USER_IDENTITY_ALREADY_EXISTS.getMessage(), optionalUserIdentity.get().getId()  );
-            throw new ResourceAlreadyExistsException(USER_IDENTITY_ALREADY_EXISTS.getMessage());
+            throw new IdentityException(USER_IDENTITY_ALREADY_EXISTS.getMessage());
         }else {
             log.info("User has not been previously saved. The application can proceed to creating user and making user the first admin for {} organization. ", organizationIdentity.getName());
         }
@@ -107,7 +108,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         ClientRepresentation clientRepresentation = identityManagerOutPutPort.getClientRepresentationByName(organizationIdentity.getName());
         if (organizationIdentity.getName().equals(clientRepresentation.getName())) {
             log.error("OrganizationIdentity already exists, before trying to create organization with name {} ", organizationIdentity.getName());
-            throw new MeedlException("Organization already exists");
+            throw new IdentityException("Organization already exists");
         }
     }
 
@@ -116,13 +117,13 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
                 organizationIdentityOutputPort.findByRcNumber(organizationIdentity.getRcNumber());
         if (foundOrganizationEntity.isPresent()) {
             log.info("Organization with rc number {} already exists", foundOrganizationEntity.get().getRcNumber());
-            throw new MeedlException(ORGANIZATION_RC_NUMBER_ALREADY_EXIST.getMessage());
+            throw new IdentityException(ORGANIZATION_RC_NUMBER_ALREADY_EXIST.getMessage());
         }
 
         Optional<OrganizationIdentity> foundOrganizationIdentity =
                 organizationIdentityOutputPort.findByTin(organizationIdentity.getTin());
         if (foundOrganizationIdentity.isPresent()) {
-            throw new MeedlException(IdentityMessages.ORGANIZATION_TIN_ALREADY_EXIST.getMessage());
+            throw new IdentityException(IdentityMessages.ORGANIZATION_TIN_ALREADY_EXIST.getMessage());
         }
     }
     @Override
@@ -275,10 +276,10 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
 
     private void validateNonUpdatableValues(OrganizationIdentity organizationIdentity) throws MeedlException {
         if (StringUtils.isNotEmpty(organizationIdentity.getName())) {
-            throw new MeedlException("Company name cannot be updated!");
+            throw new IdentityException("Company name cannot be updated!");
         }
         if (StringUtils.isNotEmpty(organizationIdentity.getRcNumber())) {
-            throw new MeedlException("Rc number cannot be updated!");
+            throw new IdentityException("Rc number cannot be updated!");
         }
     }
 
@@ -317,7 +318,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     public OrganizationIdentity viewTopOrganizationByLoanRequestCount() throws MeedlException {
         Optional<LoanMetrics> loanMetrics = loanMetricsOutputPort.findTopOrganizationWithLoanRequest();
         if (loanMetrics.isEmpty()){
-            throw new EducationException(OrganizationMessages.LOAN_METRICS_NOT_FOUND.getMessage());
+            throw new IdentityException(OrganizationMessages.LOAN_METRICS_NOT_FOUND.getMessage());
         }
         log.info("Loan metrics found: {}", loanMetrics);
         return organizationIdentityOutputPort.findById(loanMetrics.get().getOrganizationId());

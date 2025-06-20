@@ -15,7 +15,9 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -105,7 +107,7 @@ public class CohortService implements CohortUseCase {
                 .findFirst();
         if (existingProgramCohort.isPresent()) {
             log.info("Cohort with name {} already exists in program. Cohort id {}", cohortName, existingProgramCohort.get().getId());
-            throw new CohortException(CohortMessages.COHORT_WITH_NAME_EXIST.getMessage());
+            throw new EducationException(CohortMessages.COHORT_WITH_NAME_EXIST.getMessage());
         }
         return program;
     }
@@ -117,7 +119,7 @@ public class CohortService implements CohortUseCase {
         Program program = programOutputPort.findProgramById(foundCohort.getProgramId());
         checkIfCohortNameExist(cohort, foundCohort);
         if (!ObjectUtils.isEmpty(foundCohort.getLoanDetail())) {
-            throw new CohortException(CohortMessages.COHORT_WITH_LOAN_DETAILS_CANNOT_BE_EDITED.getMessage());
+            throw new EducationException(CohortMessages.COHORT_WITH_LOAN_DETAILS_CANNOT_BE_EDITED.getMessage());
         }
         cohortMapper.updateCohort(foundCohort, cohort);
         foundCohort.setUpdatedAt(LocalDateTime.now());
@@ -137,7 +139,7 @@ public class CohortService implements CohortUseCase {
         }
         if (ObjectUtils.isNotEmpty(foundCohortByName)) {
             if (!StringUtils.equals(foundCohort.getId(), foundCohortByName.getId())) {
-                throw new CohortException(CohortMessages.COHORT_WITH_NAME_EXIST.getMessage());
+                throw new EducationException(CohortMessages.COHORT_WITH_NAME_EXIST.getMessage());
             }
         }
     }
@@ -189,7 +191,7 @@ public class CohortService implements CohortUseCase {
         Program foundProgram = programOutputPort.findProgramById(cohort.getProgramId());
         if (ObjectUtils.isEmpty(foundProgram)) {
             log.error("While trying to view all cohort in a program, the program {} was not found.", cohort.getProgramId());
-            throw new MeedlException(PROGRAM_NOT_FOUND.getMessage());
+            throw new ResourceNotFoundException(PROGRAM_NOT_FOUND.getMessage());
         }
         return cohortOutputPort.findAllCohortInAProgram(cohort);
     }
@@ -199,7 +201,7 @@ public class CohortService implements CohortUseCase {
         MeedlValidator.validateUUID(id, CohortMessages.INVALID_COHORT_ID.getMessage());
         List<Loanee> loanees = loaneeOutputPort.findAllLoaneesByCohortId(id);
         if (ObjectUtils.isNotEmpty(loanees)) {
-            throw new CohortException(CohortMessages.COHORT_WITH_LOANEE_CANNOT_BE_DELETED.getMessage());
+            throw new EducationException(CohortMessages.COHORT_WITH_LOANEE_CANNOT_BE_DELETED.getMessage());
         }
         Cohort cohort = cohortOutputPort.findCohort(id);
         cohortOutputPort.deleteCohort(cohort.getId());
@@ -266,7 +268,7 @@ public class CohortService implements CohortUseCase {
         List<Loanee> cohortLoanees = loaneeOutputPort.findSelectedLoaneesInCohort(foundCohort.getId(), loaneeIds);
         if (cohortLoanees == null || cohortLoanees.isEmpty()){
             log.info("Loanee(s) selected is/are not referable.");
-            throw new MeedlException("Loanee(s) selected is/are not referable.");
+            throw new EducationException("Loanee(s) selected is/are not referable.");
         }
         if (cohortLoanees.size() == 1){
             inviteTrainee(cohortLoanees.get(0));

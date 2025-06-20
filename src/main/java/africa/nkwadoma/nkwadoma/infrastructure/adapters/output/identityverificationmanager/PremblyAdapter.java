@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityverifica
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
+import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -59,7 +60,7 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
                 return verifyBvn(identityVerification);
             }
         } else {
-            throw new IdentityVerificationException("Either NIN or BVN must be provided.");
+            throw new IdentityException("Either NIN or BVN must be provided.");
         }
     }
 
@@ -198,7 +199,7 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
 
         } catch (Exception ex) {
             log.error("An unexpected error occurred: {}", ex.getMessage(), ex);
-            throw new MeedlException("Verification server down ");
+            throw new IdentityException("Verification server down ");
         }
     }
 

@@ -17,6 +17,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanMetricsMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanOfferMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -242,7 +243,7 @@ public class LoanOfferServiceTest {
                 .thenReturn(List.of(TestData.createTestLoaneeLoanBreakdown(mockId)));
         when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(mockLoanee);
         assertThrows(
-                LoanOfferException.class,
+                LoanException.class,
                 () -> loanService.viewLoanOfferDetails(mockId, mockId)
         );
     }
