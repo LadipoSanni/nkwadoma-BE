@@ -8,12 +8,14 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.*;
 
 import java.math.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+@Slf4j
 @Getter
 @Setter
 @ToString
@@ -84,9 +86,12 @@ public class Program {
         return totalAmountOutstanding == null ? BigDecimal.ZERO : totalAmountOutstanding;
     }
 
-    public void validateUpdateProgram() throws EducationException {
+    public void validateUpdateProgram(Program foundProgram) throws EducationException {
+        log.info("Validating program duration before edit");
         if(duration <= 0){
-            throw new EducationException(ProgramMessages.PROGRAM_DURATION_CANNOT_BE_NEGATIVE.getMessage());
+            log.info("Program duration can not be less than or equal to zero. Duration passed is : {} \n previous duration is {}", duration, foundProgram.getDuration());
+//            setDuration(foundProgram.getDuration());
+//            throw new EducationException(ProgramMessages.PROGRAM_DURATION_CANNOT_BE_NEGATIVE.getMessage());
         }
     }
 }
