@@ -29,11 +29,9 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.validation.LoanBookValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.aes.TokenUtils;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.stereotype.Component;
 
@@ -242,7 +240,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
             RepaymentHistory repaymentHistory = RepaymentHistory.builder()
                     .loanee(Loanee.builder().userIdentity(UserIdentity.builder().email(validateUseEmail(row.get("email").trim())).build()).build())
                     .amountPaid(validateMoney(row.get("amountpaid").trim(), "Amount repaid should be properly indicated"))
-                    .paymentDateTime(parseFlexibleDateTime(row.get("paymentdate").trim()))
+                    .paymentDateTime(parseFlexibleDateTime(row.get("paymentdate").trim(), row.get("email")))
 //                    .modeOfPayment(validateModeOfPayment(row.get("modeofpayment").trim()))
                     .modeOfPayment(ModeOfPayment.TRANSFER)
                     .build();
@@ -262,7 +260,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     }
 
 
-    private LocalDateTime parseFlexibleDateTime(String dateStr) throws MeedlException {
+    private LocalDateTime parseFlexibleDateTime(String dateStr, String email) throws MeedlException {
         log.info("Repayment date before formating {}", dateStr);
         if (dateStr == null || MeedlValidator.isEmptyString(dateStr)) {
             return null;
@@ -295,7 +293,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         }
 
         log.error("The date format was invalid: {}", dateStr);
-        throw new LoanException("Date doesn't match format. Date: "+dateStr + " Example format : 21/10/2019");
+        throw new LoanException("Date doesn't match format dd/mm/yyyy. Date entered: "+dateStr+". For user "+email);
     }
 
     private ModeOfPayment validateModeOfPayment(String modeOfRepaymentToConvert) {
@@ -356,7 +354,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                     .uploadedStatus(UploadedStatus.ADDED)
                     .cohortId(cohort.getId())
                     .cohortName(row.get("loanproduct"))
-                    .updatedAt(parseFlexibleDateTime(row.get("loanstartdate")))
+                    .updatedAt(parseFlexibleDateTime(row.get("loanstartdate"), row.get("email")))
                     .build();
 
             loanees.add(loanee);
