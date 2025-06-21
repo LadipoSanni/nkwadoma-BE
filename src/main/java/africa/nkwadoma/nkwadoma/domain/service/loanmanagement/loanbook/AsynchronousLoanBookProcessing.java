@@ -85,7 +85,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     }
 
     private void validateAllFileFields(List<Loanee> convertedLoanees) throws MeedlException {
-        log.info("Validating the loan product name.");
+        log.info("Validating the file field values.");
         loanBookValidator.validateAllFileFields(convertedLoanees);
     }
 

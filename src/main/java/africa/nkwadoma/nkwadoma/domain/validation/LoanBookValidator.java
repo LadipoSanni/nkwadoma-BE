@@ -46,10 +46,24 @@ public class LoanBookValidator {
         for (Loanee loanee : convertedLoanees) {
             validateFileBvn(loanee.getUserIdentity());
             validateFileNin(loanee.getUserIdentity());
+            validateNames(loanee.getUserIdentity());
             validateLoanProductExist(loanee);
             validateAmount(loanee);
         }
 
+    }
+
+    private void validateNames(UserIdentity userIdentity) throws MeedlException {
+        String email = userIdentity.getEmail();
+        validateName(userIdentity.getFirstName(), "First name can not be empty for "+email,email+" first name");
+        validateName(userIdentity.getLastName(), "Last name can not be empty for "+email,email+" last name");
+        if (MeedlValidator.isNotEmptyString(userIdentity.getMiddleName())){
+            validateName(userIdentity.getMiddleName(), "Middle name can not be empty for "+email,email+" middle name");
+        }
+    }
+
+    private void validateName(String nameToValidate, String message ,String attributeName) throws MeedlException {
+        MeedlValidator.validateObjectName(nameToValidate, message , attributeName);
     }
 
     private void validateAmount(Loanee loanee) throws MeedlException {
