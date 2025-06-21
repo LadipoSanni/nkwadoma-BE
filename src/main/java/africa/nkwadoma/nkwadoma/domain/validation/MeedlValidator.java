@@ -3,15 +3,10 @@ package africa.nkwadoma.nkwadoma.domain.validation;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages;
-import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.InvestmentException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoaneeLoanBreakdownException;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
-import africa.nkwadoma.nkwadoma.infrastructure.exceptions.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -139,13 +134,13 @@ public class MeedlValidator {
             throw new MeedlException(MeedlMessages.PAGE_SIZE_CANNOT_BE_LESS_THAN_ONE.getMessage());
         }
     }
-    public static void validateBvnOrNin(String bvnOrNin, String errorMessage) throws MeedlException {
-        MeedlValidator.validateDataElement(bvnOrNin, errorMessage);
+    public static void validateElevenDigits(String numbersToValidate, String errorMessage) throws MeedlException {
+        MeedlValidator.validateDataElement(numbersToValidate, errorMessage);
         String regex = "^\\d{11}$";
 
-        boolean isValid = Pattern.matches(regex, bvnOrNin.trim());
+        boolean isValid = Pattern.matches(regex, numbersToValidate.trim());
         if (!isValid) {
-            log.error("Invalid bvn/nin {}", bvnOrNin);
+            log.error(" {} - {}", numbersToValidate, errorMessage);
             throw new MeedlException(errorMessage);
         }
     }

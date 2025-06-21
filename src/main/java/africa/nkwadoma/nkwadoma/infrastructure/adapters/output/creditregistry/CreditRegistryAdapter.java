@@ -59,7 +59,7 @@ public class CreditRegistryAdapter implements CreditRegistryOutputPort {
     }
     @Override
     public int getCreditScoreWithBvn(String bvn) throws MeedlException {
-        MeedlValidator.validateBvnOrNin(bvn, "Invalid bvn provided");
+        MeedlValidator.validateElevenDigits(bvn, "Invalid bvn provided");
         String sessionCode = getSessionCode();
         CreditRegistryFindDetailResponse creditRegistryFindDetailResponse;
         try {
@@ -127,7 +127,7 @@ public class CreditRegistryAdapter implements CreditRegistryOutputPort {
     @Override
     public CreditRegistryFindDetailResponse getCustomerDetails(String bvn, String sessionCode) throws MeedlException {
         validateSessionCode(sessionCode);
-        MeedlValidator.validateBvnOrNin(bvn, "Invalid bvn provided");
+        MeedlValidator.validateElevenDigits(bvn, "Invalid bvn provided");
 
         Map<String, String> formData = new HashMap<>();
         formData.put(SESSION_CODE.getValue(), sessionCode);
