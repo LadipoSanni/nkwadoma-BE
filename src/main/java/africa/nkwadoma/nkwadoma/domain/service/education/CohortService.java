@@ -16,7 +16,6 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -99,7 +98,7 @@ public class CohortService implements CohortUseCase {
         log.info("Checking if cohort name exists in program found : {}", program);
         if (ObjectUtils.isEmpty(program)) {
             log.info("Program selected for cohort creation was not found. Cohort name {}, {}",cohortName, ProgramMessages.PROGRAM_NOT_FOUND.getMessage());
-            throw new CohortException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage());
+            throw new ResourceNotFoundException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage());
         }
         List<ProgramCohort> programCohortList = programCohortOutputPort.findAllByProgramId(cohort.getProgramId());
         Optional<ProgramCohort> existingProgramCohort = programCohortList.stream()
