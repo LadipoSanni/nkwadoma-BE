@@ -137,6 +137,15 @@ public class LoanBookValidator {
 
         }
     }
+    public void validateAmount(List<Map<String, String>> data, String amount) throws MeedlException {
+        for (Map<String, String> row : data) {
+            String amountPassed = row.get(amount);
+
+            LocalDateTime parsedDate = validateMoneyValue(new BigDecimal(amountPassed));
+            log.info("Parsed date: {}", parsedDate);
+
+        }
+    }
     private LocalDateTime parseFlexibleDateTime(String dateStr) throws MeedlException {
         log.info("Repayment date before formating in validation service {}", dateStr);
         if (dateStr == null || MeedlValidator.isEmptyString(dateStr)) {
