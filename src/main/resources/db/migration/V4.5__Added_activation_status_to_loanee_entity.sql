@@ -1,0 +1,2 @@
+ALTER TABLE loanee
+    ADD COLUMN activation_status VARCHAR(50) DEFAULT 'INACTIVE';
