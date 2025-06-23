@@ -137,12 +137,12 @@ public class LoanBookValidator {
 
         }
     }
-    public void validateAmount(List<Map<String, String>> data, String amount) throws MeedlException {
+    public void validateAmountPaid(List<Map<String, String>> data, String amountPaidKey) throws MeedlException {
         for (Map<String, String> row : data) {
-            String amountPassed = row.get(amount);
+            String amountPassed = row.get(amountPaidKey);
 
-            LocalDateTime parsedDate = validateMoneyValue(new BigDecimal(amountPassed));
-            log.info("Parsed date: {}", parsedDate);
+            validateMoneyValue(new BigDecimal(amountPassed), "Amount repaid is required.");
+            log.info("Amount validated for amount paid: {}", amountPassed);
 
         }
     }
@@ -181,4 +181,5 @@ public class LoanBookValidator {
         log.error("The date format was invalid: {}", dateStr);
         throw new MeedlException("Date doesn't match format. Date: "+dateStr + " Example format : 21/10/2019");
     }
+
 }
