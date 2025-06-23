@@ -5,7 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.IdentityVerificationEnum;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import africa.nkwadoma.nkwadoma.infrastructure.commons.IdentityVerificationMessage;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.commons.IdentityVerificationMessage;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
