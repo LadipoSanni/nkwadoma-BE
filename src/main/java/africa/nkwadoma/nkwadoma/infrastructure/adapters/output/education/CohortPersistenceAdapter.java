@@ -7,10 +7,9 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
-import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -58,7 +57,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     @Override
     public void deleteCohort(String id) throws MeedlException {
         MeedlValidator.validateUUID(id, CohortMessages.INVALID_COHORT_ID.getMessage());
-        CohortEntity cohortEntity = cohortRepository.findById(id).orElseThrow(() -> new CohortException(COHORT_DOES_NOT_EXIST.getMessage()));
+        CohortEntity cohortEntity = cohortRepository.findById(id).orElseThrow(() -> new EducationException(COHORT_DOES_NOT_EXIST.getMessage()));
         programCohortOutputPort.deleteAllByCohort(cohortEntity);
         loanBreakdownRepository.deleteAllByCohort(cohortEntity);
         cohortRepository.deleteById(id);
@@ -67,7 +66,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     @Override
     public Cohort findCohort(String cohortId) throws MeedlException {
         MeedlValidator.validateUUID(cohortId, INVALID_COHORT_ID.getMessage());
-        CohortEntity cohortEntity = cohortRepository.findById(cohortId).orElseThrow(() -> new CohortException(COHORT_DOES_NOT_EXIST.getMessage()));
+        CohortEntity cohortEntity = cohortRepository.findById(cohortId).orElseThrow(() -> new EducationException(COHORT_DOES_NOT_EXIST.getMessage()));
         return cohortMapper.toCohort(cohortEntity);
     }
 
@@ -131,11 +130,11 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         return cohortEntities.map(cohortMapper::toCohort);
     }
 
-    private static Cohort getCohort(String cohortId, List<ProgramCohort> programCohorts) throws CohortException {
+    private static Cohort getCohort(String cohortId, List<ProgramCohort> programCohorts) throws EducationException {
         return programCohorts.stream()
                 .filter(eachCohort -> eachCohort.getCohort().getId().equals(cohortId))
                 .findFirst()
-                .orElseThrow(() -> new CohortException(COHORT_DOES_NOT_EXIST.getMessage())).getCohort();
+                .orElseThrow(() -> new EducationException(COHORT_DOES_NOT_EXIST.getMessage())).getCohort();
     }
 
 
