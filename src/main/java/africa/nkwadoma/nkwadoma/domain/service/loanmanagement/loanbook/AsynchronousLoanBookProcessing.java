@@ -225,11 +225,11 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         loaneeUseCase.referLoanee(loanee);
     }
 
-
     private Cohort findCohort(Cohort cohort) throws MeedlException {
         MeedlValidator.validateObjectInstance(cohort, CohortMessages.COHORT_CANNOT_BE_EMPTY.getMessage());
         return cohortUseCase.viewCohortDetails(cohort.getCreatedBy(), cohort.getId());
     }
+
     private List<RepaymentHistory> convertToRepaymentHistory(List<Map<String, String>>  data) throws MeedlException {
         List<RepaymentHistory> repaymentHistories = new ArrayList<>();
 

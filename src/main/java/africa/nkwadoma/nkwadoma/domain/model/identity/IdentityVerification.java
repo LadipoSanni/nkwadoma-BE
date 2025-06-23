@@ -2,7 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.model.identity;
 
 
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityVerificationEnum;
-import africa.nkwadoma.nkwadoma.domain.exceptions.InvalidInputException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.commons.IdentityVerificationMessage;
@@ -40,10 +40,10 @@ public class IdentityVerification {
         MeedlValidator.validateDataElement(this.decryptedNin, IdentityVerificationMessage.INVALID_NIN.getMessage());
 
         if (!pattern.matcher(this.decryptedBvn).matches()) {
-            throw new InvalidInputException(IdentityVerificationMessage.PROVIDE_VALID_BVN.getMessage());
+            throw new IdentityException(IdentityVerificationMessage.PROVIDE_VALID_BVN.getMessage());
         }
         if (!pattern.matcher(this.decryptedNin).matches()) {
-            throw new InvalidInputException(IdentityVerificationMessage.PROVIDE_VALID_NIN.getMessage());
+            throw new IdentityException(IdentityVerificationMessage.PROVIDE_VALID_NIN.getMessage());
         }
     }
     public void validateImageUrl() throws MeedlException {
