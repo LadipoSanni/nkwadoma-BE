@@ -225,16 +225,17 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         loaneeUseCase.referLoanee(loanee);
     }
 
-
     private Cohort findCohort(Cohort cohort) throws MeedlException {
         MeedlValidator.validateObjectInstance(cohort, CohortMessages.COHORT_CANNOT_BE_EMPTY.getMessage());
         return cohortUseCase.viewCohortDetails(cohort.getCreatedBy(), cohort.getId());
     }
+
     private List<RepaymentHistory> convertToRepaymentHistory(List<Map<String, String>>  data) throws MeedlException {
         List<RepaymentHistory> repaymentHistories = new ArrayList<>();
 
         log.info("Started creating Repayment record from data gotten from file upload {}, size {}",data, data.size());
         loanBookValidator.validateDateTimeFormat(data, "paymentdate");
+        loanBookValidator.validateAmountPaid(data, "amountpaid");
         loanBookValidator.validateUserExistForRepayment(data, "email");
         for (Map<String, String> row  : data) {
 

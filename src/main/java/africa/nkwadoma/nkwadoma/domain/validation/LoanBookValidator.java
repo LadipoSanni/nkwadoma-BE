@@ -137,6 +137,15 @@ public class LoanBookValidator {
 
         }
     }
+    public void validateAmountPaid(List<Map<String, String>> data, String amountPaidKey) throws MeedlException {
+        for (Map<String, String> row : data) {
+            String amountPassed = row.get(amountPaidKey);
+
+            validateMoneyValue(new BigDecimal(amountPassed), "Amount repaid is required.");
+            log.info("Amount validated for amount paid: {}", amountPassed);
+
+        }
+    }
     public void validateUserExistForRepayment(List<Map<String, String>> data, String email) throws MeedlException {
         for (Map<String, String> row : data) {
             String emailToCheck = row.get(email);
