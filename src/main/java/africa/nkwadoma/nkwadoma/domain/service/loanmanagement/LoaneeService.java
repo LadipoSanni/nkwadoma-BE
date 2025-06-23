@@ -15,6 +15,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
@@ -29,6 +30,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanee.UploadedStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
+import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -729,6 +731,21 @@ public class LoaneeService implements LoaneeUseCase {
             return "Loanee has been "+loaneeStatus.name();
         }else {
             return "Loanees has been "+loaneeStatus.name();
+        }
+    }
+    @Override
+    public void updateLoaneeStatus(Loanee loanee) {
+        if(ObjectUtils.isNotEmpty(loanee) && ObjectUtils.isNotEmpty(loanee.getUserIdentity())
+                && ObjectUtils.isNotEmpty(loanee.getUserIdentity().getRole())
+                && loanee.getUserIdentity().getRole() == IdentityRole.LOANEE){
+            try {
+                Loanee foundLoanee = loaneeOutputPort.findByUserId(loanee.getUserIdentity().getId())
+                        .orElseThrow(()-> new MeedlException("Loanee not found to activate."));
+                foundLoanee.setActivationStatus(ActivationStatus.ACTIVE);
+                loaneeOutputPort.save(foundLoanee);
+            } catch (MeedlException e) {
+                log.error("Failed to save loanee when attempting to update Loanee status for user with id {}", loanee.getUserIdentity().getId(), e);
+            }
         }
     }
 
