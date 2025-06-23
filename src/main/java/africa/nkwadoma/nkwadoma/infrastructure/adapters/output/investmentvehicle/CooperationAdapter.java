@@ -1,7 +1,9 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.investmentvehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.CooperationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.exceptions.InvestmentException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.Cooperation;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentvehicle.CooperationMapper;
@@ -34,7 +36,7 @@ public class CooperationAdapter implements CooperationOutputPort {
         boolean cooperationExistByName = cooperationRepository.existsByName(cooperation.getName());
         if (cooperationExistByName) {
             log.error("Cooperation already exists with name {} ", cooperation.getName());
-            throw new MeedlException("Cooperation with the same name already exists");
+            throw new InvestmentException("Cooperation with the same name already exists");
         }
     }
 
@@ -42,7 +44,7 @@ public class CooperationAdapter implements CooperationOutputPort {
     public Cooperation findById(String cooperationId) throws MeedlException {
         MeedlValidator.validateUUID(cooperationId, "Cooperation id cannot be empty");
         CooperationEntity cooperationEntity = cooperationRepository.findById(cooperationId)
-                .orElseThrow(() -> new MeedlException("Cooperation not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cooperation not found"));
         return cooperationMapper.toCooperation(cooperationEntity);
     }
 

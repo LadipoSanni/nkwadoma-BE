@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityverificationmanager;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyBvnResponse;
@@ -9,7 +10,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.pre
 import africa.nkwadoma.nkwadoma.infrastructure.commons.IdentityVerificationMessage;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityverificationmanager.prembly.PremblyParameter;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.InfrastructureException;
-import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
+//import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.*;
@@ -25,7 +26,7 @@ public class SmileIdAdapter implements IdentityVerificationOutputPort {
     private String apiKey = "null value";
 
     @Override
-    public PremblyResponse verifyIdentity(IdentityVerification identityVerification) throws InfrastructureException {
+    public PremblyResponse verifyIdentity(IdentityVerification identityVerification) throws InfrastructureException, IdentityException {
         return getNinDetails(identityVerification);
     }
 
@@ -45,7 +46,7 @@ public class SmileIdAdapter implements IdentityVerificationOutputPort {
     }
 
     @Override
-    public PremblyResponse verifyNin(IdentityVerification identityVerification) throws IdentityVerificationException {
+    public PremblyResponse verifyNin(IdentityVerification identityVerification) throws IdentityException {
         return null;
     }
 
@@ -54,7 +55,7 @@ public class SmileIdAdapter implements IdentityVerificationOutputPort {
         return null;
     }
 
-    public PremblyNinResponse getNinDetails(IdentityVerification verificationRequest) throws InfrastructureException {
+    public PremblyNinResponse getNinDetails(IdentityVerification verificationRequest) throws InfrastructureException, IdentityException {
         validateIdentityVerificationRequest(verificationRequest);
         ResponseEntity<PremblyNinResponse> responseEntity = getIdentityDetailsByNin(verificationRequest);
         String verificationResult = getNinVerificationResponse(responseEntity.getBody());
@@ -80,10 +81,10 @@ public class SmileIdAdapter implements IdentityVerificationOutputPort {
         return responseEntity;
     }
 
-    private String getNinVerificationResponse(PremblyNinResponse response) throws IdentityVerificationException {
+    private String getNinVerificationResponse(PremblyNinResponse response) throws IdentityException {
         String responseMessage = StringUtils.EMPTY;
         if (response == null || response.getNinData() == null) {
-            throw new IdentityVerificationException(IdentityVerificationMessage.SMILEID_UNAVAILABLE.getMessage());
+            throw new IdentityException(IdentityVerificationMessage.SMILEID_UNAVAILABLE.getMessage());
         }
         switch (response.getResponseCode()) {
             case "00" -> {
@@ -111,9 +112,9 @@ public class SmileIdAdapter implements IdentityVerificationOutputPort {
         return headers;
     }
 
-    private void validateIdentityVerificationRequest(IdentityVerification identityVerification) throws InfrastructureException {
+    private void validateIdentityVerificationRequest(IdentityVerification identityVerification) throws IdentityException {
         if (identityVerification == null || StringUtils.isEmpty(identityVerification.getIdentityId()) || StringUtils.isEmpty(identityVerification.getImageUrl())) {
-            throw new InfrastructureException("credentials should not be empty");
+            throw new IdentityException("credentials should not be empty");
         }
 
     }

@@ -72,7 +72,7 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
         MeedlValidator.validateUUID(organizationId,OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
         if (ObjectUtils.isEmpty(organizationIdentity)) {
-            throw new IdentityException(IdentityMessages.ORGANIZATION_NOT_FOUND.getMessage());
+            throw new ResourceNotFoundException(IdentityMessages.ORGANIZATION_NOT_FOUND.getMessage());
         }
         return organizationEmployeeOutputPort.findAllEmployeesInOrganization(organizationId,name,pageSize,pageNumber);
     }

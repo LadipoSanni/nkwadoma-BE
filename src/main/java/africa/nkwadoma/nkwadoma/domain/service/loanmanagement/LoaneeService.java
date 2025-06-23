@@ -26,10 +26,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.UploadedStatus;
-import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoaneeException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
@@ -44,7 +41,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
@@ -102,17 +98,17 @@ public class LoaneeService implements LoaneeUseCase {
                         }
                         if (loanee != null && !loanee.getUserIdentity().getRole().equals(IdentityRole.LOANEE)){
                             log.warn("The user is not a loanee but {}",loanee.getUserIdentity().getRole());
-                            throw new MeedlException("User with id "+id+" is not a loanee");
+                            throw new LoanException("User with id "+id+" is not a loanee");
                         }
                         UserIdentity userIdentity = identityManagerOutputPort.getUserByEmail(loanee.getUserIdentity().getEmail())
                                 .orElseThrow(()-> new MeedlException("Loanee does not exist on the platform"));
                         if (userIdentity.isEnabled()){
                             log.error("User with email {} is already active on th platform", userIdentity.getEmail());
-                            throw new MeedlException("User with email "+userIdentity.getEmail() +" is already active on the platform.");
+                            throw new LoanException("User with email "+userIdentity.getEmail() +" is already active on the platform.");
                         }
                         if (loanee == null){
                             log.error("Loanee not found with email {}", userIdentity.getEmail());
-                            throw new MeedlException("Loanee not found with email "+userIdentity.getEmail());
+                            throw new LoanException("Loanee not found with email "+userIdentity.getEmail());
                         }
                         if (!loanee.getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)) {
                             log.warn("The loanee being invited is not from file upload {}", userIdentity.getEmail());
@@ -340,7 +336,7 @@ public class LoaneeService implements LoaneeUseCase {
                 loanReferralOutputPort.findLoanReferralByLoaneeIdAndCohortId(loanee.getId(),loanee.getCohortId());
         if (ObjectUtils.isNotEmpty(loanReferral)) {
             log.error("Loanee has been referred to this cohort before with error: {} ", LoaneeMessages.LOANEE_HAS_BEEN_REFERRED_BEFORE.getMessage());
-            throw new LoaneeException(LoaneeMessages.LOANEE_HAS_BEEN_REFERRED_BEFORE.getMessage());
+            throw new LoanException(LoaneeMessages.LOANEE_HAS_BEEN_REFERRED_BEFORE.getMessage());
         }
         log.info("Loanee has not been referred to this cohort before.");
     }
@@ -381,9 +377,9 @@ public class LoaneeService implements LoaneeUseCase {
 //        loanee = loanees.stream().filter(eachLoanee -> eachLoanee.getId().equals(loaneeId)).findFirst()
 //                .orElseThrow(()-> new LoaneeException(LoaneeMessages.LOANEE_MUST_BE_ADDED_TO_COHORT.getMessage()));
         if (loanee.getLoaneeStatus().equals(LoaneeStatus.REFERRED)){
-            throw new LoaneeException(LoaneeMessages.LOANEE_HAS_BEEN_REFERRED.getMessage());
+            throw new LoanException(LoaneeMessages.LOANEE_HAS_BEEN_REFERRED.getMessage());
         }else if (!loanee.getLoaneeStatus().equals(LoaneeStatus.ADDED)){
-            throw new LoaneeException(LoaneeMessages.LOANEE_MUST_BE_ADDED_TO_COHORT.getMessage());
+            throw new LoanException(LoaneeMessages.LOANEE_MUST_BE_ADDED_TO_COHORT.getMessage());
         }
     }
     private OrganizationIdentity getLoaneeOrganization(String cohortId) throws MeedlException {
@@ -401,19 +397,19 @@ public class LoaneeService implements LoaneeUseCase {
         Loanee existingLoanee = loaneeOutputPort.findByLoaneeEmail(loanee.getUserIdentity().getEmail());
         if (ObjectUtils.isNotEmpty(existingLoanee)) {
             log.error("{}. {}", LoaneeMessages.LOANEE_WITH_EMAIL_EXIST_IN_COHORT.getMessage(), loanee.getUserIdentity().getEmail());
-            throw new LoaneeException(LoaneeMessages.LOANEE_WITH_EMAIL_EXIST_IN_COHORT.getMessage());
+            throw new LoanException(LoaneeMessages.LOANEE_WITH_EMAIL_EXIST_IN_COHORT.getMessage());
         }
         log.info("Successfully confirmed user does not previously exist. {}",loanee.getUserIdentity().getEmail());
     }
 
-    private static void calculateAmountRequested(Loanee loanee, BigDecimal totalLoanBreakDown, Cohort cohort) throws LoaneeException {
+    private static void calculateAmountRequested(Loanee loanee, BigDecimal totalLoanBreakDown, Cohort cohort) throws LoanException {
         log.info("Calculating amount requested for loanee {}", loanee.getUserIdentity().getEmail());
         loanee.getLoaneeLoanDetail().
                 setAmountRequested(totalLoanBreakDown.add(cohort.getTuitionAmount()).
                         subtract(loanee.getLoaneeLoanDetail().getInitialDeposit()));
         if (loanee.getLoaneeLoanDetail().getAmountRequested().compareTo(BigDecimal.ZERO)  <= 0){
             log.info("Loanee amount request is zero or negative {}", loanee.getLoaneeLoanDetail().getAmountRequested());
-            throw new LoaneeException(LoaneeMessages.LOANEE_WITH_ZERO_OR_NEGATIVE_AMOUNT_REQUEST_CANNOT_BE_ADDED_TO_COHORT.getMessage());
+            throw new LoanException(LoaneeMessages.LOANEE_WITH_ZERO_OR_NEGATIVE_AMOUNT_REQUEST_CANNOT_BE_ADDED_TO_COHORT.getMessage());
         }
     }
 
@@ -430,7 +426,7 @@ public class LoaneeService implements LoaneeUseCase {
         Optional<UserIdentity> foundUserIdentity = identityManagerOutputPort.getUserByEmail(loanee.getUserIdentity().getEmail());
         if (foundUserIdentity.isPresent()) {
             log.info("User with email {} already exists. Unable to create account for loanee while attempting to add loanee to cohort", loanee.getUserIdentity().getEmail());
-            throw new IdentityException(IdentityMessages.USER_IDENTITY_ALREADY_EXISTS.getMessage());
+            throw new LoanException(IdentityMessages.USER_IDENTITY_ALREADY_EXISTS.getMessage());
         }
         UserIdentity userIdentity = identityManagerOutputPort.createUser(loanee.getUserIdentity());
         userIdentity.setCreatedAt(loanee.getCreatedAt());
@@ -443,24 +439,24 @@ public class LoaneeService implements LoaneeUseCase {
         return loanee;
     }
 
-    private static void checkIfAmountRequestedIsNotGreaterThanTotalCohortFee(Loanee loanee, Cohort cohort) throws CohortException {
+    private static void checkIfAmountRequestedIsNotGreaterThanTotalCohortFee(Loanee loanee, Cohort cohort) throws MeedlException {
         if (loanee.getLoaneeLoanDetail().getAmountRequested().compareTo(cohort.getTotalCohortFee()) > 0) {
             log.info("{}. Cohort id: {}", CohortMessages.AMOUNT_REQUESTED_CANNOT_BE_GREATER_THAT_TOTAL_COHORT_FEE.getMessage(), cohort.getId());
-            throw new CohortException(CohortMessages.AMOUNT_REQUESTED_CANNOT_BE_GREATER_THAT_TOTAL_COHORT_FEE.getMessage());
+            throw new LoanException(CohortMessages.AMOUNT_REQUESTED_CANNOT_BE_GREATER_THAT_TOTAL_COHORT_FEE.getMessage());
         }
     }
 
-    private static void checkIfInitialDepositIsNotGreaterThanTotalCohortFee(Loanee loanee, Cohort cohort) throws CohortException {
+    private static void checkIfInitialDepositIsNotGreaterThanTotalCohortFee(Loanee loanee, Cohort cohort) throws LoanException {
         if (loanee.getLoaneeLoanDetail().getInitialDeposit().compareTo(cohort.getTotalCohortFee()) > 0) {
             log.info("{}. Cohort id: {}",CohortMessages.INITIAL_DEPOSIT_CANNOT_BE_GREATER_THAT_TOTAL_COHORT_FEE.getMessage(), cohort.getId());
-            throw new CohortException(CohortMessages.INITIAL_DEPOSIT_CANNOT_BE_GREATER_THAT_TOTAL_COHORT_FEE.getMessage());
+            throw new LoanException(CohortMessages.INITIAL_DEPOSIT_CANNOT_BE_GREATER_THAT_TOTAL_COHORT_FEE.getMessage());
         }
     }
 
-    private static void checkIfCohortTuitionDetailsHaveBeenUpdated(Cohort cohort) throws CohortException {
+    private static void checkIfCohortTuitionDetailsHaveBeenUpdated(Cohort cohort) throws LoanException {
         if (ObjectUtils.isEmpty(cohort.getTuitionAmount())) {
             log.info("Cohort does not have any cohort tuition details. Cohort id: {}", cohort.getId());
-            throw new CohortException(CohortMessages.COHORT_TUITION_DETAILS_MUST_HAVE_BEEN_UPDATED.getMessage());
+            throw new LoanException(CohortMessages.COHORT_TUITION_DETAILS_MUST_HAVE_BEEN_UPDATED.getMessage());
         }
     }
 
@@ -490,21 +486,21 @@ public class LoaneeService implements LoaneeUseCase {
         Loanee loanee = loaneeOutputPort.findLoaneeById(loan.getLoaneeId());
         if (!loanee.getUserIdentity().getId().equals(userId)) {
             log.info("Access denied: A loanee cannot defer another loanee");
-            throw new MeedlException("Access denied: A loanee cannot defer another loanee");
+            throw new LoanException("Access denied: A loanee cannot defer another loanee");
         }
         Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
         if (!cohort.getCohortStatus().equals(CohortStatus.CURRENT)){
             log.info("\"Deferral is only allowed for 'CURRENT' cohorts. This cohort's status is \"+ cohort.getCohortStatus()");
-            throw new MeedlException("Deferral is only allowed for 'CURRENT' cohorts. This cohort's status is "+ cohort.getCohortStatus());
+            throw new LoanException("Deferral is only allowed for 'CURRENT' cohorts. This cohort's status is "+ cohort.getCohortStatus());
         }
         if (loan.getLoanStatus().equals(LoanStatus.DEFERRED)){
             log.info("Loanee is already deferred");
-            throw new MeedlException("Loanee is already deferred");
+            throw new LoanException("Loanee is already deferred");
         }
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
         if(programDurationIsStillWithinFirstQuarter(cohort, program)){
             log.info("Program duration is not within first quarter");
-            throw new LoaneeException(LoaneeMessages.LOANEE_CANNOT_DEFER_LOAN.getMessage());
+            throw new LoanException(LoaneeMessages.LOANEE_CANNOT_DEFER_LOAN.getMessage());
         }
         loanee.setDeferredDateAndTime(LocalDateTime.now());
         loanee.setDeferReason(reasonForDeferral);
@@ -528,14 +524,14 @@ public class LoaneeService implements LoaneeUseCase {
                 loanOutputPort.findLoanById(loanId);
         Loanee loanee = loaneeOutputPort.findLoaneeById(loan.getLoaneeId());
         if (!userId.equals(loanee.getUserIdentity().getId())) {
-            throw new MeedlException("Access denied: A loanee cannot resume program on behalf of another loanee");
+            throw new LoanException("Access denied: A loanee cannot resume program on behalf of another loanee");
         }
         Cohort cohort = cohortOutputPort.findCohort(cohortId);
         if (!loan.getLoanStatus().equals(LoanStatus.DEFERRED)){
-            throw new MeedlException("The action is for a loanee that deferred");
+            throw new LoanException("The action is for a loanee that deferred");
         }
         if (!cohort.getCohortStatus().equals(CohortStatus.CURRENT)){
-            throw new MeedlException("Loanee can only resume to a current cohort. Selected cohort is "+ cohort.getCohortStatus());
+            throw new LoanException("Loanee can only resume to a current cohort. Selected cohort is "+ cohort.getCohortStatus());
         }
         loan.setLoanStatus(LoanStatus.PERFORMING);
         loanOutputPort.save(loan);
@@ -556,14 +552,14 @@ public class LoaneeService implements LoaneeUseCase {
         boolean cohortExistInOrganization =
                 loaneeOutputPort.checkIfLoaneeCohortExistInOrganization(loanee.getId(),organizationEmployeeIdentity.get().getOrganization());
         if (!cohortExistInOrganization) {
-            throw new LoaneeException(LoaneeMessages.LOANEE_NOT_ASSOCIATE_WITH_ORGANIZATION.getMessage());
+            throw new LoanException(LoaneeMessages.LOANEE_NOT_ASSOCIATE_WITH_ORGANIZATION.getMessage());
         }
 
         Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
         if (programDurationIsStillWithinFirstQuarter(cohort, program)){
             log.info("Program duration is not within first quarter");
-            throw new MeedlException(LoaneeMessages.LOANEE_CANNOT_DEFER_LOAN.getMessage());
+            throw new LoanException(LoaneeMessages.LOANEE_CANNOT_DEFER_LOAN.getMessage());
         }
 
         Optional<Loan> loan = findLoaneeLoanAndDeferLoan(loanee);
@@ -579,7 +575,7 @@ public class LoaneeService implements LoaneeUseCase {
             throw new LoanException(LoanMessages.LOANEE_LOAN_NOT_FOUND.getMessage());
         }
         if (loan.get().getLoanStatus().equals(LoanStatus.DEFERRED)){
-            throw new MeedlException("Loan already deferred");
+            throw new LoanException("Loan already deferred");
         }
         loanee.setDeferralApproved(true);
         loaneeOutputPort.save(loanee);
@@ -638,7 +634,7 @@ public class LoaneeService implements LoaneeUseCase {
         boolean cohortExistInOrganization =
                 loaneeOutputPort.checkIfLoaneeCohortExistInOrganization(loanee.getId(),organizationEmployeeIdentity.get().getOrganization());
         if (! cohortExistInOrganization) {
-            throw new LoaneeException(LoaneeMessages.LOANEE_NOT_ASSOCIATE_WITH_ORGANIZATION.getMessage());
+            throw new LoanException(LoaneeMessages.LOANEE_NOT_ASSOCIATE_WITH_ORGANIZATION.getMessage());
         }
 
         loanee.setDropoutApproved(true);
@@ -663,14 +659,14 @@ public class LoaneeService implements LoaneeUseCase {
         Loanee loanee = loaneeOutputPort.findLoaneeById(loan.getLoaneeId());
         if (!loanee.getUserIdentity().getId().equals(userId)){
             log.info("Loanee cannot dropout on behalf of another loanee");
-            throw new MeedlException("Loanee cannot dropout on behalf of another loanee");
+            throw new LoanException("Loanee cannot dropout on behalf of another loanee");
         }
         Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
 
         if(programDurationIsStillWithinFirstQuarter(cohort, program)){
             log.info("Program duration is not within the first quarter");
-            throw new LoaneeException(LoaneeMessages.LOANEE_CANNOT_DROP_FROM_COHORT.getMessage());
+            throw new LoanException(LoaneeMessages.LOANEE_CANNOT_DROP_FROM_COHORT.getMessage());
         }
         log.info("------------------> loanee status -----> {}", loanee);
         loanee.setDropoutRequested(true);
@@ -714,9 +710,9 @@ public class LoaneeService implements LoaneeUseCase {
         return firstQuarterEnd.isBefore(LocalDate.now());
     }
 
-    private static void checkIfLoaneeExistInCohort(boolean existInCohort) throws LoaneeException {
+    private static void checkIfLoaneeExistInCohort(boolean existInCohort) throws LoanException {
         if (!existInCohort) {
-            throw new LoaneeException(LoaneeMessages.LOANEE_DOES_NOT_EXIST_IN_COHORT.getMessage());
+            throw new LoanException(LoaneeMessages.LOANEE_DOES_NOT_EXIST_IN_COHORT.getMessage());
         }
     }
 

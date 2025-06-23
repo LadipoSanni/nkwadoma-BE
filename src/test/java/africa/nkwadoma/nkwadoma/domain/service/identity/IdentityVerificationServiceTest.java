@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerifi
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanReferralOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ServiceProvider;
+import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerificationFailureRecord;
@@ -116,7 +117,7 @@ class IdentityVerificationServiceTest {
     void verifyIdentityOfBlacklistedReferral() throws MeedlException {
         when(loanReferralOutputPort.findById(identityVerification.getLoanReferralId())).thenReturn(loanReferral);
         when(identityVerificationFailureRecordOutputPort.countByReferralId(loanReferral.getId())).thenReturn(5L);
-        assertThrows(IdentityVerificationException.class, () -> identityVerificationService.verifyIdentity(identityVerification));
+        assertThrows(IdentityException.class, () -> identityVerificationService.verifyIdentity(identityVerification));
     }
 
     @Test
@@ -178,7 +179,7 @@ class IdentityVerificationServiceTest {
         when(identityVerificationFailureRecordOutputPort.createIdentityVerificationFailureRecord(identityVerificationFailureRecord)).thenReturn(identityVerificationFailureRecord);
         when(identityVerificationFailureRecordOutputPort.countByReferralId(identityVerificationFailureRecord.getReferralId())).thenReturn(5L);
 
-        assertThrows(IdentityVerificationException.class, ()->identityVerificationService.createIdentityVerificationFailureRecord(identityVerificationFailureRecord));
+        assertThrows(IdentityException.class, ()->identityVerificationService.createIdentityVerificationFailureRecord(identityVerificationFailureRecord));
     }
     @Test
     void failedVerificationNotBlackListed() {
@@ -188,7 +189,7 @@ class IdentityVerificationServiceTest {
             String response = identityVerificationService.createIdentityVerificationFailureRecord(identityVerificationFailureRecord);
             assertNotNull(response);
             assertEquals(IDENTITY_VERIFICATION_FAILURE_SAVED.getMessage(), response);
-        } catch (IdentityVerificationException e) {
+        } catch (IdentityException e) {
             log.error("Error creating identity verification failure record {}", e.getMessage());
         }
     }

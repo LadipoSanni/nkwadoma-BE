@@ -277,5 +277,4 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
         investmentVehicleRepository.deleteById(investmentVehicleId);
     }
 
-
 }

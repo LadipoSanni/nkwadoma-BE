@@ -29,9 +29,9 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.validation.LoanBookValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.stereotype.Component;
 
@@ -85,7 +85,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     }
 
     private void validateAllFileFields(List<Loanee> convertedLoanees) throws MeedlException {
-        log.info("Validating the loan product name.");
+        log.info("Validating the file field values.");
         loanBookValidator.validateAllFileFields(convertedLoanees);
     }
 
@@ -101,7 +101,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
 
         if (loanStartAsDate.isBefore(cohortStartDate)) {
             log.info("Loan start date {} cannot be before cohort start date {}.", loanStartAsDate, cohortStartDate);
-            throw new MeedlException("Loan start date " +loanStartAsDate +" cannot be before cohort start date "+cohortStartDate );
+            throw new LoanException("Loan start date " +loanStartAsDate +" cannot be before cohort start date "+cohortStartDate );
         }
     }
 
@@ -240,7 +240,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
             RepaymentHistory repaymentHistory = RepaymentHistory.builder()
                     .loanee(Loanee.builder().userIdentity(UserIdentity.builder().email(validateUseEmail(row.get("email").trim())).build()).build())
                     .amountPaid(validateMoney(row.get("amountpaid").trim(), "Amount repaid should be properly indicated"))
-                    .paymentDateTime(parseFlexibleDateTime(row.get("paymentdate").trim()))
+                    .paymentDateTime(parseFlexibleDateTime(row.get("paymentdate").trim(), row.get("email")))
 //                    .modeOfPayment(validateModeOfPayment(row.get("modeofpayment").trim()))
                     .modeOfPayment(ModeOfPayment.TRANSFER)
                     .build();
@@ -260,7 +260,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     }
 
 
-    private LocalDateTime parseFlexibleDateTime(String dateStr) throws MeedlException {
+    private LocalDateTime parseFlexibleDateTime(String dateStr, String email) throws MeedlException {
         log.info("Repayment date before formating {}", dateStr);
         if (dateStr == null || MeedlValidator.isEmptyString(dateStr)) {
             return null;
@@ -293,7 +293,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         }
 
         log.error("The date format was invalid: {}", dateStr);
-        throw new MeedlException("Date doesn't match format. Date: "+dateStr + " Example format : 21/10/2019");
+        throw new LoanException("Date doesn't match format dd/mm/yyyy. Date entered: "+dateStr+". For user "+email);
     }
 
     private ModeOfPayment validateModeOfPayment(String modeOfRepaymentToConvert) {
@@ -354,7 +354,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                     .uploadedStatus(UploadedStatus.ADDED)
                     .cohortId(cohort.getId())
                     .cohortName(row.get("loanproduct"))
-                    .updatedAt(parseFlexibleDateTime(row.get("loanstartdate")))
+                    .updatedAt(parseFlexibleDateTime(row.get("loanstartdate"), row.get("email")))
                     .build();
 
             loanees.add(loanee);
@@ -407,11 +407,11 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                 data = validateAndReadExcel(loanBook.getFile());
             }catch (IOException e){
                 log.error("Error occurred reading excel",e);
-                throw new MeedlException(e.getMessage());
+                throw new LoanException(e.getMessage());
             }
         } else {
             log.error("Unsupported file type.");
-            throw new MeedlException("Unsupported file type.");
+            throw new LoanException("Unsupported file type.");
         }
         return data;
     }
@@ -441,7 +441,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                     int index = headerIndexMap.get(header);
                     if (index >= values.length) {
                         log.error("Missing value for column: {}", header);
-                        throw new MeedlException("Missing value for column: " + header);
+                        throw new LoanException("Missing value for column: " + header);
                     }
                     rowMap.put(header, values[index].trim());
                 }
@@ -453,7 +453,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         }
 
         if (records.isEmpty()) {
-            throw new MeedlException("CSV file has no data rows.");
+            throw new LoanException("CSV file has no data rows.");
         }
 
         return records;
@@ -462,7 +462,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     private static Map<String, Integer> getAndValidateFileHeaderMap(List<String> requiredHeaders, String headerLine) throws MeedlException {
         if (headerLine == null) {
             log.info("CSV file is empty or missing headers.");
-            throw new MeedlException("CSV file is empty or missing headers.");
+            throw new LoanException("CSV file is empty or missing headers.");
         }
 
         log.info("Header line first read {}", headerLine);
@@ -499,7 +499,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                 continue;
             }
             if (!headerIndexMap.containsKey(required)) {
-                throw new MeedlException("Missing required column: " + required);
+                throw new LoanException("Missing required column: " + required);
             }
         }
     }

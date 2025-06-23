@@ -13,6 +13,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceAlreadyExistsException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -170,7 +171,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         Optional<OrganizationIdentity> organizationByName =
                 organizationIdentityOutputPort.findOrganizationByName(foundLoanee.getReferredBy());
         if (organizationByName.isEmpty()) {
-            throw new MeedlException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
+            throw new ResourceNotFoundException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
         }
         Optional<LoanMetrics> loanMetrics =
                 loanMetricsOutputPort.findByOrganizationId(organizationByName.get().getId());
@@ -275,10 +276,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     private void checkLoanReferralHasBeenAcceptedOrDeclined(LoanReferral foundLoanReferral) throws MeedlException {
         if (foundLoanReferral.getLoanReferralStatus().equals(LoanReferralStatus.AUTHORIZED)) {
-            throw new EducationException(LoanMessages.LOAN_REFERRAL_HAS_ALREADY_BEEN_ACCEPTED.getMessage());
+            throw new LoanException(LoanMessages.LOAN_REFERRAL_HAS_ALREADY_BEEN_ACCEPTED.getMessage());
         }
         else if (foundLoanReferral.getLoanReferralStatus().equals(LoanReferralStatus.UNAUTHORIZED)) {
-            throw new EducationException(LoanMessages.LOAN_REFERRAL_HAS_ALREADY_BEEN_DECLINED.getMessage());
+            throw new LoanException(LoanMessages.LOAN_REFERRAL_HAS_ALREADY_BEEN_DECLINED.getMessage());
         }
     }
 
@@ -307,7 +308,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         Optional<OrganizationIdentity> organization =
                 organizationIdentityOutputPort.findOrganizationByName(foundLoanReferral.getLoanee().getReferredBy());
         if (organization.isEmpty()) {
-            throw new EducationException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
+            throw new LoanException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
         }
         Optional<LoanMetrics> loanMetrics =
                 loanMetricsOutputPort.findByOrganizationId(organization.get().getId());
@@ -341,7 +342,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         Optional<OrganizationIdentity> organization =
                 organizationIdentityOutputPort.findOrganizationByName(loanRequest.getLoanee().getReferredBy());
         if (organization.isEmpty()) {
-            throw new EducationException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
+            throw new LoanException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
         }
         Optional<LoanMetrics> loanMetrics =
                 loanMetricsOutputPort.findByOrganizationId(organization.get().getId());
@@ -380,12 +381,12 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         Optional<OrganizationIdentity> organizationByName =
                 organizationIdentityOutputPort.findOrganizationByName(loanRequest.getLoanee().getReferredBy());
         if (organizationByName.isEmpty()) {
-            throw new MeedlException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
+            throw new ResourceNotFoundException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
         }
         Optional<LoanMetrics> loanMetrics =
                 loanMetricsOutputPort.findByOrganizationId(organizationByName.get().getId());
         if (loanMetrics.isEmpty()) {
-            throw new LoanException("Organization has no loan metrics");
+            throw new ResourceNotFoundException("Organization has no loan metrics");
         }
         loanMetrics.get().setLoanOfferCount(
                 loanMetrics.get().getLoanOfferCount() + 1
@@ -403,7 +404,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         log.info("Loan offer: {}", loanOffer);
         if (optionalLoanee.isEmpty()) {
             log.info("Loanee is empty : {}", loanOffer);
-            throw new LoanException(LoanMessages.LOANEE_NOT_FOUND.getMessage());
+            throw new ResourceNotFoundException(LoanMessages.LOANEE_NOT_FOUND.getMessage());
         }
         Loanee loanee = optionalLoanee.get();
         if (!offer.getLoanee().getId().equals(loanee.getId())) {
@@ -458,12 +459,12 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         Optional<OrganizationIdentity> organizationByName =
                 organizationIdentityOutputPort.findOrganizationByName(offer.getLoanRequestReferredBy());
         if (organizationByName.isEmpty()) {
-            throw new MeedlException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
+            throw new ResourceNotFoundException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
         }
         Optional<LoanMetrics> loanMetrics =
                 loanMetricsOutputPort.findByOrganizationId(organizationByName.get().getId());
         if (loanMetrics.isEmpty()) {
-            throw new LoanException("Organization has no loan metrics");
+            throw new ResourceNotFoundException("Organization has no loan metrics");
         }
         loanMetrics.get().setLoanOfferCount(
                 loanMetrics.get().getLoanOfferCount() - 1
@@ -521,7 +522,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         Loanee loanee = loaneeOutputPort.findLoaneeById(loanOffer.getLoaneeId());
         if (userIdentity.getRole().equals(IdentityRole.LOANEE) &&
                 ! loanee.getUserIdentity().getId().equals(userIdentity.getId())){
-                throw new LoanOfferException(
+                throw new LoanException(
                         LoanOfferMessages.LOAN_OFFER_IS_NOT_ASSIGNED_TO_LOANEE.getMessage());
             }
         return loanOffer;
