@@ -146,6 +146,20 @@ public class LoanBookValidator {
 
         }
     }
+    public void validateUserExistForRepayment(List<Map<String, String>> data, String email) throws MeedlException {
+        for (Map<String, String> row : data) {
+            String emailToCheck = row.get(email);
+
+            Loanee loanee = loaneeOutputPort.findByLoaneeEmail(emailToCheck);
+            log.info("loanee found in repayment history : {}",loanee);
+            if (loanee == null) {
+                log.error("");
+                throw new MeedlException("Loanee with email" + emailToCheck + " does not exist for repayment");
+            }
+            log.info("Loanee with email {} exist. ", emailToCheck);
+
+        }
+    }
     private LocalDateTime parseFlexibleDateTime(String dateStr) throws MeedlException {
         log.info("Repayment date before formating in validation service {}", dateStr);
         if (dateStr == null || MeedlValidator.isEmptyString(dateStr)) {
@@ -181,5 +195,4 @@ public class LoanBookValidator {
         log.error("The date format was invalid: {}", dateStr);
         throw new MeedlException("Date doesn't match format. Date: "+dateStr + " Example format : 21/10/2019");
     }
-
 }
