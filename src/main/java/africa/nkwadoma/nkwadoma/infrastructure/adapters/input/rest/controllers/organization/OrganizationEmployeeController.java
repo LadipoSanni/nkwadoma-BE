@@ -21,10 +21,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 
 @RestController
-@RequestMapping(BASE_URL + "organization/")
+@RequestMapping( "organization/")
 @Slf4j
 @RequiredArgsConstructor
 public class OrganizationEmployeeController {

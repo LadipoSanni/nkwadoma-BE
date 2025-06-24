@@ -29,12 +29,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.*;
 
 @Slf4j
 @RestController
-@RequestMapping(BASE_URL + "loanee/")
+@RequestMapping("loanee/")
 @RequiredArgsConstructor
 public class LoaneeController {
 

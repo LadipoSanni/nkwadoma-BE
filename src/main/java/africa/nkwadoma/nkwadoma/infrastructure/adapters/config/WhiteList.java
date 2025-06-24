@@ -1,6 +1,11 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.config;
 
+import org.springframework.beans.factory.annotation.Value;
+
+
 public class WhiteList {
+//    @Value("${api.version}")
+//    private static String api_version;
     public static final String[] patterns = {
             "/swagger-ui/index.html",
             "/swagger-ui.html",
@@ -10,12 +15,13 @@ public class WhiteList {
             "/v3/api-docs",
             "/webjars/**",
             "/actuator/health",
-            "/api/v1/auth/login",
-            "/api/v1/auth/password/create",
+//            api_version+ "auth/login",
+//            api_version+ "auth/password/create",
+//            api_version+ "auth/password/forgotPassword",
             "/api/v1/auth/password/forgotPassword",
-            "/api/v1/auth/refresh-token",
-            "/api/v1/auth/password/reset",
-            "/api/v1/identity/verification/failure-record/create",
-            "/api/v1/investment-vehicle/detail/link/**"
+//            api_version+ "auth/refresh-token",
+//            api_version+ "auth/password/reset",
+//            api_version+ "identity/verification/failure-record/create",
+//            api_version+ "investment-vehicle/detail/link/**"
     };
 }

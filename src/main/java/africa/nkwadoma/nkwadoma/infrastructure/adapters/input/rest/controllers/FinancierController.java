@@ -41,11 +41,8 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
-
 @Slf4j
 @RestController
-@RequestMapping(BASE_URL)
 @RequiredArgsConstructor
 public class FinancierController {
     private final FinancierUseCase financierUseCase;

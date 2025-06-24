@@ -25,13 +25,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.REPAYMENT_HISTORY;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.YEAR_RANGE_RETRIEVED;
 
 
 @Slf4j
-@RequestMapping(BASE_URL +  REPAYMENT_HISTORY)
+@RequestMapping(REPAYMENT_HISTORY)
 @RestController
 @RequiredArgsConstructor
 public class RepaymentHistoryController {

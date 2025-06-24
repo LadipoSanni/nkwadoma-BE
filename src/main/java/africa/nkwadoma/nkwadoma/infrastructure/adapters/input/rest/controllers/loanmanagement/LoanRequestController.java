@@ -28,7 +28,7 @@ import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.*;
 
-@RequestMapping(BASE_URL + LOAN)
+@RequestMapping(LOAN)
 @RequiredArgsConstructor
 @RestController
 @Slf4j
