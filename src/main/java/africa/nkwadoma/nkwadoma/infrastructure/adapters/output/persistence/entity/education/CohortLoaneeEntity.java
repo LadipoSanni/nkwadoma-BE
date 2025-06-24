@@ -26,6 +26,9 @@ public class CohortLoaneeEntity {
     private CohortEntity cohort;
     @ManyToOne
     private LoaneeEntity loanee;
+    private String createdBy;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     @ManyToOne
     private LoaneeLoanDetailEntity loaneeLoanDetail;
     @Enumerated(EnumType.STRING)
