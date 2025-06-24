@@ -1,5 +1,6 @@
-Create Table if not exists cohort_loanee (
-    id VARCHAR(36) PRIMARY KEY,
+-- Creating cohort_loanee table
+CREATE TABLE IF NOT EXISTS cohort_loanee (
+                                             id VARCHAR(36) PRIMARY KEY,
     cohort_id VARCHAR(36) NOT NULL,
     loanee_id VARCHAR(36) NOT NULL,
     created_by VARCHAR(255),
@@ -18,9 +19,52 @@ Create Table if not exists cohort_loanee (
     deferral_approved BOOLEAN NOT NULL DEFAULT FALSE,
     dropout_requested BOOLEAN NOT NULL DEFAULT FALSE,
     dropout_approved BOOLEAN NOT NULL DEFAULT FALSE,
-    FOREIGN KEY (cohort_id) REFERENCES cohort(id),
-    FOREIGN KEY (loanee_id) REFERENCES loanee(id),
-    FOREIGN KEY (loanee_loan_detail_id) REFERENCES loanee_loan_detail(id)
-);
+    FOREIGN KEY (cohort_id) REFERENCES cohort_entity(id),
+    FOREIGN KEY (loanee_id) REFERENCES loanee_entity(id),
+    FOREIGN KEY (loanee_loan_detail_id) REFERENCES loanee_loan_detail_entity(id)
+    );
 
-
+-- Migrating data from loanee to cohort_loanee
+INSERT INTO cohort_loanee (
+    id,
+    cohort_id,
+    loanee_id,
+    created_by,
+    created_at,
+    updated_at,
+    loanee_loan_detail_id,
+    loanee_status,
+    onboarding_mode,
+    uploaded_status,
+    referral_date_time,
+    referred_by,
+    reason_for_dropout,
+    deferred_date_and_time,
+    defer_reason,
+    deferral_requested,
+    deferral_approved,
+    dropout_requested,
+    dropout_approved
+)
+SELECT
+    id,
+    cohort_id,
+    id AS loanee_id,
+    created_by,
+    created_at,
+    updated_at,
+    loanee_loan_detail_id,
+    loanee_status,
+    onboarding_mode,
+    uploaded_status,
+    referral_date_time,
+    referred_by,
+    reason_for_dropout,
+    deferred_date_and_time,
+    defer_reason,
+    deferral_requested,
+    deferral_approved,
+    dropout_requested,
+    dropout_approved
+FROM loanee_entity
+WHERE cohort_id IS NOT NULL;
