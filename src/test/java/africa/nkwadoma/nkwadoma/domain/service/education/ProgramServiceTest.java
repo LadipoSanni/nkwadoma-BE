@@ -109,8 +109,8 @@ class ProgramServiceTest {
             Program createdProgram = programService.createProgram(program);
             assertNotNull(createdProgram);
             verify(programOutputPort, times(1)).saveProgram(program);
-            when(programOutputPort.saveProgram(program)).thenThrow(ResourceAlreadyExistsException.class);
-            assertThrows(ResourceAlreadyExistsException.class, ()-> programService.createProgram(program));
+            when(programOutputPort.saveProgram(program)).thenThrow(MeedlException.class);
+            assertThrows(MeedlException.class, ()-> programService.createProgram(program));
         } catch (MeedlException e) {
             log.error("Error creating program", e);
         }
