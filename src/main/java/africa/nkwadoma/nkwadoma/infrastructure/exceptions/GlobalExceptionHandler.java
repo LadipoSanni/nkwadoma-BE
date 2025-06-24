@@ -32,11 +32,6 @@ public class GlobalExceptionHandler {
         log.info("Validation errors: {}", errors);
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
-    @ExceptionHandler(IdentityVerificationException.class)
-    @ResponseStatus(HttpStatus.EXPECTATION_FAILED)
-    public ResponseEntity<ExceptionResponse> handleValidationExceptions(IdentityVerificationException ex) {
-        return new ResponseEntity<>(errorResponseBuilder(ex.getMessage()), HttpStatus.EXPECTATION_FAILED);
-    }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

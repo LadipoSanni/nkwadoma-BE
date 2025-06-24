@@ -2,10 +2,12 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentvehicle.FinancierUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.LoaneeUseCase;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.constants.ControllerConstant;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
@@ -31,6 +33,7 @@ public class IdentityManagerController {
     private final OrganizationUseCase createOrganizationUseCase;
     private final FinancierUseCase financierUseCase;
     private final IdentityMapper identityMapper;
+    private final LoaneeUseCase loaneeUseCase;
 
     @PostMapping("auth/login")
     public ResponseEntity<ApiResponse<AccessTokenResponse>> login(@RequestBody @Valid LoginRequest loginRequest) throws MeedlException {
@@ -97,7 +100,15 @@ public class IdentityManagerController {
             activateOrganizationAndAdmin(userIdentity);
         }else if(userIdentity.getRole() == IdentityRole.FINANCIER){
             activateFinancier(userIdentity);
+        } else if (userIdentity.getRole() == IdentityRole.LOANEE) {
+            activateLoanee(userIdentity);
         }
+    }
+
+    private void activateLoanee(UserIdentity userIdentity) {
+        log.info("Started updating loanee status");
+        Loanee loanee = Loanee.builder().userIdentity(userIdentity).build();
+        loaneeUseCase.updateLoaneeStatus(loanee);
     }
 
     private void activateFinancier(UserIdentity userIdentity) {

@@ -11,7 +11,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.pre
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyNinResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityverificationmanager.prembly.PremblyParameter;
-import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -60,7 +59,7 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
                 return verifyBvn(identityVerification);
             }
         } else {
-            throw new IdentityException("Either NIN or BVN must be provided.");
+            throw new MeedlException("Either NIN or BVN must be provided.");
         }
     }
 
@@ -199,7 +198,7 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
 
         } catch (Exception ex) {
             log.error("An unexpected error occurred: {}", ex.getMessage(), ex);
-            throw new IdentityException("Verification server down ");
+            throw new MeedlException("Verification server down ");
         }
     }
 

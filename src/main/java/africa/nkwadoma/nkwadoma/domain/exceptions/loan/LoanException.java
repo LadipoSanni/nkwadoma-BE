@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.exceptions;
+package africa.nkwadoma.nkwadoma.domain.exceptions.loan;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 

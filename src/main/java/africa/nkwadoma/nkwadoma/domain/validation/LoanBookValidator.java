@@ -77,11 +77,17 @@ public class LoanBookValidator {
         validateMoneyValue(loanee.getLoaneeLoanDetail().getAmountReceived(), "Amount received for user with email "+loanee.getUserIdentity().getEmail()+" is invalid: "+ convertIfNull( loanee.getLoaneeLoanDetail().getAmountReceived()));
     }
 
-    private String convertIfNull(BigDecimal bigDecimal) {
+    public String convertIfNull(BigDecimal bigDecimal) {
         if (bigDecimal == null) {
             return "Value not provided";
         }
         return bigDecimal.toString();
+    }
+    public String convertIfNull(String amount) {
+        if (MeedlValidator.isEmptyString(amount)) {
+            return "Value not provided";
+        }
+        return amount;
     }
 
     public void validateMoneyValue(BigDecimal amount, String message) throws MeedlException {
@@ -140,12 +146,21 @@ public class LoanBookValidator {
     public void validateAmountPaid(List<Map<String, String>> data, String amountPaidKey) throws MeedlException {
         for (Map<String, String> row : data) {
             String amountPassed = row.get(amountPaidKey);
-
+            containsOnlyDigits(amountPassed, "Amount paid is not a monetary value. "+convertIfNull(amountPassed));
             validateMoneyValue(new BigDecimal(amountPassed), "Amount repaid is required.");
             log.info("Amount validated for amount paid: {}", amountPassed);
 
         }
     }
+    public void containsOnlyDigits(String input, String errorMessage) throws MeedlException {
+       boolean isOnlyDigits = input != null && input.matches("\\d+");
+       if (!isOnlyDigits){
+           log.error("Its not only digits {}", input);
+           throw new MeedlException(errorMessage);
+       }
+    }
+
+
     public void validateUserExistForRepayment(List<Map<String, String>> data, String email) throws MeedlException {
         for (Map<String, String> row : data) {
             String emailToCheck = row.get(email);
