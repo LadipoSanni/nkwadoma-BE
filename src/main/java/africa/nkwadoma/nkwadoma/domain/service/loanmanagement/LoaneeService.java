@@ -157,22 +157,9 @@ public class LoaneeService implements LoaneeUseCase {
         calculateAmountRequested(loanee, totalLoanBreakDown, cohort);
         checkIfAmountRequestedIsNotGreaterThanTotalCohortFee(loanee, cohort);
 
+        cohortLoanee = addExistingLoaneeToCohort(loanee, existingLoanee, cohort, cohortLoanee);
 
-        if (ObjectUtils.isNotEmpty(existingLoanee)){
-            checkIfLoaneeExistInCohort(cohort, existingLoanee);
-            checkIfLoaneeExistInAnActiveCohortInSameProgram(existingLoanee, cohort);
-            cohortLoanee = addLoaneeToCohort(loanee, cohort);
-        }
-
-        if (ObjectUtils.isEmpty(existingLoanee)){
-
-            loanee.getUserIdentity().setRole(IdentityRole.LOANEE);
-            loanee.setActivationStatus(ActivationStatus.ACTIVE);
-            cohortLoanee = addLoaneeToCohort(loanee, cohort);
-            Loanee createdLoanee = createLoaneeAccount(loanee);
-            cohortLoanee.setLoanee(createdLoanee);
-
-        }
+        cohortLoanee = addNewLoaneeToCohort(loanee, existingLoanee, cohortLoanee, cohort);
 
         cohortLoanee = cohortLoaneeOutputPort.save(cohortLoanee);
 
@@ -187,16 +174,35 @@ public class LoaneeService implements LoaneeUseCase {
         return cohortLoanee.getLoanee();
     }
 
+    private CohortLoanee addExistingLoaneeToCohort(Loanee loanee, Loanee existingLoanee, Cohort cohort, CohortLoanee cohortLoanee) throws MeedlException {
+        if (ObjectUtils.isNotEmpty(existingLoanee)){
+            checkIfLoaneeExistInCohort(cohort, existingLoanee);
+            checkIfLoaneeExistInAnActiveCohortInSameProgram(existingLoanee, cohort);
+            cohortLoanee = addLoaneeToCohort(loanee, cohort);
+        }
+        return cohortLoanee;
+    }
+
+    private CohortLoanee addNewLoaneeToCohort(Loanee loanee, Loanee existingLoanee, CohortLoanee cohortLoanee, Cohort cohort) throws MeedlException {
+        if (ObjectUtils.isEmpty(existingLoanee)){
+            loanee.getUserIdentity().setRole(IdentityRole.LOANEE);
+            loanee.setActivationStatus(ActivationStatus.ACTIVE);
+            cohortLoanee = addLoaneeToCohort(loanee, cohort);
+            Loanee createdLoanee = createLoaneeAccount(loanee);
+            cohortLoanee.setLoanee(createdLoanee);
+        }
+        return cohortLoanee;
+    }
+
     private CohortLoanee addLoaneeToCohort(Loanee loanee, Cohort cohort) throws MeedlException {
-        CohortLoanee cohortLoanee;
-        cohortLoanee = CohortLoanee.builder().createdBy(loanee.getUserIdentity().getCreatedBy())
+        CohortLoanee cohortLoanee = CohortLoanee.builder().createdBy(loanee.getUserIdentity().getCreatedBy())
                 .createdAt(LocalDateTime.now())
-               .cohort(cohort)
-               .loanee(loanee)
-               .loaneeStatus(LoaneeStatus.ADDED)
-               .onboardingMode(OnboardingMode.EMAIL_REFERRED)
-               .uploadedStatus(UploadedStatus.ADDED)
-               .build();
+                .cohort(cohort)
+                .loanee(loanee)
+                .loaneeStatus(LoaneeStatus.ADDED)
+                .onboardingMode(OnboardingMode.EMAIL_REFERRED)
+                .uploadedStatus(UploadedStatus.ADDED)
+                .build();
         LoaneeLoanDetail loaneeLoanDetail = saveLoaneeLoanDetails(loanee.getLoaneeLoanDetail());
         cohortLoanee.setLoaneeLoanDetail(loaneeLoanDetail);
         return cohortLoanee;
