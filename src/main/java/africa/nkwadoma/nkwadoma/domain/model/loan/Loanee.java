@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.model.loan;
 
 
+import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
@@ -50,6 +51,7 @@ public class Loanee {
     private String loanId;
     private String deferReason;
     private LocalDateTime deferredDateAndTime;
+    private ActivationStatus activationStatus;
     private String loaneeName;
     private LoanStatus loanStatus;
     private boolean deferralRequested;

@@ -46,4 +46,5 @@ public interface LoaneeUseCase {
 
     String archiveOrUnArchiveByIds(String actorId, List<String> loaneeIds, LoaneeStatus loaneeStatus) throws MeedlException;
 
+    void updateLoaneeStatus(Loanee loanee);
 }
