@@ -16,7 +16,7 @@ public interface RepaymentHistoryRepository extends JpaRepository<RepaymentHisto
                 u.firstName as firstName,
                 u.lastName as lastName,
                 r.paymentDateTime as paymentDateTime,
-                l.cohortId as cohortId,
+
                 r.amountPaid as amountPaid,
                 r.totalAmountRepaid as totalAmountRepaid,
                 r.amountOutstanding as amountOutstanding,
@@ -69,7 +69,7 @@ public interface RepaymentHistoryRepository extends JpaRepository<RepaymentHisto
                 u.firstName as firstName,
                 u.lastName as lastName,
                 r.paymentDateTime as paymentDateTime,
-                l.cohortId as cohortId,
+                
                 r.amountPaid as amountPaid,
                 r.totalAmountRepaid as totalAmountRepaid,
                 r.amountOutstanding as amountOutstanding,

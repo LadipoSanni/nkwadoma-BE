@@ -160,7 +160,7 @@ public class LoaneeService implements LoaneeUseCase {
 
         if (ObjectUtils.isNotEmpty(existingLoanee)){
             checkIfLoaneeExistInCohort(cohort, existingLoanee);
-            checkIfLoaneeExistInAnActiveCohortInSameProgram(loanee, cohort);
+            checkIfLoaneeExistInAnActiveCohortInSameProgram(existingLoanee, cohort);
             cohortLoanee = addLoaneeToCohort(loanee, cohort);
         }
 
@@ -169,7 +169,9 @@ public class LoaneeService implements LoaneeUseCase {
             loanee.getUserIdentity().setRole(IdentityRole.LOANEE);
             loanee.setActivationStatus(ActivationStatus.ACTIVE);
             cohortLoanee = addLoaneeToCohort(loanee, cohort);
-            loanee = createLoaneeAccount(loanee);
+            Loanee createdLoanee = createLoaneeAccount(loanee);
+            cohortLoanee.setLoanee(createdLoanee);
+
         }
 
         cohortLoanee = cohortLoaneeOutputPort.save(cohortLoanee);
@@ -449,7 +451,7 @@ public class LoaneeService implements LoaneeUseCase {
     private Loanee checkIfLoaneeWithEmailExist(Loanee loanee) throws MeedlException {
         Loanee existingLoanee = loaneeOutputPort.findByLoaneeEmail(loanee.getUserIdentity().getEmail());
         if (ObjectUtils.isNotEmpty(existingLoanee)) {
-            log.info("Successfully confirmed user previously exist. {}",loanee);
+            log.info("Successfully confirmed user previously exist. {}",existingLoanee);
            return existingLoanee;
         }
         log.info("Successfully confirmed user does not previously exist. {}",loanee.getUserIdentity().getEmail());

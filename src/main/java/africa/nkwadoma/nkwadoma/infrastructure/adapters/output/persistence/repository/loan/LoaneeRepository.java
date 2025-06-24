@@ -20,9 +20,10 @@ public interface LoaneeRepository extends JpaRepository<LoaneeEntity,String> {
     Optional<LoaneeEntity> findLoaneeByUserIdentityId(String userId);
 
     @Query("""
-    SELECT l FROM LoaneeEntity l
+    SELECT l FROM CohortLoaneeEntity l
+        
     LEFT JOIN LoanEntity loan ON loan.loaneeEntity.id = l.id
-    WHERE l.cohortId = :cohortId 
+    WHERE l.cohort.id = :cohortId 
         AND (:status IS NULL AND l.loaneeStatus != 'ARCHIVE' OR l.loaneeStatus = :status)
     AND (:status IS NULL OR l.loaneeStatus = :status)
     AND (:loanStatus IS NULL OR loan.loanStatus = :loanStatus)
@@ -34,19 +35,20 @@ public interface LoaneeRepository extends JpaRepository<LoaneeEntity,String> {
                                          @Param("uploadedStatus") UploadedStatus uploadedStatus,
                                          Pageable pageable);
 
-    @Query("SELECT l FROM LoaneeEntity l WHERE l.cohortId = :cohortId AND l.id IN :loaneeIds")
+    @Query("SELECT l FROM CohortLoaneeEntity l WHERE l.cohort.id = :cohortId AND l.id IN :loaneeIds")
     List<LoaneeEntity> findAllLoaneesByCohortIdAndLoaneeIds(
             @Param("cohortId") String cohortId,
             @Param("loaneeIds") List<String> loaneeIds
     );
 
+    @Query("select l from CohortLoaneeEntity l where l.id = :id ")
     List<LoaneeEntity> findAllLoaneesByCohortId(String id);
 
     @Query("""
-        SELECT l FROM LoaneeEntity l
-        WHERE l.cohortId = :cohortId
-        AND (upper(concat(l.userIdentity.firstName, ' ', l.userIdentity.lastName)) LIKE upper(concat('%', :nameFragment, '%'))
-        OR upper(concat(l.userIdentity.lastName, ' ', l.userIdentity.firstName)) LIKE upper(concat('%', :nameFragment, '%')))
+        SELECT l FROM CohortLoaneeEntity l
+        WHERE l.cohort.id = :cohortId
+        AND (upper(concat(l.loanee.userIdentity.firstName, ' ', l.loanee.userIdentity.lastName)) LIKE upper(concat('%', :nameFragment, '%'))
+        OR upper(concat(l.loanee.userIdentity.lastName, ' ', l.loanee.userIdentity.firstName)) LIKE upper(concat('%', :nameFragment, '%')))
         AND (:status IS NULL OR l.loaneeStatus = :status)
         AND (:uploadedStatus IS NULL OR l.uploadedStatus = :uploadedStatus)
         AND l.loaneeStatus != 'ARCHIVE'
@@ -92,8 +94,8 @@ public interface LoaneeRepository extends JpaRepository<LoaneeEntity,String> {
 
     @Query("""
             SELECT CASE WHEN COUNT(l) > 0 THEN true ELSE false END
-            FROM LoaneeEntity l 
-            JOIN CohortEntity c ON l.cohortId = c.id 
+            FROM CohortLoaneeEntity l 
+            JOIN CohortEntity c ON l.cohort.id = c.id 
             JOIN ProgramEntity p ON c.programId = p.id 
             WHERE l.id = :loaneeId AND p.organizationIdentity.id = :organizationId
                         """)
@@ -103,8 +105,8 @@ public interface LoaneeRepository extends JpaRepository<LoaneeEntity,String> {
     @Modifying
     @Transactional
     @Query(value = """
-        UPDATE LoaneeEntity l SET l.loaneeStatus = :status
-        WHERE l.id IN (:ids)
+        UPDATE CohortLoaneeEntity cle SET cle.loaneeStatus = :status
+        WHERE cle.id IN (:ids)
  """)
     void updateStatusByIds(@Param("ids") List<String> ids, @Param("status") LoaneeStatus status);
 
