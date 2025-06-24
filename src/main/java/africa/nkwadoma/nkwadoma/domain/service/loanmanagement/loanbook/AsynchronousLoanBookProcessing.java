@@ -341,6 +341,9 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                     .nin(row.get("nin"))
                     .createdBy(actorId)
                     .build();
+            loanBookValidator.containsOnlyDigits(row.get("initialdeposit"), "Initial deposit is not a monetary value. "+ loanBookValidator.convertIfNull(row.get("initialdeposit")));
+            loanBookValidator.containsOnlyDigits(row.get("amountrequested"), "Amount requested is not a monetary value. "+ loanBookValidator.convertIfNull(row.get("amountrequested")));
+            loanBookValidator.containsOnlyDigits(row.get("amountreceived"), "Amount received is not a monetary value. "+ loanBookValidator.convertIfNull(row.get("amountreceived")));
 
             LoaneeLoanDetail loaneeLoanDetail = LoaneeLoanDetail.builder()
                     .initialDeposit(new BigDecimal(row.get("initialdeposit")))
