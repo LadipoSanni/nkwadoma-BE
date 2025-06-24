@@ -4,21 +4,21 @@ import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.Country;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.UserRelationship;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.*;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.UploadedStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.ModeOfPayment;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
+import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.financier.*;
 import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
-import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
-import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
-import africa.nkwadoma.nkwadoma.domain.model.education.Program;
-import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentRecordBook;
@@ -635,6 +635,21 @@ public class TestData {
                         .userIdentity(UserIdentity.builder().email(TestUtils.generateEmail(7)).build())
                         .build())
                 .paymentDateTime(LocalDateTime.now())
+                .build();
+    }
+
+    public static CohortLoanee buildCohortLoanee(Loanee loanee, Cohort cohort,LoaneeLoanDetail loaneeLoanDetail,String createdBy) {
+        return CohortLoanee.builder()
+                .cohort(cohort)
+                .loanee(loanee)
+                .createdBy(createdBy)
+                .loaneeLoanDetail(loaneeLoanDetail)
+                .deferralApproved(false)
+                .deferralRequested(false)
+                .loaneeStatus(LoaneeStatus.ADDED)
+                .createdAt(LocalDateTime.now())
+                .onboardingMode(OnboardingMode.EMAIL_REFERRED)
+                .uploadedStatus(UploadedStatus.INVITED)
                 .build();
     }
 }
