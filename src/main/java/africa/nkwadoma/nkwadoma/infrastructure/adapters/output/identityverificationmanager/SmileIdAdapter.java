@@ -9,8 +9,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.pre
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.commons.IdentityVerificationMessage;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityverificationmanager.prembly.PremblyParameter;
-import africa.nkwadoma.nkwadoma.infrastructure.exceptions.InfrastructureException;
-//import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.*;
@@ -26,7 +24,7 @@ public class SmileIdAdapter implements IdentityVerificationOutputPort {
     private String apiKey = "null value";
 
     @Override
-    public PremblyResponse verifyIdentity(IdentityVerification identityVerification) throws InfrastructureException, IdentityException {
+    public PremblyResponse verifyIdentity(IdentityVerification identityVerification) throws  MeedlException {
         return getNinDetails(identityVerification);
     }
 
@@ -55,7 +53,7 @@ public class SmileIdAdapter implements IdentityVerificationOutputPort {
         return null;
     }
 
-    public PremblyNinResponse getNinDetails(IdentityVerification verificationRequest) throws InfrastructureException, IdentityException {
+    public PremblyNinResponse getNinDetails(IdentityVerification verificationRequest) throws MeedlException, IdentityException {
         validateIdentityVerificationRequest(verificationRequest);
         ResponseEntity<PremblyNinResponse> responseEntity = getIdentityDetailsByNin(verificationRequest);
         String verificationResult = getNinVerificationResponse(responseEntity.getBody());
@@ -81,10 +79,10 @@ public class SmileIdAdapter implements IdentityVerificationOutputPort {
         return responseEntity;
     }
 
-    private String getNinVerificationResponse(PremblyNinResponse response) throws IdentityException {
+    private String getNinVerificationResponse(PremblyNinResponse response) throws MeedlException {
         String responseMessage = StringUtils.EMPTY;
         if (response == null || response.getNinData() == null) {
-            throw new IdentityException(IdentityVerificationMessage.SMILEID_UNAVAILABLE.getMessage());
+            throw new MeedlException(IdentityVerificationMessage.SMILEID_UNAVAILABLE.getMessage());
         }
         switch (response.getResponseCode()) {
             case "00" -> {
@@ -112,9 +110,9 @@ public class SmileIdAdapter implements IdentityVerificationOutputPort {
         return headers;
     }
 
-    private void validateIdentityVerificationRequest(IdentityVerification identityVerification) throws IdentityException {
+    private void validateIdentityVerificationRequest(IdentityVerification identityVerification) throws MeedlException {
         if (identityVerification == null || StringUtils.isEmpty(identityVerification.getIdentityId()) || StringUtils.isEmpty(identityVerification.getImageUrl())) {
-            throw new IdentityException("credentials should not be empty");
+            throw new MeedlException("credentials should not be empty");
         }
 
     }

@@ -6,7 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.InvalidInputException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanException;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;

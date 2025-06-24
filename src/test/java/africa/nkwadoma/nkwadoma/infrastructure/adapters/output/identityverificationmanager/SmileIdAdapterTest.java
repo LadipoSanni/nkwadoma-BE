@@ -3,7 +3,6 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityverifica
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
-import africa.nkwadoma.nkwadoma.infrastructure.exceptions.InfrastructureException;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.ImageConverter;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest

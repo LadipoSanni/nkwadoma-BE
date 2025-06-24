@@ -12,7 +12,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanOfferMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanOfferEntityRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanOfferProjection;
-import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.ObjectUtils;
