@@ -9,7 +9,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.IdentityVerificationRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.IdentityVerificationRestMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
+//import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +37,7 @@ public class IdentityVerificationController {
                 .statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("/verify")
-    public ResponseEntity<ApiResponse<?>> verifyIdentity(@RequestBody @Valid IdentityVerificationRequest identityVerificationRequest) throws MeedlException, IdentityVerificationException {
+    public ResponseEntity<ApiResponse<?>> verifyIdentity(@RequestBody @Valid IdentityVerificationRequest identityVerificationRequest) throws MeedlException {
         IdentityVerification identityVerification = identityVerificationMapper.toIdentityVerification(identityVerificationRequest);
         String response = identityVerificationUseCase.verifyIdentity(identityVerification);
         return ResponseEntity.ok(ApiResponse.<String>builder()
@@ -45,7 +45,7 @@ public class IdentityVerificationController {
                 .statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("/failure-record/create")
-    public ResponseEntity<ApiResponse<?>> identityVerificationFailed(@RequestBody @Valid IdentityVerificationFailureRecordRequest identityVerificationFailureRecordRequest) throws IdentityException {
+    public ResponseEntity<ApiResponse<?>> identityVerificationFailed(@RequestBody @Valid IdentityVerificationFailureRecordRequest identityVerificationFailureRecordRequest) throws MeedlException {
         IdentityVerificationFailureRecord identityVerificationFailureRecord = identityVerificationMapper.toIdentityVerificationFailureRecord(identityVerificationFailureRecordRequest);
         return ResponseEntity.ok(ApiResponse.<String>builder()
                 .data(identityVerificationUseCase.createIdentityVerificationFailureRecord(identityVerificationFailureRecord))
