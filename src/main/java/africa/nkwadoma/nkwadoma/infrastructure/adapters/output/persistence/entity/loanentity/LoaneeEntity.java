@@ -21,7 +21,6 @@ public class LoaneeEntity {
     @Id
     @UuidGenerator
     private String id;
-    private String cohortId;
     private String createdBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -30,23 +29,6 @@ public class LoaneeEntity {
     private String registryId;
     @OneToOne
     private UserEntity userIdentity;
-    @OneToOne
-    private LoaneeLoanDetailEntity loaneeLoanDetail;
-    @Enumerated(EnumType.STRING)
-    private LoaneeStatus loaneeStatus;
-    @Enumerated(EnumType.STRING)
-    private OnboardingMode onboardingMode;
-    @Enumerated(EnumType.STRING)
-    private UploadedStatus uploadedStatus;
     @Enumerated(EnumType.STRING)
     private ActivationStatus activationStatus;
-    private LocalDateTime referralDateTime;
-    private String referredBy;
-    private String reasonForDropout;
-    private LocalDateTime deferredDateAndTime;
-    private String deferReason;
-    private boolean deferralRequested;
-    private boolean deferralApproved;
-    private boolean dropoutRequested;
-    private boolean dropoutApproved;
 }

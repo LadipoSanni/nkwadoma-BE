@@ -145,7 +145,9 @@ public class LoaneeService implements LoaneeUseCase {
         MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
         loanee.validate();
         loanee.getLoaneeLoanDetail().validate();
+
         CohortLoanee cohortLoanee = CohortLoanee.builder().build();
+
         Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
         Loanee existingLoanee = checkIfLoaneeWithEmailExist(loanee);
 
@@ -159,14 +161,13 @@ public class LoaneeService implements LoaneeUseCase {
         if (ObjectUtils.isNotEmpty(existingLoanee)){
             checkIfLoaneeExistInCohort(cohort, existingLoanee);
             checkIfLoaneeExistInAnActiveCohortInSameProgram(loanee, cohort);
-
             cohortLoanee = addLoaneeToCohort(loanee, cohort);
         }
 
         if (ObjectUtils.isEmpty(existingLoanee)){
 
             loanee.getUserIdentity().setRole(IdentityRole.LOANEE);
-
+            loanee.setActivationStatus(ActivationStatus.ACTIVE);
             cohortLoanee = addLoaneeToCohort(loanee, cohort);
             loanee = createLoaneeAccount(loanee);
         }

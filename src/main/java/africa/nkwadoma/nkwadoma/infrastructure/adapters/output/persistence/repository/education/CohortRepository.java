@@ -20,7 +20,7 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
             c.startDate AS startDate,
             COALESCE(SUM(
                 CASE 
-                    WHEN lne.onboardingMode = 'FILE_UPLOADED' THEN lld.amountRequested
+                    WHEN cle.onboardingMode = 'FILE_UPLOADED' THEN lld.amountRequested
                     ELSE lr.loanAmountRequested
                 END
             ), 0) AS amountRequested,
@@ -28,8 +28,9 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
             COALESCE(0, 0) AS amountReceived,
             COALESCE(0, 0) AS amountOutstanding
         FROM CohortEntity c
-        LEFT JOIN LoaneeEntity lne ON lne.cohortId = c.id
-        LEFT JOIN LoaneeLoanDetailEntity lld ON lld.id = lne.loaneeLoanDetail.id
+        LEFT JOIN CohortLoaneeEntity cle ON cle.cohort.id = c.id
+        LEFT JOIN LoaneeEntity lne ON lne.id = cle.loanee.id
+        LEFT JOIN LoaneeLoanDetailEntity lld ON lld.id = cle.loaneeLoanDetail.id
         LEFT JOIN LoanEntity le ON le.loaneeEntity.id = lne.id AND le.loanOfferId IS NOT NULL
         LEFT JOIN LoanOfferEntity lo ON lo.id = le.loanOfferId
         LEFT JOIN LoanRequestEntity lr ON lr.id = lo.loanRequest.id
@@ -61,7 +62,7 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
         c.startDate AS startDate,
         COALESCE(SUM(
             CASE 
-                WHEN lne.onboardingMode = 'FILE_UPLOADED_FOR_DISBURSED_LOANS' THEN lld.amountRequested
+                WHEN cle.onboardingMode = 'FILE_UPLOADED' THEN lld.amountRequested
                 ELSE lr.loanAmountRequested
             END
         ), 0) AS amountRequested,
@@ -69,8 +70,9 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
         COALESCE(0, 0) AS amountReceived,
         COALESCE(0, 0) AS amountOutstanding
     FROM CohortEntity c
-    LEFT JOIN LoaneeEntity lne ON lne.cohortId = c.id
-    LEFT JOIN LoaneeLoanDetailEntity lld ON lld.id = lne.loaneeLoanDetail.id
+    LEFT JOIN CohortLoaneeEntity cle ON cle.cohort.id = c.id
+    LEFT JOIN LoaneeEntity lne ON lne.id = cle.loanee.id
+    LEFT JOIN LoaneeLoanDetailEntity lld ON lld.id = cle.loaneeLoanDetail.id
     LEFT JOIN LoanEntity le ON le.loaneeEntity.id = lne.id AND le.loanOfferId IS NOT NULL
     LEFT JOIN LoanOfferEntity lo ON lo.id = le.loanOfferId
     LEFT JOIN LoanRequestEntity lr ON lr.id = lo.loanRequest.id
