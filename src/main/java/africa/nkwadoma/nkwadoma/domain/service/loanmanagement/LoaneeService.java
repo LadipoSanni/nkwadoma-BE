@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.notification.LoaneeEmail
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.creditregistry.CreditRegistryOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
@@ -30,7 +31,6 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanee.UploadedStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
-import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -85,6 +85,7 @@ public class LoaneeService implements LoaneeUseCase {
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
     private final LoanOfferOutputPort loanOfferOutputPort;
     private final AesOutputPort aesOutputPort;
+    private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
 
 
     @Override
@@ -142,7 +143,10 @@ public class LoaneeService implements LoaneeUseCase {
         MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
         loanee.validate();
         loanee.getLoaneeLoanDetail().validate();
-        checkIfLoaneeWithEmailExist(loanee);
+        Loanee loaneeExist = checkIfLoaneeWithEmailExist(loanee);
+        if (ObjectUtils.isNotEmpty(loaneeExist)){
+            cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(loaneeExist.getId(),loanee.getCohortId());
+        }
         String cohortId = loanee.getCohortId();
         Cohort cohort = cohortOutputPort.findCohort(cohortId);
         checkIfCohortTuitionDetailsHaveBeenUpdated(cohort);
@@ -395,13 +399,14 @@ public class LoaneeService implements LoaneeUseCase {
         loanee.setReferredBy(organizationIdentity.getName());
         return organizationIdentity;
     }
-    private void checkIfLoaneeWithEmailExist(Loanee loanee) throws MeedlException {
+    private Loanee checkIfLoaneeWithEmailExist(Loanee loanee) throws MeedlException {
         Loanee existingLoanee = loaneeOutputPort.findByLoaneeEmail(loanee.getUserIdentity().getEmail());
         if (ObjectUtils.isNotEmpty(existingLoanee)) {
-            log.error("{}. {}", LoaneeMessages.LOANEE_WITH_EMAIL_EXIST_IN_COHORT.getMessage(), loanee.getUserIdentity().getEmail());
-            throw new LoanException(LoaneeMessages.LOANEE_WITH_EMAIL_EXIST_IN_COHORT.getMessage());
+            log.info("Successfully confirmed user previously exist. {}",loanee);
+           return existingLoanee;
         }
         log.info("Successfully confirmed user does not previously exist. {}",loanee.getUserIdentity().getEmail());
+        return null;
     }
 
     private static void calculateAmountRequested(Loanee loanee, BigDecimal totalLoanBreakDown, Cohort cohort) throws LoanException {
