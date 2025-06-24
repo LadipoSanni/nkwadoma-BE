@@ -1,5 +1,5 @@
 -- Creating cohort_loanee table
-CREATE TABLE IF NOT EXISTS cohort_loanee (
+CREATE TABLE IF NOT EXISTS cohort_loanee_entity (
                                              id VARCHAR(36) PRIMARY KEY,
     cohort_id VARCHAR(36) NOT NULL,
     loanee_id VARCHAR(36) NOT NULL,
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS cohort_loanee (
     );
 
 -- Migrating data from loanee to cohort_loanee
-INSERT INTO cohort_loanee (
+INSERT INTO cohort_loanee_entity (
     id,
     cohort_id,
     loanee_id,
