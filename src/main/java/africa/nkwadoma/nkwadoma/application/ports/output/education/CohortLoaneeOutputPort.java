@@ -10,4 +10,6 @@ public interface CohortLoaneeOutputPort {
     void delete(String id) throws MeedlException;
 
     CohortLoanee findCohortLoaneeByLoaneeIdAndCohortId(String loaneeId, String cohortId) throws MeedlException;
+
+    CohortLoanee findCohortLoaneeByProgramIdAndLoaneeId(String programId, String loaneeId) throws MeedlException;
 }

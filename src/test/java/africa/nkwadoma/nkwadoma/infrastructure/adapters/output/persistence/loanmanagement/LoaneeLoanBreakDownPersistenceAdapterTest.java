@@ -1,16 +1,20 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loanmanagement;
 
 
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanBreakDownOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
+import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -47,6 +51,10 @@ public class LoaneeLoanBreakDownPersistenceAdapterTest {
     private List<LoaneeLoanBreakdown> loaneeLoanBreakdowns;
     private String loaneeId;
     private String loaneeLoanDetailsId;
+    private CohortLoanee cohortLoanee;
+    private Cohort cohort;
+    @Autowired
+    private CohortOutputPort cohortOutputPort;
 
     @BeforeAll
     void setUpLoanee(){
@@ -54,6 +62,7 @@ public class LoaneeLoanBreakDownPersistenceAdapterTest {
                 .createdBy(id).role(IdentityRole.LOANEE).build();
         loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(4000))
                 .initialDeposit(BigDecimal.valueOf(200)).build();
+        cohort = TestData.createCohortData("X-men",id,id,null,id);
         try{
             userIdentity = identityOutputPort.save(userIdentity);
             loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
@@ -61,6 +70,9 @@ public class LoaneeLoanBreakDownPersistenceAdapterTest {
             loanee = loaneeOutputPort.save(loanee);
             loaneeId = loanee.getId();
             loaneeLoanDetailsId = loaneeLoanDetail.getId();
+            cohort = cohortOutputPort.save(cohort);
+            cohortLoanee = CohortLoanee.builder().
+                    loanee(loanee).cohort(cohort).createdBy(id).loaneeLoanDetail(loaneeLoanDetail).build();
         } catch (MeedlException e) {
             log.error(e.getMessage());
         }
@@ -79,11 +91,11 @@ public class LoaneeLoanBreakDownPersistenceAdapterTest {
     @Order(1)
     void saveLoaneeLoanBreakDown(){
         try {
-            loaneeLoanBreakdowns = loaneeLoanBreakDownOutputPort.saveAll(List.of(loaneeLoanBreakdown),loanee);
+            loaneeLoanBreakdowns = loaneeLoanBreakDownOutputPort.saveAll(List.of(loaneeLoanBreakdown),cohortLoanee);
         }catch (MeedlException e){
             log.error(e.getMessage());
         }
-        assertEquals(loaneeLoanBreakdowns.get(0).getLoanee().getUserIdentity().getFirstName(),
+        assertEquals(loaneeLoanBreakdowns.get(0).getCohortLoanee().getLoanee().getUserIdentity().getFirstName(),
                 loanee.getUserIdentity().getFirstName());
     }
 
@@ -91,25 +103,25 @@ public class LoaneeLoanBreakDownPersistenceAdapterTest {
     @Test
     void cannotSaveWithNegativeAmount(){
         loaneeLoanBreakdown.setItemAmount(BigDecimal.valueOf(-4000));
-        assertThrows(MeedlException.class, () ->loaneeLoanBreakDownOutputPort.saveAll(List.of(loaneeLoanBreakdown),loanee));
+        assertThrows(MeedlException.class, () ->loaneeLoanBreakDownOutputPort.saveAll(List.of(loaneeLoanBreakdown),cohortLoanee));
     }
 
     @Test
     void cannotSaveWithNullAmount(){
         loaneeLoanBreakdown.setItemAmount(null);
-        assertThrows(MeedlException.class, () ->loaneeLoanBreakDownOutputPort.saveAll(List.of(loaneeLoanBreakdown),loanee));
+        assertThrows(MeedlException.class, () ->loaneeLoanBreakDownOutputPort.saveAll(List.of(loaneeLoanBreakdown),cohortLoanee));
     }
 
     @Test
     void cannotSaveWithNullItemName(){
         loaneeLoanBreakdown.setItemName(null);
-        assertThrows(MeedlException.class, () ->loaneeLoanBreakDownOutputPort.saveAll(List.of(loaneeLoanBreakdown),loanee));
+        assertThrows(MeedlException.class, () ->loaneeLoanBreakDownOutputPort.saveAll(List.of(loaneeLoanBreakdown),cohortLoanee));
     }
 
     @Test
     void cannotSaveWithNullBreakdownId(){
         loaneeLoanBreakdown.setLoaneeLoanBreakdownId(null);
-        assertThrows(MeedlException.class, () ->loaneeLoanBreakDownOutputPort.saveAll(List.of(loaneeLoanBreakdown),loanee));
+        assertThrows(MeedlException.class, () ->loaneeLoanBreakDownOutputPort.saveAll(List.of(loaneeLoanBreakdown),cohortLoanee));
     }
 
 
@@ -117,7 +129,7 @@ public class LoaneeLoanBreakDownPersistenceAdapterTest {
     @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY,"jdhjhdshjdshj"})
         void cannotSaveWithInvalidId(String invalidId){
             loaneeLoanBreakdown.setLoaneeLoanBreakdownId(invalidId);
-            assertThrows(MeedlException.class,()-> loaneeLoanBreakDownOutputPort.saveAll(List.of(loaneeLoanBreakdown),loanee));
+            assertThrows(MeedlException.class,()-> loaneeLoanBreakDownOutputPort.saveAll(List.of(loaneeLoanBreakdown),cohortLoanee));
     }
 
     @AfterAll

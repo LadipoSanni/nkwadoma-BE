@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
@@ -51,6 +52,17 @@ public class CohortLoaneePersistenceAdapter implements CohortLoaneeOutputPort {
                 cohortLoaneeRepository.findCohortLoaneeEntityByLoanee_IdAndCohort_Id(loaneeId,cohortId);
         log.info("After finding cohort loanee = : {}", cohortLoaneeEntity);
 
+        return cohortLoaneeMapper.toCohortLoanee(cohortLoaneeEntity);
+    }
+
+    @Override
+    public CohortLoanee findCohortLoaneeByProgramIdAndLoaneeId(String programId, String loaneeId) throws MeedlException {
+        MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+        MeedlValidator.validateUUID(programId, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
+
+        CohortLoaneeEntity cohortLoaneeEntity =
+                cohortLoaneeRepository.findCohortLoaneeEntityByCohort_ProgramIdAndLoanee_Id(programId,loaneeId);
+        log.info("After finding cohort loanee by program ID  = : {}", cohortLoaneeEntity);
         return cohortLoaneeMapper.toCohortLoanee(cohortLoaneeEntity);
     }
 }

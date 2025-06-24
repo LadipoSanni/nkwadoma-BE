@@ -141,6 +141,19 @@ public class CohortLoaneePersistenceAdapterTest {
         assertEquals(savedLoanee.getCreatedBy(),meedleUser.getId());
     }
 
+    @Test
+    void findCohortLoaneeByLoaneeIdAndCohortIdByNullLoaneeId(){
+        assertThrows(MeedlException.class, () ->
+                cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(null,cohort.getId()));
+    }
+
+    @Test
+    void findCohortLoaneeByLoaneeIdAndCohortIdByNullCohortId(){
+        assertThrows(MeedlException.class, () ->
+                cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(loanee.getId(),null));
+    }
+
+
     @Order(2)
     @Test
     void findCohortLoaneeByLoaneeIdAndCohortId(){
@@ -155,6 +168,35 @@ public class CohortLoaneePersistenceAdapterTest {
         assertEquals(foundCohortLoanee.getCohort().getId(),cohort.getId());
         assertEquals(foundCohortLoanee.getCreatedBy(),meedleUser.getId());
     }
+
+
+    @Test
+    void findCohortLoaneeByLoaneeIdAndProgramIdByNullLoaneeId(){
+        assertThrows(MeedlException.class, () ->
+                cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(cohort.getProgramId(),null));
+    }
+
+    @Test
+    void findCohortLoaneeByLoaneeIdAndProgramIdByNullProgramId(){
+        assertThrows(MeedlException.class, () ->
+                cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(null,loanee.getId()));
+    }
+
+    @Order(3)
+    @Test
+    void findCohortLoaneeByProgramIdAndLoaneeId(){
+        CohortLoanee foundCohortLoanee;
+        try {
+            foundCohortLoanee = cohortLoaneeOutputPort.findCohortLoaneeByProgramIdAndLoaneeId(cohort.getProgramId(),loanee.getId());
+        } catch (MeedlException exception) {
+            log.info("Failed to set up cohort loanee {}", exception.getMessage());
+            throw new RuntimeException(exception);
+        }
+        assertEquals(foundCohortLoanee.getLoanee().getId(),loanee.getId());
+        assertEquals(foundCohortLoanee.getCohort().getId(),cohort.getId());
+        assertEquals(foundCohortLoanee.getCreatedBy(),meedleUser.getId());
+    }
+
 
     @AfterAll
     void cleanUp() throws MeedlException {

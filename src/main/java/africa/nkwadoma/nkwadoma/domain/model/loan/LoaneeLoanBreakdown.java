@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.model.loan;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.*;
 
@@ -19,7 +20,7 @@ public class LoaneeLoanBreakdown {
     private String itemName;
     private BigDecimal itemAmount ;
     private String currency;
-    private Loanee loanee;
+    private CohortLoanee cohortLoanee;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateUUID(loaneeLoanBreakdownId, "Please provide a valid loanee's loan break down identification.");

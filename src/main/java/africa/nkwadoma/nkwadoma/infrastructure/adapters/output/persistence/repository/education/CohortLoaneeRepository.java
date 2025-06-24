@@ -6,4 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CohortLoaneeRepository extends JpaRepository<CohortLoaneeEntity, String> {
     CohortLoaneeEntity findCohortLoaneeEntityByLoanee_IdAndCohort_Id(String loaneeId, String cohortId);
+
+    CohortLoaneeEntity findCohortLoaneeEntityByCohort_ProgramIdAndLoanee_Id(String cohortProgramId, String loaneeId);
 }
