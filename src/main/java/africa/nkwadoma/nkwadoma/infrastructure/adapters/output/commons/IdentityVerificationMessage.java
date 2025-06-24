@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.commons;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.commons;
 
 public enum IdentityVerificationMessage {
     SERVICE_UNAVAILABLE("This Service is Unavailable. Please try again in a few minutes."),

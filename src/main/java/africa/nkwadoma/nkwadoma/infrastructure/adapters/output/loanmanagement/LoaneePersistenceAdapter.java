@@ -5,14 +5,13 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
-import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoaneeException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoaneeEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoaneeMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeProjection;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeRepository;
-import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import lombok.extern.slf4j.*;
@@ -152,7 +151,7 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
     public Loanee findLoaneeById(String loaneeId) throws MeedlException {
         MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
         LoaneeEntity loaneeEntity = loaneeRepository.findById(loaneeId)
-                 .orElseThrow(()-> new LoaneeException(LoaneeMessages.LOANEE_NOT_FOUND.getMessage()));
+                 .orElseThrow(()-> new LoanException(LoaneeMessages.LOANEE_NOT_FOUND.getMessage()));
         log.info("Loanee entity found successfully {}", loaneeEntity);
         return loaneeMapper.toLoanee(loaneeEntity);
     }
