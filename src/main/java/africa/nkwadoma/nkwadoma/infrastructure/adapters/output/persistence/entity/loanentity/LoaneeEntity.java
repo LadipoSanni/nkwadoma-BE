@@ -21,7 +21,6 @@ public class LoaneeEntity {
     @Id
     @UuidGenerator
     private String id;
-    private String createdBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime creditScoreUpdatedAt;

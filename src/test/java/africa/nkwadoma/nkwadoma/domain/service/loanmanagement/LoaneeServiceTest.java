@@ -211,9 +211,7 @@ class LoaneeServiceTest {
         loanOffer.setId(mockId);
         loanOffer.setLoanProduct(loanProduct);
 
-        loaneeCohort.setLoanee(firstLoanee);
-        loaneeCohort.setCohort(elites);
-        loaneeCohort.setCreatedBy(mockId);
+        loaneeCohort = TestData.buildCohortLoanee(firstLoanee,elites,loaneeLoanDetails,mockId);
     }
 
     @Test
@@ -280,12 +278,6 @@ class LoaneeServiceTest {
         assertThrows(MeedlException.class, () -> loaneeService.addLoaneeToCohort(firstLoanee));
     }
 
-
-    @Test
-    void cannotAddLoaneeToACohortWithExistingLoaneeEmail() throws MeedlException {
-        when(loaneeOutputPort.findByLoaneeEmail(userIdentity.getEmail())).thenReturn(firstLoanee);
-        assertThrows(MeedlException.class, () -> loaneeService.addLoaneeToCohort(firstLoanee));
-    }
 
     @Test
     void viewAllLoaneeInCohort() throws MeedlException {

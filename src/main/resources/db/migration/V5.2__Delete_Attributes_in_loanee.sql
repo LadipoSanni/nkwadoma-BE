@@ -17,4 +17,5 @@ DROP COLUMN IF EXISTS defer_reason,
 DROP COLUMN IF EXISTS deferral_requested,
 DROP COLUMN IF EXISTS deferral_approved,
 DROP COLUMN IF EXISTS dropout_requested,
-DROP COLUMN IF EXISTS dropout_approved;
+DROP COLUMN IF EXISTS dropout_approved,
+DROP COLUMN IF EXISTS created_by;

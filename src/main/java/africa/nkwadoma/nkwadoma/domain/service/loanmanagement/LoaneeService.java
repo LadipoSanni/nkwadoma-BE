@@ -145,40 +145,45 @@ public class LoaneeService implements LoaneeUseCase {
         MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
         loanee.validate();
         loanee.getLoaneeLoanDetail().validate();
-
         CohortLoanee cohortLoanee = CohortLoanee.builder().build();
-
         Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
         Loanee existingLoanee = checkIfLoaneeWithEmailExist(loanee);
-
         checkIfCohortTuitionDetailsHaveBeenUpdated(cohort);
         checkIfInitialDepositIsNotGreaterThanTotalCohortFee(loanee, cohort);
         BigDecimal totalLoanBreakDown = getTotalLoanBreakdown(loanee);
+        validateAmountRequested(loanee, totalLoanBreakDown, cohort);
+        cohortLoanee = addExistingLoaneeToCohort(loanee, existingLoanee, cohort, cohortLoanee);
+        cohortLoanee = addNewLoaneeToCohort(loanee, existingLoanee, cohortLoanee, cohort);
+        cohortLoanee = cohortLoaneeOutputPort.save(cohortLoanee);
+        saveLoaneeLoanBreakdowns(loanee, cohortLoanee);
+        updateCohortValues(cohort);
+        return cohortLoanee.getLoanee();
+    }
+
+    private static void validateAmountRequested(Loanee loanee, BigDecimal totalLoanBreakDown, Cohort cohort) throws MeedlException {
         calculateAmountRequested(loanee, totalLoanBreakDown, cohort);
         checkIfAmountRequestedIsNotGreaterThanTotalCohortFee(loanee, cohort);
+    }
 
-        cohortLoanee = addExistingLoaneeToCohort(loanee, existingLoanee, cohort, cohortLoanee);
+    private void saveLoaneeLoanBreakdowns(Loanee loanee, CohortLoanee cohortLoanee) throws MeedlException {
+        List<LoaneeLoanBreakdown> savedLoaneeLoanbreakDowns = loaneeLoanBreakDownOutputPort.saveAll(loanee.getLoanBreakdowns(), cohortLoanee);
+        cohortLoanee.getLoanee().setLoanBreakdowns(savedLoaneeLoanbreakDowns);
+    }
 
-        cohortLoanee = addNewLoaneeToCohort(loanee, existingLoanee, cohortLoanee, cohort);
-
-        cohortLoanee = cohortLoaneeOutputPort.save(cohortLoanee);
-
-
-        List<LoaneeLoanBreakdown> loanBreakdowns = loanee.getLoanBreakdowns();
-        loanBreakdowns = loaneeLoanBreakDownOutputPort.saveAll(loanBreakdowns,cohortLoanee);
-        cohortLoanee.getLoanee().setLoanBreakdowns(loanBreakdowns);
+    private void updateCohortValues(Cohort cohort) throws MeedlException {
         cohort.setNumberOfLoanees(cohort.getNumberOfLoanees() + 1);
         increaseNumberOfLoaneesInProgram(cohort, 1);
         increaseNumberOfLoaneesInOrganization(cohort, 1);
         cohortOutputPort.save(cohort);
-        return cohortLoanee.getLoanee();
     }
 
     private CohortLoanee addExistingLoaneeToCohort(Loanee loanee, Loanee existingLoanee, Cohort cohort, CohortLoanee cohortLoanee) throws MeedlException {
         if (ObjectUtils.isNotEmpty(existingLoanee)){
             checkIfLoaneeExistInCohort(cohort, existingLoanee);
             checkIfLoaneeExistInAnActiveCohortInSameProgram(existingLoanee, cohort);
-            cohortLoanee = addLoaneeToCohort(loanee, cohort);
+            existingLoanee.setLoaneeLoanDetail(loanee.getLoaneeLoanDetail());
+            cohortLoanee = addLoaneeToCohort(existingLoanee, cohort);
+            cohortLoanee.setCreatedBy(loanee.getUserIdentity().getCreatedBy());
         }
         return cohortLoanee;
     }
@@ -188,6 +193,7 @@ public class LoaneeService implements LoaneeUseCase {
             loanee.getUserIdentity().setRole(IdentityRole.LOANEE);
             loanee.setActivationStatus(ActivationStatus.ACTIVE);
             cohortLoanee = addLoaneeToCohort(loanee, cohort);
+            loanee.setCreatedAt(LocalDateTime.now());
             Loanee createdLoanee = createLoaneeAccount(loanee);
             cohortLoanee.setLoanee(createdLoanee);
         }
@@ -211,9 +217,11 @@ public class LoaneeService implements LoaneeUseCase {
     private void checkIfLoaneeExistInAnActiveCohortInSameProgram(Loanee loanee, Cohort cohort) throws MeedlException {
         CohortLoanee cohortLoanee =
                 cohortLoaneeOutputPort.findCohortLoaneeByProgramIdAndLoaneeId(cohort.getProgramId(), loanee.getId());
+        if(ObjectUtils.isNotEmpty(cohortLoanee)){
         if (cohortLoanee.getCohort().getCohortStatus().equals(CohortStatus.CURRENT)
                 && cohortLoanee.getCohort().getActivationStatus().equals(ActivationStatus.ACTIVE)){
             throw new EducationException(CohortMessages.LOANEE_STILL_IN_AN_ACTIVE_COHORT.getMessage());
+        }
         }
     }
 
