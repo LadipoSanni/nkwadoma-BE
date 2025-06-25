@@ -84,10 +84,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         completeLoanProcessing(loanBook);
     }
 
-    private void validateAllFileFields(List<Loanee> convertedLoanees) throws MeedlException {
-        log.info("Validating the file field values.");
-        loanBookValidator.validateAllFileFields(convertedLoanees);
-    }
+
 
     private void validateStartDates(List<Loanee> convertedLoanees, Cohort savedCohort) throws MeedlException {
         for (Loanee loanee : convertedLoanees) {
@@ -364,7 +361,8 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
 
             loanees.add(loanee);
         }
-        validateAllFileFields(loanees);
+        log.info("Validating the file field values.");
+        loanBookValidator.validateAllFileFields(loanees);
 
         return savedData(loanees);
     }

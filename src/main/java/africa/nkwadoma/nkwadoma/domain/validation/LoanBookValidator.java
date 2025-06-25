@@ -55,9 +55,15 @@ public class LoanBookValidator {
     }
 
     private void validatePhoneNumber(UserIdentity userIdentity) throws MeedlException {
-        MeedlValidator.validateElevenDigits(userIdentity.getPhoneNumber(),"User with email "+userIdentity.getEmail()+ " has invalid phone number.");
+        String phoneNumber = formatPhoneNumber(userIdentity.getPhoneNumber());
+        MeedlValidator.validateElevenDigits(phoneNumber,"User with email "+userIdentity.getEmail()+ " has invalid phone number.");
     }
-
+    public String formatPhoneNumber(String input) {
+        if (input != null && input.matches("^\\d{10}$")) {
+            return "0" + input;
+        }
+        return input;
+    }
     private void validateNames(UserIdentity userIdentity) throws MeedlException {
         String email = userIdentity.getEmail();
         validateName(userIdentity.getFirstName(), "First name can not be empty for "+email,email+" first name");

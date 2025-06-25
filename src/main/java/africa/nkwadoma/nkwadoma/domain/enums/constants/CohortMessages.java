@@ -18,7 +18,10 @@ public enum CohortMessages {
     COHORT_NAME_REQUIRED("Cohort name is required"),
     COHORT_WITH_NAME_EXIST("Cohort with name exist"),
     COHORT_WITH_LOANEE_CANNOT_BE_DELETED("Cohort with loanee cannot be deleted"),
-    COHORT_STATUS_CANNOT_BE_EMPTY("Cohort status cannot be empty"),;
+    COHORT_STATUS_CANNOT_BE_EMPTY("Cohort status cannot be empty"),
+    COHORT_LOANEE_CANNOT_BE_NULL("Cohort loanee cannot be empry"),
+    CREATED_BY_CANNOT_BE_EMPTY("Created by cannot be empty"),
+    INVALID_COHORT_LOANEE_ID("Invalid cohort loanee id"),;
 
     private final String message;
 
