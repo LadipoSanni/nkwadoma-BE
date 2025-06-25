@@ -84,4 +84,8 @@ public class Loanee {
         MeedlValidator.validateUUID(userIdentity.getCreatedBy(), "Id of actor performing this action is required.");
     }
 
+    public void validateForSaving() throws MeedlException {
+        MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
+        validateLoaneeUserIdentity();
+    }
 }

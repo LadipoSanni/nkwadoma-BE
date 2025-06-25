@@ -17,7 +17,7 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
               l.userIdentity.firstName as firstName,
               l.userIdentity.lastName as lastName,
               lo.dateTimeOffered as dateTimeOffered,
-              l.loaneeLoanDetail.amountRequested as amountRequested,
+              cle.loaneeLoanDetail.amountRequested as amountRequested,
               lo.amountApproved as amountApproved,
               lp.name as loanProductName,
               lo.loaneeResponse as loaneeResponse
@@ -25,8 +25,8 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
         FROM LoanOfferEntity lo
         JOIN lo.loanee l
         JOIN LoanProductEntity lp on lo.loanProduct.id = lp.id
-        JOIN CohortEntity c ON l.cohortId = c.id
-        JOIN ProgramEntity p ON c.programId = p.id
+  join CohortLoaneeEntity cle on cle.loanee.id = l.id
+          join CohortEntity c on cle.cohort.id = c.id        JOIN ProgramEntity p ON c.programId = p.id
         JOIN p.organizationIdentity o
         WHERE o.id = :organizationId
             and not exists (
@@ -43,10 +43,10 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
            l.creditScore as creditScore,l.userIdentity.gender as gender,l.userIdentity.phoneNumber as phoneNumber,
            l.userIdentity.dateOfBirth as dateOfBirth ,l.userIdentity.alternateContactAddress as alternateContactAddress,
            l.userIdentity.alternateEmail as alternateEmail, l.userIdentity.alternatePhoneNumber as alternatePhoneNumber,
-           l.id as loaneeId,l.loaneeLoanDetail.initialDeposit as initialDeposit,l.userIdentity.maritalStatus as
+           l.id as loaneeId,cle.loaneeLoanDetail.initialDeposit as initialDeposit,l.userIdentity.maritalStatus as
            maritalStatus,l.userIdentity.residentialAddress as residentialAddress, l.userIdentity.nationality as nationality,
            l.userIdentity.stateOfOrigin as stateOfOrigin, l.userIdentity.stateOfResidence
-           as stateOfResidence,l.userIdentity.email as email,l.loaneeLoanDetail.amountRequested as amountRequested,
+           as stateOfResidence,l.userIdentity.email as email,cle.loaneeLoanDetail.amountRequested as amountRequested,
            lo.amountApproved as amountApproved, c.startDate as startDate, c.tuitionAmount as tuitionAmount, c.name as
            cohortName, l.userIdentity.image as loaneeImage,p.name as programName,lp.termsAndCondition as termsAndCondition,
            n.id as nextOfKinId, n.firstName as nextOfKinFirstName, n.lastName as nextOfKinLastName, n.contactAddress as nextOfKinContactAddress,
@@ -57,8 +57,8 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
     from LoanOfferEntity lo
     join LoaneeEntity l on lo.loanee.id = l.id
     join UserEntity  u on l.userIdentity.id = u.id
-    left join CohortEntity c on l.cohortId = c.id
-    left join LoanProductEntity lp on lo.loanProduct.id = lp.id
+  join CohortLoaneeEntity cle on cle.loanee.id = l.id
+          join CohortEntity c on cle.cohort.id = c.id    left join LoanProductEntity lp on lo.loanProduct.id = lp.id
     left join NextOfKinEntity n on u.nextOfKinEntity.id = n.id
     left join ProgramEntity p on c.programId = p.id
     where lo.id = :id
@@ -71,13 +71,15 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
               l.userIdentity.firstName as firstName,
               l.userIdentity.lastName as lastName,
               lo.dateTimeOffered as dateTimeOffered,
-              l.loaneeLoanDetail.amountRequested as amountRequested,
+              cle.loaneeLoanDetail.amountRequested as amountRequested,
               lo.amountApproved as amountApproved,
               lp.name as loanProductName,
               lo.loaneeResponse as loaneeResponse
        
        from LoanOfferEntity lo
        left join LoaneeEntity l on lo.loanee.id = l.id
+                join CohortLoaneeEntity cle on cle.loanee.id = l.id
+          join CohortEntity c on cle.cohort.id = c.id
        left join LoanProductEntity lp on lo.loanProduct.id = lp.id
        where not exists (
                  select 1 from LoanEntity loan where loan.loanOfferId = lo.id
@@ -92,7 +94,7 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
            u.firstName AS firstName,
            u.lastName AS lastName,
            lo.dateTimeOffered AS dateTimeOffered,
-           l.loaneeLoanDetail.amountRequested AS amountRequested,
+           cle.loaneeLoanDetail.amountRequested AS amountRequested,
            lo.amountApproved AS amountApproved,
            lp.name AS loanProductName,
            lo.loaneeResponse as loaneeResponse
@@ -101,7 +103,8 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
     FROM LoanOfferEntity lo 
     JOIN lo.loanee l
     JOIN l.userIdentity u
-    JOIN CohortEntity c ON c.id = l.cohortId
+      join CohortLoaneeEntity cle on cle.loanee.id = l.id
+          join CohortEntity c on cle.cohort.id = c.id
     JOIN ProgramEntity p ON p.id = c.programId
     JOIN lo.loanProduct lp
     WHERE 
@@ -126,7 +129,7 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
            u.firstName AS firstName,
            u.lastName AS lastName,
            lo.dateTimeOffered AS dateTimeOffered,
-           l.loaneeLoanDetail.amountRequested AS amountRequested,
+           cle.loaneeLoanDetail.amountRequested AS amountRequested,
            lo.amountApproved AS amountApproved,
            lp.name AS loanProductName,
            lo.loaneeResponse as loaneeResponse
@@ -134,7 +137,8 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
     FROM LoanOfferEntity lo 
     JOIN lo.loanee l
     JOIN l.userIdentity u
-    JOIN CohortEntity c ON c.id = l.cohortId
+     join CohortLoaneeEntity cle on cle.loanee.id = l.id
+          join CohortEntity c on cle.cohort.id = c.id
     JOIN ProgramEntity p ON p.id = c.programId
     JOIN lo.loanProduct lp
     WHERE 

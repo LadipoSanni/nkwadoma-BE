@@ -141,17 +141,84 @@ public class CohortLoaneePersistenceAdapterTest {
         assertEquals(savedLoanee.getCreatedBy(),meedleUser.getId());
     }
 
+    @Test
+    void findCohortLoaneeByLoaneeIdAndCohortIdByNullLoaneeId(){
+        assertThrows(MeedlException.class, () ->
+                cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(null,cohort.getId()));
+    }
+
+    @Test
+    void findCohortLoaneeByLoaneeIdAndCohortIdByNullCohortId(){
+        assertThrows(MeedlException.class, () ->
+                cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(loanee.getId(),null));
+    }
+
+
+    @Order(2)
+    @Test
+    void findCohortLoaneeByLoaneeIdAndCohortId(){
+        CohortLoanee foundCohortLoanee;
+        try {
+            foundCohortLoanee = cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(loanee.getId(),cohort.getId());
+        } catch (MeedlException exception) {
+            log.info("Failed to set up cohort loanee {}", exception.getMessage());
+            throw new RuntimeException(exception);
+        }
+        assertEquals(foundCohortLoanee.getLoanee().getId(),loanee.getId());
+        assertEquals(foundCohortLoanee.getCohort().getId(),cohort.getId());
+        assertEquals(foundCohortLoanee.getCreatedBy(),meedleUser.getId());
+    }
+
+
+    @Test
+    void findCohortLoaneeByLoaneeIdAndProgramIdByNullLoaneeId(){
+        assertThrows(MeedlException.class, () ->
+                cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(cohort.getProgramId(),null));
+    }
+
+    @Test
+    void findCohortLoaneeByLoaneeIdAndProgramIdByNullProgramId(){
+        assertThrows(MeedlException.class, () ->
+                cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(null,loanee.getId()));
+    }
+
+    @Order(3)
+    @Test
+    void findCohortLoaneeByProgramIdAndLoaneeId(){
+        CohortLoanee foundCohortLoanee;
+        try {
+            foundCohortLoanee = cohortLoaneeOutputPort.findCohortLoaneeByProgramIdAndLoaneeId(cohort.getProgramId(),loanee.getId());
+        } catch (MeedlException exception) {
+            log.info("Failed to set up cohort loanee {}", exception.getMessage());
+            throw new RuntimeException(exception);
+        }
+        assertEquals(foundCohortLoanee.getLoanee().getId(),loanee.getId());
+        assertEquals(foundCohortLoanee.getCohort().getId(),cohort.getId());
+        assertEquals(foundCohortLoanee.getCreatedBy(),meedleUser.getId());
+    }
+
+
     @AfterAll
     void cleanUp() throws MeedlException {
+        log.info("cohort loanee id = {}", cohortLoaneeId);
         cohortLoaneeOutputPort.delete(cohortLoaneeId);
+        log.info("cohort id = {}", cohortLoaneeId);
         cohortOutputPort.deleteCohort(cohort.getId());
+        log.info("loanee id = {}", loanee.getId());
         loaneeOutputPort.deleteLoanee(loanee.getId());
+        log.info("loanee loane details id = {}", loaneeLoanDetail.getId());
         loaneeLoanDetailsOutputPort.delete(loaneeLoanDetail.getId());
+        log.info("loan breakdowns = {}", loanBreakdowns);
         loanBreakdownOutputPort.deleteAll(loanBreakdowns);
+        log.info("program id = {}", program.getId());
         programOutputPort.deleteProgram(program.getId());
+        log.info("org id = {}", organizationIdentity.getId());
         organizationIdentityOutputPort.delete(organizationIdentity.getId());
+        log.info("org empoyee  = {}", employeeIdentity.getId());
         organizationEmployeeIdentityOutputPort.delete(employeeIdentity.getId());
+        log.info("meedl id = {}", meedleUser.getId());
         userIdentityOutputPort.deleteUserById(meedleUser.getId());
+        log.info("user id = {}", userIdentity.getId());
         userIdentityOutputPort.deleteUserById(userIdentity.getId());
     }
 
