@@ -46,6 +46,7 @@ env:
   AWS_REGION: "eu-west-1"  # Updated to match the S3 region in the URL
   DEV_FRONTEND_BASE_URL: http://localhost:3000
   DEV_FRONTEND_BASE_URL2: http://localhost:3000
+  API_VERSIONING: /api/v1 
 
   
 jobs:
@@ -126,6 +127,7 @@ jobs:
           AWS_REGION: "eu-west-1"  # Updated to match the S3 region in the URL
           DEV_FRONTEND_BASE_URL: http://localhost:3000
           DEV_FRONTEND_BASE_URL2: http://localhost:3000
+          API_VERSIONING: /api/v1 
         run: mvn -B clean test
         
 
