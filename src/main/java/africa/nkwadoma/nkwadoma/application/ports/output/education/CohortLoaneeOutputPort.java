@@ -16,4 +16,6 @@ public interface CohortLoaneeOutputPort {
     CohortLoanee findCohortLoaneeByProgramIdAndLoaneeId(String programId, String loaneeId) throws MeedlException;
 
     List<CohortLoanee> findSelectedLoaneesInCohort(String id, List<String> loaneeIds) throws MeedlException;
+
+    boolean checkIfLoaneeHasBeenPreviouslyReferred(String loaneeId) throws MeedlException;
 }

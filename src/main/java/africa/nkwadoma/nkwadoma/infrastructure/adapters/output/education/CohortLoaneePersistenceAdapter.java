@@ -80,4 +80,11 @@ public class CohortLoaneePersistenceAdapter implements CohortLoaneeOutputPort {
 
         return cohortLoaneeEntities.stream().map(cohortLoaneeMapper::toCohortLoanee).collect(Collectors.toList());
     }
+
+    @Override
+    public boolean checkIfLoaneeHasBeenPreviouslyReferred(String loaneeId) throws MeedlException {
+        MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+//        return cohortLoaneeRepository.;
+        return true;
+    }
 }

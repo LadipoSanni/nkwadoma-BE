@@ -378,8 +378,8 @@ public class LoaneeService implements LoaneeUseCase {
                 loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(cohortLoanee.getId());
 
         cohortLoanee.getLoanee().setLoanBreakdowns(loanBreakdowns);
+        cohortLoanee.getLoanee().setLoanReferralId(loanReferral.getId());
         loanReferral.setLoanee(cohortLoanee.getLoanee());
-
         log.info("loan referral org == {}", loanReferral.getLoanee().getReferredBy());
         return loanReferral;
     }
