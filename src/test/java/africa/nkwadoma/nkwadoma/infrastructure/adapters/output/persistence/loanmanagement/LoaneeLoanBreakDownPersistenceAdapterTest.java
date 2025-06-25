@@ -8,6 +8,9 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanBreakDownOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.UploadedStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
@@ -77,7 +80,9 @@ public class LoaneeLoanBreakDownPersistenceAdapterTest {
             cohort = cohortOutputPort.save(cohort);
             cohortLoanee = CohortLoanee.builder().
                     loanee(loanee).cohort(cohort).createdBy(id).
-                    loaneeLoanDetail(loaneeLoanDetail).createdAt(LocalDateTime.now()).build();
+                    loaneeLoanDetail(loaneeLoanDetail).createdAt(LocalDateTime.now())
+                    .loaneeStatus(LoaneeStatus.ADDED).uploadedStatus(UploadedStatus.ADDED)
+                    .onboardingMode(OnboardingMode.EMAIL_REFERRED).build();
             cohortLoanee = cohortLoaneeOutputPort.save(cohortLoanee);
         } catch (MeedlException e) {
             log.error(e.getMessage());
