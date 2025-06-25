@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loanmanagement;
 
 
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
@@ -55,6 +56,8 @@ public class LoaneeLoanBreakDownPersistenceAdapterTest {
     private Cohort cohort;
     @Autowired
     private CohortOutputPort cohortOutputPort;
+    @Autowired
+    private CohortLoaneeOutputPort cohortLoaneeOutputPort;
 
     @BeforeAll
     void setUpLoanee(){
@@ -73,6 +76,7 @@ public class LoaneeLoanBreakDownPersistenceAdapterTest {
             cohort = cohortOutputPort.save(cohort);
             cohortLoanee = CohortLoanee.builder().
                     loanee(loanee).cohort(cohort).createdBy(id).loaneeLoanDetail(loaneeLoanDetail).build();
+            cohortLoanee = cohortLoaneeOutputPort.save(cohortLoanee);
         } catch (MeedlException e) {
             log.error(e.getMessage());
         }
@@ -135,6 +139,7 @@ public class LoaneeLoanBreakDownPersistenceAdapterTest {
     @AfterAll
     void cleanUp() throws MeedlException {
         loaneeLoanBreakDownOutputPort.deleteAll(List.of(loaneeLoanBreakdown));
+        cohortLoaneeOutputPort.delete(cohortLoanee.getId());
         loaneeOutputPort.deleteLoanee(loaneeId);
         identityOutputPort.deleteUserById(id);
         loaneeLoanDetailsOutputPort.delete(loaneeLoanDetailsId);

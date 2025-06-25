@@ -55,7 +55,7 @@ public class LoaneeLoanBreakDownPersistenceAdapter implements LoaneeLoanBreakDow
     public List<LoaneeLoanBreakdown> findAllLoaneeLoanBreakDownByLoaneeId(String loaneeId) throws MeedlException {
         MeedlValidator.validateUUID(loaneeId, LoanMessages.INVALID_LOAN_ID.getMessage());
         List<LoaneeLoanBreakdownEntity> loanBreakdownEntities =
-                loaneeLoanBreakDownRepository.findAllByCohortLoaneeId(loaneeId);
+                loaneeLoanBreakDownRepository.findAllByCohortLoanee_LoaneeId(loaneeId);
         return loaneeLoanBreakDownMapper.toLoaneeLoanBreakdown(loanBreakdownEntities);
     }
 }

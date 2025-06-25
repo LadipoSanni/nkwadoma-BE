@@ -200,15 +200,25 @@ public class CohortLoaneePersistenceAdapterTest {
 
     @AfterAll
     void cleanUp() throws MeedlException {
+        log.info("cohort loanee id = {}", cohortLoaneeId);
         cohortLoaneeOutputPort.delete(cohortLoaneeId);
+        log.info("cohort id = {}", cohortLoaneeId);
         cohortOutputPort.deleteCohort(cohort.getId());
+        log.info("loanee id = {}", loanee.getId());
         loaneeOutputPort.deleteLoanee(loanee.getId());
+        log.info("loanee loane details id = {}", loaneeLoanDetail.getId());
         loaneeLoanDetailsOutputPort.delete(loaneeLoanDetail.getId());
+        log.info("loan breakdowns = {}", loanBreakdowns);
         loanBreakdownOutputPort.deleteAll(loanBreakdowns);
+        log.info("program id = {}", program.getId());
         programOutputPort.deleteProgram(program.getId());
+        log.info("org id = {}", organizationIdentity.getId());
         organizationIdentityOutputPort.delete(organizationIdentity.getId());
+        log.info("org empoyee  = {}", employeeIdentity.getId());
         organizationEmployeeIdentityOutputPort.delete(employeeIdentity.getId());
+        log.info("meedl id = {}", meedleUser.getId());
         userIdentityOutputPort.deleteUserById(meedleUser.getId());
+        log.info("user id = {}", userIdentity.getId());
         userIdentityOutputPort.deleteUserById(userIdentity.getId());
     }
 
