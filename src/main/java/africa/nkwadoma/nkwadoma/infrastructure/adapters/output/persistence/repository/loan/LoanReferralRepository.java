@@ -33,11 +33,10 @@ public interface LoanReferralRepository extends JpaRepository<LoanReferralEntity
 
     @Query("""
     select l from LoanReferralEntity l
-        join CohortLoaneeEntity cle on cle.loanee.id = :loaneeId
-            join CohortLoaneeEntity  c on cle.cohort.id = :cohortId
-                where cle.loanee.id = :id
+        join CohortLoaneeEntity cle on cle.id = l.cohortLoanee.id
+                where cle.loanee.id = :loaneeId and cle.cohort.id = :cohortId
     """)
-    LoanReferralEntity findByLoaneeEntityIdAndLoaneeEntityCohortId(@Param("loaneeId") String id,@Param("cohortId") String cohortId);
+    LoanReferralEntity findByLoaneeEntityIdAndLoaneeEntityCohortId(@Param("loaneeId") String loaneeId,@Param("cohortId") String cohortId);
 
     Optional<LoanReferralEntity> findAllByCohortLoanee_Loanee_UserIdentity_Email(String loaneeEmail);
 

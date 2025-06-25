@@ -369,15 +369,17 @@ public class LoaneeService implements LoaneeUseCase {
 
         LoanReferral loanReferral = buildLoanReferral(cohortLoanee);
 
-        Cohort cohort = cohortOutputPort.findCohort(cohortLoanee.getCohort().getId());
-        cohort.setNumberOfReferredLoanee(cohort.getNumberOfReferredLoanee() + 1);
-        cohortOutputPort.save(cohort);
+//        Cohort cohort = cohortOutputPort.findCohort(cohortLoanee.getCohort().getId());
+        cohortLoanee.getCohort().setNumberOfReferredLoanee(cohortLoanee.getCohort().getNumberOfReferredLoanee() + 1);
+        cohortOutputPort.save(cohortLoanee.getCohort());
         Optional<LoanMetrics> loanMetrics = updateLoanMetrics(organizationIdentity);
         log.info("Loan metrics saved: {}", loanMetrics);
         List<LoaneeLoanBreakdown> loanBreakdowns =
                 loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(cohortLoanee.getId());
 
-        loanReferral.getLoanee().setLoanBreakdowns(loanBreakdowns);
+        cohortLoanee.getLoanee().setLoanBreakdowns(loanBreakdowns);
+        loanReferral.setLoanee(cohortLoanee.getLoanee());
+
         log.info("loan referral org == {}", loanReferral.getLoanee().getReferredBy());
         return loanReferral;
     }
