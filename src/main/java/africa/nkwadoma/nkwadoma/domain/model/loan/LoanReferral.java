@@ -62,6 +62,8 @@ public class LoanReferral {
 
     public void validateForCreate() throws MeedlException {
         MeedlValidator.validateObjectInstance(cohortLoanee, CohortMessages.COHORT_LOANEE_CANNOT_BE_NULL.getMessage());
+        MeedlValidator.validateObjectInstance(cohortLoanee.getCohort(), CohortMessages.COHORT_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectInstance(cohortLoanee.getLoanee(), LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateObjectInstance(loanReferralStatus,"LoanReferral Status is required");
     }
 

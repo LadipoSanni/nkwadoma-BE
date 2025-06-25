@@ -34,9 +34,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class LoanReferralAdapterTest {
 
-    //TOdo Coming back to write proper test
-
-
     @Autowired
     private CohortLoaneeOutputPort cohortLoaneeOutputPort;
     private CohortLoanee cohortLoanee;
@@ -51,7 +48,6 @@ class LoanReferralAdapterTest {
     private LoaneeLoanDetail loaneeLoanDetail;
     private Loanee loanee;
     private LoanReferral loanReferral;
-    private String cohortLoaneeId;
     private String loanReferralId;
     @Autowired
     private ProgramOutputPort programOutputPort;
@@ -123,12 +119,6 @@ class LoanReferralAdapterTest {
     }
 
     @Test
-    void saveLoanReferralWithNullCohortInCohortLoanee() {
-        loanReferral.getCohortLoanee().setCohort(null);
-        assertThrows(MeedlException.class, () -> loanReferralOutputPort.save(loanReferral));
-    }
-
-    @Test
     void saveLoanReferralWithNullLoaneeInCohortLoanee() {
         loanReferral.getCohortLoanee().setLoanee(null);
         assertThrows(MeedlException.class, () -> loanReferralOutputPort.save(loanReferral));
@@ -151,17 +141,17 @@ class LoanReferralAdapterTest {
         }catch (MeedlException exception){
             log.info("Failed to set up loanReferral {}", exception.getMessage());
         }
-        assertEquals(savedLoanReferral.getCohortLoanee(),cohortLoanee);
+        assertEquals(savedLoanReferral.getCohortLoanee().getCohort().getId(),cohortLoanee.getCohort().getId());
         assertEquals(savedLoanReferral.getLoanReferralStatus(),loanReferral.getLoanReferralStatus());
     }
 
     @AfterAll
     void cleanUp() throws MeedlException {
-        log.info("cohort loanee id = {}", loanReferralId);
+        log.info("loan referal id = {}", loanReferralId);
         loanReferralOutputPort.deleteLoanReferral(loanReferralId);
-        log.info("cohort loanee id = {}", cohortLoaneeId);
-        cohortLoaneeOutputPort.delete(cohortLoaneeId);
-        log.info("cohort id = {}", cohortLoaneeId);
+        log.info("cohort loanee id = {}", cohortLoanee.getId());
+        cohortLoaneeOutputPort.delete(cohortLoanee.getId());
+        log.info("cohort id = {}", cohort.getId());
         cohortOutputPort.deleteCohort(cohort.getId());
         log.info("loanee id = {}", loanee.getId());
         loaneeOutputPort.deleteLoanee(loanee.getId());

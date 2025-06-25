@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.model.loan.loanBook;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -24,7 +25,7 @@ public class LoanBook {
     private String actorId;
     private MeedlNotification meedlNotification;
     private List<RepaymentHistory> repaymentHistories;
-    private List<Loanee> loanees;
+    private List<CohortLoanee> loanees;
 
     public void validateRepaymentRecord() throws MeedlException {
         MeedlValidator.validateObjectInstance(this.getCohort(), "Cohort details can not be empty.");

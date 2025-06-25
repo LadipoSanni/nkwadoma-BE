@@ -5,11 +5,13 @@ import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.AsynchronousLoanBookProcessingUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.RepaymentHistoryUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanReferralOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
@@ -22,6 +24,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.UploadedStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
@@ -64,6 +67,9 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     private final AesOutputPort aesOutputPort;
     private final LoanProductOutputPort loanProductOutputPort;
     private final CohortOutputPort cohortOutputPort;
+    private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
+    private final LoanReferralOutputPort loanReferralOutputPort;
+
     @Override
     public void upLoadUserData(LoanBook loanBook) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanBook, "Loan book cannot be empty.");
@@ -76,7 +82,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         log.info("Loan book read is {}", data);
 
         Cohort savedCohort = findCohort(loanBook.getCohort());
-        List<Loanee> convertedLoanees = convertToLoanees(data, savedCohort, loanBook.getActorId());
+        List<CohortLoanee> convertedLoanees = convertToLoanees(data, savedCohort, loanBook.getActorId());
 //        validateStartDates(convertedLoanees, savedCohort);
         loanBook.setLoanees(convertedLoanees);
         referCohort(loanBook);
@@ -102,7 +108,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         }
     }
 
-    private void updateLoaneeCount(Cohort savedCohort, List<Loanee> loanees) throws MeedlException {
+    private void updateLoaneeCount(Cohort savedCohort, List<CohortLoanee> loanees) throws MeedlException {
         savedCohort = findCohort(savedCohort);
         savedCohort.setNumberOfLoanees(savedCohort.getNumberOfLoanees() + loanees.size());
         cohortOutputPort.save(savedCohort);
@@ -133,12 +139,16 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         loanBook.getLoanees()
                 .forEach(loanee -> {
                     try {
-                        log.info("Loanee with cohort name but is loan product name {}", loanee.getCohortName());
+                        log.info("Loanee with cohort name but is loan product name {}", loanee.getCohort().getName());
                         log.info("Loan start date before processing start loan before accepting loan referral {}", loanee.getReferralDateTime());
+
                         LoanReferral loanReferral = acceptLoanReferral(loanee);
-                        LoanRequest loanRequest = acceptLoanRequest(loanee, loanReferral, loanBook);
-                        acceptLoanOffer(loanRequest);
-                        startLoan(loanRequest,loanee.getUpdatedAt() );
+
+                        // TODO
+                        // COMING BACK FOR LOANREQUEST AND ALL
+//                        LoanRequest loanRequest = acceptLoanRequest(loanee, loanReferral, loanBook);
+//                        acceptLoanOffer(loanRequest);
+//                        startLoan(loanRequest,loanee.getUpdatedAt() );
                     } catch (MeedlException e) {
                         log.error("Error accepting loan referral.",e);
                     }
@@ -160,11 +170,9 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         loanOfferUseCase.acceptLoanOffer(loanOffer);
     }
 
-    private LoanReferral acceptLoanReferral(Loanee loanee) throws MeedlException {
-        LoanReferral loanReferral = LoanReferral.builder()
-                .loanee(loanee)
-                .build();
-        loanReferral = viewLoanReferralsUseCase.viewLoanReferral(loanReferral);
+    private LoanReferral acceptLoanReferral(CohortLoanee cohortLoanee) throws MeedlException {
+
+        LoanReferral loanReferral = loanReferralOutputPort.findLoanReferralByCohortLoaneeId(cohortLoanee.getId());
         loanReferral.setLoanReferralStatus(LoanReferralStatus.ACCEPTED);
         respondToLoanReferralUseCase.respondToLoanReferral(loanReferral);
         return loanReferral;
@@ -201,15 +209,15 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
 
 
     private void referCohort(LoanBook loanBook) {
-        Iterator<Loanee> iterator = loanBook.getLoanees().iterator();
+        Iterator<CohortLoanee> iterator = loanBook.getLoanees().iterator();
         while (iterator.hasNext()) {
-            Loanee loanee = iterator.next();
-            log.info("About to refer loanee with details {}", loanee);
-            log.info("About to refer loanee in cohort with loan details {}", loanee.getLoaneeLoanDetail());
+            CohortLoanee cohortLoanee = iterator.next();
+            log.info("About to refer loanee with details {}", cohortLoanee);
+            log.info("About to refer loanee in cohort with loan details {}", cohortLoanee.getLoaneeLoanDetail());
             try {
-                inviteTrainee(loanee);
+                inviteTrainee(cohortLoanee);
             } catch (MeedlException e) {
-                log.error("Failed to invite trainee with id: {}", loanee.getId(), e);
+                log.error("Failed to invite trainee with id: {}", cohortLoanee.getId(), e);
                 iterator.remove();
             }
         }
@@ -217,7 +225,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         log.info("Number of referable loanees :{} ",  loanBook.getLoanees().size());
 //        asynchronousMailingOutputPort.notifyLoanReferralActors(loanBook.getLoanees());
     }
-    private void inviteTrainee (Loanee loanee) throws MeedlException {
+    private void inviteTrainee (CohortLoanee loanee) throws MeedlException {
         log.info("Single loanee is being referred...");
         loaneeUseCase.referLoanee(loanee);
     }
@@ -322,8 +330,8 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         return amount;
     }
 
-    List<Loanee> convertToLoanees(List<Map<String, String>> data, Cohort cohort, String actorId) throws MeedlException {
-        List<Loanee> loanees = new ArrayList<>();
+    List<CohortLoanee> convertToLoanees(List<Map<String, String>> data, Cohort cohort, String actorId) throws MeedlException {
+        List<CohortLoanee> loanees = new ArrayList<>();
 
         for (Map<String, String> row : data) {
             UserIdentity userIdentity = UserIdentity.builder()
@@ -359,7 +367,16 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                     .updatedAt(parseFlexibleDateTime(row.get("loanstartdate"), row.get("email")))
                     .build();
 
-            loanees.add(loanee);
+            CohortLoanee cohortLoanee = CohortLoanee.builder()
+                    .onboardingMode(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)
+                    .loaneeLoanDetail(loaneeLoanDetail)
+                    .loaneeStatus(LoaneeStatus.ADDED)
+                    .loanee(loanee)
+                    .cohort(cohort)
+                    .updatedAt(parseFlexibleDateTime(row.get("loanstartdate"), row.get("email")))
+                    .uploadedStatus(UploadedStatus.ADDED).build();
+
+            loanees.add(cohortLoanee);
         }
         log.info("Validating the file field values.");
         loanBookValidator.validateAllFileFields(loanees);
@@ -367,25 +384,26 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         return savedData(loanees);
     }
 
-    private List<Loanee> savedData(List<Loanee> loanees){
-        List<Loanee> savedLoanees = new ArrayList<>();
+    private List<CohortLoanee> savedData(List<CohortLoanee> loanees){
+        List<CohortLoanee> savedLoanees = new ArrayList<>();
         log.info("Started saving converted data of loanees");
-        for (Loanee loanee : loanees){
+        for (CohortLoanee cohortLoanee : loanees){
             try {
-                UserIdentity userIdentity = identityManagerOutputPort.createUser(loanee.getUserIdentity());
+                UserIdentity userIdentity = identityManagerOutputPort.createUser(cohortLoanee.getLoanee().getUserIdentity());
                 userIdentityOutputPort.save(userIdentity);
-                LoaneeLoanDetail savedLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loanee.getLoaneeLoanDetail());
-                loanee.getLoaneeLoanDetail().setId(savedLoaneeLoanDetail.getId());
+                LoaneeLoanDetail savedLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(cohortLoanee.getLoaneeLoanDetail());
+                cohortLoanee.getLoaneeLoanDetail().setId(savedLoaneeLoanDetail.getId());
                 log.info("Loanee's loan details after saving in file upload {}", savedLoaneeLoanDetail);
-                loanee.setUserIdentity(userIdentity);
-                loanee.setLoaneeLoanDetail(loanee.getLoaneeLoanDetail());
+                cohortLoanee.getLoanee().setUserIdentity(userIdentity);
+                cohortLoanee.setLoaneeLoanDetail(savedLoaneeLoanDetail);
 
-                Loanee savedLoanee = loaneeOutputPort.save(loanee);
-                savedLoanee.setCohortName(loanee.getCohortName());
-                savedLoanee.getLoaneeLoanDetail().setAmountApproved(loanee.getLoaneeLoanDetail().getAmountApproved());
+                Loanee savedLoanee = loaneeOutputPort.save(cohortLoanee.getLoanee());
+                savedLoanee.setCohortName(cohortLoanee.getLoanee().getCohortName());
+                savedLoanee.getLoaneeLoanDetail().setAmountApproved(cohortLoanee.getLoaneeLoanDetail().getAmountApproved());
                 log.info("Loanee's amount approved in file upload: {}", savedLoanee.getLoaneeLoanDetail());
-                log.info("Loanee's actual loan details in file upload: {}", loanee.getLoaneeLoanDetail());
-                savedLoanees.add(savedLoanee);
+                log.info("Loanee's actual loan details in file upload: {}", cohortLoanee.getLoaneeLoanDetail());
+                cohortLoanee = cohortLoaneeOutputPort.save(cohortLoanee);
+                savedLoanees.add(cohortLoanee);
             } catch (MeedlException e) {
                 log.info("Error occurred while saving data .", e);
                 throw new RuntimeException(e);

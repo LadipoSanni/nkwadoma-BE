@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
@@ -42,14 +43,14 @@ public class LoanBookValidator {
 
     }
 
-    public void validateAllFileFields(List<Loanee> convertedLoanees) throws MeedlException {
-        for (Loanee loanee : convertedLoanees) {
-            validateFileBvn(loanee.getUserIdentity());
-            validateFileNin(loanee.getUserIdentity());
-            validatePhoneNumber(loanee.getUserIdentity());
-            validateNames(loanee.getUserIdentity());
-            validateLoanProductExist(loanee);
-            validateAmount(loanee);
+    public void validateAllFileFields(List<CohortLoanee> convertedLoanees) throws MeedlException {
+        for (CohortLoanee cohortLoanee : convertedLoanees) {
+            validateFileBvn(cohortLoanee.getLoanee().getUserIdentity());
+            validateFileNin(cohortLoanee.getLoanee().getUserIdentity());
+            validatePhoneNumber(cohortLoanee.getLoanee().getUserIdentity());
+            validateNames(cohortLoanee.getLoanee().getUserIdentity());
+            validateLoanProductExist(cohortLoanee.getLoanee());
+            validateAmount(cohortLoanee.getLoanee());
         }
 
     }
