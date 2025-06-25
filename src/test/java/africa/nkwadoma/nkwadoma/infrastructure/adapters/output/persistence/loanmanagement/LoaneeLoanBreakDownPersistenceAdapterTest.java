@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -75,7 +76,8 @@ public class LoaneeLoanBreakDownPersistenceAdapterTest {
             loaneeLoanDetailsId = loaneeLoanDetail.getId();
             cohort = cohortOutputPort.save(cohort);
             cohortLoanee = CohortLoanee.builder().
-                    loanee(loanee).cohort(cohort).createdBy(id).loaneeLoanDetail(loaneeLoanDetail).build();
+                    loanee(loanee).cohort(cohort).createdBy(id).
+                    loaneeLoanDetail(loaneeLoanDetail).createdAt(LocalDateTime.now()).build();
             cohortLoanee = cohortLoaneeOutputPort.save(cohortLoanee);
         } catch (MeedlException e) {
             log.error(e.getMessage());
