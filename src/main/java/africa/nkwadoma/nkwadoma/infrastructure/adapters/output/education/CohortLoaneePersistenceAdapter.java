@@ -14,6 +14,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 
 @Slf4j
 @RequiredArgsConstructor
@@ -64,5 +67,17 @@ public class CohortLoaneePersistenceAdapter implements CohortLoaneeOutputPort {
                 cohortLoaneeRepository.findCohortLoaneeEntityByCohort_ProgramIdAndLoanee_Id(programId,loaneeId);
         log.info("After finding cohort loanee by program ID  = : {}", cohortLoaneeEntity);
         return cohortLoaneeMapper.toCohortLoanee(cohortLoaneeEntity);
+    }
+
+    @Override
+    public List<CohortLoanee> findSelectedLoaneesInCohort(String id, List<String> loaneeIds) throws MeedlException {
+        MeedlValidator.validateUUID(id, CohortMessages.INVALID_COHORT_ID.getMessage());
+
+        List<CohortLoaneeEntity> cohortLoaneeEntities =
+                cohortLoaneeRepository.findAllCohortLoaneeEntityBy_CohortIdAnd_ListOfLoaneeId(id,loaneeIds);
+
+        log.info("found selected loanee = : {}", cohortLoaneeEntities);
+
+        return cohortLoaneeEntities.stream().map(cohortLoaneeMapper::toCohortLoanee).collect(Collectors.toList());
     }
 }

@@ -25,6 +25,7 @@ import org.springframework.boot.test.context.*;
 import java.math.*;
 import java.util.*;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.ServiceOfferingType.TRAINING;
 import static org.junit.jupiter.api.Assertions.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -35,246 +36,150 @@ class LoanReferralAdapterTest {
 
     //TOdo Coming back to write proper test
 
-//    @Autowired
-//    private LoanReferralOutputPort loanReferralOutputPort;
-//    @Autowired
-//    private LoaneeOutputPort loaneeOutputPort;
-//    @Autowired
-//    private LoanMetricsOutputPort loanMetricsOutputPort;
-//    @Autowired
-//    private UserIdentityOutputPort userIdentityOutputPort;
-//    @Autowired
-//    private ProgramOutputPort programOutputPort;
-//    @Autowired
-//    private LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
-//    @Autowired
-//    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
-//    @Autowired
-//    private LoanBreakdownOutputPort loanBreakdownOutputPort;
-//    @Autowired
-//    private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
-//    @Autowired
-//    private CohortOutputPort cohortOutputPort;
-//    @Autowired
-//    private IdentityManagerOutputPort identityManagerOutputPort;
-//    @Autowired
-//    private CohortUseCase cohortUseCase;
-//    @Autowired
-//    private LoaneeUseCase loaneeUseCase;
-//    @Autowired
-//    private LoaneeLoanBreakDownRepository loaneeLoanBreakDownRepository;
-//    @Autowired
-//    private LoanBreakdownRepository loanBreakdownRepository;
-//    private OrganizationIdentity amazingGrace;
-//    private  UserIdentity joel;
-//    private OrganizationEmployeeIdentity organizationEmployeeIdentity;
-//    private String organizationId;
-//    private String loaneeUserId;
-//    private String organizationEmployeeIdentityId;
-//    private LoanReferral loanReferral;
-//    private Loanee loanee;
-//    private String loaneeId;
-//    private UserIdentity userIdentity;
-//    private String loaneeLoanDetailId;
-//    private String loanReferralId;
-//    private Program dataAnalytics;
-//    private String programId;
-//    private LoanBreakdown loanBreakdown;
-//    private Cohort cohort;
-//    private List<LoanBreakdown> loanBreakdowns;
-//    private List<LoaneeLoanBreakdown> loaneeBreakdowns;
-//    private String cohortId;
-//    private String organizationAdminId;
-//    private LoanMetrics loanMetrics;
-//    @Autowired
-//    private LoanMetricsUseCase loanMetricsUseCase;
-//    @Autowired
-//    private MeedlNotificationOutputPort meedlNotificationOutputPort;
-//
-//    @BeforeAll
-//    void setUp() {
-//        try {
-//            joel = TestData.createTestUserIdentity("joel54@johnson.com", "fdc7f3ff-b115-42e3-a361-d93a791df2db");
-//            List<OrganizationEmployeeIdentity> employees = List.of(OrganizationEmployeeIdentity
-//                    .builder().meedlUser(joel).build());
-//
-//            amazingGrace = TestData.createOrganizationTestData(
-//                    "Amazing Grace Enterprises",
-//                    "RC7950005",
-//                    employees
-//            );
-//            amazingGrace.setServiceOfferings(List.of(ServiceOffering.builder().
-//                    name(ServiceOfferingType.TRAINING.name()).
-//                    industry(Industry.EDUCATION).build()));
-//
-//            amazingGrace = organizationIdentityOutputPort.save(amazingGrace);
-//            assertNotNull(amazingGrace);
-//            organizationId = amazingGrace.getId();
-//
-//            joel = userIdentityOutputPort.save(joel);
-//            assertNotNull(joel);
-//            organizationAdminId = joel.getId();
-//
-//            organizationEmployeeIdentity = new OrganizationEmployeeIdentity();
-//            organizationEmployeeIdentity.setOrganization(organizationId);
-//            organizationEmployeeIdentity.setMeedlUser(joel);
-//            organizationEmployeeIdentity.setStatus(ActivationStatus.INVITED);
-//            organizationEmployeeIdentity = organizationEmployeeIdentityOutputPort.
-//                    save(organizationEmployeeIdentity);
-//
-//            assertNotNull(organizationEmployeeIdentity);
-//            organizationEmployeeIdentityId = organizationEmployeeIdentity.getId();
-//
-//            dataAnalytics = TestData.createProgramTestData("Data Analytics test");
-//            dataAnalytics.setCreatedBy(organizationAdminId);
-//            List<Program> foundPrograms = programOutputPort.findProgramByName(dataAnalytics.getName(), amazingGrace.getId());
-//            log.info("Found programs is:: {}",foundPrograms.isEmpty());
-//            if (!foundPrograms.isEmpty()){
-//                Optional<Program> optionalProgram = foundPrograms.stream()
-//                        .filter(program -> program.getName().equals(dataAnalytics.getName()))
-//                        .findFirst();
-//                if (optionalProgram.isPresent()){
-//                    Program foundProgram = optionalProgram.get();
-//                    programOutputPort.deleteProgram(foundProgram.getId());
-//                }
-//            }
-//            dataAnalytics.setOrganizationIdentity(amazingGrace);
-//            Program savedProgram = programOutputPort.saveProgram(dataAnalytics);
-//            programId = savedProgram.getId();
-//
-//            loanBreakdown = TestData.createLoanBreakDown();
-//            loanBreakdowns = List.of(loanBreakdown);
-//            cohort = TestData.createCohortData("Elite", programId, organizationId, loanBreakdowns, organizationAdminId);
-//            cohort = cohortUseCase.createCohort(cohort);
-//            cohortId = cohort.getId();
-//
-//            loanBreakdowns = loanBreakdownOutputPort.findAllByCohortId(cohortId);
-//            LoanBreakdown cohortTuitionBreakdown = loanBreakdowns.get(0);
-//
-//            userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").
-//                    firstName("Adeshina").lastName("Qudus").email("qudus@example.com").image("loanee-img.png").
-//                    role(IdentityRole.LOANEE).createdBy(organizationAdminId).build();
-//            Optional<UserIdentity> foundUser = identityManagerOutputPort.getUserByEmail(userIdentity.getEmail());
-//            if (foundUser.isPresent()) {
-//                identityManagerOutputPort.deleteUser(foundUser.get());
-//            }
-//            LoaneeLoanDetail loaneeLoanDetail = LoaneeLoanDetail.builder().
-//                    amountRequested(BigDecimal.valueOf(30000.00)).
-//                    initialDeposit(BigDecimal.valueOf(10000.00)).build();
-//
-//            LoaneeLoanBreakdown loaneeLoanBreakdown = LoaneeLoanBreakdown.builder().
-//                    loaneeLoanBreakdownId(cohortTuitionBreakdown.getLoanBreakdownId()).
-//                    itemAmount(cohortTuitionBreakdown.getItemAmount()).
-//                    itemName(cohortTuitionBreakdown.getItemName()).build();
-//            loaneeBreakdowns = List.of(loaneeLoanBreakdown);
-//            loanee = Loanee.builder().userIdentity(userIdentity).
-//                    loanBreakdowns(loaneeBreakdowns).
-//                    cohortId(cohortId).loaneeLoanDetail(loaneeLoanDetail).build();
-//            loanee = loaneeUseCase.addLoaneeToCohort(loanee);
-//            assertNotNull(loanee);
-//            loaneeId = loanee.getId();
-//            loaneeUserId = loanee.getUserIdentity().getId();
-//            loaneeLoanDetailId = loanee.getLoaneeLoanDetail().getId();
-//
-//            loanMetricsUseCase.createLoanMetrics(organizationId);
-//
-//            loanReferral = loaneeUseCase.referLoanee(loanee);
-//            assertNotNull(loanReferral);
-//            log.info("Loan referral ====> {}", loanReferral);
-//            loanReferralId = loanReferral.getId();
-//        } catch (MeedlException e) {
-//            log.error("Error creating set up test data", e);
-//        }
-//    }
-//
-//
-//    @Test
-//    void viewLoanReferral() {
-//        try {
-//            Optional<LoanReferral> referral = loanReferralOutputPort.findLoanReferralById(loanReferralId);
-//
-//            assertNotNull(referral);
-//            assertFalse(referral.isEmpty());
-//            assertNotNull(referral.get().getId());
-//            assertEquals("Adeshina", referral.get().getLoanee().getUserIdentity().getFirstName());
-//            assertEquals("Qudus", referral.get().getLoanee().getUserIdentity().getLastName());
-//            assertEquals(userIdentity.getAlternatePhoneNumber(),
-//                    referral.get().getLoanee().getUserIdentity().getAlternatePhoneNumber());
-//            assertEquals(userIdentity.getAlternateEmail(),
-//                    referral.get().getLoanee().getUserIdentity().getAlternateEmail());
-//            assertEquals(userIdentity.getAlternateContactAddress(),
-//                    referral.get().getLoanee().getUserIdentity().getAlternateContactAddress());
-//            assertEquals("Elite", referral.get().getCohortName());
-//            assertEquals(cohort.getStartDate(), referral.get().getCohortStartDate());
-//            assertEquals("Data Analytics test", referral.get().getProgramName());
-//            assertEquals("loanee-img.png", referral.get().getLoaneeImage());
-//            assertNotNull(referral.get().getTuitionAmount());
-//            assertNotNull(referral.get().getInitialDeposit());
-//            assertNotNull(referral.get().getLoanAmountRequested());
-//            assertEquals(LoanReferralStatus.PENDING, referral.get().getLoanReferralStatus());
-//        } catch (MeedlException e) {
-//            log.error("Error getting loan referral", e);
-//        }
-//    }
-//
-//    @Test
-//    void viewLoanReferralWithTrailingAndLeadingSpaces() {
-//        log.info("Loan referral id : {}", loanReferralId);
-//        assertThrows(MeedlException.class, ()->
-//                loanReferralOutputPort.findLoanReferralById(loanReferralId.concat(StringUtils.SPACE)));
-//    }
-//
-//    @Test
-//    void viewLoanReferralWithNullId() {
-//        assertThrows(MeedlException.class, ()->loanReferralOutputPort.findLoanReferralById(null));
-//    }
-//
-//    @ParameterizedTest
-//    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
-//    void viewLoanReferralByIdWithSpaces(String loanReferralId) {
-//        assertThrows(MeedlException.class, ()->loanReferralOutputPort.findLoanReferralById(loanReferralId));
-//    }
-//
-//    @ParameterizedTest
-//    @ValueSource(strings = {"invalid id", "74567"})
-//    void viewLoanReferralByNonUUID(String loanReferralId) {
-//        assertThrows(MeedlException.class, ()->loanReferralOutputPort.findLoanReferralById(loanReferralId));
-//    }
-//
-//    @AfterAll
-//    void tearDown() {
-//        try {
-//            loanReferralOutputPort.deleteLoanReferral(loanReferralId);
-//            loaneeBreakdowns.forEach(loaneeLoanBreakdown ->
-//                    loaneeLoanBreakDownRepository.deleteById(loaneeLoanBreakdown.getLoaneeLoanBreakdownId())
-//            );
-//            loaneeOutputPort.deleteLoanee(loaneeId);
-//            meedlNotificationOutputPort.deleteNotificationByUserId(joel.getId());
-//            userIdentityOutputPort.deleteUserById(joel.getId());
-//            userIdentityOutputPort.deleteUserById(loaneeUserId);
-//            identityManagerOutputPort.deleteUser(loanee.getUserIdentity());
-//            loaneeLoanDetailsOutputPort.delete(loaneeLoanDetailId);
-//            loanBreakdowns.forEach(tuitionBreakdown ->
-//                    loanBreakdownRepository.deleteById(tuitionBreakdown.getLoanBreakdownId())
-//            );
-//            cohortOutputPort.deleteCohort(cohortId);
-//            programOutputPort.deleteProgram(programId);
-//            Optional<LoanMetrics> loanMetrics = loanMetricsOutputPort.findByOrganizationId(amazingGrace.getId());
-//            if (loanMetrics.isPresent()) {
-//                loanMetricsOutputPort.delete(loanMetrics.get().getId());
-//            }
-//            List<OrganizationServiceOffering> organizationServiceOfferings = organizationIdentityOutputPort.
-//                    findOrganizationServiceOfferingsByOrganizationId(amazingGrace.getId());
-//            String serviceOfferingId = null;
-//            for (OrganizationServiceOffering organizationServiceOffering : organizationServiceOfferings) {
-//                serviceOfferingId = organizationServiceOffering.getServiceOffering().getId();
-//                organizationIdentityOutputPort.deleteOrganizationServiceOffering(organizationServiceOffering.getId());
-//            }
-//            organizationIdentityOutputPort.deleteServiceOffering(serviceOfferingId);
-//            organizationIdentityOutputPort.delete(amazingGrace.getId());
-//        } catch (MeedlException e) {
-//            log.error("Exception occurred cleaning up test data: ", e);
-//        }
-//    }
+
+    @Autowired
+    private CohortLoaneeOutputPort cohortLoaneeOutputPort;
+    private CohortLoanee cohortLoanee;
+    private UserIdentity userIdentity;
+    private UserIdentity meedleUser;
+    private OrganizationEmployeeIdentity employeeIdentity;
+    private OrganizationIdentity organizationIdentity;
+    private LoanBreakdown loanBreakdown;
+    private List<LoanBreakdown> loanBreakdowns;
+    private Program program;
+    private Cohort cohort;
+    private LoaneeLoanDetail loaneeLoanDetail;
+    private Loanee loanee;
+    private LoanReferral loanReferral;
+    private String cohortLoaneeId;
+    private String loanReferralId;
+    @Autowired
+    private ProgramOutputPort programOutputPort;
+    @Autowired
+    private UserIdentityOutputPort userIdentityOutputPort;
+    @Autowired
+    private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
+    @Autowired
+    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    @Autowired
+    private LoanBreakdownOutputPort loanBreakdownOutputPort;
+    @Autowired
+    private LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
+    @Autowired
+    private CohortOutputPort cohortOutputPort;
+    @Autowired
+    private LoaneeOutputPort loaneeOutputPort;
+    @Autowired
+    private LoanReferralOutputPort loanReferralOutputPort;
+
+
+    @BeforeAll
+    void setUpLoanReferral() {
+        try {
+            meedleUser = TestData.createTestUserIdentity("ade45@gmail.com");
+            meedleUser.setRole(IdentityRole.ORGANIZATION_ADMIN);
+            meedleUser = userIdentityOutputPort.save(meedleUser);
+            employeeIdentity = TestData.createOrganizationEmployeeIdentityTestData(meedleUser);
+            employeeIdentity = organizationEmployeeIdentityOutputPort.save(employeeIdentity);
+            organizationIdentity = TestData.createOrganizationTestData("Organization test1","RC3456891", List.of(employeeIdentity));
+            organizationIdentity = organizationIdentityOutputPort.save(organizationIdentity);
+            userIdentity = TestData.createTestUserIdentity("loanee@grr.la");
+            userIdentity.setRole(IdentityRole.LOANEE);
+            userIdentity = userIdentityOutputPort.save(userIdentity);
+            program = TestData.createProgramTestData("Software engineer");
+            program.setCreatedBy(meedleUser.getId());
+            organizationIdentity.setServiceOfferings(List.of(ServiceOffering.builder().name(TRAINING.name()).build()));
+            program.setOrganizationIdentity(organizationIdentity);
+            program = programOutputPort.saveProgram(program);
+            loanBreakdown = TestData.createLoanBreakDown();
+            loanBreakdowns =  loanBreakdownOutputPort.saveAllLoanBreakDown(List.of(loanBreakdown));
+            cohort = TestData.createCohortData("Lacoste",program.getId(),
+                    organizationIdentity.getId(),loanBreakdowns,meedleUser.getId());
+            cohort = cohortOutputPort.save(cohort);
+            loaneeLoanDetail = TestData.createTestLoaneeLoanDetail();
+            loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
+            loanee = TestData.createTestLoanee(userIdentity,loaneeLoanDetail);
+            loanee = loaneeOutputPort.save(loanee);
+            cohortLoanee = TestData.buildCohortLoanee(loanee, cohort,loaneeLoanDetail,meedleUser.getId());
+            cohortLoanee = cohortLoaneeOutputPort.save(cohortLoanee);
+            log.info("Cohort Loanee == : {}", cohortLoanee);
+            loanReferral = TestData.buildLoanReferral(cohortLoanee,LoanReferralStatus.PENDING);
+        }catch (MeedlException exception){
+            log.info("Failed to set up cohort loanee {}", exception.getMessage());
+            throw new RuntimeException(exception);
+        }
+    }
+
+
+    @Test
+    void saveNullLoanReferral() {
+        assertThrows(MeedlException.class, () -> loanReferralOutputPort.save(null));
+    }
+
+    @Test
+    void saveLoanReferralWithNullCohortLoanee() {
+        loanReferral.setCohortLoanee(null);
+        assertThrows(MeedlException.class, () -> loanReferralOutputPort.save(loanReferral));
+    }
+
+    @Test
+    void saveLoanReferralWithNullCohortInCohortLoanee() {
+        loanReferral.getCohortLoanee().setCohort(null);
+        assertThrows(MeedlException.class, () -> loanReferralOutputPort.save(loanReferral));
+    }
+
+    @Test
+    void saveLoanReferralWithNullLoaneeInCohortLoanee() {
+        loanReferral.getCohortLoanee().setLoanee(null);
+        assertThrows(MeedlException.class, () -> loanReferralOutputPort.save(loanReferral));
+    }
+
+    @Test
+    void saveLoanReferralWithNullLoanReferralStatus() {
+        loanReferral.setLoanReferralStatus(null);
+        assertThrows(MeedlException.class, () -> loanReferralOutputPort.save(loanReferral));
+    }
+
+    @Order(1)
+    @Test
+    void saveLoanReferal(){
+
+        LoanReferral savedLoanReferral = new LoanReferral();
+        try{
+            savedLoanReferral = loanReferralOutputPort.save(loanReferral);
+            loanReferralId = savedLoanReferral.getId();
+        }catch (MeedlException exception){
+            log.info("Failed to set up loanReferral {}", exception.getMessage());
+        }
+        assertEquals(savedLoanReferral.getCohortLoanee(),cohortLoanee);
+        assertEquals(savedLoanReferral.getLoanReferralStatus(),loanReferral.getLoanReferralStatus());
+    }
+
+    @AfterAll
+    void cleanUp() throws MeedlException {
+        log.info("cohort loanee id = {}", loanReferralId);
+        loanReferralOutputPort.deleteLoanReferral(loanReferralId);
+        log.info("cohort loanee id = {}", cohortLoaneeId);
+        cohortLoaneeOutputPort.delete(cohortLoaneeId);
+        log.info("cohort id = {}", cohortLoaneeId);
+        cohortOutputPort.deleteCohort(cohort.getId());
+        log.info("loanee id = {}", loanee.getId());
+        loaneeOutputPort.deleteLoanee(loanee.getId());
+        log.info("loanee loane details id = {}", loaneeLoanDetail.getId());
+        loaneeLoanDetailsOutputPort.delete(loaneeLoanDetail.getId());
+        log.info("loan breakdowns = {}", loanBreakdowns);
+        loanBreakdownOutputPort.deleteAll(loanBreakdowns);
+        log.info("program id = {}", program.getId());
+        programOutputPort.deleteProgram(program.getId());
+        log.info("org id = {}", organizationIdentity.getId());
+        organizationIdentityOutputPort.delete(organizationIdentity.getId());
+        log.info("org empoyee  = {}", employeeIdentity.getId());
+        organizationEmployeeIdentityOutputPort.delete(employeeIdentity.getId());
+        log.info("meedl id = {}", meedleUser.getId());
+        userIdentityOutputPort.deleteUserById(meedleUser.getId());
+        log.info("user id = {}", userIdentity.getId());
+        userIdentityOutputPort.deleteUserById(userIdentity.getId());
+    }
+
 }
  

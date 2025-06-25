@@ -313,7 +313,7 @@ class LoaneeServiceTest {
             when(loanReferralOutputPort.findLoanReferralByLoaneeIdAndCohortId(firstLoanee.getId(),firstLoanee.getCohortId()))
                     .thenReturn(null);
             when(cohortOutputPort.findCohort(firstLoanee.getCohortId())).thenReturn(elites);
-            when(loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByLoaneeId(firstLoanee.getId())).thenReturn(List.of(loanBreakdown));
+            when(loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(firstLoanee.getId())).thenReturn(List.of(loanBreakdown));
             when(organizationEmployeeIdentityOutputPort.findByEmployeeId(any()))
                     .thenReturn(organizationEmployeeIdentity);
             when(organizationIdentityOutputPort.findById(mockId)).

@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity;
 
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanReferralStatus;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortLoaneeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,7 +19,7 @@ public class LoanReferralEntity {
     private String id;
     private String reasonForDeclining;
     @ManyToOne
-    private LoaneeEntity loaneeEntity;
+    private CohortLoaneeEntity cohortLoanee;
     @Enumerated(EnumType.STRING)
     private LoanReferralStatus loanReferralStatus;
 }

@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface LoaneeLoanBreakDownRepository extends JpaRepository<LoaneeLoanBreakdownEntity,String> {
-    List<LoaneeLoanBreakdownEntity> findAllByCohortLoanee_LoaneeId(String loaneeId);
+    List<LoaneeLoanBreakdownEntity> findAllByCohortLoaneeId(String cohortLoaneeId);
 }

@@ -1,7 +1,9 @@
 package africa.nkwadoma.nkwadoma.domain.model.loan;
 
+import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import lombok.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -27,6 +29,7 @@ public class LoanReferral {
     private String lastName;
     private String loaneeUserId;
     private Loanee loanee;
+    private CohortLoanee cohortLoanee;
     private LoanReferralStatus loanReferralStatus;
     private String referredBy;
     private boolean identityVerified;
@@ -58,7 +61,7 @@ public class LoanReferral {
     }
 
     public void validateForCreate() throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanee, "Loanee Object is required");
+        MeedlValidator.validateObjectInstance(cohortLoanee, CohortMessages.COHORT_LOANEE_CANNOT_BE_NULL.getMessage());
         MeedlValidator.validateObjectInstance(loanReferralStatus,"LoanReferral Status is required");
     }
 
