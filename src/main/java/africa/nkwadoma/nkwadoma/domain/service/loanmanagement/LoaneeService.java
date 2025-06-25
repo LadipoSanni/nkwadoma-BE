@@ -367,10 +367,7 @@ public class LoaneeService implements LoaneeUseCase {
         updateLoaneeReferralDetail(cohortLoanee);
         log.info("referred by {}", cohortLoanee.getReferredBy());
 
-        LoanReferral loanReferral = LoanReferral.builder().cohortLoanee(cohortLoanee)
-                .loanReferralStatus(LoanReferralStatus.PENDING).build();
-        loanReferral.validateForCreate();
-        loanReferralOutputPort.save(loanReferral);
+        LoanReferral loanReferral = buildLoanReferral(cohortLoanee);
 
         Cohort cohort = cohortOutputPort.findCohort(cohortLoanee.getCohort().getId());
         cohort.setNumberOfReferredLoanee(cohort.getNumberOfReferredLoanee() + 1);
@@ -382,6 +379,14 @@ public class LoaneeService implements LoaneeUseCase {
 
         loanReferral.getLoanee().setLoanBreakdowns(loanBreakdowns);
         log.info("loan referral org == {}", loanReferral.getLoanee().getReferredBy());
+        return loanReferral;
+    }
+
+    private LoanReferral buildLoanReferral(CohortLoanee cohortLoanee) throws MeedlException {
+        LoanReferral loanReferral = LoanReferral.builder().cohortLoanee(cohortLoanee)
+                .loanReferralStatus(LoanReferralStatus.PENDING).build();
+        loanReferral.validateForCreate();
+        loanReferral = loanReferralOutputPort.save(loanReferral);
         return loanReferral;
     }
 
