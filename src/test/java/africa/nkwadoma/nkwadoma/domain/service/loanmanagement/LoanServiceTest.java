@@ -72,6 +72,7 @@ class LoanServiceTest {
     private InvestmentVehicle investmentVehicle;
     private int pageSize = 10;
     private int pageNumber = 0;
+    private CohortLoanee cohortLoanee;
 
 
     @BeforeEach
@@ -112,6 +113,7 @@ class LoanServiceTest {
         loan.setOrganizationId("b95805d1-2e2d-47f8-a037-7bcd264914fc");
         loan.setPageNumber(0);
         loan.setPageSize(10);
+        cohortLoanee = TestData.buildCohortLoanee(loanee,Cohort.builder().build(),loaneeLoanDetail,testId);
 
         investmentVehicle = TestData.buildInvestmentVehicle("vehicle");
     }
@@ -194,14 +196,29 @@ class LoanServiceTest {
         try {
             when(loanReferralOutputPort.findById(loanReferral.getId())).thenReturn(loanReferral);
             when(loanRequestMapper.mapLoanReferralToLoanRequest(loanReferral)).thenReturn(loanRequest);
-            when(loanReferralOutputPort.save(loanReferral)).thenReturn(loanReferral);
+
             when(loanRequestOutputPort.save(loanRequest)).thenReturn(loanRequest);
-            loanReferral.getLoanee().setReferredBy("RefferedBy");
-            when(organizationIdentityOutputPort.findOrganizationByName(loanReferral.getLoanee().getReferredBy())).
+
+            loanRequest.setReferredBy(organizationIdentity.getName());
+
+            when(organizationIdentityOutputPort.findOrganizationByName(loanRequest.getReferredBy())).
                     thenReturn(Optional.ofNullable(organizationIdentity));
             when(loanMetricsOutputPort.findByOrganizationId(organizationIdentity.getId()))
                     .thenReturn(Optional.ofNullable(loanMetrics));
             when(loanMetricsOutputPort.save(loanMetrics)).thenReturn(loanMetrics);
+
+            when(loanReferralOutputPort.save(loanReferral)).thenReturn(loanReferral);
+
+            cohortLoanee.setReferredBy("Brown Hills Institute");
+            loanReferral.setCohortLoanee(cohortLoanee);
+
+            when(organizationIdentityOutputPort.findOrganizationByName(loanReferral.getCohortLoanee().getReferredBy())).
+                    thenReturn(Optional.ofNullable(organizationIdentity));
+            when(loanMetricsOutputPort.findByOrganizationId(organizationIdentity.getId()))
+                    .thenReturn(Optional.ofNullable(loanMetrics));
+            when(loanMetricsOutputPort.save(loanMetrics)).thenReturn(loanMetrics);
+
+
             referral = loanService.respondToLoanReferral(loanReferral);
         } catch (MeedlException e) {
             log.error(e.getMessage(), e);
@@ -245,12 +262,17 @@ class LoanServiceTest {
         try {
             when(loanReferralOutputPort.findById(loanReferral.getId())).thenReturn(loanReferral);
             when(loanReferralOutputPort.save(loanReferral)).thenReturn(loanReferral);
-            loanReferral.getLoanee().setReferredBy("RefferedBy");
-            when(organizationIdentityOutputPort.findOrganizationByName(loanReferral.getLoanee().getReferredBy())).
+
+            cohortLoanee.setReferredBy("Brown Hills Institute");
+            loanReferral.setCohortLoanee(cohortLoanee);
+
+            when(organizationIdentityOutputPort.findOrganizationByName(loanReferral.getCohortLoanee().getReferredBy())).
                     thenReturn(Optional.ofNullable(organizationIdentity));
             when(loanMetricsOutputPort.findByOrganizationId(organizationIdentity.getId()))
                     .thenReturn(Optional.ofNullable(loanMetrics));
             when(loanMetricsOutputPort.save(loanMetrics)).thenReturn(loanMetrics);
+
+
             referral = loanService.respondToLoanReferral(loanReferral);
         } catch (MeedlException e) {
             log.error(e.getMessage(), e);
