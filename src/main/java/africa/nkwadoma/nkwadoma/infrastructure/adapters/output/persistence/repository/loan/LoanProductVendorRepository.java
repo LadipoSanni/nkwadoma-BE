@@ -4,9 +4,13 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoanProductVendor;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.VendorEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface LoanProductVendorRepository extends JpaRepository<LoanProductVendor,String> {
     void deleteAllByVendorEntity(VendorEntity vendorEntity);
 
     void deleteAllByLoanProductEntity(LoanProductEntity loanProductEntity);
+
+    @Transactional
+    void deleteByVendorEntityId(String id);
 }
