@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.model.loan;
 
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
@@ -36,6 +37,7 @@ public class LoanRequest {
     private LoanProduct loanProduct;
     private LoanRequestStatus status;
     private Loanee loanee;
+    private CohortLoanee cohortLoanee;
     private LoaneeLoanDetail loaneeLoanDetail;
     private List<LoanBreakdown> loanBreakdowns;
     private List<LoaneeLoanBreakdown> loaneeLoanBreakdowns;
@@ -53,6 +55,9 @@ public class LoanRequest {
     private String loanOfferId;
     private int creditScore;
     private String actorId;
+    private String cohortLoaneeId;
+    private boolean isVerified;
+    private OnboardingMode onboardingMode;
 
 
     public void validateLoanProductIdAndAmountApproved() throws MeedlException {
@@ -62,9 +67,12 @@ public class LoanRequest {
     }
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateUUID(loaneeId, LoaneeMessages.LOANEE_MUST_EXIST.getMessage());
+        MeedlValidator.validateUUID(id, LoaneeMessages.LOAN_REFERRAL_ID_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateBigDecimalDataElement(loanAmountRequested,
                 LoanMessages.LOAN_AMOUNT_REQUESTED_MUST_NOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectInstance(referredBy,"Referred by cannot be empty");
+        MeedlValidator.validateObjectInstance(status,"Status cannot be empty");
+        MeedlValidator.validateObjectInstance(createdDate,"Created date cannot be empty");
     }
 
 

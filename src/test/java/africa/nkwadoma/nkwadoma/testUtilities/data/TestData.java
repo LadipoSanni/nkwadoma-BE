@@ -204,18 +204,17 @@ public class TestData {
         return loanOffer;
     }
 
-    public static LoanRequest buildLoanRequest(Loanee loanee, LoaneeLoanDetail loaneeLoanDetail) {
+    public static LoanRequest buildLoanRequest(String loanReferralId) {
         LoanRequest loanRequest = new LoanRequest();
-        loanRequest.setId("3a6d1124-1349-4f5b-831a-ac269369a90f");
+        loanRequest.setId(loanReferralId);
         loanRequest.setLoanAmountApproved(BigDecimal.valueOf(500000));
         loanRequest.setLoanRequestDecision(LoanDecision.ACCEPTED);
         loanRequest.setLoanAmountRequested(BigDecimal.valueOf(900000));
         loanRequest.setStatus(LoanRequestStatus.NEW);
         loanRequest.setLoanReferralStatus(LoanReferralStatus.ACCEPTED);
         loanRequest.setReferredBy("Brown Hills Institute");
-        loanee.setLoaneeLoanDetail(loaneeLoanDetail);
-        loanRequest.setLoanee(loanee);
         loanRequest.setDateTimeApproved(LocalDateTime.now());
+        loanRequest.setCreatedDate(LocalDateTime.now());
         return loanRequest;
     }
 

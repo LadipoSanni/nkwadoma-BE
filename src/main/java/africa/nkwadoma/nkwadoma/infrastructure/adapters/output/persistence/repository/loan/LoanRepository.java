@@ -23,10 +23,11 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
 
           from LoanEntity le
           join LoaneeEntity l on le.loaneeEntity.id = l.id
-          join UserEntity  u on l.userIdentity.id = u.id
-          join LoanRequestEntity lr on lr.loaneeEntity.id = l.id
-          join LoanOfferEntity loe on l.id = loe.loanee.id
           join CohortLoaneeEntity cle on cle.loanee.id = l.id
+          join LoanReferralEntity lfe on lfe.cohortLoanee.id = cle.id
+          join UserEntity  u on l.userIdentity.id = u.id
+          join LoanRequestEntity lr on lr.id = lfe.id
+          join LoanOfferEntity loe on l.id = loe.loanee.id
           join CohortEntity c on cle.cohort.id = c.id
           join ProgramEntity p on c.programId = p.id
           left join NextOfKinEntity n on u.nextOfKinEntity.id = n.id
@@ -48,9 +49,10 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
     
           from LoanEntity le
           join LoaneeEntity l on le.loaneeEntity.id = l.id
-               join CohortLoaneeEntity cle on cle.loanee.id = l.id
+          join CohortLoaneeEntity cle on cle.loanee.id = l.id
+          join LoanReferralEntity lfe on lfe.cohortLoanee.id = cle.id
           join CohortEntity c on cle.cohort.id = c.id
-          join LoanRequestEntity lr on lr.loaneeEntity.id = l.id
+          join LoanRequestEntity lr on lr.id = lfe.id
           join LoanOfferEntity loe on l.id = loe.loanee.id
           join ProgramEntity p on c.programId = p.id
           join OrganizationEntity o on p.organizationIdentity.id = o.id
@@ -101,9 +103,10 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
     
           from LoanEntity le
           join LoaneeEntity l on le.loaneeEntity.id = l.id
-          join LoanRequestEntity lr on lr.loaneeEntity.id = l.id
+               join CohortLoaneeEntity cle on cle.loanee.id = l.id
+          join LoanReferralEntity lfe on lfe.cohortLoanee.id = cle.id
+          join LoanRequestEntity lr on lr.id = lfe.id
           join LoanOfferEntity loe on l.id = loe.loanee.id
-            join CohortLoaneeEntity cle on cle.loanee.id = l.id
           join CohortEntity c on cle.cohort.id = c.id
           join ProgramEntity p on c.programId = p.id
           join OrganizationEntity o on p.organizationIdentity.id = o.id

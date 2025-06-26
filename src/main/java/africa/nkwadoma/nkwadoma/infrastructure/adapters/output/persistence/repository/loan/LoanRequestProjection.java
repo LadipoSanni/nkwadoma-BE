@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan;
 
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanRequestStatus;
 
 import java.math.*;
@@ -40,4 +41,7 @@ public interface LoanRequestProjection {
     String getNextOfKinContactAddress();
     String getNextOfKinRelationship();
     String getNextOfKinPhoneNumber();
+    String getCohortLoaneeId();
+    Boolean getIsVerified();
+    OnboardingMode getOnboardingMode();
 }
