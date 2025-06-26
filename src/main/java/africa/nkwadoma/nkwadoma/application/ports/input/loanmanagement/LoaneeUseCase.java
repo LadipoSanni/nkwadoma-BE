@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import org.springframework.data.domain.Page;
@@ -23,7 +24,7 @@ public interface LoaneeUseCase {
 
     Page<Loanee> viewAllLoaneeInCohort(Loanee loanee, int pageSize, int pageNumber) throws MeedlException;
 
-    LoanReferral referLoanee(Loanee loanee) throws MeedlException;
+    LoanReferral referLoanee(CohortLoanee cohortLoanee) throws MeedlException;
 
 //    void notifyLoanReferralActors(List<Loanee> loanees) throws MeedlException;
 

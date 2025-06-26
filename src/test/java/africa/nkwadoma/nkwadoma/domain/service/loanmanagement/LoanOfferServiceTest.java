@@ -238,7 +238,7 @@ public class LoanOfferServiceTest {
         mockLoanee.setUserIdentity(mockLoaneeIdentity);
         when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
         when(loanOfferOutputPort.findLoanOfferById(mockId)).thenReturn(mockLoanOffer);
-        when(loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByLoaneeId(mockId))
+        when(loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(mockId))
                 .thenReturn(List.of(TestData.createTestLoaneeLoanBreakdown(mockId)));
         when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(mockLoanee);
         assertThrows(
@@ -255,7 +255,7 @@ public class LoanOfferServiceTest {
             userIdentity.setRole(IdentityRole.LOANEE);
             when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
             when(loanOfferOutputPort.findLoanOfferById(mockId)).thenReturn(loanOffer);
-            when(loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByLoaneeId(anyString()))
+            when(loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(anyString()))
                      .thenReturn(List.of(TestData.createTestLoaneeLoanBreakdown(mockId)));
             when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(loanee);
             loanOffer = loanService.viewLoanOfferDetails(mockId,mockId);

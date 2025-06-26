@@ -20,23 +20,25 @@ public interface LoanReferralRepository extends JpaRepository<LoanReferralEntity
                lre.loanReferralStatus as status, o.name as referredBy,
                c.tuitionAmount as tuitionAmount, l.userIdentity.image as loaneeImage
         from LoanReferralEntity lre
-        join LoaneeEntity l on lre.loaneeEntity.id = l.id
-        join CohortLoaneeEntity  cle on  cle.loanee.id = l.id
+        join CohortLoaneeEntity  cle on  cle.id = lre.cohortLoanee.id
+        join LoaneeEntity l on cle.loanee.id = l.id
         join CohortEntity c on cle.cohort.id = c.id
         join ProgramEntity p on c.programId = p.id
         join OrganizationEntity o on p.organizationIdentity.id = o.id
         where lre.id = :id
     """)
     Optional<LoanReferralProjection> findLoanReferralById(@Param("id") String id);
-    List<LoanReferralEntity> findAllByLoaneeEntityUserIdentityId(String userId);
+
+    List<LoanReferralEntity> findAllByCohortLoanee_Loanee_UserIdentity_id(String userId);
 
     @Query("""
     select l from LoanReferralEntity l
-        join CohortLoaneeEntity cle on cle.loanee.id = :loaneeId
-            join CohortLoaneeEntity  c on cle.cohort.id = :cohortId
-                where cle.loanee.id = :id
+        join CohortLoaneeEntity cle on cle.id = l.cohortLoanee.id
+                where cle.loanee.id = :loaneeId and cle.cohort.id = :cohortId
     """)
-    LoanReferralEntity findByLoaneeEntityIdAndLoaneeEntityCohortId(@Param("loaneeId") String id,@Param("cohortId") String cohortId);
+    LoanReferralEntity findByLoaneeEntityIdAndLoaneeEntityCohortId(@Param("loaneeId") String loaneeId,@Param("cohortId") String cohortId);
 
-    Optional<LoanReferralEntity> findByLoaneeEntity_UserIdentity_Email(String loaneeEmail);
+    Optional<LoanReferralEntity> findAllByCohortLoanee_Loanee_UserIdentity_Email(String loaneeEmail);
+
+    Optional<LoanReferralEntity> findLoanReferralByCohortLoaneeId(String id);
 }

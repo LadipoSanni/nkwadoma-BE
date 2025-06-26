@@ -200,7 +200,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
                 orElseThrow(()-> new LoanException(LoanMessages.LOAN_NOT_FOUND.getMessage()));
         log.info("Found loan {}", foundLoan);
         List<LoaneeLoanBreakdown> loaneeLoanBreakdowns =
-                loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByLoaneeId(foundLoan.getLoaneeId());
+                loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(foundLoan.getLoaneeId());
         log.info("Loanee loan breakdowns returned: {}", loaneeLoanBreakdowns);
         foundLoan.setLoaneeLoanBreakdowns(loaneeLoanBreakdowns);
         return foundLoan;
@@ -251,7 +251,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
                 .orElseThrow(()->  new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage()));
         log.info("Found Loan referral by it's ID: {}, is verified : {}", loanReferral.getId(), loanReferral.getLoanee().getUserIdentity().isIdentityVerified());
         List<LoaneeLoanBreakdown> loaneeLoanBreakdowns =
-                loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByLoaneeId(loanReferral.getLoanee().getId());
+                loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(loanReferral.getLoanee().getId());
         log.info("Loanee loan breakdowns found from the DB : {}", loaneeLoanBreakdowns);
         loanReferral.setLoaneeLoanBreakdowns(loaneeLoanBreakdowns);
         log.info("Loanee loan breakdowns set to be returned: {}", loanReferral.getLoaneeLoanBreakdowns());
@@ -512,7 +512,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         LoanOffer loanOffer =
                  loanOfferOutputPort.findLoanOfferById(loanOfferId);
         List<LoaneeLoanBreakdown> loaneeLoanBreakdowns =
-                loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByLoaneeId(loanOffer.getLoaneeId());
+                loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(loanOffer.getLoaneeId());
         log.info("Loanee loan breakdowns by loanee with ID: {}: {}", loanOffer.getLoaneeId(),
                 loaneeLoanBreakdowns);
         loanOffer.setLoaneeBreakdown(loaneeLoanBreakdowns);

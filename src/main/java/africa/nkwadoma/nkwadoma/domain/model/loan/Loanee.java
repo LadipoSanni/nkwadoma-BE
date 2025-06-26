@@ -63,6 +63,7 @@ public class Loanee {
     private String termsAndConditions;
     private int tenor;
     private String institutionName;
+    private String loanReferralId;
 
 
     public void validate() throws MeedlException {

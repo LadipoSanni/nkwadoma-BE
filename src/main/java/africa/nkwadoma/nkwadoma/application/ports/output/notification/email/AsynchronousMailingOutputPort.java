@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface AsynchronousMailingOutputPort {
     @Async
-    void notifyLoanReferralActors(List<Loanee> loanees);
+    void notifyLoanReferralActors(List<Loanee> loanees,UserIdentity userIdentity) throws MeedlException;
 
     @Async
     void sendFinancierEmail(List<Financier> financiersToMail, InvestmentVehicle investmentVehicle);
