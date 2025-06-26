@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.model.loan;
 
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
@@ -54,6 +55,9 @@ public class LoanRequest {
     private String loanOfferId;
     private int creditScore;
     private String actorId;
+    private String cohortLoaneeId;
+    private boolean isVerified;
+    private OnboardingMode onboardingMode;
 
 
     public void validateLoanProductIdAndAmountApproved() throws MeedlException {

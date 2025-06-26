@@ -40,6 +40,7 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
         LoanRequestProjection loanRequestProjection =
                 loanRequestRepository.findLoanRequestById(loanRequestId)
                         .orElseThrow(()->new MeedlException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage()));
+
         LoanRequest loanRequest = loanRequestMapper.mapProjectionToLoanRequest(loanRequestProjection);
         log.info("Mapped Loan request: {}", loanRequest);
         return loanRequest;

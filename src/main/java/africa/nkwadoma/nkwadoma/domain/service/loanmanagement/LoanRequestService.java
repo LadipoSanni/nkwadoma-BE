@@ -67,8 +67,8 @@ public class LoanRequestService implements LoanRequestUseCase {
         loanRequest = loanRequestOutputPort.findById(loanRequest.getId());
         log.info("Found loan request: {}", loanRequest);
         List<LoaneeLoanBreakdown> loaneeLoanBreakdowns =
-                loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(loanRequest.getLoaneeId());
-        log.info("Loanee loan breakdowns by loanee with ID: {}: {}", loanRequest.getLoaneeId(), loaneeLoanBreakdowns);
+                loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(loanRequest.getCohortLoaneeId());
+        log.info("Loanee loan breakdowns by loanee with cohort loanee id : {}: {}", loanRequest.getCohortLoaneeId(), loaneeLoanBreakdowns);
         Loanee loanee = new Loanee();
         try {
             loanee = loaneeUseCase.viewLoaneeDetails(loanRequest.getLoaneeId(), userId);
@@ -86,8 +86,8 @@ public class LoanRequestService implements LoanRequestUseCase {
     public LoanRequest respondToLoanRequest(LoanRequest loanRequest) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanRequest, LoanMessages.LOAN_REQUEST_MUST_NOT_BE_EMPTY.getMessage());
         loanRequest.validateLoanProductIdAndAmountApproved();
-        LoanRequest foundLoanRequest = loanRequestOutputPort.findLoanRequestById(loanRequest.getId()).
-                orElseThrow(()-> new LoanException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage()));
+        LoanRequest foundLoanRequest = loanRequestOutputPort.findById(loanRequest.getId());
+
         log.info("Loan request retrieved: {}", foundLoanRequest);
 
         if (ObjectUtils.isNotEmpty(foundLoanRequest.getStatus())
@@ -100,9 +100,9 @@ public class LoanRequestService implements LoanRequestUseCase {
     private LoanRequest respondToLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
         LoanRequest updatedLoanRequest;
         if (loanRequest.getLoanRequestDecision() == LoanDecision.ACCEPTED) {
-            if (!foundLoanRequest.getLoanee().getUserIdentity().isIdentityVerified() &&
-            !foundLoanRequest.getLoanee().getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)){
-                log.info("The loanee for this loan request is not verified. Onboarding mode is: {}. {}", foundLoanRequest.getLoanee().getOnboardingMode(), LoanMessages.LOAN_REQUEST_CANNOT_BE_APPROVED.getMessage());
+            if (!foundLoanRequest.isVerified() &&
+            !foundLoanRequest.getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)){
+                log.info("The loanee for this loan request is not verified. Onboarding mode is: {}. {}", foundLoanRequest.getOnboardingMode(), LoanMessages.LOAN_REQUEST_CANNOT_BE_APPROVED.getMessage());
                 throw new LoanException(LoanMessages.LOAN_REQUEST_CANNOT_BE_APPROVED.getMessage());
             }
             updatedLoanRequest = approveLoanRequest(loanRequest, foundLoanRequest);
@@ -196,7 +196,7 @@ public class LoanRequestService implements LoanRequestUseCase {
         );
         loanProduct = loanProductOutputPort.save(loanProduct);
         foundLoanRequest.setStatus(LoanRequestStatus.APPROVED);
-        foundLoanRequest.setLoaneeId(foundLoanRequest.getLoanee().getId());
+        foundLoanRequest.setLoaneeId(foundLoanRequest.getLoaneeId());
         foundLoanRequest = loanRequestMapper.updateLoanRequest(loanRequest, foundLoanRequest);
         foundLoanRequest = loanRequestOutputPort.save(foundLoanRequest);
         foundLoanRequest.setLoanProduct(loanProduct);

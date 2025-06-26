@@ -366,7 +366,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanOffer.setLoanProduct(loanRequest.getLoanProduct());
         loanOffer.setId(loanRequest.getId());
         loanOffer.setAmountApproved(loanRequest.getLoanAmountApproved());
-        Loanee loanee = loaneeOutputPort.findLoaneeById(loanRequest.getLoanee().getId());
+        Loanee loanee = loaneeOutputPort.findLoaneeById(loanRequest.getLoaneeId());
         loanOffer.setLoanee(loanee);
 
         loanOffer = loanOfferOutputPort.save(loanOffer);
@@ -377,7 +377,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     private void increaseLoanOfferOnLoanMetrics(LoanRequest loanRequest) throws MeedlException {
         Optional<OrganizationIdentity> organizationByName =
-                organizationIdentityOutputPort.findOrganizationByName(loanRequest.getLoanee().getReferredBy());
+                organizationIdentityOutputPort.findOrganizationByName(loanRequest.getReferredBy());
         if (organizationByName.isEmpty()) {
             throw new ResourceNotFoundException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
         }

@@ -37,6 +37,10 @@ public interface LoanRequestMapper {
     @Mapping(target = "userIdentity.alternateContactAddress", source = "alternateContactAddress")
     @Mapping(target = "loanAmountRequested", source = "loanAmountRequested")
     @Mapping(target = "status", source = "status")
+    @Mapping(target = "onboardingMode", source = "onboardingMode")
+    @Mapping(target = "isVerified", source = "isVerified")
+    @Mapping(target = "cohortLoaneeId", source = "cohortLoaneeId")
+    @Mapping(target = "loaneeId", source = "loaneeId")
     LoanRequest mapProjectionToLoanRequest(LoanRequestProjection loanRequestProjection);
 
     @Mapping(target = "loanAmountRequested", source = "cohortLoanee.loaneeLoanDetail.amountRequested")
