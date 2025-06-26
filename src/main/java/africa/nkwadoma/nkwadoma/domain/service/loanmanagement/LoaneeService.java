@@ -156,6 +156,7 @@ public class LoaneeService implements LoaneeUseCase {
         cohortLoanee = addExistingLoaneeToCohort(loanee, existingLoanee, cohort, cohortLoanee);
         cohortLoanee = addNewLoaneeToCohort(loanee, existingLoanee, cohortLoanee, cohort);
         cohortLoanee = cohortLoaneeOutputPort.save(cohortLoanee);
+        log.info("Successfully added loanee = = {} ", cohortLoanee);
         saveLoaneeLoanBreakdowns(loanee, cohortLoanee);
         updateCohortValues(cohort);
         return cohortLoanee.getLoanee();

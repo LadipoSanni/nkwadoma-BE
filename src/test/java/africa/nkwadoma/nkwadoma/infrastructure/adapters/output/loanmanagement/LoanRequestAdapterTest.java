@@ -173,6 +173,17 @@ class LoanRequestAdapterTest {
         assertEquals(savedLoanRequest.getId(), loanRequest.getId());
     }
 
+    @Order(2)
+    @Test
+    void findLoanRequestById(){
+        LoanRequest foundLoanRequest = LoanRequest.builder().build();
+        try{
+            foundLoanRequest = loanRequestOutputPort.findById(loanReferralId);
+        }catch (MeedlException exception){
+            log.info("Failed to find loanRequest {}", exception.getMessage());
+        }
+        assertEquals(foundLoanRequest.getId(),loanReferralId);
+    }
 
 
 
