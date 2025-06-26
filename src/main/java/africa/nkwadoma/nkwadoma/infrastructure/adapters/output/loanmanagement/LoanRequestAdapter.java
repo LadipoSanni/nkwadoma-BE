@@ -51,8 +51,7 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
                 orElseThrow(()-> new MeedlException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage()));
         log.info("Found Loan request: {}", loanRequestEntity);
         Optional<LoanRequest> loanRequest = Optional.of(loanRequestMapper.toLoanRequest(loanRequestEntity));
-        loanRequest.get().getLoanee().getUserIdentity().setIdentityVerified(
-                loanRequestEntity.getLoaneeEntity().getUserIdentity().isIdentityVerified());
+
         return loanRequest;
     }
 

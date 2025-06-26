@@ -79,7 +79,7 @@ class LoanRequestServiceTest {
 
         loanProduct = TestData.buildTestLoanProduct();
 
-        loanRequest = TestData.buildLoanRequest(loanee, loaneeLoanDetail);
+        loanRequest = TestData.buildLoanRequest(testId);
         loanRequest.setLoanProductId(loanProduct.getId());
 
 

@@ -101,7 +101,7 @@ public class LoanOfferServiceTest {
         loaneeLoanDetail = TestData.createTestLoaneeLoanDetail();
         loanee = TestData.createTestLoanee(userIdentity,loaneeLoanDetail);
                  loanee.setId(userIdentity.getId());
-        loanRequest = TestData.buildLoanRequest(loanee,loaneeLoanDetail);
+        loanRequest = TestData.buildLoanRequest(mockId);
         loanOffer = TestData.buildLoanOffer(loanRequest,loanee,mockId);
         loanOffer2 = TestData.buildLoanOffer(loanRequest,loanee,mockId);
         loanProduct = TestData.buildTestLoanProduct();

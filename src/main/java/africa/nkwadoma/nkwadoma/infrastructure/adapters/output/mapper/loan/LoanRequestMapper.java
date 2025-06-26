@@ -7,7 +7,7 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface LoanRequestMapper {
-    @Mapping(target = "loaneeEntity", source = "loanee")
+//    @Mapping(target = "loaneeEntity", source = "loanee")
     LoanRequestEntity toLoanRequestEntity(LoanRequest loanRequest);
 
     @InheritInverseConfiguration
@@ -39,13 +39,10 @@ public interface LoanRequestMapper {
     @Mapping(target = "status", source = "status")
     LoanRequest mapProjectionToLoanRequest(LoanRequestProjection loanRequestProjection);
 
-    @Mapping(target = "loanAmountRequested", source = "loanee.loaneeLoanDetail.amountRequested")
+    @Mapping(target = "loanAmountRequested", source = "cohortLoanee.loaneeLoanDetail.amountRequested")
     @Mapping(target = "id", source = "id")
-    @Mapping(target = "loanee.id", source = "loanee.id")
     @Mapping(target = "createdDate", expression = "java(java.time.LocalDateTime.now())")
-    @Mapping(target = "dateTimeApproved", expression = "java(java.time.LocalDateTime.now())")
-    @Mapping(target = "referredBy", source = "updatedLoanReferral.loanee.referredBy")
-    @Mapping(target = "loaneeId", source = "loanee.id")
+    @Mapping(target = "referredBy", source = "cohortLoanee.referredBy")
     LoanRequest mapLoanReferralToLoanRequest(LoanReferral updatedLoanReferral);
 
     @Mapping(target = "dateTimeApproved", expression = "java(java.time.LocalDateTime.now())")

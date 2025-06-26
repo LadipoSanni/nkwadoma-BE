@@ -27,6 +27,4 @@ public class LoanRequestEntity {
     private LocalDateTime createdDate;
     @Enumerated(EnumType.STRING)
     private LoanRequestStatus status;
-    @ManyToOne
-    private LoaneeEntity loaneeEntity;
 }

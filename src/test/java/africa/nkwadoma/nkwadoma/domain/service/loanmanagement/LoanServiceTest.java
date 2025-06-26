@@ -96,7 +96,7 @@ class LoanServiceTest {
                 loanReferralStatus(LoanReferralStatus.ACCEPTED).build();
         LoanProduct loanProduct = TestData.buildTestLoanProduct();
 
-        loanRequest = TestData.buildLoanRequest(loanee, loaneeLoanDetail);
+        loanRequest = TestData.buildLoanRequest(testId);
         loanRequest.setLoaneeId(loanee.getId());
         loanRequest.setId(loanReferral.getId());
         loanRequest.setLoanProductId(loanProduct.getId());

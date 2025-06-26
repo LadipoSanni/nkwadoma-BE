@@ -40,7 +40,7 @@ public class SwaggerConfig {
         Server localServer2 = new Server();
         localServer2.setUrl("http://localhost:8080");
         Server devServer = new Server();
-        devServer.setUrl("https://rapid-hugely-worm.ngrok-free.app");
+        devServer.setUrl("https://api-systest.meedl.africa");
 
         return List.of(server, localServer1, localServer2, devServer);
     }
