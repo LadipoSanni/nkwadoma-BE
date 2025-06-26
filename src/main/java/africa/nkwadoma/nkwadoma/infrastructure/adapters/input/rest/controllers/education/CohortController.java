@@ -30,7 +30,6 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 
 @Slf4j
 @RestController
-@RequestMapping(BASE_URL)
 @RequiredArgsConstructor
 public class CohortController {
     private final CohortUseCase cohortUseCase;

@@ -29,7 +29,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.REPAYMENT_RECORD_BOOK_UPLOADED_SUCCESS;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.*;
 
-@RequestMapping(BASE_URL + LOAN_BOOK)
+@RequestMapping( LOAN_BOOK)
 @RequiredArgsConstructor
 @RestController
 @Slf4j

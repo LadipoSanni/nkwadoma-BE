@@ -24,10 +24,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.*;
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 
 @RestController
-@RequestMapping(BASE_URL)
 @RequiredArgsConstructor
 @Slf4j
 public class MeedlNotificationController {

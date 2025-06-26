@@ -15,11 +15,9 @@ import org.springframework.security.core.annotation.*;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.web.bind.annotation.*;
 
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 
 @Slf4j
 @RestController
-@RequestMapping(BASE_URL)
 @RequiredArgsConstructor
 public class LoanReferralController {
     private final RespondToLoanReferralUseCase respondToLoanReferralUseCase;
