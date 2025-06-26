@@ -12,11 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
-
 @Slf4j
 @RestController
-@RequestMapping(BASE_URL)
 @RequiredArgsConstructor
 public class EmailResendController {
     @Autowired

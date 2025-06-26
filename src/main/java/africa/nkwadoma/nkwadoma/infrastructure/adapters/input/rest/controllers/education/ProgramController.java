@@ -27,7 +27,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 
 @Slf4j
 @RestController
-@RequestMapping(BASE_URL + "program")
+@RequestMapping("program")
 @RequiredArgsConstructor
 @Tag(name = "Program Controller", description = "Manage Programs in an institute")
 public class ProgramController {

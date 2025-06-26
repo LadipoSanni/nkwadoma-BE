@@ -18,12 +18,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.IDENTITY_VERIFICATION;
 
 @Slf4j
 @RestController
-@RequestMapping(BASE_URL+IDENTITY_VERIFICATION)
+@RequestMapping(IDENTITY_VERIFICATION)
 @RequiredArgsConstructor
 public class IdentityVerificationController {
     private final IdentityVerificationUseCase identityVerificationUseCase;
