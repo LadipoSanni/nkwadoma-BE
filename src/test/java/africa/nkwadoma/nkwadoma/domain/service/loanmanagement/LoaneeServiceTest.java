@@ -281,9 +281,9 @@ class LoaneeServiceTest {
 
     @Test
     void viewAllLoaneeInCohort() throws MeedlException {
-        when(loaneeOutputPort.findAllLoaneeByCohortId(cohortLoanee,pageSize,pageNumber)).
-                thenReturn(new PageImpl<>(List.of(firstLoanee)));
-        Page<Loanee> loanees = loaneeService.viewAllLoaneeInCohort(cohortLoanee,pageSize,pageNumber);
+        when(cohortLoaneeOutputPort.findAllLoaneeInCohort(cohortLoanee,pageSize,pageNumber)).
+                thenReturn(new PageImpl<>(List.of(loaneeCohort)));
+        Page<CohortLoanee> loanees = loaneeService.viewAllLoaneeInCohort(cohortLoanee,pageSize,pageNumber);
         assertEquals(1,loanees.toList().size());
     }
 
@@ -910,32 +910,32 @@ class LoaneeServiceTest {
 
     @Test
     void viewAllLoaneeInCohortWithUploadedStatusAdded() throws MeedlException {
-        cohortLoanee.setUploadedStatus(UploadedStatus.ADDED);
-        Page<Loanee> expectedPage = new PageImpl<>(List.of(cohortLoanee));
-        when(loaneeOutputPort.findAllLoaneeByCohortId(cohortLoanee, pageSize, pageNumber))
-                .thenReturn(expectedPage);
+        loaneeCohort.setUploadedStatus(UploadedStatus.ADDED);
+        Page<CohortLoanee> expectedPage = new PageImpl<>(List.of(loaneeCohort));
+        when(cohortLoaneeOutputPort.findAllLoaneeInCohort(cohortLoanee,pageSize,pageNumber)).
+                thenReturn(expectedPage);
 
-        Page<Loanee> result = loaneeService.viewAllLoaneeInCohort(cohortLoanee, pageSize, pageNumber);
+        Page<CohortLoanee> result = loaneeService.viewAllLoaneeInCohort(cohortLoanee, pageSize, pageNumber);
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
-        assertEquals(cohortLoanee, result.getContent().get(0));
-        assertEquals(cohortLoanee.getUploadedStatus(), UploadedStatus.ADDED);
-        verify(loaneeOutputPort, times(1)).findAllLoaneeByCohortId(cohortLoanee, pageSize, pageNumber);
+        assertEquals(loaneeCohort, result.getContent().get(0));
+        assertEquals(loaneeCohort.getUploadedStatus(), UploadedStatus.ADDED);
+        verify(cohortLoaneeOutputPort, times(1)).findAllLoaneeInCohort(cohortLoanee, pageSize, pageNumber);
     }
 
     @Test
     void viewAllLoaneeInCohortWithUploadedInvited() throws MeedlException {
-        cohortLoanee.setUploadedStatus(UploadedStatus.INVITED);
-        Page<Loanee> expectedPage = new PageImpl<>(List.of(cohortLoanee));
-        when(loaneeOutputPort.findAllLoaneeByCohortId(cohortLoanee, pageSize, pageNumber))
-                .thenReturn(expectedPage);
+        loaneeCohort.setUploadedStatus(UploadedStatus.INVITED);
+        Page<CohortLoanee> expectedPage = new PageImpl<>(List.of(loaneeCohort));
+        when(cohortLoaneeOutputPort.findAllLoaneeInCohort(cohortLoanee,pageSize,pageNumber)).
+                thenReturn(expectedPage);
 
-        Page<Loanee> result = loaneeService.viewAllLoaneeInCohort(cohortLoanee, pageSize, pageNumber);
+        Page<CohortLoanee> result = loaneeService.viewAllLoaneeInCohort(cohortLoanee, pageSize, pageNumber);
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
-        assertEquals(cohortLoanee, result.getContent().get(0));
-        assertEquals(cohortLoanee.getUploadedStatus(), UploadedStatus.INVITED);
-        verify(loaneeOutputPort, times(1)).findAllLoaneeByCohortId(cohortLoanee, pageSize, pageNumber);
+        assertEquals(loaneeCohort, result.getContent().get(0));
+        assertEquals(loaneeCohort.getUploadedStatus(), UploadedStatus.INVITED);
+        verify(cohortLoaneeOutputPort, times(1)).findAllLoaneeInCohort(cohortLoanee, pageSize, pageNumber);
     }
 
 

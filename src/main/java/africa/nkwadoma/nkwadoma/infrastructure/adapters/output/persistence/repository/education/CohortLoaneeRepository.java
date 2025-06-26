@@ -1,8 +1,13 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education;
 
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.UploadedStatus;
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortLoaneeEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoaneeEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,4 +27,18 @@ public interface CohortLoaneeRepository extends JpaRepository<CohortLoaneeEntity
                                                                                     @Param("loaneeIds") List<String> loaneeIds);
 
     Long countByLoaneeId(String loaneeId);
+
+
+    @Query("""
+    SELECT CLE FROM CohortLoaneeEntity CLE
+    
+                WHERE CLE.cohort.id = :cohortId
+                AND (:loaneeStatus IS NULL AND CLE.loaneeStatus != 'ARCHIVE' OR CLE.loaneeStatus = :loaneeStatus )
+                AND (:loaneeStatus IS NULL OR CLE.loaneeStatus = :loaneeStatus)
+                AND (:uploadedStatus IS NULL OR CLE.uploadedStatus = :uploadedStatus)
+    """)
+    Page<CohortLoaneeEntity> findAllByCohortId(@Param("cohortId") String cohortId,
+                                               @Param("loaneeStatus") LoaneeStatus loaneeStatus,
+                                               @Param("uploadedStatus") UploadedStatus uploadedStatus,
+                                               Pageable pageRequest);
 }

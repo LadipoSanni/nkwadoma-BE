@@ -20,8 +20,6 @@ public interface LoaneeOutputPort {
 
     Loanee findLoaneeById(String loaneeId) throws MeedlException;
 
-    Page<Loanee> findAllLoaneeByCohortId(Loanee loanee, int pageSize , int pageNumber) throws MeedlException;
-
     List<Loanee> findAllLoaneesByCohortId(String id) throws MeedlException;
 
     Page<Loanee> searchForLoaneeInCohort(Loanee loanee, int pageSize, int pageNumber) throws MeedlException;
@@ -34,4 +32,5 @@ public interface LoaneeOutputPort {
 
     void archiveOrUnArchiveByIds(List<String> loaneesId, LoaneeStatus loaneeStatus) throws MeedlException;
 
+    Page<Loanee> findAllLoanee(int pageSize, int pageNumber) throws MeedlException;
 }
