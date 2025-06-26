@@ -22,7 +22,7 @@ public interface LoaneeUseCase {
 
     Loanee viewLoaneeDetails(String loaneeId, String userId) throws MeedlException;
 
-    Page<Loanee> viewAllLoaneeInCohort(Loanee loanee, int pageSize, int pageNumber) throws MeedlException;
+    Page<CohortLoanee> viewAllLoaneeInCohort(Loanee loanee, int pageSize, int pageNumber) throws MeedlException;
 
     LoanReferral referLoanee(CohortLoanee cohortLoanee) throws MeedlException;
 
