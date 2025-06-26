@@ -133,11 +133,10 @@ jobs:
       - name: Download .env file from S3 (Systest-2)
         run: |
           whoami
-          sudo -u ubuntu bash << 'EOF'
-            mkdir -p /home/ubuntu/semicolon/meedl/systest
-            aws s3 cp s3://semicolon-delivery/nkwadoma/backend/systest/nkwadoma.env /home/ubuntu/semicolon/meedl/systest/nkwadoma.env --region eu-west-1
-            chown ubuntu:ubuntu /home/ubuntu/semicolon/meedl/systest/nkwadoma.env
-          EOF
+          sudo mkdir -p /home/ubuntu/semicolon/meedl/systest
+          sudo aws s3 cp s3://semicolon-delivery/nkwadoma/backend/systest/nkwadoma.env /home/ubuntu/semicolon/meedl/systest/nkwadoma.env --region eu-west-1
+          sudo chown ubuntu:ubuntu /home/ubuntu/semicolon/meedl/systest/nkwadoma.env
+  
 
       - name: Determine active environment
         id: active_env
