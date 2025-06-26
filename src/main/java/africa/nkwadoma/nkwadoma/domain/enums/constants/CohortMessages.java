@@ -21,7 +21,8 @@ public enum CohortMessages {
     COHORT_STATUS_CANNOT_BE_EMPTY("Cohort status cannot be empty"),
     COHORT_LOANEE_CANNOT_BE_NULL("Cohort loanee cannot be empry"),
     CREATED_BY_CANNOT_BE_EMPTY("Created by cannot be empty"),
-    INVALID_COHORT_LOANEE_ID("Invalid cohort loanee id"),;
+    INVALID_COHORT_LOANEE_ID("Invalid cohort loanee id"),
+    LOANEE_STILL_IN_AN_ACTIVE_COHORT("Loanee still in an active cohort in this program you're adding this loanee to"),;
 
     private final String message;
 

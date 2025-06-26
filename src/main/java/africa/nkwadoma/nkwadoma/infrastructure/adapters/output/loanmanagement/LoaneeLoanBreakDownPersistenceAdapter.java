@@ -4,6 +4,8 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLo
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -26,16 +28,16 @@ public class LoaneeLoanBreakDownPersistenceAdapter implements LoaneeLoanBreakDow
 
 
     @Override
-    public List<LoaneeLoanBreakdown> saveAll(List<LoaneeLoanBreakdown> loaneeLoanBreakdowns,Loanee loanee) throws MeedlException {
+    public List<LoaneeLoanBreakdown> saveAll(List<LoaneeLoanBreakdown> loaneeLoanBreakdowns, CohortLoanee cohortLoanee) throws MeedlException {
         for (LoaneeLoanBreakdown loanBreakdown : loaneeLoanBreakdowns){
             loanBreakdown.validate();
             MeedlValidator.validateObjectInstance(loanBreakdown, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
-            loanBreakdown.setLoanee(loanee);
+            loanBreakdown.setCohortLoanee(cohortLoanee);
         }
         List<LoaneeLoanBreakdownEntity> loanBreakdownEntities =
                 loaneeLoanBreakDownMapper.toLoaneeLoanBreakdownEntities(loaneeLoanBreakdowns);
         loanBreakdownEntities = loaneeLoanBreakDownRepository.saveAll(loanBreakdownEntities);
-        log.info("Saved all loanee loan break down for loanee : {}", loanee.getUserIdentity().getEmail());
+        log.info("Saved all loanee loan break down for loanee : {}", cohortLoanee.getLoanee().getUserIdentity().getEmail());
         return loaneeLoanBreakDownMapper.toLoaneeLoanBreakdown(loanBreakdownEntities);
     }
 
@@ -53,7 +55,7 @@ public class LoaneeLoanBreakDownPersistenceAdapter implements LoaneeLoanBreakDow
     public List<LoaneeLoanBreakdown> findAllLoaneeLoanBreakDownByLoaneeId(String loaneeId) throws MeedlException {
         MeedlValidator.validateUUID(loaneeId, LoanMessages.INVALID_LOAN_ID.getMessage());
         List<LoaneeLoanBreakdownEntity> loanBreakdownEntities =
-                loaneeLoanBreakDownRepository.findAllByLoaneeId(loaneeId);
+                loaneeLoanBreakDownRepository.findAllByCohortLoanee_LoaneeId(loaneeId);
         return loaneeLoanBreakDownMapper.toLoaneeLoanBreakdown(loanBreakdownEntities);
     }
 }

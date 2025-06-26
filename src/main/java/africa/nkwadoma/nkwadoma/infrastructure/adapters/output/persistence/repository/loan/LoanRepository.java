@@ -13,10 +13,10 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
                  le.id as id, l.id as loaneeId, l.userIdentity.firstName as firstName, l.userIdentity.lastName as lastName, l.userIdentity.email as email,
                  l.userIdentity.phoneNumber as phoneNumber, l.userIdentity.alternateContactAddress as alternateContactAddress,
                  l.userIdentity.alternateEmail as alternateEmail, l.userIdentity.alternatePhoneNumber as alternatePhoneNumber, o.name as referredBy,
-                 l.loaneeLoanDetail.initialDeposit as initialDeposit, c.startDate as cohortStartDate, c.tuitionAmount as tuitionAmount, c.name as cohortName, l.userIdentity.image as loaneeImage,
+                 cle.loaneeLoanDetail.initialDeposit as initialDeposit, c.startDate as cohortStartDate, c.tuitionAmount as tuitionAmount, c.name as cohortName, l.userIdentity.image as loaneeImage,
                  p.name as programName, n.id as nextOfKinId, n.firstName as nextOfKinFirstName, n.lastName as nextOfKinLastName, n.contactAddress as nextOfKinContactAddress,
                  n.email as nextOfKinEmail, n.phoneNumber as nextOfKinPhoneNumber, n.nextOfKinRelationship as nextOfKinRelationship,
-                 l.loaneeLoanDetail.amountRequested as loanAmountRequested, lr.createdDate as createdDate, lr.status as status,
+                 cle.loaneeLoanDetail.amountRequested as loanAmountRequested, lr.createdDate as createdDate, lr.status as status,
                  l.userIdentity.gender as gender, l.userIdentity.maritalStatus as maritalStatus,
                  l.userIdentity.dateOfBirth as dateOfBirth, l.userIdentity.residentialAddress as residentialAddress, l.userIdentity.nationality as nationality,
                  l.userIdentity.stateOfOrigin as stateOfOrigin, l.userIdentity.stateOfResidence as stateOfResidence
@@ -26,7 +26,8 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           join UserEntity  u on l.userIdentity.id = u.id
           join LoanRequestEntity lr on lr.loaneeEntity.id = l.id
           join LoanOfferEntity loe on l.id = loe.loanee.id
-          join CohortEntity c on l.cohortId = c.id
+          join CohortLoaneeEntity cle on cle.loanee.id = l.id
+          join CohortEntity c on cle.cohort.id = c.id
           join ProgramEntity p on c.programId = p.id
           left join NextOfKinEntity n on u.nextOfKinEntity.id = n.id
           join OrganizationEntity o on p.organizationIdentity.id = o.id
@@ -40,16 +41,17 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           le.startDate as startDate,
           l.userIdentity.firstName as firstName,
           l.userIdentity.lastName as lastName,
-          l.loaneeLoanDetail.initialDeposit as initialDeposit,
+          cle.loaneeLoanDetail.initialDeposit as initialDeposit,
           lr.createdDate as createdDate, lr.loanAmountRequested as loanAmountRequested,
           c.name as cohortName, c.startDate as cohortStartDate, loe.dateTimeOffered as offerDate,
           p.name as programName
     
           from LoanEntity le
           join LoaneeEntity l on le.loaneeEntity.id = l.id
+               join CohortLoaneeEntity cle on cle.loanee.id = l.id
+          join CohortEntity c on cle.cohort.id = c.id
           join LoanRequestEntity lr on lr.loaneeEntity.id = l.id
           join LoanOfferEntity loe on l.id = loe.loanee.id
-          join CohortEntity c on l.cohortId = c.id
           join ProgramEntity p on c.programId = p.id
           join OrganizationEntity o on p.organizationIdentity.id = o.id
     
@@ -65,16 +67,16 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
            u.firstName AS firstName,
            u.lastName AS lastName,
            lof.dateTimeOffered AS offerDate,
-           l.loaneeLoanDetail.amountRequested AS loanAmountRequested,
-           l.loaneeLoanDetail.initialDeposit AS initialDeposit,
+           cle.loaneeLoanDetail.amountRequested AS loanAmountRequested,
+           cle.loaneeLoanDetail.initialDeposit AS initialDeposit,
            c.name AS cohortName,
            p.name AS programName
     
     FROM LoanEntity lo
     JOIN lo.loaneeEntity l
     JOIN l.userIdentity u
-    JOIN CohortEntity c ON c.id = l.cohortId
-    JOIN ProgramEntity p ON p.id = c.programId
+ join CohortLoaneeEntity cle on cle.loanee.id = l.id
+          join CohortEntity c on cle.cohort.id = c.id    JOIN ProgramEntity p ON p.id = c.programId
         JOIN LoanOfferEntity lof ON lof.loanee.id = l.id
     WHERE 
         (LOWER(u.firstName) LIKE LOWER(CONCAT('%', :name, '%'))
@@ -92,7 +94,7 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           le.startDate as startDate,
           l.userIdentity.firstName as firstName,
           l.userIdentity.lastName as lastName,
-          l.loaneeLoanDetail.initialDeposit as initialDeposit,
+          cle.loaneeLoanDetail.initialDeposit as initialDeposit,
           lr.createdDate as createdDate, lr.loanAmountRequested as loanAmountRequested,
           c.name as cohortName, c.startDate as cohortStartDate, loe.dateTimeOffered as offerDate,
           p.name as programName
@@ -101,7 +103,8 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           join LoaneeEntity l on le.loaneeEntity.id = l.id
           join LoanRequestEntity lr on lr.loaneeEntity.id = l.id
           join LoanOfferEntity loe on l.id = loe.loanee.id
-          join CohortEntity c on l.cohortId = c.id
+            join CohortLoaneeEntity cle on cle.loanee.id = l.id
+          join CohortEntity c on cle.cohort.id = c.id
           join ProgramEntity p on c.programId = p.id
           join OrganizationEntity o on p.organizationIdentity.id = o.id
     """)
@@ -113,15 +116,16 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
            u.firstName AS firstName,
            u.lastName AS lastName,
            lof.dateTimeOffered AS offerDate,
-           l.loaneeLoanDetail.amountRequested AS loanAmountRequested,
-           l.loaneeLoanDetail.initialDeposit AS initialDeposit,
+           cle.loaneeLoanDetail.amountRequested AS loanAmountRequested,
+           cle.loaneeLoanDetail.initialDeposit AS initialDeposit,
            c.name AS cohortName,
            p.name AS programName
     
     FROM LoanEntity lo
     JOIN lo.loaneeEntity l
     JOIN l.userIdentity u
-    JOIN CohortEntity c ON c.id = l.cohortId
+      join CohortLoaneeEntity cle on cle.loanee.id = l.id
+          join CohortEntity c on cle.cohort.id = c.id
     JOIN ProgramEntity p ON p.id = c.programId
         JOIN LoanOfferEntity lof ON lof.loanee.id = l.id
     WHERE

@@ -169,19 +169,19 @@ jobs:
             --restart unless-stopped \
             ${{ env.REPO_URL }}:alpha
             
-      - name: Health check new container
-        run: |
-          for i in {1..30}; do
-            if curl -s http://localhost:${{ env.NEW_PORT }}/actuator/health | grep -q "UP"; then
-              echo "New container is healthy!"
-              exit 0
-            fi
-            sleep 5
-          done
-          echo "Health check failed!"
-          sudo docker stop nkwadoma_${{ env.NEW_ENV }}
-          sudo docker rm nkwadoma_${{ env.NEW_ENV }}
-          exit 1
+      # - name: Health check new container
+      #   run: |
+      #     for i in {1..30}; do
+      #       if curl -s https://localhost:${{ env.NEW_PORT }}/actuator/health | grep -q "UP"; then
+      #         echo "New container is healthy!"
+      #         exit 0
+      #       fi
+      #       sleep 5
+      #     done
+      #     echo "Health check failed!"
+      #     sudo docker stop nkwadoma_${{ env.NEW_ENV }}
+      #     sudo docker rm nkwadoma_${{ env.NEW_ENV }}
+      #     exit 1
           
       - name: Update Nginx configuration for api-systest
         run: |

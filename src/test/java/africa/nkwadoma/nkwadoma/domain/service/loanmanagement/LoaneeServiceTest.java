@@ -102,6 +102,8 @@ class LoaneeServiceTest {
     private AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
     @Mock
     private LoanOfferOutputPort loanOfferOutputPort;
+    @Mock
+    private CohortLoaneeOutputPort cohortLoaneeOutputPort;
 
     private int pageSize = 2;
     private int pageNumber = 1;
@@ -121,6 +123,7 @@ class LoaneeServiceTest {
     private DeferProgramRequest deferProgramRequest;
     private String userId = "2bc2ef97-1035-5e42-bc8b-22a90b809f8d";
     private Loanee cohortLoanee;
+    private CohortLoanee loaneeCohort;
     private String reasonForDeferral = "My head no carry coding again";
     private LoanOffer loanOffer;
 
@@ -208,18 +211,24 @@ class LoaneeServiceTest {
         loanOffer.setId(mockId);
         loanOffer.setLoanProduct(loanProduct);
 
+        loaneeCohort = TestData.buildCohortLoanee(firstLoanee,elites,loaneeLoanDetails,mockId);
     }
 
     @Test
-    void addLoaneeToCohort() throws MeedlException {
+    void addNewLoaneeToCohort() throws MeedlException {
         OrganizationEmployeeIdentity mockEmployeeIdentity = new OrganizationEmployeeIdentity();
         mockEmployeeIdentity.setId(mockId);
         when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
+        when(loaneeOutputPort.findByLoaneeEmail(userIdentity.getEmail())).thenReturn(null);
+        firstLoanee.getUserIdentity().setRole(IdentityRole.LOANEE);
+        firstLoanee.setActivationStatus(ActivationStatus.ACTIVE);
         when(loaneeLoanDetailsOutputPort.save(any())).thenReturn(loaneeLoanDetails);
         when(identityManagerOutputPort.getUserByEmail(anyString())).thenReturn(Optional.empty());
         when(identityManagerOutputPort.createUser(userIdentity)).thenReturn(userIdentity);
         when(userIdentityOutputPort.save(userIdentity)).thenReturn(userIdentity);
         when(loaneeOutputPort.save(any())).thenReturn(firstLoanee);
+        when(cohortLoaneeOutputPort.save(any())).thenReturn(loaneeCohort);
+
         when(cohortOutputPort.save(any())).thenReturn(elites);
         when(programOutputPort.findProgramById(any())).thenReturn(atlasProgram);
         when(programOutputPort.saveProgram(any())).thenReturn(atlasProgram);
@@ -269,12 +278,6 @@ class LoaneeServiceTest {
         assertThrows(MeedlException.class, () -> loaneeService.addLoaneeToCohort(firstLoanee));
     }
 
-
-    @Test
-    void cannotAddLoaneeToACohortWithExistingLoaneeEmail() throws MeedlException {
-        when(loaneeOutputPort.findByLoaneeEmail(userIdentity.getEmail())).thenReturn(firstLoanee);
-        assertThrows(MeedlException.class, () -> loaneeService.addLoaneeToCohort(firstLoanee));
-    }
 
     @Test
     void viewAllLoaneeInCohort() throws MeedlException {
