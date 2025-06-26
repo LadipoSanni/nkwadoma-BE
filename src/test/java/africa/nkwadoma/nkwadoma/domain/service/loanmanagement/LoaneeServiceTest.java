@@ -309,6 +309,7 @@ class LoaneeServiceTest {
     @Test
     void referTrainee() throws MeedlException {
         try{
+            loaneeCohort.setId(mockId);
             loaneeCohort.setLoaneeStatus(LoaneeStatus.ADDED);
             loaneeCohort.setOnboardingMode(OnboardingMode.EMAIL_REFERRED);
             when(organizationIdentityOutputPort.findOrganizationByCohortId(any())).thenReturn(organizationIdentity);
@@ -320,20 +321,19 @@ class LoaneeServiceTest {
             loanReferral.setCohortLoanee(loaneeCohort);
             loanReferral.setLoanReferralStatus(LoanReferralStatus.PENDING);
 
-            when(loanReferralOutputPort.save(loanReferral)).thenReturn(loanReferral);
+            when(loanReferralOutputPort.save(any())).thenReturn(loanReferral);
 
-            when(cohortOutputPort.findCohort(firstLoanee.getCohortId())).thenReturn(elites);
-            when(loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(firstLoanee.getId())).thenReturn(List.of(loanBreakdown));
-            when(organizationEmployeeIdentityOutputPort.findByEmployeeId(any()))
-                    .thenReturn(organizationEmployeeIdentity);
-            when(organizationIdentityOutputPort.findById(mockId)).
-                    thenReturn(organizationIdentity);
-            when(loaneeOutputPort.save(firstLoanee)).thenReturn(firstLoanee);
-            when(cohortOutputPort.save(elites)).thenReturn(elites);
-            when(loanReferralOutputPort.createLoanReferral(firstLoanee)).thenReturn(loanReferral);
-            when(loanMetricsOutputPort.findByOrganizationId(organizationEmployeeIdentity.getOrganization()))
-                    .thenReturn(Optional.of(new LoanMetrics()));
-            when(loanMetricsOutputPort.save(any())).thenReturn(new LoanMetrics());
+            when(cohortOutputPort.save(loaneeCohort.getCohort())).thenReturn(elites);
+
+            LoanMetrics loanMetrics = LoanMetrics.builder().build();
+
+            when(loanMetricsOutputPort.findByOrganizationId(anyString())).
+                    thenReturn(Optional.of(loanMetrics));
+
+            when(loanMetricsOutputPort.save(loanMetrics)).thenReturn(loanMetrics);
+
+            when(loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(loaneeCohort.getId())).thenReturn(List.of(loanBreakdown));
+
             LoanReferral loanReferral = loaneeService.referLoanee(loaneeCohort);
             assertEquals(loanReferral.getCohortLoanee().getLoanee().getUserIdentity().getFirstName()
                     , firstLoanee.getUserIdentity().getFirstName());
@@ -353,7 +353,7 @@ class LoaneeServiceTest {
             when(organizationIdentityOutputPort.findOrganizationByCohortId(any())).thenReturn(organizationIdentity);
 
             when(loanReferralOutputPort.findLoanReferralByLoaneeIdAndCohortId(loaneeCohort.getLoanee().getId()
-                    ,loaneeCohort.getCohort().getId())).thenReturn(null);
+                    ,loaneeCohort.getCohort().getId())).thenReturn(loanReferral);
 
         }catch (MeedlException exception){
             log.error("{} {}", exception.getClass().getName(), exception.getMessage());

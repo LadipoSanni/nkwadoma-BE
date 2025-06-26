@@ -84,7 +84,7 @@ public class CohortLoaneePersistenceAdapter implements CohortLoaneeOutputPort {
     @Override
     public boolean checkIfLoaneeHasBeenPreviouslyReferred(String loaneeId) throws MeedlException {
         MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
-//        return cohortLoaneeRepository.;
-        return true;
+        Long count = cohortLoaneeRepository.countByLoaneeId(loaneeId);
+        return count > 1;
     }
 }

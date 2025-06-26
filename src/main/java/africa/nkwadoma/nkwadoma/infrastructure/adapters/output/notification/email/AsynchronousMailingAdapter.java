@@ -63,6 +63,7 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
                 .user(loanee.getUserIdentity())
                 .title("Loan Referral")
                 .notificationFlag(NotificationFlag.LOAN_REFERRAL)
+                .contentDetail("Loan Referral sent")
                 .timestamp(LocalDateTime.now())
                 .senderMail(userIdentity.getEmail())
                 .senderFullName(userIdentity.getFirstName()+" "+ userIdentity.getLastName())

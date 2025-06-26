@@ -20,4 +20,6 @@ public interface CohortLoaneeRepository extends JpaRepository<CohortLoaneeEntity
     """)
     List<CohortLoaneeEntity> findAllCohortLoaneeEntityBy_CohortIdAnd_ListOfLoaneeId(@Param("cohortId") String cohortId,
                                                                                     @Param("loaneeIds") List<String> loaneeIds);
+
+    Long countByLoaneeId(String loaneeId);
 }
