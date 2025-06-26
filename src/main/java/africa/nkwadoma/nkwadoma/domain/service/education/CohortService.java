@@ -22,6 +22,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.CohortLoanDetailMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.CohortMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +58,8 @@ public class CohortService implements CohortUseCase {
     private final LoaneeUseCase loaneeUseCase;
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
+    private final CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
+    private final CohortLoanDetailMapper cohortLoanDetailMapper;
 
     @Override
     public Cohort createCohort(Cohort cohort) throws MeedlException {
@@ -84,6 +87,10 @@ public class CohortService implements CohortUseCase {
         savedCohort.setProgramName(program.getName());
         updateNumberOfCohortInOrganization(program.getOrganizationId());
 
+        CohortLoanDetail cohortLoanDetail = CohortLoanDetail.builder()
+                .cohort(savedCohort)
+                .build();
+        cohortLoanDetailOutputPort.save(cohortLoanDetail);
         return savedCohort;
     }
 
