@@ -209,22 +209,16 @@ class LoaneePersistenceAdapterTest {
     @Order(3)
     @Test
     void findAllLoanee(){
-        // Todo
-        // Would change to find all loanee and move find all loanee in a chort to another place
-
-        Loanee cohortLoanee = Loanee.builder()
-                .cohortId(firstLoanee.getCohortId())
-                .loaneeStatus(null)
-                .loanStatus(null)
-                .build();
         Page<Loanee> loanees = Page.empty();
+        pageSize = 10;
+        pageNumber = 0;
         try {
-            loanees = loaneeOutputPort.findAllLoaneeByCohortId(cohortLoanee,pageSize,pageNumber);
+            loanees = loaneeOutputPort.findAllLoanee(pageSize,pageNumber);
             log.info("------> The loanees -----> {}", loanees.getContent());
         }catch (MeedlException exception){
             log.error(exception.getMessage());
         }
-        assertEquals(0,loanees.toList().size());
+        assertEquals(2,loanees.toList().size());
     }
 
     @Order(4)
