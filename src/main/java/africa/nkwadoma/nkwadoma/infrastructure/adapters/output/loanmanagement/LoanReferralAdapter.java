@@ -28,6 +28,7 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
     @Override
     public LoanReferral save(LoanReferral loanReferral) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanReferral, "Loan referral cannot be empty.");
+        loanReferral.validateForCreate();
         LoanReferralEntity loanReferralEntity = loanReferralMapper.toLoanReferralEntity(loanReferral);
         LoanReferralEntity savedLoanReferralEntity = loanReferralRepository.save(loanReferralEntity);
         return loanReferralMapper.toLoanReferral(savedLoanReferralEntity);
@@ -84,7 +85,7 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
     @Override
     public List<LoanReferral> findLoanReferralByUserId(String userId) throws MeedlException {
         MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
-        List<LoanReferralEntity> loanReferralEntities = loanReferralRepository.findAllByLoaneeEntityUserIdentityId(userId);
+        List<LoanReferralEntity> loanReferralEntities = loanReferralRepository.findAllByCohortLoanee_Loanee_UserIdentity_id(userId);
         return loanReferralMapper.toLoanReferrals(loanReferralEntities);
     }
 
@@ -107,10 +108,20 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
 
     @Override
     public LoanReferral findByEmail(String loaneeEmail) throws MeedlException {
-        LoanReferralEntity loanReferral = loanReferralRepository.findByLoaneeEntity_UserIdentity_Email(loaneeEmail)
+        LoanReferralEntity loanReferral = loanReferralRepository.findAllByCohortLoanee_Loanee_UserIdentity_Email(loaneeEmail)
                 .orElseThrow(()-> new MeedlException("Loan referral not found by loanee email: "+loaneeEmail));
         log.info("Loan referral entity found {}",loanReferral);
         return loanReferralMapper.toLoanReferral(loanReferral);
+    }
+
+    @Override
+    public LoanReferral findLoanReferralByCohortLoaneeId(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id,"Cohort loanee id cannot be empty");
+
+        LoanReferralEntity loanReferralEntity = loanReferralRepository.findLoanReferralByCohortLoaneeId(id)
+                .orElseThrow(() -> new LoanException("Loan referral not found for cohort loanee id: "+id));
+        log.info("Loan referral entity found {}",loanReferralEntity);
+        return loanReferralMapper.toLoanReferral(loanReferralEntity);
     }
 }
 

@@ -20,6 +20,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.CohortLoanDetailMapper;
@@ -41,6 +42,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.LOANEE_HAS_BEEN_REFERED;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -60,6 +62,7 @@ public class CohortService implements CohortUseCase {
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
     private final CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
     private final CohortLoanDetailMapper cohortLoanDetailMapper;
+    private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
 
     @Override
     public Cohort createCohort(Cohort cohort) throws MeedlException {
@@ -270,41 +273,46 @@ public class CohortService implements CohortUseCase {
 
     @Override
     public String inviteCohort(String userId, String cohortId, List<String> loaneeIds) throws MeedlException {
-        Cohort foundCohort = viewCohortDetails(userId,cohortId);
-        List<Loanee> cohortLoanees = loaneeOutputPort.findSelectedLoaneesInCohort(foundCohort.getId(), loaneeIds);
+
+        UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
+
+        Cohort foundCohort = cohortOutputPort.findCohort(cohortId);
+        List<CohortLoanee> cohortLoanees = cohortLoaneeOutputPort.findSelectedLoaneesInCohort(foundCohort.getId(), loaneeIds);
         if (cohortLoanees == null || cohortLoanees.isEmpty()){
             log.info("Loanee(s) selected is/are not referable.");
             throw new EducationException("Loanee(s) selected is/are not referable.");
         }
         if (cohortLoanees.size() == 1){
-            inviteTrainee(cohortLoanees.get(0));
-            asynchronousMailingOutputPort.notifyLoanReferralActors(cohortLoanees);
+           inviteTrainee(cohortLoanees.get(0));
+            asynchronousMailingOutputPort.notifyLoanReferralActors(List.of(cohortLoanees.get(0).getLoanee()),
+                    userIdentity);
 //            loaneeUseCase.notifyLoanReferralActors(cohortLoanees);
             return LOANEE_HAS_BEEN_REFERED;
         }
         referCohort(cohortLoanees);
         log.info("Number of referable loanees :{} ", cohortLoanees.size());
-        asynchronousMailingOutputPort.notifyLoanReferralActors(cohortLoanees);
+        List<Loanee> loanees = cohortLoanees.stream().map(CohortLoanee::getLoanee).toList();
+        asynchronousMailingOutputPort.notifyLoanReferralActors(loanees,userIdentity);
 //        loaneeUseCase.notifyLoanReferralActors(cohortLoanees);
         return COHORT_INVITED;
     }
 
-    public void referCohort(List<Loanee> cohortLoanees) {
-        Iterator<Loanee> iterator = cohortLoanees.iterator();
+    public void referCohort(List<CohortLoanee> cohortLoanees) {
+        Iterator<CohortLoanee> iterator = cohortLoanees.iterator();
         while (iterator.hasNext()) {
-            Loanee loanee = iterator.next();
+            CohortLoanee cohortLoanee = iterator.next();
             try {
-                inviteTrainee(loanee);
+                inviteTrainee(cohortLoanee);
             } catch (MeedlException e) {
-                log.error("Failed to invite trainee with id: {}", loanee.getId(), e);
+                log.error("Failed to invite trainee with id: {}", cohortLoanee.getId(), e);
                 iterator.remove();
             }
         }
     }
 
-    private void inviteTrainee (Loanee loanee) throws MeedlException {
+    private void inviteTrainee (CohortLoanee cohortLoanee) throws MeedlException {
         log.info("Single loanee is being referred...");
-        loaneeUseCase.referLoanee(loanee);
+         loaneeUseCase.referLoanee(cohortLoanee);
     }
 
 }

@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanee.UploadedStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeDeferRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeRequest;
@@ -105,9 +106,9 @@ public class LoaneeController {
             ) throws MeedlException {
         Loanee loanee = Loanee.builder().cohortId(cohortId).loaneeStatus(loaneeStatus)
                 .loanStatus(loanStatus).uploadedStatus(uploadedStatus).build();
-        Page<Loanee> loanees = loaneeUseCase.viewAllLoaneeInCohort(loanee, pageSize, pageNumber);
+        Page<CohortLoanee> loanees = loaneeUseCase.viewAllLoaneeInCohort(loanee, pageSize, pageNumber);
         List<LoaneeResponse> loaneeResponses = loanees.stream()
-                .map(loaneeRestMapper::toLoaneeResponse).toList();
+                .map(loaneeRestMapper::mapToLoaneeResponse).toList();
         PaginatedResponse<LoaneeResponse> paginatedResponse = new PaginatedResponse<>(
                 loaneeResponses, loanees.hasNext(),
                 loanees.getTotalPages(),loanees.getTotalElements() , pageNumber, pageSize

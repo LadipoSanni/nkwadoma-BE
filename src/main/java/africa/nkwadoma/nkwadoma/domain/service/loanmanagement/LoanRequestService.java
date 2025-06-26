@@ -67,7 +67,7 @@ public class LoanRequestService implements LoanRequestUseCase {
         loanRequest = loanRequestOutputPort.findById(loanRequest.getId());
         log.info("Found loan request: {}", loanRequest);
         List<LoaneeLoanBreakdown> loaneeLoanBreakdowns =
-                loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByLoaneeId(loanRequest.getLoaneeId());
+                loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(loanRequest.getLoaneeId());
         log.info("Loanee loan breakdowns by loanee with ID: {}: {}", loanRequest.getLoaneeId(), loaneeLoanBreakdowns);
         Loanee loanee = new Loanee();
         try {

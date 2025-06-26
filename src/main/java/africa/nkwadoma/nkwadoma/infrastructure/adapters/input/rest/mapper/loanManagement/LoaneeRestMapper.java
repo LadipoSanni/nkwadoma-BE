@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loanManagement;
 
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanBreakdown;
@@ -73,4 +74,11 @@ public interface LoaneeRestMapper {
     Loanee map(String id, @Context String createdBy);
 
     List<Loanee> map(List<String> ids, @Context String createdBy);
+
+    
+    
+    @Mapping(target = "userIdentity", source = "loanee.userIdentity")
+    @Mapping(target = "cohortId", source = "cohort.id")
+    @Mapping(target = "id", source = "loanee.id")
+    LoaneeResponse mapToLoaneeResponse(CohortLoanee cohortLoanee);
 }

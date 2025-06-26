@@ -1,12 +1,10 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanBreakDownOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
-import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoaneeLoanBreakdownEntity;
@@ -52,10 +50,11 @@ public class LoaneeLoanBreakDownPersistenceAdapter implements LoaneeLoanBreakDow
     }
 
     @Override
-    public List<LoaneeLoanBreakdown> findAllLoaneeLoanBreakDownByLoaneeId(String loaneeId) throws MeedlException {
-        MeedlValidator.validateUUID(loaneeId, LoanMessages.INVALID_LOAN_ID.getMessage());
+    public List<LoaneeLoanBreakdown> findAllLoaneeLoanBreakDownByCohortLoaneeId(String cohortLoaneeId) throws MeedlException {
+        MeedlValidator.validateUUID(cohortLoaneeId, CohortMessages.COHORT_LOANEE_ID_CANNOT_BE_EMPTY.getMessage());
         List<LoaneeLoanBreakdownEntity> loanBreakdownEntities =
-                loaneeLoanBreakDownRepository.findAllByCohortLoanee_LoaneeId(loaneeId);
+                loaneeLoanBreakDownRepository.findAllByCohortLoaneeId(cohortLoaneeId);
+        log.info("Found loanee loan breakdown = = {} ", loanBreakdownEntities.size());
         return loaneeLoanBreakDownMapper.toLoaneeLoanBreakdown(loanBreakdownEntities);
     }
 }

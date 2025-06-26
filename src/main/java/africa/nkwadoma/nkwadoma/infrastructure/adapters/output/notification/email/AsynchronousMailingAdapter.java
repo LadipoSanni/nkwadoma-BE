@@ -5,20 +5,25 @@ import africa.nkwadoma.nkwadoma.application.ports.input.notification.LoaneeEmail
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlnotification.MeedlNotificationUsecase;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -31,19 +36,43 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
     private final SendColleagueEmailUseCase sendEmail;
     private final MeedlNotificationUsecase meedlNotificationUsecase;
     private final OrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
+    private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
+    private final MeedlNotificationOutputPort meedlNotificationOutputPort;
 
     @Async
     @Override
-    public void notifyLoanReferralActors(List<Loanee> loanees){
+    public void notifyLoanReferralActors(List<Loanee> loanees,UserIdentity userIdentity){
         loanees.forEach(loanee -> {
             try {
-                refer(loanee);
+
+                boolean previoslyReferred = cohortLoaneeOutputPort.checkIfLoaneeHasBeenPreviouslyReferred(loanee.getId());
+                if (previoslyReferred){
+                    sendNotification(userIdentity, loanee);
+                }else {
+                    refer(loanee);
+                }
                 notifyAllPortfolioManager();
             } catch (MeedlException e) {
                 log.warn("Error sending actor email on loan referral {}", e.getMessage());
             }
         });
     }
+
+    private void sendNotification(UserIdentity userIdentity, Loanee loanee) throws MeedlException {
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .user(loanee.getUserIdentity())
+                .title("Loan Referral")
+                .notificationFlag(NotificationFlag.LOAN_REFERRAL)
+                .contentDetail("Loan Referral sent")
+                .timestamp(LocalDateTime.now())
+                .senderMail(userIdentity.getEmail())
+                .senderFullName(userIdentity.getFirstName()+" "+ userIdentity.getLastName())
+                .callToAction(true)
+                .contentId(loanee.getLoanReferralId())
+                .build();
+        meedlNotificationOutputPort.save(meedlNotification);
+    }
+
     private void notifyAllPortfolioManager() throws MeedlException {
         for (UserIdentity userIdentity : userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER)) {
             notifyPortfolioManager(userIdentity);

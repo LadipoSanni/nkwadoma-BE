@@ -24,6 +24,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
@@ -334,9 +335,9 @@ public class LoaneeService implements LoaneeUseCase {
     }
 
     @Override
-    public Page<Loanee> viewAllLoaneeInCohort(Loanee loanee, int pageSize, int pageNumber) throws MeedlException {
+    public Page<CohortLoanee> viewAllLoaneeInCohort(Loanee loanee, int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validateUUID(loanee.getCohortId(), CohortMessages.INVALID_COHORT_ID.getMessage());
-        return loaneeOutputPort.findAllLoaneeByCohortId(loanee, pageSize, pageNumber);
+        return cohortLoaneeOutputPort.findAllLoaneeInCohort(loanee,pageSize,pageNumber);
     }
 
     private LoaneeLoanDetail saveLoaneeLoanDetails(LoaneeLoanDetail loaneeLoanDetail) throws MeedlException {
@@ -345,44 +346,56 @@ public class LoaneeService implements LoaneeUseCase {
     }
 
     @Override
-    public LoanReferral referLoanee(Loanee loanee) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateUUID(loanee.getId(), LoaneeMessages.INVALID_LOANEE_ID.getMessage());
-        MeedlValidator.validateUUID(loanee.getCohortId(), CohortMessages.INVALID_COHORT_ID.getMessage());
-        MeedlValidator.validateObjectInstance(loanee.getOnboardingMode(), LoaneeMessages.INVALID_ONBOARDING_MODE.getMessage());
+    public LoanReferral referLoanee(CohortLoanee cohortLoanee) throws MeedlException {
+        MeedlValidator.validateObjectInstance(cohortLoanee, CohortMessages.COHORT_LOANEE_CANNOT_BE_NULL.getMessage());
+        MeedlValidator.validateObjectInstance(cohortLoanee.getLoanee(), LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectInstance(cohortLoanee.getCohort(), CohortMessages.COHORT_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectInstance(cohortLoanee.getOnboardingMode(), LoaneeMessages.INVALID_ONBOARDING_MODE.getMessage());
 
         OrganizationIdentity organizationIdentity = null;
-        if (loanee.getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)){
-            organizationIdentity = getLoaneeOrganization(loanee.getCohortId());
+        if (cohortLoanee.getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)){
+            organizationIdentity = getLoaneeOrganization(cohortLoanee.getCohort().getId());
         }else {
-            organizationIdentity = getLoaneeOrganization(loanee);
+            organizationIdentity = getLoaneeOrganization(cohortLoanee.getCohort().getId());
         }
-        checkIfLoaneeHasBeenReferredInTheSameCohort(loanee);
-        return referLoanee(loanee, organizationIdentity);
+        checkIfLoaneeHasBeenReferredInTheSameCohort(cohortLoanee);
+        return referLoanee(cohortLoanee, organizationIdentity);
     }
 
-    private LoanReferral referLoanee(Loanee loanee, OrganizationIdentity organizationIdentity) throws MeedlException {
-        loanee.setReferredBy(organizationIdentity.getName());
-        updateLoaneeReferralDetail(loanee);
-        log.info("referred by {}", loanee.getReferredBy());
-        LoanReferral loanReferral = loanReferralOutputPort.createLoanReferral(loanee);
-        Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
-        cohort.setNumberOfReferredLoanee(cohort.getNumberOfReferredLoanee() + 1);
-        cohortOutputPort.save(cohort);
+    private LoanReferral referLoanee(CohortLoanee cohortLoanee, OrganizationIdentity organizationIdentity) throws MeedlException {
+        cohortLoanee.setReferredBy(organizationIdentity.getName());
+        updateLoaneeReferralDetail(cohortLoanee);
+        log.info("referred by {}", cohortLoanee.getReferredBy());
+
+        LoanReferral loanReferral = buildLoanReferral(cohortLoanee);
+
+        cohortLoanee.getCohort().setNumberOfReferredLoanee(cohortLoanee.getCohort().getNumberOfReferredLoanee() + 1);
+        cohortOutputPort.save(cohortLoanee.getCohort());
         Optional<LoanMetrics> loanMetrics = updateLoanMetrics(organizationIdentity);
         log.info("Loan metrics saved: {}", loanMetrics);
         List<LoaneeLoanBreakdown> loanBreakdowns =
-                loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByLoaneeId(loanee.getId());
-        loanReferral.getLoanee().setLoanBreakdowns(loanBreakdowns);
+                loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(cohortLoanee.getId());
+
+        cohortLoanee.getLoanee().setLoanBreakdowns(loanBreakdowns);
+        cohortLoanee.getLoanee().setLoanReferralId(loanReferral.getId());
+        loanReferral.setLoanee(cohortLoanee.getLoanee());
         log.info("loan referral org == {}", loanReferral.getLoanee().getReferredBy());
         return loanReferral;
     }
 
-    private void updateLoaneeReferralDetail(Loanee loanee) throws MeedlException {
-        loanee.setLoaneeStatus(LoaneeStatus.REFERRED);
-        loanee.setReferralDateTime(LocalDateTime.now());
-        loaneeOutputPort.save(loanee);
-        log.info("saved loanee referred by {}", loanee.getReferredBy());
+    private LoanReferral buildLoanReferral(CohortLoanee cohortLoanee) throws MeedlException {
+        LoanReferral loanReferral = LoanReferral.builder().cohortLoanee(cohortLoanee)
+                .loanReferralStatus(LoanReferralStatus.PENDING).build();
+        loanReferral.validateForCreate();
+        loanReferral = loanReferralOutputPort.save(loanReferral);
+        return loanReferral;
+    }
+
+    private void updateLoaneeReferralDetail(CohortLoanee cohortLoanee) throws MeedlException {
+        cohortLoanee.setLoaneeStatus(LoaneeStatus.REFERRED);
+        cohortLoanee.setReferralDateTime(LocalDateTime.now());
+        cohortLoaneeOutputPort.save(cohortLoanee);
+        log.info("saved loanee referred by {}", cohortLoanee.getReferredBy());
     }
 
     private Optional<LoanMetrics> updateLoanMetrics(OrganizationIdentity organizationIdentity) throws MeedlException {
@@ -399,10 +412,11 @@ public class LoaneeService implements LoaneeUseCase {
         return loanMetrics;
     }
 
-    private void checkIfLoaneeHasBeenReferredInTheSameCohort(Loanee loanee) throws MeedlException {
-        checkLoaneeStatus(loanee);
+    private void checkIfLoaneeHasBeenReferredInTheSameCohort(CohortLoanee cohortLoanee) throws MeedlException {
+        checkLoaneeStatus(cohortLoanee);
         LoanReferral loanReferral =
-                loanReferralOutputPort.findLoanReferralByLoaneeIdAndCohortId(loanee.getId(),loanee.getCohortId());
+                loanReferralOutputPort.findLoanReferralByLoaneeIdAndCohortId(cohortLoanee.getLoanee().getId(),
+                        cohortLoanee.getCohort().getId());
         if (ObjectUtils.isNotEmpty(loanReferral)) {
             log.error("Loanee has been referred to this cohort before with error: {} ", LoaneeMessages.LOANEE_HAS_BEEN_REFERRED_BEFORE.getMessage());
             throw new LoanException(LoaneeMessages.LOANEE_HAS_BEEN_REFERRED_BEFORE.getMessage());
@@ -440,14 +454,14 @@ public class LoaneeService implements LoaneeUseCase {
         return loaneeOutputPort.searchForLoaneeInCohort(loanee, pageSize, pageNumber);
     }
 
-    private void checkLoaneeStatus(Loanee loanee) throws MeedlException {
+    private void checkLoaneeStatus(CohortLoanee cohortLoanee) throws MeedlException {
 //        Loanee loanee;
 //        List<Loanee> loanees = loaneeOutputPort.findAllLoaneesByCohortId(cohort.getId());
 //        loanee = loanees.stream().filter(eachLoanee -> eachLoanee.getId().equals(loaneeId)).findFirst()
 //                .orElseThrow(()-> new LoaneeException(LoaneeMessages.LOANEE_MUST_BE_ADDED_TO_COHORT.getMessage()));
-        if (loanee.getLoaneeStatus().equals(LoaneeStatus.REFERRED)){
+        if (cohortLoanee.getLoaneeStatus().equals(LoaneeStatus.REFERRED)){
             throw new LoanException(LoaneeMessages.LOANEE_HAS_BEEN_REFERRED.getMessage());
-        }else if (!loanee.getLoaneeStatus().equals(LoaneeStatus.ADDED)){
+        }else if (!cohortLoanee.getLoaneeStatus().equals(LoaneeStatus.ADDED)){
             throw new LoanException(LoaneeMessages.LOANEE_MUST_BE_ADDED_TO_COHORT.getMessage());
         }
     }

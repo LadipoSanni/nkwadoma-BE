@@ -653,4 +653,9 @@ public class TestData {
                 .build();
     }
 
+    public static LoanReferral buildLoanReferral(CohortLoanee cohortLoanee,LoanReferralStatus loanReferralStatus) {
+        return LoanReferral.builder().loanReferralStatus(loanReferralStatus)
+                .cohortLoanee(cohortLoanee).reasonForDeclining("E no consign you").build();
+    }
+
 }

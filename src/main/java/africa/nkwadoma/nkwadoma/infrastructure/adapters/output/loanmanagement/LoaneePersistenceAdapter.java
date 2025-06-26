@@ -62,16 +62,6 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
     }
 
     @Override
-    public Page<Loanee> findAllLoaneeByCohortId(Loanee loanee, int pageSize, int pageNumber) throws MeedlException {
-        MeedlValidator.validateUUID(loanee.getCohortId(), CohortMessages.INVALID_COHORT_ID.getMessage());
-        Pageable pageRequest = PageRequest.of(pageNumber, pageSize,Sort.by(Sort.Order.desc("createdAt")));
-        Page<LoaneeEntity> loaneeEntities = loaneeRepository
-                .findAllByCohortId(loanee.getCohortId(), loanee.getLoaneeStatus(), loanee.getLoanStatus(), loanee.getUploadedStatus(), pageRequest);
-        log.info("Loanees {} == ", loaneeEntities.getContent());
-        return loaneeEntities.map(loaneeMapper::toLoanee);
-    }
-
-    @Override
     public List<Loanee> findAllLoaneesByCohortId(String id) throws MeedlException {
         MeedlValidator.validateUUID(id, CohortMessages.INVALID_COHORT_ID.getMessage());
         List<LoaneeEntity> loanees = loaneeRepository.findAllLoaneesByCohortId(id);
@@ -125,6 +115,14 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
             throw new LoanException(LoaneeMessages.LOANEES_ID_CANNOT_BE_EMPTY.getMessage());
         }
         loaneeRepository.updateStatusByIds(loaneesId, loaneeStatus);
+    }
+
+    @Override
+    public Page<Loanee> findAllLoanee(int pageSize, int pageNumber) throws MeedlException {
+        log.info("pageSize = {}, pageNumber = {}", pageSize, pageNumber);
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+        Page<LoaneeEntity> loaneeEntities =  loaneeRepository.findAll(pageRequest);
+        return loaneeEntities.map(loaneeMapper::toLoanee);
     }
 
 

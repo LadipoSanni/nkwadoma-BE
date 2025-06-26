@@ -15,6 +15,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -264,13 +265,17 @@ class LoanProductAdapterTest {
         try {
             VendorEntity foundGemsVendorEntity = vendorEntityRepository.findByVendorName(gemsLoanProduct.getVendors().get(0).getVendorName());
             VendorEntity foundGoldVendorEntity = vendorEntityRepository.findByVendorName(goldLoanProduct.getVendors().get(0).getVendorName());
-            loanProductVendorRepository.deleteAllByVendorEntity(foundGemsVendorEntity);
-//            loanProductVendorRepository.deleteAllByVendorEntity(foundGoldVendorEntity);
+            log.info("Found GemsVendorEntity: {}", foundGemsVendorEntity.getId());
+            log.info("Found GoldVendorEntity: {}", foundGoldVendorEntity.getId());
+            loanProductVendorRepository.deleteByVendorEntityId((foundGemsVendorEntity.getId()));
+            loanProductVendorRepository.deleteByVendorEntityId(foundGoldVendorEntity.getId());
             vendorEntityRepository.deleteById(foundGemsVendorEntity.getId());
-//            vendorEntityRepository.deleteById(foundGoldVendorEntity.getId());
-            LoanProduct foundGemsLoanProduct = loanProductOutputPort.findByName(gemsLoanProduct.getName());
+            vendorEntityRepository.deleteById(foundGoldVendorEntity.getId());
+//            LoanProduct foundGemsLoanProduct = loanProductOutputPort.findByName(gemsLoanProduct.getName());
+            log.info("gold loan product name == {}",goldLoanProduct.getName());
             LoanProduct foundGoldLoanProduct = loanProductOutputPort.findByName(goldLoanProduct.getName());
-            loanProductOutputPort.deleteById(foundGemsLoanProduct.getId());
+//            loanProductOutputPort.deleteById(foundGemsLoanProduct.getId());
+            log.info("Found Gold Loan Product: {}", foundGoldLoanProduct.getId());
             loanProductOutputPort.deleteById(foundGoldLoanProduct.getId());
         } catch (MeedlException e) {
             log.error("Failed to delete loan product {}", gemsLoanProduct.getName());

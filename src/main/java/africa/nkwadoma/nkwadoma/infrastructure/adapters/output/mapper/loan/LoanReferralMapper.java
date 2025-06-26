@@ -10,11 +10,8 @@ import java.util.List;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface LoanReferralMapper {
-    @Mapping(target = "loaneeEntity", source = "loanee")
-    @Mapping(target = "loaneeEntity.userIdentity", source = "loanee.userIdentity")
-    @Mapping(target = "loaneeEntity.userIdentity.alternateEmail", source = "loanee.userIdentity.alternateEmail")
-    @Mapping(target = "loaneeEntity.userIdentity.alternatePhoneNumber", source = "loanee.userIdentity.alternatePhoneNumber")
-    @Mapping(target = "loaneeEntity.userIdentity.alternateContactAddress", source = "loanee.userIdentity.alternateContactAddress")
+
+
     LoanReferralEntity toLoanReferralEntity(LoanReferral loanReferral);
 
     @InheritInverseConfiguration
