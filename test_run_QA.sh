@@ -17,39 +17,23 @@ MAILOSAUR_SERVER_ID=7fn3xvxg
 AES_SECRET_KEY=secret_key
 IV_AES_KEY=4983929933491528
 EOF
-echo "✅ .env file created"
 
-# 🧹 Clean up if venv already exists
-if [ -d "venv" ]; then
-  echo "⚠️ Removing existing venv"
-  rm -rf venv
-fi
+# 🧹 Remove old venv if any
+[ -d "venv" ] && rm -rf venv
 
-# 🐍 Create fresh virtual environment
-echo "✅ Creating fresh virtualenv..."
+# 🐍 Setup virtualenv
 python3 -m venv venv
-
-# 🧠 Confirm venv was created successfully
-if [ ! -x "venv/bin/python" ]; then
-  echo "❌ venv creation failed!"
-  exit 1
-fi
-
-# 🧪 Activate the venv
 source venv/bin/activate
 
 # 📦 Install dependencies
-echo "📦 Installing dependencies..."
 pip install --upgrade pip
 pip uninstall -y config || true
-pip show config && echo "❌ Config package still installed! Please remove 'config' from requirements.txt" && exit 1 || echo "✅ Config package not installed"
 pip install pytest pytest-html python-dotenv -r requirements.txt
 
 # 🔧 Set PYTHONPATH
 export PYTHONPATH=$(pwd)/src:$(pwd)/config:$(pwd)/utils
-echo "🔧 PYTHONPATH set to: $PYTHONPATH"
 
-# 🔍 Import check
+# ✅ Manual import check
 python3 <<EOF
 try:
     from config.project_configuration import logger
@@ -59,28 +43,25 @@ except Exception as e:
     exit(1)
 EOF
 
-# 🧹 Remove caches
-echo "🧹 Cleaning __pycache__ and *.pyc files..."
+# 🧹 Cleanup caches
 find . -type d -name "__pycache__" -exec rm -rf {} +
 find . -type f -name "*.pyc" -delete
 
-# 🧪 Run tests and generate report
+# 🧪 Run tests with report
 REPORT_NAME="report-pytest-results.html"
-echo "🧪 Running tests and generating report..."
 pytest test/ --html="$REPORT_NAME" --self-contained-html -v
 
-# ☁️ Upload report to S3
+# ☁️ Upload to S3
 if [ -f "$REPORT_NAME" ]; then
-  echo "✅ Report generated: $REPORT_NAME"
   echo "☁️ Uploading report to S3..."
   aws s3 cp "$REPORT_NAME" "s3://semicolon-delivery/nkwadoma/automation-test-report/$REPORT_NAME"
-  echo "✅ Report uploaded to S3!"
+  echo "✅ Report uploaded successfully!"
+  echo "📎 Report URL:"
+  echo "https://semicolon-delivery.s3.eu-west-1.amazonaws.com/nkwadoma/automation-test-report/$REPORT_NAME"
 else
-  echo "❌ Report not found. Cannot upload."
+  echo "❌ Report not found! Skipping upload."
   exit 1
 fi
 
-# 🔻 Deactivate venv
 deactivate
-
-echo "🎉 Script completed."
+echo "✅ Script completed."
