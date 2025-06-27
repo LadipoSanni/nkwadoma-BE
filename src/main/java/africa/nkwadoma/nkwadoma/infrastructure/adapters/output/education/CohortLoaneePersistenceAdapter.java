@@ -9,6 +9,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortLoaneeEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoaneeEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.CohortLoaneeMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortLoaneeRepository;
 import lombok.RequiredArgsConstructor;
@@ -102,6 +103,21 @@ public class CohortLoaneePersistenceAdapter implements CohortLoaneeOutputPort {
                 findAllByCohortId(loanee.getCohortId(),loanee.getLoaneeStatus(),loanee.getUploadedStatus(),pageRequest);
         log.info("found all cohort loanee = : {}", cohortLoanees);
 
+        return cohortLoanees.map(cohortLoaneeMapper::toCohortLoanee);
+    }
+
+    @Override
+    public Page<CohortLoanee> searchForLoaneeInCohort(Loanee loanee, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(loanee.getCohortId(),CohortMessages.INVALID_COHORT_ID.getMessage());
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize,Sort.by(Sort.Order.desc("createdAt")));
+        log.debug("Searching for loanees with params: cohortId={}, nameFragment={}, status={}, uploadedStatus={}",
+                loanee.getCohortId(), loanee.getLoaneeName(), loanee.getLoaneeStatus(), loanee.getUploadedStatus());
+        Page<CohortLoaneeEntity> cohortLoanees =
+                cohortLoaneeRepository.findByCohortIdAndNameFragment(loanee.getCohortId(),
+                        loanee.getLoaneeName(),loanee.getLoaneeStatus(), loanee.getUploadedStatus(),pageRequest);
+        if (cohortLoanees.isEmpty()){
+            return Page.empty();
+        }
         return cohortLoanees.map(cohortLoaneeMapper::toCohortLoanee);
     }
 }
