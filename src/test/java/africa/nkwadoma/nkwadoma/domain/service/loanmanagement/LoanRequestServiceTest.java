@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.service.loanmanagement;
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlnotification.MeedlNotificationUsecase;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
@@ -64,6 +65,8 @@ class LoanRequestServiceTest {
     @Mock
     private MeedlNotificationUsecase meedlNotificationUsecase;
     private String testId = "96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f";
+    @Mock
+    private LoaneeOutputPort loaneeOutputPort;
 
 
     @BeforeEach
@@ -182,7 +185,7 @@ class LoanRequestServiceTest {
             when(userIdentityOutputPort.findById(build.getActorId()))
                     .thenReturn(new UserIdentity());
 
-
+            when(loaneeOutputPort.findLoaneeById(build.getLoaneeId())).thenReturn(loanee);
             LoanRequest response = loanRequestService.respondToLoanRequest(build);
             assertNotNull(response);
             assertEquals(LoanRequestStatus.APPROVED, response.getStatus());
