@@ -40,10 +40,12 @@ public class LoanRequestController {
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewAllLoanRequests(
             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
-            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) throws MeedlException {
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+            @RequestParam(name = "organizationId") String organizationId) throws MeedlException {
         LoanRequest loanRequest = new LoanRequest();
         loanRequest.setPageNumber(pageNumber);
         loanRequest.setPageSize(pageSize);
+        loanRequest.setOrganizationId(organizationId);
         Page<LoanRequest> loanRequests = loanRequestUseCase.viewAllLoanRequests(loanRequest);
         log.info("Loan requests: {}", loanRequests.getContent());
         List<LoanRequestResponse> loanRequestResponses = loanRequests.stream().map(loanRequestRestMapper::toLoanRequestResponse).toList();
