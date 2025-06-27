@@ -77,8 +77,8 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
         MeedlValidator.validatePageNumber(pageNumber);
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
-        Page<LoanRequestProjection> loanRequests = loanRequestRepository.findAllLoanRequestsForLoanee(userId,
-                PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.desc("createdDate"))));
+        Page<LoanRequestProjection> loanRequests =
+                loanRequestRepository.findAllLoanRequestsForLoanee(userId, PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.desc("createdDate"))));
         log.info("Loan requests retrieved from DB for loanee: {}", loanRequests.getContent());
         return loanRequests.map(loanRequestMapper::mapProjectionToLoanRequest);
     }
