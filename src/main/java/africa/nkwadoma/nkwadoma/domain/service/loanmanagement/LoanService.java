@@ -360,14 +360,12 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (loanRequest.getStatus() != LoanRequestStatus.APPROVED) {
             throw new LoanException(LoanMessages.LOAN_REQUEST_MUST_HAVE_BEEN_APPROVED.getMessage());
         }
-        loanOffer.setLoanRequest(loanRequest);
+
         loanOffer.setLoanOfferStatus(LoanOfferStatus.OFFERED);
         loanOffer.setDateTimeOffered(LocalDateTime.now());
         loanOffer.setLoanProduct(loanRequest.getLoanProduct());
         loanOffer.setId(loanRequest.getId());
         loanOffer.setAmountApproved(loanRequest.getLoanAmountApproved());
-        Loanee loanee = loaneeOutputPort.findLoaneeById(loanRequest.getLoaneeId());
-        loanOffer.setLoanee(loanee);
 
         loanOffer = loanOfferOutputPort.save(loanOffer);
         log.info("Loan offer ID: {}", loanOffer.getId());

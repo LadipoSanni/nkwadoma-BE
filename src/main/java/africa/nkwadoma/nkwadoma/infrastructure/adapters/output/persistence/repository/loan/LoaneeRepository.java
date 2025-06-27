@@ -63,12 +63,14 @@ public interface LoaneeRepository extends JpaRepository<LoaneeEntity,String> {
         SELECT l.id as id,
                l.userIdentity.firstName as firstName,
                l.userIdentity.lastName as lastName,
-               lr.referredBy as instituteName
+               cle.referredBy as instituteName
       
         FROM LoanEntity loan
                 Join loan.loaneeEntity l
                 join LoanOfferEntity lo ON lo.id = loan.loanOfferId
-                join LoanRequestEntity lr ON lr.id = lo.loanRequest.id
+                join LoanRequestEntity lr ON lr.id = lo.id
+                join LoanReferralEntity lre ON lre.id = lr.id
+                join CohortLoaneeEntity cle On cle.id = lre.cohortLoanee.id
                 where
                         lo.loanProduct.id = :loanProductId
         """)
@@ -78,12 +80,14 @@ public interface LoaneeRepository extends JpaRepository<LoaneeEntity,String> {
         SELECT l.id as id,
                l.userIdentity.firstName as firstName,
                l.userIdentity.lastName as lastName,
-               lr.referredBy as instituteName
+               cle.referredBy as instituteName
       
         FROM LoanEntity loan
                 Join loan.loaneeEntity l
                 join LoanOfferEntity lo ON lo.id = loan.loanOfferId
-                join LoanRequestEntity lr ON lr.id = lo.loanRequest.id
+                join LoanRequestEntity lr ON lr.id = lo.id
+                join LoanReferralEntity lre ON lre.id = lr.id
+                join CohortLoaneeEntity cle On cle.id = lre.cohortLoanee.id
                 where
                         lo.loanProduct.id = :loanProductId
                         and (upper(concat(l.userIdentity.firstName, ' ', l.userIdentity.lastName)) LIKE upper(concat('%', :nameFragment, '%'))

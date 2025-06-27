@@ -50,7 +50,12 @@ public class LoanOffer {
 
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateUUID(loanRequest.getId(),"Loan request id is invalid.");
+        MeedlValidator.validateUUID(id,"Loan offer id is invalid.");
+        MeedlValidator.validateObjectInstance(loanProduct,"Loan product cannot be empty.");
+        MeedlValidator.validateObjectInstance(amountApproved,"Amount approved cannot be empty.");
+        MeedlValidator.validateObjectInstance(dateTimeOffered,"Date time offered cannot be empty.");
+        MeedlValidator.validateObjectInstance(loanOfferStatus,"Loan offer status cannot be empty.");
+
     }
 
     public void validateForAcceptOffer() throws MeedlException {
