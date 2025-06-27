@@ -215,4 +215,32 @@ public interface LoanRequestRepository extends JpaRepository<LoanRequestEntity, 
     WHERE lr.status = 'NEW' AND o.id = :organizationId AND l.userIdentity.isIdentityVerified = true
 """)
     int getCountOfVerifiedLoanRequestInOrganization(@Param("organizationId") String organizationId);
+
+        @Query("""
+        SELECT lr.id AS id,
+               u.firstName AS firstName,
+               u.lastName AS lastName,
+               c.name AS cohortName,
+               o.name AS referredBy,
+               lr.loanAmountRequested AS loanAmountRequested,
+               lr.createdDate AS createdDate,
+               lld.initialDeposit AS initialDeposit,
+               c.startDate AS cohortStartDate,
+               p.name AS programName
+        FROM LoanRequestEntity lr
+        JOIN LoanReferralEntity lre ON lre.id = lr.id
+        JOIN CohortLoaneeEntity cle ON cle.id = lre.cohortLoanee.id
+        JOIN LoaneeEntity l ON l.id = cle.loanee.id
+        JOIN LoaneeLoanDetailEntity lld ON lld.id = cle.loaneeLoanDetail.id
+        JOIN UserEntity u ON u.id = l.userIdentity.id
+        JOIN CohortEntity c ON c.id = cle.cohort.id
+        JOIN ProgramEntity p ON p.id = c.programId
+        JOIN OrganizationEntity o ON o.id = p.organizationIdentity.id
+        WHERE lr.status = 'NEW'
+        AND u.id = :userId
+        AND u.isIdentityVerified = true
+        ORDER BY lr.createdDate DESC
+    """)
+    Page<LoanRequestProjection> findAllLoanRequestsForLoanee(@Param("userId") String userId, Pageable pageable);
+
 }

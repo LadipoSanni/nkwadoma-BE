@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputP
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
@@ -47,11 +48,14 @@ public class LoanRequestService implements LoanRequestUseCase {
     private final LoaneeOutputPort loaneeOutputPort;
 
     @Override
-    public Page<LoanRequest> viewAllLoanRequests(LoanRequest loanRequest) throws MeedlException {
+    public Page<LoanRequest> viewAllLoanRequests(LoanRequest loanRequest, String userId) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanRequest, LoanMessages.LOAN_REQUEST_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validatePageNumber(loanRequest.getPageNumber());
         MeedlValidator.validatePageSize(loanRequest.getPageSize());
         Page<LoanRequest> loanRequests;
+        if (userIdentityOutputPort.findById(userId).getRole().equals(IdentityRole.LOANEE)){
+            return loanRequestOutputPort.viewAllLoanRequestForLoanee(userId, loanRequest.getPageNumber(), loanRequest.getPageSize());
+        }
         if (StringUtils.isNotEmpty(loanRequest.getOrganizationId())) {
             loanRequests = loanRequestOutputPort.viewAll
                     (loanRequest.getOrganizationId(), loanRequest.getPageNumber(), loanRequest.getPageSize());

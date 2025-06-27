@@ -73,6 +73,17 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
     }
 
     @Override
+    public Page<LoanRequest> viewAllLoanRequestForLoanee(String userId, int pageNumber, int pageSize) throws MeedlException {
+        MeedlValidator.validatePageNumber(pageNumber);
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
+        Page<LoanRequestProjection> loanRequests = loanRequestRepository.findAllLoanRequestsForLoanee(userId,
+                PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.desc("createdDate"))));
+        log.info("Loan requests retrieved from DB for loanee: {}", loanRequests.getContent());
+        return loanRequests.map(loanRequestMapper::mapProjectionToLoanRequest);
+    }
+
+    @Override
     public Page<LoanRequest> viewAll(String organizationId, int pageNumber, int pageSize) throws MeedlException {
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         MeedlValidator.validatePageNumber(pageNumber);
@@ -123,4 +134,6 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
     public int getCountOfAllVerifiedLoanRequestInOrganization(String organizationId) {
         return loanRequestRepository.getCountOfVerifiedLoanRequestInOrganization(organizationId);
     }
+
+
 }
