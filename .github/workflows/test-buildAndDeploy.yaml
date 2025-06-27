@@ -53,10 +53,12 @@ jobs:
       - name: Install virtualenv
         run: pip install virtualenv
 
-      - name: Install AWS CLI
+      - name: Install AWS CLI from official source
         run: |
-          sudo apt update
-          sudo apt install -y awscli
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
+          aws --version
 
       - name: Make test script executable
         run: chmod +x test_run_QA.sh
