@@ -75,11 +75,11 @@ public interface CohortLoaneeRepository extends JpaRepository<CohortLoaneeEntity
         JOIN LoanReferralEntity lr on lr.cohortLoanee.id = cl.id
         JOIN LoanRequestEntity lre on lre.id = lr.id
         JOIN LoanOfferEntity lo on lo.id = lre.id
-        JOIN LoaneeEntity l on l.id = cl.loanee.id
+        
         where
-                        lo.loanProduct.id = :loanProductId
-                        and (upper(concat(l.userIdentity.firstName, ' ', l.userIdentity.lastName)) LIKE upper(concat('%', :nameFragment, '%'))
-                        or upper(concat(l.userIdentity.lastName, ' ', l.userIdentity.firstName)) LIKE upper(concat('%', :nameFragment, '%')))
+              lo.loanProduct.id = :loanProductId
+              and (upper(concat(cl.loanee.userIdentity.firstName, ' ', cl.loanee.userIdentity.lastName)) LIKE upper(concat('%', :nameFragment, '%'))
+              or upper(concat(cl.loanee.userIdentity.lastName, ' ', cl.loanee.userIdentity.firstName)) LIKE upper(concat('%', :nameFragment, '%')))
         """)
     Page<CohortLoaneeEntity> searchLoanBeneficiaryByLoanProductId(@Param("loanProductId")String loanProductId, @Param("nameFragment") String nameFragment, Pageable pageRequest);
 }

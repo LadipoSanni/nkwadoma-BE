@@ -140,6 +140,7 @@ public class CohortLoaneePersistenceAdapter implements CohortLoaneeOutputPort {
 
         Page<CohortLoaneeEntity> cohortLoaneeEntities =
                 cohortLoaneeRepository.searchLoanBeneficiaryByLoanProductId(id,name,pageRequest);
+        log.info("cohort loanee entities == {}",cohortLoaneeEntities);
 
         return cohortLoaneeEntities.map(cohortLoaneeMapper::toCohortLoanee);
     }

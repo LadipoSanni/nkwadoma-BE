@@ -463,7 +463,6 @@ class LoaneeServiceTest {
         when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
         when(programOutputPort.findProgramById(mockId)).thenReturn(atlasProgram);
         when(loanOfferOutputPort.findLoanOfferByLoaneeId(mockId)).thenReturn(loanOffer);
-        when(loanOutputPort.findLoanByLoanOfferId(mockId)).thenReturn(Optional.empty());
         when(organizationIdentityOutputPort.findById(mockId)).thenReturn(organizationIdentity);
         Loanee result = loaneeService.viewLoaneeDetails(null, mockId);
 
@@ -485,7 +484,7 @@ class LoaneeServiceTest {
             when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
             when(programOutputPort.findProgramById(mockId)).thenReturn(atlasProgram);
             when(loanOfferOutputPort.findLoanOfferByLoaneeId(mockId)).thenReturn(loanOffer);
-            when(loanOutputPort.findLoanByLoanOfferId(mockId)).thenReturn(Optional.empty());
+
             when(organizationIdentityOutputPort.findById(mockId)).thenReturn(organizationIdentity);
             loanee = loaneeService.viewLoaneeDetails(null, firstLoanee.getUserIdentity().getId());
         } catch (MeedlException exception) {
@@ -564,7 +563,7 @@ class LoaneeServiceTest {
 
     @Test
     void searchLoanBeneficiariesFromLoanProductReturnEmptyListIfNonIsFound(){
-        Page<CohortLoanee> loanees = new  PageImpl<>(List.of(loaneeCohort));
+        Page<CohortLoanee> loanees = Page.empty();
         try {
             when(loanProductOutputPort.findById(loanProduct.getId())).thenReturn(loanProduct);
             when(cohortLoaneeOutputPort.searchLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),"z",pageSize,pageNumber))
@@ -922,7 +921,7 @@ class LoaneeServiceTest {
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
         assertEquals(loaneeCohort, result.getContent().get(0));
-        assertEquals(loaneeCohort.getUploadedStatus(), UploadedStatus.ADDED);
+        assertEquals(UploadedStatus.ADDED, loaneeCohort.getUploadedStatus());
         verify(cohortLoaneeOutputPort, times(1)).findAllLoaneeInCohort(cohortLoanee, pageSize, pageNumber);
     }
 
@@ -937,7 +936,7 @@ class LoaneeServiceTest {
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
         assertEquals(loaneeCohort, result.getContent().get(0));
-        assertEquals(loaneeCohort.getUploadedStatus(), UploadedStatus.INVITED);
+        assertEquals(UploadedStatus.INVITED, loaneeCohort.getUploadedStatus());
         verify(cohortLoaneeOutputPort, times(1)).findAllLoaneeInCohort(cohortLoanee, pageSize, pageNumber);
     }
 
