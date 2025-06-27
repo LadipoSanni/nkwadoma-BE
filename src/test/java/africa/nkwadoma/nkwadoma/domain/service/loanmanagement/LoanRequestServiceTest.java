@@ -86,7 +86,7 @@ class LoanRequestServiceTest {
         loanRequest.setLoanProductId(loanProduct.getId());
         loanRequest.setLoanee(loanee);
 
-        loanOffer = TestData.buildLoanOffer(loanRequest, loanee);
+        loanOffer = TestData.buildLoanOffer(loanRequest);
         loanOffer.setId("9284b721-fd60-4cd9-b6dc-5ef416d70093");
     }
 

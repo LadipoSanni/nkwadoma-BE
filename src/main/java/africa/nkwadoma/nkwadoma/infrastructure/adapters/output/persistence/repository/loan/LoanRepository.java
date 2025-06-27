@@ -27,7 +27,7 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           join LoanReferralEntity lfe on lfe.cohortLoanee.id = cle.id
           join UserEntity  u on l.userIdentity.id = u.id
           join LoanRequestEntity lr on lr.id = lfe.id
-          join LoanOfferEntity loe on l.id = loe.loanee.id
+          join LoanOfferEntity loe on l.id = lr.id
           join CohortEntity c on cle.cohort.id = c.id
           join ProgramEntity p on c.programId = p.id
           left join NextOfKinEntity n on u.nextOfKinEntity.id = n.id
@@ -53,7 +53,7 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           join LoanReferralEntity lfe on lfe.cohortLoanee.id = cle.id
           join CohortEntity c on cle.cohort.id = c.id
           join LoanRequestEntity lr on lr.id = lfe.id
-          join LoanOfferEntity loe on l.id = loe.loanee.id
+          join LoanOfferEntity loe on l.id =  lr.id
           join ProgramEntity p on c.programId = p.id
           join OrganizationEntity o on p.organizationIdentity.id = o.id
     
@@ -77,9 +77,9 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
     FROM LoanEntity lo
     JOIN lo.loaneeEntity l
     JOIN l.userIdentity u
- join CohortLoaneeEntity cle on cle.loanee.id = l.id
+    join CohortLoaneeEntity cle on cle.loanee.id = l.id
           join CohortEntity c on cle.cohort.id = c.id    JOIN ProgramEntity p ON p.id = c.programId
-        JOIN LoanOfferEntity lof ON lof.loanee.id = l.id
+        JOIN LoanOfferEntity lof ON lof.id = lo.loanOfferId
     WHERE 
         (LOWER(u.firstName) LIKE LOWER(CONCAT('%', :name, '%'))
          OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :name, '%')))
@@ -106,7 +106,7 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
                join CohortLoaneeEntity cle on cle.loanee.id = l.id
           join LoanReferralEntity lfe on lfe.cohortLoanee.id = cle.id
           join LoanRequestEntity lr on lr.id = lfe.id
-          join LoanOfferEntity loe on l.id = loe.loanee.id
+          join LoanOfferEntity loe on l.id = lr.id
           join CohortEntity c on cle.cohort.id = c.id
           join ProgramEntity p on c.programId = p.id
           join OrganizationEntity o on p.organizationIdentity.id = o.id
@@ -130,7 +130,7 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
       join CohortLoaneeEntity cle on cle.loanee.id = l.id
           join CohortEntity c on cle.cohort.id = c.id
     JOIN ProgramEntity p ON p.id = c.programId
-        JOIN LoanOfferEntity lof ON lof.loanee.id = l.id
+        JOIN LoanOfferEntity lof ON lo.id = l.id
     WHERE
         c.programId = :programId
         AND p.organizationIdentity.id = :organizationId

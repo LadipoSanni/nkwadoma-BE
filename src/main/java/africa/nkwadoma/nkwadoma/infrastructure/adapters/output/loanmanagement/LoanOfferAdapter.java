@@ -40,6 +40,7 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
 
     @Override
     public LoanOffer findLoanOfferById(String loanOfferId) throws MeedlException {
+        log.info("Find loan offer by id: {}", loanOfferId);
         MeedlValidator.validateUUID(loanOfferId, LoanOfferMessages.INVALID_LOAN_OFFER_ID.getMessage());
         LoanOfferProjection loanOfferProjection = loanOfferEntityRepository.findLoanOfferById(loanOfferId);
         if (ObjectUtils.isEmpty(loanOfferProjection)) {

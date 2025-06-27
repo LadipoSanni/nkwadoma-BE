@@ -195,12 +195,12 @@ public class TestData {
         return vendor;
     }
 
-    public static LoanOffer buildLoanOffer(LoanRequest loanRequest, Loanee loanee) {
+    public static LoanOffer buildLoanOffer(LoanRequest loanRequest) {
         LoanOffer loanOffer = new LoanOffer();
         loanOffer.setDateTimeOffered(LocalDateTime.now());
-        loanOffer.setLoanRequest(loanRequest);
         loanOffer.setLoanOfferStatus(LoanOfferStatus.OFFERED);
-        loanOffer.setLoanee(loanee);
+        loanOffer.setId(loanRequest.getId());
+        loanOffer.setAmountApproved(loanRequest.getLoanAmountRequested());
         return loanOffer;
     }
 
