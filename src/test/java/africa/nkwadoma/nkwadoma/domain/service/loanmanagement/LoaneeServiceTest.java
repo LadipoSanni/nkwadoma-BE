@@ -500,7 +500,7 @@ class LoaneeServiceTest {
 
     @Test
     void searchLoaneeInACohort(){
-        Page<Loanee> loanees = Page.empty();
+        Page<CohortLoanee> loanees = Page.empty();
         try {
             firstLoanee.setLoaneeName("q");
             when(loaneeOutputPort.searchForLoaneeInCohort(firstLoanee,pageSize,pageNumber))
