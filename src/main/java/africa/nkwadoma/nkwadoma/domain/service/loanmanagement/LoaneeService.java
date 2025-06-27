@@ -295,10 +295,11 @@ public class LoaneeService implements LoaneeUseCase {
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
         loanee.setProgramName(program.getName());
 
-        Optional<Loan> loan = loanOutputPort.viewLoanByLoaneeId(loanee.getId());
-        if (loan.isPresent()) {
-            loanee.setLoanId(loan.get().getId());
-        }
+//        Optional<Loan> loan = loanOutputPort.findLoanByLoanOfferId(loanee.getId());
+//        if (loan.isPresent()) {
+//            loanee.setLoanId(loan.get().getId());
+//        }
+
         LoanOffer loanOffer = loanOfferOutputPort.findLoanOfferByLoaneeId(loanee.getId());
         if (loanOffer != null){
             loanee.setTenor(loanOffer.getLoanProduct().getTenor());
@@ -546,17 +547,17 @@ public class LoaneeService implements LoaneeUseCase {
 
 
     @Override
-    public Page<Loanee> viewAllLoaneeThatBenefitedFromLoanProduct(String loanProductId,int pageSize,int pageNumber) throws MeedlException {
+    public Page<CohortLoanee> viewAllLoaneeThatBenefitedFromLoanProduct(String loanProductId,int pageSize,int pageNumber) throws MeedlException {
         MeedlValidator.validateUUID(loanProductId,"Loan product id cannot be empty");
         LoanProduct loanProduct = loanProductOutputPort.findById(loanProductId);
-        return loaneeOutputPort.findAllLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),pageSize,pageNumber);
+        return cohortLoaneeOutputPort.findAllLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),pageSize,pageNumber);
     }
 
     @Override
-    public Page<Loanee> searchLoaneeThatBenefitedFromLoanProduct(String loanProductId,String name, int pageSize, int pageNumber) throws MeedlException {
+    public Page<CohortLoanee> searchLoaneeThatBenefitedFromLoanProduct(String loanProductId,String name, int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validateUUID(loanProductId,"Loan product id cannot be empty");
         LoanProduct loanProduct = loanProductOutputPort.findById(loanProductId);
-        return loaneeOutputPort.searchLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),name,pageSize,pageNumber);
+        return cohortLoaneeOutputPort.searchLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),name,pageSize,pageNumber);
     }
 
     @Override
@@ -654,7 +655,7 @@ public class LoaneeService implements LoaneeUseCase {
     }
 
     private Optional<Loan> findLoaneeLoanAndDeferLoan(Loanee loanee) throws MeedlException {
-        Optional<Loan> loan = loanOutputPort.viewLoanByLoaneeId(loanee.getId());
+        Optional<Loan> loan = loanOutputPort.findLoanByLoanOfferId(loanee.getId());
         if (loan.isEmpty()){
             throw new LoanException(LoanMessages.LOANEE_LOAN_NOT_FOUND.getMessage());
         }

@@ -156,7 +156,7 @@ public class LoaneeController {
 
     )throws MeedlException {
 
-        Page<Loanee> loanees =
+        Page<CohortLoanee> loanees =
                 loaneeUseCase.viewAllLoaneeThatBenefitedFromLoanProduct(loanProductId,pageSize,pageNumber);
         List<LoanBeneficiaryResponse> loaneeResponses = loanees.stream()
                 .map(loaneeRestMapper::toLoanBeneficiaryResponse).toList();
@@ -183,7 +183,7 @@ public class LoaneeController {
 
     )throws MeedlException {
 
-        Page<Loanee> loanees =
+        Page<CohortLoanee> loanees =
                 loaneeUseCase.searchLoaneeThatBenefitedFromLoanProduct(loanProductId,name,pageSize,pageNumber);
         List<LoanBeneficiaryResponse> loaneeResponses = loanees.stream()
                 .map(loaneeRestMapper::toLoanBeneficiaryResponse).toList();

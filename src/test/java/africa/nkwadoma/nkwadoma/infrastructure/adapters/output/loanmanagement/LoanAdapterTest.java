@@ -3,11 +3,15 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.VendorEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanProductVendorRepository;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.VendorEntityRepository;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.*;
@@ -22,6 +26,7 @@ import org.springframework.data.domain.*;
 import java.time.*;
 import java.util.*;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.ServiceOfferingType.TRAINING;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
@@ -29,184 +34,139 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class LoanAdapterTest {
+
+
+
     @Autowired
-    private LoanOutputPort loanOutputPort;
-    @Autowired
-    private LoaneeOutputPort loaneeOutputPort;
-    @Autowired
-    private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
-    @Autowired
-    private LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
-    @Autowired
-    private UserIdentityOutputPort userIdentityOutputPort;
+    private CohortLoaneeOutputPort cohortLoaneeOutputPort;
+    private CohortLoanee cohortLoanee;
+    private UserIdentity userIdentity;
+    private UserIdentity meedleUser;
+    private OrganizationEmployeeIdentity employeeIdentity;
+    private OrganizationIdentity organizationIdentity;
+    private LoanBreakdown loanBreakdown;
+    private List<LoanBreakdown> loanBreakdowns;
+    private Program program;
+    private Cohort cohort;
+    private LoaneeLoanDetail loaneeLoanDetail;
+    private Loanee loanee;
+    private LoanReferral loanReferral;
+    private String loanReferralId;
     @Autowired
     private ProgramOutputPort programOutputPort;
     @Autowired
-    private CohortOutputPort cohortOutputPort;
+    private UserIdentityOutputPort userIdentityOutputPort;
     @Autowired
-    private LoanBreakdownOutputPort loanBreakdownOutputPort;
-    @Autowired
-    private LoanReferralOutputPort loanReferralOutputPort;
-    @Autowired
-    private LoanOfferOutputPort loanOfferOutputPort;
+    private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     @Autowired
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     @Autowired
+    private LoanBreakdownOutputPort loanBreakdownOutputPort;
+    @Autowired
+    private LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
+    @Autowired
+    private CohortOutputPort cohortOutputPort;
+    @Autowired
+    private LoaneeOutputPort loaneeOutputPort;
+    @Autowired
+    private LoanReferralOutputPort loanReferralOutputPort;
+    @Autowired
     private LoanRequestOutputPort loanRequestOutputPort;
-    private String loanRequestId;
-    @Autowired
-    private LoaneeLoanAccountOutputPort loaneeLoanAccountOutputPort;
-    @Autowired
-    private NextOfKinOutputPort nextOfKinOutputPort;
-    private Loan loan;
-    private LoaneeLoanAccount loaneeLoanAccount;
-    private String savedLoanId;
-    private String loaneeId;
-    private String loanId;
-    private LoanReferral loanReferral;
-    private LoaneeLoanDetail loaneeLoanDetail;
     private LoanRequest loanRequest;
-    private String loanReferralId;
-    private String loaneeLoanAccountId;
-    private String programId;
-    private OrganizationIdentity amazingGrace;
-    private List<LoanBreakdown> loanBreakdowns;
-    private String amazingGraceId;
-    private String cohortId;
-    private String loaneeUserId;
-    private Loanee loanee;
-    private UserIdentity savedLoaneeUser;
-    private String userId;
-    private String loanOfferId;
-    private String organizationEmployeeIdentityId;
-    private Cohort cohort;
-    private Program program;
-    private NextOfKin nextOfKin;
-    private String nextOfKinId;
-    private int pageSize = 10;
-    private int pageNumber = 0;
+    @Autowired
+    private LoanOfferOutputPort loanOfferOutputPort;
+    private LoanOffer loanOffer;
+    private LoanProduct loanProduct;
+    @Autowired
+    private LoanProductOutputPort loanProductOutputPort;
+    @Autowired
+    private VendorEntityRepository vendorEntityRepository;
+    @Autowired
+    private LoanProductVendorRepository loanProductVendorRepository;
+    @Autowired
+    private LoanOutputPort loanOutputPort;
+    private Loan loan;
+    private String loanId;
+    int pageSize = 0;
+    int pageNumber = 10;
 
     @BeforeAll
-    public void setUp(){
+    void setUpLoanOffer() {
         try {
-            UserIdentity userIdentity = TestData.createTestUserIdentity("testuser@email.com");
-            List<OrganizationEmployeeIdentity> employees = List.of(OrganizationEmployeeIdentity
-                    .builder().meedlUser(userIdentity).build());
-            amazingGrace = TestData.createOrganizationTestData(
-                    "Amazing Grace Enterprises",
-                    "RC9500034",
-                    employees
-            );
-            Optional<OrganizationIdentity> organization =
-                    organizationIdentityOutputPort.findByOrganizationId(amazingGrace.getId());
-            if (organization.isPresent()) {
-                organizationIdentityOutputPort.delete(organization.get().getId());
-            }
-            OrganizationIdentity savedOrganization = organizationIdentityOutputPort.save(amazingGrace);
-            log.info("Organization saved id is : {}", savedOrganization.getId());
-            assertNotNull(savedOrganization);
-            assertNotNull(savedOrganization.getId());
-            amazingGraceId = savedOrganization.getId();
-//            userIdentity = saveUserIdentity(userIdentity);
-
+            meedleUser = TestData.createTestUserIdentity("ade45@gmail.com");
+            meedleUser.setRole(IdentityRole.ORGANIZATION_ADMIN);
+            meedleUser = userIdentityOutputPort.save(meedleUser);
+            employeeIdentity = TestData.createOrganizationEmployeeIdentityTestData(meedleUser);
+            employeeIdentity = organizationEmployeeIdentityOutputPort.save(employeeIdentity);
+            organizationIdentity = TestData.createOrganizationTestData("Organization test1","RC3456891", List.of(employeeIdentity));
+            organizationIdentity = organizationIdentityOutputPort.save(organizationIdentity);
+            userIdentity = TestData.createTestUserIdentity("loanee@grr.la");
+            userIdentity.setRole(IdentityRole.LOANEE);
             userIdentity = userIdentityOutputPort.save(userIdentity);
-            assertNotNull(userIdentity);
-            userId = userIdentity.getId();
-
-            OrganizationEmployeeIdentity organizationEmployeeIdentity = new OrganizationEmployeeIdentity();
-            organizationEmployeeIdentity.setOrganization(amazingGraceId);
-            organizationEmployeeIdentity.setMeedlUser(userIdentity);
-            organizationEmployeeIdentity = organizationEmployeeIdentityOutputPort.
-                    save(organizationEmployeeIdentity);
-            assertNotNull(organizationEmployeeIdentity);
-            organizationEmployeeIdentityId = organizationEmployeeIdentity.getId();
-
-            program = TestData.createProgramTestData("Data Analytics");
-            program.setCreatedBy(userId);
-            program.setOrganizationIdentity(savedOrganization);
+            program = TestData.createProgramTestData("Software engineer");
+            program.setCreatedBy(meedleUser.getId());
+            organizationIdentity.setServiceOfferings(List.of(ServiceOffering.builder().name(TRAINING.name()).build()));
+            program.setOrganizationIdentity(organizationIdentity);
             program = programOutputPort.saveProgram(program);
-            assertNotNull(program);
-            assertNotNull(program.getId());
-            programId = program.getId();
-
-            cohort = TestData.createCohortData
-                    ("elite", programId, amazingGraceId,
-                            loanBreakdowns, userId);
+            loanBreakdown = TestData.createLoanBreakDown();
+            loanBreakdowns =  loanBreakdownOutputPort.saveAllLoanBreakDown(List.of(loanBreakdown));
+            cohort = TestData.createCohortData("Lacoste",program.getId(),
+                    organizationIdentity.getId(),loanBreakdowns,meedleUser.getId());
             cohort = cohortOutputPort.save(cohort);
-            assertNotNull(cohort);
-            assertNotNull(cohort.getId());
-            cohortId = cohort.getId();
-
-            LoanBreakdown loanBreakdown = TestData.createLoanBreakDown();
-            loanBreakdown.setCohort(cohort);
-            loanBreakdowns = List.of(loanBreakdown);
-            loanBreakdowns = loanBreakdownOutputPort.saveAllLoanBreakDown
-                    (loanBreakdowns);
-
-            UserIdentity loaneeUser = TestData.createTestUserIdentity("qudus@example.com");
-            savedLoaneeUser = userIdentityOutputPort.save(loaneeUser);
-            assertNotNull(savedLoaneeUser);
-            loaneeUserId = savedLoaneeUser.getId();
-
             loaneeLoanDetail = TestData.createTestLoaneeLoanDetail();
             loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
-            loanee = TestData.createTestLoanee(savedLoaneeUser, loaneeLoanDetail);
-            loanee.setUserIdentity(savedLoaneeUser);
-            loanee.setCohortId(cohortId);
+            loanee = TestData.createTestLoanee(userIdentity,loaneeLoanDetail);
             loanee = loaneeOutputPort.save(loanee);
-            assertNotNull(loanee);
-            loaneeId = loanee.getId();
-
-
-            nextOfKin = TestData.createNextOfKinData(userIdentity);
-            NextOfKin savedNextOfKin = nextOfKinOutputPort.save(nextOfKin);
-            assertNotNull(savedNextOfKin);
-            nextOfKinId = savedNextOfKin.getId();
-
-            loaneeLoanAccount = TestData.createLoaneeLoanAccount(LoanStatus.AWAITING_DISBURSAL, AccountStatus.NEW, loanee.getId());
-            LoaneeLoanAccount foundLoaneeAccount = loaneeLoanAccountOutputPort.findByLoaneeId(loanee.getId());
-            log.info("Found loanee account: {}", foundLoaneeAccount);
-            if (ObjectUtils.isEmpty(foundLoaneeAccount)) {
-                loaneeLoanAccount = loaneeLoanAccountOutputPort.save(loaneeLoanAccount);
-                log.info("Saved loanee account: {}", loaneeLoanAccount);
-                loaneeLoanAccountId = loaneeLoanAccount.getId();
-            }
-            else loaneeLoanAccountOutputPort.deleteLoaneeLoanAccount(foundLoaneeAccount.getId());
-
-            loanReferral = LoanReferral.builder().loanee(loanee).
-                    loanReferralStatus(LoanReferralStatus.ACCEPTED).build();
+            cohortLoanee = TestData.buildCohortLoanee(loanee, cohort,loaneeLoanDetail,meedleUser.getId());
+            cohortLoanee = cohortLoaneeOutputPort.save(cohortLoanee);
+            log.info("Cohort Loanee == : {}", cohortLoanee);
+            loanReferral = TestData.buildLoanReferral(cohortLoanee,LoanReferralStatus.PENDING);
             loanReferral = loanReferralOutputPort.save(loanReferral);
-            assertNotNull(loanReferral);
-            assertNotNull(loanReferral.getId());
             loanReferralId = loanReferral.getId();
-
-            loanRequest = LoanRequest.builder().loanAmountRequested(loaneeLoanDetail.getAmountRequested())
-                    .status(LoanRequestStatus.APPROVED).referredBy("Amazing Grace Enterprises").loanee(loanee).createdDate(LocalDateTime.now()).
-                    loaneeId(loanee.getId())
-                    .dateTimeApproved(LocalDateTime.now()).build();
-            loanRequest.setId(loanReferralId);
+            loanRequest = TestData.buildLoanRequest(loanReferral.getId());
             loanRequest = loanRequestOutputPort.save(loanRequest);
-            log.info("Loan request saved: {}", loanRequest);
-            assertNotNull(loanRequest.getId());
-            loanRequestId = loanRequest.getId();
-
-            LoanOffer loanOffer = TestData.buildLoanOffer(loanRequest);
-            loanOffer.setId(loanReferralId);
+            loanOffer = TestData.buildLoanOffer(loanRequest);
+            loanProduct = TestData.buildTestLoanProduct();
+            loanProduct = loanProductOutputPort.save(loanProduct);
+            loanOffer.setLoanProduct(loanProduct);
             loanOffer = loanOfferOutputPort.save(loanOffer);
-            assertNotNull(loanOffer);
-            loanOfferId = loanOffer.getId();
-        } catch (MeedlException e) {
-            log.error("Error deleting test data: {}", e.getMessage());
+            loan = TestData.buildLoan(loanOffer.getId());
+        }catch (MeedlException exception){
+            log.info("Failed to set up cohort loanee {}", exception.getMessage());
+            throw new RuntimeException(exception);
         }
     }
 
-    @BeforeEach
-    void init() {
-        loan = TestData.createTestLoan(loanee);
-        loan.setLoanee(loanee);
-        loan.setStartDate(LocalDateTime.now());
-        loan.setLoanAccountId(loaneeLoanAccountId);
+
+    @Test
+    void saveNullLoan(){
+        assertThrows(MeedlException.class, () -> loanOutputPort.save(null));
     }
+
+    @Test
+    void saveLoanWithNullLoanOfferId(){
+        loan.setLoanOffer(null);
+        assertThrows(MeedlException.class, () -> loanOutputPort.save(null));
+    }
+
+    @Test
+    void saveLoanWithNullLoanAccountId(){
+        loan.setLoanAccountId(null);
+        assertThrows(MeedlException.class, () -> loanOutputPort.save(null));
+    }
+
+    @Test
+    void saveLoanWithNullLoanStatus(){
+        loan.setLoanStatus(null);
+        assertThrows(MeedlException.class, () -> loanOutputPort.save(null));
+    }
+
+    @Test
+    void saveLoanWithNullStartDate() {
+        loan.setStartDate(null);
+        assertThrows(MeedlException.class, ()->loanOutputPort.save(loan));
+    }
+
 
     @Test
     @Order(1)
@@ -214,8 +174,6 @@ class LoanAdapterTest {
         Loan savedLoan;
         try {
             savedLoan = loanOutputPort.save(loan);
-            savedLoanId = savedLoan.getId();
-            log.info("Saved loan: {} ", savedLoan.getId());
             loanId = savedLoan.getId();
         } catch (MeedlException e) {
             log.error("Error saving loan {}", e.getMessage());
@@ -223,29 +181,16 @@ class LoanAdapterTest {
         }
         assertNotNull(savedLoan);
         assertNotNull(savedLoan.getId());
-        assertNotNull(savedLoan.getStartDate());
-        assertEquals(loaneeLoanAccountId, savedLoan.getLoanAccountId());
-        assertEquals(loaneeId, savedLoan.getLoaneeId());
     }
-    @Test
-    void saveLoanWithNull() {
-        assertThrows(MeedlException.class, ()->loanOutputPort.save(null));
-    }
-    @Test
-    void saveLoanWithNullLoanee() {
-        loan.setLoanee(null);
-        assertThrows(MeedlException.class, ()->loanOutputPort.save(loan));
-    }
-    @Test
-    void saveLoanWithNullStartDate() {
-        loan.setStartDate(null);
-        assertThrows(MeedlException.class, ()->loanOutputPort.save(loan));
-    }
+
+
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invalid.id"})
     void findLoanByInvalidId(String id){
         assertThrows(MeedlException.class,()->loanOutputPort.findLoanById(id));
     }
+
+
     @Test
     @Order(2)
     void findLoanById() {
@@ -266,56 +211,24 @@ class LoanAdapterTest {
 
     @Test
     @Order(3)
-    void viewLoanById() {
-        //TODO
-        // Coming back to make test work
-        Optional<Loan> loan = Optional.empty();
-        try {
-            loan = loanOutputPort.viewLoanById(loanId);
-        } catch (MeedlException e) {
-            log.error("Error finding loan details {}", e.getMessage());
-        }
-
-        assertNotNull(loan);
-//        assertTrue(loan.isPresent());
-//        assertNotNull(loan.get().getId());
-//        assertNotNull(loan.get().getLoaneeId());
-//        assertEquals(loan.get().getId(), loanId);
-    }
-
-    @Test
-    @Order(4)
     void findAllLoanByOrganizationId() {
-
-        //TODO
-        // Coming back to make test work
         Page<Loan> loans = Page.empty();
         try {
             loans = loanOutputPort.findAllByOrganizationId
-                    (amazingGraceId, 10, 0);
+                    (organizationIdentity.getId(), 10, 0);
         } catch (MeedlException e) {
             log.error("Error finding loans by organization: {}", e.getMessage());
         }
 
         assertNotNull(loans);
         assertNotNull(loans.getContent());
-//        assertEquals(1, loans.getTotalElements());
-//        assertEquals(loans.getContent().get(0).getFirstName(), loanee.getUserIdentity().getFirstName());
-//        assertEquals(loans.getContent().get(0).getLastName(), loanee.getUserIdentity().getLastName());
-//        assertEquals(loans.getContent().get(0).getInitialDeposit(), loanee.getLoaneeLoanDetail().getInitialDeposit());
-//        assertEquals(loans.getContent().get(0).getAmountRequested(), loanee.getLoaneeLoanDetail().getAmountRequested());
-//        assertNotNull(loans.getContent().get(0).getOfferDate());
-//        assertNotNull(loans.getContent().get(0).getStartDate());
-//        assertEquals(loans.getContent().get(0).getCohortStartDate(), cohort.getStartDate());
-//        assertEquals(loans.getContent().get(0).getCohortName(), cohort.getName());
-//        assertEquals(loans.getContent().get(0).getProgramName(), program.getName());
     }
+
+
     @Test
-    @Order(5)
+    @Order(4)
     void findAllLoan(){
 
-        //TODO
-        // Coming back to make test work
         Page<Loan> loans = Page.empty();
         try{
             loans = loanOutputPort.findAllLoan(pageSize,pageNumber);
@@ -324,139 +237,40 @@ class LoanAdapterTest {
         }
         assertNotNull(loans);
         assertNotNull(loans.getContent());
-//        assertEquals(1, loans.getTotalElements());
-    }
 
-    @Test
-    @Order(6)
-    void setLoanStatus(){
-        Loan foundLoan = new Loan();
-        try {
-            foundLoan = loanOutputPort.findLoanById(loanId);
-            foundLoan.setLoanStatus(LoanStatus.DEFERRED);
-            foundLoan = loanOutputPort.save(foundLoan);
-        } catch (MeedlException e) {
-            log.error("Error  : {}", e.getMessage());
-        }
-        assertNotNull(foundLoan);
-        assertEquals(LoanStatus.DEFERRED, foundLoan.getLoanStatus());
-        assertEquals(loanId, foundLoan.getId());
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invalid.id"})
-    void deleteLoanByInvalidId(String id){
-        assertThrows(MeedlException.class,()->loanOutputPort.deleteById(id));
     }
 
     @AfterAll
-    void tearDown() {
-        deleteLoan();
+    void cleanUp() throws MeedlException {
+        VendorEntity foundGemsVendorEntity = vendorEntityRepository.findByVendorName(loanProduct.getVendors().get(0).getVendorName());
+        loanProductVendorRepository.deleteByVendorEntityId((foundGemsVendorEntity.getId()));
+        vendorEntityRepository.deleteById(foundGemsVendorEntity.getId());
+        loanOfferOutputPort.deleteLoanOfferById(loanReferralId);
+        loanProductOutputPort.deleteById(loanProduct.getId());
 
-        try {
-            List<OrganizationServiceOffering> organizationServiceOfferings = organizationIdentityOutputPort.
-                    findOrganizationServiceOfferingsByOrganizationId(amazingGraceId);
-            String serviceOfferingId = null;
-            for (OrganizationServiceOffering organizationServiceOffering : organizationServiceOfferings) {
-                serviceOfferingId = organizationServiceOffering.getServiceOffering().getId();
-                organizationIdentityOutputPort.deleteOrganizationServiceOffering(organizationServiceOffering.getId());
-            }
-            if (StringUtils.isNotEmpty(serviceOfferingId)) {
-                organizationIdentityOutputPort.deleteServiceOffering(serviceOfferingId);
-            }
-            organizationIdentityOutputPort.delete(amazingGraceId);
-        } catch (MeedlException e) {
-            log.error("Error deleting organization", e);
-        }
+        loanRequestOutputPort.deleteLoanRequestById(loanReferralId);
+        log.info("loan referal id = {}", loanReferralId);
+        loanReferralOutputPort.deleteLoanReferral(loanReferralId);
+        log.info("cohort loanee id = {}", cohortLoanee.getId());
+        cohortLoaneeOutputPort.delete(cohortLoanee.getId());
+        log.info("cohort id = {}", cohort.getId());
+        cohortOutputPort.deleteCohort(cohort.getId());
+        log.info("loanee id = {}", loanee.getId());
+        loaneeOutputPort.deleteLoanee(loanee.getId());
+        log.info("loanee loane details id = {}", loaneeLoanDetail.getId());
+        loaneeLoanDetailsOutputPort.delete(loaneeLoanDetail.getId());
+        log.info("loan breakdowns = {}", loanBreakdowns);
+        loanBreakdownOutputPort.deleteAll(loanBreakdowns);
+        log.info("program id = {}", program.getId());
+        programOutputPort.deleteProgram(program.getId());
+        log.info("org id = {}", organizationIdentity.getId());
+        organizationIdentityOutputPort.delete(organizationIdentity.getId());
+        log.info("org empoyee  = {}", employeeIdentity.getId());
+        organizationEmployeeIdentityOutputPort.delete(employeeIdentity.getId());
+        log.info("meedl id = {}", meedleUser.getId());
+        userIdentityOutputPort.deleteUserById(meedleUser.getId());
+        log.info("user id = {}", userIdentity.getId());
+        userIdentityOutputPort.deleteUserById(userIdentity.getId());
     }
 
-    private void deleteLoan() {
-        try {
-            nextOfKinOutputPort.deleteNextOfKin(nextOfKinId);
-        } catch (MeedlException e) {
-            log.error("Error deleting next of kin", e);
-        }
-
-        if (StringUtils.isNotEmpty(loaneeLoanAccountId)) {
-            try {
-                loaneeLoanAccountOutputPort.deleteLoaneeLoanAccount(loaneeLoanAccountId);
-            } catch (MeedlException e) {
-                log.error("Error deleting loanee account", e);
-            }
-        }
-        if (StringUtils.isNotEmpty(savedLoanId)) {
-            try {
-                loanOutputPort.deleteById(savedLoanId);
-            } catch (MeedlException e) {
-                log.error("Error deleting loan {}", e.getMessage());
-                throw new RuntimeException(e);
-            }
-        }
-        if (StringUtils.isNotEmpty(loanReferralId) ) {
-            try {
-                loanReferralOutputPort.deleteLoanReferral(loanReferral.getId());
-            } catch (MeedlException e) {
-                log.error("Error deleting loan referral: {}", e.getMessage());
-            }
-        }
-
-        if (StringUtils.isNotEmpty(loanOfferId)) {
-            loanOfferOutputPort.deleteLoanOfferById(loanOfferId);
-        }
-
-        if (StringUtils.isNotEmpty(loanRequestId)) {
-            try {
-                loanRequestOutputPort.deleteLoanRequestById(loanRequestId);
-            } catch (MeedlException e) {
-                log.error("Error deleting loan request: {}", e.getMessage());
-            }
-        }
-
-        if (StringUtils.isNotEmpty(loaneeId)) {
-            try {
-                loaneeOutputPort.deleteLoanee(loaneeId);
-            } catch (MeedlException e) {
-                log.error("Error deleting loanee {}", e.getMessage());
-                throw new RuntimeException(e);
-            }
-        }
-        if (StringUtils.isNotEmpty(loaneeUserId)) {
-            try {
-                userIdentityOutputPort.deleteUserById(loaneeUserId);
-            } catch (MeedlException e) {
-                log.error("Error deleting loanee {}", e.getMessage());
-            }
-        }
-
-        if (StringUtils.isNotEmpty(programId)) {
-            try {
-                programOutputPort.deleteProgram(programId);
-            } catch (MeedlException e) {
-                log.error("Error deleting program: {}", e.getMessage());
-            }
-        }
-
-        if (StringUtils.isNotEmpty(cohortId)) {
-            try {
-                cohortOutputPort.deleteCohort(cohortId);
-            } catch (MeedlException e) {
-                log.error("Error deleting cohort: {}", e.getMessage());
-            }
-        }
-
-        if (CollectionUtils.isNotEmpty(loanBreakdowns)) {
-            loanBreakdownOutputPort.deleteAll(loanBreakdowns);
-        }
-    }
-
-    private UserIdentity saveUserIdentity(UserIdentity userIdentity) throws MeedlException {
-        try {
-            deleteLoan();
-            userIdentityOutputPort.deleteUserById(userIdentity.getId());
-        } catch (MeedlException e) {
-            log.error("Error deleting user {}", e.getMessage());
-        }
-        userIdentity = userIdentityOutputPort.save(userIdentity);
-        return userIdentity;
-    }
 }

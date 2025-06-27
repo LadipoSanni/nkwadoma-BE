@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortLoaneeEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoaneeEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -56,4 +57,29 @@ public interface CohortLoaneeRepository extends JpaRepository<CohortLoaneeEntity
                                                      @Param("status") LoaneeStatus status,
                                                      @Param("uploadedStatus") UploadedStatus uploadedStatus,
                                                      Pageable pageable);
+
+
+    @Query("""
+        select cl from CohortLoaneeEntity cl
+        JOIN LoanReferralEntity lr on lr.cohortLoanee.id = cl.id
+        JOIN LoanRequestEntity lre on lre.id = lr.id
+        JOIN LoanOfferEntity lo on lo.id = lre.id
+        where
+        lo.loanProduct.id = :loanProductId
+    """)
+    Page<CohortLoaneeEntity> findAllLoanProductBenficiaryByLoanProductId(@Param("loanProductId")String loanProductId, Pageable pageRequest);
+
+
+    @Query("""
+        select cl from CohortLoaneeEntity cl
+        JOIN LoanReferralEntity lr on lr.cohortLoanee.id = cl.id
+        JOIN LoanRequestEntity lre on lre.id = lr.id
+        JOIN LoanOfferEntity lo on lo.id = lre.id
+        JOIN LoaneeEntity l on l.id = cl.loanee.id
+        where
+                        lo.loanProduct.id = :loanProductId
+                        and (upper(concat(l.userIdentity.firstName, ' ', l.userIdentity.lastName)) LIKE upper(concat('%', :nameFragment, '%'))
+                        or upper(concat(l.userIdentity.lastName, ' ', l.userIdentity.firstName)) LIKE upper(concat('%', :nameFragment, '%')))
+        """)
+    Page<CohortLoaneeEntity> searchLoanBeneficiaryByLoanProductId(@Param("loanProductId")String loanProductId, @Param("nameFragment") String nameFragment, Pageable pageRequest);
 }

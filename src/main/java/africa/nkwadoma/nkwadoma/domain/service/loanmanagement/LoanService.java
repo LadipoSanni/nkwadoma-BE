@@ -140,7 +140,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (loanOffer.getLoaneeResponse().equals(LoanDecision.DECLINED)){
             throw new LoanException(LoanMessages.CANNOT_START_LOAN_FOR_LOAN_OFFER_THAT_AS_BEEN_DECLINED.getMessage());
         }
-        Optional<Loan> foundLoan = loanOutputPort.viewLoanByLoaneeId(foundLoanee.getId());
+        Optional<Loan> foundLoan = loanOutputPort.findLoanByLoanOfferId(loanOffer.getId());
         if (foundLoan.isPresent()) {
             throw new LoanException(LoanMessages.LOAN_ALREADY_EXISTS_FOR_THIS_LOANEE.getMessage());
         }

@@ -51,8 +51,8 @@ public class LoanAdapter implements LoanOutputPort {
     }
 
     @Override
-    public Optional<Loan> viewLoanByLoaneeId(String loaneeId) {
-        Optional<LoanEntity> loanEntity = loanRepository.findByLoaneeEntityId(loaneeId);
+    public Optional<Loan> findLoanByLoanOfferId(String loaneeId) {
+        Optional<LoanEntity> loanEntity = loanRepository.findByLoanOfferId(loaneeId);
         Optional<Loan> optionalLoan = loanEntity.map(loanMapper::mapToLoan);
         log.info("Loan details returned: {}", optionalLoan);
         return optionalLoan;

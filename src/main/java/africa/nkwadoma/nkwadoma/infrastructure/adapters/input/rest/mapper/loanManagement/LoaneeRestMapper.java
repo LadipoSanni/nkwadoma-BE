@@ -64,10 +64,10 @@ public interface LoaneeRestMapper {
 
     List<LoaneeResponse> toLoaneeResponses(List<Loanee> loanee);
 
-    @Mapping(target = "firstName", source = "userIdentity.firstName")
-    @Mapping(target = "lastName", source = "userIdentity.lastName")
+    @Mapping(target = "firstName", source = "loanee.userIdentity.firstName")
+    @Mapping(target = "lastName", source = "loanee.userIdentity.lastName")
     @Mapping(target = "instituteName", source = "referredBy")
-    LoanBeneficiaryResponse toLoanBeneficiaryResponse(Loanee loanee);
+    LoanBeneficiaryResponse toLoanBeneficiaryResponse(CohortLoanee loanee);
 
     @Mapping(target = "id", source = "id")
     @Mapping(target = "userIdentity.createdBy",  expression = "java(createdBy)")
