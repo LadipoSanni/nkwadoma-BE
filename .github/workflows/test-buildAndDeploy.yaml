@@ -2,7 +2,7 @@ name: Deploy Systest to Local
 
 on:
   push:
-    branches: [dev]
+    branches: ['dev', 'patrick-testing']
   pull_request:
     branches: [dev]
 
@@ -35,36 +35,79 @@ jobs:
           docker build -t $IMAGE_TAG .
           docker push $IMAGE_TAG
 
+  run_tests:
+    name: Run Automation Tests
+    runs-on: ubuntu-latest
+    outputs:
+      automation_test_url_set: ${{ steps.get_automation_test_url.outputs.automation_test_url_set }}
+
+    steps:
+      # - name: Wait for 25 minutes
+      #   run: sleep 1500  # Wait for 25 minutes
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install virtualenv
+        run: pip install virtualenv
+
+      - name: Make test script executable
+        run: chmod +x test_run_QA.sh
+
+      - name: Run automation tests
+        run: ./test_run_QA.sh ${{ secrets.REPO_PAT }}
+
+      # - uses: actions/checkout@v3
+      # - name: Run tests script
+      #   run: |
+      #     chmod +x .github/workflows/scripts/run_tests.sh
+      #     .github/workflows/scripts/run_tests.sh "${{ secrets.REPO_PAT }}"
+      #   env:
+      #     BASE_URL: ${{ secrets.BASE_URL }}
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      # - name: Get Automation Test URL
+      #   id: get_automation_test_url
+      #   if: always()
+      #   run: |
+      #     echo "automation_test_url_set=true" >> $GITHUB_OUTPUT
+
   # deploy-to-local:
   #   name: Deploy to Local Systest
   #   runs-on: self-hosted
   #   needs: build-and-push
   #   if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
-
+  #
   #   steps:
   #     - name: Download Environment File
   #       run: |
   #         ENV_FILE_PATH="/home/cloud-group/nkwadoma-systest.env"
   #         aws s3 cp s3://semicolon-delivery/nkwadoma/backend/systest/nkwadoma.env $ENV_FILE_PATH --region eu-west-1
-
+  #
   #     - name: Free Port 8768 If In Use
   #       run: sudo fuser -k 8768/tcp || true
-
+  #
   #     - name: Restart Docker Container
   #       run: |
   #         CONTAINER_NAME=nkwadoma_container
   #         ENV_FILE_PATH="/home/cloud-group/nkwadoma-systest.env"
   #         IMAGE_TAG=${{ secrets.DOCKER_USERNAME }}/nkwadoma:alpha
-
+  #
   #         # Stop and remove container if it exists
   #         if [ "$(docker ps -aq -f name=$CONTAINER_NAME)" ]; then
   #           docker stop $CONTAINER_NAME || true
   #           docker rm $CONTAINER_NAME || true
   #         fi
-
+  #
   #         # Ensure network exists
   #         docker network inspect meedl-network >/dev/null 2>&1 || docker network create meedl-network
-
+  #
   #         # Pull and run new container
   #         docker pull $IMAGE_TAG
   #         nohup docker run -d \
@@ -74,7 +117,7 @@ jobs:
   #           -p 8768:8768 \
   #           --restart unless-stopped \
   #           $IMAGE_TAG > /dev/null 2>&1 &
-
+  #
   #     - name: Confirm Deployment Success
   #       run: |
   #         sleep 10
