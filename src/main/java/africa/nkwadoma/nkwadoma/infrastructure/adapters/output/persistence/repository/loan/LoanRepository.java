@@ -146,4 +146,17 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
                                                               @Param("organizationId") String organizationId, Pageable pageRequest);
 
     Optional<LoanEntity> findByLoanOfferId(String loanOfferId);
+
+
+    @Query("""
+    SELECT lo.id AS id,
+           cle.referredBy as referredBy
+    
+          FROM LoanEntity lo
+          join LoanOfferEntity loo on lo.id = lo.id
+          join LoanReferralEntity lfe on lfe.id = loo.id
+          join CohortLoaneeEntity cle on cle.id = lfe.cohortLoanee.id
+          where lo.id = :loanId
+    """)
+    LoanProjection findLoanReferralByLoanId(@Param("loanId") String loanId);
 }

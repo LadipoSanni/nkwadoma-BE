@@ -21,4 +21,6 @@ public interface LoanOutputPort {
     Page<Loan> findAllLoan(int pageSize, int pageNumber) throws MeedlException;
 
     Page<Loan> filterLoanByProgram(String programId, String organizationId, int pageSize, int pageNumber) throws MeedlException;
+
+    String findLoanReferal(String id) throws MeedlException;
 }

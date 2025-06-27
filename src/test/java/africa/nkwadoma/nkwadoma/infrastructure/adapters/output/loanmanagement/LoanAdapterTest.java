@@ -118,6 +118,7 @@ class LoanAdapterTest {
             loanee = TestData.createTestLoanee(userIdentity,loaneeLoanDetail);
             loanee = loaneeOutputPort.save(loanee);
             cohortLoanee = TestData.buildCohortLoanee(loanee, cohort,loaneeLoanDetail,meedleUser.getId());
+            cohortLoanee.setReferredBy(organizationIdentity.getName());
             cohortLoanee = cohortLoaneeOutputPort.save(cohortLoanee);
             log.info("Cohort Loanee == : {}", cohortLoanee);
             loanReferral = TestData.buildLoanReferral(cohortLoanee,LoanReferralStatus.PENDING);
@@ -238,6 +239,18 @@ class LoanAdapterTest {
         }
         assertNotNull(loans);
         assertNotNull(loans.getContent());
+    }
+
+    @Test
+    @Order(5)
+    void findLoanReferralByLoanId() {
+        String referBy = "";
+        try {
+           referBy = loanOutputPort.findLoanReferal(loanId);
+        }catch (MeedlException e){
+            log.error("Error finding loan referral : {}", e.getMessage());
+        }
+        assertEquals("Organization test1",referBy);
 
     }
 

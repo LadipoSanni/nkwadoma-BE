@@ -117,4 +117,13 @@ public class LoanAdapter implements LoanOutputPort {
         Page<Loan> loans =  loanProjectionPage.map(loanMapper::mapProjectionToLoan);
         return loans;
     }
+
+    @Override
+    public String findLoanReferal(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id,"Loan id cannot be empty");
+
+        LoanProjection loanProjection = loanRepository.findLoanReferralByLoanId(id);
+
+        return loanProjection.getReferredBy();
+    }
 }

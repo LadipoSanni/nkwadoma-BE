@@ -151,7 +151,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }
         Loan savedLoan = loanOutputPort.save(loan);
         log.info("Saved loan: {}", savedLoan);
-        updateLoanDisbursalOnLoamMatrics(foundLoanee);
+        String referBy = loanOutputPort.findLoanReferal(savedLoan.getId());
+        updateLoanDisbursalOnLoamMatrics(referBy);
         updateInvestmentVehicleTalentFunded(savedLoan);
         return savedLoan;
     }
@@ -164,9 +165,9 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         investmentVehicleOutputPort.save(investmentVehicle);
     }
 
-    private void updateLoanDisbursalOnLoamMatrics(Loanee foundLoanee) throws MeedlException {
+    private void updateLoanDisbursalOnLoamMatrics(String referBy) throws MeedlException {
         Optional<OrganizationIdentity> organizationByName =
-                organizationIdentityOutputPort.findOrganizationByName(foundLoanee.getReferredBy());
+                organizationIdentityOutputPort.findOrganizationByName(referBy);
         if (organizationByName.isEmpty()) {
             throw new ResourceNotFoundException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
         }
@@ -395,7 +396,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanOffer.validateForAcceptOffer();
         log.info("Loan offer identity validated : {}", loanOffer);
         LoanOffer offer = loanOfferOutputPort.findLoanOfferById(loanOffer.getId());
-        log.info("found Loan offer : {}", loanOffer);
+        String referBy = offer.getLoanRequestReferredBy();
+        log.info("found Loan offer : {}", offer);
         Optional<Loanee> optionalLoanee = loaneeOutputPort.findByUserId(loanOffer.getUserId());
         log.info("Loan offer: {}", loanOffer);
         if (optionalLoanee.isEmpty()) {
@@ -414,9 +416,9 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
         if (loanOffer.getLoaneeResponse().equals(LoanDecision.ACCEPTED)){
             log.info("accept offer abt to start : {}", loanOffer);
-            return acceptLoanOffer(loanee.getUserIdentity(), loanOffer, offer);
+            return acceptLoanOffer(loanee.getUserIdentity(), loanOffer, offer,referBy);
         }
-        decreaseLoanOfferOnLoanMetrics(offer);
+        decreaseLoanOfferOnLoanMetrics(referBy);
         declineLoanOffer(loanee.getUserIdentity(), loanOffer, offer);
         return null;
     }
@@ -427,7 +429,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         notifyPortfolioManager(offer, userIdentity);
     }
 
-    private LoaneeLoanAccount acceptLoanOffer(UserIdentity userIdentity, LoanOffer loanOffer, LoanOffer offer) throws MeedlException {
+    private LoaneeLoanAccount acceptLoanOffer(UserIdentity userIdentity, LoanOffer loanOffer, LoanOffer offer,String referBy) throws MeedlException {
         log.info("got into accept method: {}", loanOffer);
         //Loanee Wallet would be Created
         loanOfferMapper.updateLoanOffer(offer, loanOffer);
@@ -446,14 +448,14 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             loaneeLoanAccount = createLoaneeLoanAccount(offer.getLoaneeId());
             log.info("Loanee account is created : {}", loaneeLoanAccount);
         }
-        decreaseLoanOfferOnLoanMetrics(offer);
+        decreaseLoanOfferOnLoanMetrics(referBy);
         log.info("done decreasing  : {}", offer);
         return loaneeLoanAccount;
     }
 
-    private void decreaseLoanOfferOnLoanMetrics(LoanOffer offer) throws MeedlException {
+    private void decreaseLoanOfferOnLoanMetrics(String referBy) throws MeedlException {
         Optional<OrganizationIdentity> organizationByName =
-                organizationIdentityOutputPort.findOrganizationByName(offer.getLoanRequestReferredBy());
+                organizationIdentityOutputPort.findOrganizationByName(referBy);
         if (organizationByName.isEmpty()) {
             throw new ResourceNotFoundException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
         }
