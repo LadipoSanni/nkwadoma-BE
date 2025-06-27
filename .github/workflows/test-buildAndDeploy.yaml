@@ -2,7 +2,7 @@ name: Deploy Systest to Local
 
 on:
   push:
-    branches: ['dev', 'patrick-testing']
+    branches: [dev]
   pull_request:
     branches: [dev]
 
