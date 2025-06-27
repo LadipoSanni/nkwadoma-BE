@@ -55,10 +55,11 @@ else
   cat .env
 fi
 
-# 🔧 Set PYTHONPATH correctly
+# 🔧 Set PYTHONPATH
 echo "🔧 Setting PYTHONPATH..."
 export PYTHONPATH=$(pwd)/src:$(pwd)/config:$(pwd)/utils
 echo "🔧 PYTHONPATH set to: $PYTHONPATH"
+python3 -c "import sys; print('sys.path:', sys.path)"
 
 # 🔍 Test import manually
 echo "🔍 Verifying Python import from config.project_configuration..."
@@ -76,12 +77,12 @@ echo "🧹 Removing __pycache__ and *.pyc files to prevent import issues..."
 find . -type d -name "__pycache__" -exec rm -rf {} +
 find . -type f -name "*.pyc" -delete
 
-# 🧪 Run tests (inline PYTHONPATH!)
-echo "🧪 Running tests with pytest..."
-PYTHONPATH=$(pwd)/src:$(pwd)/config:$(pwd)/utils \
-  pytest test/ --html=report-pytest-results.html --self-contained-html -v
+# 🧪 Run tests from project root to fix import issues in conftest.py
+echo "🧪 Running tests with pytest from project root..."
+cd "$(pwd)"  # Ensure we're at project root
+pytest test/ --rootdir=. --html=report-pytest-results.html --self-contained-html -v
 
-# ☁️ Upload report to S3
+# ☁️ Upload report
 if [ -f "report-pytest-results.html" ]; then
   echo "☁️ Uploading report to S3..."
   aws s3 cp report-pytest-results.html s3://semicolon-delivery/nkwadoma/automation-test-report/automation-tests-result/report-pytest-results.html
