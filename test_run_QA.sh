@@ -56,8 +56,8 @@ else
 fi
 
 # 🔧 Set PYTHONPATH
-PYTHONPATH=$(pwd)/src:$(pwd)/config:$(pwd)/utils
-export PYTHONPATH
+echo "🔧 Setting PYTHONPATH..."
+export PYTHONPATH=$(pwd)/src:$(pwd)/config:$(pwd)/utils
 echo "🔧 PYTHONPATH set to: $PYTHONPATH"
 python3 -c "import sys; print('sys.path:', sys.path)"
 
@@ -77,22 +77,24 @@ echo "🧹 Removing __pycache__ and *.pyc files to prevent import issues..."
 find . -type d -name "__pycache__" -exec rm -rf {} +
 find . -type f -name "*.pyc" -delete
 
-# 🧪 Run tests with PYTHONPATH inline
+# 🧪 Run tests with pytest
 echo "🧪 Running tests with pytest..."
-REPORT_NAME="report-pytest-results.html"
-PYTHONPATH=$PYTHONPATH \
-  python3 -m pytest test/ --html="$REPORT_NAME" --self-contained-html -v
+set +e
+PYTHONPATH=$(pwd)/src:$(pwd)/config:$(pwd)/utils \
+  python3 -m pytest test/ --html=report-pytest-results.html --self-contained-html -v
+TEST_EXIT_CODE=$?
+set -e
 
-# ☁️ Upload report to S3
-if [ -f "$REPORT_NAME" ]; then
+# ☁️ Upload report
+if [ -f "report-pytest-results.html" ]; then
   echo "☁️ Uploading report to S3..."
-  aws s3 cp "$REPORT_NAME" s3://semicolon-delivery/nkwadoma/automation-test-report/"$REPORT_NAME" --region eu-west-1
+  aws s3 cp report-pytest-results.html s3://semicolon-delivery/nkwadoma/automation-test-report/report-pytest-results.html
 else
   echo "⚠️ Test report not found. Skipping S3 upload."
-  exit 1
 fi
 
 # 🔻 Deactivate venv
 deactivate
 
 echo "✅ Script completed."
+exit $TEST_EXIT_CODE
