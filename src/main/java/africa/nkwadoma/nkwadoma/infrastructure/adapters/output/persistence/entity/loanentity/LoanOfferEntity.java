@@ -21,12 +21,8 @@ public class LoanOfferEntity {
     private String id;
     @Enumerated(EnumType.STRING)
     private LoanOfferStatus loanOfferStatus;
-    @OneToOne
-    private LoanRequestEntity loanRequest;
     @ManyToOne
     private LoanProductEntity loanProduct;
-    @ManyToOne
-    private LoaneeEntity loanee;
     private LocalDateTime dateTimeOffered;
     private LocalDateTime dateTimeAccepted;
     private BigDecimal amountApproved;

@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.loanmanagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlnotification.MeedlNotificationUsecase;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
@@ -43,6 +44,7 @@ public class LoanRequestService implements LoanRequestUseCase {
     private final LoanMetricsOutputPort loanMetricsOutputPort;
     private final MeedlNotificationUsecase meedlNotificationUsecase;
     private final UserIdentityOutputPort userIdentityOutputPort;
+    private final LoaneeOutputPort loaneeOutputPort;
 
     @Override
     public Page<LoanRequest> viewAllLoanRequests(LoanRequest loanRequest) throws MeedlException {
@@ -142,6 +144,8 @@ public class LoanRequestService implements LoanRequestUseCase {
 
     private void sendNotification(LoanRequest loanRequest, LoanOffer loanOffer, LoanRequest updatedLoanRequest) throws MeedlException {
         UserIdentity userIdentity = userIdentityOutputPort.findById(loanRequest.getActorId());
+        Loanee loanee = loaneeOutputPort.findLoaneeById(updatedLoanRequest.getLoaneeId());
+        updatedLoanRequest.setLoanee(loanee);
         MeedlNotification meedlNotification = buildUpLoanOfferNotification(loanOffer, updatedLoanRequest, userIdentity);
         log.info("is read before after building notification {}",meedlNotification.isRead());
         meedlNotificationUsecase.sendNotification(meedlNotification);
@@ -197,10 +201,14 @@ public class LoanRequestService implements LoanRequestUseCase {
         );
         loanProduct = loanProductOutputPort.save(loanProduct);
         foundLoanRequest.setStatus(LoanRequestStatus.APPROVED);
+        log.info("found loan request == {}",foundLoanRequest.getLoaneeId());
+        String loaneeId = foundLoanRequest.getLoaneeId();
         foundLoanRequest.setLoaneeId(foundLoanRequest.getLoaneeId());
         foundLoanRequest = loanRequestMapper.updateLoanRequest(loanRequest, foundLoanRequest);
         foundLoanRequest = loanRequestOutputPort.save(foundLoanRequest);
+        log.info("found loan request == {}",foundLoanRequest.getLoaneeId());
         foundLoanRequest.setLoanProduct(loanProduct);
+        foundLoanRequest.setLoaneeId(loaneeId);
         return foundLoanRequest;
     }
 }
