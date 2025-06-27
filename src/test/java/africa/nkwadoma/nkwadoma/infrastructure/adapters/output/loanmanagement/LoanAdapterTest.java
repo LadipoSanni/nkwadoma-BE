@@ -87,8 +87,8 @@ class LoanAdapterTest {
     private LoanOutputPort loanOutputPort;
     private Loan loan;
     private String loanId;
-    int pageSize = 0;
-    int pageNumber = 10;
+    int pageSize = 10;
+    int pageNumber = 0;
 
     @BeforeAll
     void setUpLoanOffer() {
@@ -173,6 +173,7 @@ class LoanAdapterTest {
     void saveLoan(){
         Loan savedLoan;
         try {
+            log.info("loan object {}", loan);
             savedLoan = loanOutputPort.save(loan);
             loanId = savedLoan.getId();
         } catch (MeedlException e) {
@@ -214,8 +215,8 @@ class LoanAdapterTest {
     void findAllLoanByOrganizationId() {
         Page<Loan> loans = Page.empty();
         try {
-            loans = loanOutputPort.findAllByOrganizationId
-                    (organizationIdentity.getId(), 10, 0);
+            log.info("organization id before finding : {}", organizationIdentity.getId());
+            loans = loanOutputPort.findAllByOrganizationId(organizationIdentity.getId(), 10, 0);
         } catch (MeedlException e) {
             log.error("Error finding loans by organization: {}", e.getMessage());
         }
