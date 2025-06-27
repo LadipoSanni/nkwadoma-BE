@@ -502,10 +502,13 @@ class LoaneeServiceTest {
     void searchLoaneeInACohort(){
         Page<CohortLoanee> loanees = Page.empty();
         try {
-            firstLoanee.setLoaneeName("q");
-            when(loaneeOutputPort.searchForLoaneeInCohort(firstLoanee,pageSize,pageNumber))
-                    .thenReturn(new PageImpl<>(List.of(firstLoanee)));
-            loanees = loaneeService.searchForLoaneeInCohort(firstLoanee,pageSize,pageNumber);
+            loaneeCohort.getLoanee().setLoaneeName("q");
+            loaneeCohort.setCohort(elites);
+            loaneeCohort.setUploadedStatus(UploadedStatus.ADDED);
+            Page<CohortLoanee> expectedLoanees = new PageImpl<>(List.of(loaneeCohort));
+            when(cohortLoaneeOutputPort.searchForLoaneeInCohort(any(Loanee.class), eq(pageSize), eq(pageNumber)))
+                    .thenReturn(expectedLoanees);
+            loanees = loaneeService.searchForLoaneeInCohort(loaneeCohort.getLoanee(),pageSize,pageNumber);
         }catch (MeedlException exception){
             log.error("{} {}", exception.getClass().getName(), exception.getMessage());
         }

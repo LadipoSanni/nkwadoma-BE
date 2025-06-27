@@ -452,7 +452,6 @@ public class LoaneeService implements LoaneeUseCase {
     @Override
     public Page<CohortLoanee> searchForLoaneeInCohort(Loanee loanee, int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validateUUID(loanee.getCohortId(), CohortMessages.INVALID_COHORT_ID.getMessage());
-//        return loaneeOutputPort.searchForLoaneeInCohort(loanee, pageSize, pageNumber);
         return cohortLoaneeOutputPort.searchForLoaneeInCohort(loanee, pageSize, pageNumber);
     }
 
