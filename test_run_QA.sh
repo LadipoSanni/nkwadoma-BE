@@ -77,10 +77,10 @@ echo "🧹 Removing __pycache__ and *.pyc files to prevent import issues..."
 find . -type d -name "__pycache__" -exec rm -rf {} +
 find . -type f -name "*.pyc" -delete
 
-# 🧪 Run tests from project root to fix import issues in conftest.py
-echo "🧪 Running tests with pytest from project root..."
-cd "$(pwd)"  # Ensure we're at project root
-pytest test/ --rootdir=. --html=report-pytest-results.html --self-contained-html -v
+# 🧪 Run tests with PYTHONPATH
+echo "🧪 Running tests with pytest..."
+PYTHONPATH=$(pwd)/src:$(pwd)/config:$(pwd)/utils \
+  python3 -m pytest test/ --html=report-pytest-results.html --self-contained-html -v
 
 # ☁️ Upload report
 if [ -f "report-pytest-results.html" ]; then
