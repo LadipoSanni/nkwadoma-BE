@@ -39,30 +39,17 @@ fi
 source venv/bin/activate
 
 # 📦 Install dependencies
-echo "📦 Upgrading pip and installing dependencies..."
+echo "📦 Installing dependencies..."
 pip install --upgrade pip
 pip uninstall -y config || true
 pip show config && echo "❌ Config package still installed! Please remove 'config' from requirements.txt" && exit 1 || echo "✅ Config package not installed"
 pip install pytest pytest-html python-dotenv -r requirements.txt
 
-# 📄 Check if .env file exists and show contents
-echo "📄 Checking if .env file is loaded..."
-if [ ! -f .env ]; then
-  echo "❌ .env file not found in project root!"
-  exit 1
-else
-  echo "✅ .env file found. Contents:"
-  cat .env
-fi
-
 # 🔧 Set PYTHONPATH
-echo "🔧 Setting PYTHONPATH..."
 export PYTHONPATH=$(pwd)/src:$(pwd)/config:$(pwd)/utils
 echo "🔧 PYTHONPATH set to: $PYTHONPATH"
-python3 -c "import sys; print('sys.path:', sys.path)"
 
-# 🔍 Test import manually
-echo "🔍 Verifying Python import from config.project_configuration..."
+# 🔍 Import check
 python3 <<EOF
 try:
     from config.project_configuration import logger
@@ -72,26 +59,28 @@ except Exception as e:
     exit(1)
 EOF
 
-# 🧹 Remove __pycache__ and *.pyc to avoid import mismatches
-echo "🧹 Removing __pycache__ and *.pyc files to prevent import issues..."
+# 🧹 Remove caches
+echo "🧹 Cleaning __pycache__ and *.pyc files..."
 find . -type d -name "__pycache__" -exec rm -rf {} +
 find . -type f -name "*.pyc" -delete
 
-# 🧪 Run tests with PYTHONPATH
-echo "🧪 Running tests with pytest..."
-PYTHONPATH=$(pwd)/src:$(pwd)/config:$(pwd)/utils \
-  python3 -m pytest test/ --html=report-pytest-results.html --self-contained-html -v
+# 🧪 Run tests and generate report
+REPORT_NAME="report-pytest-results.html"
+echo "🧪 Running tests and generating report..."
+pytest test/ --html="$REPORT_NAME" --self-contained-html -v
 
-# ☁️ Upload report
-if [ -f "report-pytest-results.html" ]; then
+# ☁️ Upload report to S3
+if [ -f "$REPORT_NAME" ]; then
+  echo "✅ Report generated: $REPORT_NAME"
   echo "☁️ Uploading report to S3..."
-  aws s3 cp report-pytest-results.html s3://semicolon-delivery/nkwadoma/automation-test-report/automation-tests-result/report-pytest-results.html
+  aws s3 cp "$REPORT_NAME" "s3://semicolon-delivery/nkwadoma/automation-test-report/$REPORT_NAME"
+  echo "✅ Report uploaded to S3!"
 else
-  echo "⚠️ Test report not found. Skipping S3 upload."
+  echo "❌ Report not found. Cannot upload."
   exit 1
 fi
 
 # 🔻 Deactivate venv
 deactivate
 
-echo "✅ Script completed."
+echo "🎉 Script completed."
