@@ -53,7 +53,11 @@ jobs:
       - name: Install virtualenv
         run: pip install virtualenv
 
-      # ✅ Removed redundant AWS CLI install step
+      - name: Install AWS CLI
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install --update
 
       - name: Make test script executable
         run: chmod +x test_run_QA.sh
@@ -65,8 +69,8 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: eu-west-1
 
-      - name: List files for debug
-        run: ls -l nkwadoma_backend_QA || true
+      - name: List report for confirmation
+        run: ls -l
 
       # - name: Get Automation Test URL
       #   id: get_automation_test_url
@@ -95,16 +99,13 @@ jobs:
   #         ENV_FILE_PATH="/home/cloud-group/nkwadoma-systest.env"
   #         IMAGE_TAG=${{ secrets.DOCKER_USERNAME }}/nkwadoma:alpha
   #
-  #         # Stop and remove container if it exists
   #         if [ "$(docker ps -aq -f name=$CONTAINER_NAME)" ]; then
   #           docker stop $CONTAINER_NAME || true
   #           docker rm $CONTAINER_NAME || true
   #         fi
   #
-  #         # Ensure network exists
   #         docker network inspect meedl-network >/dev/null 2>&1 || docker network create meedl-network
   #
-  #         # Pull and run new container
   #         docker pull $IMAGE_TAG
   #         nohup docker run -d \
   #           --env-file $ENV_FILE_PATH \
