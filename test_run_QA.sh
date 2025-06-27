@@ -39,40 +39,52 @@ fi
 source venv/bin/activate
 
 # 📦 Install dependencies
-echo "📦 Installing dependencies..."
+echo "📦 Upgrading pip and installing dependencies..."
 pip install --upgrade pip
 pip uninstall -y config || true
-pip show config && echo "❌ Config package still installed! Remove 'config' from requirements.txt" && exit 1 || echo "✅ Config not installed"
+pip show config && echo "❌ Config package still installed! Please remove 'config' from requirements.txt" && exit 1 || echo "✅ Config package not installed"
 pip install pytest pytest-html python-dotenv -r requirements.txt
 
-# 🔧 Set PYTHONPATH
-export PYTHONPATH=$(pwd)/src:$(pwd)/config:$(pwd)/utils
+# 📄 Check if .env file exists and show contents
+echo "📄 Checking if .env file is loaded..."
+if [ ! -f .env ]; then
+  echo "❌ .env file not found in project root!"
+  exit 1
+else
+  echo "✅ .env file found. Contents:"
+  cat .env
+fi
 
-# 🧹 Clean cache
+# 🔧 Set PYTHONPATH correctly
+echo "🔧 Setting PYTHONPATH..."
+export PYTHONPATH=$(pwd)/src:$(pwd)/config:$(pwd)/utils
+echo "🔧 PYTHONPATH set to: $PYTHONPATH"
+
+# 🔍 Test import manually
+echo "🔍 Verifying Python import from config.project_configuration..."
+python3 <<EOF
+try:
+    from config.project_configuration import logger
+    print('✅ Successfully imported logger')
+except Exception as e:
+    print('❌ Import failed:', str(e))
+    exit(1)
+EOF
+
+# 🧹 Remove __pycache__ and *.pyc to avoid import mismatches
+echo "🧹 Removing __pycache__ and *.pyc files to prevent import issues..."
 find . -type d -name "__pycache__" -exec rm -rf {} +
 find . -type f -name "*.pyc" -delete
 
-# 🧪 Run tests and generate HTML report
-echo "🧪 Running tests..."
-pytest test/ --html=report-pytest-results.html --self-contained-html -v
+# 🧪 Run tests (inline PYTHONPATH!)
+echo "🧪 Running tests with pytest..."
+PYTHONPATH=$(pwd)/src:$(pwd)/config:$(pwd)/utils \
+  pytest test/ --html=report-pytest-results.html --self-contained-html -v
 
 # ☁️ Upload report to S3
 if [ -f "report-pytest-results.html" ]; then
   echo "☁️ Uploading report to S3..."
-  
-  if [[ -z "$AWS_ACCESS_KEY_ID" || -z "$AWS_SECRET_ACCESS_KEY" ]]; then
-    echo "❌ AWS credentials not found. S3 upload skipped."
-    exit 1
-  fi
-
-  export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-eu-west-1}
-
-  aws s3 cp report-pytest-results.html \
-    s3://semicolon-delivery/nkwadoma/automation-test-report/automation-tests-result/report-pytest-results.html \
-    --acl public-read \
-    --content-type text/html
-
-  echo "✅ Report uploaded successfully!"
+  aws s3 cp report-pytest-results.html s3://semicolon-delivery/nkwadoma/automation-test-report/automation-tests-result/report-pytest-results.html
 else
   echo "⚠️ Test report not found. Skipping S3 upload."
   exit 1
@@ -80,4 +92,5 @@ fi
 
 # 🔻 Deactivate venv
 deactivate
+
 echo "✅ Script completed."
