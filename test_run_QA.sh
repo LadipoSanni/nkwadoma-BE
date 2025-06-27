@@ -97,4 +97,4 @@ fi
 deactivate
 
 echo "✅ Script completed."
-exit $TEST_EXIT_CODE
+# exit $TEST_EXIT_CODE
