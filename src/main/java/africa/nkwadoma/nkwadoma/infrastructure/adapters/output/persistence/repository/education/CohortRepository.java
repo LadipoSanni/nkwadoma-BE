@@ -21,7 +21,6 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
             COALESCE(SUM(
                 CASE 
                     WHEN cle.onboardingMode = 'FILE_UPLOADED' THEN lld.amountRequested
-                    ELSE lr.loanAmountRequested
                 END
             ), 0) AS amountRequested,
             c.tuitionAmount AS tuitionAmount,
@@ -33,7 +32,7 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
         LEFT JOIN LoaneeLoanDetailEntity lld ON lld.id = cle.loaneeLoanDetail.id
         LEFT JOIN LoanEntity le ON le.loaneeEntity.id = lne.id AND le.loanOfferId IS NOT NULL
         LEFT JOIN LoanOfferEntity lo ON lo.id = le.loanOfferId
-        LEFT JOIN LoanRequestEntity lr ON lr.id = lo.loanRequest.id
+
         WHERE c.organizationId = :organizationId 
             AND (:cohortStatus IS NULL OR c.cohortStatus = :cohortStatus)
             AND LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%'))
@@ -63,7 +62,7 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
         COALESCE(SUM(
             CASE 
                 WHEN cle.onboardingMode = 'FILE_UPLOADED' THEN lld.amountRequested
-                ELSE lr.loanAmountRequested
+               
             END
         ), 0) AS amountRequested,
         c.tuitionAmount AS tuitionAmount,
@@ -75,7 +74,6 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
     LEFT JOIN LoaneeLoanDetailEntity lld ON lld.id = cle.loaneeLoanDetail.id
     LEFT JOIN LoanEntity le ON le.loaneeEntity.id = lne.id AND le.loanOfferId IS NOT NULL
     LEFT JOIN LoanOfferEntity lo ON lo.id = le.loanOfferId
-    LEFT JOIN LoanRequestEntity lr ON lr.id = lo.loanRequest.id
     WHERE c.organizationId = :organizationId AND c.cohortStatus = :cohortStatus
     GROUP BY c.id, c.name, c.startDate
 """)

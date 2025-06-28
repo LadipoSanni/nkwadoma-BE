@@ -156,6 +156,7 @@ public class LoaneeService implements LoaneeUseCase {
         cohortLoanee = addExistingLoaneeToCohort(loanee, existingLoanee, cohort, cohortLoanee);
         cohortLoanee = addNewLoaneeToCohort(loanee, existingLoanee, cohortLoanee, cohort);
         cohortLoanee = cohortLoaneeOutputPort.save(cohortLoanee);
+        log.info("Successfully added loanee = = {} ", cohortLoanee);
         saveLoaneeLoanBreakdowns(loanee, cohortLoanee);
         updateCohortValues(cohort);
         return cohortLoanee.getLoanee();
@@ -449,9 +450,9 @@ public class LoaneeService implements LoaneeUseCase {
     }
 
     @Override
-    public Page<Loanee> searchForLoaneeInCohort(Loanee loanee, int pageSize, int pageNumber) throws MeedlException {
+    public Page<CohortLoanee> searchForLoaneeInCohort(Loanee loanee, int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validateUUID(loanee.getCohortId(), CohortMessages.INVALID_COHORT_ID.getMessage());
-        return loaneeOutputPort.searchForLoaneeInCohort(loanee, pageSize, pageNumber);
+        return cohortLoaneeOutputPort.searchForLoaneeInCohort(loanee, pageSize, pageNumber);
     }
 
     private void checkLoaneeStatus(CohortLoanee cohortLoanee) throws MeedlException {

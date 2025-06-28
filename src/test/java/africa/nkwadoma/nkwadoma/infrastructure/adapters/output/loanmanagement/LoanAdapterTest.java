@@ -190,7 +190,7 @@ class LoanAdapterTest {
             assertNotNull(loanRequest.getId());
             loanRequestId = loanRequest.getId();
 
-            LoanOffer loanOffer = TestData.buildLoanOffer(loanRequest, loanee);
+            LoanOffer loanOffer = TestData.buildLoanOffer(loanRequest);
             loanOffer.setId(loanReferralId);
             loanOffer = loanOfferOutputPort.save(loanOffer);
             assertNotNull(loanOffer);

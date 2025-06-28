@@ -20,6 +20,9 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.VendorEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanProductVendorRepository;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.VendorEntityRepository;
 import africa.nkwadoma.nkwadoma.testUtilities.TestUtils;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
@@ -74,6 +77,13 @@ public class LoanBookServiceTest {
     private CohortOutputPort cohortOutputPort;
     @Autowired
     private LoanProductOutputPort loanProductOutputPort;
+    @Autowired
+    private LoanProductVendorRepository loanProductVendorRepository;
+    @Autowired
+    private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
+    private LoanProduct loanProduct;
+    @Autowired
+    private VendorEntityRepository vendorEntityRepository;
 
     @BeforeAll
     void setUp() throws IOException, MeedlException {
@@ -95,7 +105,7 @@ public class LoanBookServiceTest {
     }
 
     private LoanProduct saveLoanProduct() throws MeedlException {
-        LoanProduct loanProduct = TestData.buildTestLoanProduct();
+         loanProduct = TestData.buildTestLoanProduct();
         loanProduct = loanProductOutputPort.save(loanProduct);
         return loanProduct;
     }
@@ -187,6 +197,27 @@ public class LoanBookServiceTest {
 //        } catch (MeedlException e) {
 //            log.error("Error uploading repayment record book. {}", e.getMessage());
 //        }
+    }
+
+    @AfterAll
+    void tearDown() throws MeedlException {
+        VendorEntity foundGemsVendorEntity = vendorEntityRepository.findByVendorName(loanProduct.getVendors().get(0).getVendorName());
+
+        loanProductVendorRepository.deleteByVendorEntityId((foundGemsVendorEntity.getId()));
+
+        LoanProduct foundGoldLoanProduct = loanProductOutputPort.findByName(loanProduct.getName());
+        loanProductOutputPort.deleteById(foundGoldLoanProduct.getId());
+
+        log.info("cohort id = {}", cohort.getId());
+        cohortOutputPort.deleteCohort(cohort.getId());
+
+        log.info("program id = {}", program.getId());
+        programOutputPort.deleteProgram(program.getId());
+        log.info("org id = {}", organizationIdentity.getId());
+        organizationIdentityOutputPort.delete(organizationIdentity.getId());
+        log.info("meedl id = {}", meedleUser.getId());
+        userIdentityOutputPort.deleteUserById(meedleUser.getId());
+        identityManagerOutputPort.deleteUser(meedleUser);
     }
 
 }

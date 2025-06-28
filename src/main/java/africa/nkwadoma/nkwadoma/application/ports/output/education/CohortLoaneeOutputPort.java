@@ -22,4 +22,6 @@ public interface CohortLoaneeOutputPort {
     boolean checkIfLoaneeHasBeenPreviouslyReferred(String loaneeId) throws MeedlException;
 
     Page<CohortLoanee> findAllLoaneeInCohort(Loanee loanee, int pageSize, int pageNumber) throws MeedlException;
+
+    Page<CohortLoanee> searchForLoaneeInCohort(Loanee loanee, int pageSize, int pageNumber) throws MeedlException;
 }

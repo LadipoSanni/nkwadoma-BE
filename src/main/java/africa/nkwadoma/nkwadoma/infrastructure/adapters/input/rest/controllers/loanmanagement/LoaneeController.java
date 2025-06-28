@@ -131,9 +131,9 @@ public class LoaneeController {
                                                                   @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber)throws MeedlException {
         Loanee loanee = Loanee.builder().cohortId(cohortId).loaneeStatus(status)
                 .loaneeName(loaneeName).uploadedStatus(uploadedStatus).build();
-       Page<Loanee> loanees = loaneeUseCase.searchForLoaneeInCohort(loanee,pageSize,pageNumber);
-       List<LoaneeResponse> loaneeResponse = loanees.stream()
-               .map(loaneeRestMapper::toLoaneeResponse).toList();
+       Page<CohortLoanee> loanees = loaneeUseCase.searchForLoaneeInCohort(loanee,pageSize,pageNumber);
+        List<LoaneeResponse> loaneeResponse = loanees.stream()
+               .map(loaneeRestMapper::mapToLoaneeResponse).toList();
        PaginatedResponse<LoaneeResponse> paginatedResponse = new PaginatedResponse<>(
                loaneeResponse,loanees.hasNext(),
                loanees.getTotalPages(), loanees.getTotalElements() , pageNumber, pageSize

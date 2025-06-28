@@ -22,6 +22,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.ModeOfPayment;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.UploadedStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanRequestStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
@@ -144,9 +145,10 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
 
                         LoanReferral loanReferral = acceptLoanReferral(loanee);
 
+
+                        LoanRequest loanRequest = acceptLoanRequest(loanee, loanReferral, loanBook);
                         // TODO
-                        // COMING BACK FOR LOANREQUEST AND ALL
-//                        LoanRequest loanRequest = acceptLoanRequest(loanee, loanReferral, loanBook);
+                        // COMING BACK FOR LOAN_OFFER AND ALL
 //                        acceptLoanOffer(loanRequest);
 //                        startLoan(loanRequest,loanee.getUpdatedAt() );
                     } catch (MeedlException e) {
@@ -177,7 +179,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         respondToLoanReferralUseCase.respondToLoanReferral(loanReferral);
         return loanReferral;
     }
-    private LoanRequest acceptLoanRequest(Loanee loanee, LoanReferral loanReferral, LoanBook loanBook) throws MeedlException {
+    private LoanRequest acceptLoanRequest(CohortLoanee loanee, LoanReferral loanReferral, LoanBook loanBook) throws MeedlException {
         log.info("Loan Amount Approved is {}", loanee.getLoaneeLoanDetail().getAmountApproved());
         log.info("Amount received by this loanee {}", loanee.getLoaneeLoanDetail().getAmountReceived());
         LoanRequest loanRequest = LoanRequest.builder()
@@ -185,10 +187,12 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                 .loanAmountRequested(loanee.getLoaneeLoanDetail().getAmountRequested())
                 .loanRequestDecision(LoanDecision.ACCEPTED)
                 .id(loanReferral.getId())
-                .loanProductId(findLoanProductIdByName(loanee.getCohortName()))
-                .loanee(loanee)
+                .loanProductId(findLoanProductIdByName(loanee.getCohort().getName()))
                 .actorId(loanBook.getActorId())
                 .referredBy(loanee.getReferredBy())
+                .createdDate(LocalDateTime.now())
+                .dateTimeApproved(LocalDateTime.now())
+                .status(LoanRequestStatus.APPROVED)
                 .build();
         log.info("Accepting loan request for uploaded loanee {}", loanRequest);
         return loanRequestUseCase.respondToLoanRequest(loanRequest);

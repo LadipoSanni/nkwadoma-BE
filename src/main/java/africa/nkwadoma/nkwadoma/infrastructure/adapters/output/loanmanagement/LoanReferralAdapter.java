@@ -67,22 +67,6 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
     }
 
     @Override
-    public LoanReferral createLoanReferral(Loanee loanee) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
-        LoanReferral loanReferral = new LoanReferral();
-        loanReferral.setLoanee(loanee);
-        loanReferral.setLoanReferralStatus(LoanReferralStatus.PENDING);
-        loanReferral.validateForCreate();
-        LoanReferralEntity loanReferralEntity =
-                loanReferralMapper.toLoanReferralEntity(loanReferral);
-        loanReferralEntity = loanReferralRepository.save(loanReferralEntity);
-        log.info("Created loan referral entity: {}", loanReferralEntity);
-        loanReferral = loanReferralMapper.toLoanReferral(loanReferralEntity);
-        log.info("Mapped loan referral: {}", loanReferral);
-        return loanReferral;
-    }
-
-    @Override
     public List<LoanReferral> findLoanReferralByUserId(String userId) throws MeedlException {
         MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
         List<LoanReferralEntity> loanReferralEntities = loanReferralRepository.findAllByCohortLoanee_Loanee_UserIdentity_id(userId);

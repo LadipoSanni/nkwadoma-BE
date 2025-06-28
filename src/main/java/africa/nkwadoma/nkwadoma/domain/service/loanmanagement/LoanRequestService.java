@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.loanmanagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlnotification.MeedlNotificationUsecase;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
@@ -43,6 +44,7 @@ public class LoanRequestService implements LoanRequestUseCase {
     private final LoanMetricsOutputPort loanMetricsOutputPort;
     private final MeedlNotificationUsecase meedlNotificationUsecase;
     private final UserIdentityOutputPort userIdentityOutputPort;
+    private final LoaneeOutputPort loaneeOutputPort;
 
     @Override
     public Page<LoanRequest> viewAllLoanRequests(LoanRequest loanRequest) throws MeedlException {
@@ -67,8 +69,8 @@ public class LoanRequestService implements LoanRequestUseCase {
         loanRequest = loanRequestOutputPort.findById(loanRequest.getId());
         log.info("Found loan request: {}", loanRequest);
         List<LoaneeLoanBreakdown> loaneeLoanBreakdowns =
-                loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(loanRequest.getLoaneeId());
-        log.info("Loanee loan breakdowns by loanee with ID: {}: {}", loanRequest.getLoaneeId(), loaneeLoanBreakdowns);
+                loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(loanRequest.getCohortLoaneeId());
+        log.info("Loanee loan breakdowns by loanee with cohort loanee id : {}: {}", loanRequest.getCohortLoaneeId(), loaneeLoanBreakdowns);
         Loanee loanee = new Loanee();
         try {
             loanee = loaneeUseCase.viewLoaneeDetails(loanRequest.getLoaneeId(), userId);
@@ -86,8 +88,8 @@ public class LoanRequestService implements LoanRequestUseCase {
     public LoanRequest respondToLoanRequest(LoanRequest loanRequest) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanRequest, LoanMessages.LOAN_REQUEST_MUST_NOT_BE_EMPTY.getMessage());
         loanRequest.validateLoanProductIdAndAmountApproved();
-        LoanRequest foundLoanRequest = loanRequestOutputPort.findLoanRequestById(loanRequest.getId()).
-                orElseThrow(()-> new LoanException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage()));
+        LoanRequest foundLoanRequest = loanRequestOutputPort.findById(loanRequest.getId());
+
         log.info("Loan request retrieved: {}", foundLoanRequest);
 
         if (ObjectUtils.isNotEmpty(foundLoanRequest.getStatus())
@@ -100,9 +102,9 @@ public class LoanRequestService implements LoanRequestUseCase {
     private LoanRequest respondToLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
         LoanRequest updatedLoanRequest;
         if (loanRequest.getLoanRequestDecision() == LoanDecision.ACCEPTED) {
-            if (!foundLoanRequest.getLoanee().getUserIdentity().isIdentityVerified() &&
-            !foundLoanRequest.getLoanee().getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)){
-                log.info("The loanee for this loan request is not verified. Onboarding mode is: {}. {}", foundLoanRequest.getLoanee().getOnboardingMode(), LoanMessages.LOAN_REQUEST_CANNOT_BE_APPROVED.getMessage());
+            if (!foundLoanRequest.isVerified() &&
+            !foundLoanRequest.getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)){
+                log.info("The loanee for this loan request is not verified. Onboarding mode is: {}. {}", foundLoanRequest.getOnboardingMode(), LoanMessages.LOAN_REQUEST_CANNOT_BE_APPROVED.getMessage());
                 throw new LoanException(LoanMessages.LOAN_REQUEST_CANNOT_BE_APPROVED.getMessage());
             }
             updatedLoanRequest = approveLoanRequest(loanRequest, foundLoanRequest);
@@ -141,6 +143,8 @@ public class LoanRequestService implements LoanRequestUseCase {
 
     private void sendNotification(LoanRequest loanRequest, LoanOffer loanOffer, LoanRequest updatedLoanRequest) throws MeedlException {
         UserIdentity userIdentity = userIdentityOutputPort.findById(loanRequest.getActorId());
+        Loanee loanee = loaneeOutputPort.findLoaneeById(updatedLoanRequest.getLoaneeId());
+        updatedLoanRequest.setLoanee(loanee);
         MeedlNotification meedlNotification = buildUpLoanOfferNotification(loanOffer, updatedLoanRequest, userIdentity);
         log.info("is read before after building notification {}",meedlNotification.isRead());
         meedlNotificationUsecase.sendNotification(meedlNotification);
@@ -196,10 +200,14 @@ public class LoanRequestService implements LoanRequestUseCase {
         );
         loanProduct = loanProductOutputPort.save(loanProduct);
         foundLoanRequest.setStatus(LoanRequestStatus.APPROVED);
-        foundLoanRequest.setLoaneeId(foundLoanRequest.getLoanee().getId());
+        log.info("found loan request == {}",foundLoanRequest.getLoaneeId());
+        String loaneeId = foundLoanRequest.getLoaneeId();
+        foundLoanRequest.setLoaneeId(foundLoanRequest.getLoaneeId());
         foundLoanRequest = loanRequestMapper.updateLoanRequest(loanRequest, foundLoanRequest);
         foundLoanRequest = loanRequestOutputPort.save(foundLoanRequest);
+        log.info("found loan request == {}",foundLoanRequest.getLoaneeId());
         foundLoanRequest.setLoanProduct(loanProduct);
+        foundLoanRequest.setLoaneeId(loaneeId);
         return foundLoanRequest;
     }
 }

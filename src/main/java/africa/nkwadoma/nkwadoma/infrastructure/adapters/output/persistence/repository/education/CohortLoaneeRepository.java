@@ -41,4 +41,19 @@ public interface CohortLoaneeRepository extends JpaRepository<CohortLoaneeEntity
                                                @Param("loaneeStatus") LoaneeStatus loaneeStatus,
                                                @Param("uploadedStatus") UploadedStatus uploadedStatus,
                                                Pageable pageRequest);
+
+    @Query("""
+        SELECT l FROM CohortLoaneeEntity l
+        WHERE l.cohort.id = :cohortId
+        AND (upper(concat(l.loanee.userIdentity.firstName, ' ', l.loanee.userIdentity.lastName)) LIKE upper(concat('%', :nameFragment, '%'))
+        OR upper(concat(l.loanee.userIdentity.lastName, ' ', l.loanee.userIdentity.firstName)) LIKE upper(concat('%', :nameFragment, '%')))
+        AND (:status IS NULL OR l.loaneeStatus = :status)
+        AND (:uploadedStatus IS NULL OR l.uploadedStatus = :uploadedStatus)
+        AND l.loaneeStatus != 'ARCHIVE'
+    """)
+    Page<CohortLoaneeEntity> findByCohortIdAndNameFragment(@Param("cohortId") String cohortId,
+                                                     @Param("nameFragment") String nameFragment,
+                                                     @Param("status") LoaneeStatus status,
+                                                     @Param("uploadedStatus") UploadedStatus uploadedStatus,
+                                                     Pageable pageable);
 }

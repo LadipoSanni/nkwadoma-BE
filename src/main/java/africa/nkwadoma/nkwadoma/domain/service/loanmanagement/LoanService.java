@@ -282,9 +282,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     private LoanReferral updateLoanReferral(LoanReferral loanReferral, LoanReferral foundLoanReferral) throws MeedlException {
         if (loanReferral.getLoanReferralStatus().equals(LoanReferralStatus.ACCEPTED)) {
+            log.info("found loan referral == {}", foundLoanReferral );
             LoanRequest loanRequest = loanRequestMapper.mapLoanReferralToLoanRequest(foundLoanReferral);
+            loanRequest.setStatus(LoanRequestStatus.NEW);
             loanRequest.setLoanReferralStatus(LoanReferralStatus.ACCEPTED);
-            loanRequest.setId(loanReferral.getId());
             log.info("Mapped loan request: {}", loanRequest);
             loanRequest = createLoanRequest(loanRequest);
             log.info("Created loan request: {}", loanRequest);
@@ -301,9 +302,9 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     private void updateLoanReferralOnMetrics(LoanReferral foundLoanReferral) throws MeedlException {
-        log.info("org name ====  {}",foundLoanReferral.getLoanee().getReferredBy());
+        log.info("org name ====  {}",foundLoanReferral.getCohortLoanee().getReferredBy());
         Optional<OrganizationIdentity> organization =
-                organizationIdentityOutputPort.findOrganizationByName(foundLoanReferral.getLoanee().getReferredBy());
+                organizationIdentityOutputPort.findOrganizationByName(foundLoanReferral.getCohortLoanee().getReferredBy());
         if (organization.isEmpty()) {
             throw new LoanException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
         }
@@ -330,14 +331,14 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         LoanRequest request = loanRequestOutputPort.save(loanRequest);
         log.info("Saved loan request: {}", request);
         log.info("About to increase loan request count on metrics : {}", request);
-        increaseLoanRequestOnLoanMetrics(loanRequest);
+        increaseLoanRequestOnLoanMetrics(request.getReferredBy());
         return request;
     }
 
-    private void increaseLoanRequestOnLoanMetrics(LoanRequest loanRequest) throws MeedlException {
-        log.info("org name ====  {}",loanRequest.getLoanee().getReferredBy());
+    private void increaseLoanRequestOnLoanMetrics(String refferBy) throws MeedlException {
+        log.info("org name ====  {}",refferBy);
         Optional<OrganizationIdentity> organization =
-                organizationIdentityOutputPort.findOrganizationByName(loanRequest.getLoanee().getReferredBy());
+                organizationIdentityOutputPort.findOrganizationByName(refferBy);
         if (organization.isEmpty()) {
             throw new LoanException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
         }
@@ -359,14 +360,12 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (loanRequest.getStatus() != LoanRequestStatus.APPROVED) {
             throw new LoanException(LoanMessages.LOAN_REQUEST_MUST_HAVE_BEEN_APPROVED.getMessage());
         }
-        loanOffer.setLoanRequest(loanRequest);
+
         loanOffer.setLoanOfferStatus(LoanOfferStatus.OFFERED);
         loanOffer.setDateTimeOffered(LocalDateTime.now());
         loanOffer.setLoanProduct(loanRequest.getLoanProduct());
         loanOffer.setId(loanRequest.getId());
         loanOffer.setAmountApproved(loanRequest.getLoanAmountApproved());
-        Loanee loanee = loaneeOutputPort.findLoaneeById(loanRequest.getLoanee().getId());
-        loanOffer.setLoanee(loanee);
 
         loanOffer = loanOfferOutputPort.save(loanOffer);
         log.info("Loan offer ID: {}", loanOffer.getId());
@@ -376,7 +375,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     private void increaseLoanOfferOnLoanMetrics(LoanRequest loanRequest) throws MeedlException {
         Optional<OrganizationIdentity> organizationByName =
-                organizationIdentityOutputPort.findOrganizationByName(loanRequest.getLoanee().getReferredBy());
+                organizationIdentityOutputPort.findOrganizationByName(loanRequest.getReferredBy());
         if (organizationByName.isEmpty()) {
             throw new ResourceNotFoundException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
         }
