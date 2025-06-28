@@ -22,8 +22,10 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -83,6 +85,8 @@ public class LoanOfferAdapterTest {
     private VendorEntityRepository vendorEntityRepository;
     @Autowired
     private LoanProductVendorRepository loanProductVendorRepository;
+    private int pageSize = 10;
+    private int pageNumber = 0;
 
 
 
@@ -183,6 +187,11 @@ public class LoanOfferAdapterTest {
         assertEquals(savedLoanOffer.getId(), loanOffer.getId());
     }
 
+    @Test
+    void findLoanOfferByNullId() {
+        assertThrows(MeedlException.class, () -> loanOfferOutputPort.findLoanOfferById(null));
+    }
+
     @Order(2)
     @Test
     void findLoanOfferById(){
@@ -195,6 +204,54 @@ public class LoanOfferAdapterTest {
         assertEquals(foundLoanOffer.getId(),loanReferralId);
     }
 
+
+    @Test
+    void findAllLoanOfferAssignedToLoaneeWithNullUserId() {
+        assertThrows(MeedlException.class, () -> loanOfferOutputPort.findAllLoanOfferAssignedToLoanee(null,pageSize,pageNumber));
+    }
+
+
+    @Order(3)
+    @Test
+    void findAllLoanOfferAssignedToLOaneeByUserId(){
+        Page<LoanOffer> loanOffers = Page.empty();
+        try{
+            loanOffers = loanOfferOutputPort.findAllLoanOfferAssignedToLoanee(userIdentity.getId(),pageSize,pageNumber);
+        }catch (MeedlException exception){
+            log.info("Failed to find all loan Offers assigned to loanee {}", exception.getMessage());
+        }
+        assertEquals(1,loanOffers.getTotalElements());
+    }
+
+
+    @Test
+    void findAllLoanOfferAssignedToLoaneeInOrganizationWithNullOrganizationId() {
+        assertThrows(MeedlException.class, () -> loanOfferOutputPort.findAllLoanOfferedToLoaneesInOrganization(null,pageSize,pageNumber));
+    }
+
+    @Order(3)
+    @Test
+    void findAllLoanOfferAssignedToLoaneeInOrganizationByOrganizationId(){
+        Page<LoanOffer> loanOffers = Page.empty();
+        try{
+            loanOffers = loanOfferOutputPort.findAllLoanOfferedToLoaneesInOrganization(organizationIdentity.getId(),pageSize,pageNumber);
+        }catch (MeedlException exception){
+            log.info("Failed to find all loan Offers assigned to loanee in this organization {}", exception.getMessage());
+        }
+        assertEquals(1,loanOffers.getTotalElements());
+    }
+
+    @Order(3)
+    @Test
+    void findAllLoanOffer(){
+        Page<LoanOffer> loanOffers = Page.empty();
+        try{
+            loanOffers = loanOfferOutputPort.findAllLoanOfferedToLoaneesInOrganization(organizationIdentity.getId(),pageSize,pageNumber);
+        }catch (MeedlException exception){
+            log.info("Failed to find all loan Offered {}", exception.getMessage());
+        }
+        assertEquals(1,loanOffers.getTotalElements());
+    }
 
 
 

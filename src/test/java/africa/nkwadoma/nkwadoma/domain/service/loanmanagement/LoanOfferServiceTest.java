@@ -112,28 +112,28 @@ public class LoanOfferServiceTest {
     }
 
 
-    //TODO COMING BACK TO FIX
-//    @Test
-//    void createLoanOfferWithValidLoanRequestId() {
-//        OrganizationIdentity organizationIdentity = OrganizationIdentity.builder().id(mockId2).build();
-//        loanRequest.setStatus(LoanRequestStatus.APPROVED);
-//        LoanOffer cretedLoanOffer = new LoanOffer();
-//        try {
-//            when(loaneeOutputPort.findLoaneeById(loanRequest.getLoanee().getId())).thenReturn(loanRequest.getLoanee());
-//            when(loanOfferOutputPort.save(any(LoanOffer.class))).thenReturn(loanOffer);
-//            when(organizationIdentityOutputPort.findOrganizationByName(
-//                    loanOffer.getLoanRequest().getLoanee().getReferredBy())).thenReturn(Optional.of(organizationIdentity));
-//            when(loanMetricsOutputPort.findByOrganizationId(organizationIdentity.getId()))
-//                    .thenReturn(Optional.of(loanMetrics));
-//            when(loanMetricsOutputPort.save(loanMetrics)).thenReturn(loanMetrics);
-//            cretedLoanOffer = loanService.createLoanOffer(loanRequest);
-//        } catch (MeedlException exception) {
-//            log.error(exception.getMessage());
-//        }
-//        assertEquals(LoanRequestStatus.APPROVED, cretedLoanOffer.getLoanRequest().getStatus());
-//        assertEquals(LoanOfferStatus.OFFERED, cretedLoanOffer.getLoanOfferStatus());
-//        assertNotNull(cretedLoanOffer.getDateTimeOffered());
-//    }
+   // TODO COMING BACK TO FIX
+    @Test
+    void createLoanOfferWithValidLoanRequestId() {
+        OrganizationIdentity organizationIdentity = OrganizationIdentity.builder().id(mockId2).build();
+        loanRequest.setStatus(LoanRequestStatus.APPROVED);
+        loanRequest.setReferredBy(organizationIdentity.getName());
+        LoanOffer cretedLoanOffer = new LoanOffer();
+        try {
+            when(loanOfferOutputPort.save(any(LoanOffer.class))).thenReturn(loanOffer);
+            when(organizationIdentityOutputPort.findOrganizationByName(
+                    loanRequest.getReferredBy())).thenReturn(Optional.of(organizationIdentity));
+            when(loanMetricsOutputPort.findByOrganizationId(organizationIdentity.getId()))
+                    .thenReturn(Optional.of(loanMetrics));
+            when(loanMetricsOutputPort.save(loanMetrics)).thenReturn(loanMetrics);
+            cretedLoanOffer = loanService.createLoanOffer(loanRequest);
+        } catch (MeedlException exception) {
+            log.error(exception.getMessage());
+        }
+        assertEquals(LoanRequestStatus.APPROVED, cretedLoanOffer.getLoanRequest().getStatus());
+        assertEquals(LoanOfferStatus.OFFERED, cretedLoanOffer.getLoanOfferStatus());
+        assertNotNull(cretedLoanOffer.getDateTimeOffered());
+    }
 
     @Test
     void createLoanOfferWithUnApprovedLoanRequest() {
@@ -205,12 +205,13 @@ public class LoanOfferServiceTest {
 
     @Test
     void viewAllLoanOffer(){
-        Page<LoanOffer> loanOffers = null;
+        Page<LoanOffer> loanOffers = new PageImpl<>(Collections.singletonList(loanOffer));
         try {
+            userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
             when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
-            when(loanOfferOutputPort.findAllLoanOffer(1,0)).
+            when(loanOfferOutputPort.findAllLoanOffer(10,0)).
                     thenReturn(new PageImpl<>(List.of(loanOffer)));
-//            loanOffers = loanService.viewAllLoanOffers(mockId,1,0, );
+            loanOffers = loanService.viewAllLoanOffers(mockId,10,0,null);
         }catch (MeedlException exception){
             log.info(exception.getMessage());
         }
@@ -233,13 +234,14 @@ public class LoanOfferServiceTest {
         userIdentity.setRole(IdentityRole.LOANEE);
         LoanOffer mockLoanOffer = new LoanOffer();
         mockLoanOffer.setLoaneeId(mockId);
+        mockLoanOffer.setCohortLoaneeId(mockId);
         Loanee mockLoanee = new Loanee();
         UserIdentity mockLoaneeIdentity = new UserIdentity();
         mockLoaneeIdentity.setId(loaneeId);
         mockLoanee.setUserIdentity(mockLoaneeIdentity);
         when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
         when(loanOfferOutputPort.findLoanOfferById(mockId)).thenReturn(mockLoanOffer);
-        when(loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(mockId))
+        when(loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(mockLoanOffer.getCohortLoaneeId()))
                 .thenReturn(List.of(TestData.createTestLoaneeLoanBreakdown(mockId)));
         when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(mockLoanee);
         assertThrows(
@@ -253,10 +255,11 @@ public class LoanOfferServiceTest {
     void viewLoanOfferDetails(){
         try {
             loanOffer.setLoaneeId(mockId);
+            loanOffer.setCohortLoaneeId(mockId);
             userIdentity.setRole(IdentityRole.LOANEE);
             when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
             when(loanOfferOutputPort.findLoanOfferById(mockId)).thenReturn(loanOffer);
-            when(loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(anyString()))
+            when(loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(loanOffer.getCohortLoaneeId()))
                      .thenReturn(List.of(TestData.createTestLoaneeLoanBreakdown(mockId)));
             when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(loanee);
             loanOffer = loanService.viewLoanOfferDetails(mockId,mockId);
