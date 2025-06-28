@@ -1,4 +1,3 @@
-
 #!/bin/bash
 set -e
 
@@ -78,21 +77,24 @@ echo "🧹 Removing __pycache__ and *.pyc files to prevent import issues..."
 find . -type d -name "__pycache__" -exec rm -rf {} +
 find . -type f -name "*.pyc" -delete
 
-# 🧪 Run tests with PYTHONPATH
+# 🧪 Run tests with pytest
 echo "🧪 Running tests with pytest..."
+set +e
 PYTHONPATH=$(pwd)/src:$(pwd)/config:$(pwd)/utils \
   python3 -m pytest test/ --html=report-pytest-results.html --self-contained-html -v
+TEST_EXIT_CODE=$?
+set -e
 
 # ☁️ Upload report
 if [ -f "report-pytest-results.html" ]; then
   echo "☁️ Uploading report to S3..."
-  aws s3 cp report-pytest-results.html s3://semicolon-delivery/nkwadoma/automation-test-report/automation-tests-result/report-pytest-results.html
+  aws s3 cp report-pytest-results.html s3://semicolon-delivery/nkwadoma/automation-test-report/report-pytest-results.html
 else
   echo "⚠️ Test report not found. Skipping S3 upload."
-  exit 1
 fi
 
 # 🔻 Deactivate venv
 deactivate
 
 echo "✅ Script completed."
+exit $TEST_EXIT_CODE
