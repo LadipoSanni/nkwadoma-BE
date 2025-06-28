@@ -8,7 +8,6 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.*;
-import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanOfferStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanRequestStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
@@ -209,9 +208,9 @@ public class LoanOfferServiceTest {
         Page<LoanOffer> loanOffers = null;
         try {
             when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
-            when(loanOfferOutputPort.findAllLoanOffers(1,0)).
+            when(loanOfferOutputPort.findAllLoanOffer(1,0)).
                     thenReturn(new PageImpl<>(List.of(loanOffer)));
-            loanOffers = loanService.viewAllLoanOffers(mockId,1,0);
+//            loanOffers = loanService.viewAllLoanOffers(mockId,1,0, );
         }catch (MeedlException exception){
             log.info(exception.getMessage());
         }

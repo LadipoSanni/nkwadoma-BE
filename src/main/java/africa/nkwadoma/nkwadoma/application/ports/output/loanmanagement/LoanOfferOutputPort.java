@@ -12,13 +12,15 @@ public interface LoanOfferOutputPort {
 
     void deleteLoanOfferById(String loanOfferId);
 
-    Page<LoanOffer> findLoanOfferInOrganization(String organization,int pageSize , int pageNumber) throws MeedlException;
+    Page<LoanOffer> findAllLoanOfferedToLoaneesInOrganization(String organizationId, int pageSize , int pageNumber) throws MeedlException;
 
-    Page<LoanOffer> findAllLoanOffers(int pageSize, int pageNumber) throws MeedlException;
+    Page<LoanOffer> findAllLoanOffer(int pageSize, int pageNumber) throws MeedlException;
 
     Page<LoanOffer> searchLoanOffer(LoanOffer loanOffer) throws MeedlException;
 
     Page<LoanOffer> filterLoanOfferByProgram(LoanOffer loanOffer) throws MeedlException;
 
     LoanOffer findLoanOfferByLoaneeId(String loaneeId) throws MeedlException;
+
+    Page<LoanOffer> findAllLoanOfferAssignedToLoanee(String id, int pageSize, int pageNumber) throws MeedlException;
 }

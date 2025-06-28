@@ -473,7 +473,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         MeedlValidator.validateUUID(organizationId,OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validatePageNumber(pageNumber);
-        return loanOfferOutputPort.findLoanOfferInOrganization(organizationId, pageSize, pageNumber);
+        return loanOfferOutputPort.findAllLoanOfferedToLoaneesInOrganization(organizationId, pageSize, pageNumber);
     }
 
 
@@ -492,15 +492,19 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     @Override
-    public Page<LoanOffer> viewAllLoanOffers(String userId,int pageSize , int pageNumber) throws MeedlException {
+    public Page<LoanOffer> viewAllLoanOffers(String userId, int pageSize , int pageNumber, String organizationId) throws MeedlException {
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
         if (userIdentity.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)){
            OrganizationEmployeeIdentity organizationEmployeeIdentity =
                    organizationEmployeeIdentityOutputPort.findByCreatedBy(userId);
-            return loanOfferOutputPort.findLoanOfferInOrganization(organizationEmployeeIdentity.getOrganization(),
+            return loanOfferOutputPort.findAllLoanOfferedToLoaneesInOrganization(organizationEmployeeIdentity.getOrganization(),
                    pageSize,pageNumber);
+        }if (userIdentity.getRole().equals(IdentityRole.LOANEE)){
+            return loanOfferOutputPort.findAllLoanOfferAssignedToLoanee(userIdentity.getId(),pageSize,pageNumber);
+        }if (ObjectUtils.isNotEmpty(organizationId)){
+            return loanOfferOutputPort.findAllLoanOfferedToLoaneesInOrganization(organizationId,pageSize,pageNumber);
         }
-        return loanOfferOutputPort.findAllLoanOffers(pageSize,pageNumber);
+        return loanOfferOutputPort.findAllLoanOffer(pageSize,pageNumber);
     }
 
 
@@ -511,8 +515,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         LoanOffer loanOffer =
                  loanOfferOutputPort.findLoanOfferById(loanOfferId);
         List<LoaneeLoanBreakdown> loaneeLoanBreakdowns =
-                loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(loanOffer.getLoaneeId());
-        log.info("Loanee loan breakdowns by loanee with ID: {}: {}", loanOffer.getLoaneeId(),
+                loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(loanOffer.getCohortLoaneeId());
+        log.info("Loanee loan breakdowns found for this loan offer : {}: {}", loanOffer.getCohortLoaneeId(),
                 loaneeLoanBreakdowns);
         loanOffer.setLoaneeBreakdown(loaneeLoanBreakdowns);
         Loanee loanee = loaneeOutputPort.findLoaneeById(loanOffer.getLoaneeId());

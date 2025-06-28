@@ -30,6 +30,7 @@ public class LoanOffer {
     private LoanProduct loanProduct;
     private LocalDateTime dateTimeOffered;
     private String loaneeId;
+    private String cohortLoaneeId;
     private String userId;
     private LocalDateTime dateTimeAccepted;
     private LoanDecision loaneeResponse;
