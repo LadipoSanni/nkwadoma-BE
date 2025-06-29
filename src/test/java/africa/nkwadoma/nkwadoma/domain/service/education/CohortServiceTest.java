@@ -67,6 +67,9 @@ class CohortServiceTest {
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     @Mock
     private UserIdentityOutputPort userIdentityOutputPort;
+    @Mock
+    private CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
+    private CohortLoanDetail cohortLoanDetail;
 
 
     @BeforeEach
@@ -110,6 +113,8 @@ class CohortServiceTest {
         loanBreakdown.setItemAmount(BigDecimal.valueOf(3000));
         loanBreakdown.setCurrency("usd");
 
+        cohortLoanDetail = TestData.buildCohortLoanDetail(elites);
+
     }
 
     @Test
@@ -120,6 +125,7 @@ class CohortServiceTest {
             when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             when(cohortOutputPort.save(elites)).thenReturn(elites);
             when(organizationIdentityOutputPort.findById(program.getOrganizationId())).thenReturn(organizationIdentity);
+            when(cohortLoanDetailOutputPort.save(cohortLoanDetail)).thenReturn(cohortLoanDetail);
             Cohort cohort = cohortService.createCohort(elites);
             assertEquals(cohort.getName(), elites.getName());
             assertEquals(LocalDate.of(2025,6,29),cohort.getExpectedEndDate());
@@ -153,11 +159,13 @@ class CohortServiceTest {
     @Test
     void saveAnotherCohortInProgram() {
         try {
+            cohortLoanDetail.setCohort(xplorers);
             when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
             xplorers.setLoanBreakdowns(List.of(loanBreakdown));
             when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             when(cohortOutputPort.save(xplorers)).thenReturn(xplorers);
             when(organizationIdentityOutputPort.findById(program.getOrganizationId())).thenReturn(organizationIdentity);
+            when(cohortLoanDetailOutputPort.save(cohortLoanDetail)).thenReturn(cohortLoanDetail);
             Cohort cohort = cohortService.createCohort(xplorers);
             assertEquals(cohort.getName(), xplorers.getName());
             verify(cohortOutputPort, times(2)).save(any());

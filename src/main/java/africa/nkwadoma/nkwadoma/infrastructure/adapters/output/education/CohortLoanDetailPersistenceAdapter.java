@@ -34,4 +34,11 @@ public class CohortLoanDetailPersistenceAdapter implements CohortLoanDetailOutpu
         return cohortLoanDetailMapper.toCohortLoanDetail(cohortLoanDetailEntity);
     }
 
+    @Override
+    public void delete(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id,CohortMessages.COHORT_LOAN_DETAIL_ID.getMessage());
+
+        cohortLoanDetailRepository.deleteById(id);
+    }
+
 }

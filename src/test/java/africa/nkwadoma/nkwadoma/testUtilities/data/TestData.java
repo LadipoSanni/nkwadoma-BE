@@ -657,4 +657,8 @@ public class TestData {
                 .cohortLoanee(cohortLoanee).reasonForDeclining("E no consign you").build();
     }
 
+    public static CohortLoanDetail buildCohortLoanDetail(Cohort elites) {
+        return CohortLoanDetail.builder()
+                .cohort(elites).build();
+    }
 }

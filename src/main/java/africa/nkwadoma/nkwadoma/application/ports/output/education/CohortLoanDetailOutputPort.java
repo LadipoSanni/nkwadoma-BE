@@ -7,4 +7,6 @@ import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanDetail;
 public interface CohortLoanDetailOutputPort {
 
     CohortLoanDetail save(CohortLoanDetail cohortLoanDetail) throws MeedlException;
+
+    void delete(String id) throws MeedlException;
 }

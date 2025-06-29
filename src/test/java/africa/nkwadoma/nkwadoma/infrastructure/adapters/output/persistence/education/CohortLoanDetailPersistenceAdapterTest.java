@@ -12,6 +12,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
@@ -33,16 +34,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @Slf4j
 public class CohortLoanDetailPersistenceAdapterTest {
 
-    @Autowired
-    private CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
-    private UserIdentity firstUserIdentity;
-    private UserIdentity secondUserIdentity;
+    private UserIdentity userIdentity;
+    private UserIdentity meedleUser;
     private OrganizationEmployeeIdentity employeeIdentity;
     private OrganizationIdentity organizationIdentity;
+    private LoanBreakdown loanBreakdown;
     private List<LoanBreakdown> loanBreakdowns;
     private Program program;
     private Cohort cohort;
-    private String cohortLoaneeId;
     @Autowired
     private ProgramOutputPort programOutputPort;
     @Autowired
@@ -52,33 +51,38 @@ public class CohortLoanDetailPersistenceAdapterTest {
     @Autowired
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     @Autowired
+    private LoanBreakdownOutputPort loanBreakdownOutputPort;
+    @Autowired
     private CohortOutputPort cohortOutputPort;
     @Autowired
-    private LoaneeOutputPort loaneeOutputPort;
+    private CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
     private CohortLoanDetail cohortLoanDetail;
-    private String mockCohortId = "b59d67ca-293d-4dcf-8a86-067a3334085b";
+    private String cohortLoanDetailId;
 
     @BeforeEach
     public void setUp(){
         try {
-            firstUserIdentity = TestData.createTestUserIdentity("ade45@gmail.com");
-            firstUserIdentity.setRole(IdentityRole.ORGANIZATION_ADMIN);
-            firstUserIdentity = userIdentityOutputPort.save(firstUserIdentity);
-            employeeIdentity = TestData.createOrganizationEmployeeIdentityTestData(firstUserIdentity);
+            meedleUser = TestData.createTestUserIdentity("ade45@gmail.com");
+            meedleUser.setRole(IdentityRole.ORGANIZATION_ADMIN);
+            meedleUser = userIdentityOutputPort.save(meedleUser);
+            employeeIdentity = TestData.createOrganizationEmployeeIdentityTestData(meedleUser);
             employeeIdentity = organizationEmployeeIdentityOutputPort.save(employeeIdentity);
             organizationIdentity = TestData.createOrganizationTestData("Organization test1","RC3456891", List.of(employeeIdentity));
             organizationIdentity = organizationIdentityOutputPort.save(organizationIdentity);
-            secondUserIdentity = TestData.createTestUserIdentity("loanee@grr.la");
-            secondUserIdentity.setRole(IdentityRole.LOANEE);
-            secondUserIdentity = userIdentityOutputPort.save(secondUserIdentity);
+            userIdentity = TestData.createTestUserIdentity("loanee@grr.la");
+            userIdentity.setRole(IdentityRole.LOANEE);
+            userIdentity = userIdentityOutputPort.save(userIdentity);
             program = TestData.createProgramTestData("Software engineer");
-            program.setCreatedBy(firstUserIdentity.getId());
+            program.setCreatedBy(meedleUser.getId());
             organizationIdentity.setServiceOfferings(List.of(ServiceOffering.builder().name(TRAINING.name()).build()));
             program.setOrganizationIdentity(organizationIdentity);
             program = programOutputPort.saveProgram(program);
-            cohort = TestData.createCohortData("Klaus",program.getId(),
-                    organizationIdentity.getId(),loanBreakdowns, secondUserIdentity.getId());
+            loanBreakdown = TestData.createLoanBreakDown();
+            loanBreakdowns =  loanBreakdownOutputPort.saveAllLoanBreakDown(List.of(loanBreakdown));
+            cohort = TestData.createCohortData("Lacoste",program.getId(),
+                    organizationIdentity.getId(),loanBreakdowns,meedleUser.getId());
             cohort = cohortOutputPort.save(cohort);
+            cohortLoanDetail = TestData.buildCohortLoanDetail(cohort);
         }catch (MeedlException exception){
             log.info("Failed to set up cohort loanee {}", exception.getMessage());
             throw new RuntimeException(exception);
@@ -97,10 +101,8 @@ public class CohortLoanDetailPersistenceAdapterTest {
         CohortLoanDetail savedCohortLoanDetail = null;
         try{
             log.info("Input object -----> {}", cohortLoanDetail);
-            cohortLoanDetail = CohortLoanDetail.builder()
-                    .cohort(cohort)
-                    .build();
             savedCohortLoanDetail = cohortLoanDetailOutputPort.save(cohortLoanDetail);
+            cohortLoanDetailId = savedCohortLoanDetail.getId();
             log.info("------------> savedCohortLoanDetail ---> {}", savedCohortLoanDetail);
         }catch (MeedlException exception){
             log.info("Failed to set up cohort loanee {}", exception.getMessage());
@@ -110,4 +112,25 @@ public class CohortLoanDetailPersistenceAdapterTest {
         assertEquals(savedCohortLoanDetail.getCohort().getId(), cohort.getId());
     }
 
+
+    @AfterAll
+    void tearDown() throws MeedlException {
+
+        log.info("cohort loan detail id is {}", cohortLoanDetailId);
+        cohortLoanDetailOutputPort.delete(cohortLoanDetailId);
+        log.info("cohort id = {}", cohort.getId());
+        cohortOutputPort.deleteCohort(cohort.getId());
+        log.info("loan breakdowns = {}", loanBreakdowns);
+        loanBreakdownOutputPort.deleteAll(loanBreakdowns);
+        log.info("program id = {}", program.getId());
+        programOutputPort.deleteProgram(program.getId());
+        log.info("org id = {}", organizationIdentity.getId());
+        organizationIdentityOutputPort.delete(organizationIdentity.getId());
+        log.info("org empoyee  = {}", employeeIdentity.getId());
+        organizationEmployeeIdentityOutputPort.delete(employeeIdentity.getId());
+        log.info("meedl id = {}", meedleUser.getId());
+        userIdentityOutputPort.deleteUserById(meedleUser.getId());
+        log.info("user id = {}", userIdentity.getId());
+        userIdentityOutputPort.deleteUserById(userIdentity.getId());
+    }
 }
