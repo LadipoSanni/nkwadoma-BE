@@ -53,6 +53,6 @@ public interface LoanOfferProjection {
     String getNextOfKinRelationship();
     String getNextOfKinPhoneNumber();
     String getOrganizationId();
-    String getLoanRequestReferredBy();
+    String getReferredBy();
 
 }
