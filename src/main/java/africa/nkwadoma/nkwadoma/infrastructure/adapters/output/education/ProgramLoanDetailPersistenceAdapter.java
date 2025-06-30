@@ -41,7 +41,7 @@ public class ProgramLoanDetailPersistenceAdapter implements ProgramLoanDetailOut
     }
 
     @Override
-    public void delete(String loanDetailsId) throws MeedlException {
+    public void delete(String  loanDetailsId) throws MeedlException {
         MeedlValidator.validateUUID(loanDetailsId,"Program loan detail id cannot be empty");
         programLoanDetailRepository.deleteById(loanDetailsId);
     }
