@@ -58,6 +58,7 @@ public class CohortLoanDetailPersistenceAdapterTest {
     private CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
     private CohortLoanDetail cohortLoanDetail;
     private String cohortLoanDetailId;
+    private String cohortId;
 
     @BeforeEach
     public void setUp(){
@@ -103,6 +104,7 @@ public class CohortLoanDetailPersistenceAdapterTest {
             log.info("Input object -----> {}", cohortLoanDetail);
             savedCohortLoanDetail = cohortLoanDetailOutputPort.save(cohortLoanDetail);
             cohortLoanDetailId = savedCohortLoanDetail.getId();
+            cohortId = cohortLoanDetail.getCohort().getId();
             log.info("------------> savedCohortLoanDetail ---> {}", savedCohortLoanDetail);
         }catch (MeedlException exception){
             log.info("Failed to set up cohort loanee {}", exception.getMessage());
@@ -112,6 +114,29 @@ public class CohortLoanDetailPersistenceAdapterTest {
         assertEquals(savedCohortLoanDetail.getCohort().getId(), cohort.getId());
     }
 
+    @Test
+    void findCohortLoanDetailByNullCohortId(){
+        assertThrows(MeedlException.class, () -> cohortLoanDetailOutputPort.findByCohortId(null));
+    }
+
+    @Order(2)
+    @Test
+    void findByCohortId(){
+        CohortLoanDetail savedCohortLoanDetail = null;
+        try{
+            log.info("Input object -----> {}", cohort.getId());
+            log.info("Input object 2 -----> {}", cohortId);
+            savedCohortLoanDetail = cohortLoanDetailOutputPort.findByCohortId(cohortId);
+            log.info("found cohort loan detail ---> {}", savedCohortLoanDetail);
+            cohortLoanDetailId = savedCohortLoanDetail.getId();
+            log.info("------------> found  ---> {}", savedCohortLoanDetail);
+        }catch (MeedlException exception){
+            log.info("Failed to set up cohort loanee {}", exception.getMessage());
+            throw new RuntimeException(exception);
+        }
+        assertThat(savedCohortLoanDetail.getId()).isNotNull();
+        assertEquals(savedCohortLoanDetail.getCohort().getId(), cohortId);
+    }
 
     @AfterAll
     void tearDown() throws MeedlException {

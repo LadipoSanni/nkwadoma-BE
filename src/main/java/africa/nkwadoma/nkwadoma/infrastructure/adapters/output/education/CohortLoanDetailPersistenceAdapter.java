@@ -42,8 +42,12 @@ public class CohortLoanDetailPersistenceAdapter implements CohortLoanDetailOutpu
     }
 
     @Override
-    public CohortLoanDetail findByCohortId(String cohortId) {
-        return null;
+    public CohortLoanDetail findByCohortId(String cohortId) throws MeedlException {
+        MeedlValidator.validateUUID(cohortId,CohortMessages.INVALID_COHORT_ID.getMessage());
+
+        CohortLoanDetailEntity cohortLoanDetailEntity =
+                cohortLoanDetailRepository.findByCohortId(cohortId);
+        return cohortLoanDetailMapper.toCohortLoanDetail(cohortLoanDetailEntity);
     }
 
 }

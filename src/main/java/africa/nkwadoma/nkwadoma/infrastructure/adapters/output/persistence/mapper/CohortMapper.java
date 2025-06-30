@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper;
 
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoanBreakdownEntity;
@@ -37,4 +38,10 @@ public interface CohortMapper {
     @Mapping(target = "totalAmountRequested", source = "amountRequested")
     @Mapping(target = "totalOutstandingAmount", source = "amountOutstanding")
     Cohort mapFromProjectionToCohort(CohortProjection cohortProjection);
+
+    @Mapping(target = "totalAmountRequested", source = "totalAmountRequested")
+    @Mapping(target = "totalOutstandingAmount", source = "totalOutstandingAmount")
+    @Mapping(target = "totalAmountReceived", source = "totalAmountReceived")
+    @Mapping(target = "totalAmountRepaid", source = "totalAmountRepaid")
+    void mapCohortLoanDetailToCohort(@MappingTarget Cohort cohort,CohortLoanDetail cohortLoanDetail);
 }

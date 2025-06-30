@@ -25,6 +25,7 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.*;
 import org.springframework.data.domain.*;
 
+import java.math.BigDecimal;
 import java.time.*;
 import java.util.*;
 
@@ -73,6 +74,11 @@ class LoanServiceTest {
     private int pageSize = 10;
     private int pageNumber = 0;
     private CohortLoanee cohortLoanee;
+    @Mock
+    private CohortOutputPort cohortOutputPort;
+    @Mock
+    private CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
+    private CohortLoanDetail cohortLoanDetail;
 
 
     @BeforeEach
@@ -116,6 +122,7 @@ class LoanServiceTest {
         cohortLoanee = TestData.buildCohortLoanee(loanee,Cohort.builder().build(),loaneeLoanDetail,testId);
 
         investmentVehicle = TestData.buildInvestmentVehicle("vehicle");
+        cohortLoanDetail = TestData.buildCohortLoanDetail(Cohort.builder().build());
     }
 
     @Test
@@ -195,6 +202,7 @@ class LoanServiceTest {
         LoanReferral referral = null;
         try {
             when(loanReferralOutputPort.findById(loanReferral.getId())).thenReturn(loanReferral);
+            when(cohortOutputPort.save(cohortLoanee.getCohort())).thenReturn(cohortLoanee.getCohort());
             when(loanRequestMapper.mapLoanReferralToLoanRequest(loanReferral)).thenReturn(loanRequest);
 
             when(loanRequestOutputPort.save(loanRequest)).thenReturn(loanRequest);
@@ -293,12 +301,15 @@ class LoanServiceTest {
         LoanOffer loanOffer = new LoanOffer();
         loanOffer.setId(testId);
         loanOffer.setLoaneeResponse(LoanDecision.ACCEPTED);
+        loanOffer.setAmountApproved(BigDecimal.valueOf(9000));
         try {
             when(loaneeOutputPort.findLoaneeById(anyString())).thenReturn(loanee);
             when(loanOfferOutputPort.findLoanOfferById(loan.getLoanOfferId())).
                     thenReturn(loanOffer);
             when(loaneeLoanAccountOutputPort.findByLoaneeId(anyString())).thenReturn(loaneeLoanAccount);
             when(loanOutputPort.save(any())).thenReturn(startedLoan);
+            when(cohortLoanDetailOutputPort.findByCohortId(loanOffer.getCohortId())).thenReturn(cohortLoanDetail);
+            when(cohortLoanDetailOutputPort.save(cohortLoanDetail)).thenReturn(cohortLoanDetail);
             when(organizationIdentityOutputPort.findOrganizationByName(loanee.getReferredBy()))
                     .thenReturn(Optional.ofNullable(organizationIdentity));
             when(loanMetricsOutputPort.findByOrganizationId(organizationIdentity.getId()))

@@ -32,6 +32,7 @@ public class CohortResponse {
     private BigDecimal amountRequested;
     private BigDecimal amountOutstanding;
     private BigDecimal amountReceived;
+    private BigDecimal totalAmountRepaid;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String createdBy;

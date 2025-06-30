@@ -192,10 +192,17 @@ public class CohortService implements CohortUseCase {
         Cohort cohort = cohortOutputPort.viewCohortDetails(userId, cohortId);
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
         cohort.setProgramName(program.getName());
+        CohortLoanDetail cohortLoanDetail = cohortLoanDetailOutputPort.findByCohortId(cohort.getId());
+        log.info("cohort loan details == {}", cohortLoanDetail);
+        log.info("cohort before mapping == {}", cohort);
+        cohortMapper.mapCohortLoanDetailToCohort(cohort,cohortLoanDetail);
+        log.info("mapped cohort == {}", cohort);
         int pendingLoanOffers = loanOfferOutputPort.countNumberOfPendingLoanOfferForCohort(cohort.getId());
         cohort.setNumberOfPendingLoanOffers(pendingLoanOffers);
+        cohort.setExpectedEndDate(cohort.getStartDate().plusMonths(program.getDuration()));
         return cohort;
     }
+
 
     @Override
     public Page<Cohort> viewAllCohortInAProgram(Cohort cohort) throws MeedlException {

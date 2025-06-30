@@ -36,6 +36,7 @@ public class Cohort {
     private BigDecimal totalAmountRequested;
     private BigDecimal totalOutstandingAmount;
     private BigDecimal totalAmountReceived;
+    private BigDecimal totalAmountRepaid;
     private BigDecimal totalCohortFee = BigDecimal.ZERO;
     private LocalDateTime updatedAt;
     private String createdBy;

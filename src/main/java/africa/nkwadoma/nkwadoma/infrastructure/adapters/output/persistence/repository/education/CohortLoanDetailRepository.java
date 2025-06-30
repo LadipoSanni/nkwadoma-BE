@@ -5,4 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CohortLoanDetailRepository extends JpaRepository<CohortLoanDetailEntity, String> {
 
+    CohortLoanDetailEntity findByCohortId(String cohortId);
 }

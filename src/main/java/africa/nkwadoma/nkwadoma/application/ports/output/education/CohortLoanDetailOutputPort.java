@@ -10,5 +10,5 @@ public interface CohortLoanDetailOutputPort {
 
     void delete(String id) throws MeedlException;
 
-    CohortLoanDetail findByCohortId(String cohortId);
+    CohortLoanDetail findByCohortId(String cohortId) throws MeedlException;
 }
