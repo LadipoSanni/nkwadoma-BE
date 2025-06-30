@@ -40,6 +40,7 @@ public interface LoanRequestMapper {
     @Mapping(target = "onboardingMode", source = "onboardingMode")
     @Mapping(target = "isVerified", source = "isVerified")
     @Mapping(target = "cohortLoaneeId", source = "cohortLoaneeId")
+    @Mapping(target = "cohortId", source = "cohortId")
     @Mapping(target = "loaneeId", source = "loaneeId")
     LoanRequest mapProjectionToLoanRequest(LoanRequestProjection loanRequestProjection);
 

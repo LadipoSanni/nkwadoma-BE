@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanBreakdownOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOfferOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
@@ -14,15 +15,18 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanOfferStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.CohortLoanDetailMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.CohortMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -59,7 +63,10 @@ public class CohortService implements CohortUseCase {
     private final LoaneeUseCase loaneeUseCase;
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
+    private final CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
+    private final CohortLoanDetailMapper cohortLoanDetailMapper;
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
+    private final LoanOfferOutputPort loanOfferOutputPort;
 
     @Override
     public Cohort createCohort(Cohort cohort) throws MeedlException {
@@ -87,6 +94,14 @@ public class CohortService implements CohortUseCase {
         savedCohort.setProgramName(program.getName());
         updateNumberOfCohortInOrganization(program.getOrganizationId());
 
+        CohortLoanDetail cohortLoanDetail = CohortLoanDetail.builder()
+                .cohort(savedCohort)
+                .totalAmountRequested(BigDecimal.ZERO)
+                .totalAmountReceived(BigDecimal.ZERO)
+                .totalOutstandingAmount(BigDecimal.ZERO)
+                .totalAmountRepaid(BigDecimal.ZERO)
+                .build();
+        cohortLoanDetailOutputPort.save(cohortLoanDetail);
         return savedCohort;
     }
 
@@ -181,8 +196,18 @@ public class CohortService implements CohortUseCase {
         Cohort cohort = cohortOutputPort.viewCohortDetails(userId, cohortId);
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
         cohort.setProgramName(program.getName());
+        CohortLoanDetail cohortLoanDetail = cohortLoanDetailOutputPort.findByCohortId(cohort.getId());
+        log.info("cohort loan details == {}", cohortLoanDetail);
+        log.info("cohort before mapping == {}", cohort);
+        cohortMapper.mapCohortLoanDetailToCohort(cohort,cohortLoanDetail);
+        log.info("mapped cohort == {}", cohort);
+        int pendingLoanOffers = loanOfferOutputPort.countNumberOfPendingLoanOfferForCohort(cohort.getId());
+        log.info("pendingLoanOffers == {}", pendingLoanOffers);
+        cohort.setNumberOfPendingLoanOffers(pendingLoanOffers);
+        cohort.setExpectedEndDate(cohort.getStartDate().plusMonths(program.getDuration()));
         return cohort;
     }
+
 
     @Override
     public Page<Cohort> viewAllCohortInAProgram(Cohort cohort) throws MeedlException {
