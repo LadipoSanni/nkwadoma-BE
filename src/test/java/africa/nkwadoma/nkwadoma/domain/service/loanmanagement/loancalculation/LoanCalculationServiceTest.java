@@ -207,4 +207,52 @@ class LoanCalculationServiceTest {
         );
         assertEquals("Loan Disbursement Fees must not be negative.", exception.getMessage());
     }
+
+
+
+    @Test
+    public void calculatesMonthlyInterestCorrectly() {
+        int result = calculator.calculateMonthlyInterestRate(60);
+        assertEquals(5, result);
+    }
+
+    @Test
+    public void handlesInterestRateOfZero() {
+        int result = calculator.calculateMonthlyInterestRate(0);
+        assertEquals(0, result);
+    }
+
+    @Test
+    public void handlesInterestRateOfOne() {
+        int result = calculator.calculateMonthlyInterestRate(1);
+        assertEquals(0, result); // 1 / 12 = 0 in int division
+    }
+
+    @Test
+    public void handlesInterestRateOfTwelve() {
+        int result = calculator.calculateMonthlyInterestRate(12);
+        assertEquals(1, result);
+    }
+
+    @Test
+    public void handlesInterestRateOfOneHundred() {
+        int result = calculator.calculateMonthlyInterestRate(100);
+        assertEquals(8, result);
+    }
+
+    @Test
+    public void throwsExceptionWhenInterestRateIsNegative() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                calculator.calculateMonthlyInterestRate(-1)
+        );
+        assertEquals("Interest rate must not be negative.", exception.getMessage());
+    }
+
+    @Test
+    public void throwsExceptionWhenInterestRateIsGreaterThanHundred() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                calculator.calculateMonthlyInterestRate(101)
+        );
+        assertEquals("Interest rate must not exceed 100.", exception.getMessage());
+    }
 }
