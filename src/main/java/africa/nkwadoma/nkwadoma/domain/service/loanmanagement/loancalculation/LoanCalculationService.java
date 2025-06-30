@@ -20,17 +20,31 @@ public class LoanCalculationService {
 
         return loanAmountRequested.add(loanDisbursementFees);
     }
-    public int calculateMonthlyInterestRate(int interestRate) {
-        validateInterestRate(interestRate);
+
+    public BigDecimal calculateLoanAmountOutstanding(
+            BigDecimal loanAmountOutstanding,
+            BigDecimal monthlyRepayment,
+            int moneyWeightedPeriodicInterest
+    ) throws MeedlException {
+        validateAmount(loanAmountOutstanding, "Loan Amount Outstanding");
+        validateAmount(monthlyRepayment, "Monthly Repayment");
+        validateInterestRate(moneyWeightedPeriodicInterest, "Money Weighted Periodic Interest");
+
+        return loanAmountOutstanding
+                .subtract(monthlyRepayment)
+                .add(BigDecimal.valueOf(moneyWeightedPeriodicInterest));
+    }
+    public int calculateMonthlyInterestRate(int interestRate) throws MeedlException {
+        validateInterestRate(interestRate, "Interest rate");
         return interestRate / 12;
     }
 
-    private void validateInterestRate(int interestRate) {
+    private void validateInterestRate(int interestRate, String name) throws MeedlException {
         if (interestRate < 0) {
-            throw new IllegalArgumentException("Interest rate must not be negative.");
+            throw new MeedlException(name+" must not be negative.");
         }
         if (interestRate > 100) {
-            throw new IllegalArgumentException("Interest rate must not exceed 100.");
+            throw new MeedlException(name+" must not exceed 100.");
         }
     }
 

@@ -212,37 +212,62 @@ class LoanCalculationServiceTest {
 
     @Test
     public void calculatesMonthlyInterestCorrectly() {
-        int result = calculator.calculateMonthlyInterestRate(60);
+        int result = 0;
+        try {
+            result = calculator.calculateMonthlyInterestRate(60);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
         assertEquals(5, result);
     }
 
     @Test
     public void handlesInterestRateOfZero() {
-        int result = calculator.calculateMonthlyInterestRate(0);
+        int result = 0;
+        try {
+            result = calculator.calculateMonthlyInterestRate(0);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
         assertEquals(0, result);
     }
 
     @Test
     public void handlesInterestRateOfOne() {
-        int result = calculator.calculateMonthlyInterestRate(1);
+        int result = 0;
+        try {
+            result = calculator.calculateMonthlyInterestRate(1);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
         assertEquals(0, result); // 1 / 12 = 0 in int division
     }
 
     @Test
     public void handlesInterestRateOfTwelve() {
-        int result = calculator.calculateMonthlyInterestRate(12);
+        int result = 0;
+        try {
+            result = calculator.calculateMonthlyInterestRate(12);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
         assertEquals(1, result);
     }
 
     @Test
     public void handlesInterestRateOfOneHundred() {
-        int result = calculator.calculateMonthlyInterestRate(100);
+        int result = 0;
+        try {
+            result = calculator.calculateMonthlyInterestRate(100);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
         assertEquals(8, result);
     }
 
     @Test
     public void throwsExceptionWhenInterestRateIsNegative() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+        MeedlException exception = assertThrows(MeedlException.class, () ->
                 calculator.calculateMonthlyInterestRate(-1)
         );
         assertEquals("Interest rate must not be negative.", exception.getMessage());
@@ -250,9 +275,104 @@ class LoanCalculationServiceTest {
 
     @Test
     public void throwsExceptionWhenInterestRateIsGreaterThanHundred() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+        MeedlException exception = assertThrows(MeedlException.class, () ->
                 calculator.calculateMonthlyInterestRate(101)
         );
         assertEquals("Interest rate must not exceed 100.", exception.getMessage());
     }
+
+
+    @Test
+    public void calculatesCorrectOutstandingAmount() {
+        BigDecimal result = null;
+        try {
+            result = calculator.calculateLoanAmountOutstanding(
+                    new BigDecimal("10000.00"),
+                    new BigDecimal("1500.00"),
+                    50
+            );
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertEquals(new BigDecimal("8550.00"), result);
+    }
+
+    @Test
+    public void handlesZeroValuesGracefully() {
+        BigDecimal result = null;
+        try {
+            result = calculator.calculateLoanAmountOutstanding(
+                    BigDecimal.ZERO,
+                    BigDecimal.ZERO,
+                    0
+            );
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertEquals(BigDecimal.ZERO, result);
+    }
+
+    @Test
+    public void allowsFullInterestOfOneHundred() {
+        BigDecimal result = null;
+        try {
+            result = calculator.calculateLoanAmountOutstanding(
+                    new BigDecimal("3000.00"),
+                    new BigDecimal("500.00"),
+                    100
+            );
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertEquals(new BigDecimal("2600.00"), result);
+    }
+
+    @Test
+    public void throwsExceptionWhenLoanAmountOutstandingIsNegative() {
+        MeedlException ex = assertThrows(MeedlException.class, () ->
+                calculator.calculateLoanAmountOutstanding(new BigDecimal("-1"), new BigDecimal("100"), 10)
+        );
+        assertEquals("Loan Amount Outstanding must not be negative.", ex.getMessage());
+    }
+
+    @Test
+    public void throwsExceptionWhenMonthlyRepaymentIsNegative() {
+        MeedlException ex = assertThrows(MeedlException.class, () ->
+                calculator.calculateLoanAmountOutstanding(new BigDecimal("100"), new BigDecimal("-1"), 10)
+        );
+        assertEquals("Monthly Repayment must not be negative.", ex.getMessage());
+    }
+
+    @Test
+    public void throwsExceptionWhenLoanAmountOutstandingIsNull() {
+        MeedlException ex = assertThrows(MeedlException.class, () ->
+                calculator.calculateLoanAmountOutstanding(null, new BigDecimal("500"), 20)
+        );
+        assertEquals("Loan Amount Outstanding must not be null.", ex.getMessage());
+    }
+
+    @Test
+    public void throwsExceptionWhenMonthlyRepaymentIsNull() {
+        MeedlException ex = assertThrows(MeedlException.class, () ->
+                calculator.calculateLoanAmountOutstanding(new BigDecimal("500"), null, 20)
+        );
+        assertEquals("Monthly Repayment must not be null.", ex.getMessage());
+    }
+
+    @Test
+    public void throwsExceptionWhenInterestIsNegative() {
+        MeedlException ex = assertThrows(MeedlException.class, () ->
+                calculator.calculateLoanAmountOutstanding(new BigDecimal("1000"), new BigDecimal("500"), -5)
+        );
+        assertEquals("Money Weighted Periodic Interest must not be negative.", ex.getMessage());
+    }
+
+    @Test
+    public void throwsExceptionWhenInterestIsAboveHundred() {
+        MeedlException ex = assertThrows(MeedlException.class, () ->
+                calculator.calculateLoanAmountOutstanding(new BigDecimal("1000"), new BigDecimal("500"), 101)
+        );
+        assertEquals("Money Weighted Periodic Interest must not exceed 100.", ex.getMessage());
+    }
+
 }
