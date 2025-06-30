@@ -41,4 +41,9 @@ public class CohortLoanDetailPersistenceAdapter implements CohortLoanDetailOutpu
         cohortLoanDetailRepository.deleteById(id);
     }
 
+    @Override
+    public CohortLoanDetail findByCohortId(String cohortId) {
+        return null;
+    }
+
 }
