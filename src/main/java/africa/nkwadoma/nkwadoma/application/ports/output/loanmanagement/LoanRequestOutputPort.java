@@ -23,4 +23,7 @@ public interface LoanRequestOutputPort {
     LoanRequest findLoanRequestByLoaneeId(String id) throws MeedlException;
 
     int getCountOfAllVerifiedLoanRequestInOrganization(String id);
+
+
+    Page<LoanRequest> viewAllLoanRequestForLoanee(String userId, int pageNumber, int pageSize) throws MeedlException;
 }
