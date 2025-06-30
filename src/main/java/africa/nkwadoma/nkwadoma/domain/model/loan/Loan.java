@@ -51,10 +51,9 @@ public class Loan {
     private int pageSize;
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateObjectInstance(loanee.getUserIdentity(), UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
-        loanee.getUserIdentity().validate();
         MeedlValidator.validateUUID(loanAccountId, "Please provide a valid loan account identification.");
+        MeedlValidator.validateUUID(loanOfferId, "Please provide a valid loan offer identification.");
+        MeedlValidator.validateObjectInstance(loanStatus, "Loan status cannot be empty.");
         MeedlValidator.validateObjectInstance(startDate, LoanMessages.LOAN_START_DATE_MUST_NOT_BE_EMPTY.getMessage());
     }
 

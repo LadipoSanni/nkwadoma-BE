@@ -12,7 +12,7 @@ public interface LoanOutputPort {
     void deleteById(String savedLoanId) throws MeedlException;
 
     Optional<Loan> viewLoanById(String loanId) throws MeedlException;
-    Optional<Loan> viewLoanByLoaneeId(String loaneeId) throws MeedlException;
+    Optional<Loan> findLoanByLoanOfferId(String loanOfferId) throws MeedlException;
     Loan findLoanById(String id) throws MeedlException;
     Page<Loan> findAllByOrganizationId(String organizationId, int pageSize, int pageNumber) throws MeedlException;
 
@@ -21,4 +21,6 @@ public interface LoanOutputPort {
     Page<Loan> findAllLoan(int pageSize, int pageNumber) throws MeedlException;
 
     Page<Loan> filterLoanByProgram(String programId, String organizationId, int pageSize, int pageNumber) throws MeedlException;
+
+    String findLoanReferal(String id) throws MeedlException;
 }

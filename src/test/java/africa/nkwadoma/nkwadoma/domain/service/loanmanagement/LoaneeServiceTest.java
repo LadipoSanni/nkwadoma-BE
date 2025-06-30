@@ -463,7 +463,6 @@ class LoaneeServiceTest {
         when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
         when(programOutputPort.findProgramById(mockId)).thenReturn(atlasProgram);
         when(loanOfferOutputPort.findLoanOfferByLoaneeId(mockId)).thenReturn(loanOffer);
-        when(loanOutputPort.viewLoanByLoaneeId(mockId)).thenReturn(Optional.empty());
         when(organizationIdentityOutputPort.findById(mockId)).thenReturn(organizationIdentity);
         Loanee result = loaneeService.viewLoaneeDetails(null, mockId);
 
@@ -485,7 +484,7 @@ class LoaneeServiceTest {
             when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
             when(programOutputPort.findProgramById(mockId)).thenReturn(atlasProgram);
             when(loanOfferOutputPort.findLoanOfferByLoaneeId(mockId)).thenReturn(loanOffer);
-            when(loanOutputPort.viewLoanByLoaneeId(mockId)).thenReturn(Optional.empty());
+
             when(organizationIdentityOutputPort.findById(mockId)).thenReturn(organizationIdentity);
             loanee = loaneeService.viewLoaneeDetails(null, firstLoanee.getUserIdentity().getId());
         } catch (MeedlException exception) {
@@ -533,10 +532,10 @@ class LoaneeServiceTest {
 
     @Test
     void findALLLoanBeneficiariesFromLoanProduct(){
-        Page<Loanee> loanees = new  PageImpl<>(List.of(firstLoanee));
+        Page<CohortLoanee> loanees = new  PageImpl<>(List.of(loaneeCohort));
         try {
             when(loanProductOutputPort.findById(loanProduct.getId())).thenReturn(loanProduct);
-            when(loaneeOutputPort.findAllLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),pageSize,pageNumber))
+            when(cohortLoaneeOutputPort.findAllLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),pageSize,pageNumber))
                     .thenReturn(loanees);
             loanees = loaneeService.viewAllLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),pageSize,pageNumber);
         }catch (MeedlException meedlException){
@@ -548,10 +547,10 @@ class LoaneeServiceTest {
 
     @Test
     void searchLoanBeneficiariesFromLoanProduct(){
-        Page<Loanee> loanees = new  PageImpl<>(List.of(firstLoanee));
+        Page<CohortLoanee> loanees = new  PageImpl<>(List.of(loaneeCohort));
         try {
             when(loanProductOutputPort.findById(loanProduct.getId())).thenReturn(loanProduct);
-            when(loaneeOutputPort.searchLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),"q",pageSize,pageNumber))
+            when(cohortLoaneeOutputPort.searchLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),"q",pageSize,pageNumber))
                     .thenReturn(loanees);
             loanees = loaneeService.searchLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),"q",pageSize,pageNumber);
         }catch (MeedlException meedlException){
@@ -564,10 +563,10 @@ class LoaneeServiceTest {
 
     @Test
     void searchLoanBeneficiariesFromLoanProductReturnEmptyListIfNonIsFound(){
-        Page<Loanee> loanees =  Page.empty();
+        Page<CohortLoanee> loanees = Page.empty();
         try {
             when(loanProductOutputPort.findById(loanProduct.getId())).thenReturn(loanProduct);
-            when(loaneeOutputPort.searchLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),"z",pageSize,pageNumber))
+            when(cohortLoaneeOutputPort.searchLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),"z",pageSize,pageNumber))
                     .thenReturn(loanees);
             loanees = loaneeService.searchLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),"z",pageSize,pageNumber);
         }catch (MeedlException meedlException){
@@ -775,7 +774,7 @@ class LoaneeServiceTest {
         when(loaneeOutputPort.checkIfLoaneeCohortExistInOrganization(firstLoanee.getId(), organizationEmployeeIdentity.getOrganization()))
                 .thenReturn(true);
 
-        when(loanOutputPort.viewLoanByLoaneeId(firstLoanee.getId())).thenReturn(Optional.of(loan));
+        when(loanOutputPort.findLoanByLoanOfferId(firstLoanee.getId())).thenReturn(Optional.of(loan));
         when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
         when(programOutputPort.findProgramById(mockId)).thenReturn(atlasProgram);
         when(userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER))
@@ -922,7 +921,7 @@ class LoaneeServiceTest {
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
         assertEquals(loaneeCohort, result.getContent().get(0));
-        assertEquals(loaneeCohort.getUploadedStatus(), UploadedStatus.ADDED);
+        assertEquals(UploadedStatus.ADDED, loaneeCohort.getUploadedStatus());
         verify(cohortLoaneeOutputPort, times(1)).findAllLoaneeInCohort(cohortLoanee, pageSize, pageNumber);
     }
 
@@ -937,7 +936,7 @@ class LoaneeServiceTest {
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
         assertEquals(loaneeCohort, result.getContent().get(0));
-        assertEquals(loaneeCohort.getUploadedStatus(), UploadedStatus.INVITED);
+        assertEquals(UploadedStatus.INVITED, loaneeCohort.getUploadedStatus());
         verify(cohortLoaneeOutputPort, times(1)).findAllLoaneeInCohort(cohortLoanee, pageSize, pageNumber);
     }
 

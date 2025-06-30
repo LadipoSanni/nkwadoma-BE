@@ -120,4 +120,28 @@ public class CohortLoaneePersistenceAdapter implements CohortLoaneeOutputPort {
         }
         return cohortLoanees.map(cohortLoaneeMapper::toCohortLoanee);
     }
+
+    @Override
+    public Page<CohortLoanee> findAllLoaneeThatBenefitedFromLoanProduct(String id, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(id,"Loan product id cannot be empty");
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+
+        Page<CohortLoaneeEntity> cohortLoanees =
+                cohortLoaneeRepository.findAllLoanProductBenficiaryByLoanProductId(id,pageRequest);
+
+        return cohortLoanees.map(cohortLoaneeMapper::toCohortLoanee);
+    }
+
+    @Override
+    public Page<CohortLoanee> searchLoaneeThatBenefitedFromLoanProduct(String id, String name, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(id,"Loan product id cannot be empty");
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+
+
+        Page<CohortLoaneeEntity> cohortLoaneeEntities =
+                cohortLoaneeRepository.searchLoanBeneficiaryByLoanProductId(id,name,pageRequest);
+        log.info("cohort loanee entities == {}",cohortLoaneeEntities);
+
+        return cohortLoaneeEntities.map(cohortLoaneeMapper::toCohortLoanee);
+    }
 }

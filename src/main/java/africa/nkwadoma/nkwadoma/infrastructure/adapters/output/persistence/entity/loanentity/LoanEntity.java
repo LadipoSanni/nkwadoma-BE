@@ -15,8 +15,6 @@ public class LoanEntity {
     @Id
     @UuidGenerator
     private String id;
-    @OneToOne
-    private LoaneeEntity loaneeEntity;
     private String loanAccountId;
     private String loanOfferId;
     private LocalDateTime startDate;

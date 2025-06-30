@@ -67,11 +67,11 @@ class LoanRequestServiceTest {
     private String testId = "96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f";
     @Mock
     private LoaneeOutputPort loaneeOutputPort;
-
+    private UserIdentity userIdentity;
 
     @BeforeEach
     void setUp() {
-        UserIdentity userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").firstName("Adeshina").
+        userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").firstName("Adeshina").
                 lastName("Qudus").email("test@example.com").role(IdentityRole.LOANEE).alternateEmail("alt276@example.com").
                 alternatePhoneNumber("0986564534").alternateContactAddress("10, Onigbagbo Street, Mushin, Lagos State").
                 createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").bvn("587907453").isIdentityVerified(true).build();
@@ -133,9 +133,24 @@ class LoanRequestServiceTest {
         try {
             when(loanRequestOutputPort.viewAll(0, 10)).
                     thenReturn(new PageImpl<>(List.of(loanRequest)));
-            Page<LoanRequest> loanRequests = loanRequestService.viewAllLoanRequests(loanRequest);
+            when(userIdentityOutputPort.findById(testId)).thenReturn(UserIdentity.builder().id(testId).role(IdentityRole.PORTFOLIO_MANAGER).isIdentityVerified(true).build());
+            Page<LoanRequest> loanRequests = loanRequestService.viewAllLoanRequests(loanRequest, testId);
 
             verify(loanRequestOutputPort, times(1)).viewAll(0, 10);
+            assertNotNull(loanRequests.getContent());
+        } catch (MeedlException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    @Test
+    void viewAllLoanRequestsForLoanee() {
+        try {
+            when(userIdentityOutputPort.findById(testId)).thenReturn(UserIdentity.builder().id(testId).role(IdentityRole.LOANEE).isIdentityVerified(true).build());
+            when(loanRequestOutputPort.viewAllLoanRequestForLoanee(testId, 0, 10))
+                    .thenReturn(new PageImpl<>(List.of(loanRequest)));
+            Page<LoanRequest> loanRequests = loanRequestService.viewAllLoanRequests(loanRequest, testId);
+            verify(loanRequestOutputPort, times(1)).viewAllLoanRequestForLoanee(testId, 0, 10);
             assertNotNull(loanRequests.getContent());
         } catch (MeedlException e) {
             log.error(e.getMessage(), e);
@@ -147,9 +162,10 @@ class LoanRequestServiceTest {
         Page<LoanRequest> loanRequests = Page.empty();
         try {
             loanRequest.setOrganizationId("b95805d1-2e2d-47f8-a037-7bcd264914fc");
+            when(userIdentityOutputPort.findById(testId)).thenReturn(UserIdentity.builder().id(testId).role(IdentityRole.PORTFOLIO_MANAGER).isIdentityVerified(true).build());
             when(loanRequestOutputPort.viewAll(loanRequest.getOrganizationId(), 0, 10)).
                     thenReturn(new PageImpl<>(List.of(loanRequest)));
-            loanRequests = loanRequestService.viewAllLoanRequests(loanRequest);
+            loanRequests = loanRequestService.viewAllLoanRequests(loanRequest, testId);
 
         verify(loanRequestOutputPort, times(1)).
                 viewAll(loanRequest.getOrganizationId(),0, 10);
