@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class LoanCalculationServiceTest {
     @Autowired
     private LoanCalculationService calculator;
-    String ZERO_WITH_DECIMAL = "0.00";
+    BigDecimal ZERO = new BigDecimal("0.00");
 
     @BeforeEach
     void setUp() {
@@ -48,7 +48,7 @@ class LoanCalculationServiceTest {
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
-        assertEquals(new BigDecimal(ZERO_WITH_DECIMAL), result);
+        assertEquals(ZERO, result);
     }
 
     @Test
@@ -101,14 +101,11 @@ class LoanCalculationServiceTest {
     public void handlesZeroProgramFee() {
         BigDecimal result = null;
         try {
-            result = calculator.calculateLoanAmountRequested(
-                    BigDecimal.ZERO,
-                    new BigDecimal(ZERO_WITH_DECIMAL)
-            );
+            result = calculator.calculateLoanAmountRequested(ZERO, ZERO);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
-        assertEquals(new BigDecimal(ZERO_WITH_DECIMAL), result);
+        assertEquals(ZERO, result);
     }
 
     @Test
@@ -117,11 +114,97 @@ class LoanCalculationServiceTest {
         try {
             result = calculator.calculateLoanAmountRequested(
                     new BigDecimal("5000.00"),
-                    BigDecimal.ZERO
+                    ZERO
             );
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
         assertEquals(new BigDecimal("5000.00"), result);
+    }
+
+
+    @Test
+    public void calculatesCorrectLoanDisbursedOffered() {
+        BigDecimal result = null;
+        try {
+            result = calculator.calculateLoanDisbursedOffered(
+                    new BigDecimal("7000.00"),
+                    new BigDecimal("500.00")
+            );
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertEquals(new BigDecimal("7500.00"), result);
+    }
+
+    @Test
+    public void returnsSameAsLoanAmountWhenFeesAreZero() {
+        BigDecimal result = null;
+        try {
+            result = calculator.calculateLoanDisbursedOffered(
+                    new BigDecimal("6000.00"),
+                    ZERO
+            );
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertEquals(new BigDecimal("6000.00"), result);
+    }
+
+    @Test
+    public void returnsOnlyFeesWhenLoanAmountIsZero() {
+        BigDecimal result = null;
+        try {
+            result = calculator.calculateLoanDisbursedOffered(
+                    ZERO,
+                    new BigDecimal("200.00")
+            );
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertEquals(new BigDecimal("200.00"), result);
+    }
+
+    @Test
+    public void returnsZeroWhenBothInputsAreZero() {
+        BigDecimal result = null;
+        try {
+            result = calculator.calculateLoanDisbursedOffered(ZERO, ZERO);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertEquals(ZERO, result);
+    }
+
+    @Test
+    public void throwsExceptionWhenLoanAmountRequestedIsNull() {
+        MeedlException exception = assertThrows(MeedlException.class, () ->
+                calculator.calculateLoanDisbursedOffered(null, new BigDecimal("100.00"))
+        );
+        assertEquals("Loan Amount Requested must not be null.", exception.getMessage());
+    }
+
+    @Test
+    public void throwsExceptionWhenLoanDisbursementFeesIsNull() {
+        MeedlException exception = assertThrows(MeedlException.class, () ->
+                calculator.calculateLoanDisbursedOffered(new BigDecimal("8000.00"), null)
+        );
+        assertEquals("Loan Disbursement Fees must not be null.", exception.getMessage());
+    }
+
+    @Test
+    public void throwsExceptionWhenLoanAmountRequestedIsNegative() {
+        MeedlException exception = assertThrows(MeedlException.class, () ->
+                calculator.calculateLoanDisbursedOffered(new BigDecimal("-3000.00"), new BigDecimal("100.00"))
+        );
+        assertEquals("Loan Amount Requested must not be negative.", exception.getMessage());
+    }
+
+    @Test
+    public void throwsExceptionWhenLoanDisbursementFeesIsNegative() {
+        MeedlException exception = assertThrows(MeedlException.class, () ->
+                calculator.calculateLoanDisbursedOffered(new BigDecimal("4000.00"), new BigDecimal("-100.00"))
+        );
+        assertEquals("Loan Disbursement Fees must not be negative.", exception.getMessage());
     }
 }

@@ -14,6 +14,12 @@ public class LoanCalculationService {
 
         return programFee.subtract(initialDeposit);
     }
+    public BigDecimal calculateLoanDisbursedOffered(BigDecimal loanAmountRequested, BigDecimal loanDisbursementFees) throws MeedlException {
+        validateAmount(loanAmountRequested, "Loan Amount Requested");
+        validateAmount(loanDisbursementFees, "Loan Disbursement Fees");
+
+        return loanAmountRequested.add(loanDisbursementFees);
+    }
 
     private void validateAmount(BigDecimal amount, String name) throws MeedlException {
         if (amount == null) {
