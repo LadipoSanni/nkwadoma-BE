@@ -40,6 +40,7 @@ public class LoanOffer {
     private int creditScore;
     private String termsAndCondition;
     private String programId;
+    private String cohortId;
     private String organizationId;
     private String loanRequestReferredBy;
     private LoanType type;

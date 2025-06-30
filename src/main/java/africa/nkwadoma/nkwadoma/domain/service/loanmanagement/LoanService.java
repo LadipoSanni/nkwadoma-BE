@@ -2,6 +2,8 @@ package africa.nkwadoma.nkwadoma.domain.service.loanmanagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoanDetailOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
@@ -13,6 +15,9 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
+import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -61,6 +66,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final LoanMetricsMapper loanMetricsMapper;
     private final LoanMetricsOutputPort loanMetricsOutputPort;
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
+    private final CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
+    private final CohortOutputPort cohortOutputPort;
 
     @Override
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
@@ -151,10 +158,26 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }
         Loan savedLoan = loanOutputPort.save(loan);
         log.info("Saved loan: {}", savedLoan);
+        updateCohortLoanDetail(loanOffer);
         String referBy = loanOutputPort.findLoanReferal(savedLoan.getId());
         updateLoanDisbursalOnLoamMatrics(referBy);
         updateInvestmentVehicleTalentFunded(savedLoan);
         return savedLoan;
+    }
+
+    private void updateCohortLoanDetail(LoanOffer loanOffer) throws MeedlException {
+        CohortLoanDetail cohortLoanDetail = cohortLoanDetailOutputPort.findByCohortId(loanOffer.getCohortId());
+        log.info("current total amount received for cohort {}",cohortLoanDetail.getTotalAmountRequested());
+        log.info("loanee amount disbursed {}", loanOffer.getAmountApproved());
+        cohortLoanDetail.setTotalAmountReceived(cohortLoanDetail.getTotalAmountRequested().
+                add(loanOffer.getAmountApproved()));
+        cohortLoanDetail.setTotalOutstandingAmount(cohortLoanDetail.getTotalOutstandingAmount().
+                add(loanOffer.getAmountApproved()));
+        cohortLoanDetail = cohortLoanDetailOutputPort.save(cohortLoanDetail);
+        log.info("total amount received updated for cohort after adding == {} is {}",
+                cohortLoanDetail.getTotalAmountReceived(), loanOffer.getAmountApproved());
+        log.info("total amount outstanding updated for cohort after adding == {} is {}",
+                cohortLoanDetail.getTotalOutstandingAmount(), loanOffer.getAmountApproved());
     }
 
     private void updateInvestmentVehicleTalentFunded(Loan savedLoan) throws MeedlException {
@@ -290,6 +313,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             log.info("Mapped loan request: {}", loanRequest);
             loanRequest = createLoanRequest(loanRequest);
             log.info("Created loan request: {}", loanRequest);
+            updateNumberOfLoanRequestOnCohort(foundLoanReferral);
+
             foundLoanReferral.setLoanReferralStatus(LoanReferralStatus.AUTHORIZED);
         }
         else if (loanReferral.getLoanReferralStatus().equals(LoanReferralStatus.DECLINED)) {
@@ -300,6 +325,16 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         log.info("Updated loan referral: {}", foundLoanReferral);
         updateLoanReferralOnMetrics(foundLoanReferral);
         return foundLoanReferral;
+    }
+
+    private void updateNumberOfLoanRequestOnCohort(LoanReferral loanReferral) throws MeedlException {
+        log.info("Updating number of loan request on cohort: {}", loanReferral.getCohortLoanee());
+        Cohort cohort = loanReferral.getCohortLoanee().getCohort();
+        log.info("found cohort == {}",cohort);
+        log.info("current number of loan request == {}",cohort.getNumberOfLoanRequest());
+        cohort.setNumberOfLoanRequest(cohort.getNumberOfLoanRequest() + 1);
+        cohort = cohortOutputPort.save(cohort);
+        log.info(" number of loan request after adding 1 == {}",cohort.getNumberOfLoanRequest());
     }
 
     private void updateLoanReferralOnMetrics(LoanReferral foundLoanReferral) throws MeedlException {
