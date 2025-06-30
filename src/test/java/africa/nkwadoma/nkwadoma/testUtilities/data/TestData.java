@@ -664,4 +664,13 @@ public class TestData {
                 .loanStatus(LoanStatus.PERFORMING)
                 .build();
     }
+
+    public static ProgramLoanDetail buildProgramLoanDetail(Program program) {
+        return ProgramLoanDetail.builder()
+                .program(program)
+                .totalAmountReceived(BigDecimal.ZERO)
+                .totalOutstandingAmount(BigDecimal.ZERO)
+                .totalAmountRequested(BigDecimal.ZERO)
+                .build();
+    }
 }
