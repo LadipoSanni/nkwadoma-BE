@@ -1,5 +1,4 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramLoanDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
@@ -7,14 +6,10 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationLo
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.education.Program;
-import africa.nkwadoma.nkwadoma.domain.model.education.ProgramLoanDetail;
-import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identitymanager.OrganizationLoanDetailPersistenceAdapter;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
@@ -23,7 +18,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.ServiceOfferingType.TRAINING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -37,8 +31,6 @@ public class OrganizationLoanDetailPersistenceAdapterTest {
     private UserIdentity meedleUser;
     private OrganizationEmployeeIdentity employeeIdentity;
     private OrganizationIdentity organizationIdentity;
-    @Autowired
-    private ProgramOutputPort programOutputPort;
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
     @Autowired
@@ -114,7 +106,7 @@ public class OrganizationLoanDetailPersistenceAdapterTest {
 
     @AfterAll
     void cleanUp() throws MeedlException {
-        organizationLoanDetailOutputPort.delete(organizationIdentity.getId());
+        organizationLoanDetailOutputPort.delete(loanDetailsId);
         log.info("org id = {}", organizationIdentity.getId());
         organizationIdentityOutputPort.delete(organizationIdentity.getId());
         log.info("org empoyee  = {}", employeeIdentity.getId());

@@ -5,10 +5,15 @@ import africa.nkwadoma.nkwadoma.domain.model.education.ProgramLoanDetail;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
 
+
+@Getter
+@Setter
 @Entity
 public class ProgramLoanDetailEntity {
 
