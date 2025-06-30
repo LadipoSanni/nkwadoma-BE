@@ -3,8 +3,8 @@ name: Deploy Systest to Local
 on:
   push:
     branches: [dev]
-  pull_request:
-    branches: [dev]
+  # pull_request:
+  #   branches: [dev]
 
 jobs:
 
@@ -42,9 +42,6 @@ jobs:
       automation_test_url_set: ${{ steps.get_automation_test_url.outputs.automation_test_url_set }}
 
     steps:
-      # - name: Wait for 25 minutes
-      #   run: sleep 1500  # Wait for 25 minutes
-
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -56,21 +53,24 @@ jobs:
       - name: Install virtualenv
         run: pip install virtualenv
 
+      - name: Install AWS CLI v2
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install --update
+
       - name: Make test script executable
         run: chmod +x test_run_QA.sh
 
       - name: Run automation tests
         run: ./test_run_QA.sh ${{ secrets.REPO_PAT }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: eu-west-1
 
-      # - uses: actions/checkout@v3
-      # - name: Run tests script
-      #   run: |
-      #     chmod +x .github/workflows/scripts/run_tests.sh
-      #     .github/workflows/scripts/run_tests.sh "${{ secrets.REPO_PAT }}"
-      #   env:
-      #     BASE_URL: ${{ secrets.BASE_URL }}
-      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: List files for debug
+        run: ls -l nkwadoma_backend_QA || true
 
       # - name: Get Automation Test URL
       #   id: get_automation_test_url
@@ -99,16 +99,13 @@ jobs:
   #         ENV_FILE_PATH="/home/cloud-group/nkwadoma-systest.env"
   #         IMAGE_TAG=${{ secrets.DOCKER_USERNAME }}/nkwadoma:alpha
   #
-  #         # Stop and remove container if it exists
   #         if [ "$(docker ps -aq -f name=$CONTAINER_NAME)" ]; then
   #           docker stop $CONTAINER_NAME || true
   #           docker rm $CONTAINER_NAME || true
   #         fi
   #
-  #         # Ensure network exists
   #         docker network inspect meedl-network >/dev/null 2>&1 || docker network create meedl-network
   #
-  #         # Pull and run new container
   #         docker pull $IMAGE_TAG
   #         nohup docker run -d \
   #           --env-file $ENV_FILE_PATH \

@@ -333,7 +333,7 @@ class LoanServiceTest {
             when(loaneeOutputPort.findLoaneeById(loan.getLoaneeId())).thenReturn(loanee);
             when(loanOfferOutputPort.findLoanOfferById(loan.getLoanOfferId())).
                     thenReturn(loanOffer);
-            when(loanOutputPort.viewLoanByLoaneeId(anyString())).thenReturn(Optional.of(loan));
+            when(loanOutputPort.findLoanByLoanOfferId(anyString())).thenReturn(Optional.of(loan));
         } catch (MeedlException e) {
             log.error(e.getMessage(), e);
         }

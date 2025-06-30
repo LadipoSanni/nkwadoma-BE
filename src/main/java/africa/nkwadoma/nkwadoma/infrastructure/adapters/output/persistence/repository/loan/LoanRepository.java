@@ -22,9 +22,10 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
                  l.userIdentity.stateOfOrigin as stateOfOrigin, l.userIdentity.stateOfResidence as stateOfResidence
 
           from LoanEntity le
-          join LoaneeEntity l on le.loaneeEntity.id = l.id
-          join CohortLoaneeEntity cle on cle.loanee.id = l.id
-          join LoanReferralEntity lfe on lfe.cohortLoanee.id = cle.id
+          join LoanOfferEntity lo on lo.id = le.id
+          join LoanReferralEntity lfe on lfe.id = lo.id
+          join CohortLoaneeEntity cle on cle.id = lfe.cohortLoanee.id
+          join LoaneeEntity l on l.id = cle.loanee.id
           join UserEntity  u on l.userIdentity.id = u.id
           join LoanRequestEntity lr on lr.id = lfe.id
           join LoanOfferEntity loe on l.id = lr.id
@@ -37,53 +38,57 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
     Optional<LoanProjection> findLoanById(@Param("id") String id);
 
     @Query("""
-          select
-          le.id as id,
-          le.startDate as startDate,
-          l.userIdentity.firstName as firstName,
-          l.userIdentity.lastName as lastName,
-          cle.loaneeLoanDetail.initialDeposit as initialDeposit,
-          lr.createdDate as createdDate, lr.loanAmountRequested as loanAmountRequested,
-          c.name as cohortName, c.startDate as cohortStartDate, loe.dateTimeOffered as offerDate,
-          p.name as programName
-    
-          from LoanEntity le
-          join LoaneeEntity l on le.loaneeEntity.id = l.id
-          join CohortLoaneeEntity cle on cle.loanee.id = l.id
-          join LoanReferralEntity lfe on lfe.cohortLoanee.id = cle.id
-          join CohortEntity c on cle.cohort.id = c.id
-          join LoanRequestEntity lr on lr.id = lfe.id
-          join LoanOfferEntity loe on l.id =  lr.id
-          join ProgramEntity p on c.programId = p.id
-          join OrganizationEntity o on p.organizationIdentity.id = o.id
-    
-          where o.id = :organizationId
+         select
+             le.id as id,
+             le.startDate as startDate,
+             l.userIdentity.firstName as firstName,
+             l.userIdentity.lastName as lastName,
+             cle.loaneeLoanDetail.initialDeposit as initialDeposit,
+             lr.createdDate as createdDate,
+             lr.loanAmountRequested as loanAmountRequested,
+             c.name as cohortName,
+             c.startDate as cohortStartDate,
+             loe.dateTimeOffered as offerDate,
+             p.name as programName
+         from LoanEntity le
+         join LoanOfferEntity lo on lo.id = le.id
+         join LoanReferralEntity lfe on lfe.id = lo.id
+         join CohortLoaneeEntity cle on cle.id = lfe.cohortLoanee.id
+         join LoaneeEntity l on l.id = cle.loanee.id
+         join CohortEntity c on cle.cohort.id = c.id
+         join LoanRequestEntity lr on lr.id = lfe.id
+         join LoanOfferEntity loe on l.id = lr.id
+         join ProgramEntity p on c.programId = p.id
+         join OrganizationEntity o on p.organizationIdentity.id = o.id
+         where o.id = :organizationId
     """)
     Page<LoanProjection> findAllByOrganizationId(@Param("organizationId") String organizationId, Pageable pageable);
 
 
 
     @Query("""
-    SELECT lo.id AS id,
-           lo.startDate as startDate,
+    SELECT le.id AS id,
+           le.startDate as startDate,
            u.firstName AS firstName,
            u.lastName AS lastName,
            lof.dateTimeOffered AS offerDate,
            cle.loaneeLoanDetail.amountRequested AS loanAmountRequested,
            cle.loaneeLoanDetail.initialDeposit AS initialDeposit,
-           c.name AS cohortName,
+           cle.cohort.name AS cohortName,
            p.name AS programName
     
-    FROM LoanEntity lo
-    JOIN lo.loaneeEntity l
+    FROM LoanEntity le
+    join LoanOfferEntity lo on lo.id = le.id
+    join LoanReferralEntity lfe on lfe.id = lo.id
+    join CohortLoaneeEntity cle on cle.id = lfe.cohortLoanee.id
+    join LoaneeEntity l on l.id = cle.loanee.id
     JOIN l.userIdentity u
-    join CohortLoaneeEntity cle on cle.loanee.id = l.id
-          join CohortEntity c on cle.cohort.id = c.id    JOIN ProgramEntity p ON p.id = c.programId
-        JOIN LoanOfferEntity lof ON lof.id = lo.loanOfferId
+    JOIN ProgramEntity p ON p.id = cle.cohort.programId
+    JOIN LoanOfferEntity lof ON lof.id = le.loanOfferId
     WHERE 
         (LOWER(u.firstName) LIKE LOWER(CONCAT('%', :name, '%'))
          OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :name, '%')))
-        AND c.programId = :programId
+        AND cle.cohort.programId = :programId
         AND p.organizationIdentity.id = :organizationId
     """)
     Page<LoanProjection> findAllLoanOfferByLoaneeNameInOrganizationAndProgram( @Param("programId") String programId,
@@ -102,11 +107,11 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           p.name as programName
     
           from LoanEntity le
-          join LoaneeEntity l on le.loaneeEntity.id = l.id
-               join CohortLoaneeEntity cle on cle.loanee.id = l.id
-          join LoanReferralEntity lfe on lfe.cohortLoanee.id = cle.id
-          join LoanRequestEntity lr on lr.id = lfe.id
-          join LoanOfferEntity loe on l.id = lr.id
+          join LoanOfferEntity loe on loe.id = le.loanOfferId
+          join LoanRequestEntity lr on lr.id = loe.id
+          join LoanReferralEntity lfe on lfe.id = lr.id
+          join CohortLoaneeEntity cle on cle.loanee.id = lfe.cohortLoanee.id
+          join LoaneeEntity l on l.id = cle.loanee.id
           join CohortEntity c on cle.cohort.id = c.id
           join ProgramEntity p on c.programId = p.id
           join OrganizationEntity o on p.organizationIdentity.id = o.id
@@ -116,8 +121,8 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
     @Query("""
     SELECT lo.id AS id,
            lo.startDate as startDate,
-           u.firstName AS firstName,
-           u.lastName AS lastName,
+           l.userIdentity.firstName AS firstName,
+           l.userIdentity.lastName AS lastName,
            lof.dateTimeOffered AS offerDate,
            cle.loaneeLoanDetail.amountRequested AS loanAmountRequested,
            cle.loaneeLoanDetail.initialDeposit AS initialDeposit,
@@ -125,10 +130,12 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
            p.name AS programName
     
     FROM LoanEntity lo
-    JOIN lo.loaneeEntity l
-    JOIN l.userIdentity u
-      join CohortLoaneeEntity cle on cle.loanee.id = l.id
-          join CohortEntity c on cle.cohort.id = c.id
+    join LoanOfferEntity loe on loe.id = lo.loanOfferId
+    join LoanRequestEntity lr on lr.id = loe.id
+    join LoanReferralEntity lfe on lfe.id = lr.id
+    join CohortLoaneeEntity cle on cle.loanee.id = lfe.cohortLoanee.id
+    join LoaneeEntity l on l.id = cle.loanee.id
+    join CohortEntity c on cle.cohort.id = c.id
     JOIN ProgramEntity p ON p.id = c.programId
         JOIN LoanOfferEntity lof ON lo.id = l.id
     WHERE
@@ -138,5 +145,18 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
     Page<LoanProjection> filterLoanByProgramIdAndOrganization(@Param("programId") String programId,
                                                               @Param("organizationId") String organizationId, Pageable pageRequest);
 
-    Optional<LoanEntity> findByLoaneeEntityId(String loaneeId);
+    Optional<LoanEntity> findByLoanOfferId(String loanOfferId);
+
+
+    @Query("""
+    SELECT lo.id AS id,
+           cle.referredBy as referredBy
+    
+          FROM LoanEntity lo
+          join LoanOfferEntity loo on lo.id = lo.id
+          join LoanReferralEntity lfe on lfe.id = loo.id
+          join CohortLoaneeEntity cle on cle.id = lfe.cohortLoanee.id
+          where lo.id = :loanId
+    """)
+    LoanProjection findLoanReferralByLoanId(@Param("loanId") String loanId);
 }

@@ -13,31 +13,32 @@ import java.util.*;
 public interface CohortRepository extends JpaRepository<CohortEntity, String> {
 
     @Query("""
-        SELECT
-            c.id AS id,
-            c.name AS name,
-            COALESCE(COUNT(DISTINCT lne.id), 0) AS numberOfLoanees,
-            c.startDate AS startDate,
-            COALESCE(SUM(
-                CASE 
-                    WHEN cle.onboardingMode = 'FILE_UPLOADED' THEN lld.amountRequested
-                END
-            ), 0) AS amountRequested,
-            c.tuitionAmount AS tuitionAmount,
-            COALESCE(0, 0) AS amountReceived,
-            COALESCE(0, 0) AS amountOutstanding
-        FROM CohortEntity c
-        LEFT JOIN CohortLoaneeEntity cle ON cle.cohort.id = c.id
-        LEFT JOIN LoaneeEntity lne ON lne.id = cle.loanee.id
-        LEFT JOIN LoaneeLoanDetailEntity lld ON lld.id = cle.loaneeLoanDetail.id
-        LEFT JOIN LoanEntity le ON le.loaneeEntity.id = lne.id AND le.loanOfferId IS NOT NULL
-        LEFT JOIN LoanOfferEntity lo ON lo.id = le.loanOfferId
-
-        WHERE c.organizationId = :organizationId 
-            AND (:cohortStatus IS NULL OR c.cohortStatus = :cohortStatus)
-            AND LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%'))
-        GROUP BY c.id, c.name, c.startDate
-    """)
+    SELECT
+        c.id AS id,
+        c.name AS name,
+        COALESCE(COUNT(DISTINCT lne.id), 0) AS numberOfLoanees,
+        c.startDate AS startDate,
+        COALESCE(SUM(
+            CASE 
+                WHEN cle.onboardingMode = 'FILE_UPLOADED' THEN lld.amountRequested
+                ELSE 0
+            END
+        ), 0) AS amountRequested,
+        c.tuitionAmount AS tuitionAmount,
+        COALESCE(0, 0) AS amountReceived,
+        COALESCE(0, 0) AS amountOutstanding
+    FROM CohortEntity c
+    LEFT JOIN CohortLoaneeEntity cle ON cle.cohort.id = c.id
+    LEFT JOIN LoanReferralEntity lfr ON lfr.cohortLoanee.id = cle.id
+    LEFT JOIN LoanOfferEntity lo ON lo.id = lfr.id
+    LEFT JOIN LoaneeEntity lne ON lne.id = cle.loanee.id
+    LEFT JOIN LoaneeLoanDetailEntity lld ON lld.id = cle.loaneeLoanDetail.id
+    LEFT JOIN LoanEntity le ON le.loanOfferId = lo.id
+    WHERE c.organizationId = :organizationId 
+        AND (:cohortStatus IS NULL OR c.cohortStatus = :cohortStatus)
+        AND LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%'))
+    GROUP BY c.id, c.name, c.startDate
+""")
     Page<CohortProjection> findByNameContainingIgnoreCaseAndOrganizationId(
             @Param("name") String name,
             @Param("cohortStatus") CohortStatus cohortStatus,
@@ -62,24 +63,28 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
         COALESCE(SUM(
             CASE 
                 WHEN cle.onboardingMode = 'FILE_UPLOADED' THEN lld.amountRequested
-               
+                ELSE 0
             END
         ), 0) AS amountRequested,
         c.tuitionAmount AS tuitionAmount,
         COALESCE(0, 0) AS amountReceived,
         COALESCE(0, 0) AS amountOutstanding
     FROM CohortEntity c
+    LEFT JOIN ProgramEntity pr ON pr.id = c.programId
     LEFT JOIN CohortLoaneeEntity cle ON cle.cohort.id = c.id
+    LEFT JOIN LoanReferralEntity lfr ON lfr.cohortLoanee.id = cle.id
+    LEFT JOIN LoanOfferEntity lo ON lo.id = lfr.id
     LEFT JOIN LoaneeEntity lne ON lne.id = cle.loanee.id
     LEFT JOIN LoaneeLoanDetailEntity lld ON lld.id = cle.loaneeLoanDetail.id
-    LEFT JOIN LoanEntity le ON le.loaneeEntity.id = lne.id AND le.loanOfferId IS NOT NULL
-    LEFT JOIN LoanOfferEntity lo ON lo.id = le.loanOfferId
-    WHERE c.organizationId = :organizationId AND c.cohortStatus = :cohortStatus
+    LEFT JOIN LoanEntity le ON le.id = lo.id
+    WHERE pr.organizationIdentity.id = :organizationId 
+        AND c.cohortStatus = :cohortStatus
     GROUP BY c.id, c.name, c.startDate
 """)
-    Page<CohortProjection> findAllByOrganizationIdAndCohortStatus(@Param("organizationId") String organizationId,
-                                                                  Pageable pageRequest, @Param("cohortStatus")
-                                                                  CohortStatus cohortStatus);
+    Page<CohortProjection> findAllByOrganizationIdAndCohortStatus(
+            @Param("organizationId") String organizationId,
+            Pageable pageRequest,
+            @Param("cohortStatus") CohortStatus cohortStatus);
 
     Page<CohortEntity> findByProgramIdAndNameContainingIgnoreCase(String programId, String name,Pageable pageRequest);
 
