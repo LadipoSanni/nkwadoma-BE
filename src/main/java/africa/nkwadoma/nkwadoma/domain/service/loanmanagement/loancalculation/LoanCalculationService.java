@@ -27,7 +27,7 @@ public class LoanCalculationService {
 
     private void validateInterestRate(int interestRate) {
         if (interestRate < 0) {
-            throw new IllegalArgumentException("Interest Rate must not be negative.");
+            throw new IllegalArgumentException("Interest rate must not be negative.");
         }
         if (interestRate > 100) {
             throw new IllegalArgumentException("Interest rate must not exceed 100.");
