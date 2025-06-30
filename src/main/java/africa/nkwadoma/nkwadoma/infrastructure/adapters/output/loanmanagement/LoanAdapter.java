@@ -51,8 +51,8 @@ public class LoanAdapter implements LoanOutputPort {
     }
 
     @Override
-    public Optional<Loan> viewLoanByLoaneeId(String loaneeId) {
-        Optional<LoanEntity> loanEntity = loanRepository.findByLoaneeEntityId(loaneeId);
+    public Optional<Loan> findLoanByLoanOfferId(String loaneeId) {
+        Optional<LoanEntity> loanEntity = loanRepository.findByLoanOfferId(loaneeId);
         Optional<Loan> optionalLoan = loanEntity.map(loanMapper::mapToLoan);
         log.info("Loan details returned: {}", optionalLoan);
         return optionalLoan;
@@ -116,5 +116,14 @@ public class LoanAdapter implements LoanOutputPort {
                 loanRepository.filterLoanByProgramIdAndOrganization(programId,organizationId,pageRequest);
         Page<Loan> loans =  loanProjectionPage.map(loanMapper::mapProjectionToLoan);
         return loans;
+    }
+
+    @Override
+    public String findLoanReferal(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id,"Loan id cannot be empty");
+
+        LoanProjection loanProjection = loanRepository.findLoanReferralByLoanId(id);
+
+        return loanProjection.getReferredBy();
     }
 }
