@@ -47,4 +47,11 @@ public interface OrganizationIdentityMapper {
     @Mapping(target = "numberOfCohort", source = "numberOfCohort")
     @Mapping(target = "numberOfPrograms", source = "numberOfPrograms")
     OrganizationIdentity projectionToOrganizationIdentity(OrganizationProjection organization);
+
+    @Mapping(target = "totalAmountRequested", source = "totalAmountRequested")
+    @Mapping(target = "totalCurrentDebt", source = "totalOutstandingAmount")
+    @Mapping(target = "totalAmountReceived", source = "totalAmountReceived")
+    @Mapping(target = "totalDebtRepaid", source = "totalAmountRepaid")
+    @Mapping(target = "id", ignore = true)
+    void mapOrganizationLoanDetailsToOrganization(@MappingTarget OrganizationIdentity organizationIdentity, OrganizationLoanDetail organizationLoanDetail);
 }

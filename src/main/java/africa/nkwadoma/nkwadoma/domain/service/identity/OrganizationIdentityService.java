@@ -4,10 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.notification.Organizatio
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.LoanMetricsUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlnotification.MeedlNotificationUsecase;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
@@ -30,6 +27,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.*;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -53,6 +52,8 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     private final MeedlNotificationUsecase meedlNotificationUsecase;
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
+    private final OrganizationLoanDetailOutputPort organizationLoanDetailOutputPort;
+    private final LoanOfferOutputPort loanOfferOutputPort;
 
 
     @Override
@@ -309,6 +310,15 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
         List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity.getId());
         organizationIdentity.setServiceOfferings(serviceOfferings);
+        OrganizationLoanDetail organizationLoanDetail =
+                organizationLoanDetailOutputPort.findByOrganizationId(organizationIdentity.getId());
+        organizationIdentityMapper.mapOrganizationLoanDetailsToOrganization(organizationIdentity,organizationLoanDetail);
+        organizationIdentity.setDebtPercentage(organizationLoanDetail.getTotalOutstandingAmount()
+                .divide(organizationLoanDetail.getTotalAmountReceived(), RoundingMode.UP));
+        organizationIdentity.setRepaymentRate(organizationLoanDetail.getTotalAmountRepaid()
+                .divide(organizationLoanDetail.getTotalAmountReceived(), RoundingMode.UP).multiply(BigDecimal.valueOf(100)));
+        int pendingLoanOffer = loanOfferOutputPort.countNumberOfPendingLoanOfferForOrganization(organizationIdentity.getId());
+        organizationIdentity.setPendingLoanOfferCount(pendingLoanOffer);
         return organizationIdentity;
     }
 

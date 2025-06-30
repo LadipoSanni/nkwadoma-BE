@@ -37,4 +37,6 @@ public class ProgramResponse{
     private BigDecimal totalAmountDisbursed = BigDecimal.ZERO;
     private BigDecimal totalAmountOutstanding = BigDecimal.ZERO;
     private BigDecimal totalAmountRequested = BigDecimal.ZERO;
+    private BigDecimal repaymentRate;
+    private BigDecimal debtPercentage;
 }
