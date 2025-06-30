@@ -19,5 +19,6 @@ public interface ProgramRepository extends JpaRepository<ProgramEntity, String> 
     boolean existsByNameIgnoreCaseAndOrganizationIdentityId(@Param("programName") String programName,
                                                             @Param("organizationId") String organizationId);
 
-    Page<ProgramEntity> findAllByOrganizationIdentityId(String organizationId, Pageable pageable);
+
+    Page<ProgramProjection> findAllByOrganizationIdentityId(String organizationId, Pageable pageable);
 }

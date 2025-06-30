@@ -122,8 +122,8 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validatePageNumber(pageNumber);
         PageRequest pageRequest = PageRequest.of(pageNumber, pageSize,Sort.by(Sort.Order.desc("createdAt")));
-        Page<ProgramEntity> programEntities = programRepository.findAllByOrganizationIdentityId(organizationId, pageRequest);
-        return programEntities.map(programMapper::toProgram);
+        Page<ProgramProjection> programEntities = programRepository.findAllByOrganizationIdentityId(organizationId, pageRequest);
+        return programEntities.map(programMapper::mapFromProgramProjectionToProgram);
     }
 
     @Override
@@ -175,8 +175,8 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     public Page<Program> findAllPrograms(String meedlUserId, int pageSize, int pageNumber) throws MeedlException {
         OrganizationIdentity foundOrganizationIdentity = findCreatorOrganization(meedlUserId);
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.desc("createdAt")));
-        Page<ProgramEntity> programEntities = programRepository.findAllByOrganizationIdentityId(foundOrganizationIdentity.getId(), pageRequest);
-        return programEntities.map(programMapper::toProgram);
+        Page<ProgramProjection> programEntities = programRepository.findAllByOrganizationIdentityId(foundOrganizationIdentity.getId(), pageRequest);
+        return programEntities.map(programMapper::mapFromProgramProjectionToProgram);
     }
     private static void validateServiceOfferings(List<ServiceOffering> serviceOfferings) throws EducationException {
         log.info("Validating service offerings: {}", serviceOfferings);

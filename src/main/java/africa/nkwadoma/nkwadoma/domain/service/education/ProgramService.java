@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.AddProgramUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramLoanDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
@@ -18,6 +19,8 @@ import org.apache.commons.lang3.*;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.*;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_ALREADY_EXISTS;
@@ -31,6 +34,7 @@ public class ProgramService implements AddProgramUseCase {
     private final OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final ProgramMapper programMapper;
+    private final ProgramLoanDetailOutputPort programLoanDetailOutputPort;
 
     @Override
     public Program createProgram(Program program) throws MeedlException {
@@ -134,7 +138,14 @@ public class ProgramService implements AddProgramUseCase {
     public Program viewProgramById(Program program) throws MeedlException {
         MeedlValidator.validateObjectInstance(program, ProgramMessages.PROGRAM_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(program.getId(), ProgramMessages.INVALID_PROGRAM_ID.getMessage());
-        return programOutputPort.findProgramById(program.getId());
+        program = programOutputPort.findProgramById(program.getId());
+        ProgramLoanDetail programLoanDetail = programLoanDetailOutputPort.findByProgramId(program.getId());
+        programMapper.mapProgramLoanDetailsToProgram(program,programLoanDetail);
+        program.setDebtPercentage(programLoanDetail.getTotalOutstandingAmount()
+                .divide(programLoanDetail.getTotalAmountReceived(), RoundingMode.UP));
+        program.setRepaymentRate(programLoanDetail.getTotalAmountRepaid()
+                .divide(programLoanDetail.getTotalAmountReceived(), RoundingMode.UP).multiply(BigDecimal.valueOf(100)));
+        return program;
     }
 
 }
