@@ -24,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.ServiceOfferingType.TRAINING;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
@@ -49,6 +50,7 @@ public class ProgramLoanDetailPersistenceAdapterTest {
     private ProgramLoanDetail programLoanDetail;
     @Autowired
     private ProgramLoanDetailOutputPort programLoanDetailOutputPort;
+    private String loanDetailsId;
 
 
 
@@ -82,10 +84,47 @@ public class ProgramLoanDetailPersistenceAdapterTest {
         assertThrows(MeedlException.class, () -> programLoanDetailOutputPort.save(null));
     }
 
+    @Test
+    void saveProgramLoanDetailWithNullProgram(){
+        assertThrows(MeedlException.class, () -> programLoanDetailOutputPort.save(null));
+    }
+
+    @Order(1)
+    @Test
+    void saveProgramLoanDetail(){
+        ProgramLoanDetail savedProgramLoanDetail = ProgramLoanDetail.builder().build();
+        try {
+            savedProgramLoanDetail = programLoanDetailOutputPort.save(programLoanDetail);
+            loanDetailsId = savedProgramLoanDetail.getId();
+        }catch (MeedlException exception){
+            log.info(exception.getMessage());
+        }
+        assertEquals(savedProgramLoanDetail.getProgram().getId(), program.getId());
+    }
+
+    @Test
+    void findProgramLoanDetailWithNullProgramId(){
+        assertThrows(MeedlException.class, () -> programLoanDetailOutputPort.findByProgramId(null));
+    }
+
+
+    @Order(2)
+    @Test
+    void findProgramLoanDetail(){
+        ProgramLoanDetail foundLoanDetail = ProgramLoanDetail.builder().build();
+        try {
+            foundLoanDetail = programLoanDetailOutputPort.findByProgramId(program.getId());
+        }catch (MeedlException exception){
+            log.info(exception.getMessage());
+        }
+        assertEquals(foundLoanDetail.getProgram().getId(), program.getId());
+    }
+
 
 
     @AfterAll
     void cleanUp() throws MeedlException {
+        programLoanDetailOutputPort.delete(loanDetailsId);
         log.info("program id = {}", program.getId());
         programOutputPort.deleteProgram(program.getId());
         log.info("org id = {}", organizationIdentity.getId());

@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education;
 
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
+import africa.nkwadoma.nkwadoma.domain.model.education.ProgramLoanDetail;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
@@ -20,4 +21,6 @@ public class ProgramLoanDetailEntity {
     private BigDecimal totalOutstandingAmount = BigDecimal.ZERO;
     private BigDecimal totalAmountReceived = BigDecimal.ZERO;
     private BigDecimal totalAmountRepaid = BigDecimal.ZERO;
+
+
 }
