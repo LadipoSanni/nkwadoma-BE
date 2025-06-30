@@ -51,6 +51,7 @@ public class LoanRequestService implements LoanRequestUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final LoaneeOutputPort loaneeOutputPort;
     private final CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
+    private final CohortOutputPort cohortOutputPort;
 
     @Override
     public Page<LoanRequest> viewAllLoanRequests(LoanRequest loanRequest, String userId) throws MeedlException {
@@ -122,6 +123,9 @@ public class LoanRequestService implements LoanRequestUseCase {
             LoanOffer loanOffer = loanOfferUseCase.createLoanOffer(updatedLoanRequest);
             updatedLoanRequest.setLoanOfferId(loanOffer.getId());
             updatedLoanRequest.setDateTimeOffered(loanOffer.getDateTimeOffered());
+
+            updateNumberOfLoanRequestOnCohort(foundLoanRequest.getCohortId());
+
             log.info("Loan request updated: {}", updatedLoanRequest);
             sendNotification(loanRequest, loanOffer, updatedLoanRequest);
             return updatedLoanRequest;
@@ -130,11 +134,20 @@ public class LoanRequestService implements LoanRequestUseCase {
             log.info("Loan request is not accepted {}", loanRequest);
             updatedLoanRequest = declineLoanRequest(loanRequest, foundLoanRequest);
             updatedLoanRequest.setLoaneeId(foundLoanRequest.getLoanee().getId());
-
+            updateNumberOfLoanRequestOnCohort(foundLoanRequest.getCohortId());
             sendLoanRequestDeclinedNotification(loanRequest, updatedLoanRequest);
 
             return loanRequestOutputPort.save(updatedLoanRequest);
         }
+    }
+
+    private void updateNumberOfLoanRequestOnCohort(String cohortId) throws MeedlException {
+        Cohort cohort = cohortOutputPort.findCohort(cohortId);
+        log.info("found cohort == {}",cohort);
+        log.info("current number of loan request == {}",cohort.getNumberOfLoanRequest());
+        cohort.setNumberOfLoanRequest(cohort.getNumberOfLoanRequest() - 1);
+        cohort = cohortOutputPort.save(cohort);
+        log.info(" number of loan request after decreasing by 1 == {}",cohort.getNumberOfLoanRequest());
     }
 
     private void sendLoanRequestDeclinedNotification(LoanRequest loanRequest, LoanRequest updatedLoanRequest) throws MeedlException {

@@ -48,8 +48,11 @@ public class Cohort {
     private int numberOfLoanees = 0;
     private int numberOfReferredLoanee = 0;
     private String programName;
-    private int numberOfEmployed;
-    private int numberOfDropOut;
+    private int stillInTraining ;
+    private int numberOfDropout ;
+    private int numberEmployed ;
+    private int numberOfPendingLoanOffers;
+    private int numberOfLoanRequest = 0;
     private int pageSize;
     private int pageNumber;
 

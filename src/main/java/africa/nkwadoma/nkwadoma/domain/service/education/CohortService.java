@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanBreakdownOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOfferOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
@@ -14,12 +15,14 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanOfferStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -63,6 +66,7 @@ public class CohortService implements CohortUseCase {
     private final CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
     private final CohortLoanDetailMapper cohortLoanDetailMapper;
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
+    private final LoanOfferOutputPort loanOfferOutputPort;
 
     @Override
     public Cohort createCohort(Cohort cohort) throws MeedlException {
@@ -188,6 +192,8 @@ public class CohortService implements CohortUseCase {
         Cohort cohort = cohortOutputPort.viewCohortDetails(userId, cohortId);
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
         cohort.setProgramName(program.getName());
+        int pendingLoanOffers = loanOfferOutputPort.countNumberOfPendingLoanOfferForCohort(cohort.getId());
+        cohort.setNumberOfPendingLoanOffers(pendingLoanOffers);
         return cohort;
     }
 

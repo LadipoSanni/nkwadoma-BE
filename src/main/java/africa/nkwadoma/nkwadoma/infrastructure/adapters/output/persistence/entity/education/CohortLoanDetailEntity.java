@@ -22,4 +22,5 @@ public class CohortLoanDetailEntity {
     private BigDecimal totalAmountRequested = BigDecimal.ZERO;
     private BigDecimal totalOutstandingAmount = BigDecimal.ZERO;
     private BigDecimal totalAmountReceived  = BigDecimal.ZERO;
+    private BigDecimal totalAmountRepaid  = BigDecimal.ZERO;
 }
