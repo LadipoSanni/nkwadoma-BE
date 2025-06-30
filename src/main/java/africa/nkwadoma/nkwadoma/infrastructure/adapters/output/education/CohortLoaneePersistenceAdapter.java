@@ -123,7 +123,7 @@ public class CohortLoaneePersistenceAdapter implements CohortLoaneeOutputPort {
 
     @Override
     public Page<CohortLoanee> findAllLoaneeThatBenefitedFromLoanProduct(String id, int pageSize, int pageNumber) throws MeedlException {
-        MeedlValidator.validateUUID(id,"Loan product id cannot empty");
+        MeedlValidator.validateUUID(id,"Loan product id cannot be empty");
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
 
         Page<CohortLoaneeEntity> cohortLoanees =
@@ -134,7 +134,7 @@ public class CohortLoaneePersistenceAdapter implements CohortLoaneeOutputPort {
 
     @Override
     public Page<CohortLoanee> searchLoaneeThatBenefitedFromLoanProduct(String id, String name, int pageSize, int pageNumber) throws MeedlException {
-        MeedlValidator.validateUUID(id,"Loan product id cannot empty");
+        MeedlValidator.validateUUID(id,"Loan product id cannot be empty");
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
 
 
