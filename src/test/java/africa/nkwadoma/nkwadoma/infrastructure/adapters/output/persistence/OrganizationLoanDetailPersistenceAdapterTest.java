@@ -1,16 +1,20 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education;
-
-
-import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramLoanDetailOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationLoanDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.education.*;
+import africa.nkwadoma.nkwadoma.domain.model.education.Program;
+import africa.nkwadoma.nkwadoma.domain.model.education.ProgramLoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identitymanager.OrganizationLoanDetailPersistenceAdapter;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
@@ -27,14 +31,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
-public class ProgramLoanDetailPersistenceAdapterTest {
+public class OrganizationLoanDetailPersistenceAdapterTest {
 
 
-    private UserIdentity userIdentity;
     private UserIdentity meedleUser;
     private OrganizationEmployeeIdentity employeeIdentity;
     private OrganizationIdentity organizationIdentity;
-    private Program program;
     @Autowired
     private ProgramOutputPort programOutputPort;
     @Autowired
@@ -43,10 +45,10 @@ public class ProgramLoanDetailPersistenceAdapterTest {
     private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     @Autowired
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
-    private ProgramLoanDetail programLoanDetail;
-    @Autowired
-    private ProgramLoanDetailOutputPort programLoanDetailOutputPort;
+
     private String loanDetailsId;
+    @Autowired
+    private OrganizationLoanDetailOutputPort organizationLoanDetailOutputPort;
 
 
 
@@ -60,15 +62,7 @@ public class ProgramLoanDetailPersistenceAdapterTest {
             employeeIdentity = organizationEmployeeIdentityOutputPort.save(employeeIdentity);
             organizationIdentity = TestData.createOrganizationTestData("Organization test1", "RC3456891", List.of(employeeIdentity));
             organizationIdentity = organizationIdentityOutputPort.save(organizationIdentity);
-            userIdentity = TestData.createTestUserIdentity("loanee@grr.la");
-            userIdentity.setRole(IdentityRole.LOANEE);
-            userIdentity = userIdentityOutputPort.save(userIdentity);
-            program = TestData.createProgramTestData("Software engineer");
-            program.setCreatedBy(meedleUser.getId());
-            organizationIdentity.setServiceOfferings(List.of(ServiceOffering.builder().name(TRAINING.name()).build()));
-            program.setOrganizationIdentity(organizationIdentity);
-            program = programOutputPort.saveProgram(program);
-            programLoanDetail = TestData.buildProgramLoanDetail(program);
+
         } catch (MeedlException exception) {
             log.info(exception.getMessage());
         }
@@ -76,63 +70,56 @@ public class ProgramLoanDetailPersistenceAdapterTest {
 
 
     @Test
-    void saveNullProgramLoanDetail(){
-        assertThrows(MeedlException.class, () -> programLoanDetailOutputPort.save(null));
+    void saveNullOrganizationLoanDetail(){
+        assertThrows(MeedlException.class, () -> organizationLoanDetailOutputPort.save(null));
     }
 
     @Test
-    void saveProgramLoanDetailWithNullProgram(){
-        assertThrows(MeedlException.class, () -> programLoanDetailOutputPort.save(null));
+    void saveOrganizationLoanDetailWithNullOrganization(){
+        assertThrows(MeedlException.class, () -> organizationLoanDetailOutputPort.save(null));
     }
 
     @Order(1)
     @Test
-    void saveProgramLoanDetail(){
-        ProgramLoanDetail savedProgramLoanDetail = ProgramLoanDetail.builder().build();
+    void saveOrganizationLoanDetail(){
+        OrganizationLoanDetail savedOrganizationLoanDetail = OrganizationLoanDetail.builder().build();
         try {
-            savedProgramLoanDetail = programLoanDetailOutputPort.save(programLoanDetail);
-            loanDetailsId = savedProgramLoanDetail.getId();
+            savedOrganizationLoanDetail = organizationLoanDetailOutputPort.save(savedOrganizationLoanDetail);
+            loanDetailsId = savedOrganizationLoanDetail.getId();
         }catch (MeedlException exception){
             log.info(exception.getMessage());
         }
-        assertEquals(savedProgramLoanDetail.getProgram().getId(), program.getId());
+        assertEquals(savedOrganizationLoanDetail.getOrganization().getId(), organizationIdentity.getId());
     }
 
     @Test
-    void findProgramLoanDetailWithNullProgramId(){
-        assertThrows(MeedlException.class, () -> programLoanDetailOutputPort.findByProgramId(null));
+    void findOrganizationLoanDetailWithNullProgramId(){
+        assertThrows(MeedlException.class, () -> organizationLoanDetailOutputPort.findByOrganizationId(null));
     }
 
 
     @Order(2)
     @Test
-    void findProgramLoanDetail(){
-        ProgramLoanDetail foundLoanDetail = ProgramLoanDetail.builder().build();
+    void findOrganizationLoanDetail(){
+        OrganizationLoanDetail organizationLoanDetail = OrganizationLoanDetail.builder().build();
         try {
-            foundLoanDetail = programLoanDetailOutputPort.findByProgramId(program.getId());
+            organizationLoanDetail = organizationLoanDetailOutputPort.findByOrganizationId(organizationIdentity.getId());
         }catch (MeedlException exception){
             log.info(exception.getMessage());
         }
-        assertEquals(foundLoanDetail.getProgram().getId(), program.getId());
+        assertEquals(organizationLoanDetail.getOrganization().getId(), organizationIdentity.getId());
     }
 
 
 
     @AfterAll
     void cleanUp() throws MeedlException {
-        programLoanDetailOutputPort.delete(loanDetailsId);
-        log.info("program id = {}", program.getId());
-        programOutputPort.deleteProgram(program.getId());
+        organizationLoanDetailOutputPort.delete(organizationIdentity.getId());
         log.info("org id = {}", organizationIdentity.getId());
         organizationIdentityOutputPort.delete(organizationIdentity.getId());
         log.info("org empoyee  = {}", employeeIdentity.getId());
         organizationEmployeeIdentityOutputPort.delete(employeeIdentity.getId());
         log.info("meedl id = {}", meedleUser.getId());
         userIdentityOutputPort.deleteUserById(meedleUser.getId());
-        log.info("user id = {}", userIdentity.getId());
-        userIdentityOutputPort.deleteUserById(userIdentity.getId());
     }
-
-
-
 }

@@ -4,10 +4,14 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
 
+@Setter
+@Getter
 @Entity
 public class OrganizationLoanDetailEntity {
 
