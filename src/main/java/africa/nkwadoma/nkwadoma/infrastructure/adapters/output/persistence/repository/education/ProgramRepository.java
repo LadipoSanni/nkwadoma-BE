@@ -20,5 +20,19 @@ public interface ProgramRepository extends JpaRepository<ProgramEntity, String> 
                                                             @Param("organizationId") String organizationId);
 
 
+    @Query("""
+   
+       SELECT p.id as id,
+                   pd.totalAmountReceived as totalAmountReceived,
+                   pd.totalAmountRequested as totalAmountRequested,
+                   pd.totalAmountRepaid as totalDebtRepaid,
+                   pd.totalOutstandingAmount as totalCurrentDebt
+                       
+                   from OrganizationEntity  o 
+                   join ProgramEntity p on p.organizationIdentity.id = o.id
+                   join ProgramLoanDetailEntity pd on pd.program.id = p.id
+                       
+                           where o.id = :organizationId    
+    """)
     Page<ProgramProjection> findAllByOrganizationIdentityId(String organizationId, Pageable pageable);
 }
