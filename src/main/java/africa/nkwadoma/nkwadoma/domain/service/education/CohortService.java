@@ -96,6 +96,10 @@ public class CohortService implements CohortUseCase {
 
         CohortLoanDetail cohortLoanDetail = CohortLoanDetail.builder()
                 .cohort(savedCohort)
+                .totalAmountRequested(BigDecimal.ZERO)
+                .totalAmountReceived(BigDecimal.ZERO)
+                .totalOutstandingAmount(BigDecimal.ZERO)
+                .totalAmountRepaid(BigDecimal.ZERO)
                 .build();
         cohortLoanDetailOutputPort.save(cohortLoanDetail);
         return savedCohort;
@@ -198,6 +202,7 @@ public class CohortService implements CohortUseCase {
         cohortMapper.mapCohortLoanDetailToCohort(cohort,cohortLoanDetail);
         log.info("mapped cohort == {}", cohort);
         int pendingLoanOffers = loanOfferOutputPort.countNumberOfPendingLoanOfferForCohort(cohort.getId());
+        log.info("pendingLoanOffers == {}", pendingLoanOffers);
         cohort.setNumberOfPendingLoanOffers(pendingLoanOffers);
         cohort.setExpectedEndDate(cohort.getStartDate().plusMonths(program.getDuration()));
         return cohort;

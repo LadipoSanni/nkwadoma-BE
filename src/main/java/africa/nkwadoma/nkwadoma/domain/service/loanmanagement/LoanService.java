@@ -313,7 +313,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             log.info("Mapped loan request: {}", loanRequest);
             loanRequest = createLoanRequest(loanRequest);
             log.info("Created loan request: {}", loanRequest);
-            updateNumberOfLoanRequestOnCohort(loanReferral);
+            updateNumberOfLoanRequestOnCohort(foundLoanReferral);
 
             foundLoanReferral.setLoanReferralStatus(LoanReferralStatus.AUTHORIZED);
         }
@@ -328,6 +328,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     private void updateNumberOfLoanRequestOnCohort(LoanReferral loanReferral) throws MeedlException {
+        log.info("Updating number of loan request on cohort: {}", loanReferral.getCohortLoanee());
         Cohort cohort = loanReferral.getCohortLoanee().getCohort();
         log.info("found cohort == {}",cohort);
         log.info("current number of loan request == {}",cohort.getNumberOfLoanRequest());

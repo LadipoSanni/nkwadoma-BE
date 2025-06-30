@@ -174,6 +174,7 @@ public class LoaneeService implements LoaneeUseCase {
 
     private void updateCohortValues(Cohort cohort) throws MeedlException {
         cohort.setNumberOfLoanees(cohort.getNumberOfLoanees() + 1);
+        cohort.setStillInTraining(cohort.getStillInTraining() + 1);
         increaseNumberOfLoaneesInProgram(cohort, 1);
         increaseNumberOfLoaneesInOrganization(cohort, 1);
         cohortOutputPort.save(cohort);

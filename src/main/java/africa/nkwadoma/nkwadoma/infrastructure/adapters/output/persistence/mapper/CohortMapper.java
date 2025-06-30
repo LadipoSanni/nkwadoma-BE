@@ -43,5 +43,6 @@ public interface CohortMapper {
     @Mapping(target = "totalOutstandingAmount", source = "totalOutstandingAmount")
     @Mapping(target = "totalAmountReceived", source = "totalAmountReceived")
     @Mapping(target = "totalAmountRepaid", source = "totalAmountRepaid")
+    @Mapping(target = "id", ignore = true)
     void mapCohortLoanDetailToCohort(@MappingTarget Cohort cohort,CohortLoanDetail cohortLoanDetail);
 }

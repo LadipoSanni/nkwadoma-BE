@@ -228,7 +228,7 @@ public class LoanRequestService implements LoanRequestUseCase {
         String loaneeId = foundLoanRequest.getLoaneeId();
         foundLoanRequest.setLoaneeId(foundLoanRequest.getLoaneeId());
         foundLoanRequest = loanRequestMapper.updateLoanRequest(loanRequest, foundLoanRequest);
-        foundLoanRequest = loanRequestOutputPort.save(foundLoanRequest);
+        loanRequestOutputPort.save(foundLoanRequest);
         log.info("current total amount requested for cohort {}",foundCohort.getTotalAmountRequested());
         log.info("loanee amount requested {}",foundLoanRequest.getLoanAmountRequested());
         foundCohort.setTotalAmountRequested(foundCohort.getTotalAmountRequested().
