@@ -1,5 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education;
 
+import java.math.BigDecimal;
+
 public interface OrganizationProjection {
     String getOrganizationId();
     String getName();
@@ -11,4 +13,9 @@ public interface OrganizationProjection {
     int getNumberOfLoanees();
     int getNumberOfCohort();
     int getNumberOfPrograms();
+    BigDecimal getTotalDebtRepaid();
+    BigDecimal getTotalCurrentDebt();
+    BigDecimal getTotalHistoricalDebt();
+    BigDecimal getTotalAmountReceived ();
+    BigDecimal getTotalAmountRequested ();
 }

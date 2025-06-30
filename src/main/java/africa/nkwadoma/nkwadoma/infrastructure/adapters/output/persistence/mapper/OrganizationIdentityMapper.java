@@ -37,7 +37,6 @@ public interface OrganizationIdentityMapper {
     OrganizationIdentity updateOrganizationIdentity(@MappingTarget OrganizationIdentity organizationIdentityMapTo, OrganizationIdentity organizationIdentityMapFrom);
 
 
-    List<OrganizationIdentity> projectionToOrganizationIdentity(List<OrganizationProjection> organizations);
     @Mapping(target = "id", source = "organizationId")
     @Mapping(target = "loanRequestCount", source = "loanRequestCount")
     @Mapping(target = "loanDisbursalCount", source = "loanDisbursalCount")
@@ -54,4 +53,7 @@ public interface OrganizationIdentityMapper {
     @Mapping(target = "totalDebtRepaid", source = "totalAmountRepaid")
     @Mapping(target = "id", ignore = true)
     void mapOrganizationLoanDetailsToOrganization(@MappingTarget OrganizationIdentity organizationIdentity, OrganizationLoanDetail organizationLoanDetail);
+
+//    @Mapping()
+    OrganizationIdentity mapProjecttionToOrganizationIdentity(OrganizationProjection organizationProjection);
 }
