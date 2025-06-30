@@ -116,7 +116,6 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
     public int countNumberOfPendingLoanOfferForCohort(String id) throws MeedlException {
         MeedlValidator.validateUUID(id, CohortMessages.INVALID_COHORT_ID.getMessage());
         log.info("Number of pending loan offers for cohort {}", id);
-        log.info("Number of pending loan offers for cohort {}", loanOfferEntityRepository.countPendingOfferByCohortId(id));
         return loanOfferEntityRepository.countPendingOfferByCohortId(id);
     }
 }
