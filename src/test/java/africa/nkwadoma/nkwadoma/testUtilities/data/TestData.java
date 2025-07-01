@@ -667,15 +667,17 @@ public class TestData {
                 .totalAmountReceived(BigDecimal.valueOf(30000))
                 .totalOutstandingAmount(BigDecimal.valueOf(30000))
                 .totalAmountRequested(BigDecimal.valueOf(30000))
+                .totalAmountRepaid(BigDecimal.valueOf(30000))
                 .cohort(elites).build();
     }
 
     public static ProgramLoanDetail buildProgramLoanDetail(Program program) {
         return ProgramLoanDetail.builder()
                 .program(program)
-                .totalAmountReceived(BigDecimal.ZERO)
-                .totalOutstandingAmount(BigDecimal.ZERO)
-                .totalAmountRequested(BigDecimal.ZERO)
+                .totalAmountReceived(BigDecimal.valueOf(30000))
+                .totalOutstandingAmount(BigDecimal.valueOf(30000))
+                .totalAmountRequested(BigDecimal.valueOf(30000))
+                .totalAmountRepaid(BigDecimal.valueOf(30000))
                 .build();
     }
 

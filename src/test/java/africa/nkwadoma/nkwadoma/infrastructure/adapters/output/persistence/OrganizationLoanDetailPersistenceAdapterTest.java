@@ -41,6 +41,7 @@ public class OrganizationLoanDetailPersistenceAdapterTest {
     private String loanDetailsId;
     @Autowired
     private OrganizationLoanDetailOutputPort organizationLoanDetailOutputPort;
+    private OrganizationLoanDetail organizationLoanDetail;
 
 
 
@@ -54,6 +55,7 @@ public class OrganizationLoanDetailPersistenceAdapterTest {
             employeeIdentity = organizationEmployeeIdentityOutputPort.save(employeeIdentity);
             organizationIdentity = TestData.createOrganizationTestData("Organization test1", "RC3456891", List.of(employeeIdentity));
             organizationIdentity = organizationIdentityOutputPort.save(organizationIdentity);
+            organizationLoanDetail = TestData.buildOrganizationLoanDetail(organizationIdentity);
 
         } catch (MeedlException exception) {
             log.info(exception.getMessage());
@@ -76,7 +78,8 @@ public class OrganizationLoanDetailPersistenceAdapterTest {
     void saveOrganizationLoanDetail(){
         OrganizationLoanDetail savedOrganizationLoanDetail = OrganizationLoanDetail.builder().build();
         try {
-            savedOrganizationLoanDetail = organizationLoanDetailOutputPort.save(savedOrganizationLoanDetail);
+            savedOrganizationLoanDetail = organizationLoanDetailOutputPort.save(organizationLoanDetail);
+            log.info("save loan details == {}", savedOrganizationLoanDetail);
             loanDetailsId = savedOrganizationLoanDetail.getId();
         }catch (MeedlException exception){
             log.info(exception.getMessage());
