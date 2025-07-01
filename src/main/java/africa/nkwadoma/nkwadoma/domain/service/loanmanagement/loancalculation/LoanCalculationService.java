@@ -70,6 +70,8 @@ public class LoanCalculationService implements LoanCalculationUseCase {
         BigDecimal percentageDecimal = BigDecimal.valueOf(mgtFeeInPercentage).divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP);
         return loanAmountRequested.multiply(percentageDecimal).setScale(8, RoundingMode.HALF_UP);
     }
+
+    @Override
     public BigDecimal calculateCreditLife(BigDecimal loanAmountRequested, int creditLifePercentage, int loanTenureMonths) throws MeedlException {
         validateAmount(loanAmountRequested, "Loan Amount Requested");
         validateInterestRate(creditLifePercentage, "Credit Life Percentage");
