@@ -1,12 +1,16 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanmanagement.loancalculation;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanPeriodRecord;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -375,4 +379,109 @@ class LoanCalculationServiceTest {
         assertEquals("Money Weighted Periodic Interest must not exceed 100.", ex.getMessage());
     }
 
+
+
+    @Test
+    public void calculatesWeightedInterestCorrectly() {
+        List<LoanPeriodRecord> records = Arrays.asList(
+                new LoanPeriodRecord(new BigDecimal("1000.00"), 10),
+                new LoanPeriodRecord(new BigDecimal("2000.00"), 5)
+        );
+
+        BigDecimal result = null;
+        try {
+            result = calculator.calculateMoneyWeightedPeriodicInterest(10, records);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+
+        // Expected: (10 / 365) * ((1000*10) + (2000*5)) = (10 / 365) * (10000 + 10000) = (10 / 365) * 20000
+        BigDecimal expected = new BigDecimal("10")
+                .divide(new BigDecimal("365"), 10, BigDecimal.ROUND_HALF_UP)
+                .multiply(new BigDecimal("20000"));
+
+        assertEquals(0, result.compareTo(expected));
+    }
+
+    @Test
+    public void handlesZeroInterestRate() {
+        List<LoanPeriodRecord> records = Collections.singletonList(
+                new LoanPeriodRecord(new BigDecimal("1500.00"), 30)
+        );
+
+        BigDecimal result = null;
+        try {
+            result = calculator.calculateMoneyWeightedPeriodicInterest(0, records);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertEquals(0, result.compareTo(BigDecimal.ZERO));
+
+    }
+
+    @Test
+    public void handlesEmptyRecordList() {
+        BigDecimal result = null;
+        try {
+            result = calculator.calculateMoneyWeightedPeriodicInterest(5, Collections.emptyList());
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertEquals(0, result.compareTo(BigDecimal.ZERO));
+
+    }
+
+    @Test
+    public void throwsExceptionWhenInterestRateIsNegativeForLoanPeriodRecord() {
+        List<LoanPeriodRecord> records = Collections.singletonList(
+                new LoanPeriodRecord(new BigDecimal("1000.00"), 10));
+
+        MeedlException ex = assertThrows(MeedlException.class, () ->
+                calculator.calculateMoneyWeightedPeriodicInterest(-1, records)
+        );
+        assertEquals("Interest rate must not be negative.", ex.getMessage());
+    }
+
+    @Test
+    public void throwsExceptionWhenInterestRateExceeds100() {
+        List<LoanPeriodRecord> records = Collections.singletonList(
+                new LoanPeriodRecord(new BigDecimal("1000.00"), 10)
+        );
+
+        MeedlException ex = assertThrows(MeedlException.class, () ->
+                calculator.calculateMoneyWeightedPeriodicInterest(101, records)
+        );
+        assertEquals("Interest rate must not exceed 100.", ex.getMessage());
+    }
+
+    @Test
+    public void throwsExceptionForNegativeLoanAmountOutstanding() {
+        List<LoanPeriodRecord> records = Collections.singletonList(
+                new LoanPeriodRecord(new BigDecimal("-100.00"), 10)
+        );
+
+        MeedlException ex = assertThrows(MeedlException.class, () ->
+                calculator.calculateMoneyWeightedPeriodicInterest(100, records)
+        );
+    }
+
+    @Test
+    public void throwsExceptionForNegativeDaysHeld() {
+        List<LoanPeriodRecord> records = Collections.singletonList(
+                new LoanPeriodRecord(new BigDecimal("100.00"), -10)
+        );
+
+        MeedlException ex = assertThrows(MeedlException.class, () ->
+                calculator.calculateMoneyWeightedPeriodicInterest(100, records));
+    }
+
+    @Test
+    public void throwsExceptionWhenLoanAmountOutstandingIsNullForLoanPeriodRecord() {
+        List<LoanPeriodRecord> records = Collections.singletonList(
+                new LoanPeriodRecord(null, 10)
+        );
+
+        MeedlException ex = assertThrows(MeedlException.class, () ->
+                calculator.calculateMoneyWeightedPeriodicInterest(100, records));
+    }
 }
