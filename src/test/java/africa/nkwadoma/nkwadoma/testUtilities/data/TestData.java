@@ -687,6 +687,7 @@ public class TestData {
                 .totalAmountReceived(BigDecimal.valueOf(30000))
                 .totalOutstandingAmount(BigDecimal.valueOf(30000))
                 .totalAmountRequested(BigDecimal.valueOf(30000))
+                .totalAmountRepaid(BigDecimal.valueOf(30000))
                 .build();
     }
 }

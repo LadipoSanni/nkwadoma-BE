@@ -96,13 +96,13 @@ public class OrganizationLoanDetailPersistenceAdapterTest {
     @Order(2)
     @Test
     void findOrganizationLoanDetail(){
-        OrganizationLoanDetail organizationLoanDetail = OrganizationLoanDetail.builder().build();
+        OrganizationLoanDetail foundOganizationLoanDetail = OrganizationLoanDetail.builder().build();
         try {
-            organizationLoanDetail = organizationLoanDetailOutputPort.findByOrganizationId(organizationIdentity.getId());
+            foundOganizationLoanDetail = organizationLoanDetailOutputPort.findByOrganizationId(organizationIdentity.getId());
         }catch (MeedlException exception){
             log.info(exception.getMessage());
         }
-        assertEquals(organizationLoanDetail.getOrganization().getId(), organizationIdentity.getId());
+        assertEquals(foundOganizationLoanDetail.getOrganization().getId(), organizationIdentity.getId());
     }
 
 
