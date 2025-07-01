@@ -3,6 +3,9 @@ package africa.nkwadoma.nkwadoma.domain.service.loanmanagement;
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlnotification.MeedlNotificationUsecase;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoanDetailOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
@@ -11,6 +14,9 @@ import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
@@ -34,7 +40,7 @@ import static org.mockito.Mockito.*;
 @Slf4j
 @ExtendWith(MockitoExtension.class)
 class LoanRequestServiceTest {
-    //TODO COMING BAck FOR SERVICE TEST
+
 
     @InjectMocks
     private LoanRequestService loanRequestService;
@@ -68,6 +74,13 @@ class LoanRequestServiceTest {
     @Mock
     private LoaneeOutputPort loaneeOutputPort;
     private UserIdentity userIdentity;
+    @Mock
+    private CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
+    @Mock
+    private CohortOutputPort cohortOutputPort;
+    private CohortLoanDetail cohortLoanDetail;
+    private Cohort cohort;
+
 
     @BeforeEach
     void setUp() {
@@ -91,6 +104,8 @@ class LoanRequestServiceTest {
 
         loanOffer = TestData.buildLoanOffer(loanRequest);
         loanOffer.setId("9284b721-fd60-4cd9-b6dc-5ef416d70093");
+        cohort = TestData.createCohortData("elites",testId,testId,List.of(new LoanBreakdown()),testId);
+        cohortLoanDetail = TestData.buildCohortLoanDetail(cohort);
     }
 
     @Test
@@ -190,14 +205,19 @@ class LoanRequestServiceTest {
                             .email("email@gmail.com").build()).loanee(loanee).build();
             when(loanRequestOutputPort.findById(anyString())).thenReturn(build);
             when(loanProductOutputPort.findById(build.getLoanProductId())).thenReturn(loanProduct);
+            when(cohortLoanDetailOutputPort.findByCohortId(loanRequest.getCohortId())).thenReturn(cohortLoanDetail);
             when(loanOfferUseCase.createLoanOffer(any())).thenReturn(loanOffer);
             when(loanRequestMapper.updateLoanRequest(any(), any())).thenReturn(build);
+            when(cohortLoanDetailOutputPort.save(cohortLoanDetail)).thenReturn(cohortLoanDetail);
             when(loanRequestOutputPort.save(any())).thenReturn(build);
             when(organizationIdentityOutputPort.findOrganizationByName(any()))
                     .thenReturn(Optional.of(OrganizationIdentity.builder().id(testId).build()));
             when(loanMetricsOutputPort.findByOrganizationId(anyString()))
                     .thenReturn(Optional.of(new LoanMetrics()));
             when(loanMetricsOutputPort.save(any())).thenReturn(new LoanMetrics());
+
+            when(cohortOutputPort.findCohort(loanRequest.getCohortId())).thenReturn(cohort);
+            when(cohortOutputPort.save(cohort)).thenReturn(cohort);
             when(userIdentityOutputPort.findById(build.getActorId()))
                     .thenReturn(new UserIdentity());
 
@@ -293,6 +313,8 @@ class LoanRequestServiceTest {
         try {
             when(loanRequestOutputPort.findById(loanRequest.getId())).thenReturn(loanRequest);
             when(loanRequestOutputPort.save(any())).thenReturn(loanRequest);
+            when(cohortOutputPort.findCohort(loanRequest.getCohortId())).thenReturn(cohort);
+            when(cohortOutputPort.save(cohort)).thenReturn(cohort);
             when(userIdentityOutputPort.findById(loanRequest.getActorId()))
                     .thenReturn(new UserIdentity());
             approvedLoanRequest = loanRequestService.respondToLoanRequest(loanRequest);

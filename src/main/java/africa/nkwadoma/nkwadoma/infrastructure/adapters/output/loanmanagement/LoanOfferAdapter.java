@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOfferOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
@@ -109,5 +110,12 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
         MeedlValidator.validateUUID(loaneeId, LoanMessages.INVALID_LOANEE_ID.getMessage());
         LoanOfferEntity loanOfferEntity = loanOfferEntityRepository.findLoanOfferByLoaneeId(loaneeId);
         return loanOfferMapper.toLoanOffer(loanOfferEntity);
+    }
+
+    @Override
+    public int countNumberOfPendingLoanOfferForCohort(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id, CohortMessages.INVALID_COHORT_ID.getMessage());
+        log.info("Number of pending loan offers for cohort {}", id);
+        return loanOfferEntityRepository.countPendingOfferByCohortId(id);
     }
 }

@@ -41,6 +41,10 @@ public class CohortEntity {
     private LocalDate expectedEndDate;
     @OneToOne
     private LoanDetailEntity loanDetail;
-    private Integer numberOfLoanees = 0;
-    private Integer numberOfReferredLoanee = 0;
+    private int numberOfLoanees = 0;
+    private int stillInTraining = 0;
+    private int numberOfDropout = 0;
+    private int numberEmployed = 0;
+    private int numberOfLoanRequest = 0;
+    private int numberOfReferredLoanee = 0;
 }

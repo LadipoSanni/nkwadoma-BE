@@ -664,4 +664,12 @@ public class TestData {
                 .loanStatus(LoanStatus.PERFORMING)
                 .build();
     }
+
+    public static CohortLoanDetail buildCohortLoanDetail(Cohort elites) {
+        return CohortLoanDetail.builder()
+                .totalAmountReceived(BigDecimal.valueOf(30000))
+                .totalOutstandingAmount(BigDecimal.valueOf(30000))
+                .totalAmountRequested(BigDecimal.valueOf(30000))
+                .cohort(elites).build();
+    }
 }

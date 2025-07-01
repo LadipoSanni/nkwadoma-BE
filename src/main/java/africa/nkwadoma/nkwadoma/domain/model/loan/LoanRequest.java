@@ -56,6 +56,7 @@ public class LoanRequest {
     private int creditScore;
     private String actorId;
     private String cohortLoaneeId;
+    private String cohortId;
     private boolean isVerified;
     private OnboardingMode onboardingMode;
 
