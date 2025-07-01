@@ -34,7 +34,9 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
     WHERE c.organizationId = :organizationId 
         AND (:cohortStatus IS NULL OR c.cohortStatus = :cohortStatus)
         AND LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%'))
-    GROUP BY c.id, c.name, c.startDate
+    GROUP BY c.id, c.name, c.startDate,c.tuitionAmount, cl.totalAmountReceived ,cl.totalOutstandingAmount,
+        cl.totalAmountRepaid,cl.totalAmountRequested
+
 """)
     Page<CohortProjection> findByNameContainingIgnoreCaseAndOrganizationId(
             @Param("name") String name,
@@ -60,7 +62,8 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
         c.tuitionAmount as tuitionAmount,
         cl.totalAmountReceived AS amountReceived,
         cl.totalOutstandingAmount AS amountOutstanding,
-        cl.totalAmountRepaid AS amountRepaind
+        cl.totalAmountRepaid AS amountRepaind,
+        cl.totalAmountRequested as amountRequested
     FROM CohortEntity c
     LEFT JOIN CohortLoanDetailEntity cl ON cl.cohort.id = c.id
     LEFT JOIN ProgramEntity pr ON pr.id = c.programId
@@ -70,9 +73,10 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
     LEFT JOIN LoaneeEntity lne ON lne.id = cle.loanee.id
     LEFT JOIN LoaneeLoanDetailEntity lld ON lld.id = cle.loaneeLoanDetail.id
     LEFT JOIN LoanEntity le ON le.id = lo.id
-    WHERE pr.organizationIdentity.id = :organizationId 
+    WHERE pr.organizationIdentity.id = :organizationId
         AND c.cohortStatus = :cohortStatus
-    GROUP BY c.id, c.name, c.startDate
+    GROUP BY c.id, c.name, c.startDate ,c.tuitionAmount, cl.totalAmountReceived ,cl.totalOutstandingAmount,
+        cl.totalAmountRepaid ,cl.totalAmountRequested
 """)
     Page<CohortProjection> findAllByOrganizationIdAndCohortStatus(
             @Param("organizationId") String organizationId,

@@ -17,7 +17,7 @@ public class CohortLoanDetailEntity {
     @Id
     @UuidGenerator
     private String id;
-    @ManyToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.EAGER)
     private CohortEntity cohort;
     private BigDecimal totalAmountRequested = BigDecimal.ZERO;
     private BigDecimal totalOutstandingAmount = BigDecimal.ZERO;
