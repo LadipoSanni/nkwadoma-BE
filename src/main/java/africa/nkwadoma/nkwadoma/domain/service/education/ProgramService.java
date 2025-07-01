@@ -43,8 +43,20 @@ public class ProgramService implements AddProgramUseCase {
         OrganizationIdentity organizationIdentity = findProgramOrganization(program);
         program.setOrganizationIdentity(organizationIdentity);
         checkIfProgramExistByNameInOrganization(program);
-        return programOutputPort.saveProgram(program);
+
+        program = programOutputPort.saveProgram(program);
+
+        ProgramLoanDetail programLoanDetail = buildProgramLoanDetail(program);
+        programLoanDetailOutputPort.save(programLoanDetail);
+        return program;
     }
+
+    private static ProgramLoanDetail buildProgramLoanDetail(Program program) {
+        return ProgramLoanDetail.builder()
+                .program(program).totalAmountRequested(BigDecimal.valueOf(0)).totalOutstandingAmount(BigDecimal.valueOf(0))
+                .totalAmountReceived(BigDecimal.valueOf(0)).totalAmountRepaid(BigDecimal.valueOf(0)).build();
+    }
+
     @Override
     public Program updateProgram(Program program) throws MeedlException {
         MeedlValidator.validateObjectInstance(program, ProgramMessages.PROGRAM_CANNOT_BE_EMPTY.getMessage());

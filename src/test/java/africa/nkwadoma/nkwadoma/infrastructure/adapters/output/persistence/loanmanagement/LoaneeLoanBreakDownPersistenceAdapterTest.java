@@ -147,6 +147,7 @@ public class LoaneeLoanBreakDownPersistenceAdapterTest {
     void cleanUp() throws MeedlException {
         loaneeLoanBreakDownOutputPort.deleteAll(List.of(loaneeLoanBreakdown));
         cohortLoaneeOutputPort.delete(cohortLoanee.getId());
+        cohortOutputPort.deleteCohort(cohort.getId());
         loaneeOutputPort.deleteLoanee(loaneeId);
         identityOutputPort.deleteUserById(id);
         loaneeLoanDetailsOutputPort.delete(loaneeLoanDetailsId);

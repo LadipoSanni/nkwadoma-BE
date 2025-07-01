@@ -56,6 +56,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     private final LoanOfferOutputPort loanOfferOutputPort;
 
 
+
     @Override
     public OrganizationIdentity inviteOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
         validateOrganizationIdentityDetails(organizationIdentity);
@@ -74,8 +75,17 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         log.info("about to create Loan Metrics for organization : {}", organizationIdentity);
         LoanMetrics loanMetrics = loanMetricsUseCase.createLoanMetrics(organizationIdentity.getId());
         log.info("loan metrics was created successfully for organiozation : {}", loanMetrics.getOrganizationId());
+        OrganizationLoanDetail organizationLoanDetail = buildOrganizationLoanDetail(organizationIdentity);
+        organizationLoanDetailOutputPort.save(organizationLoanDetail);
         asynchronousNotificationOutputPort.notifyPortfolioManagerOfNewOrganization(organizationIdentity, NotificationFlag.INVITE_ORGANIZATION);
         return organizationIdentity;
+    }
+
+    private static OrganizationLoanDetail buildOrganizationLoanDetail(OrganizationIdentity organizationIdentity) {
+        return OrganizationLoanDetail.builder()
+                .organization(organizationIdentity).totalAmountReceived(BigDecimal.valueOf(0))
+                .totalAmountRequested(BigDecimal.valueOf(0)).totalAmountRepaid(BigDecimal.valueOf(0))
+                .totalOutstandingAmount(BigDecimal.valueOf(0)).build();
     }
 
     private void checkIfOrganizationAndAdminExist(OrganizationIdentity organizationIdentity) throws MeedlException {
