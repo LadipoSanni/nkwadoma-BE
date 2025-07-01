@@ -129,8 +129,6 @@ public class LoanCalculationService implements LoanCalculationUseCase {
         }
     }
 
-
-
     private void validateAmount(BigDecimal amount, String name) throws MeedlException {
         if (amount == null) {
             log.error( "{} must not be null. In validate amount", name);

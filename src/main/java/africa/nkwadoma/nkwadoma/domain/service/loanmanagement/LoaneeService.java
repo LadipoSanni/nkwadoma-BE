@@ -195,6 +195,8 @@ public class LoaneeService implements LoaneeUseCase {
         if (ObjectUtils.isEmpty(existingLoanee)){
             loanee.getUserIdentity().setRole(IdentityRole.LOANEE);
             loanee.setActivationStatus(ActivationStatus.ACTIVE);
+            loanee.setOnboardingMode(OnboardingMode.EMAIL_REFERRED);
+            loanee.setUploadedStatus(UploadedStatus.ADDED);
             cohortLoanee = addLoaneeToCohort(loanee, cohort);
             loanee.setCreatedAt(LocalDateTime.now());
             Loanee createdLoanee = createLoaneeAccount(loanee);
@@ -209,8 +211,6 @@ public class LoaneeService implements LoaneeUseCase {
                 .cohort(cohort)
                 .loanee(loanee)
                 .loaneeStatus(LoaneeStatus.ADDED)
-                .onboardingMode(OnboardingMode.EMAIL_REFERRED)
-                .uploadedStatus(UploadedStatus.ADDED)
                 .build();
         LoaneeLoanDetail loaneeLoanDetail = saveLoaneeLoanDetails(loanee.getLoaneeLoanDetail());
         cohortLoanee.setLoaneeLoanDetail(loaneeLoanDetail);
