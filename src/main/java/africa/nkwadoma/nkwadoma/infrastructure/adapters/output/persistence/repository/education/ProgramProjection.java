@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 public interface ProgramProjection {
 
-    int getId();
+     String getId();
      BigDecimal getTotalAmountRepaid();
      BigDecimal getTotalAmountDisbursed();
      BigDecimal getTotalAmountOutstanding();

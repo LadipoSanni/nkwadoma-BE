@@ -23,16 +23,16 @@ public interface ProgramRepository extends JpaRepository<ProgramEntity, String> 
     @Query("""
    
        SELECT p.id as id,
-                   pd.totalAmountReceived as totalAmountReceived,
+                   pd.totalAmountReceived as totalAmountDisbursed,
                    pd.totalAmountRequested as totalAmountRequested,
-                   pd.totalAmountRepaid as totalDebtRepaid,
-                   pd.totalOutstandingAmount as totalCurrentDebt
-                       
+                   pd.totalAmountRepaid as totalAmountRepaid,
+                   pd.totalOutstandingAmount as totalAmountOutstanding
+                   
                    from OrganizationEntity  o 
                    join ProgramEntity p on p.organizationIdentity.id = o.id
                    join ProgramLoanDetailEntity pd on pd.program.id = p.id
                        
-                           where o.id = :organizationId    
+                   where o.id = :organizationId    order by p.createdAt desc 
     """)
-    Page<ProgramProjection> findAllByOrganizationIdentityId(String organizationId, Pageable pageable);
+    Page<ProgramProjection> findAllByOrganizationIdentityId(@Param("organizationId") String organizationId, Pageable pageable);
 }

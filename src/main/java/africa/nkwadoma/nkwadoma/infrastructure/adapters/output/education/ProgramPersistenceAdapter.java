@@ -121,7 +121,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         MeedlValidator.validateUUID(organizationId,OrganizationMessages.ORGANIZATION_ID_IS_REQUIRED.getMessage());
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validatePageNumber(pageNumber);
-        PageRequest pageRequest = PageRequest.of(pageNumber, pageSize,Sort.by(Sort.Order.desc("createdAt")));
+        PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
         Page<ProgramProjection> programEntities = programRepository.findAllByOrganizationIdentityId(organizationId, pageRequest);
         return programEntities.map(programMapper::mapFromProgramProjectionToProgram);
     }

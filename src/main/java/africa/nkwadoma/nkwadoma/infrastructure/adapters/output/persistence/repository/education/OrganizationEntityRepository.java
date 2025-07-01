@@ -50,6 +50,7 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
 
     @Query(""" 
             SELECT o.id as organizationId,
+                   o.name as name,
                    ld.totalAmountReceived as totalAmountReceived,
                    ld.totalAmountRequested as totalAmountRequested,
                    ld.totalAmountRepaid as totalDebtRepaid,
@@ -102,11 +103,12 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
 
     @Query("""
     Select o.id as organizationId,
+           o.name as name,
            ld.totalAmountReceived as totalAmountReceived,
            ld.totalAmountRequested as totalAmountRequested,
            ld.totalAmountRepaid as totalDebtRepaid,
            ld.totalOutstandingAmount as totalCurrentDebt
-                  
+         
           from OrganizationEntity o
           join OrganizationLoanDetailEntity ld on ld.organization.id = o.id    
            
