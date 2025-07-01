@@ -55,5 +55,6 @@ public interface OrganizationIdentityMapper {
     void mapOrganizationLoanDetailsToOrganization(@MappingTarget OrganizationIdentity organizationIdentity, OrganizationLoanDetail organizationLoanDetail);
 
     @Mapping(target = "id", source = "organizationId")
+    @Mapping(target = "status", source = "status")
     OrganizationIdentity mapProjecttionToOrganizationIdentity(OrganizationProjection organizationProjection);
 }

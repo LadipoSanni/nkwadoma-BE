@@ -1,5 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education;
 
+import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
+
 import java.math.BigDecimal;
 
 public interface OrganizationProjection {
@@ -18,4 +20,5 @@ public interface OrganizationProjection {
     BigDecimal getTotalHistoricalDebt();
     BigDecimal getTotalAmountReceived ();
     BigDecimal getTotalAmountRequested ();
+    ActivationStatus getStatus();
 }

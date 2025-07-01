@@ -54,10 +54,11 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
                    ld.totalAmountReceived as totalAmountReceived,
                    ld.totalAmountRequested as totalAmountRequested,
                    ld.totalAmountRepaid as totalDebtRepaid,
-                   ld.totalOutstandingAmount as totalCurrentDebt
+                   ld.totalOutstandingAmount as totalCurrentDebt,
+                               o.status as status          
                    from OrganizationEntity o
                                
-                   join OrganizationLoanDetailEntity ld on ld.organization.id = o.id        
+                   left join OrganizationLoanDetailEntity ld on ld.organization.id = o.id        
                    WHERE UPPER(o.status) = UPPER(:status) 
                         """)
     Page<OrganizationProjection> findAllByStatus(@Param("status") String status, Pageable pageable);
@@ -107,10 +108,12 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
            ld.totalAmountReceived as totalAmountReceived,
            ld.totalAmountRequested as totalAmountRequested,
            ld.totalAmountRepaid as totalDebtRepaid,
-           ld.totalOutstandingAmount as totalCurrentDebt
+           ld.totalOutstandingAmount as totalCurrentDebt,
+                                              o.status as status          
+
          
           from OrganizationEntity o
-          join OrganizationLoanDetailEntity ld on ld.organization.id = o.id    
+          left join OrganizationLoanDetailEntity ld on ld.organization.id = o.id    
            
     """)
     Page<OrganizationProjection> findAllOrganization(Pageable pageRequest);
