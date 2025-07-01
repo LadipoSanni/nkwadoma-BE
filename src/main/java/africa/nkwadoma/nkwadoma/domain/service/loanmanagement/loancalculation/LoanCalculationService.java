@@ -13,6 +13,7 @@ import java.util.List;
 @Slf4j
 @Component
 public class LoanCalculationService implements LoanCalculationUseCase {
+    private final int NUMBER_OF_DECIMAL_PLACE = 8;
     @Override
     public BigDecimal calculateLoanAmountRequested(BigDecimal programFee, BigDecimal initialDeposit) throws MeedlException {
         validateAmount(programFee, "Program Fee");
@@ -53,7 +54,8 @@ public class LoanCalculationService implements LoanCalculationUseCase {
             sumProduct = sumProduct.add(product);
         }
 
-        BigDecimal rateFraction = BigDecimal.valueOf(interestRate).divide(BigDecimal.valueOf(365), 8, RoundingMode.HALF_UP);
+        BigDecimal rateFraction = BigDecimal.valueOf(interestRate)
+                                .divide(BigDecimal.valueOf(365), NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
         return rateFraction.multiply(sumProduct);
     }
 
@@ -68,7 +70,32 @@ public class LoanCalculationService implements LoanCalculationUseCase {
         validateInterestRate(mgtFeeInPercentage, "Management Fee Percentage");
 
         BigDecimal percentageDecimal = BigDecimal.valueOf(mgtFeeInPercentage).divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP);
-        return loanAmountRequested.multiply(percentageDecimal).setScale(8, RoundingMode.HALF_UP);
+        return loanAmountRequested.multiply(percentageDecimal)
+                            .setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
+    }
+
+    @Override
+    public BigDecimal calculateCreditLife(BigDecimal loanAmountRequested, int creditLifePercentage, int loanTenureMonths) throws MeedlException {
+        validateAmount(loanAmountRequested, "Loan Amount Requested");
+        validateInterestRate(creditLifePercentage, "Credit Life Percentage");
+        validateLoanTenure(loanTenureMonths);
+
+        BigDecimal percentage = BigDecimal.valueOf(creditLifePercentage)
+                                .divide(BigDecimal.valueOf(100), NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
+
+        double tenureYears = loanTenureMonths / 12.0;
+        int multiplier = Math.max(1, (int) Math.ceil(tenureYears));
+
+        return loanAmountRequested
+                .multiply(percentage)
+                .multiply(BigDecimal.valueOf(multiplier))
+                .setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
+    }
+
+    private void validateLoanTenure(int tenure) throws MeedlException {
+        if (tenure < 0) {
+            throw new MeedlException("Loan Tenure must not be negative.");
+        }
     }
 
     private void validateLoanPeriodRecord(LoanPeriodRecord record) throws MeedlException {
@@ -108,8 +135,6 @@ public class LoanCalculationService implements LoanCalculationUseCase {
         }
     }
 
-
-
     private void validateAmount(BigDecimal amount, String name) throws MeedlException {
         if (amount == null) {
             log.error( "{} must not be null. In validate amount", name);
@@ -119,6 +144,5 @@ public class LoanCalculationService implements LoanCalculationUseCase {
             log.error( "{} must not be negative. In validate amount", name);
             throw new MeedlException(name + " must not be negative.");
         }
-
     }
 }

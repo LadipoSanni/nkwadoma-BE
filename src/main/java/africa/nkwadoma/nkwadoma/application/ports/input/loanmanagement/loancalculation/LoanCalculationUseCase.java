@@ -22,4 +22,6 @@ public interface LoanCalculationUseCase {
     int calculateMonthlyInterestRate(int interestRate) throws MeedlException;
 
     BigDecimal calculateManagementOrProcessingFee(BigDecimal loanAmountRequested, double mgtFeeInPercentage) throws MeedlException;
+
+    BigDecimal calculateCreditLife(BigDecimal loanAmountRequested, int creditLifePercentage, int loanTenureMonths) throws MeedlException;
 }
