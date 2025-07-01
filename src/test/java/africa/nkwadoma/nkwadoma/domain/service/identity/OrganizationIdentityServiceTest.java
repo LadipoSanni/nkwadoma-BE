@@ -2,10 +2,7 @@
 
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.LoanMetricsUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
@@ -70,6 +67,8 @@ class OrganizationIdentityServiceTest {
     private final String mockId = "83f744df-78a2-4db6-bb04-b81545e78e49";
     private int pageSize = 10;
     private int pageNumber = 0;
+    @Mock
+    private OrganizationLoanDetailOutputPort organizationLoanDetailOutputPort;
 
     @BeforeEach
     void setUp() {
@@ -122,6 +121,8 @@ class OrganizationIdentityServiceTest {
             doNothing().when(asynchronousNotificationOutputPort).notifyPortfolioManagerOfNewOrganization(any(OrganizationIdentity.class), any(NotificationFlag.class));
             when(loanMetricsUseCase.createLoanMetrics(anyString())).thenReturn(new LoanMetrics());
 
+            OrganizationLoanDetail organizationLoanDetail = TestData.buildOrganizationLoanDetail(roseCouture);
+            when(organizationLoanDetailOutputPort.save(any())).thenReturn(organizationLoanDetail);
             invitedOrganisation = organizationIdentityService.inviteOrganization(roseCouture);
             assertNotNull(invitedOrganisation);
             assertNotNull(invitedOrganisation.getServiceOfferings());
