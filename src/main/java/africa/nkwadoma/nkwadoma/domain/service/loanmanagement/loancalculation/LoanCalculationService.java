@@ -63,7 +63,7 @@ public class LoanCalculationService implements LoanCalculationUseCase {
         return interestRate / 12;
     }
     @Override
-    public BigDecimal calculateManagementFee(BigDecimal loanAmountRequested, double mgtFeeInPercentage) throws MeedlException {
+    public BigDecimal calculateManagementOrProcessingFee(BigDecimal loanAmountRequested, double mgtFeeInPercentage) throws MeedlException {
         validateAmount(loanAmountRequested, "Loan Amount Requested");
         validateInterestRate(mgtFeeInPercentage, "Management Fee Percentage");
 
