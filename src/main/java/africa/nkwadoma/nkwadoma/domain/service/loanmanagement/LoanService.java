@@ -358,9 +358,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
                 add(loanRequest.getLoanAmountRequested()));
         cohortLoanDetailOutputPort.save(foundCohort);
         log.info("total amount requested updated for cohort after adding == {} is {}",
-                loanReferral.getLoanAmountRequested(),foundCohort.getTotalAmountRequested());
+                loanRequest.getLoanAmountRequested(),foundCohort.getTotalAmountRequested());
 
         ProgramLoanDetail programLoanDetail = programLoanDetailOutputPort.findByProgramId(cohort.getProgramId());
+        log.info("program loan details id {}",programLoanDetail.getId());
         programLoanDetail.setTotalAmountRequested(programLoanDetail.getTotalAmountRequested()
                 .add(loanRequest.getLoanAmountRequested()));
         programLoanDetailOutputPort.save(programLoanDetail);

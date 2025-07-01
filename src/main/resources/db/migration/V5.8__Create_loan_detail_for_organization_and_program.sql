@@ -1,8 +1,6 @@
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
 -- Creating program_loan_detail_entity table
-CREATE TABLE program_loan_detail_entity (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+CREATE TABLE  IF NOT EXISTS program_loan_detail_entity (
+    id VARCHAR(36) PRIMARY KEY DEFAULT uuid_generate_v4(),
     program_id VARCHAR(36) UNIQUE NOT NULL,
     total_amount_requested DECIMAL(19,2) NOT NULL DEFAULT 0.00,
     total_outstanding_amount DECIMAL(19,2) NOT NULL DEFAULT 0.00,
@@ -12,8 +10,8 @@ CREATE TABLE program_loan_detail_entity (
 );
 
 -- Creating organization_loan_detail_entity table
-CREATE TABLE organization_loan_detail_entity (
-     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+CREATE TABLE IF NOT EXISTS  organization_loan_detail_entity (
+     id VARCHAR(36) PRIMARY KEY DEFAULT uuid_generate_v4(),
      organization_id VARCHAR(36) UNIQUE NOT NULL,
      total_amount_requested DECIMAL(19,2) NOT NULL DEFAULT 0.00,
      total_outstanding_amount DECIMAL(19,2) NOT NULL DEFAULT 0.00,
@@ -93,3 +91,7 @@ SELECT
                  WHERE p.organization_identity_id = o.id
              ), 0.00)
 FROM organization o;
+
+
+ALTER TABLE cohort_loan_detail_entity
+ALTER COLUMN id TYPE VARCHAR;
