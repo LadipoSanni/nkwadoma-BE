@@ -427,4 +427,72 @@ class LoanCalculationServiceTest {
         MeedlException ex = assertThrows(MeedlException.class, () ->
                 calculator.calculateMoneyWeightedPeriodicInterest(100, records));
     }
+
+
+
+    @Test
+    public void calculateManagementFee() {
+        BigDecimal result = null;
+        try {
+            result = calculator.calculateManagementFee(new BigDecimal("10000.00"), 5.5);
+        } catch (MeedlException e) {
+            log.error("",e);
+        }
+        assertEquals(new BigDecimal("550.00000000"), result);
+    }
+
+    @Test
+    public void calculationReturnsZeroWhenPercentageIsZero() {
+        BigDecimal result = null;
+        try {
+            result = calculator.calculateManagementFee(new BigDecimal("10000.00"), 0);
+        } catch (MeedlException e) {
+            log.error("",e);
+        }
+        assertNotNull(result);
+        assertEquals(0, result.compareTo(BigDecimal.ZERO));
+    }
+
+    @Test
+    public void calculateManagementFeeWithHundredPercent() {
+        BigDecimal result = null;
+        try {
+            result = calculator.calculateManagementFee(new BigDecimal("2000.00"), 100);
+        } catch (MeedlException e) {
+            log.error("",e);
+        }
+        assertEquals(new BigDecimal("2000.00000000"), result);
+    }
+
+    @Test
+    public void calculateManagementFeeWithNulLoanAmountRequested() {
+        MeedlException ex = assertThrows(MeedlException.class, () ->
+                calculator.calculateManagementFee(null, 10)
+        );
+        assertEquals("Loan Amount Requested must not be null.", ex.getMessage());
+    }
+
+    @Test
+    public void calculateManagementFeeWithNegativeLoanAmountRequested() {
+        MeedlException ex = assertThrows(MeedlException.class, () ->
+                calculator.calculateManagementFee(new BigDecimal("-5000.00"), 10)
+        );
+        assertEquals("Loan Amount Requested must not be negative.", ex.getMessage());
+    }
+
+    @Test
+    public void calculateManagementFeeWithNegativeMgtFeeInPercent() {
+        MeedlException ex = assertThrows(MeedlException.class, () ->
+                calculator.calculateManagementFee(new BigDecimal("10000.00"), -1)
+        );
+        assertEquals("Management Fee Percentage must not be negative.", ex.getMessage());
+    }
+
+    @Test
+    public void calculateManagementFeeWithMgtFeeInPercentAboveHundred() {
+        MeedlException ex = assertThrows(MeedlException.class, () ->
+                calculator.calculateManagementFee(new BigDecimal("10000.00"), 101)
+        );
+        assertEquals("Management Fee Percentage must not exceed 100.", ex.getMessage());
+    }
 }
