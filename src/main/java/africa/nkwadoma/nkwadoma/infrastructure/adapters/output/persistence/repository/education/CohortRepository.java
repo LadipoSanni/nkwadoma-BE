@@ -18,17 +18,14 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
         c.name AS name,
         COALESCE(COUNT(DISTINCT lne.id), 0) AS numberOfLoanees,
         c.startDate AS startDate,
-        COALESCE(SUM(
-            CASE 
-                WHEN cle.onboardingMode = 'FILE_UPLOADED' THEN lld.amountRequested
-                ELSE 0
-            END
-        ), 0) AS amountRequested,
+        cl.totalAmountRequested as amountRequested,
         c.tuitionAmount AS tuitionAmount,
-        COALESCE(0, 0) AS amountReceived,
-        COALESCE(0, 0) AS amountOutstanding
+        cl.totalAmountReceived AS amountReceived,
+        cl.totalOutstandingAmount AS amountOutstanding,
+        cl.totalAmountRepaid AS amountRepaind
     FROM CohortEntity c
     LEFT JOIN CohortLoaneeEntity cle ON cle.cohort.id = c.id
+    LEFT JOIN CohortLoanDetailEntity cl ON cl.cohort.id = c.id
     LEFT JOIN LoanReferralEntity lfr ON lfr.cohortLoanee.id = cle.id
     LEFT JOIN LoanOfferEntity lo ON lo.id = lfr.id
     LEFT JOIN LoaneeEntity lne ON lne.id = cle.loanee.id
@@ -60,16 +57,12 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
         c.name AS name,
         COALESCE(COUNT(DISTINCT lne.id), 0) AS numberOfLoanees,
         c.startDate AS startDate,
-        COALESCE(SUM(
-            CASE 
-                WHEN cle.onboardingMode = 'FILE_UPLOADED' THEN lld.amountRequested
-                ELSE 0
-            END
-        ), 0) AS amountRequested,
-        c.tuitionAmount AS tuitionAmount,
-        COALESCE(0, 0) AS amountReceived,
-        COALESCE(0, 0) AS amountOutstanding
+        c.tuitionAmount as tuitionAmount,
+        cl.totalAmountReceived AS amountReceived,
+        cl.totalOutstandingAmount AS amountOutstanding,
+        cl.totalAmountRepaid AS amountRepaind
     FROM CohortEntity c
+    LEFT JOIN CohortLoanDetailEntity cl ON cl.cohort.id = c.id
     LEFT JOIN ProgramEntity pr ON pr.id = c.programId
     LEFT JOIN CohortLoaneeEntity cle ON cle.cohort.id = c.id
     LEFT JOIN LoanReferralEntity lfr ON lfr.cohortLoanee.id = cle.id
