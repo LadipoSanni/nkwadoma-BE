@@ -36,7 +36,7 @@ public interface CohortLoaneeRepository extends JpaRepository<CohortLoaneeEntity
                 WHERE CLE.cohort.id = :cohortId
                 AND (:loaneeStatus IS NULL AND CLE.loaneeStatus != 'ARCHIVE' OR CLE.loaneeStatus = :loaneeStatus )
                 AND (:loaneeStatus IS NULL OR CLE.loaneeStatus = :loaneeStatus)
-                AND (:uploadedStatus IS NULL OR CLE.uploadedStatus = :uploadedStatus)
+                AND (:uploadedStatus IS NULL OR CLE.loanee.uploadedStatus = :uploadedStatus)
     """)
     Page<CohortLoaneeEntity> findAllByCohortId(@Param("cohortId") String cohortId,
                                                @Param("loaneeStatus") LoaneeStatus loaneeStatus,
@@ -49,7 +49,7 @@ public interface CohortLoaneeRepository extends JpaRepository<CohortLoaneeEntity
         AND (upper(concat(l.loanee.userIdentity.firstName, ' ', l.loanee.userIdentity.lastName)) LIKE upper(concat('%', :nameFragment, '%'))
         OR upper(concat(l.loanee.userIdentity.lastName, ' ', l.loanee.userIdentity.firstName)) LIKE upper(concat('%', :nameFragment, '%')))
         AND (:status IS NULL OR l.loaneeStatus = :status)
-        AND (:uploadedStatus IS NULL OR l.uploadedStatus = :uploadedStatus)
+        AND (:uploadedStatus IS NULL OR l.loanee.uploadedStatus = :uploadedStatus)
         AND l.loaneeStatus != 'ARCHIVE'
     """)
     Page<CohortLoaneeEntity> findByCohortIdAndNameFragment(@Param("cohortId") String cohortId,

@@ -71,7 +71,7 @@ public interface LoanRequestRepository extends JpaRepository<LoanRequestEntity, 
         l.userIdentity.stateOfOrigin as stateOfOrigin, 
         l.userIdentity.stateOfResidence as stateOfResidence, 
         lr.status as status, cle.id as cohortLoaneeId,
-        u.isIdentityVerified as isVerified, cle.onboardingMode as onboardingMode,
+        u.isIdentityVerified as isVerified, l.onboardingMode as onboardingMode,
         c.id as cohortId
     
     FROM LoanRequestEntity lr
