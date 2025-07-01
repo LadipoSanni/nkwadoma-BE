@@ -1,28 +1,32 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanmanagement.loancalculation;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loancalculation.LoanCalculationUseCase;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanPeriodRecord;
-import org.apache.commons.lang3.Validate;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 @Component
-public class LoanCalculationService {
+public class LoanCalculationService implements LoanCalculationUseCase {
+    @Override
     public BigDecimal calculateLoanAmountRequested(BigDecimal programFee, BigDecimal initialDeposit) throws MeedlException {
         validateAmount(programFee, "Program Fee");
         validateAmount(initialDeposit, "Initial Deposit");
 
         return programFee.subtract(initialDeposit);
     }
-    public BigDecimal calculateLoanDisbursedOffered(BigDecimal loanAmountRequested, BigDecimal loanDisbursementFees) throws MeedlException {
+    @Override
+    public BigDecimal calculateLoanAmountDisbursed(BigDecimal loanAmountRequested, BigDecimal loanDisbursementFees) throws MeedlException {
         validateAmount(loanAmountRequested, "Loan Amount Requested");
         validateAmount(loanDisbursementFees, "Loan Disbursement Fees");
 
         return loanAmountRequested.add(loanDisbursementFees);
     }
 
+    @Override
     public BigDecimal calculateLoanAmountOutstanding(
             BigDecimal loanAmountOutstanding,
             BigDecimal monthlyRepayment,
@@ -36,6 +40,7 @@ public class LoanCalculationService {
                 .subtract(monthlyRepayment)
                 .add(BigDecimal.valueOf(moneyWeightedPeriodicInterest));
     }
+    @Override
     public BigDecimal calculateMoneyWeightedPeriodicInterest(int interestRate, List<LoanPeriodRecord> periods) throws MeedlException {
         validateInterestRate(interestRate, "Interest rate");
 
@@ -46,8 +51,14 @@ public class LoanCalculationService {
             sumProduct = sumProduct.add(product);
         }
 
-        BigDecimal rateFraction = BigDecimal.valueOf(interestRate).divide(BigDecimal.valueOf(365), 10, BigDecimal.ROUND_HALF_UP);
+        BigDecimal rateFraction = BigDecimal.valueOf(interestRate).divide(BigDecimal.valueOf(365), 8, RoundingMode.HALF_UP);
         return rateFraction.multiply(sumProduct);
+    }
+
+    @Override
+    public int calculateMonthlyInterestRate(int interestRate) throws MeedlException {
+        validateInterestRate(interestRate, "Interest rate");
+        return interestRate / 12;
     }
 
     private void validateLoanPeriodRecord(LoanPeriodRecord record) throws MeedlException {
@@ -63,12 +74,6 @@ public class LoanCalculationService {
         if (record.getDaysHeld() < 0) {
             throw new MeedlException("Days Held must not be negative.");
         }
-    }
-
-
-    public int calculateMonthlyInterestRate(int interestRate) throws MeedlException {
-        validateInterestRate(interestRate, "Interest rate");
-        return interestRate / 12;
     }
 
     private void validateInterestRate(int interestRate, String name) throws MeedlException {
