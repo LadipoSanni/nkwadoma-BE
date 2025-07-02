@@ -3,11 +3,13 @@ package africa.nkwadoma.nkwadoma.domain.service.loanmanagement.loancalculation;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loancalculation.LoanCalculationUseCase;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanPeriodRecord;
+import org.apache.commons.math3.stat.StatUtils;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class LoanCalculationService implements LoanCalculationUseCase {
@@ -60,6 +62,28 @@ public class LoanCalculationService implements LoanCalculationUseCase {
         validateInterestRate(interestRate, "Interest rate");
         return interestRate / 12;
     }
+
+    public BigDecimal calculateLoanDisbursementFees(Map<String, BigDecimal> feeMap) throws MeedlException {
+        if (feeMap == null || feeMap.isEmpty()) {
+            return BigDecimal.ZERO.setScale(8, RoundingMode.HALF_UP);
+        }
+
+        double[] values = new double[feeMap.size()];
+        int i = 0;
+        for (Map.Entry<String, BigDecimal> entry : feeMap.entrySet()) {
+            String name = entry.getKey();
+            BigDecimal value = entry.getValue();
+
+            if (value == null) throw new MeedlException(name + " must not be null.");
+            if (value.compareTo(BigDecimal.ZERO) < 0) throw new MeedlException(name + " must not be negative.");
+
+            values[i++] = value.doubleValue();
+        }
+
+        double sum = StatUtils.sum(values);
+        return BigDecimal.valueOf(sum).setScale(2, RoundingMode.HALF_UP);
+    }
+
 
     private void validateLoanPeriodRecord(LoanPeriodRecord record) throws MeedlException {
         if (record == null){
