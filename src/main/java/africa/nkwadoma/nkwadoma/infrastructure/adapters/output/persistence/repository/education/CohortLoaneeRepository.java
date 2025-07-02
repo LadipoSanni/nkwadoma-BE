@@ -41,16 +41,16 @@ public interface CohortLoaneeRepository extends JpaRepository<CohortLoaneeEntity
                         
                 from CohortLoaneeEntity cohort_loanee
     
-                join LoaneeEntity loanee on loanee.id = cohort_loanee.loanee.id
-                join UserEntity user on user.id = loanee.userIdentity.id
+                left join LoaneeEntity loanee on loanee.id = cohort_loanee.loanee.id
+                left join UserEntity user on user.id = loanee.userIdentity.id
                 left join NextOfKinEntity next_of_kin on next_of_kin.id = user.nextOfKinEntity.id    
-                join CohortEntity cohort on cohort.id = cohort_loanee.cohort.id
-                join ProgramEntity program on program.id = cohort.programId
-                join OrganizationEntity organization on organization.id = program.organizationIdentity.id      
-                join LoanReferralEntity  loan_referral on loan_referral.cohortLoanee.id = cohort_loanee.id
-                join LoanRequestEntity loan_request on loan_request.id = loan_referral.id 
-                join LoanOfferEntity loan_offer on loan_offer.id = loan_request.id
-                join LoanProductEntity loan_product on loan_product.id = loan_offer.loanProduct.id
+                left join CohortEntity cohort on cohort.id = cohort_loanee.cohort.id
+                left join ProgramEntity program on program.id = cohort.programId
+                left join OrganizationEntity organization on organization.id = program.organizationIdentity.id      
+                left join LoanReferralEntity  loan_referral on loan_referral.cohortLoanee.id = cohort_loanee.id
+                left join LoanRequestEntity loan_request on loan_request.id = loan_referral.id 
+                left join LoanOfferEntity loan_offer on loan_offer.id = loan_request.id
+                left join LoanProductEntity loan_product on loan_product.id = loan_offer.loanProduct.id
                 left join RepaymentHistoryEntity repayment_history on repayment_history.loanee.id = loanee.id
                 
                 where loanee.id = :loaneeId and cohort.id = :cohortId   
