@@ -323,10 +323,16 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         OrganizationLoanDetail organizationLoanDetail =
                 organizationLoanDetailOutputPort.findByOrganizationId(organizationIdentity.getId());
         organizationIdentityMapper.mapOrganizationLoanDetailsToOrganization(organizationIdentity,organizationLoanDetail);
-        organizationIdentity.setDebtPercentage(organizationLoanDetail.getTotalOutstandingAmount()
-                .divide(organizationLoanDetail.getTotalAmountReceived(), RoundingMode.UP));
-        organizationIdentity.setRepaymentRate(organizationLoanDetail.getTotalAmountRepaid()
-                .divide(organizationLoanDetail.getTotalAmountReceived(), RoundingMode.UP).multiply(BigDecimal.valueOf(100)));
+        BigDecimal totalAmountReceived = organizationIdentity.getTotalAmountReceived();
+        if (totalAmountReceived !=  null && totalAmountReceived.compareTo(BigDecimal.ZERO) > 0) {
+            organizationIdentity.setDebtPercentage(organizationLoanDetail.getTotalOutstandingAmount()
+                    .divide(organizationLoanDetail.getTotalAmountReceived(), RoundingMode.UP));
+            organizationIdentity.setRepaymentRate(organizationLoanDetail.getTotalAmountRepaid()
+                    .divide(organizationLoanDetail.getTotalAmountReceived(), RoundingMode.UP).multiply(BigDecimal.valueOf(100)));
+        }else {
+            organizationIdentity.setDebtPercentage(BigDecimal.ZERO);
+            organizationIdentity.setRepaymentRate(BigDecimal.ZERO);
+        }
         int pendingLoanOffer = loanOfferOutputPort.countNumberOfPendingLoanOfferForOrganization(organizationIdentity.getId());
         organizationIdentity.setPendingLoanOfferCount(pendingLoanOffer);
         return organizationIdentity;

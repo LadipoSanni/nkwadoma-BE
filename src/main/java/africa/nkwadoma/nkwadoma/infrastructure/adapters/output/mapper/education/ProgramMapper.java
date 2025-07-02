@@ -19,6 +19,15 @@ public interface ProgramMapper {
 
     void updateProgram(@MappingTarget Program foundProgram,Program program);
 
+
+    @Mapping(target = "programStartDate", source = "programStartDate")
+    @Mapping(target = "programDescription", source = "programDescription")
+    @Mapping(target = "name", source = "name")
+    @Mapping(target = "mode", source = "mode")
+    @Mapping(target = "numberOfLoanees", source = "numberOfLoanees")
+    @Mapping(target = "numberOfCohort", source = "numberOfCohort")
+    @Mapping(target = "duration", source = "duration")
+    @Mapping(target = "programStatus", source = "programStatus")
     Program mapFromProgramProjectionToProgram(ProgramProjection programProjection);
 
 
