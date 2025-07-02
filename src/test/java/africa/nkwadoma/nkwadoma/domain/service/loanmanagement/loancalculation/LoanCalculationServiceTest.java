@@ -31,6 +31,9 @@ class LoanCalculationServiceTest {
     @BeforeEach
     void setUp() {
     }
+    private BigDecimal decimalPlaceRoundUp(BigDecimal bigDecimal) {
+        return bigDecimal.setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
+    }
 
     @Test
     public void calculateLoanAmountRequested() {
@@ -576,8 +579,7 @@ class LoanCalculationServiceTest {
         );
 
         BigDecimal result = calculator.calculateLoanDisbursementFees(fees);
-        assertEquals(new BigDecimal("300.00")
-                .setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP), result);
+        assertEquals(decimalPlaceRoundUp(new BigDecimal("300.00")), result);
     }
 
     @Test
@@ -585,8 +587,7 @@ class LoanCalculationServiceTest {
         Map<String, BigDecimal> fees = Map.of("Credit Life", new BigDecimal("75.00"));
 
         BigDecimal result = calculator.calculateLoanDisbursementFees(fees);
-        assertEquals(new BigDecimal("75.00")
-                .setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP), result);
+        assertEquals(decimalPlaceRoundUp(new BigDecimal("75.00")), result);
     }
 
     @Test
@@ -599,15 +600,14 @@ class LoanCalculationServiceTest {
         );
 
         BigDecimal result = calculator.calculateLoanDisbursementFees(fees);
-        assertEquals(new BigDecimal("125.00")
-                .setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP), result);
+        assertEquals(decimalPlaceRoundUp(new BigDecimal("125.00")), result);
     }
 
     @Test
     public void returnsZeroWhenNoFeesProvided() throws MeedlException {
         Map<String, BigDecimal> fees = Map.of();
         BigDecimal result = calculator.calculateLoanDisbursementFees(fees);
-        assertEquals(BigDecimal.ZERO.setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP), result);
+        assertEquals(decimalPlaceRoundUp(BigDecimal.ZERO), result);
     }
 
     @Test
@@ -617,7 +617,44 @@ class LoanCalculationServiceTest {
         MeedlException ex = assertThrows(MeedlException.class, () ->
                 calculator.calculateLoanDisbursementFees(fees)
         );
-
         assertEquals("Processing Fee must not be negative.", ex.getMessage());
+    }
+
+
+
+
+
+    @Test
+    public void calculateTotalRepaymentForThreePayments() throws MeedlException {
+        List<BigDecimal> repayments = List.of(
+                new BigDecimal("200.50"),
+                new BigDecimal("199.50"),
+                new BigDecimal("100.00")
+        );
+
+        BigDecimal result = calculator.calculateTotalRepayment(repayments);
+        assertEquals(decimalPlaceRoundUp(new BigDecimal("500.00")), result);
+    }
+
+    @Test
+    public void calculateTotalRepaymentWhenWithOnePayment() throws MeedlException {
+        List<BigDecimal> repayments = List.of(new BigDecimal("150.75"));
+
+        BigDecimal result = calculator.calculateTotalRepayment(repayments);
+        assertEquals(decimalPlaceRoundUp(new BigDecimal("150.75")), result);
+    }
+
+    @Test
+    public void returnsZeroWhenRepaymentListIsEmpty() throws MeedlException {
+        List<BigDecimal> repayments = List.of();
+
+        BigDecimal result = calculator.calculateTotalRepayment(repayments);
+        assertEquals(decimalPlaceRoundUp(new BigDecimal("0.00")), result);
+    }
+
+    @Test
+    public void returnsZeroWhenRepaymentListIsNull() throws MeedlException {
+        BigDecimal result = calculator.calculateTotalRepayment(null);
+        assertEquals(decimalPlaceRoundUp(new BigDecimal("0.00")), result);
     }
 }

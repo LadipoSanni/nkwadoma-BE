@@ -72,8 +72,7 @@ public class LoanCalculationService implements LoanCalculationUseCase {
         validateInterestRate(mgtFeeInPercentage, "Management Fee Percentage");
 
         BigDecimal percentageDecimal = BigDecimal.valueOf(mgtFeeInPercentage).divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP);
-        return loanAmountRequested.multiply(percentageDecimal)
-                            .setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
+        return decimalPlaceRoundUp(loanAmountRequested.multiply(percentageDecimal));
     }
 
     @Override
@@ -88,34 +87,51 @@ public class LoanCalculationService implements LoanCalculationUseCase {
         double tenureYears = loanTenureMonths / 12.0;
         int multiplier = Math.max(1, (int) Math.ceil(tenureYears));
 
-        return loanAmountRequested
-                .multiply(percentage)
-                .multiply(BigDecimal.valueOf(multiplier))
-                .setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
+        return decimalPlaceRoundUp(
+                    loanAmountRequested
+                        .multiply(percentage)
+                        .multiply(BigDecimal.valueOf(multiplier))
+                    );
     }
 
     @Override
     public BigDecimal calculateLoanDisbursementFees(Map<String, BigDecimal> feeMap) throws MeedlException {
         if (feeMap == null || feeMap.isEmpty()) {
-            return BigDecimal.ZERO.setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
+            return decimalPlaceRoundUp(BigDecimal.ZERO);
         }
 
         double[] values = new double[feeMap.size()];
         int i = 0;
+
         for (Map.Entry<String, BigDecimal> entry : feeMap.entrySet()) {
             String name = entry.getKey();
             BigDecimal value = entry.getValue();
-
-            if (value == null) throw new MeedlException(name + " must not be null.");
-            if (value.compareTo(BigDecimal.ZERO) < 0) throw new MeedlException(name + " must not be negative.");
-
+            validateAmount(value, name);
             values[i++] = value.doubleValue();
         }
 
         double sum = StatUtils.sum(values);
-        return BigDecimal.valueOf(sum).setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
+        return decimalPlaceRoundUp(BigDecimal.valueOf(sum));
     }
 
+    @Override
+    public BigDecimal calculateTotalRepayment(List<BigDecimal> monthlyRepayments) throws MeedlException {
+        if (monthlyRepayments == null || monthlyRepayments.isEmpty()) {
+            return decimalPlaceRoundUp(BigDecimal.ZERO);
+        }
+
+        BigDecimal total = BigDecimal.ZERO;
+
+        for (int i = 0; i < monthlyRepayments.size(); i++) {
+            BigDecimal repayment = monthlyRepayments.get(i);
+            validateAmount(repayment, "Monthly Repayment "+i );
+            total = total.add(repayment);
+        }
+        return decimalPlaceRoundUp(total);
+    }
+    private BigDecimal decimalPlaceRoundUp(BigDecimal bigDecimal) {
+        return bigDecimal.setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
+    }
     private void validateLoanTenure(int tenure) throws MeedlException {
         if (tenure < 0) {
             throw new MeedlException("Loan Tenure must not be negative.");
