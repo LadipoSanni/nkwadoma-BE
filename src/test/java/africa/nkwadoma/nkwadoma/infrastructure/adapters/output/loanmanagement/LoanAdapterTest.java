@@ -259,6 +259,8 @@ class LoanAdapterTest {
         VendorEntity foundGemsVendorEntity = vendorEntityRepository.findByVendorName(loanProduct.getVendors().get(0).getVendorName());
         loanProductVendorRepository.deleteByVendorEntityId((foundGemsVendorEntity.getId()));
         vendorEntityRepository.deleteById(foundGemsVendorEntity.getId());
+        loanOutputPort.deleteById(loanId);
+
         loanOfferOutputPort.deleteLoanOfferById(loanReferralId);
         loanProductOutputPort.deleteById(loanProduct.getId());
 

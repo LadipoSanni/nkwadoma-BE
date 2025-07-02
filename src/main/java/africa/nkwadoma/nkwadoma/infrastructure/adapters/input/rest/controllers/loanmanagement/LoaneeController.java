@@ -147,6 +147,14 @@ public class LoaneeController {
 
     }
 
+    @GetMapping("cohorts/loanee")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> viewLoaneeInCohort(@RequestParam("cohortId")String cohortId,
+                                                             @RequestParam("loaneeId") String loaneeId) throws MeedlException {
+        CohortLoanee cohortLoanee = loaneeUseCase.viewLoaneeDetailInCohort(cohortId,loaneeId);
+        return null;
+    }
+
     @GetMapping("loanProduct/loanees/{loanProductId}")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewAllLoanBeneficiaryFromLoanProduct(
