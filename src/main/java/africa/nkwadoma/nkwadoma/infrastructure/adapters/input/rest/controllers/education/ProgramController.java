@@ -65,6 +65,9 @@ public class ProgramController {
         log.info("Meedl User ID: {}", meedlUser.getClaimAsString("sub"));
         program.setCreatedBy(meedlUser.getClaimAsString("sub"));
 
+        log.info("organizationId from param {}", organizationId);
+        log.info("organizationId from programId {}", program.getOrganizationId());
+
         Page<Program> programs = addProgramUseCase.viewAllPrograms(program);
         log.info("Programs returned from db: {}", programs);
         List<ProgramResponse> programResponses = programs.stream().map(programRestMapper::toProgramResponse).toList();

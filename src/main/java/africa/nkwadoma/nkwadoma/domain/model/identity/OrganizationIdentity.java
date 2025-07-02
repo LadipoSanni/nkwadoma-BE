@@ -51,7 +51,11 @@ public class OrganizationIdentity {
     private BigDecimal totalDebtRepaid;
     private BigDecimal totalCurrentDebt;
     private BigDecimal totalHistoricalDebt;
-    private double repaymentRate;
+    private BigDecimal totalAmountReceived = BigDecimal.ZERO;
+    private BigDecimal totalAmountRequested = BigDecimal.ZERO;
+    private BigDecimal repaymentRate;
+    private BigDecimal debtPercentage;
+    private int pendingLoanOfferCount;
     private int pageSize;
     private int pageNumber;
     private String logoImage;

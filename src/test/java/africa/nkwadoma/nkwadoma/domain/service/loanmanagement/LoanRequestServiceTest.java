@@ -205,10 +205,8 @@ class LoanRequestServiceTest {
                             .email("email@gmail.com").build()).loanee(loanee).build();
             when(loanRequestOutputPort.findById(anyString())).thenReturn(build);
             when(loanProductOutputPort.findById(build.getLoanProductId())).thenReturn(loanProduct);
-            when(cohortLoanDetailOutputPort.findByCohortId(loanRequest.getCohortId())).thenReturn(cohortLoanDetail);
             when(loanOfferUseCase.createLoanOffer(any())).thenReturn(loanOffer);
             when(loanRequestMapper.updateLoanRequest(any(), any())).thenReturn(build);
-            when(cohortLoanDetailOutputPort.save(cohortLoanDetail)).thenReturn(cohortLoanDetail);
             when(loanRequestOutputPort.save(any())).thenReturn(build);
             when(organizationIdentityOutputPort.findOrganizationByName(any()))
                     .thenReturn(Optional.of(OrganizationIdentity.builder().id(testId).build()));

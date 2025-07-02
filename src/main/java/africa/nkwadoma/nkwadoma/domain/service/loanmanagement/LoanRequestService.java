@@ -222,21 +222,13 @@ public class LoanRequestService implements LoanRequestUseCase {
                 loanProduct.getTotalNumberOfLoanee() + 1
         );
         loanProduct = loanProductOutputPort.save(loanProduct);
-        CohortLoanDetail foundCohort = cohortLoanDetailOutputPort.findByCohortId(foundLoanRequest.getCohortId());
         foundLoanRequest.setStatus(LoanRequestStatus.APPROVED);
         log.info("found loan request == {}",foundLoanRequest.getLoaneeId());
         String loaneeId = foundLoanRequest.getLoaneeId();
         foundLoanRequest.setLoaneeId(foundLoanRequest.getLoaneeId());
         foundLoanRequest = loanRequestMapper.updateLoanRequest(loanRequest, foundLoanRequest);
         loanRequestOutputPort.save(foundLoanRequest);
-        log.info("current total amount requested for cohort {}",foundCohort.getTotalAmountRequested());
-        log.info("loanee amount requested {}",foundLoanRequest.getLoanAmountRequested());
-        foundCohort.setTotalAmountRequested(foundCohort.getTotalAmountRequested().
-                add(foundLoanRequest.getLoanAmountRequested()));
-        cohortLoanDetailOutputPort.save(foundCohort);
-        log.info("total amount requested updated for cohort after adding == {} is {}",
-                foundLoanRequest.getLoanAmountRequested(),foundLoanRequest.getLoanAmountRequested());
-        log.info("found loan request == {}",foundLoanRequest.getLoaneeId());
+
         foundLoanRequest.setLoanProduct(loanProduct);
         foundLoanRequest.setLoaneeId(loaneeId);
         return foundLoanRequest;

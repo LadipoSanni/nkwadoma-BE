@@ -20,4 +20,8 @@ public interface LoanCalculationUseCase {
     BigDecimal calculateMoneyWeightedPeriodicInterest(int interestRate, List<LoanPeriodRecord> periods) throws MeedlException;
 
     int calculateMonthlyInterestRate(int interestRate) throws MeedlException;
+
+    BigDecimal calculateManagementOrProcessingFee(BigDecimal loanAmountRequested, double mgtFeeInPercentage) throws MeedlException;
+
+    BigDecimal calculateCreditLife(BigDecimal loanAmountRequested, int creditLifePercentage, int loanTenureMonths) throws MeedlException;
 }

@@ -1,26 +1,29 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education;
 
-import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.education.Program;
+import africa.nkwadoma.nkwadoma.domain.model.education.ProgramLoanDetail;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
 
-@Setter
+
 @Getter
-@ToString
+@Setter
 @Entity
-public class CohortLoanDetailEntity {
+public class ProgramLoanDetailEntity {
+
     @Id
-    @UuidGenerator
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-    @OneToOne(fetch = FetchType.EAGER)
-    private CohortEntity cohort;
+    @OneToOne
+    private ProgramEntity program;
     private BigDecimal totalAmountRequested = BigDecimal.ZERO;
     private BigDecimal totalOutstandingAmount = BigDecimal.ZERO;
-    private BigDecimal totalAmountReceived  = BigDecimal.ZERO;
-    private BigDecimal totalAmountRepaid  = BigDecimal.ZERO;
+    private BigDecimal totalAmountReceived = BigDecimal.ZERO;
+    private BigDecimal totalAmountRepaid = BigDecimal.ZERO;
+
+
 }
