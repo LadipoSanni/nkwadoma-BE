@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanPeriodRecord;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 public interface LoanCalculationUseCase {
     BigDecimal calculateLoanAmountRequested(BigDecimal programFee, BigDecimal initialDeposit) throws MeedlException;
@@ -24,4 +25,6 @@ public interface LoanCalculationUseCase {
     BigDecimal calculateManagementOrProcessingFee(BigDecimal loanAmountRequested, double mgtFeeInPercentage) throws MeedlException;
 
     BigDecimal calculateCreditLife(BigDecimal loanAmountRequested, int creditLifePercentage, int loanTenureMonths) throws MeedlException;
+
+    BigDecimal calculateLoanDisbursementFees(Map<String, BigDecimal> feeMap) throws MeedlException;
 }

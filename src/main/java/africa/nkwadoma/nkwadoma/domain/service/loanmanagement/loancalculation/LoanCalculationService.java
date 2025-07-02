@@ -94,12 +94,7 @@ public class LoanCalculationService implements LoanCalculationUseCase {
                 .setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
     }
 
-    private void validateLoanTenure(int tenure) throws MeedlException {
-        if (tenure < 0) {
-            throw new MeedlException("Loan Tenure must not be negative.");
-        }
-    }
-
+    @Override
     public BigDecimal calculateLoanDisbursementFees(Map<String, BigDecimal> feeMap) throws MeedlException {
         if (feeMap == null || feeMap.isEmpty()) {
             return BigDecimal.ZERO.setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
@@ -121,7 +116,11 @@ public class LoanCalculationService implements LoanCalculationUseCase {
         return BigDecimal.valueOf(sum).setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
     }
 
-
+    private void validateLoanTenure(int tenure) throws MeedlException {
+        if (tenure < 0) {
+            throw new MeedlException("Loan Tenure must not be negative.");
+        }
+    }
     private void validateLoanPeriodRecord(LoanPeriodRecord record) throws MeedlException {
         if (record == null){
             throw new MeedlException("Loan period record must not be null.");

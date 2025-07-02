@@ -13,6 +13,7 @@ import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,7 +24,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class LoanCalculationServiceTest {
     @Autowired
     private LoanCalculationUseCase calculator;
-    BigDecimal ZERO = new BigDecimal("0.00");
+    private final BigDecimal ZERO = new BigDecimal("0.00");
+    private final int NUMBER_OF_DECIMAL_PLACE = 8;
+
 
     @BeforeEach
     void setUp() {
@@ -561,5 +564,60 @@ class LoanCalculationServiceTest {
                 calculator.calculateCreditLife(new BigDecimal("10000.00"), 5, -6)
         );
         assertEquals("Loan Tenure must not be negative.", ex.getMessage());
+    }
+
+
+
+    @Test
+    public void calculateDisbursementFees() throws MeedlException {
+        Map<String, BigDecimal> fees = Map.of(
+                "Credit Life", new BigDecimal("100.00"),
+                "Management Fee", new BigDecimal("200.00")
+        );
+
+        BigDecimal result = calculator.calculateLoanDisbursementFees(fees);
+        assertEquals(new BigDecimal("300.00")
+                .setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP), result);
+    }
+
+    @Test
+    public void calculateDisbursementFeesCorrectlyWhenOneEntryIsProvided() throws MeedlException {
+        Map<String, BigDecimal> fees = Map.of("Credit Life", new BigDecimal("75.00"));
+
+        BigDecimal result = calculator.calculateLoanDisbursementFees(fees);
+        assertEquals(new BigDecimal("75.00")
+                .setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP), result);
+    }
+
+    @Test
+    public void calculateDisbursementFeesCorrectlyWhenFourEntriesAreProvided() throws MeedlException {
+        Map<String, BigDecimal> fees = Map.of(
+               "Credit Life", new BigDecimal("50.00"),
+                "Management Fee", new BigDecimal("25.00"),
+                "Processing Fee", new BigDecimal("30.00"),
+                "Other Fee", new BigDecimal("20.00")
+        );
+
+        BigDecimal result = calculator.calculateLoanDisbursementFees(fees);
+        assertEquals(new BigDecimal("125.00")
+                .setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP), result);
+    }
+
+    @Test
+    public void returnsZeroWhenNoFeesProvided() throws MeedlException {
+        Map<String, BigDecimal> fees = Map.of();
+        BigDecimal result = calculator.calculateLoanDisbursementFees(fees);
+        assertEquals(BigDecimal.ZERO.setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP), result);
+    }
+
+    @Test
+    public void calculateDisbursementFeesWithNegativeProcessingFee() {
+        Map<String, BigDecimal> fees = Map.of("Processing Fee", new BigDecimal("-50.00"));
+
+        MeedlException ex = assertThrows(MeedlException.class, () ->
+                calculator.calculateLoanDisbursementFees(fees)
+        );
+
+        assertEquals("Processing Fee must not be negative.", ex.getMessage());
     }
 }
