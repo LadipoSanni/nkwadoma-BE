@@ -94,8 +94,8 @@ public class LoanCalculationService implements LoanCalculationUseCase {
                     );
     }
 
-    @Override
-    public BigDecimal calculateLoanDisbursementFees(Map<String, BigDecimal> feeMap) throws MeedlException {
+//    @Override
+    public BigDecimal calculateLoanDisbursementFee(Map<String, BigDecimal> feeMap) throws MeedlException {
         if (feeMap == null || feeMap.isEmpty()) {
             return decimalPlaceRoundUp(BigDecimal.ZERO);
         }
@@ -112,6 +112,23 @@ public class LoanCalculationService implements LoanCalculationUseCase {
 
         double sum = StatUtils.sum(values);
         return decimalPlaceRoundUp(BigDecimal.valueOf(sum));
+    }
+    @Override
+    public BigDecimal calculateLoanDisbursementFees(Map<String, BigDecimal> feeMap) throws MeedlException {
+        if (feeMap == null || feeMap.isEmpty()) {
+            return decimalPlaceRoundUp(BigDecimal.ZERO);
+        }
+
+        BigDecimal total = BigDecimal.ZERO;
+        for (Map.Entry<String, BigDecimal> entry : feeMap.entrySet()) {
+            String name = entry.getKey();
+            BigDecimal value = entry.getValue();
+
+            validateAmount(value, name);
+            total = total.add(value);
+        }
+
+        return decimalPlaceRoundUp(total);
     }
 
     @Override
