@@ -32,6 +32,7 @@ public class CohortResponse {
     private BigDecimal amountRequested;
     private BigDecimal amountOutstanding;
     private BigDecimal amountReceived;
+    private BigDecimal totalAmountRepaid;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String createdBy;
@@ -44,6 +45,9 @@ public class CohortResponse {
     private int numberOfLoanees = 0;
     private int numberOfReferredLoanee = 0;
     private String programName;
-    private int numberOfEmployed;
-    private int numberOfDropOut;
+    private int stillInTraining ;
+    private int numberOfDropout ;
+    private int numberEmployed ;
+    private int numberOfPendingLoanOffers;
+    private int numberOfLoanRequest = 0;
 }

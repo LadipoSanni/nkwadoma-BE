@@ -30,10 +30,10 @@ public interface LoaneeUseCase {
 
     Page<CohortLoanee> searchForLoaneeInCohort(Loanee loanee, int pageSize, int pageNumber) throws MeedlException;
 
-    Page<Loanee> viewAllLoaneeThatBenefitedFromLoanProduct(String loanProductId,int pageSize,int pageNumber) throws MeedlException;
+    Page<CohortLoanee> viewAllLoaneeThatBenefitedFromLoanProduct(String loanProductId,int pageSize,int pageNumber) throws MeedlException;
 
 
-    Page<Loanee> searchLoaneeThatBenefitedFromLoanProduct(String loanProductId,String name, int pageSize, int pageNumber) throws MeedlException;
+    Page<CohortLoanee> searchLoaneeThatBenefitedFromLoanProduct(String loanProductId,String name, int pageSize, int pageNumber) throws MeedlException;
 
     String indicateDeferredLoanee(String actorId, String loaneeId) throws MeedlException;
 
@@ -48,4 +48,6 @@ public interface LoaneeUseCase {
     String archiveOrUnArchiveByIds(String actorId, List<String> loaneeIds, LoaneeStatus loaneeStatus) throws MeedlException;
 
     void updateLoaneeStatus(Loanee loanee);
+
+    CohortLoanee viewLoaneeDetailInCohort(String cohortId, String loaneeId) throws MeedlException;
 }

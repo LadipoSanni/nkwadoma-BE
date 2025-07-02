@@ -25,6 +25,7 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.*;
 import org.springframework.data.domain.*;
 
+import java.math.BigDecimal;
 import java.time.*;
 import java.util.*;
 
@@ -73,6 +74,18 @@ class LoanServiceTest {
     private int pageSize = 10;
     private int pageNumber = 0;
     private CohortLoanee cohortLoanee;
+    @Mock
+    private CohortOutputPort cohortOutputPort;
+    @Mock
+    private CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
+    private CohortLoanDetail cohortLoanDetail;
+    private Cohort cohort;
+    @Mock
+    private ProgramLoanDetailOutputPort programLoanDetailOutputPort;
+    @Mock
+    private OrganizationLoanDetailOutputPort organizationLoanDetailOutputPort;
+    private OrganizationLoanDetail organizationLoanDetail;
+    private ProgramLoanDetail programLoanDetail;
 
 
     @BeforeEach
@@ -113,9 +126,14 @@ class LoanServiceTest {
         loan.setOrganizationId("b95805d1-2e2d-47f8-a037-7bcd264914fc");
         loan.setPageNumber(0);
         loan.setPageSize(10);
-        cohortLoanee = TestData.buildCohortLoanee(loanee,Cohort.builder().build(),loaneeLoanDetail,testId);
+        cohort = TestData.createCohortData("elites",testId,testId,List.of(new LoanBreakdown()),testId);
+
+        cohortLoanee = TestData.buildCohortLoanee(loanee,cohort,loaneeLoanDetail,testId);
 
         investmentVehicle = TestData.buildInvestmentVehicle("vehicle");
+        cohortLoanDetail = TestData.buildCohortLoanDetail(cohort);
+        organizationLoanDetail = TestData.buildOrganizationLoanDetail(organizationIdentity);
+        programLoanDetail = TestData.buildProgramLoanDetail(Program.builder().id(testId).build());
     }
 
     @Test
@@ -195,6 +213,7 @@ class LoanServiceTest {
         LoanReferral referral = null;
         try {
             when(loanReferralOutputPort.findById(loanReferral.getId())).thenReturn(loanReferral);
+            when(cohortOutputPort.save(cohortLoanee.getCohort())).thenReturn(cohortLoanee.getCohort());
             when(loanRequestMapper.mapLoanReferralToLoanRequest(loanReferral)).thenReturn(loanRequest);
 
             when(loanRequestOutputPort.save(loanRequest)).thenReturn(loanRequest);
@@ -206,6 +225,15 @@ class LoanServiceTest {
             when(loanMetricsOutputPort.findByOrganizationId(organizationIdentity.getId()))
                     .thenReturn(Optional.ofNullable(loanMetrics));
             when(loanMetricsOutputPort.save(loanMetrics)).thenReturn(loanMetrics);
+
+            cohort.setId(testId);
+            when(cohortLoanDetailOutputPort.findByCohortId(cohort.getId())).thenReturn(cohortLoanDetail);
+            when(cohortLoanDetailOutputPort.save(cohortLoanDetail)).thenReturn(cohortLoanDetail);
+            when(programLoanDetailOutputPort.findByProgramId(cohort.getProgramId())).thenReturn(programLoanDetail);
+            when(programLoanDetailOutputPort.save(programLoanDetail)).thenReturn(programLoanDetail);
+            when(organizationLoanDetailOutputPort.findByOrganizationId(cohort.getOrganizationId())).thenReturn(organizationLoanDetail);
+            when(organizationLoanDetailOutputPort.save(organizationLoanDetail)).thenReturn(organizationLoanDetail);
+
 
             when(loanReferralOutputPort.save(loanReferral)).thenReturn(loanReferral);
 
@@ -293,12 +321,24 @@ class LoanServiceTest {
         LoanOffer loanOffer = new LoanOffer();
         loanOffer.setId(testId);
         loanOffer.setLoaneeResponse(LoanDecision.ACCEPTED);
+        loanOffer.setAmountApproved(BigDecimal.valueOf(9000));
+        loanOffer.setOrganizationId(testId);
+        loanOffer.setCohortId(testId);
         try {
             when(loaneeOutputPort.findLoaneeById(anyString())).thenReturn(loanee);
             when(loanOfferOutputPort.findLoanOfferById(loan.getLoanOfferId())).
                     thenReturn(loanOffer);
             when(loaneeLoanAccountOutputPort.findByLoaneeId(anyString())).thenReturn(loaneeLoanAccount);
             when(loanOutputPort.save(any())).thenReturn(startedLoan);
+            cohort.setId(testId);
+            when(cohortLoanDetailOutputPort.findByCohortId(loanOffer.getCohortId())).thenReturn(cohortLoanDetail);
+            when(cohortLoanDetailOutputPort.save(cohortLoanDetail)).thenReturn(cohortLoanDetail);
+            when(cohortOutputPort.findCohort(loanOffer.getCohortId())).thenReturn(cohort);
+            when(programLoanDetailOutputPort.findByProgramId(cohort.getProgramId())).thenReturn(programLoanDetail);
+            when(programLoanDetailOutputPort.save(programLoanDetail)).thenReturn(programLoanDetail);
+            when(organizationLoanDetailOutputPort.findByOrganizationId(cohort.getOrganizationId())).thenReturn(organizationLoanDetail);
+            when(organizationLoanDetailOutputPort.save(organizationLoanDetail)).thenReturn(organizationLoanDetail);
+
             when(organizationIdentityOutputPort.findOrganizationByName(loanee.getReferredBy()))
                     .thenReturn(Optional.ofNullable(organizationIdentity));
             when(loanMetricsOutputPort.findByOrganizationId(organizationIdentity.getId()))
@@ -333,7 +373,7 @@ class LoanServiceTest {
             when(loaneeOutputPort.findLoaneeById(loan.getLoaneeId())).thenReturn(loanee);
             when(loanOfferOutputPort.findLoanOfferById(loan.getLoanOfferId())).
                     thenReturn(loanOffer);
-            when(loanOutputPort.viewLoanByLoaneeId(anyString())).thenReturn(Optional.of(loan));
+            when(loanOutputPort.findLoanByLoanOfferId(anyString())).thenReturn(Optional.of(loan));
         } catch (MeedlException e) {
             log.error(e.getMessage(), e);
         }

@@ -10,11 +10,9 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = "spring",nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface LoanMapper {
-    @Mapping(target = "loaneeEntity", source = "loanee")
     LoanEntity mapToLoanEntity(Loan loan);
 
     @InheritInverseConfiguration
-    @Mapping(target = "loaneeId", source = "loaneeEntity.id")
     Loan mapToLoan(LoanEntity loanEntity);
 
     @Mapping(target = "amountRequested", source = "loanAmountRequested")

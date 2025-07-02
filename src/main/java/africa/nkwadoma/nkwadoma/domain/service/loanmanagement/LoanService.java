@@ -2,8 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.loanmanagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
@@ -13,11 +12,12 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
-import africa.nkwadoma.nkwadoma.domain.model.education.Program;
+import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetail;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanOfferMapper;
@@ -61,6 +61,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final LoanMetricsMapper loanMetricsMapper;
     private final LoanMetricsOutputPort loanMetricsOutputPort;
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
+    private final CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
+    private final CohortOutputPort cohortOutputPort;
+    private final ProgramLoanDetailOutputPort programLoanDetailOutputPort;
+    private final OrganizationLoanDetailOutputPort organizationLoanDetailOutputPort;
 
     @Override
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
@@ -140,7 +144,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (loanOffer.getLoaneeResponse().equals(LoanDecision.DECLINED)){
             throw new LoanException(LoanMessages.CANNOT_START_LOAN_FOR_LOAN_OFFER_THAT_AS_BEEN_DECLINED.getMessage());
         }
-        Optional<Loan> foundLoan = loanOutputPort.viewLoanByLoaneeId(foundLoanee.getId());
+        Optional<Loan> foundLoan = loanOutputPort.findLoanByLoanOfferId(loanOffer.getId());
         if (foundLoan.isPresent()) {
             throw new LoanException(LoanMessages.LOAN_ALREADY_EXISTS_FOR_THIS_LOANEE.getMessage());
         }
@@ -151,9 +155,42 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }
         Loan savedLoan = loanOutputPort.save(loan);
         log.info("Saved loan: {}", savedLoan);
-        updateLoanDisbursalOnLoamMatrics(foundLoanee);
+        updateCohortLoanDetail(loanOffer);
+        String referBy = loanOutputPort.findLoanReferal(savedLoan.getId());
+        updateLoanDisbursalOnLoamMatrics(referBy);
         updateInvestmentVehicleTalentFunded(savedLoan);
         return savedLoan;
+    }
+
+    private void updateCohortLoanDetail(LoanOffer loanOffer) throws MeedlException {
+        CohortLoanDetail cohortLoanDetail = cohortLoanDetailOutputPort.findByCohortId(loanOffer.getCohortId());
+        log.info("current total amount received for cohort {}",cohortLoanDetail.getTotalAmountRequested());
+        log.info("loanee amount disbursed {}", loanOffer.getAmountApproved());
+        cohortLoanDetail.setTotalAmountReceived(cohortLoanDetail.getTotalAmountRequested().
+                add(loanOffer.getAmountApproved()));
+        cohortLoanDetail.setTotalOutstandingAmount(cohortLoanDetail.getTotalOutstandingAmount().
+                add(loanOffer.getAmountApproved()));
+        cohortLoanDetail = cohortLoanDetailOutputPort.save(cohortLoanDetail);
+        log.info("total amount received updated for cohort after adding == {} is {}",
+                cohortLoanDetail.getTotalAmountReceived(), loanOffer.getAmountApproved());
+        log.info("total amount outstanding updated for cohort after adding == {} is {}",
+                cohortLoanDetail.getTotalOutstandingAmount(), loanOffer.getAmountApproved());
+
+        Cohort cohort = cohortOutputPort.findCohort(loanOffer.getCohortId());
+
+        ProgramLoanDetail programLoanDetail = programLoanDetailOutputPort.findByProgramId(cohort.getProgramId());
+        programLoanDetail.setTotalAmountReceived(programLoanDetail.getTotalAmountReceived()
+                .add(loanOffer.getAmountApproved()));
+        programLoanDetail.setTotalOutstandingAmount(programLoanDetail.getTotalOutstandingAmount()
+                .add(loanOffer.getAmountApproved()));
+        programLoanDetailOutputPort.save(programLoanDetail);
+
+        OrganizationLoanDetail organizationLoanDetail = organizationLoanDetailOutputPort.findByOrganizationId(cohort.getOrganizationId());
+        organizationLoanDetail.setTotalAmountReceived(organizationLoanDetail.getTotalAmountReceived()
+                .add(loanOffer.getAmountApproved()));
+        organizationLoanDetail.setTotalOutstandingAmount(organizationLoanDetail.getTotalOutstandingAmount()
+                .add(loanOffer.getAmountApproved()));
+        organizationLoanDetailOutputPort.save(organizationLoanDetail);
     }
 
     private void updateInvestmentVehicleTalentFunded(Loan savedLoan) throws MeedlException {
@@ -164,9 +201,9 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         investmentVehicleOutputPort.save(investmentVehicle);
     }
 
-    private void updateLoanDisbursalOnLoamMatrics(Loanee foundLoanee) throws MeedlException {
+    private void updateLoanDisbursalOnLoamMatrics(String referBy) throws MeedlException {
         Optional<OrganizationIdentity> organizationByName =
-                organizationIdentityOutputPort.findOrganizationByName(foundLoanee.getReferredBy());
+                organizationIdentityOutputPort.findOrganizationByName(referBy);
         if (organizationByName.isEmpty()) {
             throw new ResourceNotFoundException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
         }
@@ -289,6 +326,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             log.info("Mapped loan request: {}", loanRequest);
             loanRequest = createLoanRequest(loanRequest);
             log.info("Created loan request: {}", loanRequest);
+            updateNumberOfLoanRequestOnCohort(foundLoanReferral,loanRequest);
+
+
+
             foundLoanReferral.setLoanReferralStatus(LoanReferralStatus.AUTHORIZED);
         }
         else if (loanReferral.getLoanReferralStatus().equals(LoanReferralStatus.DECLINED)) {
@@ -299,6 +340,37 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         log.info("Updated loan referral: {}", foundLoanReferral);
         updateLoanReferralOnMetrics(foundLoanReferral);
         return foundLoanReferral;
+    }
+
+    private void updateNumberOfLoanRequestOnCohort(LoanReferral loanReferral,LoanRequest loanRequest) throws MeedlException {
+        log.info("Updating number of loan request on cohort: {}", loanReferral.getCohortLoanee());
+        Cohort cohort = loanReferral.getCohortLoanee().getCohort();
+        log.info("found cohort == {}",cohort);
+        log.info("current number of loan request == {}",cohort.getNumberOfLoanRequest());
+        cohort.setNumberOfLoanRequest(cohort.getNumberOfLoanRequest() + 1);
+        cohort = cohortOutputPort.save(cohort);
+        log.info(" number of loan request after adding 1 == {}",cohort.getNumberOfLoanRequest());
+
+        CohortLoanDetail foundCohort = cohortLoanDetailOutputPort.findByCohortId(cohort.getId());
+        log.info("current total amount requested for cohort {}",foundCohort.getTotalAmountRequested());
+        log.info("loanee amount requested {}",loanRequest.getLoanAmountRequested());
+        foundCohort.setTotalAmountRequested(foundCohort.getTotalAmountRequested().
+                add(loanRequest.getLoanAmountRequested()));
+        cohortLoanDetailOutputPort.save(foundCohort);
+        log.info("total amount requested updated for cohort after adding == {} is {}",
+                loanRequest.getLoanAmountRequested(),foundCohort.getTotalAmountRequested());
+
+        ProgramLoanDetail programLoanDetail = programLoanDetailOutputPort.findByProgramId(cohort.getProgramId());
+        log.info("program loan details id {}",programLoanDetail.getId());
+        programLoanDetail.setTotalAmountRequested(programLoanDetail.getTotalAmountRequested()
+                .add(loanRequest.getLoanAmountRequested()));
+        programLoanDetailOutputPort.save(programLoanDetail);
+
+        OrganizationLoanDetail organizationLoanDetail = organizationLoanDetailOutputPort.findByOrganizationId(cohort.getOrganizationId());
+        organizationLoanDetail.setTotalAmountRequested(organizationLoanDetail.getTotalAmountRequested()
+                .add(loanRequest.getLoanAmountRequested()));
+        organizationLoanDetailOutputPort.save(organizationLoanDetail);
+
     }
 
     private void updateLoanReferralOnMetrics(LoanReferral foundLoanReferral) throws MeedlException {
@@ -395,7 +467,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanOffer.validateForAcceptOffer();
         log.info("Loan offer identity validated : {}", loanOffer);
         LoanOffer offer = loanOfferOutputPort.findLoanOfferById(loanOffer.getId());
-        log.info("found Loan offer : {}", loanOffer);
+        String referBy = offer.getLoanRequestReferredBy();
+        log.info("found Loan offer : {}", offer);
         Optional<Loanee> optionalLoanee = loaneeOutputPort.findByUserId(loanOffer.getUserId());
         log.info("Loan offer: {}", loanOffer);
         if (optionalLoanee.isEmpty()) {
@@ -414,9 +487,9 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
         if (loanOffer.getLoaneeResponse().equals(LoanDecision.ACCEPTED)){
             log.info("accept offer abt to start : {}", loanOffer);
-            return acceptLoanOffer(loanee.getUserIdentity(), loanOffer, offer);
+            return acceptLoanOffer(loanee.getUserIdentity(), loanOffer, offer,referBy);
         }
-        decreaseLoanOfferOnLoanMetrics(offer);
+        decreaseLoanOfferOnLoanMetrics(referBy);
         declineLoanOffer(loanee.getUserIdentity(), loanOffer, offer);
         return null;
     }
@@ -427,7 +500,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         notifyPortfolioManager(offer, userIdentity);
     }
 
-    private LoaneeLoanAccount acceptLoanOffer(UserIdentity userIdentity, LoanOffer loanOffer, LoanOffer offer) throws MeedlException {
+    private LoaneeLoanAccount acceptLoanOffer(UserIdentity userIdentity, LoanOffer loanOffer, LoanOffer offer,String referBy) throws MeedlException {
         log.info("got into accept method: {}", loanOffer);
         //Loanee Wallet would be Created
         loanOfferMapper.updateLoanOffer(offer, loanOffer);
@@ -446,14 +519,14 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             loaneeLoanAccount = createLoaneeLoanAccount(offer.getLoaneeId());
             log.info("Loanee account is created : {}", loaneeLoanAccount);
         }
-        decreaseLoanOfferOnLoanMetrics(offer);
+        decreaseLoanOfferOnLoanMetrics(referBy);
         log.info("done decreasing  : {}", offer);
         return loaneeLoanAccount;
     }
 
-    private void decreaseLoanOfferOnLoanMetrics(LoanOffer offer) throws MeedlException {
+    private void decreaseLoanOfferOnLoanMetrics(String referBy) throws MeedlException {
         Optional<OrganizationIdentity> organizationByName =
-                organizationIdentityOutputPort.findOrganizationByName(offer.getLoanRequestReferredBy());
+                organizationIdentityOutputPort.findOrganizationByName(referBy);
         if (organizationByName.isEmpty()) {
             throw new ResourceNotFoundException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
         }
