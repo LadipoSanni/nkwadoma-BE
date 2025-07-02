@@ -34,9 +34,9 @@ public interface CohortLoaneeRepository extends JpaRepository<CohortLoaneeEntity
                 COALESCE(SUM(repayment_history.amountPaid), 0) AS amountPaid,
                 loan_offer.amountApproved - COALESCE(SUM(repayment_history.amountPaid), 0) AS amountOutstanding,
                 (CASE WHEN loan_offer.amountApproved = 0 THEN NULL
-                ELSE (COALESCE(SUM(repayment_history.amountPaid), 0) / loan_offer.amountApproved * 100) END) AS repaymentPercentage,
+                ELSE ROUND((COALESCE(SUM(repayment_history.amountPaid), 0) / loan_offer.amountApproved * 100), 8) END) AS repaymentPercentage,
                 (CASE WHEN loan_offer.amountApproved = 0 THEN NULL
-                ELSE ((loan_offer.amountApproved - COALESCE(SUM(repayment_history.amountPaid), 0)) / loan_offer.amountApproved * 100) END) AS debtPercentage    
+                ELSE ROUND(((loan_offer.amountApproved - COALESCE(SUM(repayment_history.amountPaid), 0)) / loan_offer.amountApproved * 100), 8) END) AS debtPercentage 
                   
                         
                 from CohortLoaneeEntity cohort_loanee
