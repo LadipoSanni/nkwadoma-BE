@@ -940,5 +940,12 @@ class LoaneeServiceTest {
         verify(cohortLoaneeOutputPort, times(1)).findAllLoaneeInCohort(cohortLoanee, pageSize, pageNumber);
     }
 
+    @Test
+    void viewLoaneeInCohort() throws MeedlException {
+        when(cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(mockId,mockId)).thenReturn(loaneeCohort);
+        CohortLoanee result = loaneeService.viewLoaneeDetailInCohort(mockId,mockId);
+        assertNotNull(result);
+    }
+
 
 }
