@@ -19,5 +19,20 @@ public interface ProgramRepository extends JpaRepository<ProgramEntity, String> 
     boolean existsByNameIgnoreCaseAndOrganizationIdentityId(@Param("programName") String programName,
                                                             @Param("organizationId") String organizationId);
 
-    Page<ProgramEntity> findAllByOrganizationIdentityId(String organizationId, Pageable pageable);
+
+    @Query("""
+   
+       SELECT p.id as id,
+                   pd.totalAmountReceived as totalAmountDisbursed,
+                   pd.totalAmountRequested as totalAmountRequested,
+                   pd.totalAmountRepaid as totalAmountRepaid,
+                   pd.totalOutstandingAmount as totalAmountOutstanding
+                   
+                   from OrganizationEntity  o 
+                   join ProgramEntity p on p.organizationIdentity.id = o.id
+                   join ProgramLoanDetailEntity pd on pd.program.id = p.id
+                       
+                   where o.id = :organizationId    order by p.createdAt desc 
+    """)
+    Page<ProgramProjection> findAllByOrganizationIdentityId(@Param("organizationId") String organizationId, Pageable pageable);
 }

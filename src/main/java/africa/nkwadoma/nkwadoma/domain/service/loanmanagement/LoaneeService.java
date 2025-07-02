@@ -348,10 +348,10 @@ public class LoaneeService implements LoaneeUseCase {
         MeedlValidator.validateObjectInstance(cohortLoanee, CohortMessages.COHORT_LOANEE_CANNOT_BE_NULL.getMessage());
         MeedlValidator.validateObjectInstance(cohortLoanee.getLoanee(), LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateObjectInstance(cohortLoanee.getCohort(), CohortMessages.COHORT_CANNOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateObjectInstance(cohortLoanee.getOnboardingMode(), LoaneeMessages.INVALID_ONBOARDING_MODE.getMessage());
+        MeedlValidator.validateObjectInstance(cohortLoanee.getLoanee().getOnboardingMode(), LoaneeMessages.INVALID_ONBOARDING_MODE.getMessage());
 
         OrganizationIdentity organizationIdentity = null;
-        if (cohortLoanee.getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)){
+        if (cohortLoanee.getLoanee().getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)){
             organizationIdentity = getLoaneeOrganization(cohortLoanee.getCohort().getId());
         }else {
             organizationIdentity = getLoaneeOrganization(cohortLoanee.getCohort().getId());

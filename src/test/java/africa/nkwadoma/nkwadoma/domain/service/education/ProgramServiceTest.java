@@ -1,11 +1,13 @@
 package africa.nkwadoma.nkwadoma.domain.service.education;
 
+import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramLoanDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
+import africa.nkwadoma.nkwadoma.domain.model.education.ProgramLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.education.*;
@@ -50,6 +52,9 @@ class ProgramServiceTest {
     UserIdentity userIdentity;
     OrganizationEmployeeIdentity employeeIdentity;
     OrganizationIdentity organizationIdentity;
+    @Mock
+    private ProgramLoanDetailOutputPort programLoanDetailOutputPort;
+    private ProgramLoanDetail programLoanDetail;
 
     @BeforeEach
     void setUp() {
@@ -63,6 +68,7 @@ class ProgramServiceTest {
                 createdBy(testId).deliveryType(DeliveryType.ONSITE).
                 mode(ProgramMode.FULL_TIME).duration(BigInteger.ONE.intValue()).build();
         organizationIdentity = TestData.createOrganizationTestData("organization","RC12345678",List.of(employeeIdentity));
+        programLoanDetail = TestData.buildProgramLoanDetail(program);
     }
 
     @Test
@@ -297,6 +303,7 @@ class ProgramServiceTest {
         try {
             program.setId("1de71eaa-de6d-4cdf-8f93-aa7be533f4aa");
             when(programOutputPort.findProgramById(program.getId())).thenReturn(program);
+            when(programLoanDetailOutputPort.findByProgramId(program.getId())).thenReturn(programLoanDetail);
             Program foundProgram = programService.viewProgramById(program);
             assertNotNull(foundProgram);
             assertEquals(foundProgram, program);

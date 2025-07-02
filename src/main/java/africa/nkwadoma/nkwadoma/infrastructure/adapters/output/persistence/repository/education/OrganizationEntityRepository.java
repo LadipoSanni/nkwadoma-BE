@@ -48,8 +48,20 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
 """)
     Page<OrganizationProjection> findAllWithLoanMetrics(@Param("loanType") String loanType, Pageable pageable);
 
-    @Query("SELECT o FROM OrganizationEntity o WHERE UPPER(o.status) = UPPER(:status) ")
-    Page<OrganizationEntity> findAllByStatus(@Param("status") String status, Pageable pageable);
+    @Query(""" 
+            SELECT o.id as organizationId,
+                   o.name as name,
+                   ld.totalAmountReceived as totalAmountReceived,
+                   ld.totalAmountRequested as totalAmountRequested,
+                   ld.totalAmountRepaid as totalDebtRepaid,
+                   ld.totalOutstandingAmount as totalCurrentDebt,
+                               o.status as status          
+                   from OrganizationEntity o
+                               
+                   left join OrganizationLoanDetailEntity ld on ld.organization.id = o.id        
+                   WHERE UPPER(o.status) = UPPER(:status) 
+                        """)
+    Page<OrganizationProjection> findAllByStatus(@Param("status") String status, Pageable pageable);
 
 
     @Query("""
@@ -88,4 +100,21 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
     WHERE c.id = :cohortId
 """)
     Optional<OrganizationEntity> findByCohortId(String cohortId);
+
+
+    @Query("""
+    Select o.id as organizationId,
+           o.name as name,
+           ld.totalAmountReceived as totalAmountReceived,
+           ld.totalAmountRequested as totalAmountRequested,
+           ld.totalAmountRepaid as totalDebtRepaid,
+           ld.totalOutstandingAmount as totalCurrentDebt,
+                                              o.status as status          
+
+         
+          from OrganizationEntity o
+          left join OrganizationLoanDetailEntity ld on ld.organization.id = o.id    
+           
+    """)
+    Page<OrganizationProjection> findAllOrganization(Pageable pageRequest);
 }

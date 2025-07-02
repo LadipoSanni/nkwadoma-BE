@@ -189,4 +189,23 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
 )
 """)
     int countPendingOfferByCohortId(@Param("cohortId") String cohortId);
+
+
+    @Query("""
+    SELECT COUNT(*)
+    FROM LoanOfferEntity lo
+    JOIN LoanRequestEntity lr ON lr.id = lo.id
+    JOIN LoanReferralEntity lre ON lre.id = lr.id
+    JOIN LoanProductEntity lp ON lp.id = lo.loanProduct.id
+    JOIN CohortLoaneeEntity cle ON cle.id = lre.cohortLoanee.id
+    JOIN LoaneeEntity l ON l.id = cle.loanee.id
+    JOIN CohortEntity c ON c.id = cle.cohort.id
+    JOIN ProgramEntity p ON p.id = c.programId
+    join OrganizationEntity o ON o.id = p.organizationIdentity.id
+    WHERE o.id = :organizationId
+    AND NOT EXISTS (
+        SELECT 1 FROM LoanEntity loan WHERE loan.loanOfferId = lo.id
+)
+""")
+    int countPendingOfferByOrganizationId(@Param("organizationId") String organizationId);
 }
