@@ -12,6 +12,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeStatusRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.CohortLoaneeResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanBeneficiaryResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoaneeResponse;
@@ -147,6 +148,22 @@ public class LoaneeController {
 
     }
 
+    @GetMapping("cohorts/loanee")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> viewLoaneeInCohort(@RequestParam("cohortId")String cohortId,
+                                                             @RequestParam("loaneeId") String loaneeId) throws MeedlException {
+        log.info("request that came in cohortID == {} , loaneeId == {}", cohortId, loaneeId);
+        CohortLoanee cohortLoanee = loaneeUseCase.viewLoaneeDetailInCohort(cohortId,loaneeId);
+        CohortLoaneeResponse cohortLoaneeResponse = loaneeRestMapper.toCohortLoaneeResponse(cohortLoanee);
+
+        ApiResponse<CohortLoaneeResponse> apiResponse = ApiResponse.<CohortLoaneeResponse>builder()
+                .data(cohortLoaneeResponse)
+                .message(LOANEE_DEAILS_IN_A_COHORT)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+
     @GetMapping("loanProduct/loanees/{loanProductId}")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewAllLoanBeneficiaryFromLoanProduct(
@@ -156,7 +173,7 @@ public class LoaneeController {
 
     )throws MeedlException {
 
-        Page<Loanee> loanees =
+        Page<CohortLoanee> loanees =
                 loaneeUseCase.viewAllLoaneeThatBenefitedFromLoanProduct(loanProductId,pageSize,pageNumber);
         List<LoanBeneficiaryResponse> loaneeResponses = loanees.stream()
                 .map(loaneeRestMapper::toLoanBeneficiaryResponse).toList();
@@ -183,7 +200,7 @@ public class LoaneeController {
 
     )throws MeedlException {
 
-        Page<Loanee> loanees =
+        Page<CohortLoanee> loanees =
                 loaneeUseCase.searchLoaneeThatBenefitedFromLoanProduct(loanProductId,name,pageSize,pageNumber);
         List<LoanBeneficiaryResponse> loaneeResponses = loanees.stream()
                 .map(loaneeRestMapper::toLoanBeneficiaryResponse).toList();

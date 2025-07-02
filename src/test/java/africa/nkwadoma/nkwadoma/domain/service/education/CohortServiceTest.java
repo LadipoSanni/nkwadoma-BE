@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanBreakdownOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOfferOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
@@ -12,6 +13,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.CohortMapper;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
@@ -67,6 +69,11 @@ class CohortServiceTest {
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     @Mock
     private UserIdentityOutputPort userIdentityOutputPort;
+    @Mock
+    private CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
+    private CohortLoanDetail cohortLoanDetail;
+    @Mock
+    private LoanOfferOutputPort loanOfferOutputPort;
 
 
     @BeforeEach
@@ -110,6 +117,8 @@ class CohortServiceTest {
         loanBreakdown.setItemAmount(BigDecimal.valueOf(3000));
         loanBreakdown.setCurrency("usd");
 
+        cohortLoanDetail = TestData.buildCohortLoanDetail(elites);
+
     }
 
     @Test
@@ -120,6 +129,7 @@ class CohortServiceTest {
             when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             when(cohortOutputPort.save(elites)).thenReturn(elites);
             when(organizationIdentityOutputPort.findById(program.getOrganizationId())).thenReturn(organizationIdentity);
+            when(cohortLoanDetailOutputPort.save(any())).thenReturn(cohortLoanDetail);
             Cohort cohort = cohortService.createCohort(elites);
             assertEquals(cohort.getName(), elites.getName());
             assertEquals(LocalDate.of(2025,6,29),cohort.getExpectedEndDate());
@@ -153,11 +163,13 @@ class CohortServiceTest {
     @Test
     void saveAnotherCohortInProgram() {
         try {
+            cohortLoanDetail.setCohort(xplorers);
             when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
             xplorers.setLoanBreakdowns(List.of(loanBreakdown));
             when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             when(cohortOutputPort.save(xplorers)).thenReturn(xplorers);
             when(organizationIdentityOutputPort.findById(program.getOrganizationId())).thenReturn(organizationIdentity);
+            when(cohortLoanDetailOutputPort.save(any())).thenReturn(cohortLoanDetail);
             Cohort cohort = cohortService.createCohort(xplorers);
             assertEquals(cohort.getName(), xplorers.getName());
             verify(cohortOutputPort, times(2)).save(any());
@@ -170,8 +182,11 @@ class CohortServiceTest {
     @Test
     void viewCohortDetails(){
         try{
+            xplorers.setId(mockId);
             when(cohortOutputPort.viewCohortDetails(mockId,mockId)).thenReturn(xplorers);
             when(programOutputPort.findProgramById(mockId)).thenReturn(program);
+            when(cohortLoanDetailOutputPort.findByCohortId(elites.getId())).thenReturn(cohortLoanDetail);
+            when(loanOfferOutputPort.countNumberOfPendingLoanOfferForCohort(xplorers.getId())).thenReturn(2);
             Cohort cohort = cohortService
                     .viewCohortDetails(mockId, mockId);
             assertNotNull(cohort);

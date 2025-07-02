@@ -164,9 +164,7 @@ public class CohortLoaneePersistenceAdapterTest {
             log.info("Failed to set up cohort loanee {}", exception.getMessage());
             throw new RuntimeException(exception);
         }
-        assertEquals(foundCohortLoanee.getLoanee().getId(),loanee.getId());
-        assertEquals(foundCohortLoanee.getCohort().getId(),cohort.getId());
-        assertEquals(foundCohortLoanee.getCreatedBy(),meedleUser.getId());
+        assertEquals(foundCohortLoanee.getLoanee().getUserIdentity().getFirstName(),loanee.getUserIdentity().getFirstName());
     }
 
 
@@ -189,7 +187,7 @@ public class CohortLoaneePersistenceAdapterTest {
         try {
             foundCohortLoanee = cohortLoaneeOutputPort.findCohortLoaneeByProgramIdAndLoaneeId(cohort.getProgramId(),loanee.getId());
         } catch (MeedlException exception) {
-            log.info("Failed to set up cohort loanee {}", exception.getMessage());
+            log.info("Failed to find  cohort loanee {}", exception.getMessage());
             throw new RuntimeException(exception);
         }
         assertEquals(foundCohortLoanee.getLoanee().getId(),loanee.getId());

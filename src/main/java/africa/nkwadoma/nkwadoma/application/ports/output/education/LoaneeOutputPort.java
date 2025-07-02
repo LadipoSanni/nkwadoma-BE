@@ -24,10 +24,6 @@ public interface LoaneeOutputPort {
 
     Page<Loanee> searchForLoaneeInCohort(Loanee loanee, int pageSize, int pageNumber) throws MeedlException;
 
-    Page<Loanee> findAllLoaneeThatBenefitedFromLoanProduct(String id,int pageSize , int pageNumber) throws MeedlException;
-
-    Page<Loanee> searchLoaneeThatBenefitedFromLoanProduct(String id,String name, int pageSize, int pageNumber) throws MeedlException;
-
     boolean checkIfLoaneeCohortExistInOrganization(String loaneeId, String organization) throws MeedlException;
 
     void archiveOrUnArchiveByIds(List<String> loaneesId, LoaneeStatus loaneeStatus) throws MeedlException;

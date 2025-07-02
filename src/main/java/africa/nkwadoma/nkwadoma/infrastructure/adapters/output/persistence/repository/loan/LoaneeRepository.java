@@ -19,22 +19,6 @@ public interface LoaneeRepository extends JpaRepository<LoaneeEntity,String> {
 
     Optional<LoaneeEntity> findLoaneeByUserIdentityId(String userId);
 
-    @Query("""
-    SELECT l FROM CohortLoaneeEntity l
-        
-    LEFT JOIN LoanEntity loan ON loan.loaneeEntity.id = l.id
-    WHERE l.cohort.id = :cohortId 
-        AND (:status IS NULL AND l.loaneeStatus != 'ARCHIVE' OR l.loaneeStatus = :status)
-    AND (:status IS NULL OR l.loaneeStatus = :status)
-    AND (:loanStatus IS NULL OR loan.loanStatus = :loanStatus)
-    AND (:uploadedStatus IS NULL OR l.uploadedStatus = :uploadedStatus)
-    """)
-    Page<LoaneeEntity> findAllByCohortId(@Param("cohortId") String cohortId,
-                                         @Param("status")LoaneeStatus status,
-                                         @Param("loanStatus") LoanStatus loanStatus,
-                                         @Param("uploadedStatus") UploadedStatus uploadedStatus,
-                                         Pageable pageable);
-
     @Query("SELECT l FROM CohortLoaneeEntity l WHERE l.cohort.id = :cohortId AND l.id IN :loaneeIds")
     List<LoaneeEntity> findAllLoaneesByCohortIdAndLoaneeIds(
             @Param("cohortId") String cohortId,
@@ -46,11 +30,12 @@ public interface LoaneeRepository extends JpaRepository<LoaneeEntity,String> {
 
     @Query("""
         SELECT l FROM CohortLoaneeEntity l
+            
         WHERE l.cohort.id = :cohortId
         AND (upper(concat(l.loanee.userIdentity.firstName, ' ', l.loanee.userIdentity.lastName)) LIKE upper(concat('%', :nameFragment, '%'))
         OR upper(concat(l.loanee.userIdentity.lastName, ' ', l.loanee.userIdentity.firstName)) LIKE upper(concat('%', :nameFragment, '%')))
         AND (:status IS NULL OR l.loaneeStatus = :status)
-        AND (:uploadedStatus IS NULL OR l.uploadedStatus = :uploadedStatus)
+        AND (:uploadedStatus IS NULL OR l.loanee.uploadedStatus = :uploadedStatus)
         AND l.loaneeStatus != 'ARCHIVE'
     """)
     Page<LoaneeEntity> findByCohortIdAndNameFragment(@Param("cohortId") String cohortId,
@@ -59,41 +44,6 @@ public interface LoaneeRepository extends JpaRepository<LoaneeEntity,String> {
                                                      @Param("uploadedStatus") UploadedStatus uploadedStatus,
                                                      Pageable pageable);
 
-    @Query("""
-        SELECT l.id as id,
-               l.userIdentity.firstName as firstName,
-               l.userIdentity.lastName as lastName,
-               cle.referredBy as instituteName
-      
-        FROM LoanEntity loan
-                Join loan.loaneeEntity l
-                join LoanOfferEntity lo ON lo.id = loan.loanOfferId
-                join LoanRequestEntity lr ON lr.id = lo.id
-                join LoanReferralEntity lre ON lre.id = lr.id
-                join CohortLoaneeEntity cle On cle.id = lre.cohortLoanee.id
-                where
-                        lo.loanProduct.id = :loanProductId
-        """)
-    Page<LoaneeProjection> findAllByLoanProductId( @Param("loanProductId")String loanProductId, Pageable pageRequest);
-
-    @Query("""
-        SELECT l.id as id,
-               l.userIdentity.firstName as firstName,
-               l.userIdentity.lastName as lastName,
-               cle.referredBy as instituteName
-      
-        FROM LoanEntity loan
-                Join loan.loaneeEntity l
-                join LoanOfferEntity lo ON lo.id = loan.loanOfferId
-                join LoanRequestEntity lr ON lr.id = lo.id
-                join LoanReferralEntity lre ON lre.id = lr.id
-                join CohortLoaneeEntity cle On cle.id = lre.cohortLoanee.id
-                where
-                        lo.loanProduct.id = :loanProductId
-                        and (upper(concat(l.userIdentity.firstName, ' ', l.userIdentity.lastName)) LIKE upper(concat('%', :nameFragment, '%'))
-                        or upper(concat(l.userIdentity.lastName, ' ', l.userIdentity.firstName)) LIKE upper(concat('%', :nameFragment, '%')))
-        """)
-    Page<LoaneeProjection> findAllByLoanProductIdAndNameFragment(@Param("loanProductId")String loanProductId, @Param("nameFragment") String nameFragment, Pageable pageRequest);
 
 
     @Query("""

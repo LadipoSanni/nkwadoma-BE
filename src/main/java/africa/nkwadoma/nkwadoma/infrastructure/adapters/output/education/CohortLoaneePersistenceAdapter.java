@@ -11,6 +11,7 @@ import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortLoaneeEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoaneeEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.CohortLoaneeMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortLoaneeProjection;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortLoaneeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,11 +58,11 @@ public class CohortLoaneePersistenceAdapter implements CohortLoaneeOutputPort {
         MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
         MeedlValidator.validateUUID(cohortId,CohortMessages.INVALID_COHORT_ID.getMessage());
 
-        CohortLoaneeEntity cohortLoaneeEntity =
+        CohortLoaneeProjection cohortLoaneeProjection =
                 cohortLoaneeRepository.findCohortLoaneeEntityByLoanee_IdAndCohort_Id(loaneeId,cohortId);
-        log.info("After finding cohort loanee = : {}", cohortLoaneeEntity);
+        log.info("After finding cohort loanee = : {}", cohortLoaneeProjection);
 
-        return cohortLoaneeMapper.toCohortLoanee(cohortLoaneeEntity);
+        return cohortLoaneeMapper.mapProjectionCohortLoanee(cohortLoaneeProjection);
     }
 
     @Override
@@ -119,5 +120,29 @@ public class CohortLoaneePersistenceAdapter implements CohortLoaneeOutputPort {
             return Page.empty();
         }
         return cohortLoanees.map(cohortLoaneeMapper::toCohortLoanee);
+    }
+
+    @Override
+    public Page<CohortLoanee> findAllLoaneeThatBenefitedFromLoanProduct(String id, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(id,"Loan product id cannot be empty");
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+
+        Page<CohortLoaneeEntity> cohortLoanees =
+                cohortLoaneeRepository.findAllLoanProductBenficiaryByLoanProductId(id,pageRequest);
+
+        return cohortLoanees.map(cohortLoaneeMapper::toCohortLoanee);
+    }
+
+    @Override
+    public Page<CohortLoanee> searchLoaneeThatBenefitedFromLoanProduct(String id, String name, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(id,"Loan product id cannot be empty");
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+
+
+        Page<CohortLoaneeEntity> cohortLoaneeEntities =
+                cohortLoaneeRepository.searchLoanBeneficiaryByLoanProductId(id,name,pageRequest);
+        log.info("cohort loanee entities == {}",cohortLoaneeEntities);
+
+        return cohortLoaneeEntities.map(cohortLoaneeMapper::toCohortLoanee);
     }
 }

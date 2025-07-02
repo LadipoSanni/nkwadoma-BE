@@ -174,6 +174,7 @@ public class LoaneeService implements LoaneeUseCase {
 
     private void updateCohortValues(Cohort cohort) throws MeedlException {
         cohort.setNumberOfLoanees(cohort.getNumberOfLoanees() + 1);
+        cohort.setStillInTraining(cohort.getStillInTraining() + 1);
         increaseNumberOfLoaneesInProgram(cohort, 1);
         increaseNumberOfLoaneesInOrganization(cohort, 1);
         cohortOutputPort.save(cohort);
@@ -194,6 +195,8 @@ public class LoaneeService implements LoaneeUseCase {
         if (ObjectUtils.isEmpty(existingLoanee)){
             loanee.getUserIdentity().setRole(IdentityRole.LOANEE);
             loanee.setActivationStatus(ActivationStatus.ACTIVE);
+            loanee.setOnboardingMode(OnboardingMode.EMAIL_REFERRED);
+            loanee.setUploadedStatus(UploadedStatus.ADDED);
             cohortLoanee = addLoaneeToCohort(loanee, cohort);
             loanee.setCreatedAt(LocalDateTime.now());
             Loanee createdLoanee = createLoaneeAccount(loanee);
@@ -208,8 +211,6 @@ public class LoaneeService implements LoaneeUseCase {
                 .cohort(cohort)
                 .loanee(loanee)
                 .loaneeStatus(LoaneeStatus.ADDED)
-                .onboardingMode(OnboardingMode.EMAIL_REFERRED)
-                .uploadedStatus(UploadedStatus.ADDED)
                 .build();
         LoaneeLoanDetail loaneeLoanDetail = saveLoaneeLoanDetails(loanee.getLoaneeLoanDetail());
         cohortLoanee.setLoaneeLoanDetail(loaneeLoanDetail);
@@ -295,10 +296,6 @@ public class LoaneeService implements LoaneeUseCase {
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
         loanee.setProgramName(program.getName());
 
-        Optional<Loan> loan = loanOutputPort.viewLoanByLoaneeId(loanee.getId());
-        if (loan.isPresent()) {
-            loanee.setLoanId(loan.get().getId());
-        }
         LoanOffer loanOffer = loanOfferOutputPort.findLoanOfferByLoaneeId(loanee.getId());
         if (loanOffer != null){
             loanee.setTenor(loanOffer.getLoanProduct().getTenor());
@@ -351,10 +348,10 @@ public class LoaneeService implements LoaneeUseCase {
         MeedlValidator.validateObjectInstance(cohortLoanee, CohortMessages.COHORT_LOANEE_CANNOT_BE_NULL.getMessage());
         MeedlValidator.validateObjectInstance(cohortLoanee.getLoanee(), LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateObjectInstance(cohortLoanee.getCohort(), CohortMessages.COHORT_CANNOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateObjectInstance(cohortLoanee.getOnboardingMode(), LoaneeMessages.INVALID_ONBOARDING_MODE.getMessage());
+        MeedlValidator.validateObjectInstance(cohortLoanee.getLoanee().getOnboardingMode(), LoaneeMessages.INVALID_ONBOARDING_MODE.getMessage());
 
         OrganizationIdentity organizationIdentity = null;
-        if (cohortLoanee.getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)){
+        if (cohortLoanee.getLoanee().getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)){
             organizationIdentity = getLoaneeOrganization(cohortLoanee.getCohort().getId());
         }else {
             organizationIdentity = getLoaneeOrganization(cohortLoanee.getCohort().getId());
@@ -546,17 +543,17 @@ public class LoaneeService implements LoaneeUseCase {
 
 
     @Override
-    public Page<Loanee> viewAllLoaneeThatBenefitedFromLoanProduct(String loanProductId,int pageSize,int pageNumber) throws MeedlException {
+    public Page<CohortLoanee> viewAllLoaneeThatBenefitedFromLoanProduct(String loanProductId,int pageSize,int pageNumber) throws MeedlException {
         MeedlValidator.validateUUID(loanProductId,"Loan product id cannot be empty");
         LoanProduct loanProduct = loanProductOutputPort.findById(loanProductId);
-        return loaneeOutputPort.findAllLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),pageSize,pageNumber);
+        return cohortLoaneeOutputPort.findAllLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),pageSize,pageNumber);
     }
 
     @Override
-    public Page<Loanee> searchLoaneeThatBenefitedFromLoanProduct(String loanProductId,String name, int pageSize, int pageNumber) throws MeedlException {
+    public Page<CohortLoanee> searchLoaneeThatBenefitedFromLoanProduct(String loanProductId,String name, int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validateUUID(loanProductId,"Loan product id cannot be empty");
         LoanProduct loanProduct = loanProductOutputPort.findById(loanProductId);
-        return loaneeOutputPort.searchLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),name,pageSize,pageNumber);
+        return cohortLoaneeOutputPort.searchLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),name,pageSize,pageNumber);
     }
 
     @Override
@@ -654,7 +651,7 @@ public class LoaneeService implements LoaneeUseCase {
     }
 
     private Optional<Loan> findLoaneeLoanAndDeferLoan(Loanee loanee) throws MeedlException {
-        Optional<Loan> loan = loanOutputPort.viewLoanByLoaneeId(loanee.getId());
+        Optional<Loan> loan = loanOutputPort.findLoanByLoanOfferId(loanee.getId());
         if (loan.isEmpty()){
             throw new LoanException(LoanMessages.LOANEE_LOAN_NOT_FOUND.getMessage());
         }
@@ -829,6 +826,13 @@ public class LoaneeService implements LoaneeUseCase {
                 log.error("Failed to save loanee when attempting to update Loanee status for user with id {}", loanee.getUserIdentity().getId(), e);
             }
         }
+    }
+
+    @Override
+    public CohortLoanee viewLoaneeDetailInCohort(String cohortId, String loaneeId) throws MeedlException {
+        MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+        MeedlValidator.validateUUID(cohortId,CohortMessages.INVALID_COHORT_ID.getMessage());
+        return cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(loaneeId,cohortId);
     }
 
     private void sendPortfolioManagerDropOutNotification(Loanee loanee, UserIdentity userIdentity) throws MeedlException {

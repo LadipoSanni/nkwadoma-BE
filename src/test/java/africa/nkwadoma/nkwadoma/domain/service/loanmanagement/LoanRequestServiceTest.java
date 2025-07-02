@@ -3,6 +3,9 @@ package africa.nkwadoma.nkwadoma.domain.service.loanmanagement;
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlnotification.MeedlNotificationUsecase;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoanDetailOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
@@ -11,6 +14,9 @@ import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
@@ -34,7 +40,7 @@ import static org.mockito.Mockito.*;
 @Slf4j
 @ExtendWith(MockitoExtension.class)
 class LoanRequestServiceTest {
-    //TODO COMING BAck FOR SERVICE TEST
+
 
     @InjectMocks
     private LoanRequestService loanRequestService;
@@ -67,11 +73,18 @@ class LoanRequestServiceTest {
     private String testId = "96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f";
     @Mock
     private LoaneeOutputPort loaneeOutputPort;
+    private UserIdentity userIdentity;
+    @Mock
+    private CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
+    @Mock
+    private CohortOutputPort cohortOutputPort;
+    private CohortLoanDetail cohortLoanDetail;
+    private Cohort cohort;
 
 
     @BeforeEach
     void setUp() {
-        UserIdentity userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").firstName("Adeshina").
+        userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").firstName("Adeshina").
                 lastName("Qudus").email("test@example.com").role(IdentityRole.LOANEE).alternateEmail("alt276@example.com").
                 alternatePhoneNumber("0986564534").alternateContactAddress("10, Onigbagbo Street, Mushin, Lagos State").
                 createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").bvn("587907453").isIdentityVerified(true).build();
@@ -91,6 +104,8 @@ class LoanRequestServiceTest {
 
         loanOffer = TestData.buildLoanOffer(loanRequest);
         loanOffer.setId("9284b721-fd60-4cd9-b6dc-5ef416d70093");
+        cohort = TestData.createCohortData("elites",testId,testId,List.of(new LoanBreakdown()),testId);
+        cohortLoanDetail = TestData.buildCohortLoanDetail(cohort);
     }
 
     @Test
@@ -133,9 +148,24 @@ class LoanRequestServiceTest {
         try {
             when(loanRequestOutputPort.viewAll(0, 10)).
                     thenReturn(new PageImpl<>(List.of(loanRequest)));
-            Page<LoanRequest> loanRequests = loanRequestService.viewAllLoanRequests(loanRequest);
+            when(userIdentityOutputPort.findById(testId)).thenReturn(UserIdentity.builder().id(testId).role(IdentityRole.PORTFOLIO_MANAGER).isIdentityVerified(true).build());
+            Page<LoanRequest> loanRequests = loanRequestService.viewAllLoanRequests(loanRequest, testId);
 
             verify(loanRequestOutputPort, times(1)).viewAll(0, 10);
+            assertNotNull(loanRequests.getContent());
+        } catch (MeedlException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    @Test
+    void viewAllLoanRequestsForLoanee() {
+        try {
+            when(userIdentityOutputPort.findById(testId)).thenReturn(UserIdentity.builder().id(testId).role(IdentityRole.LOANEE).isIdentityVerified(true).build());
+            when(loanRequestOutputPort.viewAllLoanRequestForLoanee(testId, 0, 10))
+                    .thenReturn(new PageImpl<>(List.of(loanRequest)));
+            Page<LoanRequest> loanRequests = loanRequestService.viewAllLoanRequests(loanRequest, testId);
+            verify(loanRequestOutputPort, times(1)).viewAllLoanRequestForLoanee(testId, 0, 10);
             assertNotNull(loanRequests.getContent());
         } catch (MeedlException e) {
             log.error(e.getMessage(), e);
@@ -147,9 +177,10 @@ class LoanRequestServiceTest {
         Page<LoanRequest> loanRequests = Page.empty();
         try {
             loanRequest.setOrganizationId("b95805d1-2e2d-47f8-a037-7bcd264914fc");
+            when(userIdentityOutputPort.findById(testId)).thenReturn(UserIdentity.builder().id(testId).role(IdentityRole.PORTFOLIO_MANAGER).isIdentityVerified(true).build());
             when(loanRequestOutputPort.viewAll(loanRequest.getOrganizationId(), 0, 10)).
                     thenReturn(new PageImpl<>(List.of(loanRequest)));
-            loanRequests = loanRequestService.viewAllLoanRequests(loanRequest);
+            loanRequests = loanRequestService.viewAllLoanRequests(loanRequest, testId);
 
         verify(loanRequestOutputPort, times(1)).
                 viewAll(loanRequest.getOrganizationId(),0, 10);
@@ -182,6 +213,9 @@ class LoanRequestServiceTest {
             when(loanMetricsOutputPort.findByOrganizationId(anyString()))
                     .thenReturn(Optional.of(new LoanMetrics()));
             when(loanMetricsOutputPort.save(any())).thenReturn(new LoanMetrics());
+
+            when(cohortOutputPort.findCohort(loanRequest.getCohortId())).thenReturn(cohort);
+            when(cohortOutputPort.save(cohort)).thenReturn(cohort);
             when(userIdentityOutputPort.findById(build.getActorId()))
                     .thenReturn(new UserIdentity());
 
@@ -277,6 +311,8 @@ class LoanRequestServiceTest {
         try {
             when(loanRequestOutputPort.findById(loanRequest.getId())).thenReturn(loanRequest);
             when(loanRequestOutputPort.save(any())).thenReturn(loanRequest);
+            when(cohortOutputPort.findCohort(loanRequest.getCohortId())).thenReturn(cohort);
+            when(cohortOutputPort.save(cohort)).thenReturn(cohort);
             when(userIdentityOutputPort.findById(loanRequest.getActorId()))
                     .thenReturn(new UserIdentity());
             approvedLoanRequest = loanRequestService.respondToLoanRequest(loanRequest);

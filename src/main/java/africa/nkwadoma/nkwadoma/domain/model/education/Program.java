@@ -42,6 +42,9 @@ public class Program {
     private BigDecimal totalAmountRepaid = BigDecimal.ZERO;
     private BigDecimal totalAmountDisbursed = BigDecimal.ZERO;
     private BigDecimal totalAmountOutstanding = BigDecimal.ZERO;
+    private BigDecimal totalAmountRequested = BigDecimal.ZERO;
+    private BigDecimal repaymentRate;
+    private BigDecimal debtPercentage;
     private int pageNumber;
     private int pageSize;
     private String organizationId;

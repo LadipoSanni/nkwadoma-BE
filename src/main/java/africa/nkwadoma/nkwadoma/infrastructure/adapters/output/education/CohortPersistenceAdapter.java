@@ -67,6 +67,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     public Cohort findCohort(String cohortId) throws MeedlException {
         MeedlValidator.validateUUID(cohortId, INVALID_COHORT_ID.getMessage());
         CohortEntity cohortEntity = cohortRepository.findById(cohortId).orElseThrow(() -> new EducationException(COHORT_DOES_NOT_EXIST.getMessage()));
+        log.info("cohort entity {}", cohortEntity);
         return cohortMapper.toCohort(cohortEntity);
     }
 

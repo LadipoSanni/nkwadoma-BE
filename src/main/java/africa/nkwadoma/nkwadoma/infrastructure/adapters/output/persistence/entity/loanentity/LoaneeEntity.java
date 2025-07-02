@@ -1,6 +1,8 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity;
 
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.UploadedStatus;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.UserEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -27,4 +29,8 @@ public class LoaneeEntity {
     private UserEntity userIdentity;
     @Enumerated(EnumType.STRING)
     private ActivationStatus activationStatus;
+    @Enumerated(EnumType.STRING)
+    private OnboardingMode onboardingMode;
+    @Enumerated(EnumType.STRING)
+    private UploadedStatus uploadedStatus;
 }
