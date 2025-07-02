@@ -27,4 +27,6 @@ public interface LoanCalculationUseCase {
     BigDecimal calculateCreditLife(BigDecimal loanAmountRequested, int creditLifePercentage, int loanTenureMonths) throws MeedlException;
 
     BigDecimal calculateLoanDisbursementFees(Map<String, BigDecimal> feeMap) throws MeedlException;
+
+    BigDecimal calculateTotalRepayment(List<BigDecimal> monthlyRepayments) throws MeedlException;
 }
