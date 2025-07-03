@@ -88,4 +88,15 @@ public class RepaymentHistoryAdapter implements RepaymentHistoryOutputPort {
                         repaymentHistory.getLoaneeName(),pageable);
         return repaymentHistoryEntities.map(repaymentHistoryMapper::mapProjecttionToRepaymentHistory);
     }
+    @Override
+    public RepaymentHistory findLatestRepayment(String loaneeId, String cohortId) throws MeedlException {
+        MeedlValidator.validateUUID(loaneeId, "Loanee ID cannot be null");
+        MeedlValidator.validateUUID(cohortId, "Cohort ID cannot be null");
+
+        return repaymentHistoryRepository
+                .findTopByLoaneeIdAndCohortIdOrderByPaymentDateTimeDesc(loaneeId, cohortId)
+                .map(repaymentHistoryMapper::map)
+                .orElse(null);
+    }
+
 }

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Map;
+import java.util.Optional;
 
 public interface RepaymentHistoryRepository extends JpaRepository<RepaymentHistoryEntity,String> {
 
@@ -91,6 +92,18 @@ public interface RepaymentHistoryRepository extends JpaRepository<RepaymentHisto
             @Param("year") Integer year,
             @Param("name") String name,
             Pageable pageable);
+
+    @Query("""
+    SELECT r FROM RepaymentHistoryEntity r 
+    WHERE r.loanee.id = :loaneeId AND r.cohortId = :cohortId 
+    ORDER BY r.paymentDateTime DESC
+    LIMIT 1
+""")
+    Optional<RepaymentHistoryEntity> findTopByLoaneeIdAndCohortIdOrderByPaymentDateTimeDesc(
+            @Param("loaneeId") String loaneeId,
+            @Param("cohortId") String cohortId
+    );
+
 
 }
 
