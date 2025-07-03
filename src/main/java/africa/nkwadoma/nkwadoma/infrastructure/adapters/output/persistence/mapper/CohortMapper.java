@@ -37,6 +37,7 @@ public interface CohortMapper {
     @Mapping(target = "totalAmountReceived", source = "amountReceived")
     @Mapping(target = "totalAmountRequested", source = "amountRequested")
     @Mapping(target = "totalOutstandingAmount", source = "amountOutstanding")
+    @Mapping(target = "totalAmountRepaid", source = "totalAmountRepaid")
     Cohort mapFromProjectionToCohort(CohortProjection cohortProjection);
 
     @Mapping(target = "totalAmountRequested", source = "totalAmountRequested")

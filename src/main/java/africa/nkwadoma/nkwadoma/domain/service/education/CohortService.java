@@ -224,24 +224,7 @@ public class CohortService implements CohortUseCase {
             log.error("While trying to view all cohort in a program, the program {} was not found.", cohort.getProgramId());
             throw new ResourceNotFoundException(PROGRAM_NOT_FOUND.getMessage());
         }
-        Page<Cohort> cohorts = cohortOutputPort.findAllCohortInAProgram(cohort);
-        cohorts.getContent().stream().map(eachCohort-> {
-            try {
-                CohortLoanDetail cohortLoanDetail = cohortLoanDetailOutputPort.findByCohortId(eachCohort.getId());
-                if (cohortLoanDetail != null) {
-                    eachCohort.setTotalAmountRequested(cohortLoanDetail.getTotalAmountRequested());
-                    eachCohort.setTotalOutstandingAmount(cohortLoanDetail.getTotalOutstandingAmount());
-                    eachCohort.setTotalAmountReceived(cohortLoanDetail.getTotalAmountReceived());
-                    eachCohort.setTotalAmountRepaid(cohortLoanDetail.getTotalAmountRepaid());
-                }
-            } catch (MeedlException e) {
-                log.error("Error fetching loan details for cohort {}", eachCohort.getId(), e);
-                throw new RuntimeException(e);
-            }
-            log.info("--------> Each cohort ----> {}", eachCohort);
-            return eachCohort;
-        });
-        return cohorts;
+        return cohortOutputPort.findAllCohortInAProgram(cohort);
     }
 
     @Override
