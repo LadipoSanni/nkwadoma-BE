@@ -36,9 +36,10 @@ public interface CohortLoaneeRepository extends JpaRepository<CohortLoaneeEntity
                 (CASE WHEN loan_offer.amountApproved = 0 THEN NULL
                 ELSE ROUND((COALESCE(SUM(repayment_history.amountPaid), 0) / loan_offer.amountApproved * 100), 8) END) AS repaymentPercentage,
                 (CASE WHEN loan_offer.amountApproved = 0 THEN NULL
-                ELSE ROUND(((loan_offer.amountApproved - COALESCE(SUM(repayment_history.amountPaid), 0)) / loan_offer.amountApproved * 100), 8) END) AS debtPercentage 
-                  
-                        
+                ELSE ROUND(((loan_offer.amountApproved - COALESCE(SUM(repayment_history.amountPaid), 0)) / loan_offer.amountApproved * 100), 8) END) AS debtPercentage,
+                cohort.name as cohortName
+                 
+                       
                 from CohortLoaneeEntity cohort_loanee
     
                 left join LoaneeEntity loanee on loanee.id = cohort_loanee.loanee.id
@@ -62,7 +63,7 @@ public interface CohortLoaneeRepository extends JpaRepository<CohortLoaneeEntity
                         user.stateOfResidence,user.nationality,next_of_kin.nextOfKinRelationship,
                         next_of_kin.phoneNumber,next_of_kin.firstName,next_of_kin.lastName,
                         next_of_kin.contactAddress, program.name,
-                        organization.name,loan_offer.amountApproved, loan_product.interestRate            
+                        organization.name,loan_offer.amountApproved, loan_product.interestRate,cohort.name          
     """)
     CohortLoaneeProjection findCohortLoaneeEntityByLoanee_IdAndCohort_Id(@Param("loaneeId") String loaneeId,@Param("cohortId") String cohortId);
 
