@@ -16,4 +16,6 @@ public interface RepaymentHistoryOutputPort {
     RepaymentHistory findRepaymentHistoryById(String repaymentId) throws MeedlException;
 
     Page<RepaymentHistory> searchRepaymemtHistoryByLoaneeName(RepaymentHistory repaymentHistory, int pageSize, int pageNumber) throws MeedlException;
+
+    RepaymentHistory findLatestRepayment(String loaneeId, String cohortId) throws MeedlException;
 }
