@@ -32,4 +32,5 @@ public interface CohortLoaneeProjection {
     String getHighestLevelOfEducation();
     String getProgramName();
     String getOrganizationName();
+    String getCohortName();
 }
