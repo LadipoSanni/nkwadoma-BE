@@ -154,6 +154,7 @@ public class CohortController {
         Cohort cohort = Cohort.builder().programId(programId).cohortStatus(cohortStatus)
                 .pageSize(pageSize).pageNumber(pageNumber).build();
         Page<Cohort> cohorts = cohortUseCase.viewAllCohortInAProgram(cohort);
+        log.info("-------> cohort {}", cohorts.getContent().get(0));
         List<CohortResponse> cohortResponses = cohorts.stream().map(cohortMapper::toCohortResponse).toList();
         PaginatedResponse<CohortResponse> paginatedResponse = new PaginatedResponse<>(
                 cohortResponses, cohorts.hasNext(), cohorts.getTotalPages(),cohorts.getTotalElements(), pageNumber, pageSize);
