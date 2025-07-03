@@ -113,7 +113,7 @@ class IdentityVerificationServiceTest {
 
     @Test
     void verifyIdentityOfBlacklistedReferral() throws MeedlException {
-        when(loanReferralOutputPort.findById(identityVerification.getLoanReferralId())).thenReturn(loanReferral);
+        when(loanReferralOutputPort.findLoanReferralById(identityVerification.getLoanReferralId())).thenReturn(Optional.of(loanReferral));
         when(identityVerificationFailureRecordOutputPort.countByReferralId(loanReferral.getId())).thenReturn(5L);
         assertThrows(IdentityException.class, () -> identityVerificationService.verifyIdentity(identityVerification));
     }
@@ -124,7 +124,7 @@ class IdentityVerificationServiceTest {
 //        premblyResponse.setVerification(Verification.builder().status("VERIFIED").build());
         when(tokenUtils.decryptAES(testBvn, "Error processing identity verification")).thenReturn("12345678901");
         when(tokenUtils.decryptAES(testNin, "Error processing identity verification")).thenReturn("12345678901");
-        when(loanReferralOutputPort.findById(identityVerification.getLoanReferralId())).thenReturn(loanReferral);
+        when(loanReferralOutputPort.findLoanReferralById(identityVerification.getLoanReferralId())).thenReturn(Optional.of(loanReferral));
         when(userIdentityOutputPort.findByBvn(testBvn)).thenReturn(null);
 //        when(identityVerificationOutputPort.verifyBvn(identityVerification)).thenReturn(premblyResponse);
         PremblyNinResponse premblyBvnResponse = new PremblyNinResponse();
