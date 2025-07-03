@@ -14,7 +14,7 @@ import java.util.List;
 @Component
 public class LoanCalculationService implements LoanCalculationUseCase {
     @Override
-    public List<RepaymentHistory> sortRepaymentsByDateDescending(List<RepaymentHistory> repayments) throws MeedlException {
+    public List<RepaymentHistory> sortRepaymentsByDateTimeDescending(List<RepaymentHistory> repayments) throws MeedlException {
         log.info("Started the sorting ");
         if (repayments == null) {
             log.warn("Repayments was null in the sorting method");
@@ -38,6 +38,7 @@ public class LoanCalculationService implements LoanCalculationUseCase {
 
         return repayments;
     }
+
 
 
 }

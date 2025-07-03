@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
@@ -34,14 +33,14 @@ public class LoanCalculationServiceTest {
     }
 
     @Test
-    void testSortRepayments_validList_sortedDescending() throws MeedlException {
+    void sortRepaymentsWithValidRecordsSortedInDescendingOrder() throws MeedlException {
         List<RepaymentHistory> repayments = new ArrayList<>(List.of(
                 createRepayment(LocalDateTime.of(2025, 6, 1, 10, 0), new BigDecimal("100")),
                 createRepayment(LocalDateTime.of(2025, 6, 3, 9, 0), new BigDecimal("300")),
                 createRepayment(LocalDateTime.of(2025, 6, 2, 12, 0), new BigDecimal("200"))
         ));
 
-        List<RepaymentHistory> sorted = loanCalculation.sortRepaymentsByDateDescending(repayments);
+        List<RepaymentHistory> sorted = loanCalculation.sortRepaymentsByDateTimeDescending(repayments);
 
         assertEquals(new BigDecimal("300"), sorted.get(0).getAmountPaid());
         assertEquals(new BigDecimal("200"), sorted.get(1).getAmountPaid());
@@ -49,31 +48,31 @@ public class LoanCalculationServiceTest {
     }
 
     @Test
-    void testSortRepayments_nullList_returnsEmptyList() throws MeedlException {
-        List<RepaymentHistory> result = loanCalculation.sortRepaymentsByDateDescending(null);
+    void sortRepaymentsWithNull() throws MeedlException {
+        List<RepaymentHistory> result = loanCalculation.sortRepaymentsByDateTimeDescending(null);
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
 
     @Test
-    void testSortRepayments_containsNullRepayment_throwsException() {
+    void sortRepaymentsWithNullRepayment() {
         List<RepaymentHistory> repayments = new ArrayList<>();
         repayments.add(createRepayment(LocalDateTime.now(), new BigDecimal("100")));
         repayments.add(null);
 
         MeedlException exception = assertThrows(MeedlException.class,
-                () -> loanCalculation.sortRepaymentsByDateDescending(repayments));
+                () -> loanCalculation.sortRepaymentsByDateTimeDescending(repayments));
 
         assertEquals("Repayment history cannot be null", exception.getMessage());
     }
 
     @Test
-    void testSortRepayments_containsNullDate_throwsException() {
+    void sortRepaymentsWithNullDate() {
         RepaymentHistory badRepayment = createRepayment(null, new BigDecimal("150"));
         List<RepaymentHistory> repayments = List.of(badRepayment);
 
         MeedlException exception = assertThrows(MeedlException.class,
-                () -> loanCalculation.sortRepaymentsByDateDescending(repayments));
+                () -> loanCalculation.sortRepaymentsByDateTimeDescending(repayments));
 
         assertEquals("Payment date cannot be null", exception.getMessage());
     }
