@@ -164,9 +164,9 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     private void updateCohortLoanDetail(LoanOffer loanOffer) throws MeedlException {
         CohortLoanDetail cohortLoanDetail = cohortLoanDetailOutputPort.findByCohortId(loanOffer.getCohortId());
-        log.info("current total amount received for cohort {}",cohortLoanDetail.getTotalAmountRequested());
+        log.info("current total amount received for cohort {}",cohortLoanDetail.getTotalAmountReceived());
         log.info("loanee amount disbursed {}", loanOffer.getAmountApproved());
-        cohortLoanDetail.setTotalAmountReceived(cohortLoanDetail.getTotalAmountRequested().
+        cohortLoanDetail.setTotalAmountReceived(cohortLoanDetail.getTotalAmountReceived().
                 add(loanOffer.getAmountApproved()));
         cohortLoanDetail.setTotalOutstandingAmount(cohortLoanDetail.getTotalOutstandingAmount().
                 add(loanOffer.getAmountApproved()));
@@ -176,9 +176,14 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         log.info("total amount outstanding updated for cohort after adding == {} is {}",
                 cohortLoanDetail.getTotalOutstandingAmount(), loanOffer.getAmountApproved());
 
+        log.info("cohort program id == {} cohort organization id == {}",
+                cohortLoanDetail.getCohort().getProgramId(),cohortLoanDetail.getCohort().getOrganizationId());
+
         Cohort cohort = cohortOutputPort.findCohort(loanOffer.getCohortId());
 
         ProgramLoanDetail programLoanDetail = programLoanDetailOutputPort.findByProgramId(cohort.getProgramId());
+        log.info("current total amount received for program  {}",programLoanDetail.getTotalAmountReceived());
+        log.info("loanee amount disbursed {}", loanOffer.getAmountApproved());
         programLoanDetail.setTotalAmountReceived(programLoanDetail.getTotalAmountReceived()
                 .add(loanOffer.getAmountApproved()));
         programLoanDetail.setTotalOutstandingAmount(programLoanDetail.getTotalOutstandingAmount()
@@ -186,6 +191,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         programLoanDetailOutputPort.save(programLoanDetail);
 
         OrganizationLoanDetail organizationLoanDetail = organizationLoanDetailOutputPort.findByOrganizationId(cohort.getOrganizationId());
+        log.info("current total amount received for organization  {}",organizationLoanDetail.getTotalAmountReceived());
+        log.info("loanee amount disbursed {}", loanOffer.getAmountApproved());
         organizationLoanDetail.setTotalAmountReceived(organizationLoanDetail.getTotalAmountReceived()
                 .add(loanOffer.getAmountApproved()));
         organizationLoanDetail.setTotalOutstandingAmount(organizationLoanDetail.getTotalOutstandingAmount()
@@ -467,7 +474,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanOffer.validateForAcceptOffer();
         log.info("Loan offer identity validated : {}", loanOffer);
         LoanOffer offer = loanOfferOutputPort.findLoanOfferById(loanOffer.getId());
-        String referBy = offer.getLoanRequestReferredBy();
+        String referBy = offer.getReferredBy();
         log.info("found Loan offer : {}", offer);
         Optional<Loanee> optionalLoanee = loaneeOutputPort.findByUserId(loanOffer.getUserId());
         log.info("Loan offer: {}", loanOffer);

@@ -149,7 +149,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                         LoanRequest loanRequest = acceptLoanRequest(loanee, loanReferral, loanBook);
                         log.info("loan request is {}", loanRequest);
                         acceptLoanOffer(loanRequest);
-//                        startLoan(loanRequest,loanee.getUpdatedAt() );
+                        startLoan(loanRequest,loanee.getUpdatedAt() );
                     } catch (MeedlException e) {
                         log.error("Error accepting loan referral.",e);
                     }
@@ -157,6 +157,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     }
 
     private void startLoan(LoanRequest loanRequest, LocalDateTime loanStartDate) throws MeedlException {
+        log.info("loan request is {}", loanRequest);
         log.info("The loan start date is {} for user with email {}", loanStartDate, loanRequest.getLoanee().getUserIdentity().getEmail());
         Loan loan = Loan.builder().loaneeId(loanRequest.getLoanee().getId()).startDate(loanStartDate).loanOfferId(loanRequest.getId()).build();
         createLoanProductUseCase.startLoan(loan);
@@ -371,14 +372,13 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                     .build();
 
             CohortLoanee cohortLoanee = CohortLoanee.builder()
-                    .onboardingMode(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)
                     .loaneeLoanDetail(loaneeLoanDetail)
                     .loaneeStatus(LoaneeStatus.ADDED)
                     .loanee(loanee)
                     .cohort(cohort)
                     .createdBy(cohort.getCreatedBy())
                     .updatedAt(parseFlexibleDateTime(row.get("loanstartdate"), row.get("email")))
-                    .uploadedStatus(UploadedStatus.ADDED).build();
+                    .build();
 
             loanees.add(cohortLoanee);
         }

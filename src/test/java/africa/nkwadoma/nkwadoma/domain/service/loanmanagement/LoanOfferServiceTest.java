@@ -8,7 +8,6 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.*;
-import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanOfferStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanRequestStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
@@ -180,8 +179,8 @@ public class LoanOfferServiceTest {
             when(loanOfferOutputPort.findLoanOfferById(mockId)).thenReturn(loanOffer);
             when(loaneeOutputPort.findByUserId(mockId)).thenReturn(Optional.ofNullable(loanee));
             loanOffer2.setLoaneeResponse(LoanDecision.DECLINED);
-            loanOffer.setLoanRequestReferredBy("referredBy");
-            when(organizationIdentityOutputPort.findOrganizationByName(loanOffer.getLoanRequestReferredBy()))
+            loanOffer.setReferredBy("referredBy");
+            when(organizationIdentityOutputPort.findOrganizationByName(loanOffer.getReferredBy()))
                     .thenReturn(organizationIdentity);
             doNothing().when(asynchronousNotificationOutputPort).notifyPortfolioManagerOfNewLoanOfferWithDecision(any(), any());
             when(loanMetricsOutputPort.findByOrganizationId(organizationIdentity.get().getId()))
