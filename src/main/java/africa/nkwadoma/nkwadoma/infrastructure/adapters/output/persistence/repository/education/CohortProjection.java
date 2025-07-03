@@ -21,7 +21,7 @@ public interface CohortProjection {
     BigDecimal getAmountRequested();
     BigDecimal getAmountOutstanding();
     BigDecimal getAmountReceived();
-    BigDecimal getTotalAmountRepaid();
+    BigDecimal getAmountRepaid();
     LocalDate getStartDate();
     LocalDate getExpectedEndDate();
     LocalDateTime getCreatedAt();
