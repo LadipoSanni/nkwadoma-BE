@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
-class LoanCalculationServiceTest {
+class LoanCalculationAdapterTest {
     @Autowired
     private LoanCalculationOutputPort calculator;
     private final BigDecimal ZERO = new BigDecimal("0.00");
