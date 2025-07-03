@@ -56,5 +56,10 @@ public interface OrganizationIdentityMapper {
 
     @Mapping(target = "id", source = "organizationId")
     @Mapping(target = "status", source = "status")
+    @Mapping(target = "numberOfLoanees", source = "numberOfLoanees")
+    @Mapping(target = "numberOfCohort", source = "numberOfCohort")
+    @Mapping(target = "numberOfPrograms", source = "numberOfPrograms")
+    @Mapping(target = "email", source = "email")
+    @Mapping(target = "websiteAddress", source = "websiteAddress")
     OrganizationIdentity mapProjecttionToOrganizationIdentity(OrganizationProjection organizationProjection);
 }

@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repo
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 public interface OrganizationProjection {
     String getOrganizationId();
@@ -12,6 +13,9 @@ public interface OrganizationProjection {
     Integer getLoanReferralCount();
     Integer getLoanOfferCount();
     String getLogoImage();
+    String getEmail();
+    String getWebsiteAddress();
+    String getInvitedDate();
     Integer getNumberOfLoanees();
     Integer getNumberOfCohort();
     Integer getNumberOfPrograms();

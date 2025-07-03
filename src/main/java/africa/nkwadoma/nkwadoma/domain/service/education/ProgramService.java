@@ -152,11 +152,17 @@ public class ProgramService implements AddProgramUseCase {
         MeedlValidator.validateUUID(program.getId(), ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         program = programOutputPort.findProgramById(program.getId());
         ProgramLoanDetail programLoanDetail = programLoanDetailOutputPort.findByProgramId(program.getId());
-        programMapper.mapProgramLoanDetailsToProgram(program,programLoanDetail);
-        program.setDebtPercentage(programLoanDetail.getTotalOutstandingAmount()
-                .divide(programLoanDetail.getTotalAmountReceived(), RoundingMode.UP));
-        program.setRepaymentRate(programLoanDetail.getTotalAmountRepaid()
-                .divide(programLoanDetail.getTotalAmountReceived(), RoundingMode.UP).multiply(BigDecimal.valueOf(100)));
+        BigDecimal totalAmountReceived = programLoanDetail.getTotalAmountReceived();
+        if (totalAmountReceived !=  null && totalAmountReceived.compareTo(BigDecimal.ZERO) > 0) {
+            programMapper.mapProgramLoanDetailsToProgram(program, programLoanDetail);
+            program.setDebtPercentage(programLoanDetail.getTotalOutstandingAmount()
+                    .divide(programLoanDetail.getTotalAmountReceived(), RoundingMode.UP));
+            program.setRepaymentRate(programLoanDetail.getTotalAmountRepaid()
+                    .divide(programLoanDetail.getTotalAmountReceived(), RoundingMode.UP).multiply(BigDecimal.valueOf(100)));
+        }else {
+            program.setRepaymentRate(BigDecimal.ZERO);
+            program.setDebtPercentage(BigDecimal.ZERO);
+        }
         return program;
     }
 

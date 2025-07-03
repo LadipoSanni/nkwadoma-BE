@@ -26,8 +26,18 @@ public interface ProgramRepository extends JpaRepository<ProgramEntity, String> 
                    pd.totalAmountReceived as totalAmountDisbursed,
                    pd.totalAmountRequested as totalAmountRequested,
                    pd.totalAmountRepaid as totalAmountRepaid,
-                   pd.totalOutstandingAmount as totalAmountOutstanding
-                   
+                   pd.totalOutstandingAmount as totalAmountOutstanding,
+                   p.name as name,
+                   p.objectives as objectives,
+                   p.programDescription as programDescription,
+                   p.programStartDate as programStartDate,
+                   p.programStatus as programStatus,
+                   p.mode as mode,
+                   p.duration as duration,
+                   p.deliveryType as deliveryType,
+                   p.numberOfCohort  as numberOfCohort,
+                   p.numberOfLoanees as numberOfLoanees
+                  
                    from OrganizationEntity  o 
                    join ProgramEntity p on p.organizationIdentity.id = o.id
                    join ProgramLoanDetailEntity pd on pd.program.id = p.id
