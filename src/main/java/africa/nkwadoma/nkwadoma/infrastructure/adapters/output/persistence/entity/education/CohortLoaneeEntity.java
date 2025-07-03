@@ -35,10 +35,6 @@ public class CohortLoaneeEntity {
     private LoaneeLoanDetailEntity loaneeLoanDetail;
     @Enumerated(EnumType.STRING)
     private LoaneeStatus loaneeStatus;
-    @Enumerated(EnumType.STRING)
-    private OnboardingMode onboardingMode;
-    @Enumerated(EnumType.STRING)
-    private UploadedStatus uploadedStatus;
     private LocalDateTime referralDateTime;
     private String referredBy;
     private String reasonForDropout;

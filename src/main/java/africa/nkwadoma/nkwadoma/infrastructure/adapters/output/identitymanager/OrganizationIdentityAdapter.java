@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
@@ -142,9 +143,9 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         MeedlValidator.validatePageNumber(organizationIdentity.getPageNumber());
         Pageable pageRequest = PageRequest.of(organizationIdentity.getPageNumber(), organizationIdentity.getPageSize(), Sort.by(Sort.Direction.DESC, "invitedDate"));
         log.info("Page number: {}, page size: {}", organizationIdentity.getPageNumber(), organizationIdentity.getPageSize());
-        Page<OrganizationEntity> organizationEntities = organizationEntityRepository.findAll(pageRequest);
+        Page<OrganizationProjection> organizationEntities = organizationEntityRepository.findAllOrganization(pageRequest);
         log.info("Found organizations in db: {}", organizationEntities);
-        return organizationEntities.map(organizationIdentityMapper::toOrganizationIdentity);
+        return organizationEntities.map(organizationIdentityMapper::mapProjecttionToOrganizationIdentity);
     }
 
     @Override
@@ -155,9 +156,9 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         MeedlValidator.validatePageNumber(organizationIdentity.getPageNumber());
         Pageable pageRequest = PageRequest.of(organizationIdentity.getPageNumber(), organizationIdentity.getPageSize(), Sort.by(Sort.Direction.DESC, "invitedDate"));
 
-        Page<OrganizationEntity> organizationEntities = organizationEntityRepository.findAllByStatus(String.valueOf(status),pageRequest);
+        Page<OrganizationProjection> organizationEntities= organizationEntityRepository.findAllByStatus(String.valueOf(status),pageRequest);
         log.info("Organization entities {}", organizationEntities.stream().toList());
-        return organizationEntities.map(organizationIdentityMapper::toOrganizationIdentity);
+        return organizationEntities.map(organizationIdentityMapper::mapProjecttionToOrganizationIdentity);
     }
 
     @Override

@@ -12,10 +12,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.financier.*;
 import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
-import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetail;
@@ -670,6 +667,27 @@ public class TestData {
                 .totalAmountReceived(BigDecimal.valueOf(30000))
                 .totalOutstandingAmount(BigDecimal.valueOf(30000))
                 .totalAmountRequested(BigDecimal.valueOf(30000))
+                .totalAmountRepaid(BigDecimal.valueOf(30000))
                 .cohort(elites).build();
+    }
+
+    public static ProgramLoanDetail buildProgramLoanDetail(Program program) {
+        return ProgramLoanDetail.builder()
+                .program(program)
+                .totalAmountReceived(BigDecimal.valueOf(30000))
+                .totalOutstandingAmount(BigDecimal.valueOf(30000))
+                .totalAmountRequested(BigDecimal.valueOf(30000))
+                .totalAmountRepaid(BigDecimal.valueOf(30000))
+                .build();
+    }
+
+    public static OrganizationLoanDetail buildOrganizationLoanDetail(OrganizationIdentity organizationIdentity) {
+        return OrganizationLoanDetail.builder()
+                .organization(organizationIdentity)
+                .totalAmountReceived(BigDecimal.valueOf(30000))
+                .totalOutstandingAmount(BigDecimal.valueOf(30000))
+                .totalAmountRequested(BigDecimal.valueOf(30000))
+                .totalAmountRepaid(BigDecimal.valueOf(30000))
+                .build();
     }
 }

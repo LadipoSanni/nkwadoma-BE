@@ -18,17 +18,14 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
         c.name AS name,
         COALESCE(COUNT(DISTINCT lne.id), 0) AS numberOfLoanees,
         c.startDate AS startDate,
-        COALESCE(SUM(
-            CASE 
-                WHEN cle.onboardingMode = 'FILE_UPLOADED' THEN lld.amountRequested
-                ELSE 0
-            END
-        ), 0) AS amountRequested,
+        cl.totalAmountRequested as amountRequested,
         c.tuitionAmount AS tuitionAmount,
-        COALESCE(0, 0) AS amountReceived,
-        COALESCE(0, 0) AS amountOutstanding
+        cl.totalAmountReceived AS amountReceived,
+        cl.totalOutstandingAmount AS amountOutstanding,
+        cl.totalAmountRepaid AS amountRepaind
     FROM CohortEntity c
     LEFT JOIN CohortLoaneeEntity cle ON cle.cohort.id = c.id
+    LEFT JOIN CohortLoanDetailEntity cl ON cl.cohort.id = c.id
     LEFT JOIN LoanReferralEntity lfr ON lfr.cohortLoanee.id = cle.id
     LEFT JOIN LoanOfferEntity lo ON lo.id = lfr.id
     LEFT JOIN LoaneeEntity lne ON lne.id = cle.loanee.id
@@ -37,7 +34,9 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
     WHERE c.organizationId = :organizationId 
         AND (:cohortStatus IS NULL OR c.cohortStatus = :cohortStatus)
         AND LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%'))
-    GROUP BY c.id, c.name, c.startDate
+    GROUP BY c.id, c.name, c.startDate,c.tuitionAmount, cl.totalAmountReceived ,cl.totalOutstandingAmount,
+        cl.totalAmountRepaid,cl.totalAmountRequested
+
 """)
     Page<CohortProjection> findByNameContainingIgnoreCaseAndOrganizationId(
             @Param("name") String name,
@@ -60,16 +59,13 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
         c.name AS name,
         COALESCE(COUNT(DISTINCT lne.id), 0) AS numberOfLoanees,
         c.startDate AS startDate,
-        COALESCE(SUM(
-            CASE 
-                WHEN cle.onboardingMode = 'FILE_UPLOADED' THEN lld.amountRequested
-                ELSE 0
-            END
-        ), 0) AS amountRequested,
-        c.tuitionAmount AS tuitionAmount,
-        COALESCE(0, 0) AS amountReceived,
-        COALESCE(0, 0) AS amountOutstanding
+        c.tuitionAmount as tuitionAmount,
+        cl.totalAmountReceived AS amountReceived,
+        cl.totalOutstandingAmount AS amountOutstanding,
+        cl.totalAmountRepaid AS amountRepaind,
+        cl.totalAmountRequested as amountRequested
     FROM CohortEntity c
+    LEFT JOIN CohortLoanDetailEntity cl ON cl.cohort.id = c.id
     LEFT JOIN ProgramEntity pr ON pr.id = c.programId
     LEFT JOIN CohortLoaneeEntity cle ON cle.cohort.id = c.id
     LEFT JOIN LoanReferralEntity lfr ON lfr.cohortLoanee.id = cle.id
@@ -77,9 +73,10 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
     LEFT JOIN LoaneeEntity lne ON lne.id = cle.loanee.id
     LEFT JOIN LoaneeLoanDetailEntity lld ON lld.id = cle.loaneeLoanDetail.id
     LEFT JOIN LoanEntity le ON le.id = lo.id
-    WHERE pr.organizationIdentity.id = :organizationId 
+    WHERE pr.organizationIdentity.id = :organizationId
         AND c.cohortStatus = :cohortStatus
-    GROUP BY c.id, c.name, c.startDate
+    GROUP BY c.id, c.name, c.startDate ,c.tuitionAmount, cl.totalAmountReceived ,cl.totalOutstandingAmount,
+        cl.totalAmountRepaid ,cl.totalAmountRequested
 """)
     Page<CohortProjection> findAllByOrganizationIdAndCohortStatus(
             @Param("organizationId") String organizationId,

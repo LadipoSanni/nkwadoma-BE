@@ -94,15 +94,19 @@ public class CohortService implements CohortUseCase {
         savedCohort.setProgramName(program.getName());
         updateNumberOfCohortInOrganization(program.getOrganizationId());
 
-        CohortLoanDetail cohortLoanDetail = CohortLoanDetail.builder()
-                .cohort(savedCohort)
-                .totalAmountRequested(BigDecimal.ZERO)
-                .totalAmountReceived(BigDecimal.ZERO)
-                .totalOutstandingAmount(BigDecimal.ZERO)
-                .totalAmountRepaid(BigDecimal.ZERO)
-                .build();
+        CohortLoanDetail cohortLoanDetail = buildCohortLoanDetail(savedCohort);
         cohortLoanDetailOutputPort.save(cohortLoanDetail);
         return savedCohort;
+    }
+
+    private static CohortLoanDetail buildCohortLoanDetail(Cohort savedCohort) {
+        return CohortLoanDetail.builder()
+                .cohort(savedCohort)
+                .totalAmountRequested(BigDecimal.valueOf(0))
+                .totalAmountReceived(BigDecimal.valueOf(0))
+                .totalOutstandingAmount(BigDecimal.valueOf(0))
+                .totalAmountRepaid(BigDecimal.valueOf(0))
+                .build();
     }
 
     public void updateNumberOfCohortInOrganization(String organizationId) throws MeedlException {

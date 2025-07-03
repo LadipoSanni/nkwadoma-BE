@@ -195,6 +195,8 @@ public class LoaneeService implements LoaneeUseCase {
         if (ObjectUtils.isEmpty(existingLoanee)){
             loanee.getUserIdentity().setRole(IdentityRole.LOANEE);
             loanee.setActivationStatus(ActivationStatus.ACTIVE);
+            loanee.setOnboardingMode(OnboardingMode.EMAIL_REFERRED);
+            loanee.setUploadedStatus(UploadedStatus.ADDED);
             cohortLoanee = addLoaneeToCohort(loanee, cohort);
             loanee.setCreatedAt(LocalDateTime.now());
             Loanee createdLoanee = createLoaneeAccount(loanee);
@@ -209,8 +211,6 @@ public class LoaneeService implements LoaneeUseCase {
                 .cohort(cohort)
                 .loanee(loanee)
                 .loaneeStatus(LoaneeStatus.ADDED)
-                .onboardingMode(OnboardingMode.EMAIL_REFERRED)
-                .uploadedStatus(UploadedStatus.ADDED)
                 .build();
         LoaneeLoanDetail loaneeLoanDetail = saveLoaneeLoanDetails(loanee.getLoaneeLoanDetail());
         cohortLoanee.setLoaneeLoanDetail(loaneeLoanDetail);
@@ -348,10 +348,10 @@ public class LoaneeService implements LoaneeUseCase {
         MeedlValidator.validateObjectInstance(cohortLoanee, CohortMessages.COHORT_LOANEE_CANNOT_BE_NULL.getMessage());
         MeedlValidator.validateObjectInstance(cohortLoanee.getLoanee(), LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateObjectInstance(cohortLoanee.getCohort(), CohortMessages.COHORT_CANNOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateObjectInstance(cohortLoanee.getOnboardingMode(), LoaneeMessages.INVALID_ONBOARDING_MODE.getMessage());
+        MeedlValidator.validateObjectInstance(cohortLoanee.getLoanee().getOnboardingMode(), LoaneeMessages.INVALID_ONBOARDING_MODE.getMessage());
 
         OrganizationIdentity organizationIdentity = null;
-        if (cohortLoanee.getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)){
+        if (cohortLoanee.getLoanee().getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)){
             organizationIdentity = getLoaneeOrganization(cohortLoanee.getCohort().getId());
         }else {
             organizationIdentity = getLoaneeOrganization(cohortLoanee.getCohort().getId());
@@ -826,6 +826,13 @@ public class LoaneeService implements LoaneeUseCase {
                 log.error("Failed to save loanee when attempting to update Loanee status for user with id {}", loanee.getUserIdentity().getId(), e);
             }
         }
+    }
+
+    @Override
+    public CohortLoanee viewLoaneeDetailInCohort(String cohortId, String loaneeId) throws MeedlException {
+        MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+        MeedlValidator.validateUUID(cohortId,CohortMessages.INVALID_COHORT_ID.getMessage());
+        return cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(loaneeId,cohortId);
     }
 
     private void sendPortfolioManagerDropOutNotification(Loanee loanee, UserIdentity userIdentity) throws MeedlException {
