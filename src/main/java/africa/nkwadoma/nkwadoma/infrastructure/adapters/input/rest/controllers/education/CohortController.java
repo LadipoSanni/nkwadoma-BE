@@ -168,19 +168,19 @@ public class CohortController {
 
     @GetMapping("organization-cohort/all")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER') ")
-    public ResponseEntity<ApiResponse<PaginatedResponse<CohortsResponse>>> viewAllCohortsInOrganization(
+    public ResponseEntity<ApiResponse<PaginatedResponse<CohortResponse>>> viewAllCohortsInOrganization(
             @AuthenticationPrincipal Jwt meedl,
             @RequestParam(name = "organizationId", required = false) String organizationId,
-            @RequestParam(name = "cohortStatus") CohortStatus cohortStatus,
+            @RequestParam(name = "cohortStatus", required = false) CohortStatus cohortStatus,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
         Cohort cohort = Cohort.builder().organizationId(organizationId).cohortStatus(cohortStatus)
                 .pageSize(pageSize).pageNumber(pageNumber).build();
         Page<Cohort> cohorts = cohortUseCase.viewAllCohortInOrganization(meedl.getClaimAsString("sub"),cohort);
-        List<CohortsResponse> cohortResponses = cohorts.stream().map(cohortMapper::toCohortsResponse).toList();
-        PaginatedResponse<CohortsResponse> paginatedResponse = new PaginatedResponse<>(
+        List<CohortResponse> cohortResponses = cohorts.stream().map(cohortMapper::toCohortResponse).toList();
+        PaginatedResponse<CohortResponse> paginatedResponse = new PaginatedResponse<>(
                 cohortResponses, cohorts.hasNext(), cohorts.getTotalPages(),cohorts.getTotalElements(), pageNumber,pageSize);
-        ApiResponse<PaginatedResponse<CohortsResponse>> apiResponse = ApiResponse.<PaginatedResponse<CohortsResponse>>builder()
+        ApiResponse<PaginatedResponse<CohortResponse>> apiResponse = ApiResponse.<PaginatedResponse<CohortResponse>>builder()
                 .data(paginatedResponse)
                 .message(String.format("Cohorts %s", ControllerConstant.RETURNED_SUCCESSFULLY.getMessage()))
                 .statusCode(HttpStatus.OK.toString())

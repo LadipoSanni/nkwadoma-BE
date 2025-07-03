@@ -117,7 +117,7 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
     LEFT JOIN LoaneeLoanDetailEntity lld ON lld.id = cle.loaneeLoanDetail.id
     LEFT JOIN LoanEntity le ON le.id = lo.id
     WHERE pr.organizationIdentity.id = :organizationId
-        AND c.cohortStatus = :cohortStatus
+        AND (:cohortStatus IS NULL OR c.cohortStatus = :cohortStatus)
     GROUP BY c.id, c.name ,c.cohortDescription ,c.programId,
         c.organizationId ,pr.name,c.activationStatus ,c.cohortStatus,c.stillInTraining,
         c.numberOfLoanRequest,c.imageUrl ,c.numberOfLoanees,c.startDate ,c.tuitionAmount,
