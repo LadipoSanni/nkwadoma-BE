@@ -151,20 +151,25 @@ public class LoanCalculationService implements LoanCalculationUseCase {
     }
     private void validateLoanTenure(int tenure) throws MeedlException {
         if (tenure < 0) {
+            log.error("Loan Tenure must not be negative. Validation in loan calculation service.");
             throw new MeedlException("Loan Tenure must not be negative.");
         }
     }
     private void validateLoanPeriodRecord(LoanPeriodRecord record) throws MeedlException {
         if (record == null){
+            log.error("Loan period record must not be null - {}. ",record);
             throw new MeedlException("Loan period record must not be null.");
         }
         if (record.getLoanAmountOutstanding() == null) {
+            log.error("Loan Amount Outstanding must not be null.");
             throw new MeedlException("Loan Amount Outstanding must not be null.");
         }
         if (record.getLoanAmountOutstanding().compareTo(BigDecimal.ZERO) < 0) {
+            log.error("In validateLoanPeriodRecord Method. Loan Amount Outstanding must not be negative.");
             throw new MeedlException("Loan Amount Outstanding must not be negative.");
         }
         if (record.getDaysHeld() < 0) {
+            log.error("Days Held must not be negative.");
             throw new MeedlException("Days Held must not be negative.");
         }
     }
