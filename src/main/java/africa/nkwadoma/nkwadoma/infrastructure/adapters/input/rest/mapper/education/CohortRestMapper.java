@@ -22,6 +22,7 @@ public interface CohortRestMapper {
     @Mapping(target = "amountReceived", source = "totalAmountReceived")
     @Mapping(target = "amountRequested", source = "totalAmountRequested")
     @Mapping(target = "amountOutstanding", source = "totalOutstandingAmount")
+    @Mapping(target = "totalAmountRepaid", source = "totalAmountRepaid")
     CohortResponse toCohortResponse(Cohort cohort);
 
     LoanBreakdownResponse toLoanBreakdownResponse(LoanBreakdown loanBreakdown);
@@ -36,7 +37,6 @@ public interface CohortRestMapper {
     @Mapping(target = "id", source = "id")
     @Mapping(target = "name", source = "name")
     @Mapping(target = "numberOfLoanees", source = "numberOfLoanees")
-    @Mapping(target = "tuitionAmount", source = "tuitionAmount")
     @Mapping(target = "amountReceived", source = "totalAmountReceived")
     @Mapping(target = "amountRequested", source = "totalAmountRequested")
     @Mapping(target = "amountOutstanding", source = "totalOutstandingAmount")

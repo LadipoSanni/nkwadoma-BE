@@ -277,7 +277,6 @@ public class CohortService implements CohortUseCase {
     @Override
     public Page<Cohort> viewAllCohortInOrganization(String actorId, Cohort cohort) throws MeedlException {
         UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
-        MeedlValidator.validateObjectInstance(cohort.getCohortStatus(), CohortMessages.COHORT_STATUS_CANNOT_BE_EMPTY.getMessage());
         if(userIdentity.getRole().equals(IdentityRole.PORTFOLIO_MANAGER)){
             MeedlValidator.validateUUID(cohort.getOrganizationId(), OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
             OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(cohort.getOrganizationId());
