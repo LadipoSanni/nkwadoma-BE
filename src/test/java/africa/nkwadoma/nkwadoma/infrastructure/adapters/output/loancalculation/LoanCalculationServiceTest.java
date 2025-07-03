@@ -1,6 +1,7 @@
-package africa.nkwadoma.nkwadoma.domain.service.loanmanagement.loancalculation;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loancalculation;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loancalculation.LoanCalculationUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loancalculation.LoanCalculationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanPeriodRecord;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Slf4j
 class LoanCalculationServiceTest {
     @Autowired
-    private LoanCalculationUseCase calculator;
+    private LoanCalculationOutputPort calculator;
     private final BigDecimal ZERO = new BigDecimal("0.00");
     private final int NUMBER_OF_DECIMAL_PLACE = 8;
 

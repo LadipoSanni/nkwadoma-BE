@@ -8,25 +8,5 @@ import java.util.List;
 import java.util.Map;
 
 public interface LoanCalculationUseCase {
-    BigDecimal calculateLoanAmountRequested(BigDecimal programFee, BigDecimal initialDeposit) throws MeedlException;
 
-    BigDecimal calculateLoanAmountDisbursed(BigDecimal loanAmountRequested, BigDecimal loanDisbursementFees) throws MeedlException;
-
-    BigDecimal calculateLoanAmountOutstanding(
-            BigDecimal loanAmountOutstanding,
-            BigDecimal monthlyRepayment,
-            int moneyWeightedPeriodicInterest
-    ) throws MeedlException;
-
-    BigDecimal calculateMoneyWeightedPeriodicInterest(int interestRate, List<LoanPeriodRecord> periods) throws MeedlException;
-
-    int calculateMonthlyInterestRate(int interestRate) throws MeedlException;
-
-    BigDecimal calculateManagementOrProcessingFee(BigDecimal loanAmountRequested, double mgtFeeInPercentage) throws MeedlException;
-
-    BigDecimal calculateCreditLife(BigDecimal loanAmountRequested, int creditLifePercentage, int loanTenureMonths) throws MeedlException;
-
-    BigDecimal calculateLoanDisbursementFees(Map<String, BigDecimal> feeMap) throws MeedlException;
-
-    BigDecimal calculateTotalRepayment(List<BigDecimal> monthlyRepayments) throws MeedlException;
 }
