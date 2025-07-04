@@ -21,6 +21,8 @@ import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,13 +41,14 @@ public class RepaymentHistoryAdapterTest {
     @Autowired
     private LoaneeOutputPort loaneeOutputPort;
     private RepaymentHistory repaymentHistory;
-    String mockId = "ead0f7cb-5483-4bb8-b271-813970a9c368";
+    private String mockId = "ead0f7cb-5483-4bb8-b271-813970a9c368";
     private Loanee loanee;
     private UserIdentity userIdentity;
     private LoaneeLoanDetail loaneeLoanDetail;
+    private List<String> ids = new ArrayList<>();
     @Autowired
     private LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
-    String repaymentId = "";
+    private String repaymentId = "";
     int pageSize = 10;
     int pageNumber = 0;
     private String randomId = UUID.randomUUID().toString();
@@ -62,9 +65,30 @@ public class RepaymentHistoryAdapterTest {
         loanee = loaneeOutputPort.save(loanee);
         log.info("Created loanee: {} " , loanee);
         repaymentHistory.setLoanee(loanee);
+
     }
+    private void saveTestRepaymentHistories(List<String>ids) throws MeedlException {
+        LocalDateTime baseDate = LocalDateTime.of(2025, 7, 1, 10, 0); // July 1, 2025, 10:00 AM
 
+        repaymentHistory.setPaymentDateTime(baseDate.withHour(10));
+        repaymentHistory.setAmountPaid(new BigDecimal("100"));
+        repaymentHistory.setId(null);
+        RepaymentHistory savedHistory = repaymentHistoryOutputPort.save(repaymentHistory);
+        ids.add(savedHistory.getId());
 
+        repaymentHistory.setPaymentDateTime(baseDate.withHour(12));
+        repaymentHistory.setAmountPaid(new BigDecimal("200"));
+        repaymentHistory.setId(null);
+        savedHistory = repaymentHistoryOutputPort.save(repaymentHistory);
+        ids.add(savedHistory.getId());
+
+        repaymentHistory.setPaymentDateTime(LocalDateTime.now());
+        repaymentHistory.setAmountPaid(new BigDecimal("300"));
+        repaymentHistory.setId(null);
+        savedHistory = repaymentHistoryOutputPort.save(repaymentHistory);
+        ids.add(savedHistory.getId());
+
+    }
 
     @Test
     void cannotSaveNullRepaymentHistory(){
@@ -81,7 +105,7 @@ public class RepaymentHistoryAdapterTest {
 //    @Test
 //    void cannotSaveRepaymentHistoryWithNUllPaymentDate(){
 //        repaymentHistory.setPaymentDateTime(null);
-////        assertThrows(MeedlException.class, () ->repaymentHistoryOutputPort.save(repaymentHistory));
+////       assertThrows(MeedlException.class, () ->repaymentHistoryOutputPort.save(repaymentHistory));
 //    }
 
     @Order(1)
@@ -168,6 +192,22 @@ public class RepaymentHistoryAdapterTest {
         assertNotNull(repaymentHistories);
         assertTrue(repaymentHistories.hasContent());
     }
+    @Order(7)
+    @Test
+    void testFindLatestRepaymentMultipleSameDateDifferentTimes() {
+
+        RepaymentHistory latest = null;
+        try {
+            saveTestRepaymentHistories(ids);
+            latest = repaymentHistoryOutputPort.findLatestRepayment(loanee.getId(), repaymentHistory.getCohort().getId());
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+
+        assertNotNull(latest);
+        assertEquals(new BigDecimal("300.00"), latest.getAmountPaid());
+    }
+
 
     @Test
     void findRepaymentHistoryWithNullId(){
@@ -227,9 +267,12 @@ public class RepaymentHistoryAdapterTest {
     }
 
 
-    @AfterAll
+   @AfterAll
     void cleanUp() throws MeedlException {
         repaymentHistoryOutputPort.delete(repaymentId);
+        repaymentHistoryOutputPort.delete(ids.get(0));
+        repaymentHistoryOutputPort.delete(ids.get(1));
+        repaymentHistoryOutputPort.delete(ids.get(2));
         loaneeOutputPort.deleteLoanee(loanee.getId());
         userIdentityOutputPort.deleteUserById(userIdentity.getId());
         loaneeLoanDetailsOutputPort.delete(loaneeLoanDetail.getId());

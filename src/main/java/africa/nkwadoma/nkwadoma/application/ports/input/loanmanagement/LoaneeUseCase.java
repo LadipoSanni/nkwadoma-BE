@@ -45,7 +45,7 @@ public interface LoaneeUseCase {
 
     String resumeProgram(String loanId, String cohortId, String userId) throws MeedlException;
 
-    String archiveOrUnArchiveByIds(String actorId, List<String> loaneeIds, LoaneeStatus loaneeStatus) throws MeedlException;
+    String archiveOrUnArchiveByIds(String cohortId, List<String> loaneeIds, LoaneeStatus loaneeStatus) throws MeedlException;
 
     void updateLoaneeStatus(Loanee loanee);
 

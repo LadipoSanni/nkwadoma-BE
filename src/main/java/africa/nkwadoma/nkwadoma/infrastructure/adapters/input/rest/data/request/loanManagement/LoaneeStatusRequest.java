@@ -10,6 +10,7 @@ import java.util.List;
 @Getter
 public class LoaneeStatusRequest {
 
+    private String cohortId;
     private List<String> loaneeIds;
     private LoaneeStatus loaneeStatus;
 }

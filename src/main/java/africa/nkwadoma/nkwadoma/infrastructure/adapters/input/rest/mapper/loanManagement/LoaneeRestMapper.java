@@ -101,10 +101,11 @@ public interface LoaneeRestMapper {
     @Mapping(target = "nextOfKinPhoneNumber", source = "loanee.userIdentity.nextOfKin.phoneNumber")
     @Mapping(target = "nextOfKinResidentialAddress", source = "loanee.userIdentity.nextOfKin.contactAddress")
     @Mapping(target = "amountReceived", source = "loanee.loaneeLoanDetail.amountReceived")
-    @Mapping(target = "amountPaid", source = "loanee.loaneeLoanDetail.amountRepaid")
+    @Mapping(target = "amountRepaid", source = "loanee.loaneeLoanDetail.amountRepaid")
     @Mapping(target = "amountOutstanding", source = "loanee.loaneeLoanDetail.amountOutstanding")
     @Mapping(target = "debtPercentage", source = "debtPercentage")
     @Mapping(target = "interestRate", source = "interestRate")
     @Mapping(target = "repaymentPercentage", source = "repaymentPercentage")
+    @Mapping(target = "cohortName", source = "cohort.name")
     CohortLoaneeResponse toCohortLoaneeResponse(CohortLoanee cohortLoanee);
 }

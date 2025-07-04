@@ -14,7 +14,7 @@ public class CohortLoaneeResponse {
     private String firstName;
     private String lastName;
     private BigDecimal amountReceived;
-    private BigDecimal amountPaid;
+    private BigDecimal amountRepaid;
     private BigDecimal amountOutstanding;
     private double interestRate;
     private double debtPercentage;
@@ -38,5 +38,6 @@ public class CohortLoaneeResponse {
     private String nextOfKinRelationship;
     private String highestLevelOfEducation;
     private String programName;
+    private String cohortName;
     private String organizationName;
 }

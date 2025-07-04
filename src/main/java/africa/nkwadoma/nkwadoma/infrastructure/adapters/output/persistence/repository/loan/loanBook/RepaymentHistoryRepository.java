@@ -103,5 +103,6 @@ public interface RepaymentHistoryRepository extends JpaRepository<RepaymentHisto
             @Param("cohortId") String cohortId
     );
 
+
 }
 

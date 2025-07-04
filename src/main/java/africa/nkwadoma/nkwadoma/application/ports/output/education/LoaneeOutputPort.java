@@ -26,7 +26,5 @@ public interface LoaneeOutputPort {
 
     boolean checkIfLoaneeCohortExistInOrganization(String loaneeId, String organization) throws MeedlException;
 
-    void archiveOrUnArchiveByIds(List<String> loaneesId, LoaneeStatus loaneeStatus) throws MeedlException;
-
     Page<Loanee> findAllLoanee(int pageSize, int pageNumber) throws MeedlException;
 }
