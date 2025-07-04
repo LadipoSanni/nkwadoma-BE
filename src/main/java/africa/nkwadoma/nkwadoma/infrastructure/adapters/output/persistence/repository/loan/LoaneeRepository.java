@@ -56,12 +56,5 @@ public interface LoaneeRepository extends JpaRepository<LoaneeEntity,String> {
     boolean checkIfLoaneeCohortExistInOrganization(@Param("loaneeId") String loaneeId,
                                                    @Param("organizationId") String organizationId);
 
-    @Modifying
-    @Transactional
-    @Query(value = """
-        UPDATE CohortLoaneeEntity cle SET cle.loaneeStatus = :status
-        WHERE cle.id IN (:ids)
- """)
-    void updateStatusByIds(@Param("ids") List<String> ids, @Param("status") LoaneeStatus status);
 
 }

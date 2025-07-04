@@ -7,9 +7,11 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortLoaneeEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoaneeEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeProjection;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -131,4 +133,14 @@ public interface CohortLoaneeRepository extends JpaRepository<CohortLoaneeEntity
               or upper(concat(cl.loanee.userIdentity.lastName, ' ', cl.loanee.userIdentity.firstName)) LIKE upper(concat('%', :nameFragment, '%')))
         """)
     Page<CohortLoaneeEntity> searchLoanBeneficiaryByLoanProductId(@Param("loanProductId")String loanProductId, @Param("nameFragment") String nameFragment, Pageable pageRequest);
+
+    @Modifying
+    @Transactional
+    @Query(value = """
+        UPDATE CohortLoaneeEntity cle SET cle.loaneeStatus = :loaneeStatus
+        WHERE cle.cohort.id = :cohortId and cle.loanee.id IN (:loaneeIds)
+ """)
+    void updateStatusByIds(@Param("cohortId") String cohortId,
+                           @Param("loaneeIds") List<String> loaneeIds,
+                           @Param("loaneeStatus") LoaneeStatus loaneeStatus);
 }
