@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanmanagement.loancalculation;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loancalculation.LoanCalculationUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.RepaymentHistoryOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,12 @@ import java.util.List;
 @Slf4j
 @Component
 public class LoanCalculationService implements LoanCalculationUseCase {
+    private final RepaymentHistoryOutputPort repaymentHistoryOutputPort;
+
+    public LoanCalculationService(RepaymentHistoryOutputPort repaymentHistoryOutputPort) {
+        this.repaymentHistoryOutputPort = repaymentHistoryOutputPort;
+    }
+
     @Override
     public List<RepaymentHistory> sortRepaymentsByDateTimeDescending(List<RepaymentHistory> repayments) throws MeedlException {
         log.info("Started the sorting ");
@@ -53,6 +60,40 @@ public class LoanCalculationService implements LoanCalculationUseCase {
         repayments.get(0).setTotalAmountRepaid(totalRepaymentAmount);
         return totalRepaymentAmount;
     }
+    public List<RepaymentHistory> accumulateTotalRepaid(
+            List<RepaymentHistory> sortedRepayments,
+            String loaneeId,
+            String cohortId
+    ) throws MeedlException {
+
+        if (sortedRepayments == null || sortedRepayments.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // Get the last repayment from DB
+        RepaymentHistory lastRepayment = repaymentHistoryOutputPort.findLatestRepayment(loaneeId, cohortId);
+
+        BigDecimal runningTotal;
+        if (lastRepayment == null || lastRepayment.getTotalAmountRepaid() == null) {
+            // No previous record: start fresh
+            runningTotal = BigDecimal.ZERO;
+        } else {
+            // Start from last known total
+            runningTotal = lastRepayment.getTotalAmountRepaid();
+        }
+
+        for (RepaymentHistory repayment : sortedRepayments) {
+            if (repayment.getAmountPaid() == null) {
+                throw new MeedlException("Repayment amount cannot be null");
+            }
+
+            runningTotal = runningTotal.add(repayment.getAmountPaid());
+            repayment.setTotalAmountRepaid(runningTotal);
+        }
+
+        return sortedRepayments;
+    }
+
 
     private static void validationForCalculatingTotalAmountRepaid(RepaymentHistory repayment) throws MeedlException {
         if (repayment == null) {

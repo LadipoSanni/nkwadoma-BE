@@ -11,12 +11,17 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -43,6 +48,7 @@ public class RepaymentHistoryAdapterTest {
     String repaymentId = "";
     int pageSize = 10;
     int pageNumber = 0;
+    private String randomId = UUID.randomUUID().toString();
 
     @BeforeAll
     void setUp() throws MeedlException {
@@ -164,12 +170,64 @@ public class RepaymentHistoryAdapterTest {
     }
 
     @Test
-    void trowExceptionIfFindingRepaymentHistoryWithNullId(){
+    void findRepaymentHistoryWithNullId(){
         assertThrows(MeedlException.class, () ->repaymentHistoryOutputPort.findRepaymentHistoryById(null));
     }
 
+    @Order(7)
+    @Test
+    void findLatestRepaymentForLoaneeInAParticularCohort() throws MeedlException {
+        RepaymentHistory firstRepaymentHistory = TestData.buildRepaymentHistory(randomId);
+        firstRepaymentHistory.setPaymentDateTime(LocalDateTime.now().minusDays(3));
+        firstRepaymentHistory.setAmountPaid(new BigDecimal("1000"));
+        firstRepaymentHistory.setLoanee(loanee);
+        firstRepaymentHistory = repaymentHistoryOutputPort.save(firstRepaymentHistory);
 
-   @AfterAll
+        RepaymentHistory secondRepaymentHistory = TestData.buildRepaymentHistory(randomId);
+        secondRepaymentHistory.setPaymentDateTime(LocalDateTime.now().minusDays(2));
+        secondRepaymentHistory.setAmountPaid(new BigDecimal("2000"));
+        secondRepaymentHistory.setLoanee(loanee);
+        secondRepaymentHistory = repaymentHistoryOutputPort.save(secondRepaymentHistory);
+
+        RepaymentHistory thirdRepaymentHistory = TestData.buildRepaymentHistory(randomId);
+        thirdRepaymentHistory.setPaymentDateTime(LocalDateTime.now().minusDays(1));
+        thirdRepaymentHistory.setAmountPaid(new BigDecimal("3000.00"));
+        thirdRepaymentHistory.setLoanee(loanee);
+        thirdRepaymentHistory = repaymentHistoryOutputPort.save(thirdRepaymentHistory);
+
+        RepaymentHistory latestRepaymentFound = repaymentHistoryOutputPort.findLatestRepayment(loanee.getId(), randomId);
+
+        assertNotNull(latestRepaymentFound);
+        assertEquals(thirdRepaymentHistory.getAmountPaid(), latestRepaymentFound.getAmountPaid());
+        assertEquals(thirdRepaymentHistory.getPaymentDateTime(), latestRepaymentFound.getPaymentDateTime());
+        assertEquals(thirdRepaymentHistory.getId(), latestRepaymentFound.getId());
+        repaymentHistoryOutputPort.delete(firstRepaymentHistory.getId());
+        repaymentHistoryOutputPort.delete(secondRepaymentHistory.getId());
+        repaymentHistoryOutputPort.delete(thirdRepaymentHistory.getId());
+    }
+
+    @Order(8)
+    @Test
+    void findLatestRepaymentHistoriesWithNoneExistingIdsl() throws MeedlException {
+        RepaymentHistory latest = repaymentHistoryOutputPort.findLatestRepayment(randomId, randomId);
+        assertNull(latest);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "non-existent-loanee-id" })
+    public void findLatestRepaymentWithInvalidLoaneeId(String loaneeId){
+        assertThrows(MeedlException.class, ()->
+                repaymentHistoryOutputPort.findLatestRepayment(loaneeId, randomId));
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "non-existent-cohort-id" })
+    public void findLatestRepaymentWithInvalidCohortId(String cohortId){
+        assertThrows(MeedlException.class, ()->
+                repaymentHistoryOutputPort.findLatestRepayment(repaymentId, cohortId));
+    }
+
+
+    @AfterAll
     void cleanUp() throws MeedlException {
         repaymentHistoryOutputPort.delete(repaymentId);
         loaneeOutputPort.deleteLoanee(loanee.getId());
