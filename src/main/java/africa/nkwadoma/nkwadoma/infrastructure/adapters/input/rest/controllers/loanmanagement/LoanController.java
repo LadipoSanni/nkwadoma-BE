@@ -246,7 +246,12 @@ public class LoanController {
                                                          @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                                          @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
 
-        Page<LoanOffer> loanOffers = loanOfferUseCase.viewAllLoanOffers(meedlUser.getClaimAsString("sub"),pageSize,pageNumber,organizationId);
+        LoanOffer loanOffer = new LoanOffer();
+        loanOffer.setUserId(meedlUser.getClaimAsString("sub"));
+                loanOffer.setOrganizationId(organizationId);
+        loanOffer.setPageNumber(pageNumber);
+        loanOffer.setPageSize(pageSize);
+        Page<LoanOffer> loanOffers = loanOfferUseCase.viewAllLoanOffers(loanOffer);
         List<AllLoanOfferResponse> loanOfferResponses =  loanOfferRestMapper.toLoanOfferResponses(loanOffers);
         PaginatedResponse<AllLoanOfferResponse> paginatedResponse = new PaginatedResponse<>(
                 loanOfferResponses,loanOffers.hasNext(),loanOffers.getTotalPages(),loanOffers.getTotalElements() ,pageNumber,pageSize

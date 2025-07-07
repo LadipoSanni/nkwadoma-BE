@@ -33,7 +33,6 @@ import org.springframework.data.domain.PageImpl;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -207,11 +206,15 @@ public class LoanOfferServiceTest {
     void viewAllLoanOffer(){
         Page<LoanOffer> loanOffers = new PageImpl<>(Collections.singletonList(loanOffer));
         try {
+            LoanOffer loanOffer1 = new LoanOffer();
+            loanOffer1.setPageNumber(0);
+            loanOffer1.setPageSize(10);
+            loanOffer1.setUserId(mockId);
             userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
             when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
-            when(loanOfferOutputPort.findAllLoanOffer(10,0)).
+            when(loanOfferOutputPort.findAllLoanOffer(loanOffer1.getPageSize(),loanOffer1.getPageNumber())).
                     thenReturn(new PageImpl<>(List.of(loanOffer)));
-            loanOffers = loanService.viewAllLoanOffers(mockId,10,0,null);
+            loanOffers = loanService.viewAllLoanOffers(loanOffer1);
         }catch (MeedlException exception){
             log.info(exception.getMessage());
         }

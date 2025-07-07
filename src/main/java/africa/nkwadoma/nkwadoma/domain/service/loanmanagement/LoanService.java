@@ -572,19 +572,21 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     @Override
-    public Page<LoanOffer> viewAllLoanOffers(String userId, int pageSize , int pageNumber, String organizationId) throws MeedlException {
-        UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
+    public Page<LoanOffer> viewAllLoanOffers(LoanOffer loanOffer) throws MeedlException {
+        UserIdentity userIdentity = userIdentityOutputPort.findById(loanOffer.getUserId());
         if (userIdentity.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)){
            OrganizationEmployeeIdentity organizationEmployeeIdentity =
-                   organizationEmployeeIdentityOutputPort.findByCreatedBy(userId);
+                   organizationEmployeeIdentityOutputPort.findByCreatedBy(loanOffer.getUserId());
             return loanOfferOutputPort.findAllLoanOfferedToLoaneesInOrganization(organizationEmployeeIdentity.getOrganization(),
-                   pageSize,pageNumber);
+                   loanOffer.getPageSize(),loanOffer.getPageNumber());
         }if (userIdentity.getRole().equals(IdentityRole.LOANEE)){
-            return loanOfferOutputPort.findAllLoanOfferAssignedToLoanee(userIdentity.getId(),pageSize,pageNumber);
-        }if (ObjectUtils.isNotEmpty(organizationId)){
-            return loanOfferOutputPort.findAllLoanOfferedToLoaneesInOrganization(organizationId,pageSize,pageNumber);
+            return loanOfferOutputPort.findAllLoanOfferAssignedToLoanee(userIdentity.getId(),loanOffer.getPageSize(),
+                    loanOffer.getPageNumber());
+        }if (ObjectUtils.isNotEmpty(loanOffer.getOrganizationId())){
+            return loanOfferOutputPort.findAllLoanOfferedToLoaneesInOrganization(loanOffer.getOrganizationId(),
+                    loanOffer.getPageSize(),loanOffer.getPageNumber());
         }
-        return loanOfferOutputPort.findAllLoanOffer(pageSize,pageNumber);
+        return loanOfferOutputPort.findAllLoanOffer(loanOffer.getPageSize(),loanOffer.getPageNumber());
     }
 
 
