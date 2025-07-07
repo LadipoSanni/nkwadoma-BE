@@ -66,7 +66,8 @@ public enum LoanMessages {
     LOAN_ALREADY_EXISTS_FOR_THIS_LOANEE("Loan already exists for this loanee"),
     CANNOT_START_LOAN_FOR_LOAN_OFFER_THAT_AS_BEEN_DECLINED("Can not start loan for loan offer that as been declined"),
     LOAN_REQUEST_CANNOT_BE_APPROVED("Loanee identity not verified, loanee request cannot be approved "),
-    LOANEE_LOAN_NOT_FOUND("Loanee loan not found"),;
+    LOANEE_LOAN_NOT_FOUND("Loanee loan not found"),
+    LOAN_REFERRAL_NOT_ASSIGNED_TO_LOANEE("Loan referral not assigned to loanee"),;
     private final String message;
 
     LoanMessages(String message) {

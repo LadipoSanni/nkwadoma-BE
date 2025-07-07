@@ -4,5 +4,5 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 
 public interface ViewLoanReferralsUseCase {
-    LoanReferral viewLoanReferral(LoanReferral loanReferral) throws MeedlException;
+    LoanReferral viewLoanReferral(String actorId, String loanReferralId) throws MeedlException;
 }

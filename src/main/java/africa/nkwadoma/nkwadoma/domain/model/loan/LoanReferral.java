@@ -41,6 +41,7 @@ public class LoanReferral {
     private LocalDate cohortStartDate;
     private String programName;
     private List<LoaneeLoanBreakdown> loaneeLoanBreakdowns;
+    private String cohortLoaneeId;
 
     public void validateLoanReferralStatus() throws MeedlException {
         MeedlValidator.validateObjectInstance(loanReferralStatus, LoanMessages.LOAN_REFERRAL_STATUS_CANNOT_BE_EMPTY.getMessage());
@@ -52,12 +53,6 @@ public class LoanReferral {
         MeedlValidator.validateDataElement(loanee.getUserIdentity().getAlternateContactAddress(), "Alternate Contact Address is required");
         MeedlValidator.validateEmail(loanee.getUserIdentity().getAlternateEmail());
         MeedlValidator.validateDataElement(loanee.getUserIdentity().getAlternatePhoneNumber(), "Alternate Phone Number is required");
-    }
-
-    public void validateViewLoanReferral() throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateObjectInstance(loanee.getUserIdentity(), UserMessages.USER_IDENTITY_CANNOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateUUID(loanee.getUserIdentity().getId(), UserMessages.INVALID_USER_ID.getMessage());
     }
 
     public void validateForCreate() throws MeedlException {
