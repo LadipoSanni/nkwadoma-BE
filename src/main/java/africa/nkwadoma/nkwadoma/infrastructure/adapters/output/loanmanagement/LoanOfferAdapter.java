@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOffe
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanOfferMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -20,6 +21,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -56,7 +58,7 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
     }
 
     @Override
-    public Page<LoanOffer> findLoanOfferInOrganization(String organizationId,int pageSize , int pageNumber) throws MeedlException {
+    public Page<LoanOffer> findAllLoanOfferedToLoaneesInOrganization(String organizationId, int pageSize , int pageNumber) throws MeedlException {
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
         Page<LoanOfferProjection> loanOfferProjections =
@@ -65,7 +67,7 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
     }
 
     @Override
-    public Page<LoanOffer> findAllLoanOffers(int pageSize, int pageNumber) throws MeedlException {
+    public Page<LoanOffer> findAllLoanOffer(int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validatePageNumber(pageNumber);
         Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
@@ -110,6 +112,19 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
         MeedlValidator.validateUUID(loaneeId, LoanMessages.INVALID_LOANEE_ID.getMessage());
         LoanOfferEntity loanOfferEntity = loanOfferEntityRepository.findLoanOfferByLoaneeId(loaneeId);
         return loanOfferMapper.toLoanOffer(loanOfferEntity);
+    }
+
+    @Override
+    public Page<LoanOffer> findAllLoanOfferAssignedToLoanee(String id, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(id, UserMessages.INVALID_USER_ID.getMessage());
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.asc("dateTimeOffered")));
+
+        Page<LoanOfferProjection> loanOfferProjections =
+                loanOfferEntityRepository.finAllLoanOfferAssignedToLoaneeByUserId(id,pageRequest);
+        log.info("Loan offers found: {}", loanOfferProjections);
+        Page<LoanOffer> mappedloanOffers = loanOfferProjections.map(loanOfferMapper::mapProjectionToLoanOffer);
+        log.info("Mapped loans offers: {}", mappedloanOffers);
+        return mappedloanOffers;
     }
 
     @Override

@@ -378,6 +378,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                     .loanee(loanee)
                     .cohort(cohort)
                     .createdBy(cohort.getCreatedBy())
+                    .createdAt(LocalDateTime.now())
                     .updatedAt(parseFlexibleDateTime(row.get("loanstartdate"), row.get("email")))
                     .build();
 
