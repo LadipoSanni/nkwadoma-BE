@@ -58,7 +58,6 @@ public class Cohort {
     private int pageNumber;
 
 
-
     public void validate() throws MeedlException {
         MeedlValidator.validateUUID(programId, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         MeedlValidator.validateObjectName(name,"Cohort name cannot be empty","Cohort");

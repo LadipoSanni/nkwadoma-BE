@@ -179,8 +179,8 @@ public class LoanOfferServiceTest {
             when(loanOfferOutputPort.findLoanOfferById(mockId)).thenReturn(loanOffer);
             when(loaneeOutputPort.findByUserId(mockId)).thenReturn(Optional.ofNullable(loanee));
             loanOffer2.setLoaneeResponse(LoanDecision.DECLINED);
-            loanOffer.setLoanRequestReferredBy("referredBy");
-            when(organizationIdentityOutputPort.findOrganizationByName(loanOffer.getLoanRequestReferredBy()))
+            loanOffer.setReferredBy("referredBy");
+            when(organizationIdentityOutputPort.findOrganizationByName(loanOffer.getReferredBy()))
                     .thenReturn(organizationIdentity);
             doNothing().when(asynchronousNotificationOutputPort).notifyPortfolioManagerOfNewLoanOfferWithDecision(any(), any());
             when(loanMetricsOutputPort.findByOrganizationId(organizationIdentity.get().getId()))

@@ -43,7 +43,7 @@ public class LoanOffer {
     private String programId;
     private String cohortId;
     private String organizationId;
-    private String loanRequestReferredBy;
+    private String referredBy;
     private LoanType type;
     private String name;
     private int pageSize;

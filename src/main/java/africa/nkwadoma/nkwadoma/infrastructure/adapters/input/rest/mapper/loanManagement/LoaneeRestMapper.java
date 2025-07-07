@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanBreakdown;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DeferProgramRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeLoanBreakdownRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.CohortLoaneeResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanBeneficiaryResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanBreakdownResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoaneeReferralResponse;
@@ -81,4 +82,30 @@ public interface LoaneeRestMapper {
     @Mapping(target = "cohortId", source = "cohort.id")
     @Mapping(target = "id", source = "loanee.id")
     LoaneeResponse mapToLoaneeResponse(CohortLoanee cohortLoanee);
+
+    @Mapping(target = "firstName", source = "loanee.userIdentity.firstName")
+    @Mapping(target = "lastName", source = "loanee.userIdentity.lastName")
+    @Mapping(target = "gender", source = "loanee.userIdentity.gender")
+    @Mapping(target = "dateOfBirth", source = "loanee.userIdentity.dateOfBirth")
+    @Mapping(target = "stateOfOrigin", source = "loanee.userIdentity.stateOfOrigin")
+    @Mapping(target = "maritalStatus", source = "loanee.userIdentity.maritalStatus")
+    @Mapping(target = "stateOfResidence", source = "loanee.userIdentity.stateOfResidence")
+    @Mapping(target = "nationality", source = "loanee.userIdentity.nationality")
+    @Mapping(target = "residentialAddress", source = "loanee.userIdentity.residentialAddress")
+    @Mapping(target = "phoneNumber", source = "loanee.userIdentity.phoneNumber")
+    @Mapping(target = "alternateEmail", source = "loanee.userIdentity.alternateEmail")
+    @Mapping(target = "alternatePhoneNumber", source = "loanee.userIdentity.alternatePhoneNumber")
+    @Mapping(target = "alternateContactAddress", source = "loanee.userIdentity.alternateContactAddress")
+    @Mapping(target = "nextOfKinFirstName", source = "loanee.userIdentity.nextOfKin.firstName")
+    @Mapping(target = "nextOfKinLastName", source = "loanee.userIdentity.nextOfKin.lastName")
+    @Mapping(target = "nextOfKinPhoneNumber", source = "loanee.userIdentity.nextOfKin.phoneNumber")
+    @Mapping(target = "nextOfKinResidentialAddress", source = "loanee.userIdentity.nextOfKin.contactAddress")
+    @Mapping(target = "amountReceived", source = "loanee.loaneeLoanDetail.amountReceived")
+    @Mapping(target = "amountRepaid", source = "loanee.loaneeLoanDetail.amountRepaid")
+    @Mapping(target = "amountOutstanding", source = "loanee.loaneeLoanDetail.amountOutstanding")
+    @Mapping(target = "debtPercentage", source = "debtPercentage")
+    @Mapping(target = "interestRate", source = "interestRate")
+    @Mapping(target = "repaymentPercentage", source = "repaymentPercentage")
+    @Mapping(target = "cohortName", source = "cohort.name")
+    CohortLoaneeResponse toCohortLoaneeResponse(CohortLoanee cohortLoanee);
 }

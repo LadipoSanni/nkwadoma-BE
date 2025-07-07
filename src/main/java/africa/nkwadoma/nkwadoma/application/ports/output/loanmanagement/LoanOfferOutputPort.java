@@ -25,4 +25,6 @@ public interface LoanOfferOutputPort {
     Page<LoanOffer> findAllLoanOfferAssignedToLoanee(String id, int pageSize, int pageNumber) throws MeedlException;
 
     int countNumberOfPendingLoanOfferForCohort(String id) throws MeedlException;
+
+    int countNumberOfPendingLoanOfferForOrganization(String id) throws MeedlException;
 }

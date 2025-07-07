@@ -18,6 +18,7 @@ public interface ProgramRestMapper {
     @Mapping(target = "totalAmountRepaid", source = "totalAmountRepaid", defaultValue = "0")
     @Mapping(target = "totalAmountDisbursed", source = "totalAmountDisbursed", defaultValue = "0")
     @Mapping(target = "totalAmountOutstanding", source = "totalAmountOutstanding", defaultValue = "0")
+    @Mapping(target = "totalAmountRequested", source = "totalAmountRequested", defaultValue = "0")
     ProgramResponse toProgramResponse(Program program);
 
     Program toUpdatedProgram(ProgramUpdateRequest programUpdateRequest);

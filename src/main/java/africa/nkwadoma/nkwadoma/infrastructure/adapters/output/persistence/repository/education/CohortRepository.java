@@ -18,17 +18,14 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
         c.name AS name,
         COALESCE(COUNT(DISTINCT lne.id), 0) AS numberOfLoanees,
         c.startDate AS startDate,
-        COALESCE(SUM(
-            CASE 
-                WHEN cle.onboardingMode = 'FILE_UPLOADED' THEN lld.amountRequested
-                ELSE 0
-            END
-        ), 0) AS amountRequested,
+        cl.totalAmountRequested as amountRequested,
         c.tuitionAmount AS tuitionAmount,
-        COALESCE(0, 0) AS amountReceived,
-        COALESCE(0, 0) AS amountOutstanding
+        cl.totalAmountReceived AS amountReceived,
+        cl.totalOutstandingAmount AS amountOutstanding,
+        cl.totalAmountRepaid AS amountRepaind
     FROM CohortEntity c
     LEFT JOIN CohortLoaneeEntity cle ON cle.cohort.id = c.id
+    LEFT JOIN CohortLoanDetailEntity cl ON cl.cohort.id = c.id
     LEFT JOIN LoanReferralEntity lfr ON lfr.cohortLoanee.id = cle.id
     LEFT JOIN LoanOfferEntity lo ON lo.id = lfr.id
     LEFT JOIN LoaneeEntity lne ON lne.id = cle.loanee.id
@@ -37,7 +34,9 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
     WHERE c.organizationId = :organizationId 
         AND (:cohortStatus IS NULL OR c.cohortStatus = :cohortStatus)
         AND LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%'))
-    GROUP BY c.id, c.name, c.startDate
+    GROUP BY c.id, c.name, c.startDate,c.tuitionAmount, cl.totalAmountReceived ,cl.totalOutstandingAmount,
+        cl.totalAmountRepaid,cl.totalAmountRequested
+
 """)
     Page<CohortProjection> findByNameContainingIgnoreCaseAndOrganizationId(
             @Param("name") String name,
@@ -46,30 +45,28 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
             Pageable pageRequest);
 
 
-    @Query("SELECT c FROM CohortEntity c WHERE c.programId = :programId " +
-            "AND c.cohortStatus IS NOT NULL " +
-            "AND (:cohortStatus IS NULL OR c.cohortStatus = :cohortStatus)")
-    Page<CohortEntity> findAllByProgramIdAndCohortStatus(
-            @Param("programId") String programId,
-            @Param("cohortStatus") CohortStatus cohortStatus,
-            Pageable pageRequest);
-
     @Query("""
-    SELECT
+       SELECT
         c.id AS id,
         c.name AS name,
-        COALESCE(COUNT(DISTINCT lne.id), 0) AS numberOfLoanees,
+        c.cohortDescription as cohortDescription,
+        c.programId as programId,
+        c.organizationId as organizationId,
+        pr.name as programName,
+        c.activationStatus as activationStatus,
+        c.cohortStatus as cohortStatus,
+        c.stillInTraining as stillInTraining,
+        c.numberOfLoanRequest as numberOfLoanRequest,
+        c.imageUrl as imageUrl,
+        c.numberOfLoanees as numberOfLoanees,
         c.startDate AS startDate,
-        COALESCE(SUM(
-            CASE 
-                WHEN cle.onboardingMode = 'FILE_UPLOADED' THEN lld.amountRequested
-                ELSE 0
-            END
-        ), 0) AS amountRequested,
-        c.tuitionAmount AS tuitionAmount,
-        COALESCE(0, 0) AS amountReceived,
-        COALESCE(0, 0) AS amountOutstanding
+        c.tuitionAmount as tuitionAmount,
+        cl.totalAmountReceived AS amountReceived,
+        cl.totalOutstandingAmount AS amountOutstanding,
+        cl.totalAmountRepaid AS amountRepaid,
+        cl.totalAmountRequested as amountRequested
     FROM CohortEntity c
+    LEFT JOIN CohortLoanDetailEntity cl ON cl.cohort.id = c.id
     LEFT JOIN ProgramEntity pr ON pr.id = c.programId
     LEFT JOIN CohortLoaneeEntity cle ON cle.cohort.id = c.id
     LEFT JOIN LoanReferralEntity lfr ON lfr.cohortLoanee.id = cle.id
@@ -77,9 +74,54 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
     LEFT JOIN LoaneeEntity lne ON lne.id = cle.loanee.id
     LEFT JOIN LoaneeLoanDetailEntity lld ON lld.id = cle.loaneeLoanDetail.id
     LEFT JOIN LoanEntity le ON le.id = lo.id
-    WHERE pr.organizationIdentity.id = :organizationId 
-        AND c.cohortStatus = :cohortStatus
-    GROUP BY c.id, c.name, c.startDate
+    WHERE c.programId = :programId
+            AND (:cohortStatus IS NULL OR c.cohortStatus = :cohortStatus)
+    GROUP BY c.id, c.name ,c.cohortDescription ,c.programId,
+        c.organizationId ,pr.name,c.activationStatus ,c.cohortStatus,c.stillInTraining,
+        c.numberOfLoanRequest,c.imageUrl ,c.numberOfLoanees,c.startDate ,c.tuitionAmount,
+        cl.totalAmountReceived,cl.totalOutstandingAmount,cl.totalAmountRepaid, cl.totalAmountRequested
+""")
+    Page<CohortProjection> findAllByProgramIdAndCohortStatus(
+            @Param("programId") String programId,
+            @Param("cohortStatus") CohortStatus cohortStatus,
+            Pageable pageRequest);
+
+
+    @Query("""
+    SELECT
+        c.id AS id,
+        c.name AS name,
+        c.cohortDescription as cohortDescription,
+        c.programId as programId,
+        c.organizationId as organizationId,
+        pr.name as programName,
+        c.activationStatus as activationStatus,
+        c.cohortStatus as cohortStatus,
+        c.stillInTraining as stillInTraining,
+        c.numberOfLoanRequest as numberOfLoanRequest,
+        c.imageUrl as imageUrl,
+        c.numberOfLoanees as numberOfLoanees,
+        c.startDate AS startDate,
+        c.tuitionAmount as tuitionAmount,
+        cl.totalAmountReceived AS amountReceived,
+        cl.totalOutstandingAmount AS amountOutstanding,
+        cl.totalAmountRepaid AS amountRepaid,
+        cl.totalAmountRequested as amountRequested
+    FROM CohortEntity c
+    LEFT JOIN CohortLoanDetailEntity cl ON cl.cohort.id = c.id
+    LEFT JOIN ProgramEntity pr ON pr.id = c.programId
+    LEFT JOIN CohortLoaneeEntity cle ON cle.cohort.id = c.id
+    LEFT JOIN LoanReferralEntity lfr ON lfr.cohortLoanee.id = cle.id
+    LEFT JOIN LoanOfferEntity lo ON lo.id = lfr.id
+    LEFT JOIN LoaneeEntity lne ON lne.id = cle.loanee.id
+    LEFT JOIN LoaneeLoanDetailEntity lld ON lld.id = cle.loaneeLoanDetail.id
+    LEFT JOIN LoanEntity le ON le.id = lo.id
+    WHERE pr.organizationIdentity.id = :organizationId
+        AND (:cohortStatus IS NULL OR c.cohortStatus = :cohortStatus)
+    GROUP BY c.id, c.name ,c.cohortDescription ,c.programId,
+        c.organizationId ,pr.name,c.activationStatus ,c.cohortStatus,c.stillInTraining,
+        c.numberOfLoanRequest,c.imageUrl ,c.numberOfLoanees,c.startDate ,c.tuitionAmount,
+        cl.totalAmountReceived,cl.totalOutstandingAmount,cl.totalAmountRepaid, cl.totalAmountRequested
 """)
     Page<CohortProjection> findAllByOrganizationIdAndCohortStatus(
             @Param("organizationId") String organizationId,

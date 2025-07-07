@@ -84,6 +84,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
 
         Cohort savedCohort = findCohort(loanBook.getCohort());
         List<CohortLoanee> convertedLoanees = convertToLoanees(data, savedCohort, loanBook.getActorId());
+        log.info("Converted loanees size {}", convertedLoanees.size());
 //        validateStartDates(convertedLoanees, savedCohort);
         loanBook.setLoanees(convertedLoanees);
         referCohort(loanBook);
@@ -144,13 +145,11 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                         log.info("Loan start date before processing start loan before accepting loan referral {}", loanee.getReferralDateTime());
 
                         LoanReferral loanReferral = acceptLoanReferral(loanee);
-
-
+                        log.info("loan referral is {}", loanReferral);
                         LoanRequest loanRequest = acceptLoanRequest(loanee, loanReferral, loanBook);
-                        // TODO
-                        // COMING BACK FOR LOAN_OFFER AND ALL
-//                        acceptLoanOffer(loanRequest);
-//                        startLoan(loanRequest,loanee.getUpdatedAt() );
+                        log.info("loan request is {}", loanRequest);
+                        acceptLoanOffer(loanRequest);
+                        startLoan(loanRequest,loanee.getUpdatedAt() );
                     } catch (MeedlException e) {
                         log.error("Error accepting loan referral.",e);
                     }
@@ -158,6 +157,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     }
 
     private void startLoan(LoanRequest loanRequest, LocalDateTime loanStartDate) throws MeedlException {
+        log.info("loan request is {}", loanRequest);
         log.info("The loan start date is {} for user with email {}", loanStartDate, loanRequest.getLoanee().getUserIdentity().getEmail());
         Loan loan = Loan.builder().loaneeId(loanRequest.getLoanee().getId()).startDate(loanStartDate).loanOfferId(loanRequest.getId()).build();
         createLoanProductUseCase.startLoan(loan);
@@ -372,13 +372,13 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                     .build();
 
             CohortLoanee cohortLoanee = CohortLoanee.builder()
-                    .onboardingMode(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)
                     .loaneeLoanDetail(loaneeLoanDetail)
                     .loaneeStatus(LoaneeStatus.ADDED)
                     .loanee(loanee)
                     .cohort(cohort)
+                    .createdBy(cohort.getCreatedBy())
                     .updatedAt(parseFlexibleDateTime(row.get("loanstartdate"), row.get("email")))
-                    .uploadedStatus(UploadedStatus.ADDED).build();
+                    .build();
 
             loanees.add(cohortLoanee);
         }
@@ -396,15 +396,14 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                 UserIdentity userIdentity = identityManagerOutputPort.createUser(cohortLoanee.getLoanee().getUserIdentity());
                 userIdentityOutputPort.save(userIdentity);
                 LoaneeLoanDetail savedLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(cohortLoanee.getLoaneeLoanDetail());
-                cohortLoanee.getLoaneeLoanDetail().setId(savedLoaneeLoanDetail.getId());
+                cohortLoanee.setLoaneeLoanDetail(savedLoaneeLoanDetail);
                 log.info("Loanee's loan details after saving in file upload {}", savedLoaneeLoanDetail);
-                cohortLoanee.getLoanee().setUserIdentity(userIdentity);
                 cohortLoanee.setLoaneeLoanDetail(savedLoaneeLoanDetail);
 
                 Loanee savedLoanee = loaneeOutputPort.save(cohortLoanee.getLoanee());
-                savedLoanee.setCohortName(cohortLoanee.getLoanee().getCohortName());
-                savedLoanee.getLoaneeLoanDetail().setAmountApproved(cohortLoanee.getLoaneeLoanDetail().getAmountApproved());
-                log.info("Loanee's amount approved in file upload: {}", savedLoanee.getLoaneeLoanDetail());
+
+                log.info("saved loanee  == {} ",savedLoanee);
+                cohortLoanee.setLoanee(savedLoanee);
                 log.info("Loanee's actual loan details in file upload: {}", cohortLoanee.getLoaneeLoanDetail());
                 cohortLoanee = cohortLoaneeOutputPort.save(cohortLoanee);
                 savedLoanees.add(cohortLoanee);

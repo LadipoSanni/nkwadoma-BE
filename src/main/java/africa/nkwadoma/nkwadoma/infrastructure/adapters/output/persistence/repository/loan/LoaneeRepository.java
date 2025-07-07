@@ -30,11 +30,12 @@ public interface LoaneeRepository extends JpaRepository<LoaneeEntity,String> {
 
     @Query("""
         SELECT l FROM CohortLoaneeEntity l
+            
         WHERE l.cohort.id = :cohortId
         AND (upper(concat(l.loanee.userIdentity.firstName, ' ', l.loanee.userIdentity.lastName)) LIKE upper(concat('%', :nameFragment, '%'))
         OR upper(concat(l.loanee.userIdentity.lastName, ' ', l.loanee.userIdentity.firstName)) LIKE upper(concat('%', :nameFragment, '%')))
         AND (:status IS NULL OR l.loaneeStatus = :status)
-        AND (:uploadedStatus IS NULL OR l.uploadedStatus = :uploadedStatus)
+        AND (:uploadedStatus IS NULL OR l.loanee.uploadedStatus = :uploadedStatus)
         AND l.loaneeStatus != 'ARCHIVE'
     """)
     Page<LoaneeEntity> findByCohortIdAndNameFragment(@Param("cohortId") String cohortId,
@@ -55,12 +56,5 @@ public interface LoaneeRepository extends JpaRepository<LoaneeEntity,String> {
     boolean checkIfLoaneeCohortExistInOrganization(@Param("loaneeId") String loaneeId,
                                                    @Param("organizationId") String organizationId);
 
-    @Modifying
-    @Transactional
-    @Query(value = """
-        UPDATE CohortLoaneeEntity cle SET cle.loaneeStatus = :status
-        WHERE cle.id IN (:ids)
- """)
-    void updateStatusByIds(@Param("ids") List<String> ids, @Param("status") LoaneeStatus status);
 
 }

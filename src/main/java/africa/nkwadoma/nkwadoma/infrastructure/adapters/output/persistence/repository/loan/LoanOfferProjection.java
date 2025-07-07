@@ -56,5 +56,6 @@ public interface LoanOfferProjection {
     String getLoanRequestReferredBy();
     String getCohortLoaneeId();
     String getCohortId();
+    String getReferredBy();
 
 }

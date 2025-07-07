@@ -133,4 +133,10 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
         log.info("Number of pending loan offers for cohort {}", id);
         return loanOfferEntityRepository.countPendingOfferByCohortId(id);
     }
+
+    @Override
+    public int countNumberOfPendingLoanOfferForOrganization(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+        return loanOfferEntityRepository.countPendingOfferByOrganizationId(id);
+    }
 }

@@ -23,6 +23,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Setter
@@ -50,6 +51,12 @@ public class CohortLoanee {
     private boolean deferralApproved;
     private boolean dropoutRequested;
     private boolean dropoutApproved;
+    private double interestRate;
+    private double debtPercentage;
+    private double repaymentPercentage;
+    private String highestLevelOfEducation;
+    private String programName;
+    private String organizationName;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(cohort, CohortMessages.COHORT_CANNOT_BE_EMPTY.getMessage());

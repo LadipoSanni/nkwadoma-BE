@@ -4,13 +4,16 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeO
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanException;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortLoaneeEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoaneeEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.CohortLoaneeMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortLoaneeProjection;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortLoaneeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,11 +60,11 @@ public class CohortLoaneePersistenceAdapter implements CohortLoaneeOutputPort {
         MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
         MeedlValidator.validateUUID(cohortId,CohortMessages.INVALID_COHORT_ID.getMessage());
 
-        CohortLoaneeEntity cohortLoaneeEntity =
+        CohortLoaneeProjection cohortLoaneeProjection =
                 cohortLoaneeRepository.findCohortLoaneeEntityByLoanee_IdAndCohort_Id(loaneeId,cohortId);
-        log.info("After finding cohort loanee = : {}", cohortLoaneeEntity);
+        log.info("After finding cohort loanee = : {}", cohortLoaneeProjection);
 
-        return cohortLoaneeMapper.toCohortLoanee(cohortLoaneeEntity);
+        return cohortLoaneeMapper.mapProjectionCohortLoanee(cohortLoaneeProjection);
     }
 
     @Override
@@ -143,5 +146,14 @@ public class CohortLoaneePersistenceAdapter implements CohortLoaneeOutputPort {
         log.info("cohort loanee entities == {}",cohortLoaneeEntities);
 
         return cohortLoaneeEntities.map(cohortLoaneeMapper::toCohortLoanee);
+    }
+
+    @Override
+    public void archiveOrUnArchiveByIds(String cohortId, List<String> loaneeIds, LoaneeStatus loaneeStatus) throws MeedlException {
+        MeedlValidator.validateUUID(cohortId,CohortMessages.INVALID_COHORT_ID.getMessage());
+        if (loaneeIds.isEmpty()){
+            throw new LoanException(LoaneeMessages.LOANEES_ID_CANNOT_BE_EMPTY.getMessage());
+        }
+        cohortLoaneeRepository.updateStatusByIds(cohortId,loaneeIds, loaneeStatus);
     }
 }

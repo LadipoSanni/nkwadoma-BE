@@ -92,14 +92,6 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
     }
 
     @Override
-    public void archiveOrUnArchiveByIds(List<String> loaneesId, LoaneeStatus loaneeStatus) throws MeedlException {
-        if (loaneesId.isEmpty()){
-            throw new LoanException(LoaneeMessages.LOANEES_ID_CANNOT_BE_EMPTY.getMessage());
-        }
-        loaneeRepository.updateStatusByIds(loaneesId, loaneeStatus);
-    }
-
-    @Override
     public Page<Loanee> findAllLoanee(int pageSize, int pageNumber) throws MeedlException {
         log.info("pageSize = {}, pageNumber = {}", pageSize, pageNumber);
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize);

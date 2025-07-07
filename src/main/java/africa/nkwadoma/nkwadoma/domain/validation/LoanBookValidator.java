@@ -160,7 +160,7 @@ public class LoanBookValidator {
         }
     }
     public void containsOnlyDigits(String input, String errorMessage) throws MeedlException {
-       boolean isOnlyDigits = input != null && input.matches("\\d+");
+       boolean isOnlyDigits = input != null && input.matches("\\d+(\\.\\d+)?");
        if (!isOnlyDigits){
            log.error("Its not only digits {}", input);
            throw new MeedlException(errorMessage);

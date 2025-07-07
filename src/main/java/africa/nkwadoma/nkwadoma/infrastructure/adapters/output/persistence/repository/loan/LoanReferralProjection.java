@@ -23,4 +23,6 @@ public interface LoanReferralProjection {
     String getProgramName();
     boolean getIdentityVerified();
     LoanReferralStatus getStatus();
+    String getEmail();
+    String getUserId();
 }

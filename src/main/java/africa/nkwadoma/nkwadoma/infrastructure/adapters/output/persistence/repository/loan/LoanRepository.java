@@ -149,7 +149,7 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
 
 
     @Query("""
-    SELECT lo.id AS id,
+    SELECT DISTINCT lo.id AS id,
            cle.referredBy as referredBy
     
           FROM LoanEntity lo
