@@ -97,7 +97,10 @@ public class RepaymentHistoryAdapterTest {
         }
         return dateTime.withNano(micro * 1000);
     }
-
+    private LocalDateTime truncateToMicroseconds(LocalDateTime dateTime) {
+        int micro = dateTime.getNano() / 1000; // truncate (not round)
+        return dateTime.withNano(micro * 1000);
+    }
     @Test
     void cannotSaveNullRepaymentHistory(){
         assertThrows(MeedlException.class, () ->repaymentHistoryOutputPort.save(null));
@@ -247,7 +250,7 @@ public class RepaymentHistoryAdapterTest {
 
         assertNotNull(latestRepaymentFound);
         assertEquals(thirdRepaymentHistory.getAmountPaid(), latestRepaymentFound.getAmountPaid());
-        assertEquals(roundUpToMicroseconds(thirdRepaymentHistory.getPaymentDateTime()), roundUpToMicroseconds(latestRepaymentFound.getPaymentDateTime()));
+        assertEquals(truncateToMicroseconds(thirdRepaymentHistory.getPaymentDateTime()), truncateToMicroseconds(latestRepaymentFound.getPaymentDateTime()));
         assertEquals(thirdRepaymentHistory.getId(), latestRepaymentFound.getId());
         repaymentHistoryOutputPort.delete(firstRepaymentHistory.getId());
         repaymentHistoryOutputPort.delete(secondRepaymentHistory.getId());
