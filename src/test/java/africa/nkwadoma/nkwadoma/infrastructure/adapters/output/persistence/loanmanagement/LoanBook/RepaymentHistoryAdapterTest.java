@@ -89,6 +89,14 @@ public class RepaymentHistoryAdapterTest {
         ids.add(savedHistory.getId());
 
     }
+    private LocalDateTime roundUpToMicroseconds(LocalDateTime dateTime) {
+        int nano = dateTime.getNano();
+        int micro = (nano + 999) / 1000;
+        if (micro == 1_000_000) {
+            return dateTime.plusSeconds(1).withNano(0);
+        }
+        return dateTime.withNano(micro * 1000);
+    }
 
     @Test
     void cannotSaveNullRepaymentHistory(){
@@ -239,13 +247,12 @@ public class RepaymentHistoryAdapterTest {
 
         assertNotNull(latestRepaymentFound);
         assertEquals(thirdRepaymentHistory.getAmountPaid(), latestRepaymentFound.getAmountPaid());
-        assertEquals(thirdRepaymentHistory.getPaymentDateTime(), latestRepaymentFound.getPaymentDateTime());
+        assertEquals(roundUpToMicroseconds(thirdRepaymentHistory.getPaymentDateTime()), roundUpToMicroseconds(latestRepaymentFound.getPaymentDateTime()));
         assertEquals(thirdRepaymentHistory.getId(), latestRepaymentFound.getId());
         repaymentHistoryOutputPort.delete(firstRepaymentHistory.getId());
         repaymentHistoryOutputPort.delete(secondRepaymentHistory.getId());
         repaymentHistoryOutputPort.delete(thirdRepaymentHistory.getId());
     }
-
     @Order(8)
     @Test
     void findLatestRepaymentHistoriesWithNoneExistingIdsl() throws MeedlException {
