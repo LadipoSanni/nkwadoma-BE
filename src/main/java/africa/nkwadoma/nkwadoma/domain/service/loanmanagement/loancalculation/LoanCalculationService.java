@@ -73,15 +73,12 @@ public class LoanCalculationService implements LoanCalculationUseCase {
             return Collections.emptyList();
         }
 
-        // Get the last repayment from DB
         RepaymentHistory lastRepayment = repaymentHistoryOutputPort.findLatestRepayment(loaneeId, cohortId);
 
         BigDecimal runningTotal;
         if (lastRepayment == null || lastRepayment.getTotalAmountRepaid() == null) {
-            // No previous record: start fresh
             runningTotal = BigDecimal.ZERO;
         } else {
-            // Start from last known total
             runningTotal = lastRepayment.getTotalAmountRepaid();
         }
 
