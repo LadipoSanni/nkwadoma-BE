@@ -163,12 +163,13 @@ class LoanServiceTest {
         LoanReferral foundLoanReferral = new LoanReferral();
         try {
             userIdentity.setId(testId);
-            loanReferral.getCohortLoanee().setId(testId);
+            loanReferral.setLoaneeUserId(testId);
+            loanReferral.setCohortLoaneeId(testId);
             when(userIdentityOutputPort.findById(testId)).thenReturn(userIdentity);
             when(loanReferralOutputPort.
-                    findById(testId)).thenReturn(loanReferral);
+                    findLoanReferralById(testId)).thenReturn(Optional.ofNullable(loanReferral));
             when(loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(
-                    loanReferral.getCohortLoanee().getId())).thenReturn(List.of(TestData.createTestLoaneeLoanBreakdown(testId)));
+                    loanReferral.getCohortLoaneeId())).thenReturn(List.of(TestData.createTestLoaneeLoanBreakdown(testId)));
             foundLoanReferral = loanService.viewLoanReferral(testId,testId);
         } catch (MeedlException e) {
             log.error("Error getting loan referral", e);
@@ -184,7 +185,7 @@ class LoanServiceTest {
             loanReferral.getCohortLoanee().setId(testId);
             when(userIdentityOutputPort.findById(testId)).thenReturn(userIdentity1);
             when(loanReferralOutputPort.
-                    findById(testId)).thenReturn(loanReferral);
+                    findLoanReferralById(testId)).thenReturn(Optional.ofNullable(loanReferral));
             assertThrows(MeedlException.class, () ->  loanService.viewLoanReferral(testId,testId));
         } catch (MeedlException e) {
             log.error("Error getting loan referral", e);
