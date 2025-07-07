@@ -241,6 +241,7 @@ public class LoaneeService implements LoaneeUseCase {
         OrganizationIdentity organizationIdentity =
                 organizationIdentityOutputPort.findById(cohort.getOrganizationId());
         organizationIdentity.setNumberOfLoanees(organizationIdentity.getNumberOfLoanees() + size);
+        organizationIdentity.setStillInTraining(organizationIdentity.getStillInTraining() + size);
         organizationIdentity.setOrganizationEmployees(
                 organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId()));
         organizationIdentityOutputPort.save(organizationIdentity);
