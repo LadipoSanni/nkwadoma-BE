@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.loanmanagement.loancalculation;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loancalculation.LoanCalculationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.RepaymentHistoryOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanCalculationMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,8 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanCalculationMessages.PAYMENT_DATE_CANNOT_BE_NULL;
 
 @Slf4j
 @Component
@@ -33,12 +36,12 @@ public class LoanCalculationService implements LoanCalculationUseCase {
         for (RepaymentHistory repayment : repayments) {
             if (repayment == null) {
                 log.warn("Repayment history cannot be null, before sorting repayment by date.");
-                throw new MeedlException("Repayment history must be provided and not empty.");
+                throw new MeedlException(LoanCalculationMessages.REPAYMENT_HISTORY_MUST_BE_PROVIDED.getMessage());
             }
             log.info("Date of this repayment is : {}", repayment.getPaymentDateTime());
             if (repayment.getPaymentDateTime() == null) {
                 log.warn("Payment date cannot be null, before sorting repayment by date.");
-                throw new MeedlException("Payment date must be provided");
+                throw new MeedlException(LoanCalculationMessages.PAYMENT_DATE_CANNOT_BE_NULL.getMessage());
             }
         }
 

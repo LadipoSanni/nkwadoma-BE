@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanmanagement.loancalculation;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.RepaymentHistoryOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanCalculationMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import lombok.extern.slf4j.Slf4j;
@@ -73,7 +74,7 @@ public class LoanCalculationServiceTest {
         MeedlException exception = assertThrows(MeedlException.class,
                 () -> loanCalculation.sortRepaymentsByDateTimeDescending(repayments));
 
-        assertEquals("Repayment history cannot be null", exception.getMessage());
+        assertEquals(LoanCalculationMessages.REPAYMENT_HISTORY_MUST_BE_PROVIDED.getMessage(), exception.getMessage());
     }
 
     @Test
@@ -84,7 +85,7 @@ public class LoanCalculationServiceTest {
         MeedlException exception = assertThrows(MeedlException.class,
                 () -> loanCalculation.sortRepaymentsByDateTimeDescending(repayments));
 
-        assertEquals("Payment date cannot be null", exception.getMessage());
+        assertEquals(LoanCalculationMessages.PAYMENT_DATE_CANNOT_BE_NULL.getMessage(), exception.getMessage());
     }
 
     @Test
