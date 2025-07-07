@@ -54,7 +54,7 @@ public class LoanBookController {
         LoanBook loanBookReturned = loanBookUseCase.upLoadUserData(loanBook);
         LoanBookResponse loanBookResponse = new LoanBookResponse();
         loanBookResponse.setCohort(loanBookReturned.getCohort());
-        loanBookResponse.setLoanees(loanBookReturned.getLoanees());
+        loanBookResponse.setLoanees(loanBookReturned.getCohortLoanees());
         ApiResponse<LoanBookResponse> apiResponse = ApiResponse.<LoanBookResponse>builder()
                 .data(loanBookResponse)
                 .message(LOAN_BOOK_UPLOADED_SUCCESS)

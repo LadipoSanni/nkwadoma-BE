@@ -114,7 +114,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     @Override
     public Page<LoanProduct> search(String loanProductName, int pageSize, int pageNumber) throws MeedlException {
-        MeedlValidator.validateDataElement(loanProductName, "Loan product name is required");
+        MeedlValidator.validateDataElement(loanProductName, LoanMessages.LOAN_PRODUCT_NAME_REQUIRED.getMessage());
         return loanProductOutputPort.search(loanProductName,pageSize,pageNumber);
     }
 
@@ -122,7 +122,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     @Override
     public LoanProduct updateLoanProduct(LoanProduct loanProduct) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanProduct, LoanMessages.LOAN_PRODUCT_NAME_REQUIRED.getMessage());
+        MeedlValidator.validateObjectInstance(loanProduct, LoanMessages.LOAN_PRODUCT_REQUIRED.getMessage());
         MeedlValidator.validateUUID(loanProduct.getId(), LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
         LoanProduct foundLoanProduct = loanProductOutputPort.findById(loanProduct.getId());
         if (foundLoanProduct.getTotalNumberOfLoanee() > BigInteger.ZERO.intValue()) {

@@ -83,12 +83,12 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         log.info("Loan book read is {}", data);
 
         Cohort savedCohort = findCohort(loanBook.getCohort());
-        List<CohortLoanee> convertedLoanees = convertToLoanees(data, savedCohort, loanBook.getActorId());
-        log.info("Converted loanees size {}", convertedLoanees.size());
-//        validateStartDates(convertedLoanees, savedCohort);
-        loanBook.setLoanees(convertedLoanees);
+        List<CohortLoanee> convertedCohortLoanees = convertToLoanees(data, savedCohort, loanBook.getActorId());
+        log.info("Converted loanees size {}", convertedCohortLoanees.size());
+//        validateStartDates(convertedCohortLoanees, savedCohort);
+        loanBook.setCohortLoanees(convertedCohortLoanees);
         referCohort(loanBook);
-        updateLoaneeCount(savedCohort,convertedLoanees);
+        updateLoaneeCount(savedCohort,convertedCohortLoanees);
         completeLoanProcessing(loanBook);
     }
 
@@ -138,18 +138,18 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     }
 
     private void completeLoanProcessing(LoanBook loanBook) {
-        loanBook.getLoanees()
-                .forEach(loanee -> {
+        loanBook.getCohortLoanees()
+                .forEach(cohortLoanee -> {
                     try {
-                        log.info("Loanee with cohort name but is loan product name {}", loanee.getCohort().getName());
-                        log.info("Loan start date before processing start loan before accepting loan referral {}", loanee.getReferralDateTime());
+                        log.info("Loanee with cohort name but is loan product name {}", cohortLoanee.getCohort().getName());
+                        log.info("Loan start date before processing start loan before accepting loan referral {}", cohortLoanee.getReferralDateTime());
 
-                        LoanReferral loanReferral = acceptLoanReferral(loanee);
+                        LoanReferral loanReferral = acceptLoanReferral(cohortLoanee);
                         log.info("loan referral is {}", loanReferral);
-                        LoanRequest loanRequest = acceptLoanRequest(loanee, loanReferral, loanBook);
+                        LoanRequest loanRequest = acceptLoanRequest(cohortLoanee, loanReferral, loanBook);
                         log.info("loan request is {}", loanRequest);
                         acceptLoanOffer(loanRequest);
-                        startLoan(loanRequest,loanee.getUpdatedAt() );
+                        startLoan(loanRequest,cohortLoanee.getUpdatedAt() );
                     } catch (MeedlException e) {
                         log.error("Error accepting loan referral.",e);
                     }
@@ -187,7 +187,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                 .loanAmountRequested(loanee.getLoaneeLoanDetail().getAmountRequested())
                 .loanRequestDecision(LoanDecision.ACCEPTED)
                 .id(loanReferral.getId())
-                .loanProductId(findLoanProductIdByName(loanee.getCohort().getName()))
+                .loanProductId(findLoanProductIdByName(loanee.getLoanee().getLoanProductName()))
                 .actorId(loanBook.getActorId())
                 .referredBy(loanee.getReferredBy())
                 .createdDate(LocalDateTime.now())
@@ -213,10 +213,11 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
 
 
     private void referCohort(LoanBook loanBook) {
-        Iterator<CohortLoanee> iterator = loanBook.getLoanees().iterator();
+        Iterator<CohortLoanee> iterator = loanBook.getCohortLoanees().iterator();
         while (iterator.hasNext()) {
             CohortLoanee cohortLoanee = iterator.next();
             log.info("About to refer loanee with details {}", cohortLoanee);
+            log.info("Loan product name from cohort loanee at this point is  {}", cohortLoanee.getLoanee().getLoanProductName());
             log.info("About to refer loanee in cohort with loan details {}", cohortLoanee.getLoaneeLoanDetail());
             try {
                 inviteTrainee(cohortLoanee);
@@ -226,7 +227,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
             }
         }
 
-        log.info("Number of referable loanees :{} ",  loanBook.getLoanees().size());
+        log.info("Number of referable loanees :{} ",  loanBook.getCohortLoanees().size());
 //        asynchronousMailingOutputPort.notifyLoanReferralActors(loanBook.getLoanees());
     }
     private void inviteTrainee (CohortLoanee loanee) throws MeedlException {
@@ -335,7 +336,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     }
 
     List<CohortLoanee> convertToLoanees(List<Map<String, String>> data, Cohort cohort, String actorId) throws MeedlException {
-        List<CohortLoanee> loanees = new ArrayList<>();
+        List<CohortLoanee> cohortLoanees = new ArrayList<>();
 
         for (Map<String, String> row : data) {
             UserIdentity userIdentity = UserIdentity.builder()
@@ -367,7 +368,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                     .onboardingMode(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)
                     .uploadedStatus(UploadedStatus.ADDED)
                     .cohortId(cohort.getId())
-                    .cohortName(row.get("loanproduct"))
+                    .loanProductName(row.get("loanproduct"))
                     .updatedAt(parseFlexibleDateTime(row.get("loanstartdate"), row.get("email")))
                     .build();
 
@@ -380,18 +381,18 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                     .updatedAt(parseFlexibleDateTime(row.get("loanstartdate"), row.get("email")))
                     .build();
 
-            loanees.add(cohortLoanee);
+            cohortLoanees.add(cohortLoanee);
         }
         log.info("Validating the file field values.");
-        loanBookValidator.validateAllFileFields(loanees);
+        loanBookValidator.validateAllFileFields(cohortLoanees);
 
-        return savedData(loanees);
+        return savedData(cohortLoanees);
     }
 
-    private List<CohortLoanee> savedData(List<CohortLoanee> loanees){
+    private List<CohortLoanee> savedData(List<CohortLoanee> cohortLoanees){
         List<CohortLoanee> savedLoanees = new ArrayList<>();
-        log.info("Started saving converted data of loanees");
-        for (CohortLoanee cohortLoanee : loanees){
+        log.info("Started saving converted data of cohortLoanees");
+        for (CohortLoanee cohortLoanee : cohortLoanees){
             try {
                 UserIdentity userIdentity = identityManagerOutputPort.createUser(cohortLoanee.getLoanee().getUserIdentity());
                 userIdentityOutputPort.save(userIdentity);
@@ -403,16 +404,19 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                 Loanee savedLoanee = loaneeOutputPort.save(cohortLoanee.getLoanee());
 
                 log.info("saved loanee  == {} ",savedLoanee);
+                savedLoanee.setLoanProductName(cohortLoanee.getLoanee().getLoanProductName());
                 cohortLoanee.setLoanee(savedLoanee);
                 log.info("Loanee's actual loan details in file upload: {}", cohortLoanee.getLoaneeLoanDetail());
-                cohortLoanee = cohortLoaneeOutputPort.save(cohortLoanee);
-                savedLoanees.add(cohortLoanee);
+                CohortLoanee savedCohortLoanee = cohortLoaneeOutputPort.save(cohortLoanee);
+                savedCohortLoanee.getLoanee().setLoanProductName(cohortLoanee.getLoanee().getLoanProductName());
+                log.info("The loan product name after saving the cohort loanee is {}", savedCohortLoanee.getLoanee().getLoanProductName());
+                savedLoanees.add(savedCohortLoanee);
             } catch (MeedlException e) {
                 log.info("Error occurred while saving data .", e);
                 throw new RuntimeException(e);
             }
         }
-        log.info("Done saving loanee data from file to db. loanees size {}", savedLoanees.size());
+        log.info("Done saving loanee data from file to db. cohortLoanees size {}", savedLoanees.size());
         return savedLoanees;
     }
     private List<Map<String, String>> readFile(LoanBook loanBook, List<String> requiredHeaders) throws MeedlException {
@@ -523,6 +527,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                 continue;
             }
             if (!headerIndexMap.containsKey(required)) {
+                log.error("Missing required column {}, Provided headers are {}", required, headerIndexMap);
                 throw new LoanException("Missing required column: " + required);
             }
         }

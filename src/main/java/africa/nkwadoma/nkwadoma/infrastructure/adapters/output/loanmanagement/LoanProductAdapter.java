@@ -85,13 +85,14 @@ public class LoanProductAdapter implements LoanProductOutputPort {
 
     @Override
     public boolean existsByNameIgnoreCase(String name) throws MeedlException {
+        log.info("Does loan product with name {} exist on the platform", name);
         MeedlValidator.validateDataElement(name, LoanMessages.LOAN_PRODUCT_NAME_REQUIRED.getMessage());
         return loanProductEntityRepository.existsByNameIgnoreCase(name);
     }
 
     @Override
     public LoanProduct findById(String id) throws MeedlException {
-        MeedlValidator.validateUUID(id, LoanMessages.LOAN_PRODUCT_NAME_REQUIRED.getMessage());
+        MeedlValidator.validateUUID(id, LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
         LoanProductEntity entity = loanProductEntityRepository.findById(id).orElseThrow(()-> new LoanException("Loan product not found"));
         return loanProductMapper.mapEntityToLoanProduct(entity);
     }

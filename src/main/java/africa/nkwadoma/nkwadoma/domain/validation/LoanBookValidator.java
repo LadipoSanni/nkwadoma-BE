@@ -134,11 +134,12 @@ public class LoanBookValidator {
 
 
     private void validateLoanProductExist(Loanee loanee) throws MeedlException {
-        boolean loanProductExist = loanProductOutputPort.existsByNameIgnoreCase(loanee.getCohortName());
+        boolean loanProductExist = loanProductOutputPort.existsByNameIgnoreCase(loanee.getLoanProductName());
         if (!loanProductExist) {
             log.error("Loan Product with name {} does not exist for user with email {}", loanee.getCohortName(), loanee.getUserIdentity().getEmail());
             throw new MeedlException("Loan product with name " + loanee.getCohortName() + " does not exist for user with email "+ loanee.getUserIdentity().getEmail());
         }
+        log.info("Loan product exists with name {}", loanee.getLoanProductName());
     }
 
     public void validateDateTimeFormat(List<Map<String, String>> data, String dateName) throws MeedlException {
