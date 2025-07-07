@@ -89,18 +89,6 @@ public class RepaymentHistoryAdapterTest {
         ids.add(savedHistory.getId());
 
     }
-    private LocalDateTime roundUpToMicroseconds(LocalDateTime dateTime) {
-        int nano = dateTime.getNano();
-        int micro = (nano + 999) / 1000;
-        if (micro == 1_000_000) {
-            return dateTime.plusSeconds(1).withNano(0);
-        }
-        return dateTime.withNano(micro * 1000);
-    }
-    private LocalDateTime truncateToMicroseconds(LocalDateTime dateTime) {
-        int micro = dateTime.getNano() / 1000; // truncate (not round)
-        return dateTime.withNano(micro * 1000);
-    }
     private LocalDateTime roundToMicroseconds(LocalDateTime dateTime) {
         int nano = dateTime.getNano();
         int micro = (nano + 500) / 1000; // round to nearest microsecond

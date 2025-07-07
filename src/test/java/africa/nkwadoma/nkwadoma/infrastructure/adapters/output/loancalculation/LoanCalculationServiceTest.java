@@ -1,6 +1,5 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loancalculation;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loancalculation.LoanCalculationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loancalculation.LoanCalculationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanPeriodRecord;
