@@ -13,8 +13,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanCalculationMessages.PAYMENT_DATE_CANNOT_BE_NULL;
-
 @Slf4j
 @Component
 public class LoanCalculationService implements LoanCalculationUseCase {
@@ -63,6 +61,7 @@ public class LoanCalculationService implements LoanCalculationUseCase {
         repayments.get(0).setTotalAmountRepaid(totalRepaymentAmount);
         return totalRepaymentAmount;
     }
+    @Override
     public List<RepaymentHistory> accumulateTotalRepaid(
             List<RepaymentHistory> sortedRepayments,
             String loaneeId,
