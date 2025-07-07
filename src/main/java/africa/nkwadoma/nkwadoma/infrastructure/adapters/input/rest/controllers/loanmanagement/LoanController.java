@@ -240,12 +240,18 @@ public class LoanController {
 
 
     @GetMapping("/loanOffer/all")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('LOANEE')")
     public ResponseEntity<ApiResponse<?>> viewLoanOffers(@AuthenticationPrincipal Jwt meedlUser,
+                                                         @RequestParam(required = false) String organizationId ,
                                                          @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                                          @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
 
-        Page<LoanOffer> loanOffers = loanOfferUseCase.viewAllLoanOffers(meedlUser.getClaimAsString("sub"),pageSize,pageNumber);
+        LoanOffer loanOffer = new LoanOffer();
+        loanOffer.setUserId(meedlUser.getClaimAsString("sub"));
+                loanOffer.setOrganizationId(organizationId);
+        loanOffer.setPageNumber(pageNumber);
+        loanOffer.setPageSize(pageSize);
+        Page<LoanOffer> loanOffers = loanOfferUseCase.viewAllLoanOffers(loanOffer);
         List<AllLoanOfferResponse> loanOfferResponses =  loanOfferRestMapper.toLoanOfferResponses(loanOffers);
         PaginatedResponse<AllLoanOfferResponse> paginatedResponse = new PaginatedResponse<>(
                 loanOfferResponses,loanOffers.hasNext(),loanOffers.getTotalPages(),loanOffers.getTotalElements() ,pageNumber,pageSize
@@ -272,25 +278,6 @@ public class LoanController {
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
 
-
-    @GetMapping("/organization/view-all-loanOffers")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<ApiResponse<?>> viewAllLoanOffers(@RequestParam @NotBlank(message = "Organization ID is required") String organizationId ,
-                                                            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
-                                                            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
-
-        Page<LoanOffer> loanOffers = loanOfferUseCase.viewAllLoanOffersInOrganization(organizationId,pageSize,pageNumber);
-        List<AllLoanOfferResponse> loanOfferResponses =  loanOfferRestMapper.toLoanOfferResponses(loanOffers);
-        PaginatedResponse<AllLoanOfferResponse> paginatedResponse = new PaginatedResponse<>(
-                loanOfferResponses,loanOffers.hasNext(),loanOffers.getTotalPages(),loanOffers.getTotalElements() ,pageNumber,pageSize
-        );
-        ApiResponse<PaginatedResponse<AllLoanOfferResponse>> apiResponse = ApiResponse.<PaginatedResponse<AllLoanOfferResponse>>builder()
-                .data(paginatedResponse)
-                .message(ALL_LOAN_OFFERS)
-                .statusCode(HttpStatus.OK.toString())
-                .build();
-        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
-    }
 
     @GetMapping("/search-loan")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
