@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -88,10 +89,21 @@ public class RepaymentHistoryAdapter implements RepaymentHistoryOutputPort {
                         repaymentHistory.getLoaneeName(),pageable);
         return repaymentHistoryEntities.map(repaymentHistoryMapper::mapProjecttionToRepaymentHistory);
     }
-    @Override
-    public RepaymentHistory findLatestRepayment(String loaneeId, String cohortId) throws MeedlException {
+//    @Override
+    public RepaymentHistory findLatestRepayment2(String loaneeId, String cohortId) throws MeedlException {
         MeedlValidator.validateUUID(loaneeId, "Loanee ID cannot be null");
         MeedlValidator.validateUUID(cohortId, "Cohort ID cannot be null");
+
+        return repaymentHistoryRepository
+                .findTopByLoaneeIdAndCohortIdOrderByPaymentDateTimeDesc(loaneeId, cohortId)
+                .map(repaymentHistoryMapper::map)
+                .orElse(null);
+    }
+
+    @Override
+    public RepaymentHistory findLatestRepayment(String loaneeId, String cohortId) throws MeedlException {
+        MeedlValidator.validateUUID(loaneeId, "Please provide a valid Loanee ID ");
+        MeedlValidator.validateUUID(cohortId, "Please provide a valid Cohort ID.");
 
         return repaymentHistoryRepository
                 .findTopByLoaneeIdAndCohortIdOrderByPaymentDateTimeDesc(loaneeId, cohortId)
