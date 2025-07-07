@@ -173,10 +173,11 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
             Loanee loanee = loaneeOutputPort.findByLoaneeEmail(email);
             result.put(loanee.getId(), sortedRepayment);
         }
-
+        log.info("Repayment histories in map {}", result);
         return result;
     }
 
+    @Override
     public List<RepaymentHistory> getRepaymentsByEmail(List<RepaymentHistory> allRepayments, String email) {
         return allRepayments.stream()
                 .filter(rh -> {

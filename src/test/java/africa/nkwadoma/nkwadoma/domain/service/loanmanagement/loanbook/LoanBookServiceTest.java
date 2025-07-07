@@ -18,8 +18,10 @@ import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
+import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.VendorEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanProductVendorRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.VendorEntityRepository;
@@ -34,9 +36,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -197,6 +201,112 @@ public class LoanBookServiceTest {
 //        } catch (MeedlException e) {
 //            log.error("Error uploading repayment record book. {}", e.getMessage());
 //        }
+    }
+
+
+
+
+    @Test
+    void getAllRepaymentsMatchingSingleEmail() {
+        String email = "test@example.com";
+
+        RepaymentHistory match1 = createRepayment(UUID.randomUUID().toString(), email);
+        RepaymentHistory match2 = createRepayment(UUID.randomUUID().toString(), email);
+        RepaymentHistory nonMatch = createRepayment(UUID.randomUUID().toString(), "other@example.com");
+
+        List<RepaymentHistory> result = asynchronousLoanBookProcessingUseCase.getRepaymentsByEmail(
+                List.of(match1, match2, nonMatch), email
+        );
+
+        assertEquals(2, result.size());
+        assertTrue(result.contains(match1));
+        assertTrue(result.contains(match2));
+    }
+
+    @Test
+    void getEmptyListWhenEmailDoesntMatch() {
+        String email = "test@example.com";
+        RepaymentHistory nonMatch1 = createRepayment(UUID.randomUUID().toString(), "nope1@example.com");
+        RepaymentHistory nonMatch2 = createRepayment(UUID.randomUUID().toString(), "nope2@example.com");
+
+        List<RepaymentHistory> result = asynchronousLoanBookProcessingUseCase.getRepaymentsByEmail(
+                List.of(nonMatch1, nonMatch2), email
+        );
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void shouldSkipRepaymentWhenLoaneeIsNull() {
+        RepaymentHistory rh = RepaymentHistory.builder()
+                .id(UUID.randomUUID().toString())
+                .loanee(null)
+                .build();
+
+        List<RepaymentHistory> result = asynchronousLoanBookProcessingUseCase.getRepaymentsByEmail(
+                List.of(rh), "any@example.com"
+        );
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void shouldSkipRepaymentWhenUserIdentityIsNull() {
+        Loanee loanee = Loanee.builder().userIdentity(null).build();
+        RepaymentHistory rh = RepaymentHistory.builder()
+                .id(UUID.randomUUID().toString())
+                .loanee(loanee)
+                .build();
+
+        List<RepaymentHistory> result = asynchronousLoanBookProcessingUseCase.getRepaymentsByEmail(
+                List.of(rh), "any@example.com"
+        );
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void shouldSkipRepaymentWhenUserIdentityEmailIsNull() {
+        UserIdentity userIdentity = UserIdentity.builder().email(null).build();
+        Loanee loanee = Loanee.builder().userIdentity(userIdentity).build();
+        RepaymentHistory rh = RepaymentHistory.builder()
+                .id(UUID.randomUUID().toString())
+                .loanee(loanee)
+                .build();
+
+        List<RepaymentHistory> result = asynchronousLoanBookProcessingUseCase.getRepaymentsByEmail(
+                List.of(rh), "any@example.com"
+        );
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void returnsEmptyListWhenRepaymentHistoriesIsEmpty() {
+        List<RepaymentHistory> result = asynchronousLoanBookProcessingUseCase.getRepaymentsByEmail(
+                List.of(), "test@example.com"
+        );
+
+        assertTrue(result.isEmpty());
+    }
+
+    private RepaymentHistory createRepayment(String id, String email) {
+        UserIdentity userIdentity = UserIdentity.builder()
+                .id(id)
+                .email(email)
+                .build();
+
+        Loanee loanee = Loanee.builder()
+                .id(id)
+                .userIdentity(userIdentity)
+                .build();
+
+        return RepaymentHistory.builder()
+                .id(id)
+                .loanee(loanee)
+                .paymentDateTime(LocalDateTime.now())
+                .month(7)
+                .build();
     }
 
     @AfterAll
