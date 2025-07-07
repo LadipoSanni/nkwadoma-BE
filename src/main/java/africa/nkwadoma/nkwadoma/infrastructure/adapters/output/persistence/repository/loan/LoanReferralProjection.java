@@ -25,4 +25,5 @@ public interface LoanReferralProjection {
     LoanReferralStatus getStatus();
     String getEmail();
     String getUserId();
+    String getCohortLoaneeId();
 }

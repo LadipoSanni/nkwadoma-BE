@@ -274,28 +274,21 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     @Override
-    public LoanReferral viewLoanReferral(LoanReferral loanReferral) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanReferral, LoanMessages.LOAN_REFERRAL_CANNOT_BE_EMPTY.getMessage());
-        loanReferral.validateViewLoanReferral();
-        List<LoanReferral> foundLoanReferrals = loanReferralOutputPort.findLoanReferralByUserId(
-                loanReferral.getLoanee().getUserIdentity().getId());
-        if (foundLoanReferrals.isEmpty()) {
-            throw new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage());
-        } else if (foundLoanReferrals.size() > 1){
-            throw new LoanException(LoanMessages.MULTIPLE_LOAN_REFERRALS_IS_CURRENTLY_NOT_ALLOWED.getMessage());
-        } else {
-            return getLoanReferral(foundLoanReferrals);
+    public LoanReferral viewLoanReferral(String actorId, String loanReferralId) throws MeedlException {
+        MeedlValidator.validateUUID(actorId,UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateUUID(loanReferralId, LoanMessages.LOAN_REFERRAL_ID_MUST_NOT_BE_EMPTY.getMessage());
+        UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
+        LoanReferral loanReferral = loanReferralOutputPort.findLoanReferralById(loanReferralId)
+                .orElseThrow(() -> new ResourceNotFoundException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage()));
+        if (! userIdentity.getId().equals(loanReferral.getLoaneeUserId())){
+            log.info("User identity does not match cohort loanee user identity");
+            log.info("actor id {}", userIdentity.getId());
+            log.info("cohort loanee user identity id {}", loanReferral.getLoaneeUserId());
+            throw new LoanException(LoanMessages.LOAN_REFERRAL_NOT_ASSIGNED_TO_LOANEE.getMessage());
         }
-    }
-
-    private LoanReferral getLoanReferral(List<LoanReferral> foundLoanReferrals) throws MeedlException {
-        LoanReferral loanReferral = foundLoanReferrals.get(0);
-        MeedlValidator.validateObjectInstance(loanReferral, LoanMessages.LOAN_REFERRAL_CANNOT_BE_EMPTY.getMessage());
-        loanReferral = loanReferralOutputPort.findLoanReferralById(loanReferral.getId())
-                .orElseThrow(()->  new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage()));
-        log.info("Found Loan referral by it's ID: {}, is verified : {}", loanReferral.getId(), loanReferral.getLoanee().getUserIdentity().isIdentityVerified());
         List<LoaneeLoanBreakdown> loaneeLoanBreakdowns =
-                loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(loanReferral.getLoanee().getId());
+                loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(
+                        loanReferral.getCohortLoaneeId());
         log.info("Loanee loan breakdowns found from the DB : {}", loaneeLoanBreakdowns);
         loanReferral.setLoaneeLoanBreakdowns(loaneeLoanBreakdowns);
         log.info("Loanee loan breakdowns set to be returned: {}", loanReferral.getLoaneeLoanBreakdowns());

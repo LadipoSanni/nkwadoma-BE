@@ -442,10 +442,6 @@ public class LoaneeService implements LoaneeUseCase {
         loaneeEmailUsecase.sendLoaneeHasBeenReferEmail(userIdentity);
     }
 
-    private void refer(Loanee loanee) throws MeedlException {
-        loaneeEmailUsecase.referLoaneeEmail(loanee);
-    }
-
     @Override
     public Page<CohortLoanee> searchForLoaneeInCohort(Loanee loanee, int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validateUUID(loanee.getCohortId(), CohortMessages.INVALID_COHORT_ID.getMessage());
