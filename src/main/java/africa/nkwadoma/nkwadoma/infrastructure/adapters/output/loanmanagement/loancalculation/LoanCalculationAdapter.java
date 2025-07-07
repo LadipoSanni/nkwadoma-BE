@@ -135,6 +135,7 @@ public class LoanCalculationAdapter implements LoanCalculationOutputPort {
     @Override
     public BigDecimal calculateTotalRepayment(List<BigDecimal> monthlyRepayments) throws MeedlException {
         if (monthlyRepayments == null || monthlyRepayments.isEmpty()) {
+            log.warn("The monthly repayment list was empty. Returned zero. ");
             return decimalPlaceRoundUp(BigDecimal.ZERO);
         }
 
@@ -197,7 +198,7 @@ public class LoanCalculationAdapter implements LoanCalculationOutputPort {
         }
     }
 
-    private void validateAmount(BigDecimal amount, String name) throws MeedlException {
+    public void validateAmount(BigDecimal amount, String name) throws MeedlException {
         if (amount == null) {
             log.error( "{} must not be null. In validate amount", name);
             throw new MeedlException(name + " must not be null.");

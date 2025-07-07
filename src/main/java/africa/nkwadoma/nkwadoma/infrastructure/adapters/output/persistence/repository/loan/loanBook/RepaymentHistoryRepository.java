@@ -92,7 +92,6 @@ public interface RepaymentHistoryRepository extends JpaRepository<RepaymentHisto
             @Param("year") Integer year,
             @Param("name") String name,
             Pageable pageable);
-
     @Query("""
     SELECT r FROM RepaymentHistoryEntity r 
     WHERE r.loanee.id = :loaneeId AND r.cohortId = :cohortId 

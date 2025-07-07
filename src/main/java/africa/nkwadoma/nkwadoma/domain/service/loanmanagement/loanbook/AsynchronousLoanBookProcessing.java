@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.AsynchronousLoanBookProcessingUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.RepaymentHistoryUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loancalculation.LoanCalculationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
@@ -13,6 +14,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanReferralOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loancalculation.LoanCalculationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
@@ -46,6 +48,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -70,6 +73,8 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     private final CohortOutputPort cohortOutputPort;
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
     private final LoanReferralOutputPort loanReferralOutputPort;
+    private final LoanCalculationOutputPort loanCalculationOutputPort;
+    private final LoanCalculationUseCase loanCalculationUseCase;
 
     @Override
     public void upLoadUserData(LoanBook loanBook) throws MeedlException {
@@ -133,8 +138,66 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         repaymentRecordBook.setCohort(savedCohort);
         List<RepaymentHistory> convertedRepaymentHistories = convertToRepaymentHistory(data);
         repaymentRecordBook.setRepaymentHistories(convertedRepaymentHistories);
+
+        Set<String> loaneesThatMadePayment = getSetOfLoanees(convertedRepaymentHistories);
+        Map<String, List<RepaymentHistory>> mapOfRepaymentHistoriesForEachLoanee = getRepaymentHistoriesForLoanees(loaneesThatMadePayment, convertedRepaymentHistories);
+        processAccumulatedRepayments(mapOfRepaymentHistoriesForEachLoanee, repaymentRecordBook.getCohort().getId(), repaymentRecordBook);
         List<RepaymentHistory> savedRepaymentHistories = repaymentHistoryUseCase.saveCohortRepaymentHistory(repaymentRecordBook);
         log.info("Repayment record uploaded..");
+    }
+    public void processAccumulatedRepayments(
+            Map<String, List<RepaymentHistory>> mapOfRepaymentHistoriesForEachLoanee,
+            String cohortId,
+            LoanBook repaymentRecordBook) throws MeedlException {
+        for (Map.Entry<String, List<RepaymentHistory>> entry : mapOfRepaymentHistoriesForEachLoanee.entrySet()) {
+            String loaneeId = entry.getKey();
+            List<RepaymentHistory> sortedRepayments = entry.getValue();
+            sortedRepayments = loanCalculationUseCase.accumulateTotalRepaid(sortedRepayments, loaneeId, cohortId);
+            repaymentRecordBook.setRepaymentHistories(sortedRepayments);
+            List<RepaymentHistory> savedRepaymentHistories = repaymentHistoryUseCase.saveCohortRepaymentHistory(repaymentRecordBook);
+            log.info("repayment histories for loanee {} -- {}", loaneeId, savedRepaymentHistories);
+        }
+        log.info("Done processing accumulated repayments.");
+    }
+
+    public Map<String, List<RepaymentHistory>> getRepaymentHistoriesForLoanees(
+            Set<String> loaneeEmails,
+            List<RepaymentHistory> allRepayments
+    ) throws MeedlException {
+        Map<String, List<RepaymentHistory>> result = new HashMap<>();
+
+        for (String email : loaneeEmails) {
+            List<RepaymentHistory> sortedRepayment = loanCalculationUseCase
+                    .sortRepaymentsByDateTimeDescending(
+                            getRepaymentsByEmail(allRepayments, email));
+            Loanee loanee = loaneeOutputPort.findByLoaneeEmail(email);
+            result.put(loanee.getId(), sortedRepayment);
+        }
+
+        return result;
+    }
+
+    public List<RepaymentHistory> getRepaymentsByEmail(List<RepaymentHistory> allRepayments, String email) {
+        return allRepayments.stream()
+                .filter(rh -> {
+                    Loanee loanee = rh.getLoanee();
+                    return loanee != null &&
+                            loanee.getUserIdentity() != null &&
+                            email.equals(loanee.getUserIdentity().getEmail());
+                })
+                .collect(Collectors.toList());
+    }
+
+    private Set<String> getSetOfLoanees(List<RepaymentHistory> repaymentHistories) {
+        Set<String> repayingUserEmails = repaymentHistories.stream()
+                .map(RepaymentHistory::getLoanee)
+                .filter(Objects::nonNull)
+                .map(Loanee::getUserIdentity)
+                .filter(Objects::nonNull)
+                .map(UserIdentity::getEmail)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        return repayingUserEmails;
     }
 
     private void completeLoanProcessing(LoanBook loanBook) {

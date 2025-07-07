@@ -1,6 +1,5 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loancalculation;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loancalculation.LoanCalculationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loancalculation.LoanCalculationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanPeriodRecord;
@@ -22,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
-class LoanCalculationServiceTest {
+class LoanCalculationAdapterTest {
     @Autowired
     private LoanCalculationOutputPort calculator;
     private final BigDecimal ZERO = new BigDecimal("0.00");
@@ -337,12 +336,12 @@ class LoanCalculationServiceTest {
             log.error("",e);
         }
 
-        // For easy understanding.
-        // Interest = 10
-        // Interest / 365 = 10/363 = 0.0274
-        // Summation of Loan period record = ((1000*10) + (2000*5)) = (10000 + 10000) = 20000
-        // 0.0274 * 20000 = 547.94520
-        // Expected: (10 / 365) * ((1000*10) + (2000*5)) = (10 / 365) * (10000 + 10000) = (10 / 365) * 20000
+        //// For easy understanding.
+        //// Interest = 10
+        //// Interest / 365 = 10/363 = 0.0274
+        //// Summation of Loan period record = ((1000*10) + (2000*5)) = (10000 + 10000) = 20000
+        //// 0.0274 * 20000 = 547.94520
+        //// Expected: (10 / 365) * ((1000*10) + (2000*5)) = (10 / 365) * (10000 + 10000) = (10 / 365) * 20000
         BigDecimal expected = new BigDecimal("10")
                 .divide(new BigDecimal("365"), 8, RoundingMode.HALF_UP)
                 .multiply(new BigDecimal("20000"));
