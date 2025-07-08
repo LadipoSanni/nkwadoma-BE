@@ -15,6 +15,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanRequest;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
@@ -136,6 +137,12 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
 
     private void invite(Loanee loanee) throws MeedlException {
         loaneeEmailUsecase.inviteLoaneeEmail(loanee);
+    }
+
+    @Override
+    public void sendLoanRequestDecisionMail(LoanRequest loanRequest) throws MeedlException {
+        log.info("Sending loan request decision mail ...... {} ", loanRequest.getUserIdentity());
+        loaneeEmailUsecase.sendLoanRequestApprovalEmail(loanRequest);
     }
 
     private void emailInviteNonExistingFinancierToVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
