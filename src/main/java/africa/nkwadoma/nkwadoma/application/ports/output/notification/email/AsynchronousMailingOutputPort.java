@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanRequest;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import org.springframework.scheduling.annotation.Async;
 
@@ -23,4 +24,7 @@ public interface AsynchronousMailingOutputPort {
     void sendEmailToInvitedOrganization(UserIdentity userIdentity) throws MeedlException;
     @Async
     void sendLoaneeInvite(List<Loanee> loanees);
+
+    @Async
+    void sendLoanRequestDecisionMail(LoanRequest loanRequest) throws MeedlException;
 }
