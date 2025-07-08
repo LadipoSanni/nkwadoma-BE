@@ -128,8 +128,7 @@ public class LoanRequestService implements LoanRequestUseCase {
 
             updateNumberOfLoanRequestOnCohort(foundLoanRequest.getCohortId());
 
-            log.info("Loan request updated: {}", updatedLoanRequest);
-            loanRequest.setLoanee(foundLoanRequest.getLoanee());
+            log.info("Loan request updated: {}", updatedLoanRequest.getUserIdentity());
 
             sendNotification(loanRequest, loanOffer, updatedLoanRequest);
             return updatedLoanRequest;
@@ -175,7 +174,7 @@ public class LoanRequestService implements LoanRequestUseCase {
         MeedlNotification meedlNotification = buildUpLoanOfferNotification(loanOffer, updatedLoanRequest, userIdentity);
         log.info("is read before after building notification {}",meedlNotification.isRead());
         meedlNotificationUsecase.sendNotification(meedlNotification);
-        asynchronousMailingOutputPort.sendLoanRequestDecisionMail(loanRequest);
+        asynchronousMailingOutputPort.sendLoanRequestDecisionMail(updatedLoanRequest);
     }
 
     private static MeedlNotification buildUpLoanOfferNotification(LoanOffer loanOffer, LoanRequest updatedLoanRequest, UserIdentity userIdentity) {

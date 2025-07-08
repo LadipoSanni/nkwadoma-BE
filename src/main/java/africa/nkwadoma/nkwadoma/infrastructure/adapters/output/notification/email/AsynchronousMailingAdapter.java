@@ -141,7 +141,7 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
 
     @Override
     public void sendLoanRequestDecisionMail(LoanRequest loanRequest) throws MeedlException {
-        log.info("Sending loan request decision mail ...... ");
+        log.info("Sending loan request decision mail ...... {} ", loanRequest.getUserIdentity());
         loaneeEmailUsecase.sendLoanRequestApprovalEmail(loanRequest);
     }
 
