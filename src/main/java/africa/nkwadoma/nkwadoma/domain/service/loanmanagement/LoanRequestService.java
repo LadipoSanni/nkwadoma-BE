@@ -129,6 +129,8 @@ public class LoanRequestService implements LoanRequestUseCase {
             updateNumberOfLoanRequestOnCohort(foundLoanRequest.getCohortId());
 
             log.info("Loan request updated: {}", updatedLoanRequest);
+            loanRequest.setLoanee(foundLoanRequest.getLoanee());
+
             sendNotification(loanRequest, loanOffer, updatedLoanRequest);
             return updatedLoanRequest;
         }

@@ -182,7 +182,8 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
 
     private LoanReferral fetchLoanReferral(String loanReferralId) throws MeedlException {
         Optional<LoanReferral> loanReferral = loanReferralOutputPort.findLoanReferralById(loanReferralId);
-        log.info("Loanee referred : {}",loanReferral.get().getLoanee().getUserIdentity().getEmail());
+//        log.info("Loanee referred : {}",loanReferral.get().getLoanee().getUserIdentity().getEmail());
+        log.info("Loanee referred : {}",loanReferral);
         return loanReferral.get();
     }
 
