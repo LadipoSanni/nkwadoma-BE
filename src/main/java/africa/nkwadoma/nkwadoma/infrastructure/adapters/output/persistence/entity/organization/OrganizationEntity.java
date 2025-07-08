@@ -34,6 +34,7 @@ public class OrganizationEntity {
     private String updatedBy;
     private LocalDateTime timeUpdated;
     private int numberOfLoanees;
+    private int stillInTraining;
     private int numberOfCohort;
     private boolean isEnabled;
     @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
