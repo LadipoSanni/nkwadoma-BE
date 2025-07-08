@@ -436,9 +436,9 @@ class LoanServiceTest {
     void viewAllLoan(){
         Page<Loan> loans = Page.empty();
         try{
-            when(loanOutputPort.findAllLoan(pageSize,pageNumber))
+            when(loanOutputPort.findAllLoan(null, pageSize,pageNumber))
                     .thenReturn(new PageImpl<>(List.of(loan)));
-            loans = loanService.viewAllLoans(pageSize,pageNumber);
+            loans = loanService.viewAllLoans(null, pageSize,pageNumber);
         }catch (MeedlException e){
             log.error("Error viewing all loans: {}", e.getMessage());
         }
