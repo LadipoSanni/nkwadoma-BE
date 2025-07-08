@@ -297,10 +297,15 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     @Override
     public LoanReferral respondToLoanReferral(LoanReferral loanReferral) throws MeedlException {
+        log.info("---------> Loan referral userid from controller -----> {}", loanReferral.getLoaneeUserId());
         MeedlValidator.validateObjectInstance(loanReferral, LoanMessages.LOAN_REFERRAL_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(loanReferral.getId(), LoanMessages.INVALID_LOAN_REFERRAL_ID.getMessage());
-
         LoanReferral foundLoanReferral = loanReferralOutputPort.findById(loanReferral.getId());
+        log.info("---------> found Loan referral -----> {}", foundLoanReferral);
+        log.info("--------> found loan referral user id --->  {}", foundLoanReferral.getCohortLoanee().getLoanee().getUserIdentity().getId());
+        if (!loanReferral.getLoaneeUserId().equals(foundLoanReferral.getCohortLoanee().getLoanee().getUserIdentity().getId())) {
+            throw new LoanException("Loanee cannot respond on behalf of another loanee");
+        }
         log.info("Found Loan Referral: {}", foundLoanReferral);
         checkLoanReferralHasBeenAcceptedOrDeclined(foundLoanReferral);
         loanReferral.validateLoanReferralStatus();

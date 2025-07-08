@@ -11,6 +11,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
 import lombok.*;
 import lombok.extern.slf4j.*;
 import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.*;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.web.bind.annotation.*;
@@ -24,13 +25,17 @@ public class LoanReferralController {
     private final ViewLoanReferralsUseCase viewLoanReferralsUseCase;
     private final LoanReferralRestMapper loanReferralRestMapper;
 
+    @PreAuthorize("hasRole('LOANEE')")
     @PostMapping("loan-referrals/respond")
     public ResponseEntity<ApiResponse<?>> respondToLoanReferral
-            (@RequestBody LoanReferralResponseRequest request) throws MeedlException {
+            (@AuthenticationPrincipal Jwt meedlUser, @RequestBody LoanReferralResponseRequest request) throws MeedlException {
+        String userId = meedlUser.getClaimAsString("sub");
+        log.info("->>>>>>>>>>>>>> controller UserId -------->>>>> {}", userId);
         LoanReferral referral = new LoanReferral();
         referral.setId(request.getId());
         referral.setLoanReferralStatus(request.getLoanReferralStatus());
         referral.setReasonForDeclining(request.getReason());
+        referral.setLoaneeUserId(userId);
         log.info("Loan referral model: {}", referral);
         referral = respondToLoanReferralUseCase.respondToLoanReferral(referral);
         LoanReferralResponse loanReferralResponse = loanReferralRestMapper.toLoanReferralResponse(referral);
