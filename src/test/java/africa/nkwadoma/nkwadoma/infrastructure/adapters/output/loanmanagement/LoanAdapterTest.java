@@ -87,6 +87,7 @@ class LoanAdapterTest {
     private LoanOutputPort loanOutputPort;
     private Loan loan;
     private String loanId;
+    private final String organizationName = "Organization test1";
     int pageSize = 10;
     int pageNumber = 0;
 
@@ -98,7 +99,7 @@ class LoanAdapterTest {
             meedleUser = userIdentityOutputPort.save(meedleUser);
             employeeIdentity = TestData.createOrganizationEmployeeIdentityTestData(meedleUser);
             employeeIdentity = organizationEmployeeIdentityOutputPort.save(employeeIdentity);
-            organizationIdentity = TestData.createOrganizationTestData("Organization test1","RC3456891", List.of(employeeIdentity));
+            organizationIdentity = TestData.createOrganizationTestData(organizationName,"RC3456891", List.of(employeeIdentity));
             organizationIdentity = organizationIdentityOutputPort.save(organizationIdentity);
             userIdentity = TestData.createTestUserIdentity("loanee@grr.la");
             userIdentity.setRole(IdentityRole.LOANEE);
@@ -250,7 +251,7 @@ class LoanAdapterTest {
         }catch (MeedlException e){
             log.error("Error finding loan referral : {}", e.getMessage());
         }
-        assertEquals("Organization test1",referBy);
+        assertEquals(organizationName,referBy);
 
     }
 

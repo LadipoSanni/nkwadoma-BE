@@ -122,7 +122,9 @@ public class LoanAdapter implements LoanOutputPort {
     public String findLoanReferal(String id) throws MeedlException {
         MeedlValidator.validateUUID(id,"Loan id cannot be empty");
 
+        log.info("Find loan referrer by loan id {}", id);
         LoanProjection loanProjection = loanRepository.findLoanReferralByLoanId(id);
+        log.info("Found loan referrer by loan id {}", loanProjection);
 
         return loanProjection.getReferredBy();
     }
