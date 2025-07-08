@@ -5,7 +5,6 @@ import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.AsynchronousLoanBookProcessingUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.RepaymentHistoryUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loancalculation.LoanCalculationUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
@@ -14,8 +13,6 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanReferralOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loancalculation.LoanCalculationOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanDecision;
@@ -60,20 +57,16 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     private final IdentityManagerOutputPort identityManagerOutputPort;
     private final CohortUseCase cohortUseCase;
     private final LoanBookValidator loanBookValidator;
-    private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
     private final LoaneeUseCase loaneeUseCase;
     private final RespondToLoanReferralUseCase respondToLoanReferralUseCase;
-    private final ViewLoanReferralsUseCase viewLoanReferralsUseCase;
     private final CreateLoanProductUseCase createLoanProductUseCase;
     private final LoanRequestUseCase loanRequestUseCase;
     private final LoanOfferUseCase loanOfferUseCase;
     private final RepaymentHistoryUseCase repaymentHistoryUseCase;
-    private final AesOutputPort aesOutputPort;
     private final LoanProductOutputPort loanProductOutputPort;
     private final CohortOutputPort cohortOutputPort;
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
     private final LoanReferralOutputPort loanReferralOutputPort;
-    private final LoanCalculationOutputPort loanCalculationOutputPort;
     private final LoanCalculationUseCase loanCalculationUseCase;
 
     @Override
