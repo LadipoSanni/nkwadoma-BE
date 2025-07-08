@@ -233,7 +233,21 @@ class LoanAdapterTest {
 
         Page<Loan> loans = Page.empty();
         try{
-            loans = loanOutputPort.findAllLoan(pageSize,pageNumber);
+            loans = loanOutputPort.findAllLoan(null, pageSize,pageNumber);
+        }catch (MeedlException e){
+            log.error("Error finding loans : {}", e.getMessage());
+        }
+        assertNotNull(loans);
+        assertNotNull(loans.getContent());
+    }
+
+    @Test
+    @Order(6)
+    void findAllLoanDisbursalByOrganizationId(){
+
+        Page<Loan> loans = Page.empty();
+        try{
+            loans = loanOutputPort.findAllLoan(organizationIdentity.getId(), pageSize,pageNumber);
         }catch (MeedlException e){
             log.error("Error finding loans : {}", e.getMessage());
         }

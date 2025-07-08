@@ -264,6 +264,7 @@ public class LoanController {
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
 
+    //here
     @GetMapping("/view-loan-offer/{loanOfferId}")
     @PreAuthorize("hasRole('LOANEE') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewLoanOffer(@AuthenticationPrincipal Jwt meedlUser, @PathVariable @NotBlank(message = "LoanOffer ID is required")
@@ -309,10 +310,11 @@ public class LoanController {
 
     @GetMapping("/view-all-disbursal")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<ApiResponse<?>> viewAllDisbursedLoan(@RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+    public ResponseEntity<ApiResponse<?>> viewAllDisbursedLoan(@RequestParam(required = false) String organizationId,
+                                                               @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                                                @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
 
-        Page<Loan> loans = createLoanProductUseCase.viewAllLoans(pageSize,pageNumber);
+        Page<Loan> loans = createLoanProductUseCase.viewAllLoans(organizationId,pageSize,pageNumber);
         log.info("Mapped Loan responses: {}", loans.getContent().toArray());
         Page<LoanQueryResponse> loanResponses = loans.map(loanRestMapper::toLoanQueryResponse);
         log.info("Mapped Loan responses: {}", loanResponses.getContent().toArray());
