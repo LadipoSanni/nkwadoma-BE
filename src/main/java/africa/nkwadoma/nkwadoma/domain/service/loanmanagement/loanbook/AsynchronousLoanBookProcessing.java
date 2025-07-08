@@ -140,11 +140,21 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         repaymentRecordBook.setRepaymentHistories(convertedRepaymentHistories);
 
         Set<String> loaneesThatMadePayment = getSetOfLoanees(convertedRepaymentHistories);
+        log.info("Set of loanees that made payments size : {}, set",loaneesThatMadePayment.size());
         Map<String, List<RepaymentHistory>> mapOfRepaymentHistoriesForEachLoanee = getRepaymentHistoriesForLoanees(loaneesThatMadePayment, convertedRepaymentHistories);
+        printRepaymentCountsPerLoanee(mapOfRepaymentHistoriesForEachLoanee);
         processAccumulatedRepayments(mapOfRepaymentHistoriesForEachLoanee, repaymentRecordBook.getCohort().getId(), repaymentRecordBook);
-        List<RepaymentHistory> savedRepaymentHistories = repaymentHistoryUseCase.saveCohortRepaymentHistory(repaymentRecordBook);
         log.info("Repayment record uploaded..");
     }
+    public void printRepaymentCountsPerLoanee(Map<String, List<RepaymentHistory>> mapOfRepaymentHistoriesForEachLoanee) {
+        for (Map.Entry<String, List<RepaymentHistory>> entry : mapOfRepaymentHistoriesForEachLoanee.entrySet()) {
+            String loaneeId = entry.getKey();
+            int numberOfRepayments = entry.getValue() != null ? entry.getValue().size() : 0;
+
+            log.info("Loanee: {} | Repayments: {}", loaneeId, numberOfRepayments);
+        }
+    }
+
     public void processAccumulatedRepayments(
             Map<String, List<RepaymentHistory>> mapOfRepaymentHistoriesForEachLoanee,
             String cohortId,
@@ -173,10 +183,11 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
             Loanee loanee = loaneeOutputPort.findByLoaneeEmail(email);
             result.put(loanee.getId(), sortedRepayment);
         }
-
+        log.info("Repayment histories in map {}", result);
         return result;
     }
 
+    @Override
     public List<RepaymentHistory> getRepaymentsByEmail(List<RepaymentHistory> allRepayments, String email) {
         return allRepayments.stream()
                 .filter(rh -> {

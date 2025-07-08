@@ -125,8 +125,9 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
     }
 
     @Override
-    public void referLoaneeEmail(Loanee loanee) throws MeedlException {
-        Context context = emailOutputPort.getNameAndLinkContextAndIndustryName(getLink(loanee.getUserIdentity()),
+    public void referLoaneeEmail(String loanReferralId,Loanee loanee) throws MeedlException {
+        Context context = emailOutputPort.getNameAndLinkContextAndIndustryNameAndLoanReferralId(getLink(loanee.getUserIdentity()),
+                                                            loanReferralId,
                                                             loanee.getUserIdentity().getFirstName(),
                                                                 loanee.getReferredBy());
         Email email = Email.builder()
@@ -169,6 +170,21 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
                 .build();
 
         sendMail(loanRequest.getUserIdentity(), email);
+    }
+
+    @Override
+    public void inviteLoaneeEmail(Loanee loanee) throws MeedlException {
+        Context context = emailOutputPort.getNameAndLinkContextAndIndustryName(getLink(loanee.getUserIdentity()),
+                loanee.getUserIdentity().getFirstName(),
+                loanee.getReferredBy());
+        Email email = Email.builder()
+                .context(context)
+                .subject(LoaneeMessages.LOANEE_REFERRAL_SUBJECT.getMessage())
+                .to(loanee.getUserIdentity().getEmail())
+                .template(LoaneeMessages.LOANEE_REFERRAL.getMessage())
+                .firstName(loanee.getUserIdentity().getFirstName())
+                .build();
+        sendMail(loanee.getUserIdentity(), email);
     }
 
     @Override

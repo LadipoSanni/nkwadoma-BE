@@ -16,6 +16,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanRequest;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import lombok.AllArgsConstructor;
@@ -42,24 +43,24 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
 
     @Async
     @Override
-    public void notifyLoanReferralActors(List<Loanee> loanees,UserIdentity userIdentity){
-        loanees.forEach(loanee -> {
+    public void notifyLoanReferralActors(List<LoanReferral> loanReferrals,List<Loanee> loanees, UserIdentity userIdentity){
+        for (int loanee = 0; loanee < loanees.size(); loanee++) {
             try {
-
-                boolean previoslyReferred = cohortLoaneeOutputPort.checkIfLoaneeHasBeenPreviouslyReferred(loanee.getId());
+                boolean previoslyReferred = cohortLoaneeOutputPort.checkIfLoaneeHasBeenPreviouslyReferred(
+                        loanees.get(loanee).getId());
                 if (previoslyReferred){
-                    sendNotification(userIdentity, loanee);
+                    sendNotification(loanReferrals.get(loanee).getId(),userIdentity, loanees.get(loanee));
                 }else {
-                    refer(loanee);
+                    refer(loanReferrals.get(loanee).getId(),loanees.get(loanee));
                 }
                 notifyAllPortfolioManager();
             } catch (MeedlException e) {
                 log.warn("Error sending actor email on loan referral {}", e.getMessage());
             }
-        });
+        };
     }
 
-    private void sendNotification(UserIdentity userIdentity, Loanee loanee) throws MeedlException {
+    private void sendNotification(String loanReferralId,UserIdentity userIdentity, Loanee loanee) throws MeedlException {
         MeedlNotification meedlNotification = MeedlNotification.builder()
                 .user(loanee.getUserIdentity())
                 .title("Loan Referral")
@@ -69,7 +70,7 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
                 .senderMail(userIdentity.getEmail())
                 .senderFullName(userIdentity.getFirstName()+" "+ userIdentity.getLastName())
                 .callToAction(true)
-                .contentId(loanee.getLoanReferralId())
+                .contentId(loanReferralId)
                 .build();
         meedlNotificationOutputPort.save(meedlNotification);
     }
@@ -83,9 +84,10 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
         loaneeEmailUsecase.sendLoaneeHasBeenReferEmail(userIdentity);
     }
 
-    private void refer(Loanee loanee) throws MeedlException {
-        loaneeEmailUsecase.referLoaneeEmail(loanee);
+    private void refer(String loanReferralId,Loanee loanee) throws MeedlException {
+        loaneeEmailUsecase.referLoaneeEmail(loanReferralId,loanee);
     }
+
     @Async
     @Override
     public void sendFinancierEmail(List<Financier> financiersToMail, InvestmentVehicle investmentVehicle) {
@@ -125,12 +127,16 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
     public void sendLoaneeInvite(List<Loanee> loanees) {
         loanees.forEach(loanee -> {
             try {
-                refer(loanee);
+                invite(loanee);
                 notifyAllPortfolioManager();
             } catch (MeedlException e) {
                 log.warn("Error sending actor email on loan referral {}", e.getMessage());
             }
         });
+    }
+
+    private void invite(Loanee loanee) throws MeedlException {
+        loaneeEmailUsecase.inviteLoaneeEmail(loanee);
     }
 
     @Override
