@@ -30,7 +30,6 @@ public class LoanReferralController {
     public ResponseEntity<ApiResponse<?>> respondToLoanReferral
             (@AuthenticationPrincipal Jwt meedlUser, @RequestBody LoanReferralResponseRequest request) throws MeedlException {
         String userId = meedlUser.getClaimAsString("sub");
-        log.info("->>>>>>>>>>>>>> controller UserId -------->>>>> {}", userId);
         LoanReferral referral = new LoanReferral();
         referral.setId(request.getId());
         referral.setLoanReferralStatus(request.getLoanReferralStatus());
