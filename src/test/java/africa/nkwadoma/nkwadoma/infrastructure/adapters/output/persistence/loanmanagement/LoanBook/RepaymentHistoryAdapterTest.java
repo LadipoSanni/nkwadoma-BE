@@ -270,13 +270,74 @@ public class RepaymentHistoryAdapterTest {
                 repaymentHistoryOutputPort.findLatestRepayment(repaymentId, cohortId));
     }
 
+    @Order(9)
+    @Test
+    void findAllRepaymentHistoryForValidLoaneeAndCohort() throws MeedlException {
+        String cohortId = UUID.randomUUID().toString();
 
-   @AfterAll
+        RepaymentHistory firstRepayment = TestData
+                .buildRepaymentHistory(cohortId, "500.00", LocalDateTime.now().minusDays(3) );
+        firstRepayment.getLoanee().setId(loanee.getId());
+        firstRepayment.getLoanee().getUserIdentity().setId(userIdentity.getId());
+        firstRepayment = repaymentHistoryOutputPort.save(firstRepayment);
+        ids.add(firstRepayment.getId());
+
+        RepaymentHistory secondRepayment = TestData
+                .buildRepaymentHistory(cohortId, "800.00", LocalDateTime.now().minusDays(2));
+        secondRepayment.getLoanee().setId(loanee.getId());
+        secondRepayment.getLoanee().getUserIdentity().setId(userIdentity.getId());
+        secondRepayment = repaymentHistoryOutputPort.save(secondRepayment);
+        ids.add(secondRepayment.getId());
+
+        List<RepaymentHistory> found = repaymentHistoryOutputPort.findAllRepaymentHistoryForLoan(loanee.getId(), cohortId);
+
+        assertNotNull(found);
+        assertEquals(2, found.size());
+        assertTrue(found.get(0).getPaymentDateTime().isBefore(found.get(1).getPaymentDateTime()));
+    }
+    @Order(10)
+    @Test
+    void findAllRepaymentHistoryForValidLoaneeButInvalidCohort() throws MeedlException {
+        List<RepaymentHistory> result = repaymentHistoryOutputPort.findAllRepaymentHistoryForLoan(loanee.getId(), UUID.randomUUID().toString());
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+    @Order(11)
+    @Test
+    void findAllRepaymentHistoryWithInvalidUUID() {
+        String invalidUuid = "not-a-uuid";
+
+        assertThrows(MeedlException.class, () ->
+                repaymentHistoryOutputPort.findAllRepaymentHistoryForLoan(invalidUuid, invalidUuid));
+
+        assertThrows(MeedlException.class, () ->
+                repaymentHistoryOutputPort.findAllRepaymentHistoryForLoan(loanee.getId(), invalidUuid));
+    }
+    @Order(12)
+    @Test
+    void findAllRepaymentHistoryForLoaneeWithNoPayments() throws MeedlException {
+        UserIdentity userIdentity = TestData.createTestUserIdentity("userwithnorepyament@email.com", UUID.randomUUID().toString());
+        userIdentityOutputPort.save(userIdentity);
+        Loanee newLoanee = loaneeOutputPort.save(
+                TestData.createTestLoanee(userIdentity, loaneeLoanDetail)
+        );
+
+        List<RepaymentHistory> result = repaymentHistoryOutputPort.findAllRepaymentHistoryForLoan(newLoanee.getId(), UUID.randomUUID().toString());
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        loaneeOutputPort.deleteLoanee(newLoanee.getId());
+        userIdentityOutputPort.deleteUserById(userIdentity.getId());
+    }
+
+
+    @AfterAll
     void cleanUp() throws MeedlException {
         repaymentHistoryOutputPort.delete(repaymentId);
-        repaymentHistoryOutputPort.delete(ids.get(0));
-        repaymentHistoryOutputPort.delete(ids.get(1));
-        repaymentHistoryOutputPort.delete(ids.get(2));
+        for (String id : ids) {
+            repaymentHistoryOutputPort.delete(id);
+        }
         loaneeOutputPort.deleteLoanee(loanee.getId());
         userIdentityOutputPort.deleteUserById(userIdentity.getId());
         loaneeLoanDetailsOutputPort.delete(loaneeLoanDetail.getId());

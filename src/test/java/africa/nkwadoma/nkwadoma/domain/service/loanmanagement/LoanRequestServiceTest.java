@@ -10,6 +10,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputP
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
@@ -48,6 +49,8 @@ class LoanRequestServiceTest {
     private LoanRequestOutputPort loanRequestOutputPort;
     @Mock
     private LoanProductOutputPort loanProductOutputPort;
+    @Mock
+    private AsynchronousMailingOutputPort asynchronousMailingOutputPort;
     @Mock
     private LoaneeUseCase loaneeUseCase;
     @Mock
@@ -225,7 +228,7 @@ class LoanRequestServiceTest {
             assertEquals(LoanRequestStatus.APPROVED, response.getStatus());
             assertEquals(new BigDecimal("5000"), response.getLoanAmountApproved());
             verify(meedlNotificationUsecase).sendNotification(any(MeedlNotification.class));
-
+            verify(asynchronousMailingOutputPort).sendLoanRequestDecisionMail(any(LoanRequest.class));
 
         } catch (MeedlException e) {
             log.error("Exception occurred saving loan request ", e);

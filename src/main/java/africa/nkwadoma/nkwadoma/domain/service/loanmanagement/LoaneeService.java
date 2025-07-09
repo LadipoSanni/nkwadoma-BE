@@ -241,6 +241,7 @@ public class LoaneeService implements LoaneeUseCase {
         OrganizationIdentity organizationIdentity =
                 organizationIdentityOutputPort.findById(cohort.getOrganizationId());
         organizationIdentity.setNumberOfLoanees(organizationIdentity.getNumberOfLoanees() + size);
+        organizationIdentity.setStillInTraining(organizationIdentity.getStillInTraining() + size);
         organizationIdentity.setOrganizationEmployees(
                 organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId()));
         organizationIdentityOutputPort.save(organizationIdentity);
@@ -440,10 +441,6 @@ public class LoaneeService implements LoaneeUseCase {
     }
     private void notifyPortfolioManager(UserIdentity userIdentity) throws MeedlException {
         loaneeEmailUsecase.sendLoaneeHasBeenReferEmail(userIdentity);
-    }
-
-    private void refer(Loanee loanee) throws MeedlException {
-        loaneeEmailUsecase.referLoaneeEmail(loanee);
     }
 
     @Override

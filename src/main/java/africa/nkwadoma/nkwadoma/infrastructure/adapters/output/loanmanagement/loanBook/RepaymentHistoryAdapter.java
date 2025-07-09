@@ -1,6 +1,9 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement.loanBook;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.RepaymentHistoryOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.repayment.RepaymentMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.RepaymentHIstoryException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
@@ -17,8 +20,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -29,7 +33,7 @@ public class RepaymentHistoryAdapter implements RepaymentHistoryOutputPort {
 
     @Override
     public RepaymentHistory save(RepaymentHistory repaymentHistory) throws MeedlException {
-        MeedlValidator.validateObjectInstance(repaymentHistory,"RepaymentHistory cannot be empty");
+        MeedlValidator.validateObjectInstance(repaymentHistory, RepaymentMessages.REPAYMENT_CANNOT_BE_NULL.getMessage());
         repaymentHistory.validate();
         log.info("Repayment history before mapping to entity in adapter {}", repaymentHistory);
         RepaymentHistoryEntity repaymentHistoryEntity = repaymentHistoryMapper.map(repaymentHistory);
@@ -42,7 +46,7 @@ public class RepaymentHistoryAdapter implements RepaymentHistoryOutputPort {
     @Override
 
     public void delete(String repaymentId) throws MeedlException {
-        MeedlValidator.validateUUID(repaymentId,"RepaymentId cannot be empty");
+        MeedlValidator.validateUUID(repaymentId,RepaymentMessages.INVALID_REPAYMENT_ID_PROVIDED.getMessage());
         repaymentHistoryRepository.deleteById(repaymentId);
     }
 
@@ -91,8 +95,8 @@ public class RepaymentHistoryAdapter implements RepaymentHistoryOutputPort {
     }
 //    @Override
     public RepaymentHistory findLatestRepayment2(String loaneeId, String cohortId) throws MeedlException {
-        MeedlValidator.validateUUID(loaneeId, "Loanee ID cannot be null");
-        MeedlValidator.validateUUID(cohortId, "Cohort ID cannot be null");
+        MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+        MeedlValidator.validateUUID(cohortId, CohortMessages.INVALID_COHORT_ID.getMessage());
 
         return repaymentHistoryRepository
                 .findTopByLoaneeIdAndCohortIdOrderByPaymentDateTimeDesc(loaneeId, cohortId)
@@ -102,13 +106,25 @@ public class RepaymentHistoryAdapter implements RepaymentHistoryOutputPort {
 
     @Override
     public RepaymentHistory findLatestRepayment(String loaneeId, String cohortId) throws MeedlException {
-        MeedlValidator.validateUUID(loaneeId, "Please provide a valid Loanee ID ");
-        MeedlValidator.validateUUID(cohortId, "Please provide a valid Cohort ID.");
+        MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+        MeedlValidator.validateUUID(cohortId, CohortMessages.INVALID_COHORT_ID.getMessage());
 
         return repaymentHistoryRepository
                 .findTopByLoaneeIdAndCohortIdOrderByPaymentDateTimeDesc(loaneeId, cohortId)
                 .map(repaymentHistoryMapper::map)
                 .orElse(null);
+    }
+
+    @Override
+    public List<RepaymentHistory> findAllRepaymentHistoryForLoan(String loaneeId, String cohortId) throws MeedlException {
+        MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+        MeedlValidator.validateUUID(cohortId, CohortMessages.INVALID_COHORT_ID.getMessage());
+
+        return repaymentHistoryRepository
+                .findAllByLoanee_IdAndCohortIdOrderByPaymentDateTimeAsc(loaneeId, cohortId)
+                .stream()
+                .map(repaymentHistoryMapper::map)
+                .collect(Collectors.toList());
     }
 
 }

@@ -40,10 +40,10 @@ public class EmailResendAdapter implements EmailResendUseCase {
         log.info("All found loan referral for chron job {}", allLoanReferral);
         for (LoanReferral loanReferral : allLoanReferral){
             try {
-                LoanReferral foundLoanReferral = viewLoanReferralsUseCase.viewLoanReferral(loanReferral);
+                LoanReferral foundLoanReferral = loanReferralOutputPort.findById(loanReferral.getId());
                 log.info("Loan referral viewed {}", foundLoanReferral);
-                refer(loanReferral.getLoanee(), foundLoanReferral.getId());
-                log.info("Loanee has been referred. {}", loanReferral.getLoanee().getUserIdentity().getEmail());
+                refer(loanReferral.getCohortLoanee().getLoanee(), foundLoanReferral.getId());
+                log.info("Loanee has been referred. {}", loanReferral.getCohortLoanee().getLoanee().getUserIdentity().getEmail());
             }catch (MeedlException e){
                 log.error("A terrible error occurred while trying to resend referral email.",e);
             }

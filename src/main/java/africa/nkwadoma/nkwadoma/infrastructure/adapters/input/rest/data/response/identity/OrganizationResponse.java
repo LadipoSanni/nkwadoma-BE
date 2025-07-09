@@ -29,6 +29,7 @@ public class OrganizationResponse {
     private ActivationStatus status;
     private String createdBy;
     private int numberOfLoanees;
+    private int stillInTraining;
     private int numberOfCohort;
     private int loanRequestCount;
     private int loanDisbursalCount;

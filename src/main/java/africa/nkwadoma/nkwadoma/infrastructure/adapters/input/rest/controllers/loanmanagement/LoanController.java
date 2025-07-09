@@ -175,6 +175,7 @@ public class LoanController {
         loan.setLoaneeId(loaneeId);
         loan.setLoanOfferId(loanOfferId);
         loan = createLoanProductUseCase.startLoan(loan);
+        log.info("---> Loan object from controller---.> {}", loan);
         StartLoanResponse startLoanResponse = loanProductMapper.toStartLoanResponse(loan);
         ApiResponse<StartLoanResponse> apiResponse = ApiResponse.<StartLoanResponse>builder()
                 .data(startLoanResponse)
@@ -182,41 +183,6 @@ public class LoanController {
                 .statusCode(HttpStatus.OK.name())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-    }
-
-    @GetMapping("/loan-disbursals")
-    @Operation(summary = "View all loan disbursals by organization ID")
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",
-                    description = "Loan disbursals retrieved", content = {
-                    @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = LoanQueryResponse.class))
-            }),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",
-                    description = "Organization not found"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400",
-                    description = "Invalid organization ID provided")
-    })
-    public ResponseEntity<ApiResponse<PaginatedResponse<LoanQueryResponse>>>
-    viewAllLoansByOrganizationId(@Valid @RequestParam(name = "organizationId") @Parameter(description = "id of organization to be searched")
-                                 @NotBlank(message = "Organization ID is required") String organizationId,
-                                 @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
-                                 @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
-        Loan loan = Loan.builder().organizationId(organizationId).pageNumber(pageNumber).pageSize(pageSize).build();
-        Page<Loan> loans = createLoanProductUseCase.viewAllLoansByOrganizationId(loan);
-        log.info("Mapped Loan responses: {}", loans.getContent().toArray());
-        Page<LoanQueryResponse> loanResponses = loans.map(loanRestMapper::toLoanQueryResponse);
-        log.info("Mapped Loan responses: {}", loanResponses.getContent().toArray());
-        PaginatedResponse<LoanQueryResponse> paginatedResponse =
-                PaginatedResponse.<LoanQueryResponse>builder()
-                        .body(loanResponses.getContent())
-                        .pageSize(pageSize)
-                        .pageNumber(pageNumber)
-                        .totalPages(loanResponses.getTotalPages())
-                        .hasNextPage(loanResponses.hasNext())
-                        .build();
-        return ResponseEntity.ok(new ApiResponse<>
-                (SuccessMessages.LOAN_DISBURSALS_RETURNED_SUCCESSFULLY, paginatedResponse, HttpStatus.OK.name(), LocalDateTime.now()));
     }
 
     @PostMapping("/accept/loan-offer")
@@ -309,10 +275,11 @@ public class LoanController {
 
     @GetMapping("/view-all-disbursal")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<ApiResponse<?>> viewAllDisbursedLoan(@RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+    public ResponseEntity<ApiResponse<?>> viewAllDisbursedLoan(@RequestParam(required = false) String organizationId,
+                                                               @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                                                @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
 
-        Page<Loan> loans = createLoanProductUseCase.viewAllLoans(pageSize,pageNumber);
+        Page<Loan> loans = createLoanProductUseCase.viewAllLoans(organizationId,pageSize,pageNumber);
         log.info("Mapped Loan responses: {}", loans.getContent().toArray());
         Page<LoanQueryResponse> loanResponses = loans.map(loanRestMapper::toLoanQueryResponse);
         log.info("Mapped Loan responses: {}", loanResponses.getContent().toArray());
