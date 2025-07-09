@@ -70,8 +70,7 @@ public class LoanAdapter implements LoanOutputPort {
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.name());
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validatePageNumber(pageNumber);
-        Page<LoanProjection> loanProjectionPage = loanRepository.findAllByOrganizationId
-                (organizationId, PageRequest.of(pageNumber, pageSize));
+        Page<LoanProjection> loanProjectionPage = loanRepository.findAllLoanInOrganization(organizationId, PageRequest.of(pageNumber, pageSize));
         if (loanProjectionPage.isEmpty()) {
             log.info("Empty page returned");
             return Page.empty();
@@ -100,7 +99,7 @@ public class LoanAdapter implements LoanOutputPort {
         MeedlValidator.validatePageNumber(pageNumber);
         Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
         Page<LoanProjection> loanProjectionPage =
-                loanRepository.findAllLoan(organizationId, pageRequest);
+                loanRepository.findAllLoan(pageRequest);
         Page<Loan> loans =  loanProjectionPage.map(loanMapper::mapProjectionToLoan);
         return loans;
     }
