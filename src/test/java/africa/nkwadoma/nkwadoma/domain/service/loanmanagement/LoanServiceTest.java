@@ -107,17 +107,9 @@ class LoanServiceTest {
         LoaneeLoanDetail loaneeLoanDetail = TestData.createTestLoaneeLoanDetail();
         loanee = TestData.createTestLoanee(userIdentity, loaneeLoanDetail);
         loaneeLoanAccount = TestData.createLoaneeLoanAccount(LoanStatus.AWAITING_DISBURSAL, AccountStatus.NEW, loanee.getId());
-
-        loanReferral = LoanReferral.builder().id(testId).loanee(loanee).
-                loanReferralStatus(LoanReferralStatus.ACCEPTED).build();
         LoanProduct loanProduct = TestData.buildTestLoanProduct();
 
-        loanRequest = TestData.buildLoanRequest(testId);
-        loanRequest.setLoaneeId(loanee.getId());
-        loanRequest.setId(loanReferral.getId());
-        loanRequest.setLoanProductId(loanProduct.getId());
-        loanRequest.setReferredBy(organizationIdentity.getName());
-        loanRequest.setCreatedDate(LocalDateTime.now());
+
 
         loanMetrics = LoanMetrics.builder()
                 .organizationId(organizationIdentity.getId())
@@ -131,13 +123,25 @@ class LoanServiceTest {
         cohort = TestData.createCohortData("elites",testId,testId,List.of(new LoanBreakdown()),testId);
 
         cohortLoanee = TestData.buildCohortLoanee(loanee,cohort,loaneeLoanDetail,testId);
+        loanReferral = LoanReferral.builder().id(testId)
+                .loanee(loanee)
+                .loanReferralStatus(LoanReferralStatus.ACCEPTED)
+                .loaneeUserId(testId)
+                .cohortLoanee(cohortLoanee)
+                .build();
 
-        loanReferral.setCohortLoanee(cohortLoanee);
+        loanRequest = TestData.buildLoanRequest(testId);
+        loanRequest.setLoaneeId(loanee.getId());
+        loanRequest.setId(loanReferral.getId());
+        loanRequest.setLoanProductId(loanProduct.getId());
+        loanRequest.setReferredBy(organizationIdentity.getName());
+        loanRequest.setCreatedDate(LocalDateTime.now());
 
         investmentVehicle = TestData.buildInvestmentVehicle("vehicle");
         cohortLoanDetail = TestData.buildCohortLoanDetail(cohort);
         organizationLoanDetail = TestData.buildOrganizationLoanDetail(organizationIdentity);
         programLoanDetail = TestData.buildProgramLoanDetail(Program.builder().id(testId).build());
+
     }
 
     @Test
@@ -285,7 +289,9 @@ class LoanServiceTest {
 
     @Test
     void acceptNullLoanReferral() {
-        assertThrows(MeedlException.class, ()-> loanService.respondToLoanReferral(null));
+        loanReferral.setLoanReferralStatus(null);
+        loanReferral.setCohortLoanee(cohortLoanee);
+        assertThrows(MeedlException.class, ()-> loanService.respondToLoanReferral(loanReferral));
     }
 
     @Test

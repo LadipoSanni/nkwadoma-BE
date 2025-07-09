@@ -144,7 +144,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         LoanOffer loanOffer = loanOfferOutputPort.findLoanOfferById(loan.getLoanOfferId());
         log.info("-----> Loan offer ----> {}", loanOffer);
         if (loanOffer.getLoaneeResponse() == null) {
-            log.info("Loanee response is null ");
+            log.info("Loanee response is null");
             throw new LoanException("Loanee response is null");
         }
         if (loanOffer.getLoaneeResponse().equals(LoanDecision.DECLINED)){
@@ -309,16 +309,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     @Override
     public LoanReferral respondToLoanReferral(LoanReferral loanReferral) throws MeedlException {
-        log.info("---------> Loan referral userid from controller -----> {}", loanReferral.getLoaneeUserId());
         MeedlValidator.validateObjectInstance(loanReferral, LoanMessages.LOAN_REFERRAL_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(loanReferral.getId(), LoanMessages.INVALID_LOAN_REFERRAL_ID.getMessage());
         LoanReferral foundLoanReferral = loanReferralOutputPort.findById(loanReferral.getId());
-        log.info("---------> found Loan referral -----> {}", foundLoanReferral);
-        log.info("--------> found loan referral user id --->  {}", foundLoanReferral.getCohortLoanee().getLoanee().getUserIdentity().getId());
-        if (!loanReferral.getLoaneeUserId().equals(foundLoanReferral.getCohortLoanee().getLoanee().getUserIdentity().getId())) {
-            throw new LoanException("Loanee cannot respond on behalf of another loanee");
-        }
-        log.info("Found Loan Referral: {}", foundLoanReferral);
+        if (foundLoanReferral == null) throw new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage());
         checkLoanReferralHasBeenAcceptedOrDeclined(foundLoanReferral);
         loanReferral.validateLoanReferralStatus();
 
