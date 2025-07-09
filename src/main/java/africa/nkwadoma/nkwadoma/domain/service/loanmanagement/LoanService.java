@@ -138,11 +138,13 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     @Override
     public Loan startLoan(Loan loan) throws MeedlException {
+        log.info("------> loan---> {}", loan);
         MeedlValidator.validateObjectInstance(loan, LoanMessages.LOAN_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(loan.getLoaneeId(), LoaneeMessages.PLEASE_PROVIDE_A_VALID_LOANEE_IDENTIFICATION.getMessage());
         Loanee foundLoanee = loaneeOutputPort.findLoaneeById(loan.getLoaneeId());
         LoanOffer loanOffer = loanOfferOutputPort.findLoanOfferById(loan.getLoanOfferId());
         log.info("-----> Loan offer ----> {}", loanOffer);
+        log.info("-----> offer response ----> {}", loanOffer.getLoaneeResponse());
         if (loanOffer.getLoaneeResponse() == null) {
             log.info("Loanee response is null");
             throw new LoanException("Loanee response is null");

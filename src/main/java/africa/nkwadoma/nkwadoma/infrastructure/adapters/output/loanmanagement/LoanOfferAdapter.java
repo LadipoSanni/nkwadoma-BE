@@ -49,6 +49,7 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
         if (ObjectUtils.isEmpty(loanOfferProjection)) {
             throw new LoanException(LoanMessages.LOAN_OFFER_NOT_FOUND.getMessage());
         }
+        log.info("---->loan offer projection: {}", loanOfferProjection);
         return loanOfferMapper.mapProjectionToLoanOffer(loanOfferProjection);
     }
 
