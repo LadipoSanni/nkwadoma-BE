@@ -96,13 +96,42 @@ public class LoanCalculationServiceTest {
                 createRepayment(LocalDateTime.of(2025, 3, 1, 10, 0), new BigDecimal("5000"))
         );
 
-        when(repaymentHistoryOutputPort.findLatestRepayment(loaneeId, cohortId)).thenReturn(null);
-
         List<RepaymentHistory> updated = loanCalculation.accumulateTotalRepaid(repayments, loaneeId, cohortId);
         log.info("Updated repayment history in test after both sorting \n {}", updated);
         assertEquals(new BigDecimal("5000"), updated.get(0).getTotalAmountRepaid());
         assertEquals(new BigDecimal("7000"), updated.get(1).getTotalAmountRepaid());
         assertEquals(new BigDecimal("8000"), updated.get(2).getTotalAmountRepaid());
     }
+
+    @Test
+    void accumulateTotalRepaidWithPreviousRepayments() throws MeedlException {
+        List<RepaymentHistory> previousRepayments = new ArrayList<>(List.of(
+                createRepayment(LocalDateTime.of(2025, 1, 1, 10, 0), new BigDecimal("1000")),
+                createRepayment(LocalDateTime.of(2025, 2, 1, 10, 0), new BigDecimal("2000"))
+        ));
+
+        List<RepaymentHistory> newRepayments = new ArrayList<>(List.of(
+                createRepayment(LocalDateTime.of(2025, 3, 1, 10, 0), new BigDecimal("3000")),
+                createRepayment(LocalDateTime.of(2025, 4, 1, 10, 0), new BigDecimal("4000"))
+        ));
+
+        when(repaymentHistoryOutputPort.findAllRepaymentHistoryForLoan(loaneeId, cohortId))
+                .thenReturn(previousRepayments);
+
+        List<RepaymentHistory> updated = loanCalculation.accumulateTotalRepaid(newRepayments, loaneeId, cohortId);
+
+        assertEquals(4, updated.size());
+
+        assertEquals(new BigDecimal("4000"), updated.get(0).getAmountPaid());
+        assertEquals(new BigDecimal("3000"), updated.get(1).getAmountPaid());
+        assertEquals(new BigDecimal("2000"), updated.get(2).getAmountPaid());
+        assertEquals(new BigDecimal("1000"), updated.get(3).getAmountPaid());
+
+        assertEquals(new BigDecimal("4000"), updated.get(0).getTotalAmountRepaid());
+        assertEquals(new BigDecimal("7000"), updated.get(1).getTotalAmountRepaid());
+        assertEquals(new BigDecimal("9000"), updated.get(2).getTotalAmountRepaid());
+        assertEquals(new BigDecimal("10000"), updated.get(3).getTotalAmountRepaid());
+    }
+
 
 }

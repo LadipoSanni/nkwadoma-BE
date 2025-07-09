@@ -5,7 +5,6 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanCalculationMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -72,11 +71,11 @@ public class LoanCalculationService implements LoanCalculationUseCase {
             return Collections.emptyList();
         }
 
-        RepaymentHistory lastRepayment = repaymentHistoryOutputPort.findLatestRepayment(loaneeId, cohortId);
+//        RepaymentHistory lastRepayment = repaymentHistoryOutputPort.findLatestRepayment(loaneeId, cohortId);
+        List<RepaymentHistory> previousRepaymentHistory = repaymentHistoryOutputPort.findAllRepaymentHistoryForLoan(loaneeId, cohortId);
 
         BigDecimal runningTotal = BigDecimal.ZERO;;
-        if (lastRepayment != null) {
-            List<RepaymentHistory> previousRepaymentHistory = repaymentHistoryOutputPort.findAllRepaymentHistoryForLoan(loaneeId, cohortId);
+        if (previousRepaymentHistory != null && !previousRepaymentHistory.isEmpty()) {
             repaymentHistories = combinePreviousAndNewRepaymentHistory(previousRepaymentHistory, repaymentHistories);
         }
         repaymentHistories = sortRepaymentsByDateTimeDescending(repaymentHistories);
