@@ -180,7 +180,7 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
            cle.referredBy as referredBy
     
           FROM LoanEntity lo
-          join LoanOfferEntity loo on lo.id = lo.id
+          join LoanOfferEntity loo on lo.id = lo.loanOfferId
           join LoanReferralEntity lfe on lfe.id = loo.id
           join CohortLoaneeEntity cle on cle.id = lfe.cohortLoanee.id
           where lo.id = :loanId

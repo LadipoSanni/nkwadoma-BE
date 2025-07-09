@@ -34,6 +34,8 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages.LOAN_DECISION;
+
 @RequiredArgsConstructor
 @Slf4j
 @EnableAsync
@@ -147,7 +149,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         log.info("-----> offer response ----> {}", loanOffer.getLoaneeResponse());
         if (loanOffer.getLoaneeResponse() == null) {
             log.info("Loanee response is null");
-            throw new LoanException("Loanee response is null");
+            throw new LoanException(LOAN_DECISION.getMessage());
         }
         if (loanOffer.getLoaneeResponse().equals(LoanDecision.DECLINED)){
             throw new LoanException(LoanMessages.CANNOT_START_LOAN_FOR_LOAN_OFFER_THAT_AS_BEEN_DECLINED.getMessage());
