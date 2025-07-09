@@ -176,14 +176,14 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
 
 
     @Query("""
-    SELECT DISTINCT lo.id AS id,
-           cle.referredBy as referredBy
-    
-          FROM LoanEntity lo
-          join LoanOfferEntity loo on lo.id = lo.loanOfferId
-          join LoanReferralEntity lfe on lfe.id = loo.id
-          join CohortLoaneeEntity cle on cle.id = lfe.cohortLoanee.id
-          where lo.id = :loanId
+    SELECT lo.id AS id,
+           cle.referredBy AS referredBy
+    FROM LoanEntity lo
+    JOIN LoanOfferEntity loo ON loo.id = lo.loanOfferId
+    JOIN LoanRequestEntity lr ON lr.id = loo.id
+    JOIN LoanReferralEntity lfe ON lfe.id = lr.id
+    JOIN CohortLoaneeEntity cle ON cle.id = lfe.cohortLoanee.id
+    WHERE lo.id = :loanId
     """)
     LoanProjection findLoanReferralByLoanId(@Param("loanId") String loanId);
 }
