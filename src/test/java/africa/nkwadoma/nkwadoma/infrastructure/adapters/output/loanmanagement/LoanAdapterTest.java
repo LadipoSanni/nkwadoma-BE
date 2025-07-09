@@ -243,7 +243,7 @@ class LoanAdapterTest {
     }
 
     @Test
-    @Order(6)
+    @Order(5)
     void findAllLoanDisbursalByOrganizationId(){
 
         Page<Loan> loans = Page.empty();
@@ -257,7 +257,7 @@ class LoanAdapterTest {
     }
 
     @Test
-    @Order(5)
+    @Order(6)
     void findLoanReferralByLoanId() {
         String referBy = "";
         try {
@@ -267,6 +267,20 @@ class LoanAdapterTest {
         }
         assertEquals(organizationName,referBy);
 
+    }
+
+    @Test
+    @Order(7)
+    void findAllLoanDisbursedToALoaneeByUserId(){
+
+        Page<Loan> loans = Page.empty();
+        try{
+            loans = loanOutputPort.findAllLoanDisburedToLoanee(userIdentity.getId(), pageSize,pageNumber);
+        }catch (MeedlException e){
+            log.error("Error finding loans : {}", e.getMessage());
+        }
+        assertNotNull(loans);
+        assertNotNull(loans.getContent());
     }
 
     @AfterAll
