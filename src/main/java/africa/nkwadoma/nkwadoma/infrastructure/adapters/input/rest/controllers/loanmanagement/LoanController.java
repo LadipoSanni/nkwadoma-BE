@@ -175,6 +175,7 @@ public class LoanController {
         loan.setLoaneeId(loaneeId);
         loan.setLoanOfferId(loanOfferId);
         loan = createLoanProductUseCase.startLoan(loan);
+        log.info("---> Loan object from controller---.> {}", loan);
         StartLoanResponse startLoanResponse = loanProductMapper.toStartLoanResponse(loan);
         ApiResponse<StartLoanResponse> apiResponse = ApiResponse.<StartLoanResponse>builder()
                 .data(startLoanResponse)
