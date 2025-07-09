@@ -116,7 +116,7 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           join ProgramEntity p on c.programId = p.id
           join OrganizationEntity o on p.organizationIdentity.id = o.id
     """)
-    Page<LoanProjection> findAllLoan(@Param("organizationId") String organizationId, Pageable pageRequest);
+    Page<LoanProjection> findAllLoan(Pageable pageRequest);
 
     @Query("""
           select
@@ -140,7 +140,7 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           join OrganizationEntity o on p.organizationIdentity.id = o.id
           where o.id = :organizationId
     """)
-    Page<LoanProjection> findAllLoanInOrganization(Pageable pageRequest);
+    Page<LoanProjection> findAllLoanInOrganization(@Param("organizationId") String organizationId, Pageable pageRequest);
 
     @Query("""
     SELECT lo.id AS id,
