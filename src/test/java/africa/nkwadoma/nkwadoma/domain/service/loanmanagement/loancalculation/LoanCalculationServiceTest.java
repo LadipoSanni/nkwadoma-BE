@@ -51,7 +51,7 @@ public class LoanCalculationServiceTest {
                 createRepayment(LocalDateTime.of(2025, 6, 2, 12, 0), new BigDecimal("200"))
         ));
 
-        List<RepaymentHistory> sorted = loanCalculation.sortRepaymentsByDateTimeDescending(repayments);
+        List<RepaymentHistory> sorted = loanCalculation.sortRepaymentsByDateTimeAscending(repayments);
 
         assertEquals(new BigDecimal("300"), sorted.get(0).getAmountPaid());
         assertEquals(new BigDecimal("200"), sorted.get(1).getAmountPaid());
@@ -60,7 +60,7 @@ public class LoanCalculationServiceTest {
 
     @Test
     void sortRepaymentsWithNull() throws MeedlException {
-        List<RepaymentHistory> result = loanCalculation.sortRepaymentsByDateTimeDescending(null);
+        List<RepaymentHistory> result = loanCalculation.sortRepaymentsByDateTimeAscending(null);
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
@@ -72,7 +72,7 @@ public class LoanCalculationServiceTest {
         repayments.add(null);
 
         MeedlException exception = assertThrows(MeedlException.class,
-                () -> loanCalculation.sortRepaymentsByDateTimeDescending(repayments));
+                () -> loanCalculation.sortRepaymentsByDateTimeAscending(repayments));
 
         assertEquals(LoanCalculationMessages.REPAYMENT_HISTORY_MUST_BE_PROVIDED.getMessage(), exception.getMessage());
     }
@@ -83,7 +83,7 @@ public class LoanCalculationServiceTest {
         List<RepaymentHistory> repayments = List.of(badRepayment);
 
         MeedlException exception = assertThrows(MeedlException.class,
-                () -> loanCalculation.sortRepaymentsByDateTimeDescending(repayments));
+                () -> loanCalculation.sortRepaymentsByDateTimeAscending(repayments));
 
         assertEquals(LoanCalculationMessages.PAYMENT_DATE_CANNOT_BE_NULL.getMessage(), exception.getMessage());
     }

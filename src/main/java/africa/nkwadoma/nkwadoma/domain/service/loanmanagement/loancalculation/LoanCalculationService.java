@@ -22,7 +22,7 @@ public class LoanCalculationService implements LoanCalculationUseCase {
     private final RepaymentHistoryOutputPort repaymentHistoryOutputPort;
 
     @Override
-    public List<RepaymentHistory> sortRepaymentsByDateTimeDescending(List<RepaymentHistory> repayments) throws MeedlException {
+    public List<RepaymentHistory> sortRepaymentsByDateTimeAscending(List<RepaymentHistory> repayments) throws MeedlException {
         log.info("Started the sorting ");
         if (repayments == null) {
             log.warn("Repayments was null in the sorting method");
@@ -42,7 +42,7 @@ public class LoanCalculationService implements LoanCalculationUseCase {
             }
         }
 
-        mutableRepayments.sort(Comparator.comparing(RepaymentHistory::getPaymentDateTime).reversed());
+        mutableRepayments.sort(Comparator.comparing(RepaymentHistory::getPaymentDateTime));
 
         return mutableRepayments;
     }
@@ -78,7 +78,7 @@ public class LoanCalculationService implements LoanCalculationUseCase {
         if (previousRepaymentHistory != null && !previousRepaymentHistory.isEmpty()) {
             repaymentHistories = combinePreviousAndNewRepaymentHistory(previousRepaymentHistory, repaymentHistories);
         }
-        repaymentHistories = sortRepaymentsByDateTimeDescending(repaymentHistories);
+        repaymentHistories = sortRepaymentsByDateTimeAscending(repaymentHistories);
 
 
         for (RepaymentHistory repayment : repaymentHistories) {
