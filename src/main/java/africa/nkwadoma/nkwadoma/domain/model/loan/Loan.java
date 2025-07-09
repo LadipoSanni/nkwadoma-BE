@@ -47,6 +47,7 @@ public class Loan {
     private String programName;
     private String referredBy;
     private String organizationId;
+    private String cohortLoaneeId;
     private int pageNumber;
     private int pageSize;
 

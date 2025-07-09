@@ -19,20 +19,21 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
                  cle.loaneeLoanDetail.amountRequested as loanAmountRequested, lr.createdDate as createdDate, lr.status as status,
                  l.userIdentity.gender as gender, l.userIdentity.maritalStatus as maritalStatus,
                  l.userIdentity.dateOfBirth as dateOfBirth, l.userIdentity.residentialAddress as residentialAddress, l.userIdentity.nationality as nationality,
-                 l.userIdentity.stateOfOrigin as stateOfOrigin, l.userIdentity.stateOfResidence as stateOfResidence
+                 l.userIdentity.stateOfOrigin as stateOfOrigin, l.userIdentity.stateOfResidence as stateOfResidence,
+                 cle.id as cohortLoaneeId
 
           from LoanEntity le
-          join LoanOfferEntity lo on lo.id = le.id
+          join LoanOfferEntity lo on lo.id = le.loanOfferId
           join LoanReferralEntity lfe on lfe.id = lo.id
           join CohortLoaneeEntity cle on cle.id = lfe.cohortLoanee.id
           join LoaneeEntity l on l.id = cle.loanee.id
-          join UserEntity  u on l.userIdentity.id = u.id
+          join UserEntity  u on u.id = l.userIdentity.id
           join LoanRequestEntity lr on lr.id = lfe.id
-          join LoanOfferEntity loe on l.id = lr.id
-          join CohortEntity c on cle.cohort.id = c.id
-          join ProgramEntity p on c.programId = p.id
-          left join NextOfKinEntity n on u.nextOfKinEntity.id = n.id
-          join OrganizationEntity o on p.organizationIdentity.id = o.id
+          join LoanOfferEntity loe on loe.id = lr.id
+          join CohortEntity c on c.id = cle.cohort.id
+          join ProgramEntity p on p.id = c.programId
+          left join NextOfKinEntity n on n.id = u.nextOfKinEntity.id
+          join OrganizationEntity o on o.id = p.organizationIdentity.id
           where le.id = :id
     """)
     Optional<LoanProjection> findLoanById(@Param("id") String id);
@@ -110,11 +111,11 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           join LoanOfferEntity loe on loe.id = le.loanOfferId
           join LoanRequestEntity lr on lr.id = loe.id
           join LoanReferralEntity lfe on lfe.id = lr.id
-          join CohortLoaneeEntity cle on cle.loanee.id = lfe.cohortLoanee.id
+          join CohortLoaneeEntity cle on cle.id = lfe.cohortLoanee.id
           join LoaneeEntity l on l.id = cle.loanee.id
-          join CohortEntity c on cle.cohort.id = c.id
-          join ProgramEntity p on c.programId = p.id
-          join OrganizationEntity o on p.organizationIdentity.id = o.id
+          join CohortEntity c on c.id = cle.cohort.id
+          join ProgramEntity p on p.id = c.programId
+          join OrganizationEntity o on o.id = p.organizationIdentity.id
     """)
     Page<LoanProjection> findAllLoan(Pageable pageRequest);
 
