@@ -41,5 +41,6 @@ public interface LoanMapper {
     @Mapping(target = "userIdentity.alternateContactAddress", source = "alternateContactAddress")
     @Mapping(target = "loanAmountRequested", source = "loanAmountRequested")
     @Mapping(target = "status", source = "status")
+    @Mapping(target = "cohortLoaneeId", source = "cohortLoaneeId")
     Loan mapProjectionToLoan(LoanProjection loanProjection);
 }

@@ -252,7 +252,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
                 orElseThrow(()-> new LoanException(LoanMessages.LOAN_NOT_FOUND.getMessage()));
         log.info("Found loan {}", foundLoan);
         List<LoaneeLoanBreakdown> loaneeLoanBreakdowns =
-                loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(foundLoan.getLoaneeId());
+                loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(foundLoan.getCohortLoaneeId());
         log.info("Loanee loan breakdowns returned: {}", loaneeLoanBreakdowns);
         foundLoan.setLoaneeLoanBreakdowns(loaneeLoanBreakdowns);
         return foundLoan;
