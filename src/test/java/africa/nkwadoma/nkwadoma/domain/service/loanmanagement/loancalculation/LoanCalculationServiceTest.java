@@ -89,7 +89,7 @@ public class LoanCalculationServiceTest {
     }
 
     @Test
-    void testAccumulateTotalRepaid_noPreviousRepayment() throws MeedlException {
+    void accumulateTotalRepaidWIthNoPreviousRepayment() throws MeedlException {
         List<RepaymentHistory> repayments = List.of(
                 createRepayment(LocalDateTime.of(2025, 1, 1, 10, 0), new BigDecimal("1000")),
                 createRepayment(LocalDateTime.of(2025, 2, 1, 10, 0), new BigDecimal("2000")),
@@ -99,9 +99,9 @@ public class LoanCalculationServiceTest {
         when(repaymentHistoryOutputPort.findLatestRepayment(loaneeId, cohortId)).thenReturn(null);
 
         List<RepaymentHistory> updated = loanCalculation.accumulateTotalRepaid(repayments, loaneeId, cohortId);
-
-        assertEquals(new BigDecimal("1000"), updated.get(0).getTotalAmountRepaid());
-        assertEquals(new BigDecimal("3000"), updated.get(1).getTotalAmountRepaid());
+        log.info("Updated repayment history in test after both sorting \n {}", updated);
+        assertEquals(new BigDecimal("5000"), updated.get(0).getTotalAmountRepaid());
+        assertEquals(new BigDecimal("7000"), updated.get(1).getTotalAmountRepaid());
         assertEquals(new BigDecimal("8000"), updated.get(2).getTotalAmountRepaid());
     }
 

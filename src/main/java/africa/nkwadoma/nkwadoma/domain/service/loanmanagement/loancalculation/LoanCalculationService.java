@@ -29,9 +29,9 @@ public class LoanCalculationService implements LoanCalculationUseCase {
             log.warn("Repayments was null in the sorting method");
             return Collections.emptyList();
         }
-
-        log.info("Repayments are not empty and the sorting has started. The number of the repayment is :{}", repayments.size());
-        for (RepaymentHistory repayment : repayments) {
+        List<RepaymentHistory> mutableRepayments = new ArrayList<>(repayments);
+        log.info("The repayment list before sorting {} \n --------------------------------------------    Repayments are not empty and the sorting has started. The number of the repayment is :{}",mutableRepayments, repayments.size());
+        for (RepaymentHistory repayment : mutableRepayments) {
             if (repayment == null) {
                 log.warn("Repayment history cannot be null, before sorting repayment by date.");
                 throw new MeedlException(LoanCalculationMessages.REPAYMENT_HISTORY_MUST_BE_PROVIDED.getMessage());
@@ -43,9 +43,9 @@ public class LoanCalculationService implements LoanCalculationUseCase {
             }
         }
 
-        repayments.sort(Comparator.comparing(RepaymentHistory::getPaymentDateTime).reversed());
+        mutableRepayments.sort(Comparator.comparing(RepaymentHistory::getPaymentDateTime).reversed());
 
-        return repayments;
+        return mutableRepayments;
     }
     public BigDecimal calculateTotalAmountRepaid(List<RepaymentHistory> repayments) throws MeedlException {
         if (repayments == null || repayments.isEmpty()) {
@@ -91,6 +91,7 @@ public class LoanCalculationService implements LoanCalculationUseCase {
             runningTotal = runningTotal.add(repayment.getAmountPaid());
             repayment.setTotalAmountRepaid(runningTotal);
         }
+        log.info("The repayment histories after adding up total amount repaid");
 
         return repaymentHistories;
     }
