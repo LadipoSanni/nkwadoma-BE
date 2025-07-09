@@ -144,7 +144,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         LoanOffer loanOffer = loanOfferOutputPort.findLoanOfferById(loan.getLoanOfferId());
         log.info("-----> Loan offer ----> {}", loanOffer);
         if (loanOffer.getLoaneeResponse() == null) {
-            log.info("Loanee response is null {}");
+            log.info("Loanee response is null ");
             throw new LoanException("Loanee response is null");
         }
         if (loanOffer.getLoaneeResponse().equals(LoanDecision.DECLINED)){
