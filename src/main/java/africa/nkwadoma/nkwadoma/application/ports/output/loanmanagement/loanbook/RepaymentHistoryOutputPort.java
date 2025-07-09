@@ -4,6 +4,8 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
+
 public interface RepaymentHistoryOutputPort {
     RepaymentHistory save(RepaymentHistory repaymentHistory) throws MeedlException;
 
@@ -18,4 +20,6 @@ public interface RepaymentHistoryOutputPort {
     Page<RepaymentHistory> searchRepaymemtHistoryByLoaneeName(RepaymentHistory repaymentHistory, int pageSize, int pageNumber) throws MeedlException;
 
     RepaymentHistory findLatestRepayment(String loaneeId, String cohortId) throws MeedlException;
+
+    List<RepaymentHistory> findAllRepaymentHistoryForLoan(String loaneeId, String cohortId) throws MeedlException;
 }

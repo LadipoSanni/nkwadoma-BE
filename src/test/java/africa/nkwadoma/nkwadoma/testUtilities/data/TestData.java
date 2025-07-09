@@ -633,6 +633,18 @@ public class TestData {
                 .paymentDateTime(LocalDateTime.now())
                 .build();
     }
+    public static RepaymentHistory buildRepaymentHistory(String cohortId, String amountPaid, LocalDateTime paymentTime) {
+        return RepaymentHistory.builder()
+                .modeOfPayment(ModeOfPayment.CASH)
+                .amountPaid(new BigDecimal(amountPaid))
+                .amountOutstanding(BigDecimal.valueOf(20322))
+                .cohort(Cohort.builder().id(cohortId).build())
+                .loanee(Loanee.builder()
+                        .userIdentity(UserIdentity.builder().email(TestUtils.generateEmail(7)).build())
+                        .build())
+                .paymentDateTime(paymentTime)
+                .build();
+    }
 
     public static CohortLoanee buildCohortLoanee(Loanee loanee, Cohort cohort,LoaneeLoanDetail loaneeLoanDetail,String createdBy) {
         return CohortLoanee.builder()

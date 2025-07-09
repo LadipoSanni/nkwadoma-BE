@@ -5,22 +5,22 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanCalculationMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
+@RequiredArgsConstructor
 @Component
 public class LoanCalculationService implements LoanCalculationUseCase {
     private final RepaymentHistoryOutputPort repaymentHistoryOutputPort;
-
-    public LoanCalculationService(RepaymentHistoryOutputPort repaymentHistoryOutputPort) {
-        this.repaymentHistoryOutputPort = repaymentHistoryOutputPort;
-    }
 
     @Override
     public List<RepaymentHistory> sortRepaymentsByDateTimeDescending(List<RepaymentHistory> repayments) throws MeedlException {
@@ -63,35 +63,47 @@ public class LoanCalculationService implements LoanCalculationUseCase {
     }
     @Override
     public List<RepaymentHistory> accumulateTotalRepaid(
-            List<RepaymentHistory> sortedRepayments,
+            List<RepaymentHistory> repaymentHistories,
             String loaneeId,
             String cohortId
     ) throws MeedlException {
 
-        if (sortedRepayments == null || sortedRepayments.isEmpty()) {
+        if (repaymentHistories == null || repaymentHistories.isEmpty()) {
             return Collections.emptyList();
         }
 
         RepaymentHistory lastRepayment = repaymentHistoryOutputPort.findLatestRepayment(loaneeId, cohortId);
 
-        BigDecimal runningTotal;
-        if (lastRepayment == null || lastRepayment.getTotalAmountRepaid() == null) {
-            runningTotal = BigDecimal.ZERO;
-        } else {
-            runningTotal = lastRepayment.getTotalAmountRepaid();
+        BigDecimal runningTotal = BigDecimal.ZERO;;
+        if (lastRepayment != null) {
+            List<RepaymentHistory> previousRepaymentHistory = repaymentHistoryOutputPort.findAllRepaymentHistoryForLoan(loaneeId, cohortId);
+            repaymentHistories = combinePreviousAndNewRepaymentHistory(previousRepaymentHistory, repaymentHistories);
         }
+        repaymentHistories = sortRepaymentsByDateTimeDescending(repaymentHistories);
 
-        for (RepaymentHistory repayment : sortedRepayments) {
-            if (repayment.getAmountPaid() == null) {
-                throw new MeedlException("Repayment amount cannot be null");
+
+        for (RepaymentHistory repayment : repaymentHistories) {
+            if (repayment == null || repayment.getAmountPaid() == null) {
+                log.error("Repayment does not have amount paid ---- {}", repayment);
+                throw new MeedlException("Repayment amount must be provided.");
             }
 
             runningTotal = runningTotal.add(repayment.getAmountPaid());
             repayment.setTotalAmountRepaid(runningTotal);
         }
 
-        return sortedRepayments;
+        return repaymentHistories;
     }
+    public static List<RepaymentHistory> combinePreviousAndNewRepaymentHistory(
+            List<RepaymentHistory> previousRepaymentHistories,
+            List<RepaymentHistory> newRepaymentHistories
+    ) {
+        List<RepaymentHistory> mergedList = new ArrayList<>(previousRepaymentHistories.size() + newRepaymentHistories.size());
+        mergedList.addAll(previousRepaymentHistories);
+        mergedList.addAll(newRepaymentHistories);
+        return mergedList;
+    }
+
 
 
     private static void validationForCalculatingTotalAmountRepaid(RepaymentHistory repayment) throws MeedlException {

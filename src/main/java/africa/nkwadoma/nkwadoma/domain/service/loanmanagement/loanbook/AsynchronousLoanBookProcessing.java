@@ -161,9 +161,9 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
             LoanBook repaymentRecordBook) throws MeedlException {
         for (Map.Entry<String, List<RepaymentHistory>> entry : mapOfRepaymentHistoriesForEachLoanee.entrySet()) {
             String loaneeId = entry.getKey();
-            List<RepaymentHistory> sortedRepayments = entry.getValue();
-            sortedRepayments = loanCalculationUseCase.accumulateTotalRepaid(sortedRepayments, loaneeId, cohortId);
-            repaymentRecordBook.setRepaymentHistories(sortedRepayments);
+            List<RepaymentHistory> repaymentHistories = entry.getValue();
+            repaymentHistories = loanCalculationUseCase.accumulateTotalRepaid(repaymentHistories, loaneeId, cohortId);
+            repaymentRecordBook.setRepaymentHistories(repaymentHistories);
             List<RepaymentHistory> savedRepaymentHistories = repaymentHistoryUseCase.saveCohortRepaymentHistory(repaymentRecordBook);
             log.info("repayment histories for loanee {} -- {}", loaneeId, savedRepaymentHistories);
         }
@@ -177,11 +177,14 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         Map<String, List<RepaymentHistory>> result = new HashMap<>();
 
         for (String email : loaneeEmails) {
-            List<RepaymentHistory> sortedRepayment = loanCalculationUseCase
-                    .sortRepaymentsByDateTimeDescending(
-                            getRepaymentsByEmail(allRepayments, email));
+            List<RepaymentHistory> repaymentHistories =
+//                    loanCalculationUseCase
+//                    .sortRepaymentsByDateTimeDescending(
+                            getRepaymentsByEmail(allRepayments, email)
+//            )
+            ;
             Loanee loanee = loaneeOutputPort.findByLoaneeEmail(email);
-            result.put(loanee.getId(), sortedRepayment);
+            result.put(loanee.getId(), repaymentHistories);
         }
         log.info("Repayment histories in map {}", result);
         return result;
