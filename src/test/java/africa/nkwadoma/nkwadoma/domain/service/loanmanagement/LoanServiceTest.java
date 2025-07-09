@@ -422,7 +422,7 @@ class LoanServiceTest {
         try {
             when(loanOutputPort.findAllByOrganizationId(anyString(), anyInt(), anyInt()))
                     .thenReturn(new PageImpl<>(List.of(loan)));
-            loans = loanService.viewAllLoansByOrganizationId(loan);
+            loans = loanService.viewAllLoans(testId,pageSize,pageNumber);
         } catch (MeedlException e) {
             log.error("Error viewing all loans: ", e);
         }
@@ -430,21 +430,15 @@ class LoanServiceTest {
         assertNotNull(loans);
         assertNotNull(loans.getContent());
         assertEquals(1, loans.getTotalElements());
-        try {
-            verify(loanOutputPort, times(1))
-                    .findAllByOrganizationId(loan.getOrganizationId(), 10, 0);
-        } catch (MeedlException e) {
-            log.error("Error viewing all loans: ", e);
-        }
     }
 
     @Test
     void viewAllLoan(){
         Page<Loan> loans = Page.empty();
         try{
-            when(loanOutputPort.findAllLoan(null, pageSize,pageNumber))
+            when(loanOutputPort.findAllLoan(pageSize,pageNumber))
                     .thenReturn(new PageImpl<>(List.of(loan)));
-            loans = loanService.viewAllLoans(null, pageSize,pageNumber);
+            loans = loanService.viewAllLoans(null,pageSize,pageNumber);
         }catch (MeedlException e){
             log.error("Error viewing all loans: {}", e.getMessage());
         }

@@ -105,7 +105,8 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           cle.loaneeLoanDetail.initialDeposit as initialDeposit,
           lr.createdDate as createdDate, lr.loanAmountRequested as loanAmountRequested,
           c.name as cohortName, c.startDate as cohortStartDate, loe.dateTimeOffered as offerDate,
-          p.name as programName
+          p.name as programName,lr.loanAmountApproved as loanAmountApproved,c.tuitionAmount as tuitionAmount
+
     
           from LoanEntity le
           join LoanOfferEntity loe on loe.id = le.loanOfferId
@@ -128,17 +129,18 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           cle.loaneeLoanDetail.initialDeposit as initialDeposit,
           lr.createdDate as createdDate, lr.loanAmountRequested as loanAmountRequested,
           c.name as cohortName, c.startDate as cohortStartDate, loe.dateTimeOffered as offerDate,
-          p.name as programName
+          p.name as programName,
+          lr.loanAmountApproved as loanAmountApproved,c.tuitionAmount as tuitionAmount
     
-          from LoanEntity le
+            from LoanEntity le
           join LoanOfferEntity loe on loe.id = le.loanOfferId
           join LoanRequestEntity lr on lr.id = loe.id
           join LoanReferralEntity lfe on lfe.id = lr.id
-          join CohortLoaneeEntity cle on cle.loanee.id = lfe.cohortLoanee.id
+          join CohortLoaneeEntity cle on cle.id = lfe.cohortLoanee.id
           join LoaneeEntity l on l.id = cle.loanee.id
-          join CohortEntity c on cle.cohort.id = c.id
-          join ProgramEntity p on c.programId = p.id
-          join OrganizationEntity o on p.organizationIdentity.id = o.id
+          join CohortEntity c on c.id = cle.cohort.id
+          join ProgramEntity p on p.id = c.programId
+          join OrganizationEntity o on o.id = p.organizationIdentity.id
           where o.id = :organizationId
     """)
     Page<LoanProjection> findAllLoanInOrganization(@Param("organizationId") String organizationId, Pageable pageRequest);

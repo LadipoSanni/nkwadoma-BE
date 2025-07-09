@@ -94,7 +94,7 @@ public class LoanAdapter implements LoanOutputPort {
     }
 
     @Override
-    public Page<Loan> findAllLoan(String organizationId, int pageSize , int pageNumber) throws MeedlException {
+    public Page<Loan> findAllLoan(int pageSize , int pageNumber) throws MeedlException {
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validatePageNumber(pageNumber);
         Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
