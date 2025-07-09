@@ -234,7 +234,7 @@ class LoanAdapterTest {
 
         Page<Loan> loans = Page.empty();
         try{
-            loans = loanOutputPort.findAllLoan(null, pageSize,pageNumber);
+            loans = loanOutputPort.findAllLoan(pageSize,pageNumber);
         }catch (MeedlException e){
             log.error("Error finding loans : {}", e.getMessage());
         }
@@ -248,7 +248,7 @@ class LoanAdapterTest {
 
         Page<Loan> loans = Page.empty();
         try{
-            loans = loanOutputPort.findAllLoan(organizationIdentity.getId(), pageSize,pageNumber);
+            loans = loanOutputPort.findAllByOrganizationId(organizationIdentity.getId(), pageSize,pageNumber);
         }catch (MeedlException e){
             log.error("Error finding loans : {}", e.getMessage());
         }

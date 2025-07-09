@@ -39,7 +39,7 @@ public class Loan {
     private LoanOffer loanOffer;
     private LoanStatus loanStatus;
     private BigDecimal initialDeposit;
-    private BigDecimal amountRequested;
+    private BigDecimal loanAmountApproved;
     private BigDecimal tuitionAmount;
     private NextOfKin nextOfKin;
     private UserIdentity userIdentity;

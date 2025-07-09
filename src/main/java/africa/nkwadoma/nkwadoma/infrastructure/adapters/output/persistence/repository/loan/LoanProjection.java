@@ -16,6 +16,7 @@ public interface LoanProjection {
     String getCohortName();
     String getProgramName();
     BigDecimal getLoanAmountRequested();
+    BigDecimal getLoanAmountApproved();
     LocalDateTime getOfferDate();
     LocalDateTime getStartDate();
     BigDecimal getInitialDeposit();
