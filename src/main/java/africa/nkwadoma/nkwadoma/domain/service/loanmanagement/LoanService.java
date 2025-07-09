@@ -248,16 +248,19 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     @Override
-    public Page<Loan> viewAllLoans(String organizationId, int pageSize, int pageNumber) throws MeedlException {
-        MeedlValidator.validatePageSize(pageSize);
-        MeedlValidator.validatePageNumber(pageNumber);
-        Page<Loan> loans;
-        if (StringUtils.isNotEmpty(organizationId)) {
-            loans = loanOutputPort.findAllByOrganizationId(organizationId, pageSize, pageNumber);
-        } else {
-            loans = loanOutputPort.findAllLoan(pageSize,pageNumber);
+    public Page<Loan> viewAllLoans(Loan loan) throws MeedlException {
+        MeedlValidator.validatePageSize(loan.getPageSize());
+        MeedlValidator.validatePageNumber(loan.getPageNumber());
+        UserIdentity userIdentity = userIdentityOutputPort.findById(loan.getActorId());
+
+        if (userIdentity.getRole().equals(IdentityRole.LOANEE)){
+            return loanOutputPort.findAllLoanDisburedToLoanee(userIdentity.getId(),loan.getPageNumber(),loan.getPageSize());
         }
-        return loans;
+        if (StringUtils.isNotEmpty(loan.getOrganizationId())) {
+            return loanOutputPort.findAllByOrganizationId(loan.getOrganizationId(), loan.getPageSize(), loan.getPageNumber());
+        } else {
+            return loanOutputPort.findAllLoan(loan.getPageSize(), loan.getPageNumber());
+        }
     }
 
     private String getLoanAccountId(Loanee foundLoanee) throws MeedlException {

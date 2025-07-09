@@ -16,5 +16,5 @@ public interface CreateLoanProductUseCase {
 
     Loan viewLoanDetails(String loanId) throws MeedlException;
 
-    Page<Loan> viewAllLoans(String organizationId,int pageSize, int pageNumber) throws MeedlException;
+    Page<Loan> viewAllLoans(Loan loan) throws MeedlException;
 }
