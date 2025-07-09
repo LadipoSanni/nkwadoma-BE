@@ -25,6 +25,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
@@ -141,6 +142,11 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         MeedlValidator.validateUUID(loan.getLoaneeId(), LoaneeMessages.PLEASE_PROVIDE_A_VALID_LOANEE_IDENTIFICATION.getMessage());
         Loanee foundLoanee = loaneeOutputPort.findLoaneeById(loan.getLoaneeId());
         LoanOffer loanOffer = loanOfferOutputPort.findLoanOfferById(loan.getLoanOfferId());
+        log.info("-----> Loan offer ----> {}", loanOffer);
+        if (loanOffer.getLoaneeResponse() == null) {
+            log.info("Loanee response is null");
+            throw new LoanException("Loanee response is null");
+        }
         if (loanOffer.getLoaneeResponse().equals(LoanDecision.DECLINED)){
             throw new LoanException(LoanMessages.CANNOT_START_LOAN_FOR_LOAN_OFFER_THAT_AS_BEEN_DECLINED.getMessage());
         }
@@ -254,7 +260,13 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     public Page<Loan> viewAllLoans(String organizationId, int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validatePageNumber(pageNumber);
-        return loanOutputPort.findAllLoan(organizationId, pageSize,pageNumber);
+        Page<Loan> loans;
+        if (StringUtils.isNotEmpty(organizationId)) {
+            loans = loanOutputPort.findAllByOrganizationId(organizationId, pageSize, pageNumber);
+        } else {
+            loans = loanOutputPort.findAllLoan(organizationId, pageSize,pageNumber);
+        }
+        return loans;
     }
 
     private String getLoanAccountId(Loanee foundLoanee) throws MeedlException {
@@ -299,9 +311,11 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     public LoanReferral respondToLoanReferral(LoanReferral loanReferral) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanReferral, LoanMessages.LOAN_REFERRAL_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(loanReferral.getId(), LoanMessages.INVALID_LOAN_REFERRAL_ID.getMessage());
-
         LoanReferral foundLoanReferral = loanReferralOutputPort.findById(loanReferral.getId());
-        log.info("Found Loan Referral: {}", foundLoanReferral);
+        if (foundLoanReferral == null) {
+            log.info("FoundLoanReferral is null");
+            throw new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage());
+        }
         checkLoanReferralHasBeenAcceptedOrDeclined(foundLoanReferral);
         loanReferral.validateLoanReferralStatus();
 
