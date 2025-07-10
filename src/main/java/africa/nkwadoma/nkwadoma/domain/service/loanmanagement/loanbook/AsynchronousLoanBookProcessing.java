@@ -91,6 +91,30 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     }
 
 
+    @Override
+    public void uploadRepaymentHistory(LoanBook repaymentRecordBook) throws MeedlException {
+        MeedlValidator.validateObjectInstance(repaymentRecordBook, "Repayment record book cannot be empty.");
+        repaymentRecordBook.validateRepaymentRecord();
+        List<String> requiredHeaders = getRepaymentRecordUploadRequiredHeaders();
+
+        List<Map<String, String>>  data = readFile(repaymentRecordBook, requiredHeaders);
+        repaymentRecordBook.setMeedlNotification(new MeedlNotification());
+        log.info("Repayment record book read is {}", data);
+
+
+        Cohort savedCohort = findCohort(repaymentRecordBook.getCohort());
+        repaymentRecordBook.setCohort(savedCohort);
+        loanBookValidator.repaymentHistoryValidation(data);
+        List<RepaymentHistory> convertedRepaymentHistories = convertToRepaymentHistory(data);
+        repaymentRecordBook.setRepaymentHistories(convertedRepaymentHistories);
+
+        Set<String> loaneesThatMadePayment = getSetOfLoanees(convertedRepaymentHistories);
+        log.info("Set of loanees that made payments size : {}, set",loaneesThatMadePayment.size());
+        Map<String, List<RepaymentHistory>> mapOfRepaymentHistoriesForEachLoanee = getRepaymentHistoriesForLoanees(loaneesThatMadePayment, convertedRepaymentHistories);
+        printRepaymentCountsPerLoanee(mapOfRepaymentHistoriesForEachLoanee);
+        processAccumulatedRepayments(mapOfRepaymentHistoriesForEachLoanee, repaymentRecordBook.getCohort().getId(), repaymentRecordBook);
+        log.info("Repayment record uploaded..");
+    }
 
     private void validateStartDates(List<Loanee> convertedLoanees, Cohort savedCohort) throws MeedlException {
         for (Loanee loanee : convertedLoanees) {
@@ -114,30 +138,6 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         cohortOutputPort.save(savedCohort);
         loaneeUseCase.increaseNumberOfLoaneesInOrganization(savedCohort, loanees.size());
         loaneeUseCase.increaseNumberOfLoaneesInProgram(savedCohort, loanees.size());
-    }
-
-    @Override
-    public void uploadRepaymentRecord(LoanBook repaymentRecordBook) throws MeedlException {
-        MeedlValidator.validateObjectInstance(repaymentRecordBook, "Repayment record book cannot be empty.");
-        repaymentRecordBook.validateRepaymentRecord();
-        List<String> requiredHeaders = getRepaymentRecordUploadRequiredHeaders();
-
-        List<Map<String, String>>  data = readFile(repaymentRecordBook, requiredHeaders);
-        repaymentRecordBook.setMeedlNotification(new MeedlNotification());
-        log.info("Repayment record book read is {}", data);
-
-
-        Cohort savedCohort = findCohort(repaymentRecordBook.getCohort());
-        repaymentRecordBook.setCohort(savedCohort);
-        List<RepaymentHistory> convertedRepaymentHistories = convertToRepaymentHistory(data);
-        repaymentRecordBook.setRepaymentHistories(convertedRepaymentHistories);
-
-        Set<String> loaneesThatMadePayment = getSetOfLoanees(convertedRepaymentHistories);
-        log.info("Set of loanees that made payments size : {}, set",loaneesThatMadePayment.size());
-        Map<String, List<RepaymentHistory>> mapOfRepaymentHistoriesForEachLoanee = getRepaymentHistoriesForLoanees(loaneesThatMadePayment, convertedRepaymentHistories);
-        printRepaymentCountsPerLoanee(mapOfRepaymentHistoriesForEachLoanee);
-        processAccumulatedRepayments(mapOfRepaymentHistoriesForEachLoanee, repaymentRecordBook.getCohort().getId(), repaymentRecordBook);
-        log.info("Repayment record uploaded..");
     }
     public void printRepaymentCountsPerLoanee(Map<String, List<RepaymentHistory>> mapOfRepaymentHistoriesForEachLoanee) {
         for (Map.Entry<String, List<RepaymentHistory>> entry : mapOfRepaymentHistoriesForEachLoanee.entrySet()) {
@@ -314,9 +314,6 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         List<RepaymentHistory> repaymentHistories = new ArrayList<>();
 
         log.info("Started creating Repayment record from data gotten from file upload {}, size {}",data, data.size());
-        loanBookValidator.validateDateTimeFormat(data, "paymentdate");
-        loanBookValidator.validateAmountPaid(data, "amountpaid");
-        loanBookValidator.validateUserExistForRepayment(data, "email");
         for (Map<String, String> row  : data) {
 
             RepaymentHistory repaymentHistory = RepaymentHistory.builder()
@@ -407,7 +404,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
 
     List<CohortLoanee> convertToLoanees(List<Map<String, String>> data, Cohort cohort, String actorId) throws MeedlException {
         List<CohortLoanee> cohortLoanees = new ArrayList<>();
-
+        int rowCount = 1;
         for (Map<String, String> row : data) {
             UserIdentity userIdentity = UserIdentity.builder()
                     .firstName(row.get("firstname"))
@@ -421,9 +418,9 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                     .nin(row.get("nin"))
                     .createdBy(actorId)
                     .build();
-            loanBookValidator.containsOnlyDigits(row.get("initialdeposit"), "Initial deposit is not a monetary value. "+ loanBookValidator.convertIfNull(row.get("initialdeposit")));
-            loanBookValidator.containsOnlyDigits(row.get("amountrequested"), "Amount requested is not a monetary value. "+ loanBookValidator.convertIfNull(row.get("amountrequested")));
-            loanBookValidator.containsOnlyDigits(row.get("amountreceived"), "Amount received is not a monetary value. "+ loanBookValidator.convertIfNull(row.get("amountreceived")));
+            loanBookValidator.containsOnlyDigits(row.get("initialdeposit"), "Initial deposit is not a monetary value. "+ loanBookValidator.convertIfNull(row.get("initialdeposit")), rowCount);
+            loanBookValidator.containsOnlyDigits(row.get("amountrequested"), "Amount requested is not a monetary value. "+ loanBookValidator.convertIfNull(row.get("amountrequested")), rowCount);
+            loanBookValidator.containsOnlyDigits(row.get("amountreceived"), "Amount received is not a monetary value. "+ loanBookValidator.convertIfNull(row.get("amountreceived")), rowCount);
 
             LoaneeLoanDetail loaneeLoanDetail = LoaneeLoanDetail.builder()
                     .initialDeposit(new BigDecimal(row.get("initialdeposit")))
@@ -453,6 +450,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                     .build();
 
             cohortLoanees.add(cohortLoanee);
+            rowCount++;
         }
         log.info("Validating the file field values.");
         loanBookValidator.validateAllFileFields(cohortLoanees);

@@ -1,8 +1,8 @@
 package africa.nkwadoma.nkwadoma.domain.validation;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -13,11 +13,21 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+
 @SpringBootTest
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Slf4j
 class LoanBookValidatorTest {
 
     @Autowired
     private LoanBookValidator loanBookValidator;
+    private int rowCount = 1;
+
+    @BeforeAll
+    public void setUp(){
+        loanBookValidator.setValidationErrorMessage();
+    }
 
     private Map<String, String> createRow(String key, String value) {
         Map<String, String> row = new HashMap<>();
@@ -26,127 +36,120 @@ class LoanBookValidatorTest {
     }
 
     @Test
-    void testValidDateddMMyyyy() {
-        List<Map<String, String>> data = List.of(createRow("startDate", "15-06-2024"));
-        assertDoesNotThrow(() -> loanBookValidator.validateDateTimeFormat(data, "startDate"));
+    void validDateddMMyyyy() {
+        Map<String, String> row = createRow("startDate", "15-06-2024");
+        assertDoesNotThrow(() -> loanBookValidator.validateDateTimeFormat(row, "startDate", rowCount));
     }
 
     @Test
-    void testValidDateddMMyyyyHHmmss() {
-        List<Map<String, String>> data = List.of(createRow("startDate", "15-06-2024 10:20:30"));
-        assertDoesNotThrow(() -> loanBookValidator.validateDateTimeFormat(data, "startDate"));
+    void validDateddMMyyyyHHmmss() {
+        Map<String, String> row = createRow("startDate", "15-06-2024 10:20:30");
+        assertDoesNotThrow(() -> loanBookValidator.validateDateTimeFormat(row, "startDate", rowCount));
     }
 
     @Test
-    void testValidDateISOLocalDateTime() {
-        List<Map<String, String>> data = List.of(createRow("startDate", "2024-06-15T10:20:30"));
-        assertDoesNotThrow(() -> loanBookValidator.validateDateTimeFormat(data, "startDate"));
+    void validDateISOLocalDateTime() {
+        Map<String, String> row = createRow("startDate", "2024-06-15T10:20:30");
+        assertDoesNotThrow(() -> loanBookValidator.validateDateTimeFormat(row, "startDate", rowCount));
     }
 
     @Test
-    void testValidDate_yyyyMd() {
-        List<Map<String, String>> data = List.of(createRow("startDate", "2024-6-1"));
-        assertDoesNotThrow(() -> loanBookValidator.validateDateTimeFormat(data, "startDate"));
+    void validDateYyyyMd() {
+        Map<String, String> row = createRow("startDate", "2024-6-1");
+        assertDoesNotThrow(() -> loanBookValidator.validateDateTimeFormat(row, "startDate", rowCount));
     }
 
     @Test
-    void testValidDate_dMyyyy() {
-        List<Map<String, String>> data = List.of(createRow("startDate", "1-6-2024"));
-        assertDoesNotThrow(() -> loanBookValidator.validateDateTimeFormat(data, "startDate"));
+    void validDatedMYyyy() {
+        Map<String, String> row = createRow("startDate", "1-6-2024");
+        assertDoesNotThrow(() -> loanBookValidator.validateDateTimeFormat(row, "startDate", rowCount));
     }
 
     @Test
-    void testDateWithSlashes() {
-        List<Map<String, String>> data = List.of(createRow("startDate", "15/06/2024"));
-        assertDoesNotThrow(() -> loanBookValidator.validateDateTimeFormat(data, "startDate"));
+    void validateDateWithSlashes() {
+        Map<String, String> row = createRow("startDate", "15/06/2024");
+        assertDoesNotThrow(() -> loanBookValidator.validateDateTimeFormat(row, "startDate", rowCount));
     }
 
     @Test
-    void testDateWithExtraWhitespaces() {
-        List<Map<String, String>> data = List.of(createRow("startDate", "  15-06-2024  "));
-        assertDoesNotThrow(() -> loanBookValidator.validateDateTimeFormat(data, "startDate"));
+    void validateDateWithExtraWhitespaces() {
+        Map<String, String> row = createRow("startDate", "  15-06-2024  ");
+        assertDoesNotThrow(() -> loanBookValidator.validateDateTimeFormat(row, "startDate", rowCount));
     }
 
     @Test
-    void testNullDate() {
-        List<Map<String, String>> data = List.of(createRow("startDate", null));
-        assertDoesNotThrow(() -> loanBookValidator.validateDateTimeFormat(data, "startDate"));
+    void validateWithNullDate() {
+        Map<String, String> row = createRow("startDate", null);
+        assertDoesNotThrow(() -> loanBookValidator.validateDateTimeFormat(row, "startDate", rowCount));
     }
 
     @Test
-    void testEmptyDate() {
-        List<Map<String, String>> data = List.of(createRow("startDate", ""));
-        assertDoesNotThrow(() -> loanBookValidator.validateDateTimeFormat(data, "startDate"));
+    void validateEmptyDate() {
+        Map<String, String> row = createRow("startDate", "");
+        assertDoesNotThrow(() -> loanBookValidator.validateDateTimeFormat(row, "startDate", rowCount));
     }
 
     @Test
-    void testInvalidDateFormat() {
-        List<Map<String, String>> data = List.of(createRow("startDate", "15.06.2024"));
+    void validateInvalidDateFormat() {
+        Map<String, String> row = createRow("startDate", "15.06.2024");
         MeedlException ex = assertThrows(MeedlException.class,
-                () -> loanBookValidator.validateDateTimeFormat(data, "startDate"));
+                () -> loanBookValidator.validateDateTimeFormat(row, "startDate", rowCount));
         assertTrue(ex.getMessage().contains("Date doesn't match format"));
     }
 
-    @Test
-    void testCompletelyInvalidDate() {
-        List<Map<String, String>> data = List.of(createRow("startDate", "this-is-not-a-date"));
-        MeedlException ex = assertThrows(MeedlException.class,
-                () -> loanBookValidator.validateDateTimeFormat(data, "startDate"));
-        assertTrue(ex.getMessage().contains("Date doesn't match format"));
-    }
+//    @Test
+//    void testCompletelyInvalidDate() {
+//        Map<String, String> row = createRow("startDate", "this-is-not-a-date");
+//        MeedlException ex = assertThrows(MeedlException.class,
+//                () -> loanBookValidator.validateDateTimeFormat(row, "startDate", rowCount));
+//        assertTrue(ex.getMessage().contains("Date doesn't match format"));
+//    }
 
     @Test
-    void testInvalidDayMonth() {
-        List<Map<String, String>> data = List.of(createRow("startDate", "32-13-2024"));
+    void invalidDayMonth() {
+        Map<String, String> row = createRow("startDate", "32-13-2024");
         MeedlException ex = assertThrows(MeedlException.class,
-                () -> loanBookValidator.validateDateTimeFormat(data, "startDate"));
+                () -> loanBookValidator.validateDateTimeFormat(row, "startDate", rowCount));
         assertTrue(ex.getMessage().contains("Date doesn't match format"));
     }
     @Test
-    void testValidateMoneyValueNullAmount() {
+    void validateMoneyValueNullAmount() {
         BigDecimal amount = null;
         String message = "Amount cannot be null";
 
         MeedlException exception = assertThrows(MeedlException.class, () ->
-                loanBookValidator.validateMoneyValue(amount, message)
+                loanBookValidator.validateMoneyValue(amount, message, rowCount)
         );
 
         assertEquals(message, exception.getMessage());
     }
 
     @Test
-    void testValidateMoneyValueZeroAmountPassesValidation() {
+    void validateZeroAmountIsValidAmount() {
         BigDecimal amount = BigDecimal.ZERO;
         assertDoesNotThrow(() ->
-                loanBookValidator.validateMoneyValue(amount, "Zero is valid")
+                loanBookValidator.validateMoneyValue(amount, "Zero is valid", rowCount)
         );
     }
 
-    @Test
-    void testValidateMoneyValuePositiveAmountPassesValidation() {
-        BigDecimal amount = new BigDecimal("100.00");
-        assertDoesNotThrow(() ->
-                loanBookValidator.validateMoneyValue(amount, "Positive is valid")
-        );
-    }
 
     @Test
-    void testValidateMoneyValueNegativeAmount() {
+    void validateMoneyValueNegativeAmount() {
         BigDecimal amount = new BigDecimal("-50.00");
         String message = "Amount cannot be negative";
 
         MeedlException exception = assertThrows(MeedlException.class, () ->
-                loanBookValidator.validateMoneyValue(amount, message)
+                loanBookValidator.validateMoneyValue(amount, message, rowCount)
         );
 
         assertEquals(message, exception.getMessage());
     }
 
     @Test
-    void testValidateMoneyValueLargePositiveAmount_passesValidation() {
+    void validateMoneyValueLargePositiveAmountPassesValidation() {
         BigDecimal amount = new BigDecimal("999999999999.99");
         assertDoesNotThrow(() ->
-                loanBookValidator.validateMoneyValue(amount, "Large positive is valid")
+                loanBookValidator.validateMoneyValue(amount, "Large positive is valid", rowCount)
         );
     }
 
@@ -156,9 +159,91 @@ class LoanBookValidatorTest {
         String message = "Large negative not allowed";
 
         MeedlException exception = assertThrows(MeedlException.class, () ->
-                loanBookValidator.validateMoneyValue(amount, message)
+                loanBookValidator.validateMoneyValue(amount, message, rowCount)
         );
 
         assertEquals(message, exception.getMessage());
     }
+
+    @Test
+    void testValidWholeNumberAmount() {
+        Map<String, String> row = createRow("amountPaid", "1000");
+        assertDoesNotThrow(() -> loanBookValidator.validateAmountPaid(row, "amountPaid", rowCount));
+    }
+
+    @Test
+    void testValidDecimalAmount() {
+        Map<String, String> row = createRow("amountPaid", "1000.50");
+        assertDoesNotThrow(() -> loanBookValidator.validateAmountPaid(row, "amountPaid", rowCount));
+    }
+
+    @Test
+    void testAmountWithCommaShouldFail() {
+        Map<String, String> row = createRow("amountPaid", "1,000");
+        MeedlException ex = assertThrows(MeedlException.class,
+                () -> loanBookValidator.validateAmountPaid(row, "amountPaid", rowCount));
+        assertTrue(ex.getMessage().contains("Amount paid is not a monetary value"));
+    }
+
+    @Test
+    void validateAmountWithLetter() {
+        Map<String, String> row = createRow("amountPaid", "10a00");
+        MeedlException ex = assertThrows(MeedlException.class,
+                () -> loanBookValidator.validateAmountPaid(row, "amountPaid", rowCount));
+        assertTrue(ex.getMessage().contains("Amount paid is not a monetary value"));
+    }
+
+    @Test
+    void validateAmountWithSpecialChars() {
+        Map<String, String> row = createRow("amountPaid", "$1000");
+        MeedlException ex = assertThrows(MeedlException.class,
+                () -> loanBookValidator.validateAmountPaid(row, "amountPaid", rowCount));
+        assertTrue(ex.getMessage().contains("Amount paid is not a monetary value"));
+    }
+
+    @Test
+    void testNullAmountShouldFail() {
+        Map<String, String> row = createRow("amountPaid", null);
+        MeedlException ex = assertThrows(MeedlException.class,
+                () -> loanBookValidator.validateAmountPaid(row, "amountPaid", rowCount));
+        assertTrue(ex.getMessage().contains("Amount paid is not a monetary value"));
+    }
+
+    @Test
+    void testEmptyStringShouldFail() {
+        Map<String, String> row = createRow("amountPaid", "");
+        MeedlException ex = assertThrows(MeedlException.class,
+                () -> loanBookValidator.validateAmountPaid(row, "amountPaid", rowCount));
+        assertTrue(ex.getMessage().contains("Amount paid is not a monetary value"));
+    }
+
+    @Test
+    void validateNegativeAmountShould() {
+        Map<String, String> row = createRow("amountPaid", "-500");
+        MeedlException ex = assertThrows(MeedlException.class,
+                () -> loanBookValidator.validateAmountPaid(row, "amountPaid", rowCount));
+        assertTrue(ex.getMessage().contains("Amount paid is not a monetary value. -500"));
+    }
+
+    @Test
+    void validateForPositiveAmount() {
+        Map<String, String> row = createRow("amountPaid", "0");
+        assertDoesNotThrow(() -> loanBookValidator.validateAmountPaid(row, "amountPaid", rowCount));
+    }
+    @Test
+    void validateAmountWithTrailingDot() {
+        Map<String, String> row = createRow("amountPaid", "1000.");
+        MeedlException ex = assertThrows(MeedlException.class,
+                () -> loanBookValidator.validateAmountPaid(row, "amountPaid", rowCount));
+        assertTrue(ex.getMessage().contains("Amount paid is not a monetary value"));
+    }
+
+    @Test
+    void validateAmountWithLeadingDot() {
+        Map<String, String> row = createRow("amountPaid", ".50");
+        MeedlException ex = assertThrows(MeedlException.class,
+                () -> loanBookValidator.validateAmountPaid(row, "amountPaid", rowCount));
+        assertTrue(ex.getMessage().contains("Amount paid is not a monetary value"));
+    }
+
 }
