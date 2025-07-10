@@ -143,8 +143,10 @@ public class IdentityManagerController {
     public ResponseEntity<ApiResponse<UserIdentityResponse>> viewUserDetail(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
         UserIdentity userIdentity = UserIdentity.builder().id(meedlUser.getClaimAsString("sub")).build();
         UserIdentity userIdentityFound = createUserUseCase.viewUserDetail(userIdentity);
+        UserIdentityResponse userIdentityResponse = identityMapper.toUserIdentityResponse(userIdentityFound);
+        userIdentityResponse.setAdditionalDetailsCompleted(userIdentityFound.isAdditionalDetailsCompleted());
         return ResponseEntity.ok(ApiResponse.<UserIdentityResponse>builder()
-                .data(identityMapper.toUserIdentityResponse(userIdentityFound))
+                .data(userIdentityResponse)
                 .message(ControllerConstant.RETURNED_SUCCESSFULLY.getMessage())
                 .statusCode(HttpStatus.OK.name()).build());
     }

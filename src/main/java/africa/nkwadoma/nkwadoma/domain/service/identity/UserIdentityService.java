@@ -26,6 +26,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mappe
 import com.nimbusds.jwt.*;
 import lombok.*;
 import lombok.extern.slf4j.*;
+import org.apache.commons.lang3.StringUtils;
 import org.keycloak.representations.*;
 import org.keycloak.representations.idm.*;
 import org.springframework.scheduling.annotation.*;
@@ -246,9 +247,11 @@ public class UserIdentityService implements CreateUserUseCase {
         MeedlValidator.validateUUID(userIdentity.getId(), UserMessages.INVALID_USER_ID.getMessage());
         log.info("Viewing user details");
         UserIdentity foundUser = userIdentityOutputPort.findById(userIdentity.getId());
-        if (foundUser != null && foundUser.getNextOfKin() != null){
+        if (foundUser != null && StringUtils.isNotEmpty(foundUser.getAlternateEmail())){
+            log.info("Additional details has been added.");
             foundUser.setAdditionalDetailsCompleted(Boolean.TRUE);
         }
+        log.info("Alternate email {}", foundUser.getAlternateEmail());
         return foundUser;
     }
 
