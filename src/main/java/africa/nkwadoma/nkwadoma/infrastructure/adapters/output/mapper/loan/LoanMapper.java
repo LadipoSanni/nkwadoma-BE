@@ -15,7 +15,7 @@ public interface LoanMapper {
     @InheritInverseConfiguration
     Loan mapToLoan(LoanEntity loanEntity);
 
-    @Mapping(target = "amountRequested", source = "loanAmountRequested")
+    @Mapping(target = "loanAmountRequested", source = "loanAmountRequested")
     @Mapping(target = "loaneeId", source = "loaneeId")
     @Mapping(target = "nextOfKin.id", source = "nextOfKinId")
     @Mapping(target = "nextOfKin.firstName", source = "nextOfKinFirstName")
@@ -39,7 +39,9 @@ public interface LoanMapper {
     @Mapping(target = "userIdentity.alternateEmail", source = "alternateEmail")
     @Mapping(target = "userIdentity.alternatePhoneNumber", source = "alternatePhoneNumber")
     @Mapping(target = "userIdentity.alternateContactAddress", source = "alternateContactAddress")
-    @Mapping(target = "loanAmountRequested", source = "loanAmountRequested")
+    @Mapping(target = "loanAmountApproved", source = "loanAmountApproved")
+    @Mapping(target = "tuitionAmount", source = "tuitionAmount")
     @Mapping(target = "status", source = "status")
+    @Mapping(target = "cohortLoaneeId", source = "cohortLoaneeId")
     Loan mapProjectionToLoan(LoanProjection loanProjection);
 }

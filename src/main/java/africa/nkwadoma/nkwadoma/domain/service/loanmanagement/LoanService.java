@@ -34,6 +34,8 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages.LOAN_DECISION;
+
 @RequiredArgsConstructor
 @Slf4j
 @EnableAsync
@@ -138,14 +140,16 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     @Override
     public Loan startLoan(Loan loan) throws MeedlException {
+        log.info("------> loan---> {}", loan);
         MeedlValidator.validateObjectInstance(loan, LoanMessages.LOAN_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(loan.getLoaneeId(), LoaneeMessages.PLEASE_PROVIDE_A_VALID_LOANEE_IDENTIFICATION.getMessage());
         Loanee foundLoanee = loaneeOutputPort.findLoaneeById(loan.getLoaneeId());
         LoanOffer loanOffer = loanOfferOutputPort.findLoanOfferById(loan.getLoanOfferId());
         log.info("-----> Loan offer ----> {}", loanOffer);
+        log.info("-----> offer response ----> {}", loanOffer.getLoaneeResponse());
         if (loanOffer.getLoaneeResponse() == null) {
             log.info("Loanee response is null");
-            throw new LoanException("Loanee response is null");
+            throw new LoanException(LOAN_DECISION.getMessage());
         }
         if (loanOffer.getLoaneeResponse().equals(LoanDecision.DECLINED)){
             throw new LoanException(LoanMessages.CANNOT_START_LOAN_FOR_LOAN_OFFER_THAT_AS_BEEN_DECLINED.getMessage());
@@ -231,17 +235,6 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanMetricsOutputPort.save(loanMetrics.get());
     }
 
-    @Override
-    public Page<Loan> viewAllLoansByOrganizationId(Loan loan) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loan, LoanMessages.LOAN_CANNOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateUUID(loan.getOrganizationId(), LoanMessages.LOAN_ID_REQUIRED.getMessage());
-        MeedlValidator.validatePageSize(loan.getPageSize());
-        MeedlValidator.validatePageNumber(loan.getPageNumber());
-        Page<Loan> loans = loanOutputPort.findAllByOrganizationId
-                (loan.getOrganizationId(), loan.getPageSize(), loan.getPageNumber());
-        log.info("Loans returned from output port: {}", loans.getContent().toArray());
-        return loans;
-    }
 
     @Override
     public Loan viewLoanDetails(String loanId) throws MeedlException {
@@ -250,23 +243,26 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
                 orElseThrow(()-> new LoanException(LoanMessages.LOAN_NOT_FOUND.getMessage()));
         log.info("Found loan {}", foundLoan);
         List<LoaneeLoanBreakdown> loaneeLoanBreakdowns =
-                loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(foundLoan.getLoaneeId());
+                loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(foundLoan.getCohortLoaneeId());
         log.info("Loanee loan breakdowns returned: {}", loaneeLoanBreakdowns);
         foundLoan.setLoaneeLoanBreakdowns(loaneeLoanBreakdowns);
         return foundLoan;
     }
 
     @Override
-    public Page<Loan> viewAllLoans(String organizationId, int pageSize, int pageNumber) throws MeedlException {
-        MeedlValidator.validatePageSize(pageSize);
-        MeedlValidator.validatePageNumber(pageNumber);
-        Page<Loan> loans;
-        if (StringUtils.isNotEmpty(organizationId)) {
-            loans = loanOutputPort.findAllByOrganizationId(organizationId, pageSize, pageNumber);
-        } else {
-            loans = loanOutputPort.findAllLoan(organizationId, pageSize,pageNumber);
+    public Page<Loan> viewAllLoans(Loan loan) throws MeedlException {
+        MeedlValidator.validatePageSize(loan.getPageSize());
+        MeedlValidator.validatePageNumber(loan.getPageNumber());
+        UserIdentity userIdentity = userIdentityOutputPort.findById(loan.getActorId());
+
+        if (userIdentity.getRole().equals(IdentityRole.LOANEE)){
+            return loanOutputPort.findAllLoanDisburedToLoanee(userIdentity.getId(),loan.getPageNumber(),loan.getPageSize());
         }
-        return loans;
+        if (StringUtils.isNotEmpty(loan.getOrganizationId())) {
+            return loanOutputPort.findAllByOrganizationId(loan.getOrganizationId(), loan.getPageSize(), loan.getPageNumber());
+        } else {
+            return loanOutputPort.findAllLoan(loan.getPageSize(), loan.getPageNumber());
+        }
     }
 
     private String getLoanAccountId(Loanee foundLoanee) throws MeedlException {
