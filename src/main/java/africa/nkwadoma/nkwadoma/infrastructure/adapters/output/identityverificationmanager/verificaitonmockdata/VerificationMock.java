@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.pre
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class VerificationMock {
@@ -20,8 +21,8 @@ public class VerificationMock {
                 .ninData(PremblyNinResponse.NinData.builder()
                         .nin(nin)
                         .firstname("John")
-                        .middleName("Doe")
-                        .lastname("Smith")
+                        .middleName(generateName())
+                        .lastname(generateName())
                         .birthDate(LocalDate.now().toString())
                         .birthCountry(getRandomCountryName())
                         .birthState("Lagos")
@@ -70,8 +71,8 @@ public class VerificationMock {
                 .responseCode("00")
                 .data(PremblyBvnResponse.BvnData.builder()
                         .bvn(bvn)
-                        .firstName("John")
-                        .middleName("Doe")
+                        .firstName(generateName())
+                        .middleName(generateName())
                         .lastName("Smith")
                         .dateOfBirth("1990-01-01")
                         .registrationDate("2020-05-15")
@@ -95,10 +96,10 @@ public class VerificationMock {
                         .watchListed("No")
                         .image("base64-image-string")
                         .number("12345")
-                        .faceData(createMockFaceData()) // Assuming an empty instance is okay
+                        .faceData(createMockFaceData())
                         .build())
-                .verification(createMockVerification()) // Assuming no data for verification
-                .session(null) // Assuming no session data
+                .verification(createMockVerification())
+                .session(null)
                 .build();
     }
     public static PremblyFaceData createMockFaceData() {
@@ -112,7 +113,7 @@ public class VerificationMock {
     public static Verification createMockVerification() {
         return Verification.builder()
                 .status("VERIFIED")
-                .validIdentity(true) // This will be updated dynamically if updateValidIdentity() is called
+                .validIdentity(true)
                 .reference("REF-123456345")
                 .build();
     }
@@ -121,4 +122,33 @@ public class VerificationMock {
         int randomIndex = ThreadLocalRandom.current().nextInt(countries.length);
         return countries[randomIndex].name();
     }
+
+    private static final char[] VOWELS = {'a', 'e', 'i', 'o', 'u'};
+    private static final char[] CONSONANTS = {
+            'b','c','d','f','g','h','j','k','l','m','n','p','q','r','s','t','v','w','x','y','z'
+    };
+    private static final Random RANDOM = new Random();
+    public static String generateName() {
+        int length = RANDOM.nextBoolean() ? 3 : 4;
+        StringBuilder name = new StringBuilder();
+
+        name.append(randomConsonant());
+        name.append(randomVowel());
+        name.append(randomConsonant());
+
+        if (length == 4) {
+            name.append(randomVowel());
+        }
+
+        return name.toString();
+    }
+
+    private static char randomVowel() {
+        return VOWELS[RANDOM.nextInt(VOWELS.length)];
+    }
+
+    private static char randomConsonant() {
+        return CONSONANTS[RANDOM.nextInt(CONSONANTS.length)];
+    }
+
 }
