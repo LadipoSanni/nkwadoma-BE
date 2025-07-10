@@ -33,5 +33,6 @@ public class UserIdentityResponse {
     private String organizationDomain;
     private String deactivationReason;
     private String reactivationReason;
+    private boolean additionalDetailsCompleted;
     private NextOfKinResponse nextOfKinResponse;
 }

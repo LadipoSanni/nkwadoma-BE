@@ -65,6 +65,7 @@ public class UserIdentity {
     private String nin;
     private String address;
     private String taxId;
+    private boolean additionalDetailsCompleted;
     private NextOfKin nextOfKin;
     private BankDetail bankDetail;
 
