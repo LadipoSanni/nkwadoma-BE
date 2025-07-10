@@ -12,8 +12,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loanManagement.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
 import io.swagger.v3.oas.annotations.*;
-import io.swagger.v3.oas.annotations.media.*;
-import io.swagger.v3.oas.annotations.responses.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -274,12 +272,15 @@ public class LoanController {
     }
 
     @GetMapping("/view-all-disbursal")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('LOANEE')")
     public ResponseEntity<ApiResponse<?>> viewAllDisbursedLoan(@RequestParam(required = false) String organizationId,
                                                                @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
-                                                               @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
+                                                               @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+                                                               @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
 
-        Page<Loan> loans = createLoanProductUseCase.viewAllLoans(organizationId,pageSize,pageNumber);
+        Loan loan = Loan.builder().actorId(meedlUser.getClaimAsString("sub")).organizationId(organizationId)
+                .pageNumber(pageNumber).pageSize(pageSize).build();
+        Page<Loan> loans = createLoanProductUseCase.viewAllLoans(loan);
         log.info("Mapped Loan responses: {}", loans.getContent().toArray());
         Page<LoanQueryResponse> loanResponses = loans.map(loanRestMapper::toLoanQueryResponse);
         log.info("Mapped Loan responses: {}", loanResponses.getContent().toArray());
