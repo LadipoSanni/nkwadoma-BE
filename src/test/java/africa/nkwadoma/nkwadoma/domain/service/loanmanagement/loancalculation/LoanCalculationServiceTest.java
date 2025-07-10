@@ -51,16 +51,16 @@ public class LoanCalculationServiceTest {
                 createRepayment(LocalDateTime.of(2025, 6, 2, 12, 0), new BigDecimal("200"))
         ));
 
-        List<RepaymentHistory> sorted = loanCalculation.sortRepaymentsByDateTimeDescending(repayments);
+        List<RepaymentHistory> sorted = loanCalculation.sortRepaymentsByDateTimeAscending(repayments);
 
-        assertEquals(new BigDecimal("300"), sorted.get(0).getAmountPaid());
+        assertEquals(new BigDecimal("300"), sorted.get(2).getAmountPaid());
         assertEquals(new BigDecimal("200"), sorted.get(1).getAmountPaid());
-        assertEquals(new BigDecimal("100"), sorted.get(2).getAmountPaid());
+        assertEquals(new BigDecimal("100"), sorted.get(0).getAmountPaid());
     }
 
     @Test
     void sortRepaymentsWithNull() throws MeedlException {
-        List<RepaymentHistory> result = loanCalculation.sortRepaymentsByDateTimeDescending(null);
+        List<RepaymentHistory> result = loanCalculation.sortRepaymentsByDateTimeAscending(null);
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
@@ -72,7 +72,7 @@ public class LoanCalculationServiceTest {
         repayments.add(null);
 
         MeedlException exception = assertThrows(MeedlException.class,
-                () -> loanCalculation.sortRepaymentsByDateTimeDescending(repayments));
+                () -> loanCalculation.sortRepaymentsByDateTimeAscending(repayments));
 
         assertEquals(LoanCalculationMessages.REPAYMENT_HISTORY_MUST_BE_PROVIDED.getMessage(), exception.getMessage());
     }
@@ -83,7 +83,7 @@ public class LoanCalculationServiceTest {
         List<RepaymentHistory> repayments = List.of(badRepayment);
 
         MeedlException exception = assertThrows(MeedlException.class,
-                () -> loanCalculation.sortRepaymentsByDateTimeDescending(repayments));
+                () -> loanCalculation.sortRepaymentsByDateTimeAscending(repayments));
 
         assertEquals(LoanCalculationMessages.PAYMENT_DATE_CANNOT_BE_NULL.getMessage(), exception.getMessage());
     }
@@ -98,8 +98,8 @@ public class LoanCalculationServiceTest {
 
         List<RepaymentHistory> updated = loanCalculation.accumulateTotalRepaid(repayments, loaneeId, cohortId);
         log.info("Updated repayment history in test after both sorting \n {}", updated);
-        assertEquals(new BigDecimal("5000"), updated.get(0).getTotalAmountRepaid());
-        assertEquals(new BigDecimal("7000"), updated.get(1).getTotalAmountRepaid());
+        assertEquals(new BigDecimal("1000"), updated.get(0).getTotalAmountRepaid());
+        assertEquals(new BigDecimal("3000"), updated.get(1).getTotalAmountRepaid());
         assertEquals(new BigDecimal("8000"), updated.get(2).getTotalAmountRepaid());
     }
 
@@ -122,14 +122,14 @@ public class LoanCalculationServiceTest {
 
         assertEquals(4, updated.size());
 
-        assertEquals(new BigDecimal("4000"), updated.get(0).getAmountPaid());
-        assertEquals(new BigDecimal("3000"), updated.get(1).getAmountPaid());
-        assertEquals(new BigDecimal("2000"), updated.get(2).getAmountPaid());
-        assertEquals(new BigDecimal("1000"), updated.get(3).getAmountPaid());
+        assertEquals(new BigDecimal("1000"), updated.get(0).getAmountPaid());
+        assertEquals(new BigDecimal("2000"), updated.get(1).getAmountPaid());
+        assertEquals(new BigDecimal("3000"), updated.get(2).getAmountPaid());
+        assertEquals(new BigDecimal("4000"), updated.get(3).getAmountPaid());
 
-        assertEquals(new BigDecimal("4000"), updated.get(0).getTotalAmountRepaid());
-        assertEquals(new BigDecimal("7000"), updated.get(1).getTotalAmountRepaid());
-        assertEquals(new BigDecimal("9000"), updated.get(2).getTotalAmountRepaid());
+        assertEquals(new BigDecimal("1000"), updated.get(0).getTotalAmountRepaid());
+        assertEquals(new BigDecimal("3000"), updated.get(1).getTotalAmountRepaid());
+        assertEquals(new BigDecimal("6000"), updated.get(2).getTotalAmountRepaid());
         assertEquals(new BigDecimal("10000"), updated.get(3).getTotalAmountRepaid());
     }
 

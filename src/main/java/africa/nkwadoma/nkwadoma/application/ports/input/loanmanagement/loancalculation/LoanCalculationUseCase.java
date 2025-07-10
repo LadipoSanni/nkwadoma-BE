@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface LoanCalculationUseCase {
 
-    List<RepaymentHistory> sortRepaymentsByDateTimeDescending(List<RepaymentHistory> repayments)throws MeedlException;
+    List<RepaymentHistory> sortRepaymentsByDateTimeAscending(List<RepaymentHistory> repayments)throws MeedlException;
 
     List<RepaymentHistory> accumulateTotalRepaid(
             List<RepaymentHistory> sortedRepayments,
