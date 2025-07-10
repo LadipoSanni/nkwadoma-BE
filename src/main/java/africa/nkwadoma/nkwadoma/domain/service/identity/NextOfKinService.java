@@ -34,9 +34,17 @@ public class NextOfKinService implements NextOfKinUseCase {
             throw new IdentityException(IdentityMessages.USER_HAS_NEXT_OF_KIN.getMessage());
         }
         NextOfKin savedNextOfKin = nextOfKinOutputPort.save(nextOfKin);
+        updateAlternativeDetails(foundUserIdentity, nextOfKin);
         log.info("Saved next of kin: {}", savedNextOfKin);
         updateUserNextOfKinDetails(foundUserIdentity, savedNextOfKin);
         return savedNextOfKin;
+    }
+
+    private void updateAlternativeDetails(UserIdentity userIdentity, NextOfKin nextOfKin) throws MeedlException {
+        userIdentity.setAlternateEmail(nextOfKin.getAlternateEmail());
+        userIdentity.setAlternatePhoneNumber(nextOfKin.getAlternatePhoneNumber());
+        userIdentity.setAlternateContactAddress(nextOfKin.getAlternateContactAddress());
+        userIdentityOutputPort.save(userIdentity);
     }
 
     private void updateUserNextOfKinDetails(UserIdentity userIdentity, NextOfKin savedNextOfKin) throws MeedlException {
