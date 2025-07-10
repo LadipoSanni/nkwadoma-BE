@@ -5,7 +5,6 @@ import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.AsynchronousLoanBookProcessingUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.RepaymentHistoryUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loancalculation.LoanCalculationUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
@@ -14,8 +13,6 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanReferralOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loancalculation.LoanCalculationOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanDecision;
@@ -60,20 +57,16 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     private final IdentityManagerOutputPort identityManagerOutputPort;
     private final CohortUseCase cohortUseCase;
     private final LoanBookValidator loanBookValidator;
-    private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
     private final LoaneeUseCase loaneeUseCase;
     private final RespondToLoanReferralUseCase respondToLoanReferralUseCase;
-    private final ViewLoanReferralsUseCase viewLoanReferralsUseCase;
     private final CreateLoanProductUseCase createLoanProductUseCase;
     private final LoanRequestUseCase loanRequestUseCase;
     private final LoanOfferUseCase loanOfferUseCase;
     private final RepaymentHistoryUseCase repaymentHistoryUseCase;
-    private final AesOutputPort aesOutputPort;
     private final LoanProductOutputPort loanProductOutputPort;
     private final CohortOutputPort cohortOutputPort;
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
     private final LoanReferralOutputPort loanReferralOutputPort;
-    private final LoanCalculationOutputPort loanCalculationOutputPort;
     private final LoanCalculationUseCase loanCalculationUseCase;
 
     @Override
@@ -98,6 +91,30 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     }
 
 
+    @Override
+    public void uploadRepaymentHistory(LoanBook repaymentRecordBook) throws MeedlException {
+        MeedlValidator.validateObjectInstance(repaymentRecordBook, "Repayment record book cannot be empty.");
+        repaymentRecordBook.validateRepaymentRecord();
+        List<String> requiredHeaders = getRepaymentRecordUploadRequiredHeaders();
+
+        List<Map<String, String>>  data = readFile(repaymentRecordBook, requiredHeaders);
+        repaymentRecordBook.setMeedlNotification(new MeedlNotification());
+        log.info("Repayment record book read is {}", data);
+
+
+        Cohort savedCohort = findCohort(repaymentRecordBook.getCohort());
+        repaymentRecordBook.setCohort(savedCohort);
+        loanBookValidator.repaymentHistoryValidation(data);
+        List<RepaymentHistory> convertedRepaymentHistories = convertToRepaymentHistory(data);
+        repaymentRecordBook.setRepaymentHistories(convertedRepaymentHistories);
+
+        Set<String> loaneesThatMadePayment = getSetOfLoanees(convertedRepaymentHistories);
+        log.info("Set of loanees that made payments size : {}, set",loaneesThatMadePayment.size());
+        Map<String, List<RepaymentHistory>> mapOfRepaymentHistoriesForEachLoanee = getRepaymentHistoriesForLoanees(loaneesThatMadePayment, convertedRepaymentHistories);
+        printRepaymentCountsPerLoanee(mapOfRepaymentHistoriesForEachLoanee);
+        processAccumulatedRepayments(mapOfRepaymentHistoriesForEachLoanee, repaymentRecordBook.getCohort().getId(), repaymentRecordBook);
+        log.info("Repayment record uploaded..");
+    }
 
     private void validateStartDates(List<Loanee> convertedLoanees, Cohort savedCohort) throws MeedlException {
         for (Loanee loanee : convertedLoanees) {
@@ -121,30 +138,6 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         cohortOutputPort.save(savedCohort);
         loaneeUseCase.increaseNumberOfLoaneesInOrganization(savedCohort, loanees.size());
         loaneeUseCase.increaseNumberOfLoaneesInProgram(savedCohort, loanees.size());
-    }
-
-    @Override
-    public void uploadRepaymentRecord(LoanBook repaymentRecordBook) throws MeedlException {
-        MeedlValidator.validateObjectInstance(repaymentRecordBook, "Repayment record book cannot be empty.");
-        repaymentRecordBook.validateRepaymentRecord();
-        List<String> requiredHeaders = getRepaymentRecordUploadRequiredHeaders();
-
-        List<Map<String, String>>  data = readFile(repaymentRecordBook, requiredHeaders);
-        repaymentRecordBook.setMeedlNotification(new MeedlNotification());
-        log.info("Repayment record book read is {}", data);
-
-
-        Cohort savedCohort = findCohort(repaymentRecordBook.getCohort());
-        repaymentRecordBook.setCohort(savedCohort);
-        List<RepaymentHistory> convertedRepaymentHistories = convertToRepaymentHistory(data);
-        repaymentRecordBook.setRepaymentHistories(convertedRepaymentHistories);
-
-        Set<String> loaneesThatMadePayment = getSetOfLoanees(convertedRepaymentHistories);
-        log.info("Set of loanees that made payments size : {}, set",loaneesThatMadePayment.size());
-        Map<String, List<RepaymentHistory>> mapOfRepaymentHistoriesForEachLoanee = getRepaymentHistoriesForLoanees(loaneesThatMadePayment, convertedRepaymentHistories);
-        printRepaymentCountsPerLoanee(mapOfRepaymentHistoriesForEachLoanee);
-        processAccumulatedRepayments(mapOfRepaymentHistoriesForEachLoanee, repaymentRecordBook.getCohort().getId(), repaymentRecordBook);
-        log.info("Repayment record uploaded..");
     }
     public void printRepaymentCountsPerLoanee(Map<String, List<RepaymentHistory>> mapOfRepaymentHistoriesForEachLoanee) {
         for (Map.Entry<String, List<RepaymentHistory>> entry : mapOfRepaymentHistoriesForEachLoanee.entrySet()) {
@@ -321,9 +314,6 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         List<RepaymentHistory> repaymentHistories = new ArrayList<>();
 
         log.info("Started creating Repayment record from data gotten from file upload {}, size {}",data, data.size());
-        loanBookValidator.validateDateTimeFormat(data, "paymentdate");
-        loanBookValidator.validateAmountPaid(data, "amountpaid");
-        loanBookValidator.validateUserExistForRepayment(data, "email");
         for (Map<String, String> row  : data) {
 
             RepaymentHistory repaymentHistory = RepaymentHistory.builder()
@@ -414,7 +404,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
 
     List<CohortLoanee> convertToLoanees(List<Map<String, String>> data, Cohort cohort, String actorId) throws MeedlException {
         List<CohortLoanee> cohortLoanees = new ArrayList<>();
-
+        int rowCount = 1;
         for (Map<String, String> row : data) {
             UserIdentity userIdentity = UserIdentity.builder()
                     .firstName(row.get("firstname"))
@@ -428,9 +418,9 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                     .nin(row.get("nin"))
                     .createdBy(actorId)
                     .build();
-            loanBookValidator.containsOnlyDigits(row.get("initialdeposit"), "Initial deposit is not a monetary value. "+ loanBookValidator.convertIfNull(row.get("initialdeposit")));
-            loanBookValidator.containsOnlyDigits(row.get("amountrequested"), "Amount requested is not a monetary value. "+ loanBookValidator.convertIfNull(row.get("amountrequested")));
-            loanBookValidator.containsOnlyDigits(row.get("amountreceived"), "Amount received is not a monetary value. "+ loanBookValidator.convertIfNull(row.get("amountreceived")));
+            loanBookValidator.containsOnlyDigits(row.get("initialdeposit"), "Initial deposit is not a monetary value. "+ loanBookValidator.convertIfNull(row.get("initialdeposit")), rowCount);
+            loanBookValidator.containsOnlyDigits(row.get("amountrequested"), "Amount requested is not a monetary value. "+ loanBookValidator.convertIfNull(row.get("amountrequested")), rowCount);
+            loanBookValidator.containsOnlyDigits(row.get("amountreceived"), "Amount received is not a monetary value. "+ loanBookValidator.convertIfNull(row.get("amountreceived")), rowCount);
 
             LoaneeLoanDetail loaneeLoanDetail = LoaneeLoanDetail.builder()
                     .initialDeposit(new BigDecimal(row.get("initialdeposit")))
@@ -460,6 +450,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                     .build();
 
             cohortLoanees.add(cohortLoanee);
+            rowCount++;
         }
         log.info("Validating the file field values.");
         loanBookValidator.validateAllFileFields(cohortLoanees);
