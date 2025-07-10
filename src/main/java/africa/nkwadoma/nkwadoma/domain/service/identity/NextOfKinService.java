@@ -12,8 +12,6 @@ import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.*;
 
-import java.util.*;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -35,13 +33,21 @@ public class NextOfKinService implements NextOfKinUseCase {
         }
         NextOfKin savedNextOfKin = nextOfKinOutputPort.save(nextOfKin);
         log.info("Saved next of kin: {}", savedNextOfKin);
-        updateUserNextOfKinDetails(foundUserIdentity, savedNextOfKin);
+        updateUserNextOfKinDetails(foundUserIdentity, savedNextOfKin, nextOfKin);
         return savedNextOfKin;
     }
 
-    private void updateUserNextOfKinDetails(UserIdentity userIdentity, NextOfKin savedNextOfKin) throws MeedlException {
+    private void updateAlternativeDetails(UserIdentity userIdentity, NextOfKin nextOfKin) throws MeedlException {
+        userIdentity.setAlternateEmail(nextOfKin.getAlternateEmail());
+        userIdentity.setAlternatePhoneNumber(nextOfKin.getAlternatePhoneNumber());
+        userIdentity.setAlternateContactAddress(nextOfKin.getAlternateContactAddress());
+        userIdentityOutputPort.save(userIdentity);
+    }
+
+    private void updateUserNextOfKinDetails(UserIdentity userIdentity, NextOfKin savedNextOfKin, NextOfKin nextOfKin) throws MeedlException {
         log.info("Updating next of kin for user : {}", userIdentity);
         userIdentity.setNextOfKin(savedNextOfKin);
+        updateAlternativeDetails(userIdentity, nextOfKin);
         log.info("Next of kin before being updated on user db {}", userIdentity.getNextOfKin());
         userIdentityOutputPort.save(userIdentity);
     }
