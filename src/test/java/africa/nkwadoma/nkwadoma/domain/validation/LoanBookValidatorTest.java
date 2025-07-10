@@ -9,21 +9,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 
-//@SpringBootTest
-//@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-//@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(MockitoExtension.class)
 @Slf4j
 class LoanBookValidatorTest {
@@ -32,9 +26,9 @@ class LoanBookValidatorTest {
     private LoanBookValidator loanBookValidator;
     @Mock
     private LoaneeOutputPort loaneeOutputPort;
-    private Loanee mockLoanee = new Loanee();
+    private final Loanee mockLoanee = new Loanee();
 
-    private int rowCount = 1;
+    private final int rowCount = 1;
 
     @BeforeEach
     public void setUp(){
@@ -108,14 +102,6 @@ class LoanBookValidatorTest {
                 () -> loanBookValidator.validateDateTimeFormat(row, "startDate", rowCount));
         assertTrue(ex.getMessage().contains("Date doesn't match format"));
     }
-
-//    @Test
-//    void testCompletelyInvalidDate() {
-//        Map<String, String> row = createRow("startDate", "this-is-not-a-date");
-//        MeedlException ex = assertThrows(MeedlException.class,
-//                () -> loanBookValidator.validateDateTimeFormat(row, "startDate", rowCount));
-//        assertTrue(ex.getMessage().contains("Date doesn't match format"));
-//    }
 
     @Test
     void invalidDayMonth() {
@@ -214,7 +200,7 @@ class LoanBookValidatorTest {
     }
 
     @Test
-    void testNullAmountShouldFail() {
+    void validateAmountPaidWithNull() {
         Map<String, String> row = createRow("amountPaid", null);
         MeedlException ex = assertThrows(MeedlException.class,
                 () -> loanBookValidator.validateAmountPaid(row, "amountPaid", rowCount));
@@ -222,7 +208,7 @@ class LoanBookValidatorTest {
     }
 
     @Test
-    void testEmptyStringShouldFail() {
+    void validateAmountPaidWithEmptyString() {
         Map<String, String> row = createRow("amountPaid", "");
         MeedlException ex = assertThrows(MeedlException.class,
                 () -> loanBookValidator.validateAmountPaid(row, "amountPaid", rowCount));
@@ -280,7 +266,6 @@ class LoanBookValidatorTest {
         MeedlException ex = assertThrows(MeedlException.class, () ->
                 loanBookValidator.validateUserExistForRepayment(row, "email", rowCount)
         );
-
         assertTrue(ex.getMessage().contains("does not exist for repayment"));
     }
     @Test
@@ -293,7 +278,6 @@ class LoanBookValidatorTest {
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
                 loanBookValidator.validateUserExistForRepayment(row, "email", rowCount)
         );
-
         assertTrue(ex.getMessage().contains("Unexpected error"));
     }
 
