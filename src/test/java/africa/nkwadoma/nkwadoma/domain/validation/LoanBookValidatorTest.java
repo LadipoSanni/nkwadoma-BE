@@ -1,8 +1,14 @@
 package africa.nkwadoma.nkwadoma.domain.validation;
 
+import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -12,19 +18,25 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 
-@SpringBootTest
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+//@SpringBootTest
+//@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+//@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ExtendWith(MockitoExtension.class)
 @Slf4j
 class LoanBookValidatorTest {
 
-    @Autowired
+    @InjectMocks
     private LoanBookValidator loanBookValidator;
+    @Mock
+    private LoaneeOutputPort loaneeOutputPort;
+    private Loanee mockLoanee = new Loanee();
+
     private int rowCount = 1;
 
-    @BeforeAll
+    @BeforeEach
     public void setUp(){
         loanBookValidator.setValidationErrorMessage();
     }
@@ -245,5 +257,45 @@ class LoanBookValidatorTest {
                 () -> loanBookValidator.validateAmountPaid(row, "amountPaid", rowCount));
         assertTrue(ex.getMessage().contains("Amount paid is not a monetary value"));
     }
+
+
+
+    @Test
+    void validateLoaneeExists() throws MeedlException {
+        Map<String, String> row = createRow("email", "test@example.com");
+
+        log.info("Mock loanee is {}",mockLoanee);
+        when(loaneeOutputPort.findByLoaneeEmail("test@example.com")).thenReturn(mockLoanee);
+
+        assertDoesNotThrow(() ->
+                loanBookValidator.validateUserExistForRepayment(row, "email", rowCount)
+        );
+    }
+    @Test
+    void validateWhenLoaneeDoesNotExist() throws MeedlException {
+        Map<String, String> row = createRow("email", "nonexistent@example.com");
+
+        when(loaneeOutputPort.findByLoaneeEmail("nonexistent@example.com")).thenReturn(null);
+
+        MeedlException ex = assertThrows(MeedlException.class, () ->
+                loanBookValidator.validateUserExistForRepayment(row, "email", rowCount)
+        );
+
+        assertTrue(ex.getMessage().contains("does not exist for repayment"));
+    }
+    @Test
+    void validateWithInvalidEmail() throws MeedlException {
+        Map<String, String> row = createRow("email", "example.com");
+
+        when(loaneeOutputPort.findByLoaneeEmail("example.com"))
+                .thenThrow(new MeedlException("Unexpected error"));
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                loanBookValidator.validateUserExistForRepayment(row, "email", rowCount)
+        );
+
+        assertTrue(ex.getMessage().contains("Unexpected error"));
+    }
+
 
 }

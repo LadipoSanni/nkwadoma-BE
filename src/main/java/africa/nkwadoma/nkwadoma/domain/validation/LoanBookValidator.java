@@ -159,7 +159,7 @@ public class LoanBookValidator {
 
             validateDateTimeFormat(row, "paymentdate", rowCount);
             validateAmountPaid(row, "amountpaid", rowCount);
-//            validateUserExistForRepayment(row, "email");
+            validateUserExistForRepayment(row, "email", rowCount);
             rowCount++;
         }
     }
@@ -190,21 +190,36 @@ public class LoanBookValidator {
 
     public void validateUserExistForRepayment(Map<String, String> row, String email, int rowCount) throws MeedlException {
 
-            String emailToCheck = row.get(email);
+        String emailToCheck = row.get(email);
 
-            Loanee loanee = loaneeOutputPort.findByLoaneeEmail(emailToCheck);
-            log.info("loanee found in repayment history : {}",loanee);
-            if (loanee == null) {
-                log.error("Loanee with email{} does not exist for repayment. For row {}", emailToCheck, rowCount);
-                validationErrorMessage.append("Error in row : ")
-                        .append(rowCount)
-                        .append(" ").append("Loanee with email")
-                        .append(emailToCheck)
-                        .append(" does not exist for repayment.")
-                        .append("\n");
-                throw new MeedlException("Loanee with email" + emailToCheck + " does not exist for repayment");
-            }
-            log.info("Loanee with email {} on row {} exist. ", emailToCheck, rowCount);
+        Loanee loanee = null;
+        try {
+
+            loanee = loaneeOutputPort.findByLoaneeEmail(emailToCheck);
+        } catch (MeedlException exception) {
+            validationErrorMessage.append("Error in row : ")
+                    .append(rowCount)
+                    .append(" ").append("Loanee with email : ")
+                    .append(emailToCheck)
+                    .append(". ")
+                    .append(exception.getMessage())
+                    .append("\n");
+            log.error("{}", exception.getMessage());
+            throw  new RuntimeException(exception.getMessage());
+        }
+
+        log.info("loanee found in repayment history : {}", loanee);
+        if (loanee == null) {
+            log.error("Loanee with email {} does not exist for repayment. For row {}", emailToCheck, rowCount);
+            validationErrorMessage.append("Error in row : ")
+                    .append(rowCount)
+                    .append(" ").append("Loanee with email : ")
+                    .append(emailToCheck)
+                    .append(" does not exist for repayment.")
+                    .append("\n");
+            throw new MeedlException("Loanee with email : " + emailToCheck + " does not exist for repayment");
+        }
+        log.info("Loanee with email {} on row {} exist. ", emailToCheck, rowCount);
 
     }
     private LocalDateTime parseFlexibleDateTime(String dateStr, int rowCount) throws MeedlException {
