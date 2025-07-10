@@ -245,7 +245,11 @@ public class UserIdentityService implements CreateUserUseCase {
     public UserIdentity viewUserDetail(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateUUID(userIdentity.getId(), UserMessages.INVALID_USER_ID.getMessage());
         log.info("Viewing user details");
-        return userIdentityOutputPort.findById(userIdentity.getId());
+        UserIdentity foundUser = userIdentityOutputPort.findById(userIdentity.getId());
+        if (foundUser != null && foundUser.getNextOfKin() != null){
+            foundUser.setAdditionalDetailsCompleted(Boolean.TRUE);
+        }
+        return foundUser;
     }
 
 }
