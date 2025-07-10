@@ -152,10 +152,12 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             throw new LoanException(LOAN_DECISION.getMessage());
         }
         if (loanOffer.getLoaneeResponse().equals(LoanDecision.DECLINED)){
+            log.error("{}", LoanMessages.CANNOT_START_LOAN_FOR_LOAN_OFFER_THAT_AS_BEEN_DECLINED.getMessage());
             throw new LoanException(LoanMessages.CANNOT_START_LOAN_FOR_LOAN_OFFER_THAT_AS_BEEN_DECLINED.getMessage());
         }
         Optional<Loan> foundLoan = loanOutputPort.findLoanByLoanOfferId(loanOffer.getId());
         if (foundLoan.isPresent()) {
+            log.error("{}", LoanMessages.LOAN_ALREADY_EXISTS_FOR_THIS_LOANEE.getMessage());
             throw new LoanException(LoanMessages.LOAN_ALREADY_EXISTS_FOR_THIS_LOANEE.getMessage());
         }
         if (loan.getStartDate() != null){
