@@ -102,9 +102,9 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         log.info("Repayment record book read is {}", data);
 
 
+        loanBookValidator.repaymentHistoryValidation(data, repaymentHistoryBook);
         Cohort savedCohort = findCohort(repaymentHistoryBook.getCohort());
         repaymentHistoryBook.setCohort(savedCohort);
-        loanBookValidator.repaymentHistoryValidation(data, repaymentHistoryBook);
         List<RepaymentHistory> convertedRepaymentHistories = convertToRepaymentHistory(data);
         repaymentHistoryBook.setRepaymentHistories(convertedRepaymentHistories);
 
