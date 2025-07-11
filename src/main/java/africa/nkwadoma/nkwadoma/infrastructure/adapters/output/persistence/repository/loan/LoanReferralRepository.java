@@ -1,6 +1,8 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan;
 
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoanReferralEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.*;
@@ -45,4 +47,40 @@ public interface LoanReferralRepository extends JpaRepository<LoanReferralEntity
     Optional<LoanReferralEntity> findAllByCohortLoanee_Loanee_UserIdentity_Email(String loaneeEmail);
 
     Optional<LoanReferralEntity> findLoanReferralByCohortLoaneeId(String id);
+
+    @Query("""
+    select lre.id as id, 
+           l.userIdentity.firstName as firstName, 
+           l.userIdentity.lastName as lastName,
+           l.userIdentity.alternatePhoneNumber as alternatePhoneNumber,
+           l.userIdentity.isIdentityVerified as identityVerified,
+           l.userIdentity.email as email,
+           l.userIdentity.id as userId,
+           l.userIdentity.alternateEmail as alternateEmail,
+           l.id as loaneeId,
+           l.userIdentity.alternateContactAddress as alternateContactAddress,
+           c.name as cohortName,
+           p.name as programName,
+           c.startDate as cohortStartDate,
+           lre.loanReferralStatus as status,
+           o.name as referredBy,
+           c.tuitionAmount as tuitionAmount,
+           l.userIdentity.image as loaneeImage,
+           cle.loaneeLoanDetail.initialDeposit as initialDeposit,
+           cle.loaneeLoanDetail.amountRequested as loanAmountRequested,
+           cle.id as cohortLoaneeId
+    from LoanReferralEntity lre
+    join lre.cohortLoanee cle
+    join cle.loanee l
+    join l.userIdentity u
+    join cle.cohort c
+    join ProgramEntity p on c.programId = p.id
+    join p.organizationIdentity o
+    where cle.loanee.id = :loaneeId
+""")
+    Page<LoanReferralProjection> findAllLoanReferralsForLoanee(
+            @Param("loaneeId") String loaneeId,
+            Pageable pageRequest
+    );
+
 }
