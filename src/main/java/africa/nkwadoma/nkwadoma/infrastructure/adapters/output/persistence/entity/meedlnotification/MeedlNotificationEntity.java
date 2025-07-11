@@ -28,8 +28,8 @@ public class MeedlNotificationEntity {
     private boolean callToAction;
     private String senderMail;
     private String senderFullName;
-    @Lob
-    @Column(name = "content_detail", columnDefinition = "TEXT")
+//    @Lob
+//    @Column(name = "content_detail", columnDefinition = "TEXT")
     private String contentDetail;
     @Enumerated(EnumType.STRING)
     private NotificationFlag notificationFlag;
