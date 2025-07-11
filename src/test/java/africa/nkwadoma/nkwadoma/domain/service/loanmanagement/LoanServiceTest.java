@@ -482,16 +482,9 @@ class LoanServiceTest {
 
     @Test
     void viewLoanReferralForLoanee_Success() throws MeedlException {
-        // Arrange
         String userId = testId;
-        int pageNumber = 0;
-        int pageSize = 10;
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-
-        // Use pre-existing loanee
         when(loaneeOutputPort.findByUserId(userId)).thenReturn(Optional.of(loanee));
-
-        // Use pre-existing loanReferral with modifications for variety
         loanReferral.setId(UUID.randomUUID().toString());
         loanReferral.setLoanReferralStatus(LoanReferralStatus.PENDING);
         LoanReferral loanReferral2 = LoanReferral.builder()
@@ -505,17 +498,12 @@ class LoanServiceTest {
         when(loanReferralOutputPort.findAllLoanReferralForLoanee(loanee.getId(), pageNumber, pageSize))
                 .thenReturn(loanReferralsPage);
 
-        // Mock LoanBreakdowns
         List<LoaneeLoanBreakdown> breakdowns1 = List.of(TestData.createTestLoaneeLoanBreakdown(cohortLoanee.getId()));
         List<LoaneeLoanBreakdown> breakdowns2 = List.of(TestData.createTestLoaneeLoanBreakdown(cohortLoanee.getId()));
         when(loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(cohortLoanee.getId()))
                 .thenReturn(breakdowns1)
                 .thenReturn(breakdowns2);
-
-        // Act
         Page<LoanReferral> result = loanService.viewLoanReferralForLoanee(userId, pageNumber, pageSize);
-
-        // Assert
         assertNotNull(result);
         assertEquals(2, result.getTotalElements());
         assertEquals(2, result.getContent().size());
