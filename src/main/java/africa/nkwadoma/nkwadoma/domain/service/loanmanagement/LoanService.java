@@ -309,14 +309,14 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     @Override
-    public Page<LoanReferral> viewLoanReferralForLoanee(String userId, int pageNumber, int pageSize) throws MeedlException {
+    public Page<LoanReferral> viewLoanReferralsForLoanee(String userId, int pageNumber, int pageSize) throws MeedlException {
         MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
         Optional<Loanee> loanee = loaneeOutputPort.findByUserId(userId);
         String loaneeId = null;
         if (loanee.isPresent()) {
             loaneeId = loanee.get().getId();
         }
-        Page<LoanReferral> loanReferrals = loanReferralOutputPort.findAllLoanReferralForLoanee(loaneeId, pageNumber, pageSize);
+        Page<LoanReferral> loanReferrals = loanReferralOutputPort.findAllLoanReferralsForLoanee(loaneeId, pageNumber, pageSize);
 
         List<LoanReferral> updatedLoanReferrals = loanReferrals.getContent().stream()
                 .peek(loanReferral -> {

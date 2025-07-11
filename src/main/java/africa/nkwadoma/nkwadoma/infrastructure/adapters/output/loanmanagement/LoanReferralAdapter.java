@@ -112,7 +112,7 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
     }
 
     @Override
-    public Page<LoanReferral> findAllLoanReferralForLoanee(String loaneeId, int pageNumber, int pageSize) throws MeedlException {
+    public Page<LoanReferral> findAllLoanReferralsForLoanee(String loaneeId, int pageNumber, int pageSize) throws MeedlException {
         MeedlValidator.validateUUID(loaneeId, UserMessages.INVALID_USER_ID.getMessage());
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
         Page<LoanReferralProjection> loanReferralEntities = loanReferralRepository.findAllLoanReferralsForLoanee(loaneeId, pageRequest);

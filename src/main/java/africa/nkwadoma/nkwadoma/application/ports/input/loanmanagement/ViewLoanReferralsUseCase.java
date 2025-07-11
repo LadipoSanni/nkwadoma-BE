@@ -7,6 +7,6 @@ import org.springframework.data.domain.Page;
 public interface ViewLoanReferralsUseCase {
     LoanReferral viewLoanReferral(String actorId, String loanReferralId) throws MeedlException;
 
-    Page<LoanReferral> viewLoanReferralForLoanee(String userId, int pageNumber, int pageSize) throws MeedlException;
+    Page<LoanReferral> viewLoanReferralsForLoanee(String userId, int pageNumber, int pageSize) throws MeedlException;
 
 }

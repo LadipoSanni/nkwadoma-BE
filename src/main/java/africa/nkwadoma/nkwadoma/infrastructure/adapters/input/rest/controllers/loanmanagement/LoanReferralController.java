@@ -66,12 +66,13 @@ public class LoanReferralController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('LOANEE')")
     @GetMapping("loanee/loan-referrals")
     public ResponseEntity<ApiResponse<?>> viewAllLoanReferralsForLoanee(@AuthenticationPrincipal Jwt meedlUser,
                                                                         @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
                                                                         @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) throws MeedlException {
         String userId = meedlUser.getClaimAsString("sub");
-        Page<LoanReferral> loanReferrals = viewLoanReferralsUseCase.viewLoanReferralForLoanee(userId, pageNumber, pageSize);
+        Page<LoanReferral> loanReferrals = viewLoanReferralsUseCase.viewLoanReferralsForLoanee(userId, pageNumber, pageSize);
         List<LoanReferralResponse> loanReferralResponses = loanReferralRestMapper.toLoanReferralResponses(loanReferrals);
         PaginatedResponse<LoanReferralResponse> paginatedResponse = new PaginatedResponse<>(
                 loanReferralResponses, loanReferrals.hasNext(), loanReferrals.getTotalPages(), loanReferrals.getTotalElements() ,pageNumber,pageSize
