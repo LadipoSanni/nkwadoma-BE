@@ -22,4 +22,7 @@ public interface AsynchronousNotificationOutputPort {
     void sendDeferralNotificationToEmployee(Loanee loanee, String loanId, NotificationFlag notificationFlag) throws MeedlException;
     @Async
     void notifyPortfolioManagerOfNewLoanOfferWithDecision(LoanOffer loanOffer, UserIdentity userIdentity) throws MeedlException;
+
+    @Async
+    void notifyPmForLoanRepaymentUploadFailure(UserIdentity foundActor, StringBuilder validationErrorMessage, String fileName) throws MeedlException;
 }

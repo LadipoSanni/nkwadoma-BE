@@ -92,27 +92,27 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
 
 
     @Override
-    public void uploadRepaymentHistory(LoanBook repaymentRecordBook) throws MeedlException {
-        MeedlValidator.validateObjectInstance(repaymentRecordBook, "Repayment record book cannot be empty.");
-        repaymentRecordBook.validateRepaymentRecord();
+    public void uploadRepaymentHistory(LoanBook repaymentHistoryBook) throws MeedlException {
+        MeedlValidator.validateObjectInstance(repaymentHistoryBook, "Repayment record book cannot be empty.");
+        repaymentHistoryBook.validateRepaymentRecord();
         List<String> requiredHeaders = getRepaymentRecordUploadRequiredHeaders();
 
-        List<Map<String, String>>  data = readFile(repaymentRecordBook, requiredHeaders);
-        repaymentRecordBook.setMeedlNotification(new MeedlNotification());
+        List<Map<String, String>>  data = readFile(repaymentHistoryBook, requiredHeaders);
+        repaymentHistoryBook.setMeedlNotification(new MeedlNotification());
         log.info("Repayment record book read is {}", data);
 
 
-        Cohort savedCohort = findCohort(repaymentRecordBook.getCohort());
-        repaymentRecordBook.setCohort(savedCohort);
-        loanBookValidator.repaymentHistoryValidation(data);
+        Cohort savedCohort = findCohort(repaymentHistoryBook.getCohort());
+        repaymentHistoryBook.setCohort(savedCohort);
+        loanBookValidator.repaymentHistoryValidation(data, repaymentHistoryBook);
         List<RepaymentHistory> convertedRepaymentHistories = convertToRepaymentHistory(data);
-        repaymentRecordBook.setRepaymentHistories(convertedRepaymentHistories);
+        repaymentHistoryBook.setRepaymentHistories(convertedRepaymentHistories);
 
         Set<String> loaneesThatMadePayment = getSetOfLoanees(convertedRepaymentHistories);
         log.info("Set of loanees that made payments size : {}, set",loaneesThatMadePayment.size());
         Map<String, List<RepaymentHistory>> mapOfRepaymentHistoriesForEachLoanee = getRepaymentHistoriesForLoanees(loaneesThatMadePayment, convertedRepaymentHistories);
         printRepaymentCountsPerLoanee(mapOfRepaymentHistoriesForEachLoanee);
-        processAccumulatedRepayments(mapOfRepaymentHistoriesForEachLoanee, repaymentRecordBook.getCohort().getId(), repaymentRecordBook);
+        processAccumulatedRepayments(mapOfRepaymentHistoriesForEachLoanee, repaymentHistoryBook.getCohort().getId(), repaymentHistoryBook);
         log.info("Repayment record uploaded..");
     }
 
