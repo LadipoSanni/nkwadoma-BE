@@ -28,5 +28,5 @@ public class LoanReferralResponse {
     private String programName;
     private boolean identityVerified;
     private LoanReferralStatus loanReferralStatus;
-    private List<LoaneeLoanBreakdown> loaneeLoanBreakdowns;
+    private List<LoaneeLoanBreakDownResponse> loaneeLoanBreakdowns;
 }

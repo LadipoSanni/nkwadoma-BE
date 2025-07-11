@@ -241,6 +241,7 @@ public class LoaneeService implements LoaneeUseCase {
         OrganizationIdentity organizationIdentity =
                 organizationIdentityOutputPort.findById(cohort.getOrganizationId());
         organizationIdentity.setNumberOfLoanees(organizationIdentity.getNumberOfLoanees() + size);
+        organizationIdentity.setStillInTraining(organizationIdentity.getStillInTraining() + size);
         organizationIdentity.setOrganizationEmployees(
                 organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId()));
         organizationIdentityOutputPort.save(organizationIdentity);
@@ -440,10 +441,6 @@ public class LoaneeService implements LoaneeUseCase {
     }
     private void notifyPortfolioManager(UserIdentity userIdentity) throws MeedlException {
         loaneeEmailUsecase.sendLoaneeHasBeenReferEmail(userIdentity);
-    }
-
-    private void refer(Loanee loanee) throws MeedlException {
-        loaneeEmailUsecase.referLoaneeEmail(loanee);
     }
 
     @Override
@@ -798,14 +795,15 @@ public class LoaneeService implements LoaneeUseCase {
     }
 
     @Override
-    public String archiveOrUnArchiveByIds(String actorId, List<String> loaneeIds, LoaneeStatus loaneeStatus) throws MeedlException {
+    public String archiveOrUnArchiveByIds(String cohortId, List<String> loaneeIds, LoaneeStatus loaneeStatus) throws MeedlException {
+        MeedlValidator.validateUUID(cohortId,CohortMessages.INVALID_COHORT_ID.getMessage());
         if (loaneeIds.isEmpty()){
             throw new MeedlException(LoaneeMessages.LOANEES_ID_CANNOT_BE_EMPTY.getMessage());
         }
         for (String loaneeId : loaneeIds) {
             MeedlValidator.validateUUID(loaneeId,UserMessages.INVALID_USER_ID.getMessage());
         }
-        loaneeOutputPort.archiveOrUnArchiveByIds(loaneeIds,loaneeStatus);
+        cohortLoaneeOutputPort.archiveOrUnArchiveByIds(cohortId,loaneeIds,loaneeStatus);
         if (loaneeIds.size() == 1) {
             return "Loanee has been "+loaneeStatus.name();
         }else {

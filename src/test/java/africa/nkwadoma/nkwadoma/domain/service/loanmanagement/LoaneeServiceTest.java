@@ -902,12 +902,14 @@ class LoaneeServiceTest {
 
     @Test
     void archiveLoanee(){
-        List<Loanee> loaneeList = new ArrayList<>();
+
+        String response = "";
         try{
-            String response = loaneeService.archiveOrUnArchiveByIds(mockId,List.of(mockId),LoaneeStatus.ARCHIVE);
+            response = loaneeService.archiveOrUnArchiveByIds(elites.getId(),List.of(firstLoanee.getId()),LoaneeStatus.ARCHIVE);
         }catch (MeedlException meedlException){
             log.error(meedlException.getMessage());
         }
+       assertEquals(response,"Loanee has been "+LoaneeStatus.ARCHIVE.name());
     }
 
     @Test

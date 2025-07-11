@@ -93,6 +93,18 @@ class LoaneePersistenceAdapterTest {
         anotherLoanee.setUserIdentity(anotherUser);
 
     }
+    private Loanee saveLoanee(Loanee loanee) {
+        try {
+            UserIdentity savedUserIdentity = identityOutputPort.save(firstLoanee.getUserIdentity());
+            firstLoanee.setUserIdentity(savedUserIdentity);
+            loanee = loaneeOutputPort.save(firstLoanee);
+
+            log.info("Saved loanee {}, saved user {}", loaneeId, userId);
+        }catch (MeedlException exception){
+            log.error(exception.getMessage());
+        }
+        return loanee;
+    }
 
     @Test
     void saveNullLoanee(){
@@ -177,17 +189,13 @@ class LoaneePersistenceAdapterTest {
     @Test
     void saveLoanee(){
         Loanee loanee = new Loanee();
-        try {
-            UserIdentity savedUserIdentity = identityOutputPort.save(firstLoanee.getUserIdentity());
-            firstLoanee.setUserIdentity(savedUserIdentity);
-            loanee = loaneeOutputPort.save(firstLoanee);
-            loaneeId = loanee.getId();
-            userId = savedUserIdentity.getId();
-        }catch (MeedlException exception){
-            log.error(exception.getMessage());
-        }
+        loanee = saveLoanee(loanee);
+        loaneeId = loanee.getId();
+        userId = loanee.getUserIdentity().getId();
+        log.info("User id in the first save {}", userId);
         assertEquals(loanee.getUserIdentity().getFirstName(),firstLoanee.getUserIdentity().getFirstName());
     }
+
 
     @Order(2)
     @Test
@@ -208,17 +216,33 @@ class LoaneePersistenceAdapterTest {
 
     @Order(3)
     @Test
-    void findAllLoanee(){
+    void findAllLoanee() {
         Page<Loanee> loanees = Page.empty();
         pageSize = 10;
         pageNumber = 0;
+        Loanee savedLoanee = null;
+        int previousSize = 0;
         try {
-            loanees = loaneeOutputPort.findAllLoanee(pageSize,pageNumber);
+            loanees = loaneeOutputPort.findAllLoanee(pageSize, pageNumber);
+            previousSize = loanees.toList().size();
+            log.info("Loanees previous size = {}", previousSize);
+            firstLoanee.getUserIdentity().setEmail("findalltest@gmail.com");
+            firstLoanee.getUserIdentity().setId(UUID.randomUUID().toString());
+            savedLoanee = saveLoanee(firstLoanee);
+            log.info("User id in the view all loanee {}, Loanee id {}", savedLoanee.getUserIdentity().getId(), savedLoanee.getId());
+            loanees = loaneeOutputPort.findAllLoanee(pageSize, pageNumber);
             log.info("------> The loanees -----> {}", loanees.getContent());
-        }catch (MeedlException exception){
+        } catch (MeedlException exception) {
             log.error(exception.getMessage());
         }
-        assertEquals(2,loanees.toList().size());
+        assertNotNull(savedLoanee);
+        assertEquals(previousSize+1, loanees.toList().size());
+        try {
+            deleteLoanee(savedLoanee.getId(), savedLoanee.getUserIdentity(), savedLoanee.getUserIdentity().getId());
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     @Order(4)
@@ -259,14 +283,23 @@ class LoaneePersistenceAdapterTest {
 
     @AfterAll
     void cleanUp() throws MeedlException {
-        loaneeRepository.deleteById(loaneeId);
-        identityManagerOutputPort.deleteUser(userIdentity);
-        identityOutputPort.deleteUserById(userId);
+        deleteLoanee(loaneeId, userIdentity, userId);
         loaneeRepository.deleteById(secondLoaneeId);
         Optional<UserIdentity> userByEmail = identityManagerOutputPort.getUserByEmail(anotherUser.getEmail());
         if(userByEmail.isPresent()){
             identityManagerOutputPort.deleteUser(userByEmail.get());
         }
         identityOutputPort.deleteUserById(otherUserId);
+    }
+
+    private void deleteLoanee(String loaneeId,UserIdentity userIdentity,String userId) throws MeedlException {
+        loaneeRepository.deleteById(loaneeId);
+        try {
+
+            identityManagerOutputPort.deleteUser(userIdentity);
+        }catch (MeedlException e){
+            log.error("",e);
+        }
+        identityOutputPort.deleteUserById(userId);
     }
 }

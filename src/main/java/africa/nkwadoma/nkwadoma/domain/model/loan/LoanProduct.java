@@ -58,6 +58,10 @@ public class LoanProduct {
     private int pageSize;
     private int pageNumber;
 
+    public void validateCostOfFund() throws MeedlException{
+        if (costOfFund > 100) throw new MeedlException("Cost of fund cannot be greater than 100");
+    }
+
     public void validateLoanProductDetails() throws MeedlException {
         log.info("Started loan product validation");
         MeedlValidator.validateObjectName(name,"Loan product name cannot be empty","Loan product");
@@ -68,6 +72,7 @@ public class LoanProduct {
         validateObligorLimit();
         validateTenor();
         validateMoratorium();
+        validateCostOfFund();
 
         log.info("Ended loan product validation successfully... ");
     }

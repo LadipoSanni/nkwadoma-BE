@@ -22,6 +22,5 @@ public interface LoanReferralRestMapper {
 //            throw new MeedlException(ErrorMessages.INVALID_LOAN_REFERRAL_STATUS);
 //        }
 //    }
-    @Mapping(target = "loanee.userIdentity.id", source = "userId")
-    LoanReferral toLoanReferral(String userId);
+
 }

@@ -39,7 +39,7 @@ public class Loan {
     private LoanOffer loanOffer;
     private LoanStatus loanStatus;
     private BigDecimal initialDeposit;
-    private BigDecimal amountRequested;
+    private BigDecimal loanAmountApproved;
     private BigDecimal tuitionAmount;
     private NextOfKin nextOfKin;
     private UserIdentity userIdentity;
@@ -47,6 +47,8 @@ public class Loan {
     private String programName;
     private String referredBy;
     private String organizationId;
+    private String actorId;
+    private String cohortLoaneeId;
     private int pageNumber;
     private int pageSize;
 

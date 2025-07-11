@@ -70,8 +70,7 @@ public class LoanAdapter implements LoanOutputPort {
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.name());
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validatePageNumber(pageNumber);
-        Page<LoanProjection> loanProjectionPage = loanRepository.findAllByOrganizationId
-                (organizationId, PageRequest.of(pageNumber, pageSize));
+        Page<LoanProjection> loanProjectionPage = loanRepository.findAllLoanInOrganization(organizationId, PageRequest.of(pageNumber, pageSize));
         if (loanProjectionPage.isEmpty()) {
             log.info("Empty page returned");
             return Page.empty();
@@ -122,8 +121,21 @@ public class LoanAdapter implements LoanOutputPort {
     public String findLoanReferal(String id) throws MeedlException {
         MeedlValidator.validateUUID(id,"Loan id cannot be empty");
 
+        log.info("Find loan referrer by loan id {}", id);
         LoanProjection loanProjection = loanRepository.findLoanReferralByLoanId(id);
+        log.info("Found loan referrer by loan id {}", loanProjection);
 
         return loanProjection.getReferredBy();
+    }
+
+    @Override
+    public Page<Loan> findAllLoanDisburedToLoanee(String id, int pageNumber, int pageSize) throws MeedlException {
+        MeedlValidator.validateUUID(id,UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+        Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
+        Page<LoanProjection> loanProjection =
+                loanRepository.findAllLoanDisburestToLoanee(id,pageRequest);
+        return loanProjection.map(loanMapper::mapProjectionToLoan);
     }
 }

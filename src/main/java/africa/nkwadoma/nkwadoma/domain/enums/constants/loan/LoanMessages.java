@@ -17,6 +17,7 @@ public enum LoanMessages {
     MORATORIUM_BELOW_BOUND("Moratorium cannot be below 1"),
     MORATORIUM_ABOVE_BOUND("Moratorium cannot be above 24"),
     LOAN_PRODUCT_NAME_REQUIRED("Loan product name is required"),
+    LOAN_PRODUCT_REQUIRED("Loan product cannot be empty"),
     MINIMUM_REPAYMENT_AMOUNT_REQUIRED("Minimum repayment amount is required"),
     TERMS_AND_CONDITIONS_REQUIRED("Loan terms and conditions is required"),
     LOAN_INTEREST_RATE_REQUIRED("Loan interest rate is required"),
@@ -65,7 +66,9 @@ public enum LoanMessages {
     LOAN_ALREADY_EXISTS_FOR_THIS_LOANEE("Loan already exists for this loanee"),
     CANNOT_START_LOAN_FOR_LOAN_OFFER_THAT_AS_BEEN_DECLINED("Can not start loan for loan offer that as been declined"),
     LOAN_REQUEST_CANNOT_BE_APPROVED("Loanee identity not verified, loanee request cannot be approved "),
-    LOANEE_LOAN_NOT_FOUND("Loanee loan not found"),;
+    LOANEE_LOAN_NOT_FOUND("Loanee loan not found"),
+    LOAN_REFERRAL_NOT_ASSIGNED_TO_LOANEE("Loan referral not assigned to loanee"),
+    LOAN_DECISION("Loan offer decision hasn't been made yet "),;
     private final String message;
 
     LoanMessages(String message) {

@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputP
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
@@ -52,6 +53,7 @@ public class LoanRequestService implements LoanRequestUseCase {
     private final LoaneeOutputPort loaneeOutputPort;
     private final CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
     private final CohortOutputPort cohortOutputPort;
+    private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
 
     @Override
     public Page<LoanRequest> viewAllLoanRequests(LoanRequest loanRequest, String userId) throws MeedlException {
@@ -126,7 +128,8 @@ public class LoanRequestService implements LoanRequestUseCase {
 
             updateNumberOfLoanRequestOnCohort(foundLoanRequest.getCohortId());
 
-            log.info("Loan request updated: {}", updatedLoanRequest);
+            log.info("Loan request updated: {}", updatedLoanRequest.getUserIdentity());
+
             sendNotification(loanRequest, loanOffer, updatedLoanRequest);
             return updatedLoanRequest;
         }
@@ -171,6 +174,7 @@ public class LoanRequestService implements LoanRequestUseCase {
         MeedlNotification meedlNotification = buildUpLoanOfferNotification(loanOffer, updatedLoanRequest, userIdentity);
         log.info("is read before after building notification {}",meedlNotification.isRead());
         meedlNotificationUsecase.sendNotification(meedlNotification);
+        asynchronousMailingOutputPort.sendLoanRequestDecisionMail(updatedLoanRequest);
     }
 
     private static MeedlNotification buildUpLoanOfferNotification(LoanOffer loanOffer, LoanRequest updatedLoanRequest, UserIdentity userIdentity) {

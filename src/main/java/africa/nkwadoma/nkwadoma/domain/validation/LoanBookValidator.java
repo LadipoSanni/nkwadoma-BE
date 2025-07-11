@@ -8,7 +8,8 @@ import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
-import lombok.AllArgsConstructor;
+import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -23,14 +24,19 @@ import java.util.Map;
 
 @Slf4j
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class LoanBookValidator {
     private final LoaneeOutputPort loaneeOutputPort;
     private final LoanProductOutputPort loanProductOutputPort;
     private final AesOutputPort aesOutputPort;
+    private MeedlNotification repaymentHistoryFailureNotification;
+    private StringBuilder validationErrorMessage;
 
     public void validateUserDataUploadFile(LoanBook loanBook, List<Map<String, String>> data, List<String> requiredHeaders) {
 
+    }
+    public void setValidationErrorMessage(){
+        validationErrorMessage = new StringBuilder();
     }
     public void validateUserDataFileHeader(LoanBook loanBook, List<String> requiredHeaders, Map<String, Integer> headerIndexMap){
         for (String required : requiredHeaders) {
@@ -44,13 +50,15 @@ public class LoanBookValidator {
     }
 
     public void validateAllFileFields(List<CohortLoanee> convertedLoanees) throws MeedlException {
+        int rowCount = 1;
         for (CohortLoanee cohortLoanee : convertedLoanees) {
             validateFileBvn(cohortLoanee.getLoanee().getUserIdentity());
             validateFileNin(cohortLoanee.getLoanee().getUserIdentity());
             validatePhoneNumber(cohortLoanee.getLoanee().getUserIdentity());
             validateNames(cohortLoanee.getLoanee().getUserIdentity());
             validateLoanProductExist(cohortLoanee.getLoanee());
-            validateAmount(cohortLoanee.getLoanee());
+            validateAmount(cohortLoanee.getLoanee(), rowCount);
+            rowCount++;
         }
 
     }
@@ -78,10 +86,10 @@ public class LoanBookValidator {
         MeedlValidator.validateObjectName(nameToValidate, message , attributeName);
     }
 
-    private void validateAmount(Loanee loanee) throws MeedlException {
-        validateMoneyValue(loanee.getLoaneeLoanDetail().getInitialDeposit(), "Initial deposit for user with email "+loanee.getUserIdentity().getEmail()+" is invalid: "+ convertIfNull( loanee.getLoaneeLoanDetail().getInitialDeposit()));
-        validateMoneyValue(loanee.getLoaneeLoanDetail().getAmountRequested(), "Amount requested for user with email "+loanee.getUserIdentity().getEmail()+" is invalid: "+ convertIfNull( loanee.getLoaneeLoanDetail().getAmountRequested()));
-        validateMoneyValue(loanee.getLoaneeLoanDetail().getAmountReceived(), "Amount received for user with email "+loanee.getUserIdentity().getEmail()+" is invalid: "+ convertIfNull( loanee.getLoaneeLoanDetail().getAmountReceived()));
+    private void validateAmount(Loanee loanee, int rowCount) throws MeedlException {
+        validateMoneyValue(loanee.getLoaneeLoanDetail().getInitialDeposit(), "Initial deposit for user with email "+loanee.getUserIdentity().getEmail()+" is invalid: "+ convertIfNull( loanee.getLoaneeLoanDetail().getInitialDeposit()), rowCount);
+        validateMoneyValue(loanee.getLoaneeLoanDetail().getAmountRequested(), "Amount requested for user with email "+loanee.getUserIdentity().getEmail()+" is invalid: "+ convertIfNull( loanee.getLoaneeLoanDetail().getAmountRequested()), rowCount);
+        validateMoneyValue(loanee.getLoaneeLoanDetail().getAmountReceived(), "Amount received for user with email "+loanee.getUserIdentity().getEmail()+" is invalid: "+ convertIfNull( loanee.getLoaneeLoanDetail().getAmountReceived()), rowCount);
     }
 
     public String convertIfNull(BigDecimal bigDecimal) {
@@ -97,10 +105,11 @@ public class LoanBookValidator {
         return amount;
     }
 
-    public void validateMoneyValue(BigDecimal amount, String message) throws MeedlException {
+    public void validateMoneyValue(BigDecimal amount, String message, int rowCount) throws MeedlException {
         MeedlValidator.validateBigDecimalDataElement(amount, message);
         if (amount.compareTo(BigDecimal.ZERO) < 0) {
             log.warn("Negative amount detected: {} {}", amount, message);
+            validationErrorMessage.append("Error in row : ").append(rowCount).append(" ").append(message).append("\n");
             throw new MeedlException(message);
         }
     }
@@ -134,55 +143,86 @@ public class LoanBookValidator {
 
 
     private void validateLoanProductExist(Loanee loanee) throws MeedlException {
-        boolean loanProductExist = loanProductOutputPort.existsByNameIgnoreCase(loanee.getCohortName());
+        boolean loanProductExist = loanProductOutputPort.existsByNameIgnoreCase(loanee.getLoanProductName());
         if (!loanProductExist) {
             log.error("Loan Product with name {} does not exist for user with email {}", loanee.getCohortName(), loanee.getUserIdentity().getEmail());
             throw new MeedlException("Loan product with name " + loanee.getCohortName() + " does not exist for user with email "+ loanee.getUserIdentity().getEmail());
         }
+        log.info("Loan product exists with name {}", loanee.getLoanProductName());
     }
 
-    public void validateDateTimeFormat(List<Map<String, String>> data, String dateName) throws MeedlException {
-            for (Map<String, String> row : data) {
+    public void repaymentHistoryValidation(List<Map<String, String>> data) throws MeedlException {
+        repaymentHistoryFailureNotification = new MeedlNotification();
+        validationErrorMessage = new StringBuilder();
+        int rowCount = 1;
+        for (Map<String, String> row : data) {
+
+            validateDateTimeFormat(row, "paymentdate", rowCount);
+            validateAmountPaid(row, "amountpaid", rowCount);
+            validateUserExistForRepayment(row, "email", rowCount);
+            rowCount++;
+        }
+    }
+    public void validateDateTimeFormat(Map<String, String> row, String dateName, int rowCount) throws MeedlException {
                 String dateStr = row.get(dateName);
 
-                LocalDateTime parsedDate = parseFlexibleDateTime(dateStr);
+                LocalDateTime parsedDate = parseFlexibleDateTime(dateStr, rowCount);
                 log.info("Parsed date: {}", parsedDate);
-
-        }
     }
-    public void validateAmountPaid(List<Map<String, String>> data, String amountPaidKey) throws MeedlException {
-        for (Map<String, String> row : data) {
+    public void validateAmountPaid(Map<String, String> row, String amountPaidKey, int rowCount) throws MeedlException {
+
             String amountPassed = row.get(amountPaidKey);
-            containsOnlyDigits(amountPassed, "Amount paid is not a monetary value. "+convertIfNull(amountPassed));
-            validateMoneyValue(new BigDecimal(amountPassed), "Amount repaid is required.");
-            log.info("Amount validated for amount paid: {}", amountPassed);
 
-        }
+            containsOnlyDigits(amountPassed, "Amount paid is not a monetary value. "+convertIfNull(amountPassed), rowCount);
+            validateMoneyValue(new BigDecimal(amountPassed), "Amount repaid is required.", rowCount);
+            log.info("Amount validated for amount paid: {} Row : {}", amountPassed, rowCount);
+
     }
-    public void containsOnlyDigits(String input, String errorMessage) throws MeedlException {
+    public void containsOnlyDigits(String input, String errorMessage, int rowCount) throws MeedlException {
        boolean isOnlyDigits = input != null && input.matches("\\d+(\\.\\d+)?");
        if (!isOnlyDigits){
            log.error("Its not only digits {}", input);
+           validationErrorMessage.append("Error in row : ").append(rowCount).append(" ").append(errorMessage).append("\n");
            throw new MeedlException(errorMessage);
        }
     }
 
 
-    public void validateUserExistForRepayment(List<Map<String, String>> data, String email) throws MeedlException {
-        for (Map<String, String> row : data) {
-            String emailToCheck = row.get(email);
+    public void validateUserExistForRepayment(Map<String, String> row, String email, int rowCount) throws MeedlException {
 
-            Loanee loanee = loaneeOutputPort.findByLoaneeEmail(emailToCheck);
-            log.info("loanee found in repayment history : {}",loanee);
-            if (loanee == null) {
-                log.error("");
-                throw new MeedlException("Loanee with email" + emailToCheck + " does not exist for repayment");
-            }
-            log.info("Loanee with email {} exist. ", emailToCheck);
+        String emailToCheck = row.get(email);
 
+        Loanee loanee = null;
+        try {
+
+            loanee = loaneeOutputPort.findByLoaneeEmail(emailToCheck);
+        } catch (MeedlException exception) {
+            validationErrorMessage.append("Error in row : ")
+                    .append(rowCount)
+                    .append(" ").append("Loanee with email : ")
+                    .append(emailToCheck)
+                    .append(". ")
+                    .append(exception.getMessage())
+                    .append("\n");
+            log.error("{}", exception.getMessage());
+            throw  new RuntimeException(exception.getMessage());
         }
+
+        log.info("loanee found in repayment history : {}", loanee);
+        if (loanee == null) {
+            log.error("Loanee with email {} does not exist for repayment. For row {}", emailToCheck, rowCount);
+            validationErrorMessage.append("Error in row : ")
+                    .append(rowCount)
+                    .append(" ").append("Loanee with email : ")
+                    .append(emailToCheck)
+                    .append(" does not exist for repayment.")
+                    .append("\n");
+            throw new MeedlException("Loanee with email : " + emailToCheck + " does not exist for repayment");
+        }
+        log.info("Loanee with email {} on row {} exist. ", emailToCheck, rowCount);
+
     }
-    private LocalDateTime parseFlexibleDateTime(String dateStr) throws MeedlException {
+    private LocalDateTime parseFlexibleDateTime(String dateStr, int rowCount) throws MeedlException {
         log.info("Repayment date before formating in validation service {}", dateStr);
         if (dateStr == null || MeedlValidator.isEmptyString(dateStr)) {
             return null;
@@ -215,6 +255,7 @@ public class LoanBookValidator {
         }
 
         log.error("The date format was invalid: {}", dateStr);
+        validationErrorMessage.append("Error on row : ").append(rowCount).append(" Date doesn't match format. Date: ").append(dateStr).append(" Example format : 21/10/2019. \n ");
         throw new MeedlException("Date doesn't match format. Date: "+dateStr + " Example format : 21/10/2019");
     }
 }

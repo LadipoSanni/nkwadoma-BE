@@ -31,6 +31,7 @@ public interface LoanReferralMapper {
     @Mapping(target = "loanee.userIdentity.isIdentityVerified", source = "identityVerified")
     @Mapping(target = "loaneeUserId", source = "userId")
     @Mapping(target = "referredBy", source = "referredBy")
+    @Mapping(target = "cohortLoaneeId", source = "cohortLoaneeId")
     LoanReferral mapProjectionToLoanReferralEntity(LoanReferralProjection loanReferralProjection);
 
     List<LoanReferral> toLoanReferrals(List<LoanReferralEntity> loanReferralEntities);

@@ -45,6 +45,7 @@ public class Loanee {
     private String reasonForDropout;
     private List<RepaymentHistory> repaymentHistories;
     private String cohortName;
+    private String loanProductName;
     private LocalDate cohortStartDate;
     private String programName;
     private String programId;

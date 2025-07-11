@@ -125,8 +125,9 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
     }
 
     @Override
-    public void referLoaneeEmail(Loanee loanee) throws MeedlException {
-        Context context = emailOutputPort.getNameAndLinkContextAndIndustryName(getLink(loanee.getUserIdentity()),
+    public void referLoaneeEmail(String loanReferralId,Loanee loanee) throws MeedlException {
+        Context context = emailOutputPort.getNameAndLinkContextAndIndustryNameAndLoanReferralId(getLink(loanee.getUserIdentity()),
+                                                            loanReferralId,
                                                             loanee.getUserIdentity().getFirstName(),
                                                                 loanee.getReferredBy());
         Email email = Email.builder()
@@ -157,18 +158,33 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
     @Override
     public void sendLoanRequestApprovalEmail(LoanRequest loanRequest) {
         Context context = emailOutputPort.getNameAndLinkContextAndLoanOfferId
-                (loanRequest.getLoanee().getUserIdentity().getFirstName(),
+                (loanRequest.getUserIdentity().getFirstName(),
                         getLoanOfferLink(loanRequest.getLoanOfferId()));
 
         Email email = Email.builder()
                 .context(context)
                 .subject(LoaneeMessages.LOAN_REQUEST_APPROVED.getMessage())
-                .to(loanRequest.getLoanee().getUserIdentity().getEmail())
+                .to(loanRequest.getUserIdentity().getEmail())
                 .template(LoaneeMessages.LOAN_REQUEST_APPROVAL.getMessage())
-                .firstName(loanRequest.getLoanee().getUserIdentity().getFirstName())
+                .firstName(loanRequest.getUserIdentity().getFirstName())
                 .build();
 
         sendMail(loanRequest.getUserIdentity(), email);
+    }
+
+    @Override
+    public void inviteLoaneeEmail(Loanee loanee) throws MeedlException {
+        Context context = emailOutputPort.getNameAndLinkContextAndIndustryName(getLink(loanee.getUserIdentity()),
+                loanee.getUserIdentity().getFirstName(),
+                loanee.getReferredBy());
+        Email email = Email.builder()
+                .context(context)
+                .subject(LoaneeMessages.LOANEE_REFERRAL_SUBJECT.getMessage())
+                .to(loanee.getUserIdentity().getEmail())
+                .template(LoaneeMessages.LOANEE_REFERRAL.getMessage())
+                .firstName(loanee.getUserIdentity().getFirstName())
+                .build();
+        sendMail(loanee.getUserIdentity(), email);
     }
 
     @Override
