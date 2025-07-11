@@ -479,4 +479,78 @@ class LoanServiceTest {
         assertNotNull(loans.getContent());
         assertEquals(1, loans.getTotalElements());
     }
+
+    @Test
+    void viewLoanReferralForLoanee_Success() throws MeedlException {
+        // Arrange
+        String userId = testId;
+        int pageNumber = 0;
+        int pageSize = 10;
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+        // Use pre-existing loanee
+        when(loaneeOutputPort.findByUserId(userId)).thenReturn(Optional.of(loanee));
+
+        // Use pre-existing loanReferral with modifications for variety
+        loanReferral.setId(UUID.randomUUID().toString());
+        loanReferral.setLoanReferralStatus(LoanReferralStatus.PENDING);
+        LoanReferral loanReferral2 = LoanReferral.builder()
+                .id(UUID.randomUUID().toString())
+                .loanee(loanee)
+                .loanReferralStatus(LoanReferralStatus.ACCEPTED)
+                .loaneeUserId(testId)
+                .cohortLoaneeId(cohortLoanee.getId())
+                .build();
+        Page<LoanReferral> loanReferralsPage = new PageImpl<>(List.of(loanReferral, loanReferral2), pageable, 2);
+        when(loanReferralOutputPort.findAllLoanReferralForLoanee(loanee.getId(), pageNumber, pageSize))
+                .thenReturn(loanReferralsPage);
+
+        // Mock LoanBreakdowns
+        List<LoaneeLoanBreakdown> breakdowns1 = List.of(TestData.createTestLoaneeLoanBreakdown(cohortLoanee.getId()));
+        List<LoaneeLoanBreakdown> breakdowns2 = List.of(TestData.createTestLoaneeLoanBreakdown(cohortLoanee.getId()));
+        when(loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(cohortLoanee.getId()))
+                .thenReturn(breakdowns1)
+                .thenReturn(breakdowns2);
+
+        // Act
+        Page<LoanReferral> result = loanService.viewLoanReferralForLoanee(userId, pageNumber, pageSize);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(2, result.getTotalElements());
+        assertEquals(2, result.getContent().size());
+        assertEquals(breakdowns1, result.getContent().get(0).getLoaneeLoanBreakdowns());
+        assertEquals(breakdowns2, result.getContent().get(1).getLoaneeLoanBreakdowns());
+        verify(loaneeOutputPort, times(1)).findByUserId(userId);
+        verify(loanReferralOutputPort, times(1)).findAllLoanReferralForLoanee(loanee.getId(), pageNumber, pageSize);
+        verify(loaneeLoanBreakDownOutputPort, times(2)).findAllLoaneeLoanBreakDownByCohortLoaneeId(cohortLoanee.getId());
+        verifyNoMoreInteractions(loaneeOutputPort, loanReferralOutputPort, loaneeLoanBreakDownOutputPort);
+    }
+
+    @Test
+    void viewLoanReferralForLoanee_WithMeedlExceptionInBreakdownFetch() throws MeedlException {
+        String userId = testId;
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        when(loaneeOutputPort.findByUserId(userId)).thenReturn(Optional.of(loanee));
+        loanReferral.setId(UUID.randomUUID().toString());
+        loanReferral.setLoanReferralStatus(LoanReferralStatus.PENDING);
+        Page<LoanReferral> loanReferralsPage = new PageImpl<>(List.of(loanReferral), pageable, 1);
+        when(loanReferralOutputPort.findAllLoanReferralForLoanee(loanee.getId(), pageNumber, pageSize))
+                .thenReturn(loanReferralsPage);
+
+        MeedlException mockException = new MeedlException("Failed to fetch loan breakdowns");
+        when(loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(cohortLoanee.getId()))
+                .thenThrow(mockException);
+        Page<LoanReferral> loanReferrals = loanService.viewLoanReferralForLoanee(userId, pageNumber, pageSize);
+
+        assertNotNull(loanReferrals);
+        assertEquals(1, loanReferrals.getTotalElements());
+        assertEquals(1, loanReferrals.getContent().size());
+        assertNull(loanReferrals.getContent().get(0).getLoaneeLoanBreakdowns());
+        verify(loaneeOutputPort, times(1)).findByUserId(userId);
+        verify(loanReferralOutputPort, times(1)).findAllLoanReferralForLoanee(loanee.getId(), pageNumber, pageSize);
+        verify(loaneeLoanBreakDownOutputPort, times(1)).findAllLoaneeLoanBreakDownByCohortLoaneeId(cohortLoanee.getId());
+        verifyNoMoreInteractions(loaneeOutputPort, loanReferralOutputPort, loaneeLoanBreakDownOutputPort);
+    }
+
 }

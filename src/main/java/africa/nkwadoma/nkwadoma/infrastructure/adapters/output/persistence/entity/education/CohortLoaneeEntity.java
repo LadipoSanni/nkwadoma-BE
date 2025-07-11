@@ -20,7 +20,9 @@ import java.time.LocalDateTime;
 @Entity
 @ToString
 public class CohortLoaneeEntity {
-
+    //50
+    // view all loan referral by loanee and all offers
+    //65
     @Id
     @UuidGenerator
     private String id;

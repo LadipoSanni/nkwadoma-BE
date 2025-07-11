@@ -10,11 +10,17 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loanMa
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
 import lombok.*;
 import lombok.extern.slf4j.*;
+import org.springframework.data.domain.Page;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.*;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.ALL_LOAN;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.ALL_LOAN_OFFERS;
 
 
 @Slf4j
@@ -58,5 +64,23 @@ public class LoanReferralController {
                 .statusCode(HttpStatus.OK.name())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("loanee/loan-referrals")
+    public ResponseEntity<ApiResponse<?>> viewAllLoanReferralsForLoanee(@AuthenticationPrincipal Jwt meedlUser,
+                                                                        @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+                                                                        @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) throws MeedlException {
+        String userId = meedlUser.getClaimAsString("sub");
+        Page<LoanReferral> loanReferrals = viewLoanReferralsUseCase.viewLoanReferralForLoanee(userId, pageNumber, pageSize);
+        List<LoanReferralResponse> loanReferralResponses = loanReferralRestMapper.toLoanReferralResponses(loanReferrals);
+        PaginatedResponse<LoanReferralResponse> paginatedResponse = new PaginatedResponse<>(
+                loanReferralResponses, loanReferrals.hasNext(), loanReferrals.getTotalPages(), loanReferrals.getTotalElements() ,pageNumber,pageSize
+        );
+        ApiResponse<PaginatedResponse<LoanReferralResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoanReferralResponse>>builder()
+                .data(paginatedResponse)
+                .message(ALL_LOAN)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
 }

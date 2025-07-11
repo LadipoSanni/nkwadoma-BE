@@ -14,6 +14,9 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanException;
 import lombok.*;
 import lombok.extern.slf4j.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.*;
 
 import java.util.*;
@@ -106,6 +109,14 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
                 .orElseThrow(() -> new LoanException("Loan referral not found for cohort loanee id: "+id));
         log.info("Loan referral entity found {}",loanReferralEntity);
         return loanReferralMapper.toLoanReferral(loanReferralEntity);
+    }
+
+    @Override
+    public Page<LoanReferral> findAllLoanReferralForLoanee(String loaneeId, int pageNumber, int pageSize) throws MeedlException {
+        MeedlValidator.validateUUID(loaneeId, UserMessages.INVALID_USER_ID.getMessage());
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+        Page<LoanReferralProjection> loanReferralEntities = loanReferralRepository.findAllLoanReferralsForLoanee(loaneeId, pageRequest);
+        return loanReferralEntities.map(loanReferralMapper::mapProjectionToLoanReferralEntity);
     }
 }
 
