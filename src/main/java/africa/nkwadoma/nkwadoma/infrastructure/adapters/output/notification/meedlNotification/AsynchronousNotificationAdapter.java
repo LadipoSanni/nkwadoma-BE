@@ -68,7 +68,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                     .user(portfolioManager)
                     .timestamp(LocalDateTime.now())
                     .contentId(organizationIdentity.getId())
-                    .title("Organization has been invited.")
+                    .title("Organization has been invited")
                     .callToAction(Boolean.TRUE)
                     .senderMail(organizationIdentity.getEmail())
                     .senderFullName(organizationIdentity.getName())
@@ -149,7 +149,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
     }
     private MeedlNotification buildLoanOfferPortfolioManagerNotification(LoanOffer loanOffer, UserIdentity sender) {
         return MeedlNotification.builder()
-                .title("Loan Offer Decision Made.")
+                .title("Loan Offer Decision Made")
                 .contentId(loanOffer.getId())
                 .contentDetail("A Loan Offer has been "+ loanOffer.getLoaneeResponse())
                 .senderFullName(sender.getFirstName() +" "+ sender.getFirstName())
