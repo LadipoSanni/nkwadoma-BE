@@ -65,6 +65,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final CohortOutputPort cohortOutputPort;
     private final ProgramLoanDetailOutputPort programLoanDetailOutputPort;
     private final OrganizationLoanDetailOutputPort organizationLoanDetailOutputPort;
+    private final LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
 
     @Override
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
@@ -155,14 +156,17 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }
         Loan savedLoan = loanOutputPort.save(loan);
         log.info("Saved loan: {}", savedLoan);
-        updateCohortLoanDetail(loanOffer);
+        updateLoanDetail(loanOffer);
         String referBy = loanOutputPort.findLoanReferal(savedLoan.getId());
         updateLoanDisbursalOnLoamMatrics(referBy);
         updateInvestmentVehicleTalentFunded(savedLoan);
         return savedLoan;
     }
 
-    private void updateCohortLoanDetail(LoanOffer loanOffer) throws MeedlException {
+    private void updateLoanDetail(LoanOffer loanOffer) throws MeedlException {
+//        LoaneeLoanDetail loaneeLoanDetail = loaneeLoanDetailsOutputPort.findByCohortLoaneeId(loanOffer);
+
+
         CohortLoanDetail cohortLoanDetail = cohortLoanDetailOutputPort.findByCohortId(loanOffer.getCohortId());
         log.info("current total amount received for cohort {}",cohortLoanDetail.getTotalAmountReceived());
         log.info("loanee amount disbursed {}", loanOffer.getAmountApproved());
