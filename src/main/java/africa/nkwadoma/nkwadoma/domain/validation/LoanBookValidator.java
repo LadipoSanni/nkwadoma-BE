@@ -167,7 +167,6 @@ public class LoanBookValidator {
         for (Map<String, String> row : data) {
 
             validateDateTimeFormat(row, "paymentdate", rowCount);
-//            validateAmountPaid(row, "amountpaid", rowCount);
             validateAmountPaid(row.get("amountpaid"), rowCount);
             validateUserExistForRepayment(row, "email", rowCount);
             rowCount++;
@@ -202,8 +201,6 @@ public class LoanBookValidator {
     }
 
     private void buildFailureNotification(LoanBook repaymentHistoryBook) throws MeedlException {
-        MeedlNotification failureNotification =  MeedlNotification.builder()
-                .build();
         UserIdentity foundActor = userIdentityOutputPort.findById(repaymentHistoryBook.getActorId());
         asynchronousNotificationOutputPort.notifyPmForLoanRepaymentUploadFailure(foundActor, validationErrorMessage, repaymentHistoryBook.getFile().getName());
 
