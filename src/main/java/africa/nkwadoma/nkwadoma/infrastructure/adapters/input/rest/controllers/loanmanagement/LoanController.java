@@ -83,6 +83,7 @@ public class LoanController {
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
     }
+
     @GetMapping("/loan-product/all")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = LOAN_PRODUCT_VIEW_ALL, description = LOAN_PRODUCT_VIEW_ALL_DESCRIPTION )

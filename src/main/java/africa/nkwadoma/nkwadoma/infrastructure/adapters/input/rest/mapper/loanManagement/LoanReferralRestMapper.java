@@ -3,6 +3,9 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loanM
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.*;
 import org.mapstruct.*;
+import org.springframework.data.domain.Page;
+
+import java.util.List;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface LoanReferralRestMapper {
@@ -10,17 +13,6 @@ public interface LoanReferralRestMapper {
     @Mapping(target = "lastName", source = "lastName")
     LoanReferralResponse toLoanReferralResponse(LoanReferral loanReferral);
 
-//    LoanReferral toLoanReferral(LoanReferralRequest request);
-//
-//    default LoanReferralStatus toLoanReferralStatus(String loanReferralStatus) throws MeedlException {
-//        if (loanReferralStatus == null) {
-//            return null;
-//        }
-//        try {
-//            return LoanReferralStatus.valueOf(loanReferralStatus.toUpperCase());
-//        } catch (IllegalArgumentException e) {
-//            throw new MeedlException(ErrorMessages.INVALID_LOAN_REFERRAL_STATUS);
-//        }
-//    }
+    List<LoanReferralResponse> toLoanReferralResponses(Page<LoanReferral> loanReferrals);
 
 }
