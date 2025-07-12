@@ -118,7 +118,7 @@ public class LoanBookValidator {
         if (amount.compareTo(BigDecimal.ZERO) < 0) {
             log.warn("Negative amount detected: {} {}", amount, message);
             validationErrorMessage.append("Error in row : ").append(rowCount).append(" ").append(message).append("\n");
-//            throw new MeedlException(message);
+            throw new MeedlException(message);
         }
     }
 
@@ -245,7 +245,7 @@ public class LoanBookValidator {
        if (!isOnlyDigits){
            log.error("Its not only digits {}", input);
            validationErrorMessage.append("Error in row : ").append(rowCount).append(" ").append(errorMessage).append("\n");
-//           throw new MeedlException(errorMessage);
+           throw new MeedlException(errorMessage);
        }
     }
 
@@ -267,7 +267,7 @@ public class LoanBookValidator {
                     .append(exception.getMessage())
                     .append("\n");
             log.error("{}", exception.getMessage());
-//            throw  new RuntimeException(exception.getMessage());
+            throw  new RuntimeException(exception.getMessage());
         }
 
         log.info("loanee found in repayment history : {}", loanee);
@@ -279,7 +279,7 @@ public class LoanBookValidator {
                     .append(emailToCheck)
                     .append(" does not exist for repayment.")
                     .append("\n ");
-//            throw new MeedlException("Loanee with email : " + emailToCheck + " does not exist for repayment");
+            throw new MeedlException("Loanee with email : " + emailToCheck + " does not exist for repayment");
         }
         log.info("Loanee with email {} on row {} exist. ", emailToCheck, rowCount);
 
@@ -318,7 +318,7 @@ public class LoanBookValidator {
 
         log.error("The date format was invalid: {}", dateStr);
         validationErrorMessage.append("Error on row : ").append(rowCount).append(" Date doesn't match format. Date provided is : ").append(dateStr).append(". Example date format : 1/10/2019 -- mm/dd/yyyy. \n ");
-//        throw new MeedlException("Date doesn't match format. Date: "+dateStr + " Example format : 21/10/2019");
-        return null;
+        throw new MeedlException("Date doesn't match format. Date: "+dateStr + " Example format : 21/10/2019");
+//        return null;
     }
 }
