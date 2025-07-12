@@ -7,4 +7,6 @@ public interface LoaneeLoanDetailsOutputPort {
     LoaneeLoanDetail save(LoaneeLoanDetail loaneeLoanDetail);
 
     void delete(String id) throws MeedlException;
+
+    LoaneeLoanDetail findByCohortLoaneeId(String cohortLoaneeId) throws MeedlException;
 }

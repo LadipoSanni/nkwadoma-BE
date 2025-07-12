@@ -176,8 +176,11 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     private void updateLoanDetail(LoanOffer loanOffer) throws MeedlException {
-//        LoaneeLoanDetail loaneeLoanDetail = loaneeLoanDetailsOutputPort.findByCohortLoaneeId(loanOffer);
+        LoaneeLoanDetail loaneeLoanDetail =
+                loaneeLoanDetailsOutputPort.findByCohortLoaneeId(loanOffer.getCohortLoaneeId());
 
+        loaneeLoanDetail.setAmountReceived(loanOffer.getAmountApproved());
+        loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
 
         CohortLoanDetail cohortLoanDetail = cohortLoanDetailOutputPort.findByCohortId(loanOffer.getCohortId());
         log.info("current total amount received for cohort {}",cohortLoanDetail.getTotalAmountReceived());
