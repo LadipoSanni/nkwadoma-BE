@@ -1,9 +1,14 @@
 package africa.nkwadoma.nkwadoma.domain.validation;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
@@ -29,6 +34,9 @@ public class LoanBookValidator {
     private final LoaneeOutputPort loaneeOutputPort;
     private final LoanProductOutputPort loanProductOutputPort;
     private final AesOutputPort aesOutputPort;
+    private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
+    private final UserIdentityOutputPort userIdentityOutputPort;
+    private final CohortUseCase cohortUseCase;
     private MeedlNotification repaymentHistoryFailureNotification;
     private StringBuilder validationErrorMessage;
 
@@ -151,23 +159,77 @@ public class LoanBookValidator {
         log.info("Loan product exists with name {}", loanee.getLoanProductName());
     }
 
-    public void repaymentHistoryValidation(List<Map<String, String>> data) throws MeedlException {
+    public void repaymentHistoryValidation(List<Map<String, String>> data, LoanBook repaymentHistoryBook) throws MeedlException {
         repaymentHistoryFailureNotification = new MeedlNotification();
         validationErrorMessage = new StringBuilder();
+        validateCohortExists(repaymentHistoryBook.getCohort());
         int rowCount = 1;
         for (Map<String, String> row : data) {
 
             validateDateTimeFormat(row, "paymentdate", rowCount);
-            validateAmountPaid(row, "amountpaid", rowCount);
+            validateAmountPaid(row.get("amountpaid"), rowCount);
             validateUserExistForRepayment(row, "email", rowCount);
             rowCount++;
         }
+        hasFailure(repaymentHistoryBook);
+
     }
+
+    private void validateCohortExists(Cohort cohort) {
+        try {
+            Cohort foundCohort = findCohort(cohort);
+            log.info("Cohort was found successfully in upload repayment history validation {}", foundCohort);
+        } catch (MeedlException e) {
+            log.error("Cohort in upload repayment validation not found. error : {}", e.getMessage());
+            validationErrorMessage.append("Error finding cohort with message: ").append(e.getMessage()).append(". \n ");
+        }
+    }
+    private Cohort findCohort(Cohort cohort) throws MeedlException {
+        MeedlValidator.validateObjectInstance(cohort, CohortMessages.COHORT_CANNOT_BE_EMPTY.getMessage());
+        return cohortUseCase.viewCohortDetails(cohort.getCreatedBy(), cohort.getId());
+    }
+
+
+
+    private void hasFailure(LoanBook repaymentHistoryBook) throws MeedlException {
+        if (validationErrorMessage!= null && !validationErrorMessage.toString().isBlank()) {
+            log.warn("Validation Error: {}", validationErrorMessage);
+            buildFailureNotification(repaymentHistoryBook);
+            throw new MeedlException("One or multiple Errors Occures.");
+        }
+        log.info("No errors was found during the upload.");
+    }
+
+    private void buildFailureNotification(LoanBook repaymentHistoryBook) throws MeedlException {
+        UserIdentity foundActor = userIdentityOutputPort.findById(repaymentHistoryBook.getActorId());
+        asynchronousNotificationOutputPort.notifyPmForLoanRepaymentUploadFailure(foundActor, validationErrorMessage, repaymentHistoryBook.getFile().getName());
+
+    }
+
     public void validateDateTimeFormat(Map<String, String> row, String dateName, int rowCount) throws MeedlException {
                 String dateStr = row.get(dateName);
 
                 LocalDateTime parsedDate = parseFlexibleDateTime(dateStr, rowCount);
                 log.info("Parsed date: {}", parsedDate);
+    }
+    private void validateAmountPaid(String amountPaid, int rowCount) {
+            if (amountPaid == null || amountPaid.trim().isEmpty()) {
+                validationErrorMessage.append("Error row : ").append(rowCount).append(" Monetary value is required.");
+            }
+
+            try {
+                BigDecimal value = new BigDecimal(amountPaid.trim());
+
+                if (value.compareTo(BigDecimal.ZERO) < 0) {
+                    validationErrorMessage.append("Error row : ").append(rowCount).append(" Monetary value cannot be negative.");
+                }
+
+            } catch (NumberFormatException e) {
+                validationErrorMessage.append("Error row : ").append(rowCount).append(" Invalid monetary value. Must be a number.");
+            } catch (Exception e) {
+                validationErrorMessage.append("Error row : ").append(rowCount).append(" Unexpected error occurred while validating monetary value.");
+            }
+
     }
     public void validateAmountPaid(Map<String, String> row, String amountPaidKey, int rowCount) throws MeedlException {
 
@@ -216,7 +278,7 @@ public class LoanBookValidator {
                     .append(" ").append("Loanee with email : ")
                     .append(emailToCheck)
                     .append(" does not exist for repayment.")
-                    .append("\n");
+                    .append("\n ");
             throw new MeedlException("Loanee with email : " + emailToCheck + " does not exist for repayment");
         }
         log.info("Loanee with email {} on row {} exist. ", emailToCheck, rowCount);
@@ -255,7 +317,8 @@ public class LoanBookValidator {
         }
 
         log.error("The date format was invalid: {}", dateStr);
-        validationErrorMessage.append("Error on row : ").append(rowCount).append(" Date doesn't match format. Date: ").append(dateStr).append(" Example format : 21/10/2019. \n ");
+        validationErrorMessage.append("Error on row : ").append(rowCount).append(" Date doesn't match format. Date provided is : ").append(dateStr).append(". Example date format : 1/10/2019 -- mm/dd/yyyy. \n ");
         throw new MeedlException("Date doesn't match format. Date: "+dateStr + " Example format : 21/10/2019");
+//        return null;
     }
 }

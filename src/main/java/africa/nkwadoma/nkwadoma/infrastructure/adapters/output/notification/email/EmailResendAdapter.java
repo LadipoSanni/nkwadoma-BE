@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.email;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.notification.email;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.EmailResendUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.ViewLoanReferralsUseCase;
