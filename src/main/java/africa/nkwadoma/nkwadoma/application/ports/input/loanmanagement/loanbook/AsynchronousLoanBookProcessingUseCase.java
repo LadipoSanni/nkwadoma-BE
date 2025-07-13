@@ -10,7 +10,7 @@ public interface AsynchronousLoanBookProcessingUseCase {
 //    @Async
 void upLoadUserData(LoanBook loanBook) throws MeedlException;
 
-    void uploadRepaymentHistory(LoanBook repaymentRecordBook) throws MeedlException;
+    void uplxoadRepaymentHistory(LoanBook repaymentRecordBook) throws MeedlException;
 
     List<RepaymentHistory> getRepaymentsByEmail(List<RepaymentHistory> allRepayments, String email);
 }
