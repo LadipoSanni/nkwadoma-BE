@@ -35,10 +35,12 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @Slf4j
 @Tag(name = LOAN_BOOK_CONTROLLER, description = LOAN_BOOK_CONTROLLER_DESCRIPTION)
 public class LoanBookController {
+
     @Autowired
     private LoanBookRestMapper loanBookRestMapper;
     @Autowired
     private LoanBookUseCase loanBookUseCase;
+
     @PostMapping(value = "/upload/{cohortId}/file/loanee/data", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = LOAN_BOOK_USER_DATA_CREATION_VIA_FILE_UPLOAD,description = LOAN_BOOK_USER_DATA_CREATION_DESCRIPTION)
