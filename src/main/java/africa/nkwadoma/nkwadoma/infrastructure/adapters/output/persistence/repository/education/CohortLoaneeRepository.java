@@ -66,7 +66,8 @@ public interface CohortLoaneeRepository extends JpaRepository<CohortLoaneeEntity
                         user.stateOfResidence,user.nationality,next_of_kin.nextOfKinRelationship,
                         next_of_kin.phoneNumber,next_of_kin.firstName,next_of_kin.lastName,
                         next_of_kin.contactAddress, program.name,
-                        organization.name,loan_offer.amountApproved, loan_product.interestRate,cohort.name          
+                        organization.name,loan_offer.amountApproved, loan_product.interestRate,cohort.name, 
+                        loaneeLoanDetail.id          
     """)
     CohortLoaneeProjection findCohortLoaneeEntityByLoanee_IdAndCohort_Id(@Param("loaneeId") String loaneeId,@Param("cohortId") String cohortId);
 
