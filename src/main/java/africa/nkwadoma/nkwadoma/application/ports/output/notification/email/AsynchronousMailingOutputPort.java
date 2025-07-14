@@ -28,4 +28,7 @@ public interface AsynchronousMailingOutputPort {
 
     @Async
     void sendLoanRequestDecisionMail(LoanRequest loanRequest) throws MeedlException;
+
+    @Async
+    void notifyDeactivatedUser(UserIdentity userIdentity);
 }
