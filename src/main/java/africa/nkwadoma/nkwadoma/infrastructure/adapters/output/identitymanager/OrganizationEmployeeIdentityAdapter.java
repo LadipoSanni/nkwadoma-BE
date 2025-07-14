@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEmployeeEntity;
@@ -129,14 +130,18 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
     }
 
     @Override
-    public List<OrganizationEmployeeIdentity> findEmployeesByNameAndRole(String organizationId, String name, IdentityRole identityRole) throws MeedlException {
-        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-        MeedlValidator.validateDataElement(name, "Admin name to search for is required.");
+    public Page<OrganizationEmployeeIdentity> findEmployeesByNameAndRole(OrganizationIdentity
+            organizationIdentity, IdentityRole identityRole) throws MeedlException {
+        MeedlValidator.validateUUID(organizationIdentity.getId(), OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         MeedlValidator.validateObjectInstance(identityRole, INVALID_VALID_ROLE.getMessage());
-        List<OrganizationEmployeeEntity> organizationEmployeeEntities =
+        MeedlValidator.validatePageNumber(organizationIdentity.getPageNumber());
+        MeedlValidator.validatePageSize(organizationIdentity.getPageSize());
+
+        Pageable pageRequest = PageRequest.of(organizationIdentity.getPageNumber(),organizationIdentity.getPageSize());
+        Page<OrganizationEmployeeEntity> organizationEmployeeEntities =
                 employeeAdminEntityRepository.findByOrganizationIdAndRoleAndNameFragment
-                        (organizationId,identityRole,name);
-        return organizationEmployeeEntities.stream().map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity).toList();
+                        (organizationIdentity.getId(),identityRole,organizationIdentity.getName(),pageRequest);
+        return organizationEmployeeEntities.map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity);
     }
 
     @Override

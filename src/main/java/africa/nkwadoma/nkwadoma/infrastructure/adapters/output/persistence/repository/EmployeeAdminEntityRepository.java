@@ -28,11 +28,13 @@ public interface EmployeeAdminEntityRepository extends JpaRepository<Organizatio
     @Query("SELECT o FROM OrganizationEmployeeEntity o " +
             "WHERE o.organization = :organizationId " +
             "AND o.meedlUser.role = :meedlUserRole " +
-            "AND upper(concat(o.meedlUser.firstName, ' ', o.meedlUser.lastName)) LIKE upper(concat('%', :nameFragment, '%'))")
-    List<OrganizationEmployeeEntity> findByOrganizationIdAndRoleAndNameFragment(
+            "AND upper(concat(o.meedlUser.firstName, ' ', o.meedlUser.lastName)) LIKE upper(concat('%', :nameFragment, '%')) " +
+            "ORDER BY o.meedlUser.createdAt ASC")
+    Page<OrganizationEmployeeEntity> findByOrganizationIdAndRoleAndNameFragment(
             @Param("organizationId") String organizationId,
             @Param("meedlUserRole") IdentityRole meedlUserRole,
-            @Param("nameFragment") String nameFragment);
+            @Param("nameFragment") String nameFragment,
+            Pageable pageable);
 
     Page<OrganizationEmployeeEntity> findAllByOrganizationAndMeedlUserRole(String organizationId, IdentityRole identityRole, Pageable pageRequest);
 

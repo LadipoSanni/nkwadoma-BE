@@ -59,6 +59,7 @@ public class OrganizationIdentity {
     private int pendingLoanOfferCount;
     private int pageSize;
     private int pageNumber;
+    private String actorId;
     private String logoImage;
     private String bannerImage;
     private String address;

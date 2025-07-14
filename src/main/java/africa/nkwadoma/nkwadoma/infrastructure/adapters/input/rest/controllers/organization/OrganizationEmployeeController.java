@@ -56,14 +56,24 @@ public class OrganizationEmployeeController {
 
     @GetMapping("search/admin")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<?> searchOrganizationEmployees(@AuthenticationPrincipal Jwt meedlUser, @RequestParam("name") String name) throws MeedlException {
-        String userId = meedlUser.getClaimAsString("sub");
-        List<OrganizationEmployeeIdentity> organizationEmployeeIdentities =
-                viewOrganizationEmployeesUseCase.searchOrganizationAdmin(userId,name);
+    public ResponseEntity<?> searchOrganizationEmployees(@AuthenticationPrincipal Jwt meedlUser,
+                                                         @RequestParam("name") String name,
+                                                         @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                         @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
+        OrganizationIdentity organizationIdentity = OrganizationIdentity.builder().pageSize(pageSize)
+                .pageNumber(pageNumber).name(name).actorId(meedlUser.getClaimAsString("sub")).build();
+        Page<OrganizationEmployeeIdentity> organizationEmployeeIdentities =
+                viewOrganizationEmployeesUseCase.searchOrganizationAdmin(organizationIdentity);
         List<OrganizationEmployeeResponse> organizationEmployeeResponses =
                 organizationEmployeeIdentities.stream().map(organizationEmployeeRestMapper::toOrganizationEmployeeResponse).toList();
-        ApiResponse<List<OrganizationEmployeeResponse>> apiResponse = ApiResponse.<List<OrganizationEmployeeResponse>>builder()
-                .data(organizationEmployeeResponses)
+
+        PaginatedResponse<OrganizationEmployeeResponse> paginatedResponse =new PaginatedResponse<>(
+                organizationEmployeeResponses,organizationEmployeeIdentities.hasNext(),
+                organizationEmployeeIdentities.getTotalPages(), organizationEmployeeIdentities.getTotalElements() ,pageNumber,pageSize
+        );
+
+        ApiResponse<PaginatedResponse<OrganizationEmployeeResponse>> apiResponse = ApiResponse.<PaginatedResponse<OrganizationEmployeeResponse>>builder()
+                .data(paginatedResponse)
                 .message(SuccessMessages.SUCCESSFUL_RESPONSE)
                 .statusCode(HttpStatus.OK.toString())
                 .build();
