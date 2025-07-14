@@ -9,6 +9,8 @@ import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotif
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
@@ -41,14 +43,14 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
     @Async
     @Override
     public void notifyLoanReferralActors(List<LoanReferral> loanReferrals,List<Loanee> loanees, UserIdentity userIdentity){
-        for (int loanee = 0; loanee < loanees.size(); loanee++) {
+        for (int loaneeCount = 0; loaneeCount < loanees.size(); loaneeCount++) {
             try {
                 boolean previoslyReferred = cohortLoaneeOutputPort.checkIfLoaneeHasBeenPreviouslyReferred(
-                        loanees.get(loanee).getId());
+                        loanees.get(loaneeCount).getId());
                 if (previoslyReferred){
-                    sendNotification(loanReferrals.get(loanee).getId(),userIdentity, loanees.get(loanee));
+                    sendNotification(loanReferrals.get(loaneeCount).getId(),userIdentity, loanees.get(loaneeCount));
                 }else {
-                    refer(loanReferrals.get(loanee).getId(),loanees.get(loanee));
+                    refer(loanReferrals.get(loaneeCount).getId(),loanees.get(loaneeCount));
                 }
                 notifyAllPortfolioManager();
             } catch (MeedlException e) {
@@ -145,6 +147,22 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
     @Override
     public void notifyDeactivatedUser(UserIdentity userIdentity) {
         userEmailUseCase.sendDeactivatedUserEmailNotification(userIdentity);
+    }
+
+    @Override
+    public void sendDeactivatedEmployeesEmailNotification(List<OrganizationEmployeeIdentity> organizationEmployees, OrganizationIdentity foundOrganization) {
+        for (OrganizationEmployeeIdentity employee : organizationEmployees){
+            try {
+               notifyDeactivatedEmployee(employee, foundOrganization.getName());
+            } catch (MeedlException e) {
+                log.warn("Error sending actor email on deactivate organization {}", e.getMessage());
+            }
+        };
+        notifyAllPortfolioManager();
+    }
+
+    private void notifyDeactivatedEmployee(OrganizationEmployeeIdentity employee, String organizationName) {
+        sendOrganizationEmployeeEmailUseCase.sendDeactivateOrganizationEmailNotification(employee.getMeedlUser(), organizationName);
     }
 
     private void emailInviteNonExistingFinancierToVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {

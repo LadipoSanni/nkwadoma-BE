@@ -14,9 +14,12 @@ public interface EmailOutputPort {
     Context getNameAndLinkContextAndInvestmentVehicleName(String link, String firstName, String investmentVehicleName);
 
     Context getNameAndLinkContextAndLoanOfferId(String firstName, String loanOfferId);
+
     Context getNameAndLinkContextAndLoanOfferIdAndLoaneeId(String firstName,String loanOfferId);
     Context getNameAndLinkContextAndIndustryNameAndLoanReferralId(String link,String loanReferralId, String firstName, String organizationName);
 
 
-    Context getNameContext(String firstName);
+    Context getNameAndDeactivationReasonContext(String firstName, String deactivationReason);
+
+    Context getDeactivatedOrganizationContext(String firstName,  String deactivationReason, String organizationName);
 }

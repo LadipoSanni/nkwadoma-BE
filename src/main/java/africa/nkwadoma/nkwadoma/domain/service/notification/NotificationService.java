@@ -14,6 +14,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanDecision;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.meedlexception.MeedlNotificationException;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.notification.Email;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -21,7 +22,6 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.aes.TokenUtils;
 import lombok.*;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.ObjectUtils;
@@ -76,6 +76,7 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
         sendMail(userIdentity, email);
 
     }
+
     @Override
     public void sendColleagueEmail(String organizationName,UserIdentity userIdentity) throws MeedlException {
         Context context = emailOutputPort.getNameAndLinkContextAndIndustryName(getLink(userIdentity),
@@ -333,7 +334,19 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
 
     @Override
     public void sendDeactivatedUserEmailNotification(UserIdentity userIdentity) {
-        Context context = emailOutputPort.getNameContext(userIdentity.getFirstName());
+        Context context = emailOutputPort.getNameAndDeactivationReasonContext(userIdentity.getFirstName(), userIdentity.getDeactivationReason());
+        Email email = Email.builder()
+                .context(context)
+                .subject(UserMessages.USER_HAS_BEEN_DEACTIVATED.getMessage())
+                .to(userIdentity.getEmail())
+                .template(UserMessages.DEACTIVATED_USER.getMessage())
+                .firstName(userIdentity.getFirstName())
+                .build();
+        sendMail(userIdentity, email);
+    }
+    @Override
+    public void sendDeactivateOrganizationEmailNotification(UserIdentity userIdentity, String organizationName) {
+        Context context = emailOutputPort.getDeactivatedOrganizationContext(userIdentity.getFirstName(), userIdentity.getDeactivationReason() , organizationName);
         Email email = Email.builder()
                 .context(context)
                 .subject(UserMessages.USER_HAS_BEEN_DEACTIVATED.getMessage())

@@ -15,7 +15,9 @@ public enum UserMessages {
     USER_IDENTITY_MUST_NOT_BE_EMPTY("User identity must not be empty"),
     BVN_CANNOT_BE_EMPTY("Bvn cannot be empty"),
     REFRESH_TOKEN_CANNOT_BE_EMPTY("Refresh token cannot be empty"), INVALID_REFRESH_TOKEN("Invalid refresh token"),
-    COOPERATION_MUST_NOT_BE_EMPTY("Cooperation cannot be empty"), USER_HAS_BEEN_DEACTIVATED("Account Deactivation"), DEACTIVATED_USER("deactivated-user");
+    COOPERATION_MUST_NOT_BE_EMPTY("Cooperation cannot be empty"),
+    USER_HAS_BEEN_DEACTIVATED("Account Deactivation"),
+    DEACTIVATED_USER("deactivated-user");
     private final String message;
 
     UserMessages(String message) {

@@ -194,6 +194,8 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         foundOrganization.setEnabled(Boolean.FALSE);
         foundOrganization.setStatus(ActivationStatus.DEACTIVATED);
         organizationIdentityOutputPort.save(foundOrganization);
+
+        asynchronousMailingOutputPort.sendDeactivatedEmployeesEmailNotification(organizationEmployees, foundOrganization);
         return foundOrganization;
     }
 

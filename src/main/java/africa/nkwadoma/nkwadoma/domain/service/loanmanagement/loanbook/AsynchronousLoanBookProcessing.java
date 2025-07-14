@@ -33,6 +33,7 @@ import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.validation.LoanBookValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanException;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortLoaneeEntity;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
@@ -155,8 +156,11 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         for (Map.Entry<String, List<RepaymentHistory>> entry : mapOfRepaymentHistoriesForEachLoanee.entrySet()) {
             String loaneeId = entry.getKey();
             List<RepaymentHistory> repaymentHistories = entry.getValue();
-            repaymentHistories = loanCalculationUseCase.accumulateTotalRepaid(repaymentHistories, loaneeId, cohortId);
+            repaymentHistories = loanCalculationUseCase.calculateTotalRepaidment(repaymentHistories, loaneeId, cohortId);
             repaymentRecordBook.setRepaymentHistories(repaymentHistories);
+
+            CohortLoanee cohortLoanee = cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId();
+            cohortLoanee.getLoaneeLoanDetail();
             List<RepaymentHistory> savedRepaymentHistories = repaymentHistoryUseCase.saveCohortRepaymentHistory(repaymentRecordBook);
             log.info("repayment histories for loanee {} -- {}", loaneeId, savedRepaymentHistories);
         }
