@@ -1,9 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.notification.email;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.notification.FinancierEmailUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.notification.LoaneeEmailUsecase;
-import africa.nkwadoma.nkwadoma.application.ports.input.notification.OrganizationEmployeeEmailUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.notification.SendColleagueEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.notification.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlnotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
@@ -34,9 +31,9 @@ import java.util.List;
 public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final LoaneeEmailUsecase loaneeEmailUsecase;
+    private final UserEmailUseCase userEmailUseCase;
     private final FinancierEmailUseCase financierEmailUseCase;
     private final SendColleagueEmailUseCase sendEmail;
-    private final MeedlNotificationUsecase meedlNotificationUsecase;
     private final OrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
     private final MeedlNotificationOutputPort meedlNotificationOutputPort;
@@ -143,6 +140,11 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
     public void sendLoanRequestDecisionMail(LoanRequest loanRequest) throws MeedlException {
         log.info("Sending loan request decision mail ...... {} ", loanRequest.getUserIdentity());
         loaneeEmailUsecase.sendLoanRequestApprovalEmail(loanRequest);
+    }
+
+    @Override
+    public void notifyDeactivatedUser(UserIdentity userIdentity) {
+        userEmailUseCase.sendDeactivatedUserEmailNotification(userIdentity);
     }
 
     private void emailInviteNonExistingFinancierToVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
