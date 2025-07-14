@@ -28,9 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.*;
 import java.util.*;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_ALREADY_EXISTS;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_NOT_FOUND;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages.INVALID_USER_ID;
 
 @RequiredArgsConstructor
 @Component
@@ -49,27 +47,31 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     private final ProgramCohortRepository programCohortRepository;
 
     @Override
-    public List<Program> findProgramByName(String programName, String organizationId) throws MeedlException {
-        MeedlValidator.validateDataElement(programName, ProgramMessages.PROGRAM_NAME_REQUIRED.getMessage());
+    public Page<Program> findProgramByName(Program program, String organizationId) throws MeedlException {
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-        List<ProgramEntity> programEntities = programRepository.
-                findByNameContainingIgnoreCaseAndOrganizationIdentityId(programName.trim(), organizationId);
+        MeedlValidator.validatePageSize(program.getPageSize());
+        MeedlValidator.validatePageNumber(program.getPageNumber());
+
+        Pageable pageRequest = PageRequest.of(program.getPageNumber(), program.getPageSize(), Sort.by(Sort.Order.desc("createdAt")));
+
+        Page<ProgramEntity> programEntities = programRepository.
+                findByNameContainingIgnoreCaseAndOrganizationIdentityId(program.getName(), organizationId,pageRequest);
         log.info("Program entities: {}", programEntities);
         if (programEntities.isEmpty()) {
-            return new ArrayList<>();
+            return Page.empty();
         }
-        return programEntities.stream().map(programMapper::toProgram).toList();
+        return programEntities.map(programMapper::toProgram);
     }
 
     @Override
-    public List<Program> findProgramByName(String programName) throws MeedlException {
+    public Page<Program> findProgramByName(String programName) throws MeedlException {
         MeedlValidator.validateDataElement(programName, ProgramMessages.PROGRAM_NAME_REQUIRED.getMessage());
-        List<ProgramEntity> programEntities = programRepository.findByNameContainingIgnoreCase(programName);
+        Page<ProgramEntity> programEntities = programRepository.findByNameContainingIgnoreCase(programName);
         log.info("Program entities found: {}", programEntities);
         if (programEntities.isEmpty()) {
-            return new ArrayList<>();
+            return Page.empty();
         }
-        return programEntities.stream().map(programMapper::toProgram).toList();
+        return programEntities.map(programMapper::toProgram);
     }
 
     @Override

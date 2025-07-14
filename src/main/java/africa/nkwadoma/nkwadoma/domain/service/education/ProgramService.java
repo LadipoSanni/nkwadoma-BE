@@ -74,13 +74,13 @@ public class ProgramService implements AddProgramUseCase {
 //             OrganizationIdentity organizationIdentity = findProgramOrganization(foundProgram);
 //            program.setOrganizationIdentity(organizationIdentity);
 //            checkIfProgramExistByNameInOrganization(foundProgram);
-            List<Program> programs =
-                    programOutputPort.findProgramByName(program.getName(),foundProgram.getOrganizationId());
-            for (Program p : programs) {
-                if (!p.getId().equals(program.getId())){
+            program.setOrganizationId(foundProgram.getOrganizationId());
+            boolean existInORg =
+                    programOutputPort.programExistsInOrganization(program);
+                if (existInORg){
                   throw new EducationException(PROGRAM_ALREADY_EXISTS.getMessage());
                 }
-            }
+
         }
         return programOutputPort.saveProgram(foundProgram);
     }
@@ -113,19 +113,21 @@ public class ProgramService implements AddProgramUseCase {
     }
 
     @Override
-    public List<Program> viewProgramByName(Program program) throws MeedlException {
+    public Page<Program> viewProgramByName(Program program) throws MeedlException {
         MeedlValidator.validateObjectInstance(program, ProgramMessages.PROGRAM_CANNOT_BE_EMPTY.getMessage());
         program.validateViewProgramByNameInput();
+        MeedlValidator.validatePageSize(program.getPageSize());
+        MeedlValidator.validatePageNumber(program.getPageNumber());
         return getPrograms(program);
     }
 
-    private List<Program> getPrograms(Program program) throws MeedlException {
+    private Page<Program> getPrograms(Program program) throws MeedlException {
         UserIdentity foundCreator = userIdentityOutputPort.findById(program.getCreatedBy());
         log.info("Found User identity: {}", foundCreator);
         if (ObjectUtils.isNotEmpty(foundCreator) && foundCreator.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)) {
             OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.findByCreatedBy(foundCreator.getId());
             log.info("Found Organization Employee: {}", employeeIdentity);
-            return programOutputPort.findProgramByName(program.getName().trim(), employeeIdentity.getOrganization());
+            return programOutputPort.findProgramByName(program, employeeIdentity.getOrganization());
         }
         return programOutputPort.findProgramByName(program.getName().trim());
     }

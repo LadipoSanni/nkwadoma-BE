@@ -8,8 +8,8 @@ import org.springframework.data.repository.query.Param;
 import java.util.*;
 
 public interface ProgramRepository extends JpaRepository<ProgramEntity, String> {
-    List<ProgramEntity> findByNameContainingIgnoreCase(String programName);
-    List<ProgramEntity> findByNameContainingIgnoreCaseAndOrganizationIdentityId(String programName, String organizationId);
+    Page<ProgramEntity> findByNameContainingIgnoreCase(String programName);
+    Page<ProgramEntity> findByNameContainingIgnoreCaseAndOrganizationIdentityId(String programName, String organizationId, Pageable pageable);
     List<ProgramEntity> findProgramEntitiesByOrganizationIdentityId(String organizationIdentityId);
     boolean existsByNameAndOrganizationIdentity_Id(String programName, String organizationId);
     @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END " +

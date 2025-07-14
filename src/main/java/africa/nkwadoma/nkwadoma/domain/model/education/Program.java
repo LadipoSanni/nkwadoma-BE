@@ -67,7 +67,6 @@ public class Program {
     }
 
     public void validateViewProgramByNameInput() throws MeedlException {
-        MeedlValidator.validateDataElement(name, ProgramMessages.PROGRAM_NAME_REQUIRED.getMessage());
         MeedlValidator.validateUUID(createdBy, UserMessages.INVALID_USER_ID.getMessage());
     }
 
