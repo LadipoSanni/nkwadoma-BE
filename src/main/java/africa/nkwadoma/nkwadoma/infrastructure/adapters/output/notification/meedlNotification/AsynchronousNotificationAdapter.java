@@ -68,7 +68,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                     .user(portfolioManager)
                     .timestamp(LocalDateTime.now())
                     .contentId(organizationIdentity.getId())
-                    .title("Organization has been invited.")
+                    .title("Organization has been invited")
                     .callToAction(Boolean.TRUE)
                     .senderMail(organizationIdentity.getEmail())
                     .senderFullName(organizationIdentity.getName())
@@ -105,6 +105,25 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
         MeedlNotification meedlNotification = buildLoanOfferPortfolioManagerNotification(loanOffer, userIdentity );
         notifyPortfolioManagers(meedlNotification);
         
+    }
+
+    @Override
+    public void notifyPmForLoanRepaymentUploadFailure(UserIdentity foundActor, StringBuilder validationErrorMessage, String fileName) throws MeedlException {
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .user(foundActor)
+                .timestamp(LocalDateTime.now())
+                .contentId(foundActor.getId())
+                .title("Failed to upload repayment history: " + fileName)
+                .callToAction(Boolean.FALSE)
+                .senderMail(foundActor.getEmail())
+                .senderFullName(foundActor.getFirstName())
+                .contentDetail(validationErrorMessage.toString())
+                .notificationFlag(NotificationFlag.REPAYMENT_UPLOAD_FAILURE)
+                .build();
+
+        log.info("Failure notification sent to the actor with email : {} ", foundActor.getEmail());
+        meedlNotificationUsecase.sendNotification(meedlNotification);
+
     }
 
     private void notifyPortfolioManagers(MeedlNotification meedlNotification) throws MeedlException {
@@ -149,7 +168,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
     }
     private MeedlNotification buildLoanOfferPortfolioManagerNotification(LoanOffer loanOffer, UserIdentity sender) {
         return MeedlNotification.builder()
-                .title("Loan Offer Decision Made.")
+                .title("Loan Offer Decision Made")
                 .contentId(loanOffer.getId())
                 .contentDetail("A Loan Offer has been "+ loanOffer.getLoaneeResponse())
                 .senderFullName(sender.getFirstName() +" "+ sender.getFirstName())

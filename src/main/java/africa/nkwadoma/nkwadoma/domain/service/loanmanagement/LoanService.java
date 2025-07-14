@@ -27,12 +27,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages.LOAN_DECISION;
 
@@ -68,6 +70,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final CohortOutputPort cohortOutputPort;
     private final ProgramLoanDetailOutputPort programLoanDetailOutputPort;
     private final OrganizationLoanDetailOutputPort organizationLoanDetailOutputPort;
+    private final LoaneeUseCase loaneeUseCase;
     private final LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
 
     @Override
@@ -310,6 +313,34 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanReferral.setLoaneeLoanBreakdowns(loaneeLoanBreakdowns);
         log.info("Loanee loan breakdowns set to be returned: {}", loanReferral.getLoaneeLoanBreakdowns());
         return loanReferral;
+    }
+
+    @Override
+    public Page<LoanReferral> viewLoanReferralsForLoanee(String userId, int pageNumber, int pageSize) throws MeedlException {
+        MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
+        Optional<Loanee> loanee = loaneeOutputPort.findByUserId(userId);
+        String loaneeId = null;
+        if (loanee.isPresent()) {
+            loaneeId = loanee.get().getId();
+        }
+        Page<LoanReferral> loanReferrals = loanReferralOutputPort.findAllLoanReferralsForLoanee(loaneeId, pageNumber, pageSize);
+
+        List<LoanReferral> updatedLoanReferrals = loanReferrals.getContent().stream()
+                .peek(loanReferral -> {
+                    try {
+                        List<LoaneeLoanBreakdown> loaneeLoanBreakdowns = loaneeLoanBreakDownOutputPort
+                                .findAllLoaneeLoanBreakDownByCohortLoaneeId(loanReferral.getCohortLoaneeId());
+                        log.info("Loanee loan breakdowns found from the DB for cohortLoaneeId {}: {}",
+                                loanReferral.getCohortLoaneeId(), loaneeLoanBreakdowns);
+                        loanReferral.setLoaneeLoanBreakdowns(loaneeLoanBreakdowns);
+                    } catch (MeedlException e) {
+                        log.error("Failed to fetch loanee loan breakdowns for cohortLoaneeId {}: {}",
+                                loanReferral.getCohortLoaneeId(), e.getMessage());
+                    }
+                })
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(updatedLoanReferrals, loanReferrals.getPageable(), loanReferrals.getTotalElements());
     }
 
     @Override
