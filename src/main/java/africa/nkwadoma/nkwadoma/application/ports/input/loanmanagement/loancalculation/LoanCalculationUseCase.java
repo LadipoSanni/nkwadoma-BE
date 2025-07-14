@@ -9,7 +9,7 @@ public interface LoanCalculationUseCase {
 
     List<RepaymentHistory> sortRepaymentsByDateTimeAscending(List<RepaymentHistory> repayments)throws MeedlException;
 
-    List<RepaymentHistory> accumulateTotalRepaid(
+    List<RepaymentHistory> calculateTotalRepaidment(
             List<RepaymentHistory> sortedRepayments,
             String loaneeId,
             String cohortId

@@ -2,7 +2,6 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.notification.ema
 
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.notification.ContextMessages;
-import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.meedlexception.MeedlNotificationException;
 import africa.nkwadoma.nkwadoma.domain.model.notification.Email;
@@ -85,11 +84,13 @@ public class EmailAdapter implements EmailOutputPort {
     }
 
     @Override
-    public Context getNameContext(String firstName) {
+    public Context getNameAndDeactivationReasonContext(String firstName, String deactivationReason) {
         Context context = new Context();
         context.setVariable(ContextMessages.CONTEXT_FIRST_NAME.getMessage(), firstName);
+        context.setVariable(ContextMessages.CONTEXT_DEACTIVATION_REASON.getMessage(), deactivationReason);
         return context;
     }
+
 
     @Override
     public Context getNameAndLinkContextAndInvestmentVehicleName(String link, String firstName, String investmentVehicleName) {
