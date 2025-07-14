@@ -20,6 +20,4 @@ public interface EmailOutputPort {
 
 
     Context getNameAndDeactivationReasonContext(String firstName, String deactivationReason);
-
-    Context getDeactivatedOrganizationContext(String firstName,  String deactivationReason, String organizationName);
 }

@@ -91,15 +91,6 @@ public class EmailAdapter implements EmailOutputPort {
         return context;
     }
 
-    @Override
-    public Context getDeactivatedOrganizationContext(String firstName, String deactivationReason, String organizationName) {
-        Context context = new Context();
-        context.setVariable(ContextMessages.CONTEXT_FIRST_NAME.getMessage(), firstName);
-        context.setVariable(ContextMessages.CONTEXT_DEACTIVATION_REASON.getMessage(), deactivationReason);
-        context.setVariable(ContextMessages.CONTEXT_ORGANIZATION_NAME.getMessage(), organizationName);
-        return context;
-    }
-
 
     @Override
     public Context getNameAndLinkContextAndInvestmentVehicleName(String link, String firstName, String investmentVehicleName) {

@@ -77,6 +77,7 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
 
     }
 
+
     @Override
     public void sendColleagueEmail(String organizationName,UserIdentity userIdentity) throws MeedlException {
         Context context = emailOutputPort.getNameAndLinkContextAndIndustryName(getLink(userIdentity),
@@ -335,18 +336,6 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
     @Override
     public void sendDeactivatedUserEmailNotification(UserIdentity userIdentity) {
         Context context = emailOutputPort.getNameAndDeactivationReasonContext(userIdentity.getFirstName(), userIdentity.getDeactivationReason());
-        Email email = Email.builder()
-                .context(context)
-                .subject(UserMessages.USER_HAS_BEEN_DEACTIVATED.getMessage())
-                .to(userIdentity.getEmail())
-                .template(UserMessages.DEACTIVATED_USER.getMessage())
-                .firstName(userIdentity.getFirstName())
-                .build();
-        sendMail(userIdentity, email);
-    }
-    @Override
-    public void sendDeactivateOrganizationEmailNotification(UserIdentity userIdentity, String organizationName) {
-        Context context = emailOutputPort.getDeactivatedOrganizationContext(userIdentity.getFirstName(), userIdentity.getDeactivationReason() , organizationName);
         Email email = Email.builder()
                 .context(context)
                 .subject(UserMessages.USER_HAS_BEEN_DEACTIVATED.getMessage())

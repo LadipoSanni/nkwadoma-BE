@@ -142,25 +142,9 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findById(organizationId);
         List<OrganizationEmployeeIdentity> organizationEmployees = foundOrganization.getOrganizationEmployees();
         log.info("found organization employees to reactivate: {}",organizationEmployees.size());
-        organizationEmployees
-                .forEach(organizationEmployeeIdentity -> {
-                    try {
-                        log.info("Reactivating user {}", organizationEmployeeIdentity.getMeedlUser());
-                        organizationEmployeeIdentity.getMeedlUser().setReactivationReason(reason);
-                        organizationEmployeeIdentity.setStatus(ActivationStatus.ACTIVE);
-                        organizationEmployeeIdentity = organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
-                        log.info("Updated Organization employee status: {}", organizationEmployeeIdentity.getStatus());
-                        identityManagerOutPutPort.enableUserAccount(organizationEmployeeIdentity.getMeedlUser());
-                    } catch (MeedlException e) {
-                        log.error("Error enabling organization user : {}", e.getMessage());
-                    }
-                });
+        reactivateOrganizationEmployees(reason, organizationEmployees);
 
-        identityManagerOutPutPort.enableClient(foundOrganization);
-        foundOrganization.setEnabled(Boolean.TRUE);
-        foundOrganization.setStatus(ActivationStatus.ACTIVE);
-        foundOrganization.setTimeUpdated(LocalDateTime.now());
-        organizationIdentityOutputPort.save(foundOrganization);
+        updateOrganizationActivationStatus(foundOrganization,ActivationStatus.ACTIVE);
         log.info("Updated Organization entity status: {}", foundOrganization.getStatus());
         return foundOrganization;
     }
@@ -168,35 +152,74 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     @Override
     public OrganizationIdentity deactivateOrganization(String organizationId, String reason) throws MeedlException {
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-        log.info("Reason for deactivating organization is {}", reason);
         MeedlValidator.validateDataElement(reason, "Deactivation reason is required");
         log.info("Deactivation reason : {} validated", reason);
+
         OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findById(organizationId);
         List<OrganizationEmployeeIdentity> organizationEmployees = foundOrganization.getOrganizationEmployees();
         log.info("Found organization employees: {}", organizationEmployees);
+
+        deactivateOrganizationEmployees(reason, organizationEmployees);
+        updateOrganizationActivationStatus(foundOrganization,ActivationStatus.DEACTIVATED);
+        asynchronousMailingOutputPort.sendDeactivatedEmployeesEmailNotification(organizationEmployees, foundOrganization);
+        return foundOrganization;
+    }
+    private void reactivateOrganizationEmployees(String reason, List<OrganizationEmployeeIdentity> organizationEmployees) {
+        organizationEmployees
+                .forEach(organizationEmployeeIdentity -> {
+                    try {
+                        reactivateOrganizationEmployee(organizationEmployeeIdentity, reason);
+                    } catch (MeedlException e) {
+                        log.error("Error enabling organization user : {}", e.getMessage());
+                    }
+                });
+    }
+
+    private void deactivateOrganizationEmployees(String reason, List<OrganizationEmployeeIdentity> organizationEmployees) {
         organizationEmployees
                 .forEach(organizationEmployeeIdentity -> {
                             UserIdentity userIdentity = organizationEmployeeIdentity.getMeedlUser();
                             try {
-                                log.info("Deactivating user {} , while deactivating organization.", organizationEmployeeIdentity.getMeedlUser());
-                                userIdentity.setDeactivationReason(reason);
-                                log.info("Reason on deactivating user before deactivating organization is {}", organizationEmployeeIdentity.getMeedlUser().getDeactivationReason());
-                                organizationEmployeeIdentity.setStatus(ActivationStatus.DEACTIVATED);
-                                organizationEmployeeIdentity = organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
-                                log.info("Updated organization status: {}", organizationEmployeeIdentity.getStatus());
-                                identityManagerOutPutPort.disableUserAccount(userIdentity);
+                                deactivateOrganizationEmployee(reason, organizationEmployeeIdentity, userIdentity);
                             } catch (MeedlException e) {
                                 log.error("Error disabling organization user : {}", e.getMessage());
                             }
                         });
+    }
 
-        identityManagerOutPutPort.disableClient(foundOrganization);
-        foundOrganization.setEnabled(Boolean.FALSE);
-        foundOrganization.setStatus(ActivationStatus.DEACTIVATED);
-        organizationIdentityOutputPort.save(foundOrganization);
+    private void updateOrganizationActivationStatus(OrganizationIdentity organization, ActivationStatus activationStatus) throws MeedlException {
+        if (activationStatus == ActivationStatus.ACTIVE) {
+            identityManagerOutPutPort.enableClient(organization);
+            organization.setEnabled(Boolean.TRUE);
+            organization.setStatus(ActivationStatus.ACTIVE);
+        } else {
+            identityManagerOutPutPort.disableClient(organization);
+            organization.setEnabled(Boolean.FALSE);
+            organization.setStatus(ActivationStatus.DEACTIVATED);
+        }
 
-        asynchronousMailingOutputPort.sendDeactivatedEmployeesEmailNotification(organizationEmployees, foundOrganization);
-        return foundOrganization;
+        organization.setTimeUpdated(LocalDateTime.now());
+        organizationIdentityOutputPort.save(organization);
+    }
+
+    private void reactivateOrganizationEmployee(OrganizationEmployeeIdentity organizationEmployeeIdentity, String reason) throws MeedlException {
+        log.info("Reactivating user {}", organizationEmployeeIdentity.getMeedlUser());
+        organizationEmployeeIdentity.getMeedlUser().setReactivationReason(reason);
+        organizationEmployeeIdentity.setStatus(ActivationStatus.ACTIVE);
+        organizationEmployeeIdentity = organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
+        log.info("Updated Organization employee status: {}", organizationEmployeeIdentity.getStatus());
+        identityManagerOutPutPort.enableUserAccount(organizationEmployeeIdentity.getMeedlUser());
+    }
+
+
+    private void deactivateOrganizationEmployee(String reason, OrganizationEmployeeIdentity organizationEmployeeIdentity, UserIdentity userIdentity) throws MeedlException {
+        log.info("Deactivating user {} , while deactivating organization.", organizationEmployeeIdentity.getMeedlUser());
+        userIdentity.setDeactivationReason(reason);
+        log.info("Reason on deactivating user before deactivating organization is {}", organizationEmployeeIdentity.getMeedlUser().getDeactivationReason());
+        organizationEmployeeIdentity.setStatus(ActivationStatus.DEACTIVATED);
+        organizationEmployeeIdentity = organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
+        log.info("Updated organization status: {}", organizationEmployeeIdentity.getStatus());
+        identityManagerOutPutPort.disableUserAccount(userIdentity);
     }
 
     private void validateOrganizationIdentityDetails(OrganizationIdentity organizationIdentity) throws MeedlException {

@@ -159,8 +159,8 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
             repaymentHistories = loanCalculationUseCase.calculateTotalRepaidment(repaymentHistories, loaneeId, cohortId);
             repaymentRecordBook.setRepaymentHistories(repaymentHistories);
 
-            CohortLoanee cohortLoanee = cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId();
-            cohortLoanee.getLoaneeLoanDetail();
+//            CohortLoanee cohortLoanee = cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId();
+//            cohortLoanee.getLoaneeLoanDetail();
             List<RepaymentHistory> savedRepaymentHistories = repaymentHistoryUseCase.saveCohortRepaymentHistory(repaymentRecordBook);
             log.info("repayment histories for loanee {} -- {}", loaneeId, savedRepaymentHistories);
         }

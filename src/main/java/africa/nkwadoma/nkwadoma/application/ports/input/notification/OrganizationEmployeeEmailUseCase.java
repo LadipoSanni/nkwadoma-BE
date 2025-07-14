@@ -6,6 +6,4 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 public interface OrganizationEmployeeEmailUseCase {
     void sendEmail(UserIdentity userIdentity) throws MeedlException;
     void sendForgotPasswordEmail(UserIdentity userIdentity) throws MeedlException;
-
-    void sendDeactivateOrganizationEmailNotification(UserIdentity userIdentity, String organizationName);
 }

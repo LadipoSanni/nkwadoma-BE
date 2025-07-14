@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.notification.email;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.*;
-import africa.nkwadoma.nkwadoma.application.ports.input.meedlnotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
@@ -150,19 +149,19 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
     }
 
     @Override
-    public void sendDeactivatedEmployeesEmailNotification(List<OrganizationEmployeeIdentity> organizationEmployees, OrganizationIdentity foundOrganization) {
-        for (OrganizationEmployeeIdentity employee : organizationEmployees){
-            try {
-               notifyDeactivatedEmployee(employee, foundOrganization.getName());
-            } catch (MeedlException e) {
-                log.warn("Error sending actor email on deactivate organization {}", e.getMessage());
-            }
-        };
-        notifyAllPortfolioManager();
+    public void sendDeactivatedEmployeesEmailNotification(List<OrganizationEmployeeIdentity> organizationEmployees, OrganizationIdentity organization) throws MeedlException {
+        organizationEmployees
+                .forEach(this::notifyDeactivatedEmployee);
+
+        notifyAllPortfolioManagerOnAccountDeactivation(organization);
     }
 
-    private void notifyDeactivatedEmployee(OrganizationEmployeeIdentity employee, String organizationName) {
-        sendOrganizationEmployeeEmailUseCase.sendDeactivateOrganizationEmailNotification(employee.getMeedlUser(), organizationName);
+    private void notifyAllPortfolioManagerOnAccountDeactivation(OrganizationIdentity organization) throws MeedlException {
+     notifyAllPortfolioManager();
+    }
+
+    private void notifyDeactivatedEmployee(OrganizationEmployeeIdentity employee) {
+        userEmailUseCase.sendDeactivatedUserEmailNotification(employee.getMeedlUser());
     }
 
     private void emailInviteNonExistingFinancierToVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {

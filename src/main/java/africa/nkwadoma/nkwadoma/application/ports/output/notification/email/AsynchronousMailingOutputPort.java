@@ -35,5 +35,5 @@ public interface AsynchronousMailingOutputPort {
     void notifyDeactivatedUser(UserIdentity userIdentity);
 
     @Async
-    void sendDeactivatedEmployeesEmailNotification(List<OrganizationEmployeeIdentity> organizationEmployees, OrganizationIdentity foundOrganization);
+    void sendDeactivatedEmployeesEmailNotification(List<OrganizationEmployeeIdentity> organizationEmployees, OrganizationIdentity foundOrganization) throws MeedlException;
 }
