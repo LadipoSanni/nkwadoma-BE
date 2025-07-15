@@ -101,15 +101,6 @@ class ProgramPersistenceAdapterTest {
         dataScience.setDurationType(DurationType.YEARS);
     }
 
-//    @AfterEach
-//    void cleanUp() {
-//        if (StringUtils.isNotEmpty(dataAnalyticsProgramId)) {
-//            programRepository.deleteById(dataAnalyticsProgramId);
-//        }
-//        if (StringUtils.isNotEmpty(dataScienceProgramId)) {
-//            programRepository.deleteById(dataScienceProgramId);
-//        }
-//    }
 
     @Order(1)
     @Test
@@ -242,8 +233,8 @@ class ProgramPersistenceAdapterTest {
         }
         assertNotNull(foundProgram);
         assertEquals(2, foundProgram.getContent().size());
-        assertEquals("Data sciences", foundProgram.getContent().get(0).getName());
-        assertEquals("Data analysis", foundProgram.getContent().get(1).getName());
+        assertEquals("Data analysis", foundProgram.getContent().get(0).getName());
+        assertEquals("Data sciences", foundProgram.getContent().get(1).getName());
     }
 
     @Test
@@ -258,8 +249,8 @@ class ProgramPersistenceAdapterTest {
         }
         assertNotNull(foundProgram);
         assertEquals(2, foundProgram.getContent().size());
-        assertEquals("Data sciences", foundProgram.getContent().get(0).getName());
-        assertEquals("Data analysis", foundProgram.getContent().get(1).getName());
+        assertEquals("Data analysis", foundProgram.getContent().get(0).getName());
+        assertEquals("Data sciences", foundProgram.getContent().get(1).getName());
     }
 
     @Test
