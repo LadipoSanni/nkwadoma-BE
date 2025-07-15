@@ -23,8 +23,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.*;
-
 @Slf4j
 @RestController
 @RequestMapping("program")
@@ -96,7 +94,7 @@ public class ProgramController {
                 .pageNumber(pageNumber).pageSize(pageSize).build();
         log.info("Program search parameters: {}", program);
 
-        Page<Program> programs = addProgramUseCase.viewProgramByName(program);
+        Page<Program> programs = addProgramUseCase.searchProgramByName(program);
         List<ProgramResponse> programResponses = programs.stream().
                 map(programRestMapper::toProgramResponse).toList();
         return new ResponseEntity<>(ApiResponse.builder().

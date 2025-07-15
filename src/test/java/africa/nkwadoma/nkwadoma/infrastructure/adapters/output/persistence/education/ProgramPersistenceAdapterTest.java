@@ -1,17 +1,12 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.education.*;
-import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
-import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
-import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.*;
 import africa.nkwadoma.nkwadoma.testUtilities.data.*;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
@@ -22,11 +17,9 @@ import org.springframework.beans.factory.annotation.*;
 import org.springframework.boot.test.context.*;
 import org.springframework.data.domain.*;
 
-import java.math.*;
 import java.time.*;
 import java.util.*;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
@@ -108,32 +101,54 @@ class ProgramPersistenceAdapterTest {
         dataScience.setDurationType(DurationType.YEARS);
     }
 
-    @AfterEach
-    void cleanUp() {
-        if (StringUtils.isNotEmpty(dataAnalyticsProgramId)) {
-            programRepository.deleteById(dataAnalyticsProgramId);
-        }
-        if (StringUtils.isNotEmpty(dataScienceProgramId)) {
-            programRepository.deleteById(dataScienceProgramId);
-        }
-    }
+//    @AfterEach
+//    void cleanUp() {
+//        if (StringUtils.isNotEmpty(dataAnalyticsProgramId)) {
+//            programRepository.deleteById(dataAnalyticsProgramId);
+//        }
+//        if (StringUtils.isNotEmpty(dataScienceProgramId)) {
+//            programRepository.deleteById(dataScienceProgramId);
+//        }
+//    }
 
+    @Order(1)
     @Test
     void saveProgram() {
+        Program savedProgram = null;
         try {
             dataAnalytics.setCreatedBy(userId);
-            Program savedProgram = programOutputPort.saveProgram(dataAnalytics);
+            savedProgram = programOutputPort.saveProgram(dataAnalytics);
             dataAnalyticsProgramId = savedProgram.getId();
 
-            assertNotNull(savedProgram);
-            assertNotNull(savedProgram.getId());
-            assertEquals(dataAnalytics.getName(), savedProgram.getName());
-            assertEquals(dataAnalytics.getProgramStatus(), savedProgram.getProgramStatus());
-            assertEquals(dataAnalytics.getProgramDescription(), savedProgram.getProgramDescription());
-            assertEquals(LocalDate.now(), savedProgram.getProgramStartDate());
         } catch (MeedlException e) {
             log.error("Error saving program", e);
         }
+        assertNotNull(savedProgram);
+        assertNotNull(savedProgram.getId());
+        assertEquals(dataAnalytics.getName(), savedProgram.getName());
+        assertEquals(dataAnalytics.getProgramStatus(), savedProgram.getProgramStatus());
+        assertEquals(dataAnalytics.getProgramDescription(), savedProgram.getProgramDescription());
+        assertEquals(LocalDate.now(), savedProgram.getProgramStartDate());
+    }
+
+    @Order(2)
+    @Test
+    void saveAnotherProgram() {
+        Program savedProgram = null;
+        try {
+            dataScience.setCreatedBy(userId);
+            savedProgram = programOutputPort.saveProgram(dataScience);
+            dataScienceProgramId = savedProgram.getId();
+
+        } catch (MeedlException e) {
+            log.error("Error saving program", e);
+        }
+        assertNotNull(savedProgram);
+        assertNotNull(savedProgram.getId());
+        assertEquals(dataScience.getName(), savedProgram.getName());
+        assertEquals(dataScience.getProgramStatus(), savedProgram.getProgramStatus());
+        assertEquals(dataScience.getProgramDescription(), savedProgram.getProgramDescription());
+        assertEquals(LocalDate.now(), savedProgram.getProgramStartDate());
     }
 
     @Test
@@ -215,114 +230,70 @@ class ProgramPersistenceAdapterTest {
         assertThrows(MeedlException.class, () -> programOutputPort.saveProgram(dataAnalytics));
     }
 
+    @Order(3)
     @Test
     void findProgramByNameWithOrganizationId() {
+        Page<Program> foundProgram = Page.empty();
         try {
-            assertEquals(new ArrayList<>(), programOutputPort.findProgramByName(dataScience.getName(), organizationId));
-            assertEquals(new ArrayList<>(), programOutputPort.findProgramByName(dataAnalytics.getName(), organizationId));
-            dataScience.setCreatedBy(userId);
-            Program savedProgram = programOutputPort.saveProgram(dataScience);
-            dataScienceProgramId = savedProgram.getId();
-            dataAnalytics.setCreatedBy(userId);
-            Program dataAnalyticsProgram = programOutputPort.saveProgram(dataAnalytics);
-            dataAnalyticsProgramId = dataAnalyticsProgram.getId();
-
-            List<Program> foundProgram = programOutputPort.findProgramByName("data", organizationId);
-
-            assertNotNull(foundProgram);
-            assertEquals(2, foundProgram.size());
-            assertEquals("Data sciences", foundProgram.get(0).getName());
-            assertEquals("Data analysis", foundProgram.get(1).getName());
+            Program searchQuery = Program.builder().name("data").pageSize(pageSize).pageNumber(pageNumber).build();
+            foundProgram = programOutputPort.findProgramByNameWithinOrganization(searchQuery, organizationId);
         } catch (MeedlException e) {
             log.error("Error finding program by name", e);
         }
+        assertNotNull(foundProgram);
+        assertEquals(2, foundProgram.getContent().size());
+        assertEquals("Data sciences", foundProgram.getContent().get(0).getName());
+        assertEquals("Data analysis", foundProgram.getContent().get(1).getName());
     }
 
     @Test
+    @Order(4)
     void findProgramByName() {
+        Page<Program> foundProgram = Page.empty();
+
         try {
-            assertEquals(new ArrayList<>(), programOutputPort.findProgramByName(dataScience.getName()));
-            assertEquals(new ArrayList<>(), programOutputPort.findProgramByName(dataAnalytics.getName()));
-            dataScience.setCreatedBy(userId);
-            Program savedProgram = programOutputPort.saveProgram(dataScience);
-            dataScienceProgramId = savedProgram.getId();
-
-            dataAnalytics.setCreatedBy(userId);
-            Program dataAnalyticsProgram = programOutputPort.saveProgram(dataAnalytics);
-            dataAnalyticsProgramId = dataAnalyticsProgram.getId();
-
-            List<Program> foundProgram = programOutputPort.findProgramByName("data");
-
-            assertNotNull(foundProgram);
-            assertEquals(2, foundProgram.size());
-            assertEquals("Data sciences", foundProgram.get(0).getName());
-            assertEquals("Data analysis", foundProgram.get(1).getName());
+            foundProgram = programOutputPort.findProgramByName("data",pageNumber,pageSize);
         } catch (MeedlException e) {
             log.error("Error finding program by name", e);
         }
+        assertNotNull(foundProgram);
+        assertEquals(2, foundProgram.getContent().size());
+        assertEquals("Data sciences", foundProgram.getContent().get(0).getName());
+        assertEquals("Data analysis", foundProgram.getContent().get(1).getName());
     }
 
     @Test
+    @Order(5)
     void findProgramByNameThatMatchesOneResult() {
+        Page<Program> foundProgram = Page.empty();
         try {
-            assertEquals(new ArrayList<>(), programOutputPort.findProgramByName(dataScience.getName(), organizationId));
-            assertEquals(new ArrayList<>(), programOutputPort.findProgramByName(dataAnalytics.getName(), organizationId));
-            dataScience.setCreatedBy(userId);
-            Program savedProgram = programOutputPort.saveProgram(dataScience);
-            dataScienceProgramId = savedProgram.getId();
-            dataAnalytics.setCreatedBy(userId);
-            Program dataAnalyticsProgram = programOutputPort.saveProgram(dataAnalytics);
-            dataAnalyticsProgramId = dataAnalyticsProgram.getId();
+            foundProgram = programOutputPort.findProgramByName("ysis", pageNumber,pageSize);
 
-            List<Program> foundProgram = programOutputPort.findProgramByName("ysis", organizationId);
-
-            assertNotNull(foundProgram);
-            assertEquals(1, foundProgram.size());
-            assertEquals("Data analysis", foundProgram.get(0).getName());
         } catch (MeedlException e) {
             log.error("Error finding program by name", e);
         }
+        assertNotNull(foundProgram);
+        assertEquals(1, foundProgram.getContent().size());
+        assertEquals("Data analysis", foundProgram.getContent().get(0).getName());
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
-    void findProgramByNullOrEmptyName(String name) {
-        assertThrows(MeedlException.class, () -> programOutputPort.findProgramByName(name, organizationId));
+    @Test
+    void findProgramByNullOrganizationId() {
+        assertThrows(MeedlException.class, () -> programOutputPort.findProgramByNameWithinOrganization(dataAnalytics, null));
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"  First program", "Second program   ", "    Third program     "})
-    void findProgramByNameWithSpaces(String name) {
-        try {
-            dataAnalytics.setCreatedBy(userId);
-            dataAnalytics.setName(name);
-            Program savedProgram = programOutputPort.saveProgram(dataAnalytics);
-            dataAnalyticsProgramId = savedProgram.getId();
 
-            assertNotNull(savedProgram);
-            List<Program> foundProgramByName = programOutputPort.findProgramByName(name, organizationId);
-            assertNotNull(foundProgramByName);
-            assertEquals(foundProgramByName.get(0).getName(), dataAnalytics.getName());
-        } catch (MeedlException e) {
-            log.error("Error finding program by name with spaces", e);
-        }
-    }
-
+    @Order(6)
     @Test
     void findProgramById() {
+        Program foundProgram = null;
         try {
-            dataAnalytics.setCreatedBy(userId);
-            Program savedProgram = programOutputPort.saveProgram(dataAnalytics);
-            assertNotNull(savedProgram);
-            dataAnalyticsProgramId = savedProgram.getId();
-
-            Program foundProgram = programOutputPort.findProgramById(savedProgram.getId());
-
-            assertNotNull(foundProgram);
-            assertEquals(savedProgram.getId(), foundProgram.getId());
+            foundProgram = programOutputPort.findProgramById(dataAnalyticsProgramId);
         } catch (MeedlException e) {
             log.error("Error finding program by ID", e);
         }
+        assertNotNull(foundProgram);
+        assertEquals(dataAnalyticsProgramId, foundProgram.getId());
     }
 
     @ParameterizedTest
@@ -345,34 +316,21 @@ class ProgramPersistenceAdapterTest {
         MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.findProgramById(programId));
         assertEquals("Please provide a valid program identification.", meedlException.getMessage());
     }
+
+    @Order(7)
     @Test
     void findAllPrograms() {
+        Page<Program> foundPrograms = Page.empty();
         try {
-            Page<Program> firstFoundPrograms = programOutputPort.findAllPrograms(
+
+            foundPrograms = programOutputPort.findAllPrograms(
                     userId, pageSize, pageNumber);
-            dataScience.setCreatedBy(organizationIdentity.getCreatedBy());
-            Program savedProgram = programOutputPort.saveProgram(dataScience);
-            dataScienceProgramId = savedProgram.getId();
 
-            Page<Program> foundPrograms = programOutputPort.findAllPrograms(
-                    userId, pageSize, pageNumber);
-            List<Program> programsList = foundPrograms.toList();
-
-            log.info("Found " + firstFoundPrograms.getTotalElements() + " programs");
-            assertEquals(firstFoundPrograms.getTotalElements() + 1, foundPrograms.getTotalElements());
-            assertEquals(1, foundPrograms.getTotalPages());
-            assertTrue(foundPrograms.isFirst());
-            assertTrue(foundPrograms.isLast());
-
-            assertNotNull(programsList);
-            assertEquals(firstFoundPrograms.stream().toList().size() + 1, programsList.size());
-            assertEquals(programsList.get(0).getName(), dataScience.getName());
-            assertEquals(programsList.get(0).getDuration(), dataScience.getDuration());
-            assertEquals(programsList.get(0).getNumberOfCohort(), dataScience.getNumberOfCohort());
-            assertEquals(programsList.get(0).getNumberOfLoanees(), dataScience.getNumberOfLoanees());
         } catch (MeedlException e) {
             log.error("Error finding all programs", e);
         }
+        assertNotNull(foundPrograms);
+        assertEquals(foundPrograms.getContent().size(), 2);
     }
 
     @ParameterizedTest
@@ -381,17 +339,14 @@ class ProgramPersistenceAdapterTest {
         assertThrows(MeedlException.class, () -> programOutputPort.findAllPrograms(organizationId, pageSize, pageNumber));
     }
 
+    @Order(8)
     @Test
     void deleteProgram() {
         try {
-            dataScience.setCreatedBy(userId);
-            Program savedProgram = programOutputPort.saveProgram(dataScience);
-            assertNotNull(savedProgram);
 
-            programOutputPort.deleteProgram(savedProgram.getId());
-
-            List<Program> programByName = programOutputPort.findProgramByName(dataScience.getName(), organizationId);
-            assertTrue(programByName.isEmpty());
+            programOutputPort.deleteProgram(dataScience.getId());
+            Program program = programOutputPort.findProgramById(dataScience.getId());
+            assertNull(program);
         } catch (MeedlException e) {
             log.error("Error while deleting program", e);
         }

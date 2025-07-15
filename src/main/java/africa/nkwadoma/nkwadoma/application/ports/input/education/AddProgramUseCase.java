@@ -10,7 +10,7 @@ public interface AddProgramUseCase {
     Page<Program> viewAllPrograms(Program program) throws MeedlException;
 
     Program updateProgram(Program program) throws MeedlException;
-    Page<Program> viewProgramByName(Program program) throws MeedlException;
+    Page<Program> searchProgramByName(Program program) throws MeedlException;
 
     Program viewProgramById(Program program) throws MeedlException;
 

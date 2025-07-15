@@ -21,7 +21,6 @@ import org.springframework.stereotype.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_ALREADY_EXISTS;
 
@@ -75,9 +74,10 @@ public class ProgramService implements AddProgramUseCase {
 //            program.setOrganizationIdentity(organizationIdentity);
 //            checkIfProgramExistByNameInOrganization(foundProgram);
             program.setOrganizationId(foundProgram.getOrganizationId());
-            boolean existInORg =
+            program.setId(foundProgram.getId());
+            boolean existInOrganization =
                     programOutputPort.programExistsInOrganization(program);
-                if (existInORg){
+                if (existInOrganization){
                   throw new EducationException(PROGRAM_ALREADY_EXISTS.getMessage());
                 }
 
@@ -113,7 +113,7 @@ public class ProgramService implements AddProgramUseCase {
     }
 
     @Override
-    public Page<Program> viewProgramByName(Program program) throws MeedlException {
+    public Page<Program> searchProgramByName(Program program) throws MeedlException {
         MeedlValidator.validateObjectInstance(program, ProgramMessages.PROGRAM_CANNOT_BE_EMPTY.getMessage());
         program.validateViewProgramByNameInput();
         MeedlValidator.validatePageSize(program.getPageSize());
@@ -127,9 +127,9 @@ public class ProgramService implements AddProgramUseCase {
         if (ObjectUtils.isNotEmpty(foundCreator) && foundCreator.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)) {
             OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.findByCreatedBy(foundCreator.getId());
             log.info("Found Organization Employee: {}", employeeIdentity);
-            return programOutputPort.findProgramByName(program, employeeIdentity.getOrganization());
+            return programOutputPort.findProgramByNameWithinOrganization(program, employeeIdentity.getOrganization());
         }
-        return programOutputPort.findProgramByName(program.getName().trim());
+        return programOutputPort.findProgramByName(program.getName(),program.getPageNumber(),program.getPageSize());
     }
 
     @Override

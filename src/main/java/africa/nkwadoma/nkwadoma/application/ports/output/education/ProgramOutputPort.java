@@ -8,8 +8,8 @@ import org.springframework.data.domain.*;
 import java.util.*;
 
 public interface ProgramOutputPort {
-    Page<Program> findProgramByName(Program program, String organizationId) throws MeedlException;
-    Page<Program> findProgramByName(String programName) throws MeedlException;
+    Page<Program> findProgramByNameWithinOrganization(Program program, String organizationId) throws MeedlException;
+    Page<Program> findProgramByName(String programName,int pageNumber, int pageSize) throws MeedlException;
     Program saveProgram(Program program) throws MeedlException;
     boolean programExistsInOrganization(Program program) throws MeedlException;
     void deleteProgram(String programId) throws MeedlException;

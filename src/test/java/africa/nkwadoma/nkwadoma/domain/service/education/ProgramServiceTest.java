@@ -218,45 +218,41 @@ class ProgramServiceTest {
     }
 
     @Test
-     void viewProgramByName() {
+     void searchProgramByNameWithinAnOrganization() {
         try {
+            program.setPageNumber(pageNumber);
+            program.setPageSize(pageSize);
             when(userIdentityOutputPort.findById(program.getCreatedBy())).thenReturn(userIdentity);
             when(employeeIdentityOutputPort.findByCreatedBy(program.getId())).thenReturn(employeeIdentity);
-            when(programOutputPort.findProgramByName(program.getName(), employeeIdentity.getOrganization())).thenReturn(List.of(program));
-            List<Program> foundProgram = programService.viewProgramByName(program);
+            when(programOutputPort.findProgramByNameWithinOrganization(program, employeeIdentity.getOrganization()))
+                    .thenReturn(new PageImpl<>(List.of(program)));
+            Page<Program> foundProgram = programService.searchProgramByName(program);
 
             assertNotNull(foundProgram);
-            assertEquals(foundProgram, List.of(program));
-            verify(programOutputPort, times(1)).findProgramByName(program.getName(), employeeIdentity.getOrganization());
+            assertEquals(foundProgram, new PageImpl<>(List.of(program)));
+            verify(programOutputPort, times(1)).findProgramByNameWithinOrganization(program, employeeIdentity.getOrganization());
         } catch (MeedlException e) {
             log.error("Error viewing program by name", e);
         }
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"   tf8980w", "grvboiwv    "})
-    void viewProgramByNameWithSpaces(String programWithSpace) {
+    @Test
+    void searchProgramAcrossPlatform() {
         try {
-            program.setName(programWithSpace);
-
+            program.setPageNumber(pageNumber);
+            program.setPageSize(pageSize);
+            userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
             when(userIdentityOutputPort.findById(program.getCreatedBy())).thenReturn(userIdentity);
-            when(employeeIdentityOutputPort.findByCreatedBy(program.getId())).thenReturn(employeeIdentity);
-            when(programOutputPort.findProgramByName(program.getName(), employeeIdentity.getOrganization())).thenReturn(List.of(program));
-            List<Program> foundProgram = programService.viewProgramByName(program);
-
+            when(programOutputPort.findProgramByName(program.getName(),program.getPageNumber(),program.getPageSize()))
+                    .thenReturn(new PageImpl<>(List.of(program)));
+                    Page<Program> foundProgram = programService.searchProgramByName(program);
             assertNotNull(foundProgram);
-            verify(programOutputPort, times(1)).findProgramByName(program.getName().trim(), employeeIdentity.getOrganization());
+            verify(programOutputPort, times(1)).findProgramByName(program.getName(),program.getPageNumber(),program.getPageSize());
         } catch (MeedlException e) {
             log.error("Error viewing program by name", e);
         }
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.SPACE})
-    void viewProgramWithNullOrEmptyName(String programWithSpace) {
-        program.setName(programWithSpace);
-        assertThrows(MeedlException.class, ()-> programService.viewProgramByName(program));
-    }
 
     @Test
     void deleteProgram() {

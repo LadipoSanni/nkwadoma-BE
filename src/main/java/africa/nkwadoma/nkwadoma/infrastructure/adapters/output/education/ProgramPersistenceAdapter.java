@@ -47,7 +47,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     private final ProgramCohortRepository programCohortRepository;
 
     @Override
-    public Page<Program> findProgramByName(Program program, String organizationId) throws MeedlException {
+    public Page<Program> findProgramByNameWithinOrganization(Program program, String organizationId) throws MeedlException {
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         MeedlValidator.validatePageSize(program.getPageSize());
         MeedlValidator.validatePageNumber(program.getPageNumber());
@@ -64,9 +64,12 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     }
 
     @Override
-    public Page<Program> findProgramByName(String programName) throws MeedlException {
-        MeedlValidator.validateDataElement(programName, ProgramMessages.PROGRAM_NAME_REQUIRED.getMessage());
-        Page<ProgramEntity> programEntities = programRepository.findByNameContainingIgnoreCase(programName);
+    public Page<Program> findProgramByName(String programName,int pageNumber, int pageSize) throws MeedlException {
+
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.desc("createdAt")));
+        Page<ProgramEntity> programEntities = programRepository.findByNameContainingIgnoreCase(programName,pageRequest);
         log.info("Program entities found: {}", programEntities);
         if (programEntities.isEmpty()) {
             return Page.empty();
@@ -132,7 +135,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     public boolean programExistsInOrganization(Program program) throws MeedlException {
         MeedlValidator.validateDataElement(program.getName(),ProgramMessages.PROGRAM_NAME_REQUIRED.getMessage());
         log.error("Checking if this program name : {}, exists in organization: {}", program.getName(), program.getOrganizationId());
-        return programRepository.existsByNameIgnoreCaseAndOrganizationIdentityId(program.getName(), program.getOrganizationId() );
+        return programRepository.existsByNameIgnoreCaseAndOrganizationIdentityId(program.getName(), program.getOrganizationId(), program.getId());
     }
 
     @Override
@@ -178,6 +181,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         OrganizationIdentity foundOrganizationIdentity = findCreatorOrganization(meedlUserId);
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
         Page<ProgramProjection> programEntities = programRepository.findAllByOrganizationIdentityId(foundOrganizationIdentity.getId(), pageRequest);
+        log.info("proigram entites size {}",programEntities.getContent().size());
         return programEntities.map(programMapper::mapFromProgramProjectionToProgram);
     }
     private static void validateServiceOfferings(List<ServiceOffering> serviceOfferings) throws EducationException {
