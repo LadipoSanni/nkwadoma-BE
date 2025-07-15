@@ -9,8 +9,9 @@ public interface LoaneeLoanDetailRepository extends JpaRepository<LoaneeLoanDeta
 
     @Query("""
      SELECT loaneeLoanDetail
-          from LoaneeLoanDetailEntity loaneeLoanDetail
-          join CohortLoaneeEntity cohortLoanee
+          
+          from CohortLoaneeEntity cohortLoanee
+          join LoaneeLoanDetailEntity loaneeLoanDetail on loaneeLoanDetail.id = cohortLoanee.loaneeLoanDetail.id
           where cohortLoanee.id = :cohortLoaneeId
      """)
     LoaneeLoanDetailEntity findByCohortLoaneeId(@Param("cohortLoaneeId") String cohortLoaneeId);
