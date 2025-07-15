@@ -25,8 +25,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ControllerConstant.*;
@@ -287,14 +290,21 @@ public class LoanController {
         log.info("Mapped Loan responses: {}", loanResponses.getContent().toArray());
         PaginatedResponse<LoanQueryResponse> paginatedResponse =
                 PaginatedResponse.<LoanQueryResponse>builder()
+
                         .body(loanResponses.getContent())
                         .pageSize(pageSize)
                         .pageNumber(pageNumber)
                         .totalPages(loanResponses.getTotalPages())
                         .hasNextPage(loanResponses.hasNext())
                         .build();
+
+        Map<String, BigDecimal> totals = new HashMap<>();
+        totals.put("totalAmountReceived", loan.getLoanDetailSummary().getTotalAmountReceived());
+        totals.put("totalAmountRepaid", loan.getLoanDetailSummary().getTotalAmountRepaid());
+        totals.put("totalAmountOutstanding", loan.getLoanDetailSummary().getTotalAmountOutstanding());
+
         return ResponseEntity.ok(new ApiResponse<>
-                (SuccessMessages.LOAN_DISBURSALS_RETURNED_SUCCESSFULLY, paginatedResponse, HttpStatus.OK.name(), LocalDateTime.now()));
+                (SuccessMessages.LOAN_DISBURSALS_RETURNED_SUCCESSFULLY, paginatedResponse, HttpStatus.OK.name(), LocalDateTime.now(), totals));
     }
 
     @GetMapping("/filter-by-program")

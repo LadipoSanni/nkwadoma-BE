@@ -51,6 +51,12 @@ public class Loan {
     private String cohortLoaneeId;
     private int pageNumber;
     private int pageSize;
+    private String organizationName;
+    private BigDecimal totalAmountOutstanding;
+    private BigDecimal totalAmountReceived;
+    private BigDecimal totalAmountRepaid;
+    private LoanDetailSummary loanDetailSummary;
+
 
     public void validate() throws MeedlException {
         MeedlValidator.validateUUID(loanAccountId, "Please provide a valid loan account identification.");

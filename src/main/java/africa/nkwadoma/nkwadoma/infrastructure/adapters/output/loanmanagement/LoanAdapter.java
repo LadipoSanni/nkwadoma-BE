@@ -23,6 +23,7 @@ import java.util.*;
 public class LoanAdapter implements LoanOutputPort {
     private final LoanMapper loanMapper;
     private final LoanRepository loanRepository;
+    private final LoaneeLoanDetailRepository loaneeLoanDetailRepository;
 
     @Override
     public Loan save(Loan loan) throws MeedlException {
