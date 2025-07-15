@@ -97,9 +97,13 @@ public class ProgramController {
         Page<Program> programs = addProgramUseCase.searchProgramByName(program);
         List<ProgramResponse> programResponses = programs.stream().
                 map(programRestMapper::toProgramResponse).toList();
+        PaginatedResponse<ProgramResponse> response = new PaginatedResponse<>(
+                programResponses, programs.hasNext(),
+                programs.getTotalPages(), programs.getTotalElements(),pageNumber, pageSize
+        );
         return new ResponseEntity<>(ApiResponse.builder().
                 statusCode(HttpStatus.OK.name()).
-                data(programResponses).
+                data(response).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
                 HttpStatus.OK
         );

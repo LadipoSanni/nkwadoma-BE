@@ -52,7 +52,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         MeedlValidator.validatePageSize(program.getPageSize());
         MeedlValidator.validatePageNumber(program.getPageNumber());
 
-        Pageable pageRequest = PageRequest.of(program.getPageNumber(), program.getPageSize(), Sort.by(Sort.Order.desc("createdAt")));
+        Pageable pageRequest = PageRequest.of(program.getPageNumber(), program.getPageSize(), Sort.by(Sort.Order.asc("createdAt")));
 
         Page<ProgramEntity> programEntities = programRepository.
                 findByNameContainingIgnoreCaseAndOrganizationIdentityId(program.getName(), organizationId,pageRequest);
@@ -68,7 +68,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
 
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validatePageNumber(pageNumber);
-        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.desc("createdAt")));
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.asc("createdAt")));
         Page<ProgramEntity> programEntities = programRepository.findByNameContainingIgnoreCase(programName,pageRequest);
         log.info("Program entities found: {}", programEntities);
         if (programEntities.isEmpty()) {
