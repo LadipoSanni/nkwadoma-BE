@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanSummaryProjection;
 
 public interface LoaneeLoanDetailsOutputPort {
     LoaneeLoanDetail save(LoaneeLoanDetail loaneeLoanDetail);
@@ -9,4 +10,6 @@ public interface LoaneeLoanDetailsOutputPort {
     void delete(String id) throws MeedlException;
 
     LoaneeLoanDetail findByCohortLoaneeId(String cohortLoaneeId) throws MeedlException;
+
+    LoanSummaryProjection getLoanSummary(String userId) throws MeedlException;
 }

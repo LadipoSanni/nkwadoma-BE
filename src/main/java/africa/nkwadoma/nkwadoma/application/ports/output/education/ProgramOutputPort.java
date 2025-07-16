@@ -3,14 +3,13 @@ package africa.nkwadoma.nkwadoma.application.ports.output.education;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.ProgramEntity;
 import org.springframework.data.domain.*;
 
 import java.util.*;
 
 public interface ProgramOutputPort {
-    List<Program> findProgramByName(String programName, String organizationId) throws MeedlException;
-    List<Program> findProgramByName(String programName) throws MeedlException;
+    Page<Program> findProgramByNameWithinOrganization(Program program, String organizationId) throws MeedlException;
+    Page<Program> findProgramByName(String programName,int pageNumber, int pageSize) throws MeedlException;
     Program saveProgram(Program program) throws MeedlException;
     boolean programExistsInOrganization(Program program) throws MeedlException;
     void deleteProgram(String programId) throws MeedlException;
@@ -20,4 +19,5 @@ public interface ProgramOutputPort {
     List<Program> findAllProgramsByOrganizationId(String organizationId);
 
     Page<Program> findAllProgramByOrganizationId(String organizationId, int pageSize, int pageNumber) throws MeedlException;
+
 }

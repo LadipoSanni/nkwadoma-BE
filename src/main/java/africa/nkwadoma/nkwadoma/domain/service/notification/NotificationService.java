@@ -1,9 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.service.notification;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.notification.FinancierEmailUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.notification.SendColleagueEmailUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.notification.LoaneeEmailUsecase;
-import africa.nkwadoma.nkwadoma.application.ports.input.notification.OrganizationEmployeeEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.notification.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlnotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.EmailOutputPort;
@@ -11,11 +8,13 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.EmailTokenOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanDecision;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.meedlexception.MeedlNotificationException;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.notification.Email;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -23,7 +22,6 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.aes.TokenUtils;
 import lombok.*;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.ObjectUtils;
@@ -42,7 +40,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @RequiredArgsConstructor
 @Slf4j
 public class NotificationService implements OrganizationEmployeeEmailUseCase, SendColleagueEmailUseCase ,
-        LoaneeEmailUsecase, MeedlNotificationUsecase, FinancierEmailUseCase {
+        LoaneeEmailUsecase, MeedlNotificationUsecase, FinancierEmailUseCase, UserEmailUseCase {
     private final EmailOutputPort emailOutputPort;
     private final AesOutputPort tokenUtils;
     private final EmailTokenOutputPort emailTokenManager;
@@ -78,6 +76,8 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
         sendMail(userIdentity, email);
 
     }
+
+
     @Override
     public void sendColleagueEmail(String organizationName,UserIdentity userIdentity) throws MeedlException {
         Context context = emailOutputPort.getNameAndLinkContextAndIndustryName(getLink(userIdentity),
@@ -331,5 +331,18 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
         MeedlValidator.validateUUID(userId, MeedlMessages.USER_ID_CANNOT_BE_EMPTY.getMessage());
         notificationIdList = MeedlValidator.validateNotificationListAndFilter(notificationIdList);
         meedlNotificationOutputPort.deleteMultipleNotification(userId, notificationIdList);
+    }
+
+    @Override
+    public void sendDeactivatedUserEmailNotification(UserIdentity userIdentity) {
+        Context context = emailOutputPort.getNameAndDeactivationReasonContext(userIdentity.getFirstName(), userIdentity.getDeactivationReason());
+        Email email = Email.builder()
+                .context(context)
+                .subject(UserMessages.USER_HAS_BEEN_DEACTIVATED.getMessage())
+                .to(userIdentity.getEmail())
+                .template(UserMessages.DEACTIVATED_USER.getMessage())
+                .firstName(userIdentity.getFirstName())
+                .build();
+        sendMail(userIdentity, email);
     }
 }

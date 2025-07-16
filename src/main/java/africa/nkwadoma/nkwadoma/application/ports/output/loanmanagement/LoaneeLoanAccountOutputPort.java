@@ -9,4 +9,6 @@ public interface LoaneeLoanAccountOutputPort {
     void deleteLoaneeLoanAccount(String loaneeLoanAccountId) throws MeedlException;
 
     LoaneeLoanAccount findByLoaneeId(String loaneeId) throws MeedlException;
+
+
 }

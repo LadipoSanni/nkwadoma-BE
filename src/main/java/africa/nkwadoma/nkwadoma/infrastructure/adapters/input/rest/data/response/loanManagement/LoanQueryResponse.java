@@ -17,6 +17,7 @@ public class LoanQueryResponse {
     private String id;
     private String firstName;
     private String lastName;
+    private String organizationName;
     private String cohortName;
     private String programName;
     private BigDecimal amountRequested;

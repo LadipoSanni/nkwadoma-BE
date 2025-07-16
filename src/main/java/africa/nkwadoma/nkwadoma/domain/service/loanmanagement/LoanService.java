@@ -22,6 +22,7 @@ import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanOfferMapper;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanException;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanSummaryProjection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -72,6 +73,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final OrganizationLoanDetailOutputPort organizationLoanDetailOutputPort;
     private final LoaneeUseCase loaneeUseCase;
     private final LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
+    private final LoanMapper loanMapper;
 
     @Override
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
@@ -285,6 +287,9 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         UserIdentity userIdentity = userIdentityOutputPort.findById(loan.getActorId());
 
         if (userIdentity.getRole().equals(IdentityRole.LOANEE)){
+            LoanSummaryProjection loanSummaryProjection = loaneeLoanDetailsOutputPort.getLoanSummary(userIdentity.getId());
+            LoanDetailSummary loanDetailSummary = loanMapper.toLoanDetailSummary(loanSummaryProjection);
+            loan.setLoanDetailSummary(loanDetailSummary);
             return loanOutputPort.findAllLoanDisburedToLoanee(userIdentity.getId(),loan.getPageNumber(),loan.getPageSize());
         }
         if (StringUtils.isNotEmpty(loan.getOrganizationId())) {

@@ -2,9 +2,9 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import lombok.*;
@@ -12,8 +12,6 @@ import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.*;
-
-import java.util.List;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -42,12 +40,14 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
     }
 
     @Override
-    public List<OrganizationEmployeeIdentity>  searchOrganizationAdmin(String userId, String name) throws MeedlException {
-        MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
+    public Page<OrganizationEmployeeIdentity> searchOrganizationAdmin(OrganizationIdentity organizationIdentity) throws MeedlException {
+        MeedlValidator.validateUUID(organizationIdentity.getActorId(), UserMessages.INVALID_USER_ID.getMessage());
         OrganizationEmployeeIdentity organizationEmployeeIdentity
-                = organizationEmployeeOutputPort.findByCreatedBy(userId);
-        return organizationEmployeeOutputPort.findEmployeesByNameAndRole(organizationEmployeeIdentity.getOrganization(),
-                name, organizationEmployeeIdentity.getMeedlUser().getRole());
+                = organizationEmployeeOutputPort.findByCreatedBy(organizationIdentity.getActorId());
+        organizationIdentity.setId(organizationEmployeeIdentity.getOrganization());
+
+        return organizationEmployeeOutputPort.findEmployeesByNameAndRole(
+                organizationIdentity, organizationEmployeeIdentity.getMeedlUser().getRole());
     }
 
     @Override

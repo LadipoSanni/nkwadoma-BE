@@ -33,4 +33,5 @@ public interface CohortLoaneeProjection {
     String getProgramName();
     String getOrganizationName();
     String getCohortName();
+    String getLoaneeLoanDetailId();
 }
