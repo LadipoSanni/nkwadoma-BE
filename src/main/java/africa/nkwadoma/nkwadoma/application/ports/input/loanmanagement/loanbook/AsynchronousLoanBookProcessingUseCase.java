@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.Async;
 import java.util.List;
 
 public interface AsynchronousLoanBookProcessingUseCase {
-//    @Async
+    @Async
 void upLoadUserData(LoanBook loanBook) throws MeedlException;
     @Async
     void uploadRepaymentHistory(LoanBook repaymentRecordBook) throws MeedlException;
