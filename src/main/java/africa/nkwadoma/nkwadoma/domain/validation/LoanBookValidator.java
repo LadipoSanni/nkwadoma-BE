@@ -12,6 +12,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import lombok.RequiredArgsConstructor;
@@ -66,9 +67,17 @@ public class LoanBookValidator {
             validateNames(cohortLoanee.getLoanee().getUserIdentity());
             validateLoanProductExist(cohortLoanee.getLoanee());
             validateAmount(cohortLoanee.getLoanee(), rowCount);
+            validateInitialDepositAndAmountApproved(cohortLoanee.getLoaneeLoanDetail());
             rowCount++;
         }
 
+    }
+
+    private void validateInitialDepositAndAmountApproved(LoaneeLoanDetail loaneeLoanDetail) throws MeedlException {
+        if (loaneeLoanDetail.getInitialDeposit().compareTo(loaneeLoanDetail.getAmountReceived()) > 0) {
+            log.error("Initial deposit: {} cannot be greater than amount received: {}", loaneeLoanDetail.getInitialDeposit(), loaneeLoanDetail.getAmountReceived());
+            throw new MeedlException("Initial deposit cannot be greater than amount received");
+        }
     }
 
     private void validatePhoneNumber(UserIdentity userIdentity) throws MeedlException {
