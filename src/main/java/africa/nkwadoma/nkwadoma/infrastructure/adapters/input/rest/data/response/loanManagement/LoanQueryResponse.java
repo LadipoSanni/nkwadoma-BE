@@ -25,6 +25,12 @@ public class LoanQueryResponse {
     private LocalDateTime startDate;
     private BigDecimal initialDeposit;
     private BigDecimal tuitionAmount;
+    private BigDecimal loanAmountOutstanding;
+    private BigDecimal loanAmountRepaid;
+    private double interestRate;
+    private BigDecimal repaymentRate;
+    private BigDecimal debtPercentage;
+    private BigDecimal interestIncurred;
     private LocalDate cohortStartDate;
     private String referredBy;
     private LoanRequestStatus status;
