@@ -88,8 +88,8 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
 //        validateStartDates(convertedCohortLoanees, savedCohort);
         loanBook.setCohortLoanees(convertedCohortLoanees);
         referCohort(loanBook);
-        updateLoaneeCount(savedCohort,convertedCohortLoanees);
         completeLoanProcessing(loanBook);
+        updateLoaneeCount(savedCohort,convertedCohortLoanees);
     }
 
 
@@ -113,7 +113,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         Set<String> loaneesThatMadePayment = getSetOfLoanees(convertedRepaymentHistories);
         log.info("Set of loanees that made payments size : {}, set",loaneesThatMadePayment.size());
         Map<String, List<RepaymentHistory>> mapOfRepaymentHistoriesForEachLoanee = getRepaymentHistoriesForLoanees(loaneesThatMadePayment, convertedRepaymentHistories);
-        printRepaymentCountsPerLoanee(mapOfRepaymentHistoriesForEachLoanee);
+//        printRepaymentCountsPerLoanee(mapOfRepaymentHistoriesForEachLoanee);
         processAccumulatedRepayments(mapOfRepaymentHistoriesForEachLoanee, repaymentHistoryBook.getCohort().getId(), repaymentHistoryBook);
         log.info("Repayment record uploaded..");
     }
@@ -136,7 +136,9 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
 
     private void updateLoaneeCount(Cohort savedCohort, List<CohortLoanee> loanees) throws MeedlException {
         savedCohort = findCohort(savedCohort);
+        log.info("Number of loanees in a cohort on upload {}", savedCohort.getNumberOfLoanees() + loanees.size());
         savedCohort.setNumberOfLoanees(savedCohort.getNumberOfLoanees() + loanees.size());
+        log.info("Number of loanees in the cohort updated before save {}", savedCohort.getNumberOfLoanees());
         cohortOutputPort.save(savedCohort);
         loaneeUseCase.increaseNumberOfLoaneesInOrganization(savedCohort, loanees.size());
         loaneeUseCase.increaseNumberOfLoaneesInProgram(savedCohort, loanees.size());
@@ -508,6 +510,8 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                 log.info("Loanee's actual loan details in file upload: {}", cohortLoanee.getLoaneeLoanDetail());
                 CohortLoanee savedCohortLoanee = cohortLoaneeOutputPort.save(cohortLoanee);
                 savedCohortLoanee.getLoanee().setLoanProductName(cohortLoanee.getLoanee().getLoanProductName());
+                log.info("Saved cohort loanee in upload, number of loanees in cohort {}", savedCohortLoanee.getCohort().getNumberOfLoanees());
+                log.info("none saved cohort loanee in upload, number of loanees in cohort {}", cohortLoanee.getCohort().getNumberOfLoanees());
                 log.info("The loan product name after saving the cohort loanee is {}", savedCohortLoanee.getLoanee().getLoanProductName());
                 savedLoanees.add(savedCohortLoanee);
             } catch (MeedlException e) {
