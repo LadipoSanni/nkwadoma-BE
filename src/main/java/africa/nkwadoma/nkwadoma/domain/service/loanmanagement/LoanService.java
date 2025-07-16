@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.loanmanagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.LoanUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleOutputPort;
@@ -44,7 +45,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages.
 @EnableAsync
 @Service
 public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUseCase, ViewLoanReferralsUseCase,
-        RespondToLoanReferralUseCase, LoanOfferUseCase {
+        RespondToLoanReferralUseCase, LoanOfferUseCase, LoanUseCase {
     private final LoanProductOutputPort loanProductOutputPort;
     private final LoaneeOutputPort loaneeOutputPort;
     private final LoanMetricsUseCase loanMetricsUseCase;
@@ -287,11 +288,6 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         UserIdentity userIdentity = userIdentityOutputPort.findById(loan.getActorId());
 
         if (userIdentity.getRole().equals(IdentityRole.LOANEE)){
-            LoanSummaryProjection loanSummaryProjection = loaneeLoanDetailsOutputPort.getLoanSummary(userIdentity.getId());
-            log.info("LoanSummary projection: {}", loanSummaryProjection);
-            LoanDetailSummary loanDetailSummary = loanMapper.toLoanDetailSummary(loanSummaryProjection);
-            loan.setLoanDetailSummary(loanDetailSummary);
-            log.info("====> Loan Summary Object {}", loanDetailSummary.toString());
             return loanOutputPort.findAllLoanDisburedToLoanee(userIdentity.getId(),loan.getPageNumber(),loan.getPageSize());
         }
         if (StringUtils.isNotEmpty(loan.getOrganizationId())) {
@@ -299,6 +295,13 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         } else {
             return loanOutputPort.findAllLoan(loan.getPageSize(), loan.getPageNumber());
         }
+    }
+
+    @Override
+    public LoanDetailSummary viewLoanTotal(String actorId) throws MeedlException {
+        MeedlValidator.validateUUID(actorId,UserMessages.INVALID_USER_ID.getMessage());
+        LoanSummaryProjection loanSummaryProjection = loaneeLoanDetailsOutputPort.getLoanSummary(actorId);
+        return loanMapper.toLoanDetailSummary(loanSummaryProjection);
     }
 
     private String getLoanAccountId(Loanee foundLoanee) throws MeedlException {
