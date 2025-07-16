@@ -29,6 +29,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
 import lombok.*;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
+import org.apache.commons.logging.Log;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.*;
 
@@ -113,6 +114,7 @@ public class LoanRequestService implements LoanRequestUseCase {
     }
 
     private LoanRequest respondToLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
+        log.info("Responding to loan request : {} , loan request decision : {}", loanRequest,loanRequest.getLoanRequestDecision());
         LoanRequest updatedLoanRequest;
         if (loanRequest.getLoanRequestDecision() == LoanDecision.ACCEPTED) {
             if (!foundLoanRequest.isVerified() &&
@@ -136,8 +138,12 @@ public class LoanRequestService implements LoanRequestUseCase {
         else {
             log.info("Loan request is not accepted {}", loanRequest);
             updatedLoanRequest = declineLoanRequest(loanRequest, foundLoanRequest);
-            updatedLoanRequest.setLoaneeId(foundLoanRequest.getLoanee().getId());
+            log.info("Loan request loanee id  : {}", foundLoanRequest.getLoaneeId());
+            updatedLoanRequest.setLoaneeId(foundLoanRequest.getLoaneeId());
+            log.info("Loan request cohort id  : {}", foundLoanRequest.getCohortId());
             updateNumberOfLoanRequestOnCohort(foundLoanRequest.getCohortId());
+            log.info("updated loan request user identity {}",updatedLoanRequest.getLoanee());
+            log.info("loan request user identity {}",loanRequest.getLoanee());
             sendLoanRequestDeclinedNotification(loanRequest, updatedLoanRequest);
 
             return loanRequestOutputPort.save(updatedLoanRequest);
@@ -155,6 +161,8 @@ public class LoanRequestService implements LoanRequestUseCase {
 
     private void sendLoanRequestDeclinedNotification(LoanRequest loanRequest, LoanRequest updatedLoanRequest) throws MeedlException {
         UserIdentity userIdentity = userIdentityOutputPort.findById(loanRequest.getActorId());
+        Loanee loanee = loaneeOutputPort.findLoaneeById(updatedLoanRequest.getLoaneeId());
+        updatedLoanRequest.setLoanee(loanee);
         MeedlNotification meedlNotification = MeedlNotification.builder()
                 .contentId(updatedLoanRequest.getId())
                 .contentDetail(MeedlNotificationMessages.LOAN_REQUEST_DECLINED_CONTENT.getMessage().concat(" "+loanRequest.getDeclineReason()))
