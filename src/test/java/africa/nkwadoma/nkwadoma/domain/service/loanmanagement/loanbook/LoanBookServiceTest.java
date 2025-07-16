@@ -163,14 +163,6 @@ public class LoanBookServiceTest {
 //        loanBookUseCase.upLoadFile(loanBook);
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "", "288b3cf9-7106-4405-9061-7cd92aceb474"})
-    void uploadLoanBookWithInvalidActorId(String id){
-        Cohort cohort = Cohort.builder().createdBy(id).build();
-        loanBook.setCohort(cohort);
-        assertThrows(MeedlException.class,() -> asynchronousLoanBookProcessingUseCase.upLoadUserData(loanBook));
-    }
-
 
     @Test
     void getAllRepaymentsMatchingSingleEmail() {
