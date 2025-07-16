@@ -96,11 +96,12 @@ public class LoanCalculationServiceTest {
                 createRepayment(LocalDateTime.of(2025, 3, 1, 10, 0), new BigDecimal("5000"))
         );
 
-        List<RepaymentHistory> updated = loanCalculation.calculateTotalRepaidment(repayments, loaneeId, cohortId);
-        log.info("Updated repayment history in test after both sorting \n {}", updated);
-        assertEquals(new BigDecimal("1000"), updated.get(0).getTotalAmountRepaid());
-        assertEquals(new BigDecimal("3000"), updated.get(1).getTotalAmountRepaid());
-        assertEquals(new BigDecimal("8000"), updated.get(2).getTotalAmountRepaid());
+        BigDecimal totalAmountRepaid = loanCalculation.calculateTotalRepaidment(repayments, loaneeId, cohortId);
+        log.info("Updated repayment history in test after both sorting \n {}", totalAmountRepaid);
+        assertEquals(new BigDecimal("1000"), repayments.get(0).getTotalAmountRepaid());
+        assertEquals(new BigDecimal("3000"), repayments.get(1).getTotalAmountRepaid());
+        assertEquals(new BigDecimal("8000"), repayments.get(2).getTotalAmountRepaid());
+        assertEquals(new BigDecimal("8000"), totalAmountRepaid);
     }
 
     @Test
@@ -118,19 +119,10 @@ public class LoanCalculationServiceTest {
         when(repaymentHistoryOutputPort.findAllRepaymentHistoryForLoan(loaneeId, cohortId))
                 .thenReturn(previousRepayments);
 
-        List<RepaymentHistory> updated = loanCalculation.calculateTotalRepaidment(newRepayments, loaneeId, cohortId);
+        BigDecimal totalAmountRepaid = loanCalculation.calculateTotalRepaidment(newRepayments, loaneeId, cohortId);
 
-        assertEquals(4, updated.size());
 
-        assertEquals(new BigDecimal("1000"), updated.get(0).getAmountPaid());
-        assertEquals(new BigDecimal("2000"), updated.get(1).getAmountPaid());
-        assertEquals(new BigDecimal("3000"), updated.get(2).getAmountPaid());
-        assertEquals(new BigDecimal("4000"), updated.get(3).getAmountPaid());
-
-        assertEquals(new BigDecimal("1000"), updated.get(0).getTotalAmountRepaid());
-        assertEquals(new BigDecimal("3000"), updated.get(1).getTotalAmountRepaid());
-        assertEquals(new BigDecimal("6000"), updated.get(2).getTotalAmountRepaid());
-        assertEquals(new BigDecimal("10000"), updated.get(3).getTotalAmountRepaid());
+        assertEquals(new BigDecimal("10000"), totalAmountRepaid);
     }
 
 

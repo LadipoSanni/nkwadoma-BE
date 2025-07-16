@@ -3,13 +3,14 @@ package africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loancalc
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface LoanCalculationUseCase {
 
     List<RepaymentHistory> sortRepaymentsByDateTimeAscending(List<RepaymentHistory> repayments)throws MeedlException;
 
-    List<RepaymentHistory> calculateTotalRepaidment(
+    BigDecimal calculateTotalRepaidment(
             List<RepaymentHistory> sortedRepayments,
             String loaneeId,
             String cohortId
