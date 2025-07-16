@@ -36,6 +36,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanException;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortLoaneeEntity;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.stereotype.Component;
 
@@ -153,36 +154,56 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
             Map<String, List<RepaymentHistory>> mapOfRepaymentHistoriesForEachLoanee,
             String cohortId,
             LoanBook repaymentRecordBook) throws MeedlException {
+
         for (Map.Entry<String, List<RepaymentHistory>> entry : mapOfRepaymentHistoriesForEachLoanee.entrySet()) {
             String loaneeId = entry.getKey();
             List<RepaymentHistory> repaymentHistories = entry.getValue();
-            repaymentHistories = loanCalculationUseCase.calculateTotalRepaidment(repaymentHistories, loaneeId, cohortId);
+            BigDecimal totalAmountRepaid = loanCalculationUseCase.calculateTotalRepaidment(repaymentHistories, loaneeId, cohortId);
             repaymentRecordBook.setRepaymentHistories(repaymentHistories);
 
-//            CohortLoanee cohortLoanee = cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId();
-//            cohortLoanee.getLoaneeLoanDetail();
+            calculateLoaneeLoanDetails(cohortId, loaneeId, totalAmountRepaid);
+
             List<RepaymentHistory> savedRepaymentHistories = repaymentHistoryUseCase.saveCohortRepaymentHistory(repaymentRecordBook);
             log.info("repayment histories for loanee {} -- {}", loaneeId, savedRepaymentHistories);
         }
         log.info("Done processing accumulated repayments.");
     }
 
+    private void calculateLoaneeLoanDetails(String cohortId, String loaneeId, BigDecimal amountRepaid) throws MeedlException {
+        CohortLoanee cohortLoanee = cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(loaneeId, cohortId);
+        LoaneeLoanDetail loaneeLoanDetail = cohortLoanee.getLoaneeLoanDetail();
+        BigDecimal amountOutstanding = null;
+        BigDecimal totalAmountRepaid = null;
+        if (ObjectUtils.isNotEmpty(loaneeLoanDetail.getInitialDeposit())) {
+            totalAmountRepaid = amountRepaid.add(loaneeLoanDetail.getInitialDeposit());
+        }else {
+            totalAmountRepaid = amountRepaid;
+        }
+        amountOutstanding = loaneeLoanDetail.getAmountApproved().subtract(totalAmountRepaid);
+
+        loaneeLoanDetail.setAmountRepaid(amountRepaid);
+        loaneeLoanDetail.setAmountOutstanding(amountOutstanding);
+
+        loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
+    }
+
     public Map<String, List<RepaymentHistory>> getRepaymentHistoriesForLoanees(
             Set<String> loaneeEmails,
             List<RepaymentHistory> allRepayments
-    ) throws MeedlException {
-        Map<String, List<RepaymentHistory>> result = new HashMap<>();
+    ){
+        Map<String, List<RepaymentHistory>> result = loaneeEmails.stream()
+                .map(email -> {
+                    try {
+                        Loanee loanee = loaneeOutputPort.findByLoaneeEmail(email);
+                        List<RepaymentHistory> repaymentHistories = getRepaymentsByEmail(allRepayments, email);
+                        return Map.entry(loanee.getId(), repaymentHistories);
+                    } catch (MeedlException e) {
+                        log.error("Repayment processing for each loanee failed to find loanee with email {}",email, e);
+                        throw new RuntimeException("Repayment processing. Failed to get loanee for email: " + email, e);
+                    }
+                })
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        for (String email : loaneeEmails) {
-            List<RepaymentHistory> repaymentHistories =
-//                    loanCalculationUseCase
-//                    .sortRepaymentsByDateTimeDescending(
-                            getRepaymentsByEmail(allRepayments, email)
-//            )
-            ;
-            Loanee loanee = loaneeOutputPort.findByLoaneeEmail(email);
-            result.put(loanee.getId(), repaymentHistories);
-        }
         log.info("Repayment histories in map {}", result);
         return result;
     }

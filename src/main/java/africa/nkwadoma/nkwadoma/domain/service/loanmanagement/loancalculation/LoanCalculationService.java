@@ -66,14 +66,14 @@ public class LoanCalculationService implements LoanCalculationUseCase {
     }
 
     @Override
-    public List<RepaymentHistory> calculateTotalRepaidment(
+    public BigDecimal calculateTotalRepaidment(
             List<RepaymentHistory> repaymentHistories,
             String loaneeId,
             String cohortId
     ) throws MeedlException {
 
         if (repaymentHistories == null || repaymentHistories.isEmpty()) {
-            return Collections.emptyList();
+            return BigDecimal.ZERO;
         }
 
 //        RepaymentHistory lastRepayment = repaymentHistoryOutputPort.findLatestRepayment(loaneeId, cohortId);
@@ -92,7 +92,7 @@ public class LoanCalculationService implements LoanCalculationUseCase {
         }
         log.info("The repayment histories after adding up total amount repaid");
 
-        return repaymentHistories;
+        return runningTotal;
     }
 
     private static void validateAmountRepaid(RepaymentHistory repayment) throws MeedlException {
