@@ -7,8 +7,19 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface LoaneeLoanDetailRepository extends JpaRepository<LoaneeLoanDetailEntity, String> {
+
+    @Query("""
+     SELECT loaneeLoanDetail
+          
+          from CohortLoaneeEntity cohortLoanee
+          join LoaneeLoanDetailEntity loaneeLoanDetail on loaneeLoanDetail.id = cohortLoanee.loaneeLoanDetail.id
+          where cohortLoanee.id = :cohortLoaneeId
+     """)
+    LoaneeLoanDetailEntity findByCohortLoaneeId(@Param("cohortLoaneeId") String cohortLoaneeId);
 
     @Query("""
     SELECT

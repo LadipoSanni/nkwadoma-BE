@@ -9,5 +9,7 @@ public interface LoaneeLoanDetailsOutputPort {
 
     void delete(String id) throws MeedlException;
 
+    LoaneeLoanDetail findByCohortLoaneeId(String cohortLoaneeId) throws MeedlException;
+
     LoanSummaryProjection getLoanSummary(String userId) throws MeedlException;
 }
