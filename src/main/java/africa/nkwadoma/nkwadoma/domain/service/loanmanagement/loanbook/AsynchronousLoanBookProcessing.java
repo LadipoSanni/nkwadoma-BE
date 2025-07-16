@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.LoanUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.RepaymentHistoryUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loancalculation.LoanCalculationUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
@@ -38,6 +39,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.stereotype.Component;
 
@@ -62,7 +64,6 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     private final LoanBookValidator loanBookValidator;
     private final LoaneeUseCase loaneeUseCase;
     private final RespondToLoanReferralUseCase respondToLoanReferralUseCase;
-    private final CreateLoanProductUseCase createLoanProductUseCase;
     private final LoanRequestUseCase loanRequestUseCase;
     private final LoanOfferUseCase loanOfferUseCase;
     private final RepaymentHistoryUseCase repaymentHistoryUseCase;
@@ -72,6 +73,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     private final LoanReferralOutputPort loanReferralOutputPort;
     private final LoanCalculationUseCase loanCalculationUseCase;
     private final LoanUseCase loanUseCase;
+    private final AesOutputPort aesOutputPort;
 
     @Override
     public void upLoadUserData(LoanBook loanBook) throws MeedlException {
@@ -448,8 +450,8 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                     .phoneNumber(row.get("phonenumber"))
                     .role(IdentityRole.LOANEE)
                     .createdAt(LocalDateTime.now())
-                    .bvn(loanBookValidator.encryptValue(row.get("bvn"), "Invalid bvn"))
-                    .nin(row.get("nin"))
+                    .bvn(encryptValue(row.get("bvn"), "Invalid bvn "))
+                    .nin(encryptValue(row.get("nin"), "Invalid nin "))
                     .createdBy(actorId)
                     .build();
             LoaneeLoanDetail loaneeLoanDetail = LoaneeLoanDetail.builder()
@@ -485,6 +487,16 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         log.info("Validating the file field values.");
         return savedData(cohortLoanees);
     }
+    public String encryptValue(String value, String errorMessage) {
+        try {
+            MeedlValidator.validateElevenDigits(value, errorMessage);
+            return aesOutputPort.encryptAES(value.trim());
+        } catch (MeedlException e) {
+            log.error("Unable to encrypt value {}", value);
+        }
+        return StringUtils.EMPTY;
+    }
+
 
     private List<CohortLoanee> savedData(List<CohortLoanee> cohortLoanees){
         List<CohortLoanee> savedLoanees = new ArrayList<>();

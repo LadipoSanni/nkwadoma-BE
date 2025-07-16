@@ -33,7 +33,6 @@ import java.util.Map;
 public class LoanBookValidator {
     private final LoaneeOutputPort loaneeOutputPort;
     private final LoanProductOutputPort loanProductOutputPort;
-    private final AesOutputPort aesOutputPort;
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final CohortUseCase cohortUseCase;
@@ -152,27 +151,6 @@ public class LoanBookValidator {
         log.info("Eleven digit number successfully validated and encrypted ");
 
     }
-    private void validateElevenDigit(UserIdentity userIdentity) throws MeedlException {
-        String encryptedBvn = validateFileAndEncryptBvnOrNin(userIdentity.getBvn(), "User with email "+userIdentity.getEmail()+" has invalid or missing bvn "+userIdentity.getBvn() );
-        userIdentity.setBvn(encryptedBvn);
-        log.info("Bvn successfully validated and encrypted");
-
-    }
-    private String validateFileAndEncryptBvnOrNin(String bvnOrNin, String errorMessage) throws MeedlException {
-        MeedlValidator.validateElevenDigits(bvnOrNin, errorMessage);
-
-        return encryptValue(bvnOrNin, errorMessage);
-    }
-    public String encryptValue(String value, String errorMessage) {
-        try {
-            MeedlValidator.validateElevenDigits(value, errorMessage);
-            return aesOutputPort.encryptAES(value.trim());
-        } catch (MeedlException e) {
-            log.error("Unable to encrypt value {}", value);
-        }
-        return StringUtils.EMPTY;
-    }
-
 
     private void validateLoanProductExist(String loanProductName, int rowCount){
         boolean loanProductExist = false;
