@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.service.loanmanagement.loanbook;
 import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.AsynchronousLoanBookProcessingUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.LoanUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.RepaymentHistoryUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loancalculation.LoanCalculationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
@@ -70,6 +71,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
     private final LoanReferralOutputPort loanReferralOutputPort;
     private final LoanCalculationUseCase loanCalculationUseCase;
+    private final LoanUseCase loanUseCase;
 
     @Override
     public void upLoadUserData(LoanBook loanBook) throws MeedlException {
@@ -261,7 +263,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         log.info("loan request is {}", loanRequest);
         log.info("The loan start date is {} for user with email {}", loanStartDate, loanRequest.getLoanee().getUserIdentity().getEmail());
         Loan loan = Loan.builder().loaneeId(loanRequest.getLoanee().getId()).startDate(loanStartDate).loanOfferId(loanRequest.getId()).build();
-        createLoanProductUseCase.startLoan(loan);
+        loanUseCase.startLoan(loan);
         log.info("Loan started for loanee {}", loanRequest.getLoanee().getUserIdentity().getEmail());
     }
 

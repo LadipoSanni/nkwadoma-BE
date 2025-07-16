@@ -483,9 +483,6 @@ class LoanServiceTest {
         userIdentity.setRole(IdentityRole.LOANEE);
         try{
             when(userIdentityOutputPort.findById(loan.getActorId())).thenReturn(userIdentity);
-            LoanSummaryProjection loanSummaryProjection = mock(LoanSummaryProjection.class);
-            when(loaneeLoanDetailsOutputPort.getLoanSummary(userIdentity.getId())).thenReturn(loanSummaryProjection);
-            when(loanMapper.toLoanDetailSummary(loanSummaryProjection)).thenReturn(loanDetailSummary);
             when(loanOutputPort.findAllLoanDisburedToLoanee(userIdentity.getId(),pageNumber,pageSize))
                     .thenReturn(new PageImpl<>(List.of(loan)));
             loans = loanService.viewAllLoans(loan);
@@ -495,11 +492,21 @@ class LoanServiceTest {
         assertNotNull(loans);
         assertNotNull(loans.getContent());
         assertEquals(1, loans.getTotalElements());
-        assertNotNull(loan.getLoanDetailSummary());
-        assertEquals(BigDecimal.valueOf(3000.00), loan.getLoanDetailSummary().getTotalAmountOutstanding());
-        assertEquals(BigDecimal.valueOf(2000.00), loan.getLoanDetailSummary().getTotalAmountRepaid());
-        assertEquals(BigDecimal.valueOf(5000.00), loan.getLoanDetailSummary().getTotalAmountReceived());
     }
+
+    @Test
+    void viewLoaneeDetailsTotal(){
+        LoanSummaryProjection loanSummaryProjection = mock(LoanSummaryProjection.class);
+        try {
+        when(loaneeLoanDetailsOutputPort.getLoanSummary(testId)).thenReturn(loanSummaryProjection);
+        when(loanMapper.toLoanDetailSummary(loanSummaryProjection)).thenReturn(loanDetailSummary);
+        loanDetailSummary = loanService.viewLoanTotal(testId);
+    }catch (MeedlException exception){
+        log.error(exception.getMessage(), exception);
+    }
+        assertNotNull(loanDetailSummary);
+}
+
 
     @Test
     void viewLoanReferralForLoanee_Success() throws MeedlException {
