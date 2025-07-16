@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.loanmanagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.LoanUseCase;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
@@ -47,6 +48,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 public class LoanController {
     private final CreateLoanProductUseCase createLoanProductUseCase;
     private final ViewLoanProductUseCase viewLoanProductUseCase;
+    private final LoanUseCase loanUseCase;
     private final LoanOfferUseCase loanOfferUseCase;
     private final LoanRestMapper loanRestMapper;
     private final LoanOfferRestMapper loanOfferRestMapper;
@@ -153,7 +155,7 @@ public class LoanController {
             @PathVariable @NotBlank(message = "Provide a valid loan ID")
             String loanId) throws MeedlException {
         log.info("View loan details by id was called.... {}", loanId);
-        Loan loan = createLoanProductUseCase.viewLoanDetails(loanId);
+        Loan loan = loanUseCase.viewLoanDetails(loanId);
         log.info("Loan details: {}", loan);
         LoanQueryResponse loanResponse = loanRestMapper.toLoanQueryResponse(loan);
         log.info("Loan details response: {}", loanResponse);
@@ -176,7 +178,7 @@ public class LoanController {
         Loan loan = new Loan();
         loan.setLoaneeId(loaneeId);
         loan.setLoanOfferId(loanOfferId);
-        loan = createLoanProductUseCase.startLoan(loan);
+        loan = loanUseCase.startLoan(loan);
         log.info("---> Loan object from controller---.> {}", loan);
         StartLoanResponse startLoanResponse = loanProductMapper.toStartLoanResponse(loan);
         ApiResponse<StartLoanResponse> apiResponse = ApiResponse.<StartLoanResponse>builder()
@@ -284,7 +286,7 @@ public class LoanController {
 
         Loan loan = Loan.builder().actorId(meedlUser.getClaimAsString("sub")).organizationId(organizationId)
                 .pageNumber(pageNumber).pageSize(pageSize).build();
-        Page<Loan> loans = createLoanProductUseCase.viewAllLoans(loan);
+        Page<Loan> loans = loanUseCase.viewAllLoans(loan);
         log.info("Mapped Loan responses: {}", loans.getContent().toArray());
         Page<LoanQueryResponse> loanResponses = loans.map(loanRestMapper::toLoanQueryResponse);
         log.info("Mapped Loan responses: {}", loanResponses.getContent().toArray());
@@ -297,18 +299,28 @@ public class LoanController {
                         .totalPages(loanResponses.getTotalPages())
                         .hasNextPage(loanResponses.hasNext())
                         .build();
-        log.info("---> Total Amount Recieved ---> {}", loan.getLoanDetailSummary().getTotalAmountReceived());
-        log.info("---> Total Amount Recieved ---> {}", loan.getLoanDetailSummary().getTotalAmountReceived());
-        log.info("---> Total Amount Recieved ---> {}", loan.getLoanDetailSummary().getTotalAmountReceived());
-
-        Map<String, BigDecimal> totals = new HashMap<>();
-        totals.put("totalAmountReceived", loan.getLoanDetailSummary().getTotalAmountReceived());
-        totals.put("totalAmountRepaid", loan.getLoanDetailSummary().getTotalAmountRepaid());
-        totals.put("totalAmountOutstanding", loan.getLoanDetailSummary().getTotalAmountOutstanding());
-
-        return ResponseEntity.ok(new ApiResponse<>
-                (SuccessMessages.LOAN_DISBURSALS_RETURNED_SUCCESSFULLY, paginatedResponse, HttpStatus.OK.name(), LocalDateTime.now(), totals));
+        ApiResponse<PaginatedResponse<LoanQueryResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoanQueryResponse>>builder()
+                .data(paginatedResponse)
+                .message(ALL_LOAN)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
+
+    @GetMapping("/total")
+    @PreAuthorize("hasRole('LOANEE')")
+    public ResponseEntity<ApiResponse<?>> viewTotalAmount(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
+
+        LoanDetailSummary loanDetailSummary = loanUseCase.viewTotalAmount(meedlUser.getClaimAsString("sub"));
+        LoanDetailSummaryResponse loanDetailSummaryResponse = loanRestMapper.toLoanSummaryDetail(loanDetailSummary);
+        ApiResponse<LoanDetailSummaryResponse> apiResponse = ApiResponse.<LoanDetailSummaryResponse>builder()
+                .data(loanDetailSummaryResponse)
+                .message(LOAN_AMOUNT_SUMMARY)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+
 
     @GetMapping("/filter-by-program")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")

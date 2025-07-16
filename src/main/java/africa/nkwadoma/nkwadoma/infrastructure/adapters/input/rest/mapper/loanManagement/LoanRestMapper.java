@@ -15,4 +15,6 @@ public interface LoanRestMapper {
     @Mapping(target = "loaneeLoanBreakDowns", source = "loaneeLoanBreakdowns")
     @Mapping(target = "organizationName", source = "organizationName")
     LoanQueryResponse toLoanQueryResponse(Loan loan);
+
+    LoanDetailSummaryResponse toLoanSummaryDetail(LoanDetailSummary loanDetailSummary);
 }
