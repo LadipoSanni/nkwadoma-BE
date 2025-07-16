@@ -66,7 +66,7 @@ public class LoanCalculationService implements LoanCalculationUseCase {
     }
 
     @Override
-    public BigDecimal calculateTotalRepaidment(
+    public BigDecimal calculateTotalRepayment(
             List<RepaymentHistory> repaymentHistories,
             String loaneeId,
             String cohortId
