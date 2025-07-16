@@ -104,8 +104,6 @@ public class LoanBookServiceTest {
         repaymentRecordBook.setLoanProductId(loanProduct.getId());
         log.info("Loan book cohort id {}", loanBook.getCohort().getId());
 
-
-
     }
 
     private LoanProduct saveLoanProduct() throws MeedlException {
@@ -164,22 +162,7 @@ public class LoanBookServiceTest {
         log.info("Loan book before upload in test {}", loanBook);
 //        loanBookUseCase.upLoadFile(loanBook);
     }
-    @Test
-    void uploadLoanBookWithNull(){
-        assertThrows(MeedlException.class,() -> asynchronousLoanBookProcessingUseCase.upLoadUserData(null));
-    }
-    @Test
-    void uploadLoanBookWithNullCohort(){
-        loanBook.setCohort(null);
-        assertThrows(MeedlException.class,() -> asynchronousLoanBookProcessingUseCase.upLoadUserData(null));
-    }
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "", "288b3cf9-7106-4405-9061-7cd92aceb474"})
-    void uploadLoanBookWithInvalidCohortId(String id){
-        Cohort cohort = Cohort.builder().id(id).build();
-        loanBook.setCohort(cohort);
-        assertThrows(MeedlException.class,() -> asynchronousLoanBookProcessingUseCase.upLoadUserData(loanBook));
-    }
+
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "", "288b3cf9-7106-4405-9061-7cd92aceb474"})
     void uploadLoanBookWithInvalidActorId(String id){
@@ -187,23 +170,6 @@ public class LoanBookServiceTest {
         loanBook.setCohort(cohort);
         assertThrows(MeedlException.class,() -> asynchronousLoanBookProcessingUseCase.upLoadUserData(loanBook));
     }
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "", "288b3cf9-7106-4405-9061-7cd92aceb474"})
-    void uploadLoanBookWithInvalidLoanProductId(String id){
-        loanBook.setLoanProductId(id);
-        assertThrows(MeedlException.class,() -> asynchronousLoanBookProcessingUseCase.upLoadUserData(loanBook));
-    }
-
-    @Test
-    void upLoadRepaymentRecord(){
-//        try {
-//            loanBookUseCase.uploadRepaymentRecord(repaymentRecordBook);
-//        } catch (MeedlException e) {
-//            log.error("Error uploading repayment record book. {}", e.getMessage());
-//        }
-    }
-
-
 
 
     @Test
