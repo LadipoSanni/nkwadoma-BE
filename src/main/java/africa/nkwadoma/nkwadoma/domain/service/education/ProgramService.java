@@ -21,7 +21,6 @@ import org.springframework.stereotype.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_ALREADY_EXISTS;
 
@@ -74,13 +73,14 @@ public class ProgramService implements AddProgramUseCase {
 //             OrganizationIdentity organizationIdentity = findProgramOrganization(foundProgram);
 //            program.setOrganizationIdentity(organizationIdentity);
 //            checkIfProgramExistByNameInOrganization(foundProgram);
-            List<Program> programs =
-                    programOutputPort.findProgramByName(program.getName(),foundProgram.getOrganizationId());
-            for (Program p : programs) {
-                if (!p.getId().equals(program.getId())){
+            program.setOrganizationId(foundProgram.getOrganizationId());
+            program.setId(foundProgram.getId());
+            boolean existInOrganization =
+                    programOutputPort.programExistsInOrganization(program);
+                if (existInOrganization){
                   throw new EducationException(PROGRAM_ALREADY_EXISTS.getMessage());
                 }
-            }
+
         }
         return programOutputPort.saveProgram(foundProgram);
     }
@@ -113,21 +113,23 @@ public class ProgramService implements AddProgramUseCase {
     }
 
     @Override
-    public List<Program> viewProgramByName(Program program) throws MeedlException {
+    public Page<Program> searchProgramByName(Program program) throws MeedlException {
         MeedlValidator.validateObjectInstance(program, ProgramMessages.PROGRAM_CANNOT_BE_EMPTY.getMessage());
         program.validateViewProgramByNameInput();
+        MeedlValidator.validatePageSize(program.getPageSize());
+        MeedlValidator.validatePageNumber(program.getPageNumber());
         return getPrograms(program);
     }
 
-    private List<Program> getPrograms(Program program) throws MeedlException {
+    private Page<Program> getPrograms(Program program) throws MeedlException {
         UserIdentity foundCreator = userIdentityOutputPort.findById(program.getCreatedBy());
         log.info("Found User identity: {}", foundCreator);
         if (ObjectUtils.isNotEmpty(foundCreator) && foundCreator.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)) {
             OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.findByCreatedBy(foundCreator.getId());
             log.info("Found Organization Employee: {}", employeeIdentity);
-            return programOutputPort.findProgramByName(program.getName().trim(), employeeIdentity.getOrganization());
+            return programOutputPort.findProgramByNameWithinOrganization(program, employeeIdentity.getOrganization());
         }
-        return programOutputPort.findProgramByName(program.getName().trim());
+        return programOutputPort.findProgramByName(program.getName(),program.getPageNumber(),program.getPageSize());
     }
 
     @Override

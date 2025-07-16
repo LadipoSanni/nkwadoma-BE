@@ -1,12 +1,15 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan;
 
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loan;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetailSummary;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoanEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.*;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
+
+import java.math.BigDecimal;
 
 @Mapper(componentModel = "spring",nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface LoanMapper {
@@ -43,5 +46,9 @@ public interface LoanMapper {
     @Mapping(target = "tuitionAmount", source = "tuitionAmount")
     @Mapping(target = "status", source = "status")
     @Mapping(target = "cohortLoaneeId", source = "cohortLoaneeId")
+    @Mapping(target = "organizationName", source = "organizationName")
     Loan mapProjectionToLoan(LoanProjection loanProjection);
+
+    LoanDetailSummary toLoanDetailSummary(LoanSummaryProjection loanSummaryProjection);
+
 }
