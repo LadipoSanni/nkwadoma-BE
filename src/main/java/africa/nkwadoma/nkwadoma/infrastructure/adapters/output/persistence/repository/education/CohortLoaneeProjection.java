@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 public interface CohortLoaneeProjection {
 
+    String getId();
     String getFirstName();
     String getLastName();
     BigDecimal getAmountReceived();
