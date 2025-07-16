@@ -35,17 +35,17 @@ INSERT INTO loan_request_entity_new (
     status
 )
 SELECT
-    lr.loan_request_decision,
-    lr.created_date,
-    lr.date_time_approved,
-    lr.loan_amount_approved,
-    lr.loan_amount_requested,
-    lr.decline_reason,
-    lr.id,
-    lr.loanee_entity_id,
-    lr.referred_by,
-    lr.status
-FROM loan_request_entity lr;
+    loan_request_decision,
+    created_date,
+    date_time_approved,
+    loan_amount_approved,
+    loan_amount_requested,
+    decline_reason,
+    id,
+    loanee_entity_id,
+    referred_by,
+    status
+FROM loan_request_entity;
 
 -- Step 5: Drop the old loan_request_entity table
 DROP TABLE loan_request_entity;
