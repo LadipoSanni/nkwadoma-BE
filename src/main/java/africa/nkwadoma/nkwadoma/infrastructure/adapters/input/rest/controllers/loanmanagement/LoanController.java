@@ -297,6 +297,9 @@ public class LoanController {
                         .totalPages(loanResponses.getTotalPages())
                         .hasNextPage(loanResponses.hasNext())
                         .build();
+        log.info("---> Total Amount Recieved ---> {}", loan.getLoanDetailSummary().getTotalAmountReceived());
+        log.info("---> Total Amount Recieved ---> {}", loan.getLoanDetailSummary().getTotalAmountReceived());
+        log.info("---> Total Amount Recieved ---> {}", loan.getLoanDetailSummary().getTotalAmountReceived());
 
         Map<String, BigDecimal> totals = new HashMap<>();
         totals.put("totalAmountReceived", loan.getLoanDetailSummary().getTotalAmountReceived());
