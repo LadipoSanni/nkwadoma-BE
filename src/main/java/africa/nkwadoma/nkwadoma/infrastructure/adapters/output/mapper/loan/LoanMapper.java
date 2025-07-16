@@ -46,7 +46,7 @@ public interface LoanMapper {
     @Mapping(target = "tuitionAmount", source = "tuitionAmount")
     @Mapping(target = "status", source = "status")
     @Mapping(target = "cohortLoaneeId", source = "cohortLoaneeId")
-    @Mapping(target = "organizationName", source = "organizationName")
+    @Mapping(target = "organizationName", source = "referredBy")
     Loan mapProjectionToLoan(LoanProjection loanProjection);
 
     LoanDetailSummary toLoanDetailSummary(LoanSummaryProjection loanSummaryProjection);
