@@ -288,8 +288,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
         if (userIdentity.getRole().equals(IdentityRole.LOANEE)){
             LoanSummaryProjection loanSummaryProjection = loaneeLoanDetailsOutputPort.getLoanSummary(userIdentity.getId());
+            log.info("LoanSummary projection: {}", loanSummaryProjection);
             LoanDetailSummary loanDetailSummary = loanMapper.toLoanDetailSummary(loanSummaryProjection);
             loan.setLoanDetailSummary(loanDetailSummary);
+            log.info("====> Loan Summary Object {}", loanDetailSummary.toString());
             return loanOutputPort.findAllLoanDisburedToLoanee(userIdentity.getId(),loan.getPageNumber(),loan.getPageSize());
         }
         if (StringUtils.isNotEmpty(loan.getOrganizationId())) {
