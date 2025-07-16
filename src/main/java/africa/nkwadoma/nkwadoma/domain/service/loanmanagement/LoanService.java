@@ -298,7 +298,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     @Override
-    public LoanDetailSummary viewTotalAmount(String actorId) throws MeedlException {
+    public LoanDetailSummary viewLoanTotal(String actorId) throws MeedlException {
         MeedlValidator.validateUUID(actorId,UserMessages.INVALID_USER_ID.getMessage());
         LoanSummaryProjection loanSummaryProjection = loaneeLoanDetailsOutputPort.getLoanSummary(actorId);
         return loanMapper.toLoanDetailSummary(loanSummaryProjection);

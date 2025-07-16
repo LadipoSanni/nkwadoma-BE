@@ -26,11 +26,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ControllerConstant.*;
@@ -311,7 +307,7 @@ public class LoanController {
     @PreAuthorize("hasRole('LOANEE')")
     public ResponseEntity<ApiResponse<?>> viewTotalAmount(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
 
-        LoanDetailSummary loanDetailSummary = loanUseCase.viewTotalAmount(meedlUser.getClaimAsString("sub"));
+        LoanDetailSummary loanDetailSummary = loanUseCase.viewLoanTotal(meedlUser.getClaimAsString("sub"));
         LoanDetailSummaryResponse loanDetailSummaryResponse = loanRestMapper.toLoanSummaryDetail(loanDetailSummary);
         ApiResponse<LoanDetailSummaryResponse> apiResponse = ApiResponse.<LoanDetailSummaryResponse>builder()
                 .data(loanDetailSummaryResponse)
