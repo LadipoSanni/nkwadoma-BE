@@ -3,7 +3,9 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.respons
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,6 +18,7 @@ public class ApiResponse<T>{
     private String statusCode;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime timeStamp;
+    private Map<String, BigDecimal> metadata;
 
 
     public static ApiResponse<Object> buildApiResponse(Object data, String message, String statusCode) {

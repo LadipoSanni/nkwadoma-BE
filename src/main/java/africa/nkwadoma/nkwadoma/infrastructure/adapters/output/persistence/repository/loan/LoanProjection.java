@@ -43,4 +43,5 @@ public interface LoanProjection {
     String getNextOfKinRelationship();
     String getNextOfKinPhoneNumber();
     String getCohortLoaneeId();
+    String getOrganizationName();
 }

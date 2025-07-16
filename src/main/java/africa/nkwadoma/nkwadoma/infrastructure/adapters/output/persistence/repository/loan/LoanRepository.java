@@ -5,6 +5,7 @@ import org.springframework.data.domain.*;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.*;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 public interface LoanRepository extends JpaRepository<LoanEntity, String> {
@@ -130,9 +131,10 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           lr.createdDate as createdDate, lr.loanAmountRequested as loanAmountRequested,
           c.name as cohortName, c.startDate as cohortStartDate, loe.dateTimeOffered as offerDate,
           p.name as programName,
-          lr.loanAmountApproved as loanAmountApproved,c.tuitionAmount as tuitionAmount
-    
-            from LoanEntity le
+          lr.loanAmountApproved as loanAmountApproved,
+          c.tuitionAmount as tuitionAmount,
+          o.name as organizationName
+          from LoanEntity le
           join LoanOfferEntity loe on loe.id = le.loanOfferId
           join LoanRequestEntity lr on lr.id = loe.id
           join LoanReferralEntity lfe on lfe.id = lr.id
@@ -198,8 +200,9 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           lr.createdDate as createdDate, lr.loanAmountRequested as loanAmountRequested,
           c.name as cohortName, c.startDate as cohortStartDate, loe.dateTimeOffered as offerDate,
           p.name as programName,
-          lr.loanAmountApproved as loanAmountApproved,c.tuitionAmount as tuitionAmount
-    
+          lr.loanAmountApproved as loanAmountApproved,
+          c.tuitionAmount as tuitionAmount,
+          o.name as organizationName
             from LoanEntity le
           join LoanOfferEntity loe on loe.id = le.loanOfferId
           join LoanRequestEntity lr on lr.id = loe.id
@@ -213,4 +216,18 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           where u.id = :id
     """)
     Page<LoanProjection> findAllLoanDisburestToLoanee(@Param("id") String id, Pageable pageRequest);
+
+    @Query("""
+    SELECT SUM(lr.loanAmountApproved)
+    FROM LoanEntity le
+    JOIN LoanOfferEntity loe ON loe.id = le.loanOfferId
+    JOIN LoanRequestEntity lr ON lr.id = loe.id
+    JOIN LoanReferralEntity lfe ON lfe.id = lr.id
+    JOIN CohortLoaneeEntity cle ON cle.id = lfe.cohortLoanee.id
+    JOIN LoaneeEntity l ON l.id = cle.loanee.id
+    JOIN UserEntity u ON u.id = l.userIdentity.id
+    WHERE u.id = :id
+""")
+    BigDecimal getTotalLoanAmountApproved(@Param("id") String id);
+
 }
