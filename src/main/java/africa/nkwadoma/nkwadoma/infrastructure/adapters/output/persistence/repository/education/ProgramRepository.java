@@ -8,17 +8,17 @@ import org.springframework.data.repository.query.Param;
 import java.util.*;
 
 public interface ProgramRepository extends JpaRepository<ProgramEntity, String> {
-    List<ProgramEntity> findByNameContainingIgnoreCase(String programName);
-    List<ProgramEntity> findByNameContainingIgnoreCaseAndOrganizationIdentityId(String programName, String organizationId);
+    Page<ProgramEntity> findByNameContainingIgnoreCase(String programName,Pageable pageable);
+    Page<ProgramEntity> findByNameContainingIgnoreCaseAndOrganizationIdentityId(String programName, String organizationId, Pageable pageable);
     List<ProgramEntity> findProgramEntitiesByOrganizationIdentityId(String organizationIdentityId);
-    boolean existsByNameAndOrganizationIdentity_Id(String programName, String organizationId);
-    @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END " +
+    @Query("SELECT COUNT(p) > 0 " +
             "FROM ProgramEntity p " +
             "WHERE LOWER(p.name) = LOWER(:programName) " +
-            "AND p.organizationIdentity.id = :organizationId")
+            "AND p.organizationIdentity.id = :organizationId " +
+            "AND (:programId IS NULL OR p.id != :programId)")
     boolean existsByNameIgnoreCaseAndOrganizationIdentityId(@Param("programName") String programName,
-                                                            @Param("organizationId") String organizationId);
-
+                                                            @Param("organizationId") String organizationId,
+                                                            @Param("programId") String programId);
 
     @Query("""
    
@@ -37,12 +37,12 @@ public interface ProgramRepository extends JpaRepository<ProgramEntity, String> 
                    p.deliveryType as deliveryType,
                    p.numberOfCohort  as numberOfCohort,
                    p.numberOfLoanees as numberOfLoanees
-                  
+                       
                    from OrganizationEntity  o 
                    join ProgramEntity p on p.organizationIdentity.id = o.id
-                   join ProgramLoanDetailEntity pd on pd.program.id = p.id
+                   left join ProgramLoanDetailEntity pd on pd.program.id = p.id
                        
-                   where o.id = :organizationId    order by p.createdAt desc 
+                   where o.id = :organizationId    order by p.createdAt asc 
     """)
     Page<ProgramProjection> findAllByOrganizationIdentityId(@Param("organizationId") String organizationId, Pageable pageable);
 }

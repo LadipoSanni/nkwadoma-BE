@@ -23,8 +23,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.*;
-
 @Slf4j
 @RestController
 @RequestMapping("program")
@@ -89,16 +87,23 @@ public class ProgramController {
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
     public ResponseEntity<ApiResponse<?>> searchProgramByName
             (@Valid @RequestParam(name = "name") @NotBlank(message = "Program name is required") String name,
-             @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
-        Program program = Program.builder().name(name.trim()).createdBy(meedlUser.getClaimAsString("sub")).build();
+             @AuthenticationPrincipal Jwt meedlUser,
+             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
+        Program program = Program.builder().name(name.trim()).createdBy(meedlUser.getClaimAsString("sub"))
+                .pageNumber(pageNumber).pageSize(pageSize).build();
         log.info("Program search parameters: {}", program);
 
-        List<Program> programs = addProgramUseCase.viewProgramByName(program);
+        Page<Program> programs = addProgramUseCase.searchProgramByName(program);
         List<ProgramResponse> programResponses = programs.stream().
                 map(programRestMapper::toProgramResponse).toList();
+        PaginatedResponse<ProgramResponse> response = new PaginatedResponse<>(
+                programResponses, programs.hasNext(),
+                programs.getTotalPages(), programs.getTotalElements(),pageNumber, pageSize
+        );
         return new ResponseEntity<>(ApiResponse.builder().
                 statusCode(HttpStatus.OK.name()).
-                data(programResponses).
+                data(response).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
                 HttpStatus.OK
         );
