@@ -171,20 +171,24 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
 
     private void calculateLoaneeLoanDetails(String cohortId, String loaneeId, BigDecimal amountRepaid) throws MeedlException {
         CohortLoanee cohortLoanee = cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(loaneeId, cohortId);
-        LoaneeLoanDetail loaneeLoanDetail = cohortLoanee.getLoaneeLoanDetail();
+        log.info("cohort loanee found {}",cohortLoanee);
+        LoaneeLoanDetail loaneeLoanDetail = loaneeLoanDetailsOutputPort.findByCohortLoaneeId(cohortLoanee.getId());
+        log.info("loanee loan details {}",loaneeLoanDetail);
         BigDecimal amountOutstanding = null;
         BigDecimal totalAmountRepaid = null;
         if (ObjectUtils.isNotEmpty(loaneeLoanDetail.getInitialDeposit())) {
+            log.info("Initial deposit during repayment {}", loaneeLoanDetail.getInitialDeposit());
             totalAmountRepaid = amountRepaid.add(loaneeLoanDetail.getInitialDeposit());
         }else {
             totalAmountRepaid = amountRepaid;
         }
-        amountOutstanding = loaneeLoanDetail.getAmountApproved().subtract(totalAmountRepaid);
+        amountOutstanding = loaneeLoanDetail.getAmountReceived().subtract(totalAmountRepaid);
 
         loaneeLoanDetail.setAmountRepaid(amountRepaid);
         loaneeLoanDetail.setAmountOutstanding(amountOutstanding);
 
-        loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
+        LoaneeLoanDetail updatedLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
+        log.info("Updated Loanee loan detail after repayment {}", updatedLoaneeLoanDetail);
     }
 
     public Map<String, List<RepaymentHistory>> getRepaymentHistoriesForLoanees(
@@ -451,6 +455,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                     .initialDeposit(new BigDecimal(row.get("initialdeposit")))
                     .amountRequested(new BigDecimal(row.get("amountrequested")))
                     .amountReceived(new BigDecimal(row.get("amountreceived")))
+                    .amountOutstanding(new BigDecimal(row.get("amountreceived")).subtract(new BigDecimal(row.get("initialdeposit"))))
                     .build();
             log.info("loan product name found from csv {}", row.get("loanproduct"));
             Loanee loanee = Loanee.builder()

@@ -21,7 +21,7 @@ public interface CohortLoaneeRepository extends JpaRepository<CohortLoaneeEntity
 
 
     @Query("""
-        select cohort_loanee.id,
+        select cohort_loanee.id as id,
                 user.firstName as firstName, user.lastName as lastName,user.gender as gender,
                 user.stateOfOrigin as stateOfOrigin, user.dateOfBirth as dateOfBirth, user.email as email,
                 user.residentialAddress as residentialAddress, user.maritalStatus as maritalStatus,

@@ -40,5 +40,6 @@ public interface CohortLoaneeMapper {
     @Mapping(target = "interestRate", source = "interestRate")
     @Mapping(target = "repaymentPercentage", source = "repaymentPercentage")
     @Mapping(target = "cohort.name", source = "cohortName")
+    @Mapping(target = "id", source = "id")
     CohortLoanee mapProjectionCohortLoanee(CohortLoaneeProjection cohortLoaneeEntity);
 }
