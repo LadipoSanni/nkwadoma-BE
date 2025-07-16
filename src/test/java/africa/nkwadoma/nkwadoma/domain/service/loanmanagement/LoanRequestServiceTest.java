@@ -304,6 +304,7 @@ class LoanRequestServiceTest {
 
     @Test
     void declineLoanRequest() {
+        Loanee loanee = Loanee.builder().userIdentity(UserIdentity.builder().build()).build();
         loanRequest.setLoanRequestDecision(LoanDecision.DECLINED);
         loanRequest.setDeclineReason("I just don't want the loan offer");
         loanRequest.setLoanProductId(loanRequest.getLoanProductId());
@@ -318,6 +319,7 @@ class LoanRequestServiceTest {
             when(cohortOutputPort.save(cohort)).thenReturn(cohort);
             when(userIdentityOutputPort.findById(loanRequest.getActorId()))
                     .thenReturn(new UserIdentity());
+            when(loaneeOutputPort.findLoaneeById(loanRequest.getLoaneeId())).thenReturn(loanee);
             approvedLoanRequest = loanRequestService.respondToLoanRequest(loanRequest);
         } catch (MeedlException e) {
             log.error("", e);
