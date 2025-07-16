@@ -166,20 +166,20 @@ class LoanBookValidatorTest {
     @Test
     void testValidWholeNumberAmount() {
         Map<String, String> row = createRow("amountPaid", "1000");
-        assertDoesNotThrow(() -> loanBookValidator.validateAmountPaid(row, "amountPaid", rowCount));
+        assertDoesNotThrow(() -> loanBookValidator.validateMonetaryValue(row, "amountPaid", rowCount));
     }
 
     @Test
     void testValidDecimalAmount() {
         Map<String, String> row = createRow("amountPaid", "1000.50");
-        assertDoesNotThrow(() -> loanBookValidator.validateAmountPaid(row, "amountPaid", rowCount));
+        assertDoesNotThrow(() -> loanBookValidator.validateMonetaryValue(row, "amountPaid", rowCount));
     }
 
     @Test
     void testAmountWithCommaShouldFail() {
         Map<String, String> row = createRow("amountPaid", "1,000");
         MeedlException ex = assertThrows(MeedlException.class,
-                () -> loanBookValidator.validateAmountPaid(row, "amountPaid", rowCount));
+                () -> loanBookValidator.validateMonetaryValue(row, "amountPaid", rowCount));
         assertTrue(ex.getMessage().contains("Amount paid is not a monetary value"));
     }
 
@@ -187,7 +187,7 @@ class LoanBookValidatorTest {
     void validateAmountWithLetter() {
         Map<String, String> row = createRow("amountPaid", "10a00");
         MeedlException ex = assertThrows(MeedlException.class,
-                () -> loanBookValidator.validateAmountPaid(row, "amountPaid", rowCount));
+                () -> loanBookValidator.validateMonetaryValue(row, "amountPaid", rowCount));
         assertTrue(ex.getMessage().contains("Amount paid is not a monetary value"));
     }
 
@@ -195,7 +195,7 @@ class LoanBookValidatorTest {
     void validateAmountWithSpecialChars() {
         Map<String, String> row = createRow("amountPaid", "$1000");
         MeedlException ex = assertThrows(MeedlException.class,
-                () -> loanBookValidator.validateAmountPaid(row, "amountPaid", rowCount));
+                () -> loanBookValidator.validateMonetaryValue(row, "amountPaid", rowCount));
         assertTrue(ex.getMessage().contains("Amount paid is not a monetary value"));
     }
 
@@ -203,7 +203,7 @@ class LoanBookValidatorTest {
     void validateAmountPaidWithNull() {
         Map<String, String> row = createRow("amountPaid", null);
         MeedlException ex = assertThrows(MeedlException.class,
-                () -> loanBookValidator.validateAmountPaid(row, "amountPaid", rowCount));
+                () -> loanBookValidator.validateMonetaryValue(row, "amountPaid", rowCount));
         assertTrue(ex.getMessage().contains("Amount paid is not a monetary value"));
     }
 
@@ -211,7 +211,7 @@ class LoanBookValidatorTest {
     void validateAmountPaidWithEmptyString() {
         Map<String, String> row = createRow("amountPaid", "");
         MeedlException ex = assertThrows(MeedlException.class,
-                () -> loanBookValidator.validateAmountPaid(row, "amountPaid", rowCount));
+                () -> loanBookValidator.validateMonetaryValue(row, "amountPaid", rowCount));
         assertTrue(ex.getMessage().contains("Amount paid is not a monetary value"));
     }
 
@@ -219,20 +219,20 @@ class LoanBookValidatorTest {
     void validateNegativeAmountShould() {
         Map<String, String> row = createRow("amountPaid", "-500");
         MeedlException ex = assertThrows(MeedlException.class,
-                () -> loanBookValidator.validateAmountPaid(row, "amountPaid", rowCount));
+                () -> loanBookValidator.validateMonetaryValue(row, "amountPaid", rowCount));
         assertTrue(ex.getMessage().contains("Amount paid is not a monetary value. -500"));
     }
 
     @Test
     void validateForPositiveAmount() {
         Map<String, String> row = createRow("amountPaid", "0");
-        assertDoesNotThrow(() -> loanBookValidator.validateAmountPaid(row, "amountPaid", rowCount));
+        assertDoesNotThrow(() -> loanBookValidator.validateMonetaryValue(row, "amountPaid", rowCount));
     }
     @Test
     void validateAmountWithTrailingDot() {
         Map<String, String> row = createRow("amountPaid", "1000.");
         MeedlException ex = assertThrows(MeedlException.class,
-                () -> loanBookValidator.validateAmountPaid(row, "amountPaid", rowCount));
+                () -> loanBookValidator.validateMonetaryValue(row, "amountPaid", rowCount));
         assertTrue(ex.getMessage().contains("Amount paid is not a monetary value"));
     }
 
@@ -240,7 +240,7 @@ class LoanBookValidatorTest {
     void validateAmountWithLeadingDot() {
         Map<String, String> row = createRow("amountPaid", ".50");
         MeedlException ex = assertThrows(MeedlException.class,
-                () -> loanBookValidator.validateAmountPaid(row, "amountPaid", rowCount));
+                () -> loanBookValidator.validateMonetaryValue(row, "amountPaid", rowCount));
         assertTrue(ex.getMessage().contains("Amount paid is not a monetary value"));
     }
 
@@ -254,7 +254,7 @@ class LoanBookValidatorTest {
         when(loaneeOutputPort.findByLoaneeEmail("test@example.com")).thenReturn(mockLoanee);
 
         assertDoesNotThrow(() ->
-                loanBookValidator.validateUserExistForRepayment(row, "email", rowCount)
+                loanBookValidator.validateUserExistByEmail(row, "email", rowCount)
         );
     }
 //    @Test
@@ -264,7 +264,7 @@ class LoanBookValidatorTest {
         when(loaneeOutputPort.findByLoaneeEmail("nonexistent@example.com")).thenReturn(null);
 
         MeedlException ex = assertThrows(MeedlException.class, () ->
-                loanBookValidator.validateUserExistForRepayment(row, "email", rowCount)
+                loanBookValidator.validateUserExistByEmail(row, "email", rowCount)
         );
         assertTrue(ex.getMessage().contains("does not exist for repayment"));
     }
@@ -276,7 +276,7 @@ class LoanBookValidatorTest {
                 .thenThrow(new MeedlException("Unexpected error"));
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                loanBookValidator.validateUserExistForRepayment(row, "email", rowCount)
+                loanBookValidator.validateUserExistByEmail(row, "email", rowCount)
         );
         assertTrue(ex.getMessage().contains("Unexpected error"));
     }
