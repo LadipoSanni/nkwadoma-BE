@@ -9,9 +9,7 @@ SET
                  JOIN cohort_loanee_entity cl ON cl.id = lre.cohort_loanee_id
         WHERE lld.id = cl.loanee_loan_detail_id
     ),
-    amount_outstanding = GREATEST(
-            (
-                SELECT lld.amount_received - lld.amount_repaid
-            ),
-            0
-     );
+    amount_outstanding = CASE
+             WHEN COALESCE(lld.amount_received, 0) - COALESCE(lld.amount_repaid, 0) < 0 THEN 0
+             ELSE COALESCE(lld.amount_received, 0) - COALESCE(lld.amount_repaid, 0)
+    END;
