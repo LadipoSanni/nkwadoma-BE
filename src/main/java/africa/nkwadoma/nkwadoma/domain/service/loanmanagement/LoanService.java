@@ -173,11 +173,45 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }
         Loan savedLoan = loanOutputPort.save(loan);
         log.info("Saved loan: {}", savedLoan);
-        updateCohortLoanDetail(loanOffer);
+        updateLoanDetail(loanOffer);
         String referBy = loanOutputPort.findLoanReferal(savedLoan.getId());
         updateLoanDisbursalOnLoamMatrics(referBy);
         updateInvestmentVehicleTalentFunded(savedLoan);
         return savedLoan;
+    }
+
+    private void updateLoanDetail(LoanOffer loanOffer) throws MeedlException {
+        updateLoaneeLoanDetail(loanOffer);
+
+        updateCohortLoanDetail(loanOffer);
+
+        Cohort cohort = cohortOutputPort.findCohort(loanOffer.getCohortId());
+
+        updateProgramDetail(loanOffer, cohort);
+
+        updateOrganizationLoanDetail(loanOffer, cohort);
+    }
+
+    private void updateOrganizationLoanDetail(LoanOffer loanOffer, Cohort cohort) throws MeedlException {
+        OrganizationLoanDetail organizationLoanDetail = organizationLoanDetailOutputPort.findByOrganizationId(cohort.getOrganizationId());
+        log.info("current total amount received for organization  {}",organizationLoanDetail.getTotalAmountReceived());
+        log.info("loanee amount disbursed {}", loanOffer.getAmountApproved());
+        organizationLoanDetail.setTotalAmountReceived(organizationLoanDetail.getTotalAmountReceived()
+                .add(loanOffer.getAmountApproved()));
+        organizationLoanDetail.setTotalOutstandingAmount(organizationLoanDetail.getTotalOutstandingAmount()
+                .add(loanOffer.getAmountApproved()));
+        organizationLoanDetailOutputPort.save(organizationLoanDetail);
+    }
+
+    private void updateProgramDetail(LoanOffer loanOffer, Cohort cohort) throws MeedlException {
+        ProgramLoanDetail programLoanDetail = programLoanDetailOutputPort.findByProgramId(cohort.getProgramId());
+        log.info("current total amount received for program  {}",programLoanDetail.getTotalAmountReceived());
+        log.info("loanee amount disbursed {}", loanOffer.getAmountApproved());
+        programLoanDetail.setTotalAmountReceived(programLoanDetail.getTotalAmountReceived()
+                .add(loanOffer.getAmountApproved()));
+        programLoanDetail.setTotalOutstandingAmount(programLoanDetail.getTotalOutstandingAmount()
+                .add(loanOffer.getAmountApproved()));
+        programLoanDetailOutputPort.save(programLoanDetail);
     }
 
     private void updateCohortLoanDetail(LoanOffer loanOffer) throws MeedlException {
@@ -196,26 +230,15 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
         log.info("cohort program id == {} cohort organization id == {}",
                 cohortLoanDetail.getCohort().getProgramId(),cohortLoanDetail.getCohort().getOrganizationId());
+    }
 
-        Cohort cohort = cohortOutputPort.findCohort(loanOffer.getCohortId());
+    private void updateLoaneeLoanDetail(LoanOffer loanOffer) throws MeedlException {
+        LoaneeLoanDetail loaneeLoanDetail =
+                loaneeLoanDetailsOutputPort.findByCohortLoaneeId(loanOffer.getCohortLoaneeId());
 
-        ProgramLoanDetail programLoanDetail = programLoanDetailOutputPort.findByProgramId(cohort.getProgramId());
-        log.info("current total amount received for program  {}",programLoanDetail.getTotalAmountReceived());
-        log.info("loanee amount disbursed {}", loanOffer.getAmountApproved());
-        programLoanDetail.setTotalAmountReceived(programLoanDetail.getTotalAmountReceived()
-                .add(loanOffer.getAmountApproved()));
-        programLoanDetail.setTotalOutstandingAmount(programLoanDetail.getTotalOutstandingAmount()
-                .add(loanOffer.getAmountApproved()));
-        programLoanDetailOutputPort.save(programLoanDetail);
-
-        OrganizationLoanDetail organizationLoanDetail = organizationLoanDetailOutputPort.findByOrganizationId(cohort.getOrganizationId());
-        log.info("current total amount received for organization  {}",organizationLoanDetail.getTotalAmountReceived());
-        log.info("loanee amount disbursed {}", loanOffer.getAmountApproved());
-        organizationLoanDetail.setTotalAmountReceived(organizationLoanDetail.getTotalAmountReceived()
-                .add(loanOffer.getAmountApproved()));
-        organizationLoanDetail.setTotalOutstandingAmount(organizationLoanDetail.getTotalOutstandingAmount()
-                .add(loanOffer.getAmountApproved()));
-        organizationLoanDetailOutputPort.save(organizationLoanDetail);
+        loaneeLoanDetail.setAmountReceived(loanOffer.getAmountApproved());
+        loaneeLoanDetail.setAmountOutstanding(loanOffer.getAmountApproved());
+        loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
     }
 
     private void updateInvestmentVehicleTalentFunded(Loan savedLoan) throws MeedlException {

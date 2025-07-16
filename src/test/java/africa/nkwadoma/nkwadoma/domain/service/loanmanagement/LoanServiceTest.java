@@ -75,6 +75,7 @@ class LoanServiceTest {
     private int pageSize = 10;
     private int pageNumber = 0;
     private CohortLoanee cohortLoanee;
+    private LoaneeLoanDetail loaneeLoanDetail;
     @Mock
     private CohortOutputPort cohortOutputPort;
     @Mock
@@ -109,7 +110,7 @@ class LoanServiceTest {
         organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
         organizationIdentity.setWebsiteAddress("rosecouture.org");
         userIdentity = TestData.createTestUserIdentity("test@example.com");
-        LoaneeLoanDetail loaneeLoanDetail = TestData.createTestLoaneeLoanDetail();
+        loaneeLoanDetail = TestData.createTestLoaneeLoanDetail();
         loanee = TestData.createTestLoanee(userIdentity, loaneeLoanDetail);
         loaneeLoanAccount = TestData.createLoaneeLoanAccount(LoanStatus.AWAITING_DISBURSAL, AccountStatus.NEW, loanee.getId());
         LoanProduct loanProduct = TestData.buildTestLoanProduct();
@@ -365,6 +366,9 @@ class LoanServiceTest {
             when(loaneeLoanAccountOutputPort.findByLoaneeId(anyString())).thenReturn(loaneeLoanAccount);
             when(loanOutputPort.save(any())).thenReturn(startedLoan);
             cohort.setId(testId);
+            when(loaneeLoanDetailsOutputPort.findByCohortLoaneeId(loanOffer.getCohortLoaneeId()))
+                    .thenReturn(loaneeLoanDetail);
+            when(loaneeLoanDetailsOutputPort.save(loaneeLoanDetail)).thenReturn(loaneeLoanDetail);
             when(cohortLoanDetailOutputPort.findByCohortId(loanOffer.getCohortId())).thenReturn(cohortLoanDetail);
             when(cohortLoanDetailOutputPort.save(cohortLoanDetail)).thenReturn(cohortLoanDetail);
             when(cohortOutputPort.findCohort(loanOffer.getCohortId())).thenReturn(cohort);
