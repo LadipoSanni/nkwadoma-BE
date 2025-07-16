@@ -47,6 +47,9 @@ public interface LoanMapper {
     @Mapping(target = "status", source = "status")
     @Mapping(target = "cohortLoaneeId", source = "cohortLoaneeId")
     @Mapping(target = "organizationName", source = "referredBy")
+    @Mapping(target = "loanAmountOutstanding", source = "amountOutstanding")
+    @Mapping(target = "loanAmountRepaid", source = "amountRepaid")
+    @Mapping(target = "interestRate", source = "interestRate")
     Loan mapProjectionToLoan(LoanProjection loanProjection);
 
     LoanDetailSummary toLoanDetailSummary(LoanSummaryProjection loanSummaryProjection);

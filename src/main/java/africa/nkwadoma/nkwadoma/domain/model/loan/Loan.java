@@ -49,13 +49,16 @@ public class Loan {
     private String organizationId;
     private String actorId;
     private String cohortLoaneeId;
+    private BigDecimal loanAmountOutstanding;
+    private BigDecimal loanAmountRepaid;
+    private double interestRate;
     private int pageNumber;
     private int pageSize;
     private String organizationName;
-    private BigDecimal totalAmountOutstanding;
-    private BigDecimal totalAmountReceived;
-    private BigDecimal totalAmountRepaid;
     private LoanDetailSummary loanDetailSummary;
+    private BigDecimal repaymentRate;
+    private BigDecimal debtPercentage;
+    private BigDecimal interestIncurred;
 
 
     public void validate() throws MeedlException {

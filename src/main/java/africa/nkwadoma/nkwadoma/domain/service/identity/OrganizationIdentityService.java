@@ -351,7 +351,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         BigDecimal totalAmountReceived = organizationIdentity.getTotalAmountReceived();
         if (totalAmountReceived !=  null && totalAmountReceived.compareTo(BigDecimal.ZERO) > 0) {
             organizationIdentity.setDebtPercentage(organizationLoanDetail.getTotalOutstandingAmount()
-                    .divide(organizationLoanDetail.getTotalAmountReceived(), RoundingMode.UP));
+                    .divide(organizationLoanDetail.getTotalAmountReceived(), RoundingMode.UP).multiply(BigDecimal.valueOf(100)));
             organizationIdentity.setRepaymentRate(organizationLoanDetail.getTotalAmountRepaid()
                     .divide(organizationLoanDetail.getTotalAmountReceived(), RoundingMode.UP).multiply(BigDecimal.valueOf(100)));
         }else {

@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loancalculation.LoanCalculationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
@@ -33,7 +34,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -75,6 +78,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final LoaneeUseCase loaneeUseCase;
     private final LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
     private final LoanMapper loanMapper;
+    private final LoanCalculationOutputPort loanCalculationOutputPort;
 
     @Override
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
@@ -278,6 +282,16 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
                 loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(foundLoan.getCohortLoaneeId());
         log.info("Loanee loan breakdowns returned: {}", loaneeLoanBreakdowns);
         foundLoan.setLoaneeLoanBreakdowns(loaneeLoanBreakdowns);
+        BigDecimal amountReceived = foundLoan.getLoanAmountApproved();
+        if (amountReceived !=  null && amountReceived.compareTo(BigDecimal.ZERO) > 0) {
+            foundLoan.setDebtPercentage(foundLoan.getLoanAmountOutstanding()
+                    .divide(foundLoan.getLoanAmountApproved(), RoundingMode.UP).multiply(BigDecimal.valueOf(100)));
+            foundLoan.setRepaymentRate(foundLoan.getLoanAmountRepaid()
+                    .divide(foundLoan.getLoanAmountApproved(), RoundingMode.UP).multiply(BigDecimal.valueOf(100)));
+        }else {
+            foundLoan.setDebtPercentage(BigDecimal.ZERO);
+            foundLoan.setRepaymentRate(BigDecimal.ZERO);
+        }
         return foundLoan;
     }
 
