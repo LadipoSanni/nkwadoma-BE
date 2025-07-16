@@ -198,19 +198,19 @@ class LoanRequestServiceTest {
     @Test
     void approveLoanRequest() {
         try {
-            Loanee loanee = Loanee.builder().userIdentity(UserIdentity.builder().build()).build();
+            Loanee loanee = Loanee.builder().onboardingMode(OnboardingMode.EMAIL_REFERRED).userIdentity(UserIdentity.builder().build()).build();
             // Setup stubs
-            LoanRequest build = LoanRequest.builder().id(testId).isVerified(true)
+            LoanRequest loanRequestBuilt = LoanRequest.builder().id(testId).isVerified(true)
                     .onboardingMode(OnboardingMode.EMAIL_REFERRED).loanProductId(testId)
                     .status(LoanRequestStatus.NEW).loanAmountApproved(BigDecimal.valueOf(5000))
                     .loanRequestDecision(LoanDecision.ACCEPTED).loanAmountRequested(BigDecimal.valueOf(5000))
                     .loaneeId(testId).userIdentity(UserIdentity.builder().firstName("first name").lastName("hshsh")
                             .email("email@gmail.com").build()).loanee(loanee).build();
-            when(loanRequestOutputPort.findById(anyString())).thenReturn(build);
-            when(loanProductOutputPort.findById(build.getLoanProductId())).thenReturn(loanProduct);
+            when(loanRequestOutputPort.findById(anyString())).thenReturn(loanRequestBuilt);
+            when(loanProductOutputPort.findById(loanRequestBuilt.getLoanProductId())).thenReturn(loanProduct);
             when(loanOfferUseCase.createLoanOffer(any())).thenReturn(loanOffer);
-            when(loanRequestMapper.updateLoanRequest(any(), any())).thenReturn(build);
-            when(loanRequestOutputPort.save(any())).thenReturn(build);
+            when(loanRequestMapper.updateLoanRequest(any(), any())).thenReturn(loanRequestBuilt);
+            when(loanRequestOutputPort.save(any())).thenReturn(loanRequestBuilt);
             when(organizationIdentityOutputPort.findOrganizationByName(any()))
                     .thenReturn(Optional.of(OrganizationIdentity.builder().id(testId).build()));
             when(loanMetricsOutputPort.findByOrganizationId(anyString()))
@@ -219,11 +219,11 @@ class LoanRequestServiceTest {
 
             when(cohortOutputPort.findCohort(loanRequest.getCohortId())).thenReturn(cohort);
             when(cohortOutputPort.save(cohort)).thenReturn(cohort);
-            when(userIdentityOutputPort.findById(build.getActorId()))
+            when(userIdentityOutputPort.findById(loanRequestBuilt.getActorId()))
                     .thenReturn(new UserIdentity());
 
-            when(loaneeOutputPort.findLoaneeById(build.getLoaneeId())).thenReturn(loanee);
-            LoanRequest response = loanRequestService.respondToLoanRequest(build);
+            when(loaneeOutputPort.findLoaneeById(loanRequestBuilt.getLoaneeId())).thenReturn(loanee);
+            LoanRequest response = loanRequestService.respondToLoanRequest(loanRequestBuilt);
             assertNotNull(response);
             assertEquals(LoanRequestStatus.APPROVED, response.getStatus());
             assertEquals(new BigDecimal("5000"), response.getLoanAmountApproved());
