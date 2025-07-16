@@ -174,7 +174,10 @@ public class LoanRequestService implements LoanRequestUseCase {
         MeedlNotification meedlNotification = buildUpLoanOfferNotification(loanOffer, updatedLoanRequest, userIdentity);
         log.info("is read before after building notification {}",meedlNotification.isRead());
         meedlNotificationUsecase.sendNotification(meedlNotification);
-        asynchronousMailingOutputPort.sendLoanRequestDecisionMail(updatedLoanRequest);
+
+        if (!loanee.getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)) {
+            asynchronousMailingOutputPort.sendLoanRequestDecisionMail(updatedLoanRequest);
+        }
     }
 
     private static MeedlNotification buildUpLoanOfferNotification(LoanOffer loanOffer, LoanRequest updatedLoanRequest, UserIdentity userIdentity) {
