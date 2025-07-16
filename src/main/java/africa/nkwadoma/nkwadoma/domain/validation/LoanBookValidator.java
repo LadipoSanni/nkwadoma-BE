@@ -46,7 +46,9 @@ public class LoanBookValidator {
         int rowCount = 1;
         for (Map<String, String> row : data) {
 
-            validatePhoneNumber(row.get("phonenumber"), rowCount);
+            validateElevenDigit(row.get("bvn"), "Invalid bvn : "+rowCount);
+            validateElevenDigit(row.get("nin"), "Invalid nin row : "+rowCount);
+            validateElevenDigit(row.get("phonenumber"), "Invalid phone number row : "+rowCount);
             validateUserExistByEmail(row, "email", rowCount );
 
             validateName(rowCount, row.get("firstname"), "First name");
@@ -68,21 +70,6 @@ public class LoanBookValidator {
         hasFailure(loanBook);
     }
 
-
-
-    public void validateAllFileFields(List<CohortLoanee> convertedLoanees) throws MeedlException {
-        int rowCount = 1;
-        for (CohortLoanee cohortLoanee : convertedLoanees) {
-//            validateFileBvn(cohortLoanee.getLoanee().getUserIdentity());
-//            validateFileNin(cohortLoanee.getLoanee().getUserIdentity());
-//            validatePhoneNumber(cohortLoanee.getLoanee().getUserIdentity());
-//            validateLoanProductExist(cohortLoanee.getLoanee(), rowCount);
-//            validateAmount(cohortLoanee.getLoanee(), rowCount);
-//            validateInitialDepositAndAmountApproved(cohortLoanee.getLoaneeLoanDetail());
-            rowCount++;
-        }
-
-    }
     public void setValidationErrorMessage(){
         validationErrorMessage = new StringBuilder();
     }
@@ -110,20 +97,7 @@ public class LoanBookValidator {
             }
         }
     }
-    private void validatePhoneNumber(String phoneNumber, int rowCount) {
-        phoneNumber = formatPhoneNumber(phoneNumber);
-        try {
-            MeedlValidator.validateElevenDigits(phoneNumber, "Invalid phone number row : "+rowCount);
-        } catch (MeedlException e) {
-            validationErrorMessage.append(e.getMessage())
-                    .append("\n");
-        }
 
-    }
-    private void validatePhoneNumber(UserIdentity userIdentity) throws MeedlException {
-        String phoneNumber = formatPhoneNumber(userIdentity.getPhoneNumber());
-        MeedlValidator.validateElevenDigits(phoneNumber,"User with email "+userIdentity.getEmail()+ " has invalid phone number.");
-    }
     public String formatPhoneNumber(String input) {
         if (input != null && input.matches("^\\d{10}$")) {
             return "0" + input;
@@ -143,12 +117,6 @@ public class LoanBookValidator {
                     .append(rowCount)
                     .append("\n");
         }
-    }
-
-    private void validateAmount(Loanee loanee, int rowCount) throws MeedlException {
-        validateMoneyValue(loanee.getLoaneeLoanDetail().getInitialDeposit(), "Initial deposit for user with email "+loanee.getUserIdentity().getEmail()+" is invalid: "+ convertIfNull( loanee.getLoaneeLoanDetail().getInitialDeposit()), rowCount);
-        validateMoneyValue(loanee.getLoaneeLoanDetail().getAmountRequested(), "Amount requested for user with email "+loanee.getUserIdentity().getEmail()+" is invalid: "+ convertIfNull( loanee.getLoaneeLoanDetail().getAmountRequested()), rowCount);
-        validateMoneyValue(loanee.getLoaneeLoanDetail().getAmountReceived(), "Amount received for user with email "+loanee.getUserIdentity().getEmail()+" is invalid: "+ convertIfNull( loanee.getLoaneeLoanDetail().getAmountReceived()), rowCount);
     }
 
     public String convertIfNull(BigDecimal bigDecimal) {
@@ -173,13 +141,18 @@ public class LoanBookValidator {
         }
     }
 
-    private void validateFileNin(UserIdentity userIdentity) throws MeedlException {
-        String encryptedNin = validateFileAndEncryptBvnOrNin(userIdentity.getNin(), "User with email "+userIdentity.getEmail()+" has invalid or missing nin "+userIdentity.getNin());
-        userIdentity.setNin(encryptedNin);
-        log.info("nin successfully validated and encrypted");
-    }
+    private void validateElevenDigit(String elevenDigitNumber, String errorMessage)  {
+        elevenDigitNumber = formatPhoneNumber(elevenDigitNumber);
+        try {
+            MeedlValidator.validateElevenDigits(elevenDigitNumber, errorMessage);
+        } catch (MeedlException e) {
+            validationErrorMessage.append(errorMessage)
+                    .append("\n");
+        }
+        log.info("Eleven digit number successfully validated and encrypted ");
 
-    private void validateFileBvn(UserIdentity userIdentity) throws MeedlException {
+    }
+    private void validateElevenDigit(UserIdentity userIdentity) throws MeedlException {
         String encryptedBvn = validateFileAndEncryptBvnOrNin(userIdentity.getBvn(), "User with email "+userIdentity.getEmail()+" has invalid or missing bvn "+userIdentity.getBvn() );
         userIdentity.setBvn(encryptedBvn);
         log.info("Bvn successfully validated and encrypted");
@@ -190,7 +163,7 @@ public class LoanBookValidator {
 
         return encryptValue(bvnOrNin, errorMessage);
     }
-    private String encryptValue(String value, String errorMessage) {
+    public String encryptValue(String value, String errorMessage) {
         try {
             MeedlValidator.validateElevenDigits(value, errorMessage);
             return aesOutputPort.encryptAES(value.trim());
@@ -340,7 +313,6 @@ public class LoanBookValidator {
                     .append(exception.getMessage())
                     .append("\n");
             log.error("{}", exception.getMessage());
-//            throw  new RuntimeException(exception.getMessage());
         }
 
         log.info("loanee found in repayment history : {}", loanee);
@@ -352,7 +324,6 @@ public class LoanBookValidator {
                     .append(emailToCheck)
                     .append(" does not exist for repayment.")
                     .append("\n ");
-//            throw new MeedlException("Loanee with email : " + emailToCheck + " does not exist for repayment");
         }
         log.info("Loanee with email {} on row {} exist. ", emailToCheck, rowCount);
 

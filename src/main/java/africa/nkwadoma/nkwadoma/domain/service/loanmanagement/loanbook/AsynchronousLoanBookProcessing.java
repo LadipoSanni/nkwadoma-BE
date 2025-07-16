@@ -439,7 +439,6 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
 
     List<CohortLoanee> convertToLoanees(List<Map<String, String>> data, Cohort cohort, String actorId) throws MeedlException {
         List<CohortLoanee> cohortLoanees = new ArrayList<>();
-        int rowCount = 1;
         for (Map<String, String> row : data) {
             UserIdentity userIdentity = UserIdentity.builder()
                     .firstName(row.get("firstname"))
@@ -449,14 +448,10 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                     .phoneNumber(row.get("phonenumber"))
                     .role(IdentityRole.LOANEE)
                     .createdAt(LocalDateTime.now())
-                    .bvn(row.get("bvn"))
+                    .bvn(loanBookValidator.encryptValue(row.get("bvn"), "Invalid bvn"))
                     .nin(row.get("nin"))
                     .createdBy(actorId)
                     .build();
-            loanBookValidator.containsOnlyDigits(row.get("initialdeposit"), "Initial deposit is not a monetary value. "+ loanBookValidator.convertIfNull(row.get("initialdeposit")), rowCount);
-            loanBookValidator.containsOnlyDigits(row.get("amountrequested"), "Amount requested is not a monetary value. "+ loanBookValidator.convertIfNull(row.get("amountrequested")), rowCount);
-            loanBookValidator.containsOnlyDigits(row.get("amountreceived"), "Amount received is not a monetary value. "+ loanBookValidator.convertIfNull(row.get("amountreceived")), rowCount);
-
             LoaneeLoanDetail loaneeLoanDetail = LoaneeLoanDetail.builder()
                     .initialDeposit(new BigDecimal(row.get("initialdeposit")))
                     .amountRequested(new BigDecimal(row.get("amountrequested")))
@@ -486,11 +481,8 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                     .build();
 
             cohortLoanees.add(cohortLoanee);
-            rowCount++;
         }
         log.info("Validating the file field values.");
-        loanBookValidator.validateAllFileFields(cohortLoanees);
-
         return savedData(cohortLoanees);
     }
 
