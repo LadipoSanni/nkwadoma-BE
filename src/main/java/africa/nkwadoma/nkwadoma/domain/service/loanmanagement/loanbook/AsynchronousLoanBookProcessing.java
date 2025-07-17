@@ -540,27 +540,6 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         return loaneeOutputPort.save(cohortLoanee.getLoanee());
     }
 
-//    private void saveUploadedUserIdentity(CohortLoanee cohortLoanee) {
-//        String email = cohortLoanee.getLoanee().getUserIdentity().getEmail();
-//        try {
-//            UserIdentity userIdentity = identityManagerOutputPort.createUser(cohortLoanee.getLoanee().getUserIdentity());
-//            userIdentityOutputPort.save(userIdentity);
-//        } catch (MeedlException e) {
-//            log.warn("Loanee been added already exist on platform");
-//            try {
-//                UserIdentity foundUser = userIdentityOutputPort.findByEmail(email);
-//                cohortLoanee.getLoanee().getUserIdentity().setId(foundUser.getId());
-//            } catch (MeedlException ex) {
-//               log.error("Unable to find user on bd by email on the platform in upload data flow after being unable to save user with email :{}", email);
-//                try {
-//                    Optional<UserIdentity> optionalFoundUser = identityManagerOutputPort.getUserByEmail(email);
-//                    optionalFoundUser.ifPresent(userIdentity -> cohortLoanee.getLoanee().getUserIdentity().setId(userIdentity.getId()));
-//                } catch (MeedlException exc) {
-//                    log.error("Loanee wasn't found on keycloak either in upload user data flow");
-//                }
-//            }
-//        }
-//    }
     private void saveUploadedUserIdentity(CohortLoanee cohortLoanee) {
         UserIdentity identity = cohortLoanee.getLoanee().getUserIdentity();
         String email = identity.getEmail();
@@ -570,7 +549,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
             userIdentityOutputPort.save(createdIdentity);
             return;
         } catch (MeedlException e) {
-            log.warn("Loanee already exists on platform for email: {}", email);
+            log.warn("Loanee already exists on platform for email: {}", email, e);
         }
 
         if (findUserInDbAndSetId(identity, email)) return;
@@ -579,25 +558,27 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
 
         log.error("Loanee wasn't found anywhere (DB or Keycloak) for email: {}", email);
     }
-    private boolean findUserInKeycloakAndSetId(UserIdentity identity, String email) {
-        try {
-            Optional<UserIdentity> optionalUser = identityManagerOutputPort.getUserByEmail(email);
-            optionalUser.ifPresent(user -> identity.setId(user.getId()));
-            return optionalUser.isPresent();
-        } catch (MeedlException e) {
-            log.error("Loanee wasn't found on keycloak either in upload user data flow");
-            return false;
-        }
-    }
 
     private boolean findUserInDbAndSetId(UserIdentity identity, String email) {
         try {
-            log.error("Unable to find user on bd by email on the platform in upload data flow after being unable to save user with email :{}", email);
             UserIdentity foundUser = userIdentityOutputPort.findByEmail(email);
             identity.setId(foundUser.getId());
+            log.warn("User found in DB successfully for upload data. email: {}", email);
             return true;
         } catch (MeedlException e) {
-            log.warn("User not found in DB for email: {}", email);
+            log.error("Unable to find user on bd by email on the platform in upload data flow after being unable to save user with email :{}", email);
+            return false;
+        }
+    }
+    private boolean findUserInKeycloakAndSetId(UserIdentity userIdentity, String email) {
+        try {
+            Optional<UserIdentity> optionalUser = identityManagerOutputPort.getUserByEmail(email);
+            optionalUser.ifPresent(user -> userIdentity.setId(user.getId()));
+            log.info("User identity exists on keycloak but not on db email : {}", email);
+            userIdentityOutputPort.save(userIdentity);
+            return optionalUser.isPresent();
+        } catch (MeedlException e) {
+            log.error("Loanee wasn't found on keycloak either in upload user data flow");
             return false;
         }
     }

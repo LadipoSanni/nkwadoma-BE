@@ -102,7 +102,7 @@ public class LoaneeService implements LoaneeUseCase {
                         validationsForInvitingLoanee(loanee, id);
                         loanee.setUploadedStatus(UploadedStatus.INVITED);
                         loanee = loaneeOutputPort.save(loanee);
-                        getLoanInCohort(loanee.getId(), cohortId);
+                        getLoanInCohort(loanee, cohortId);
 //                        getLoaneeLoanReferral(loanee);
                     } catch (MeedlException e) {
                         log.error("Loanee with id doesn't exist");
