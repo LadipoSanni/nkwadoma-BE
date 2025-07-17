@@ -58,7 +58,16 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
                     o.status as status,o.email as email,
                     o.numberOfLoanees as numberOfLoanees,
                     o.numberOfCohort as numberOfCohort,o.websiteAddress as websiteAddress,
-                    o.numberOfPrograms as numberOfPrograms
+                    o.numberOfPrograms as numberOfPrograms,
+                      CASE
+            WHEN COALESCE(ld.totalAmountReceived, 0) = 0 THEN 0.0 
+            ELSE (ld.totalOutstandingAmount / ld.totalAmountReceived * 100.0) 
+        END as debtPercentage,
+        CASE 
+            WHEN COALESCE(ld.totalAmountReceived, 0) = 0 THEN 0.0 
+            ELSE (ld.totalAmountRepaid / ld.totalAmountReceived * 100.0) 
+        END as repaymentRate
+                                
                    from OrganizationEntity o
                                
                    left join OrganizationLoanDetailEntity ld on ld.organization.id = o.id        
@@ -106,21 +115,29 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
 
 
     @Query("""
-    Select o.id as organizationId,
-           o.name as name,
-           ld.totalAmountReceived as totalAmountReceived,
-           ld.totalAmountRequested as totalAmountRequested,
-           ld.totalAmountRepaid as totalDebtRepaid,
-           ld.totalOutstandingAmount as totalCurrentDebt,
-           o.status as status,o.email as email,
-           o.numberOfLoanees as numberOfLoanees, o.websiteAddress as websiteAddress,
-           o.numberOfCohort as numberOfCohort,
-           o.numberOfPrograms as numberOfPrograms
-
-         
-          from OrganizationEntity o
-          left join OrganizationLoanDetailEntity ld on ld.organization.id = o.id    
-           
-    """)
+    SELECT 
+        o.id as organizationId,
+        o.name as name,
+        ld.totalAmountReceived as totalAmountReceived,
+        ld.totalAmountRequested as totalAmountRequested,
+        ld.totalAmountRepaid as totalDebtRepaid,
+        ld.totalOutstandingAmount as totalCurrentDebt,
+        o.status as status,
+        o.email as email,
+        o.numberOfLoanees as numberOfLoanees,
+        o.websiteAddress as websiteAddress,
+        o.numberOfCohort as numberOfCohort,
+        o.numberOfPrograms as numberOfPrograms,
+        CASE 
+            WHEN COALESCE(ld.totalAmountReceived, 0) = 0 THEN 0.0 
+            ELSE (ld.totalOutstandingAmount / ld.totalAmountReceived * 100.0) 
+        END as debtPercentage,
+        CASE 
+            WHEN COALESCE(ld.totalAmountReceived, 0) = 0 THEN 0.0 
+            ELSE (ld.totalAmountRepaid / ld.totalAmountReceived * 100.0) 
+        END as repaymentRate
+    FROM OrganizationEntity o
+    LEFT JOIN OrganizationLoanDetailEntity ld ON ld.organization.id = o.id
+""")
     Page<OrganizationProjection> findAllOrganization(Pageable pageRequest);
 }
