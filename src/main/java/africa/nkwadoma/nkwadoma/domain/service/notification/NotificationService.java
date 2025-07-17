@@ -147,7 +147,7 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
         Context context = emailOutputPort.getNameAndLinkContext(getLink(userIdentity),userIdentity.getFirstName());
         Email email = Email.builder()
                 .context(context)
-                .subject(LoaneeMessages.LOANEE_HAS_REFERRED.getMessage())
+                .subject(LoaneeMessages.LOANEE_HAS_BEEN_REFERRED.getMessage())
                 .to(userIdentity.getEmail())
                 .template(LoaneeMessages.LOANEE_REFERRAL_INVITATION_SENT.getMessage())
                 .firstName(userIdentity.getFirstName())

@@ -523,7 +523,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                 savedLoanees.add(savedCohortLoanee);
             } catch (MeedlException e) {
                 log.info("Error occurred while saving data .", e);
-                throw new RuntimeException(e);
+//                throw new RuntimeException(e);
             }
         }
         log.info("Done saving loanee data from file to db. cohortLoanees size {}", savedLoanees.size());
