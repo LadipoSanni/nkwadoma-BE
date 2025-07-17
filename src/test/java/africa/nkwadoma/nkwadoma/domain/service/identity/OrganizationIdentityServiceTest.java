@@ -13,6 +13,8 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanMetrics;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
@@ -341,13 +343,23 @@ class OrganizationIdentityServiceTest {
 
     @Test
     void shouldReturnOrganizationDetails_WhenUserIsOrganizationAdmin() throws MeedlException {
+
+        OrganizationLoanDetail loanDetail = OrganizationLoanDetail.builder()
+                .totalAmountRepaid(BigDecimal.valueOf(5000))
+                .totalAmountRequested(BigDecimal.valueOf(5000))
+                .totalOutstandingAmount(BigDecimal.valueOf(10000))
+                .build();
+
+        when(userIdentityOutputPort.findById(mockId)).thenReturn(sarah);
         sarah.setRole(IdentityRole.ORGANIZATION_ADMIN);
         employeeSarah.setOrganization(roseCouture.getId());
-        when(userIdentityOutputPort.findById(mockId)).thenReturn(sarah);
         when(organizationEmployeeIdentityOutputPort.findByCreatedBy(mockId)).thenReturn(employeeSarah);
         when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
-        when(organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(roseCouture.getId())).thenReturn(orgEmployee);
+
+        when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
         when(organizationIdentityOutputPort.getServiceOfferings(roseCouture.getId())).thenReturn(roseCouture.getServiceOfferings());
+        when(organizationLoanDetailOutputPort.findByOrganizationId(roseCouture.getId())).thenReturn(loanDetail);
+        when(loanOfferOutputPort.countNumberOfPendingLoanOfferForOrganization(roseCouture.getId())).thenReturn(3);
         OrganizationIdentity result = organizationIdentityService.viewOrganizationDetails(null, mockId);
 
         assertNotNull(result);
