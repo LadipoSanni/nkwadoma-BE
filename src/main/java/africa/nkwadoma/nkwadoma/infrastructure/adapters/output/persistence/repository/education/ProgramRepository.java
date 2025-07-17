@@ -45,4 +45,17 @@ public interface ProgramRepository extends JpaRepository<ProgramEntity, String> 
                    where o.id = :organizationId    order by p.createdAt asc 
     """)
     Page<ProgramProjection> findAllByOrganizationIdentityId(@Param("organizationId") String organizationId, Pageable pageable);
+
+
+    @Query("""
+        SELECT COUNT(cle) > 0
+        
+        from ProgramEntity p
+             join CohortEntity cohort on cohort.programId = p.id 
+             join CohortLoaneeEntity cle on cle.cohort.id = cohort.id
+                     
+             where p.id =: programId
+             
+        """)
+    boolean checkIfLaoneeExistsByProgramId(@Param("programId") String programId);
 }
