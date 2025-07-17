@@ -1,8 +1,11 @@
 package africa.nkwadoma.nkwadoma.domain.service.education;
 
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoanDetailOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramLoanDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
@@ -55,6 +58,12 @@ class ProgramServiceTest {
     @Mock
     private ProgramLoanDetailOutputPort programLoanDetailOutputPort;
     private ProgramLoanDetail programLoanDetail;
+    @Mock
+    private  LoanBreakdownOutputPort loanBreakdownOutputPort;
+    @Mock
+    private  CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
+    @Mock
+    private  CohortOutputPort cohortOutputPort;
 
     @BeforeEach
     void setUp() {
@@ -255,20 +264,46 @@ class ProgramServiceTest {
 
 
     @Test
-    void deleteProgram() {
-        try {
-            when(programOutputPort.findProgramById(program.getId())).thenReturn(program);
-            program.setOrganizationId(organizationIdentity.getId());
-            when(organizationIdentityOutputPort.findById(program.getOrganizationId())).
-                    thenReturn(organizationIdentity);
-            organizationIdentity.setNumberOfPrograms(1);
-            programService.deleteProgram(program);
-            verify(programOutputPort, times(1)).deleteProgram(program.getId());
-        } catch (MeedlException e) {
-            log.error("Error deleting program", e);
-        }
-        assertEquals(0, organizationIdentity.getNumberOfPrograms());
+    void deleteProgramWithActiveLoaneeInCohort() throws MeedlException {
+        when(programOutputPort.findProgramById(program.getId())).thenReturn(program);
+        when(programOutputPort.checkIfLoaneeExistInProgram(program.getId())).thenReturn(true);
+        assertThrows(MeedlException.class, ()->programService.deleteProgram(program));
     }
+
+    @Test
+    void deleteProgramWithNoActiveLoaneeInCohort()  {
+        try {
+            organizationIdentity.setNumberOfPrograms(5);
+            organizationIdentity.setNumberOfCohort(10);
+            when(programOutputPort.findProgramById(program.getId())).thenReturn(program);
+            when(programOutputPort.checkIfLoaneeExistInProgram(program.getId())).thenReturn(false);
+            doNothing().when(loanBreakdownOutputPort).deleteAllBreakDownAssociateWithProgram(program.getId());
+            doNothing().when(cohortLoanDetailOutputPort).deleteAllCohortLoanDetailAssociateWithProgram(program.getId());
+            when(cohortOutputPort.deleteAllCohortAssociateWithProgram(program.getId())).thenReturn(1);
+            doNothing().when(programOutputPort).deleteProgram(program.getId());
+            when(organizationIdentityOutputPort.findById(program.getOrganizationId())).thenReturn(organizationIdentity);
+            when(organizationIdentityOutputPort.save(organizationIdentity)).thenReturn(organizationIdentity);
+
+            assertDoesNotThrow(() -> programService.deleteProgram(program));
+
+            verify(programOutputPort).findProgramById(program.getId());
+            verify(programOutputPort).checkIfLoaneeExistInProgram(program.getId());
+            verify(loanBreakdownOutputPort).deleteAllBreakDownAssociateWithProgram(program.getId());
+            verify(cohortLoanDetailOutputPort).deleteAllCohortLoanDetailAssociateWithProgram(program.getId());
+            verify(cohortOutputPort).deleteAllCohortAssociateWithProgram(program.getId());
+            verify(programOutputPort).deleteProgram(program.getId());
+            verify(organizationIdentityOutputPort).findById(program.getOrganizationId());
+            verify(organizationIdentityOutputPort).save(organizationIdentity);
+        }catch (MeedlException meedlException){
+            log.error("Error deleting program", meedlException);
+        }
+
+        assertEquals(4, organizationIdentity.getNumberOfPrograms(), "Number of programs should be decremented by 1");
+        assertEquals(9, organizationIdentity.getNumberOfCohort(), "Number of cohorts should be decremented by 1");
+
+    }
+
+
 
     @Test
     void deleteNonExistingProgram() {
