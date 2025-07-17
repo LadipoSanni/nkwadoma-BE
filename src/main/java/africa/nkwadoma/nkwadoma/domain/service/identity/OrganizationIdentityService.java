@@ -340,6 +340,11 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     }
 
     @Override
+    public OrganizationIdentity viewOrganizationDetails(String organizationId, String userId) throws MeedlException {
+        return null;
+    }
+
+//    @Override
     public OrganizationIdentity viewOrganizationDetails(String organizationId) throws MeedlException {
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
