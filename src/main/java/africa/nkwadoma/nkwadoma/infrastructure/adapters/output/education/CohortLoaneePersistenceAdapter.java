@@ -94,6 +94,7 @@ public class CohortLoaneePersistenceAdapter implements CohortLoaneeOutputPort {
     public boolean checkIfLoaneeHasBeenPreviouslyReferred(String loaneeId) throws MeedlException {
         MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
         Long count = cohortLoaneeRepository.countByLoaneeId(loaneeId);
+        log.info("loan referral count = {}", count);
         return count > 1;
     }
 
