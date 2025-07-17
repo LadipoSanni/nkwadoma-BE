@@ -13,7 +13,6 @@ import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.CohortMapper;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
@@ -183,7 +182,7 @@ class CohortServiceTest {
     void viewCohortDetails(){
         try{
             xplorers.setId(mockId);
-            when(cohortOutputPort.viewCohortDetails(mockId,mockId)).thenReturn(xplorers);
+            when(cohortOutputPort.findCohortById(mockId)).thenReturn(xplorers);
             when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             when(cohortLoanDetailOutputPort.findByCohortId(elites.getId())).thenReturn(cohortLoanDetail);
             when(loanOfferOutputPort.countNumberOfPendingLoanOfferForCohort(xplorers.getId())).thenReturn(2);
@@ -191,7 +190,7 @@ class CohortServiceTest {
                     .viewCohortDetails(mockId, mockId);
             assertNotNull(cohort);
             assertEquals(cohort.getName(),xplorers.getName());
-            verify(cohortOutputPort, times(1)).viewCohortDetails(any(), any());
+            verify(cohortOutputPort, times(1)).findCohortById(any());
         }catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
@@ -328,7 +327,7 @@ class CohortServiceTest {
         try {
             when(loaneeOutputPort.findAllLoaneesByCohortId(mockId)).thenReturn(new ArrayList<>());
             xplorers.setId(mockId);
-            when(cohortOutputPort.findCohort(mockId)).thenReturn(xplorers);
+            when(cohortOutputPort.findCohortById(mockId)).thenReturn(xplorers);
             when(programOutputPort.findProgramById(xplorers.getProgramId())).thenReturn(program);
             when(organizationIdentityOutputPort.findById(program.getOrganizationId()))
                     .thenReturn(organizationIdentity);
@@ -369,7 +368,7 @@ class CohortServiceTest {
             elites.setName("edited cohort");
             elites.setUpdatedBy(mockId);
             when(programOutputPort.findProgramById(mockId)).thenReturn(program);
-            when(cohortOutputPort.findCohort(elites.getId())).thenReturn(elites);
+            when(cohortOutputPort.findCohortById(elites.getId())).thenReturn(elites);
             when(cohortOutputPort.checkIfCohortExistWithName(elites.getName())).thenReturn(elites);
             when(loanBreakdownOutputPort.findAllByCohortId(elites.getId())).thenReturn(List.of(loanBreakdown));
             when(cohortOutputPort.save(elites)).thenReturn(elites);

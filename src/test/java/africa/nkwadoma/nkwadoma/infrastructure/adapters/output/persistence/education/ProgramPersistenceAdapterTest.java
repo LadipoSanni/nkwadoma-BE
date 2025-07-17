@@ -386,7 +386,7 @@ class ProgramPersistenceAdapterTest {
             assertNotNull(savedCohort);
 
             programOutputPort.deleteProgram(dataAnalyticsProgramId);
-            savedCohort = cohortOutputPort.findCohort(savedCohort.getId());
+            savedCohort = cohortOutputPort.findCohortById(savedCohort.getId());
             assertNull(savedCohort);
             cohortOutputPort.deleteCohort(cohort.getProgramId());
         } catch (MeedlException e) {

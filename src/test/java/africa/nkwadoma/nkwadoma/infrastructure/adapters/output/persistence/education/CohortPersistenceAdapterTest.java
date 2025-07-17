@@ -246,7 +246,7 @@ class CohortPersistenceAdapterTest {
     void viewCohortDetails(){
         Cohort viewedCohort = new Cohort() ;
         try{
-            viewedCohort = cohortOutputPort.findCohort(cohortTwoId);
+            viewedCohort = cohortOutputPort.findCohortById(cohortTwoId);
         }catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
@@ -257,13 +257,13 @@ class CohortPersistenceAdapterTest {
     @Order(5)
     @Test
     void viewCohortWithNullUserId(){
-        assertThrows(MeedlException.class, () -> cohortOutputPort.viewCohortDetails(null,
+        assertThrows(MeedlException.class, () -> cohortOutputPort.findCohortById(
                 cohortTwoId));
     }
 
     @Test
     void viewCohortWithNullCohortId(){
-        assertThrows(MeedlException.class, () -> cohortOutputPort.viewCohortDetails(elites.getCreatedBy(),
+        assertThrows(MeedlException.class, () -> cohortOutputPort.findCohortById(
                 null));
     }
 
@@ -271,7 +271,7 @@ class CohortPersistenceAdapterTest {
     @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
     void viewCohortWithEmptyUserId(String userId){
         assertThrows(MeedlException.class, ()->
-                cohortOutputPort.viewCohortDetails(userId,
+                cohortOutputPort.findCohortById(
                         cohortTwoId));
     }
 
@@ -279,7 +279,7 @@ class CohortPersistenceAdapterTest {
     @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
     void viewCohortWithEmptyCohortId(String cohortId){
         assertThrows(MeedlException.class, ()->
-                cohortOutputPort.viewCohortDetails(elites.getCreatedBy(),
+                cohortOutputPort.findCohortById(
                         cohortId));
     }
 
@@ -326,7 +326,7 @@ class CohortPersistenceAdapterTest {
     void addLoanDetailsToCohort(){
         Cohort editedCohort = new Cohort();
         try{
-            Cohort cohort = cohortOutputPort.findCohort(cohortTwoId);
+            Cohort cohort = cohortOutputPort.findCohortById(cohortTwoId);
             assertNull(cohort.getLoanDetail());
             cohort.setLoanDetail(loanDetail);
             log.info("{} = =",cohort);

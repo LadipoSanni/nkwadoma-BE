@@ -371,7 +371,7 @@ class LoanServiceTest {
             when(loaneeLoanDetailsOutputPort.save(loaneeLoanDetail)).thenReturn(loaneeLoanDetail);
             when(cohortLoanDetailOutputPort.findByCohortId(loanOffer.getCohortId())).thenReturn(cohortLoanDetail);
             when(cohortLoanDetailOutputPort.save(cohortLoanDetail)).thenReturn(cohortLoanDetail);
-            when(cohortOutputPort.findCohort(loanOffer.getCohortId())).thenReturn(cohort);
+            when(cohortOutputPort.findCohortById(loanOffer.getCohortId())).thenReturn(cohort);
             when(programLoanDetailOutputPort.findByProgramId(cohort.getProgramId())).thenReturn(programLoanDetail);
             when(programLoanDetailOutputPort.save(programLoanDetail)).thenReturn(programLoanDetail);
             when(organizationLoanDetailOutputPort.findByOrganizationId(cohort.getOrganizationId())).thenReturn(organizationLoanDetail);

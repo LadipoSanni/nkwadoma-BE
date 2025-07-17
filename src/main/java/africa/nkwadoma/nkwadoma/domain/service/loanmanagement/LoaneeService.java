@@ -162,7 +162,7 @@ public class LoaneeService implements LoaneeUseCase {
         loanee.validate();
         loanee.getLoaneeLoanDetail().validate();
         CohortLoanee cohortLoanee = CohortLoanee.builder().build();
-        Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
+        Cohort cohort = cohortOutputPort.findCohortById(loanee.getCohortId());
         Loanee existingLoanee = checkIfLoaneeWithEmailExist(loanee);
         checkIfCohortTuitionDetailsHaveBeenUpdated(cohort);
         checkIfInitialDepositIsNotGreaterThanTotalCohortFee(loanee, cohort);
@@ -306,7 +306,7 @@ public class LoaneeService implements LoaneeUseCase {
 
         log.info("Credit score for loanee with id {} has already been updated within the last month", loanee.getId());
 
-        Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
+        Cohort cohort = cohortOutputPort.findCohortById(loanee.getCohortId());
         loanee.setCohortName(cohort.getName());
         loanee.setCohortStartDate(cohort.getStartDate());
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
@@ -583,7 +583,7 @@ public class LoaneeService implements LoaneeUseCase {
             log.info("Access denied: A loanee cannot defer another loanee");
             throw new LoanException("Access denied: A loanee cannot defer another loanee");
         }
-        Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
+        Cohort cohort = cohortOutputPort.findCohortById(loanee.getCohortId());
         if (!cohort.getCohortStatus().equals(CohortStatus.CURRENT)){
             log.info("\"Deferral is only allowed for 'CURRENT' cohorts. This cohort's status is \"+ cohort.getCohortStatus()");
             throw new LoanException("Deferral is only allowed for 'CURRENT' cohorts. This cohort's status is "+ cohort.getCohortStatus());
@@ -621,7 +621,7 @@ public class LoaneeService implements LoaneeUseCase {
         if (!userId.equals(loanee.getUserIdentity().getId())) {
             throw new LoanException("Access denied: A loanee cannot resume program on behalf of another loanee");
         }
-        Cohort cohort = cohortOutputPort.findCohort(cohortId);
+        Cohort cohort = cohortOutputPort.findCohortById(cohortId);
         if (!loan.getLoanStatus().equals(LoanStatus.DEFERRED)){
             throw new LoanException("The action is for a loanee that deferred");
         }
@@ -650,7 +650,7 @@ public class LoaneeService implements LoaneeUseCase {
             throw new LoanException(LoaneeMessages.LOANEE_NOT_ASSOCIATE_WITH_ORGANIZATION.getMessage());
         }
 
-        Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
+        Cohort cohort = cohortOutputPort.findCohortById(loanee.getCohortId());
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
         if (programDurationIsStillWithinFirstQuarter(cohort, program)){
             log.info("Program duration is not within first quarter");
@@ -756,7 +756,7 @@ public class LoaneeService implements LoaneeUseCase {
             log.info("Loanee cannot dropout on behalf of another loanee");
             throw new LoanException("Loanee cannot dropout on behalf of another loanee");
         }
-        Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
+        Cohort cohort = cohortOutputPort.findCohortById(loanee.getCohortId());
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
 
         if(programDurationIsStillWithinFirstQuarter(cohort, program)){
