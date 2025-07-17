@@ -510,7 +510,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                 log.info("Loanee's loan details after saving in file upload {}", savedLoaneeLoanDetail);
                 cohortLoanee.setLoaneeLoanDetail(savedLoaneeLoanDetail);
 
-                Loanee savedLoanee = loaneeOutputPort.save(cohortLoanee.getLoanee());
+                Loanee savedLoanee = getSavedLoanee(cohortLoanee);
 
                 log.info("saved loanee  == {} ",savedLoanee);
                 savedLoanee.setLoanProductName(cohortLoanee.getLoanee().getLoanProductName());
@@ -530,18 +530,34 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         return savedLoanees;
     }
 
+    private Loanee getSavedLoanee(CohortLoanee cohortLoanee) throws MeedlException {
+        Optional<Loanee> optionalLoaneeFound = loaneeOutputPort.findByUserId(cohortLoanee.getLoanee().getUserIdentity().getId());
+        if (optionalLoaneeFound.isPresent()){
+            log.info("Loanee been uploaded exist previously as a loanee ");
+            cohortLoanee.getLoanee().setId(optionalLoaneeFound.get().getId());
+            return cohortLoanee.getLoanee();
+        }
+        return loaneeOutputPort.save(cohortLoanee.getLoanee());
+    }
+
     private void saveUploadedUserIdentity(CohortLoanee cohortLoanee) {
+        String email = cohortLoanee.getLoanee().getUserIdentity().getEmail();
         try {
             UserIdentity userIdentity = identityManagerOutputPort.createUser(cohortLoanee.getLoanee().getUserIdentity());
             userIdentityOutputPort.save(userIdentity);
         } catch (MeedlException e) {
             log.warn("Loanee been added already exist on platform");
             try {
-                UserIdentity foundUser = userIdentityOutputPort.findByEmail(cohortLoanee.getLoanee().getUserIdentity().getEmail());
+                UserIdentity foundUser = userIdentityOutputPort.findByEmail(email);
                 cohortLoanee.getLoanee().getUserIdentity().setId(foundUser.getId());
             } catch (MeedlException ex) {
-               log.error("Unable to find user on bd by email on the platform in upload data flow after being unable to save user with email :{}", cohortLoanee.getLoanee().getUserIdentity().getEmail());
-
+               log.error("Unable to find user on bd by email on the platform in upload data flow after being unable to save user with email :{}", email);
+                try {
+                    Optional<UserIdentity> optionalFoundUser = identityManagerOutputPort.getUserByEmail(email);
+                    optionalFoundUser.ifPresent(userIdentity -> cohortLoanee.getLoanee().getUserIdentity().setId(userIdentity.getId()));
+                } catch (MeedlException exc) {
+                    log.error("Loanee wasn't found on keycloak either in upload user data flow");
+                }
             }
         }
     }
