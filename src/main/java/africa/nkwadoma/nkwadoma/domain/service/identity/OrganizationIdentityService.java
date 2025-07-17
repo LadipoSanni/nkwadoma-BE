@@ -284,7 +284,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
 
     private void updateOrganizationStatus(OrganizationIdentity organizationIdentity, OrganizationEmployeeIdentity employeeIdentity) throws MeedlException {
         OrganizationIdentity foundOrganizationIdentity =
-                viewOrganizationDetails(employeeIdentity.getOrganization());
+                viewOrganizationDetails(employeeIdentity.getOrganization(), organizationIdentity.getUserIdentity().getId());
         log.info("Found organization: {}", foundOrganizationIdentity);
         if (foundOrganizationIdentity.getStatus() != ActivationStatus.ACTIVE) {
             log.info("Organization found is not activated with id {} and status {}", foundOrganizationIdentity.getId(), foundOrganizationIdentity.getStatus());
@@ -340,17 +340,24 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     }
 
     @Override
-    public OrganizationIdentity viewOrganizationDetails(String organizationId) throws MeedlException {
-        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
-        List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity.getId());
-        organizationIdentity.setServiceOfferings(serviceOfferings);
-        OrganizationLoanDetail organizationLoanDetail =
-                organizationLoanDetailOutputPort.findByOrganizationId(organizationIdentity.getId());
-        organizationIdentityMapper.mapOrganizationLoanDetailsToOrganization(organizationIdentity,organizationLoanDetail);
-        getLoanPercentage(organizationIdentity, organizationLoanDetail);
-        int pendingLoanOffer = loanOfferOutputPort.countNumberOfPendingLoanOfferForOrganization(organizationIdentity.getId());
-        organizationIdentity.setPendingLoanOfferCount(pendingLoanOffer);
+    public OrganizationIdentity viewOrganizationDetails(String organizationId, String userId) throws MeedlException {
+        MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
+        UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
+        if(userIdentity.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)){
+            OrganizationEmployeeIdentity organizationEmployeeIdentity =
+                    organizationEmployeeIdentityOutputPort.findByCreatedBy(userIdentity.getId());
+            organizationId = organizationEmployeeIdentity.getOrganization();
+        }
+            MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+            OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
+            List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity.getId());
+            organizationIdentity.setServiceOfferings(serviceOfferings);
+            OrganizationLoanDetail organizationLoanDetail =
+                    organizationLoanDetailOutputPort.findByOrganizationId(organizationIdentity.getId());
+            organizationIdentityMapper.mapOrganizationLoanDetailsToOrganization(organizationIdentity,organizationLoanDetail);
+            getLoanPercentage(organizationIdentity, organizationLoanDetail);
+            int pendingLoanOffer = loanOfferOutputPort.countNumberOfPendingLoanOfferForOrganization(organizationIdentity.getId());
+            organizationIdentity.setPendingLoanOfferCount(pendingLoanOffer);
         return organizationIdentity;
     }
 
@@ -397,17 +404,4 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         return organizationIdentities;
     }
 
-    @Override
-    public OrganizationIdentity viewOrganizationDetailsByOrganizationAdmin(String adminId) throws MeedlException {
-        MeedlValidator.validateUUID(adminId, MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
-        OrganizationEmployeeIdentity organizationEmployeeIdentity =
-                organizationEmployeeIdentityOutputPort.findByCreatedBy(adminId);
-        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
-        organizationIdentity.setOrganizationEmployees(organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId()));
-        List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity.getId());
-        log.info("Total number loanees {}",organizationIdentity.getNumberOfLoanees());
-        log.info("Total number Programs {}",organizationIdentity.getNumberOfPrograms());
-        organizationIdentity.setServiceOfferings(serviceOfferings);
-        return organizationIdentity;
-    }
 }
