@@ -8,9 +8,9 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.UploadType;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -49,7 +49,7 @@ public class LoanBookValidator {
         if (isValidCohort){
             validateLoaneeDetails(loanBook, data);
         }
-        hasFailure(loanBook);
+        hasFailure(loanBook, UploadType.USER_DATA);
     }
 
     private void validateLoaneeDetails(LoanBook loanBook, List<Map<String, String>> data) {
@@ -224,7 +224,7 @@ public class LoanBookValidator {
             validateUserExistByEmail(row.get("email"), rowCount);
             rowCount++;
         }
-        hasFailure(repaymentHistoryBook);
+        hasFailure(repaymentHistoryBook, UploadType.REPAYMENT);
 
     }
 
@@ -260,19 +260,22 @@ public class LoanBookValidator {
 
 
 
-    private void hasFailure(LoanBook repaymentHistoryBook) throws MeedlException {
+    private void hasFailure(LoanBook loanBook, UploadType uploadType) throws MeedlException {
         if (validationErrorMessage!= null && !validationErrorMessage.toString().isBlank()) {
             log.warn("Validation Error: {}", validationErrorMessage);
-            buildFailureNotification(repaymentHistoryBook);
+            buildFailureNotification(loanBook, uploadType);
             throw new MeedlException("One or multiple Errors Occures.");
         }
         log.info("No errors was found during the upload.");
     }
 
-    private void buildFailureNotification(LoanBook repaymentHistoryBook) throws MeedlException {
-        UserIdentity foundActor = userIdentityOutputPort.findById(repaymentHistoryBook.getActorId());
-        asynchronousNotificationOutputPort.notifyPmForLoanRepaymentUploadFailure(foundActor, validationErrorMessage, repaymentHistoryBook.getFile().getName());
-
+    private void buildFailureNotification(LoanBook loanBook, UploadType uploadType) throws MeedlException {
+        UserIdentity foundActor = userIdentityOutputPort.findById(loanBook.getActorId());
+        if (uploadType.equals(UploadType.REPAYMENT)){
+            asynchronousNotificationOutputPort.notifyPmForLoanRepaymentUploadFailure(foundActor, validationErrorMessage, loanBook.getFile().getName());
+        }else if (uploadType.equals(UploadType.USER_DATA)){
+            asynchronousNotificationOutputPort.notifyPmForUserDataUploadFailure(foundActor, validationErrorMessage, loanBook.getFile().getName());
+        }
     }
 
     public void validateDateTimeFormat(Map<String, String> row, String dateName, int rowCount) throws MeedlException {

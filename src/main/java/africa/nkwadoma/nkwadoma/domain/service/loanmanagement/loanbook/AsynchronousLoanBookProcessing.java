@@ -87,6 +87,8 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
 
         Cohort savedCohort = findCohort(loanBook.getCohort());
         List<CohortLoanee> convertedCohortLoanees = convertToLoanees(data, savedCohort, loanBook.getActorId());
+        convertedCohortLoanees = addUploadedLoaneeToCohort(convertedCohortLoanees);
+
         log.info("Converted loanees size {}", convertedCohortLoanees.size());
 //        validateStartDates(convertedCohortLoanees, savedCohort);
         loanBook.setCohortLoanees(convertedCohortLoanees);
@@ -484,7 +486,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
             cohortLoanees.add(cohortLoanee);
         }
         log.info("Validating the file field values.");
-        return savedData(cohortLoanees);
+        return cohortLoanees;
     }
     public String encryptValue(String value, String errorMessage) {
         try {
@@ -497,13 +499,12 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     }
 
 
-    private List<CohortLoanee> savedData(List<CohortLoanee> cohortLoanees){
+    private List<CohortLoanee> addUploadedLoaneeToCohort(List<CohortLoanee> cohortLoanees){
         List<CohortLoanee> savedLoanees = new ArrayList<>();
         log.info("Started saving converted data of cohortLoanees");
         for (CohortLoanee cohortLoanee : cohortLoanees){
             try {
-                UserIdentity userIdentity = identityManagerOutputPort.createUser(cohortLoanee.getLoanee().getUserIdentity());
-                userIdentityOutputPort.save(userIdentity);
+                saveUploadedUserIdentity(cohortLoanee);
                 LoaneeLoanDetail savedLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(cohortLoanee.getLoaneeLoanDetail());
                 cohortLoanee.setLoaneeLoanDetail(savedLoaneeLoanDetail);
                 log.info("Loanee's loan details after saving in file upload {}", savedLoaneeLoanDetail);
@@ -522,13 +523,22 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                 log.info("The loan product name after saving the cohort loanee is {}", savedCohortLoanee.getLoanee().getLoanProductName());
                 savedLoanees.add(savedCohortLoanee);
             } catch (MeedlException e) {
-                log.info("Error occurred while saving data .", e);
-//                throw new RuntimeException(e);
+                log.info("Error occurred while saving uploaded loanee data ...", e);
             }
         }
         log.info("Done saving loanee data from file to db. cohortLoanees size {}", savedLoanees.size());
         return savedLoanees;
     }
+
+    private void saveUploadedUserIdentity(CohortLoanee cohortLoanee) {
+        try {
+            UserIdentity userIdentity = identityManagerOutputPort.createUser(cohortLoanee.getLoanee().getUserIdentity());
+            userIdentityOutputPort.save(userIdentity);
+        } catch (MeedlException e) {
+            log.warn("Loanee been added already exist on platform");
+        }
+    }
+
     private List<Map<String, String>> readFile(LoanBook loanBook, List<String> requiredHeaders) throws MeedlException {
         List<Map<String, String>> data;
         if (loanBook.getFile().getName().endsWith(".csv")) {
