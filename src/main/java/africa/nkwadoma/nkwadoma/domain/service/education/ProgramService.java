@@ -1,9 +1,12 @@
 package africa.nkwadoma.nkwadoma.domain.service.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.AddProgramUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoanDetailOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramLoanDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
@@ -13,14 +16,18 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.education.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
 import lombok.*;
 import lombok.extern.slf4j.*;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.*;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.*;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_ALREADY_EXISTS;
 
@@ -34,6 +41,9 @@ public class ProgramService implements AddProgramUseCase {
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final ProgramMapper programMapper;
     private final ProgramLoanDetailOutputPort programLoanDetailOutputPort;
+    private final LoanBreakdownOutputPort loanBreakdownOutputPort;
+    private final CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
+    private final CohortOutputPort cohortOutputPort;
 
     @Override
     public Program createProgram(Program program) throws MeedlException {
@@ -132,19 +142,32 @@ public class ProgramService implements AddProgramUseCase {
         return programOutputPort.findProgramByName(program.getName(),program.getPageNumber(),program.getPageSize());
     }
 
+    @Transactional
     @Override
     public void deleteProgram(Program program) throws MeedlException {
         MeedlValidator.validateObjectInstance(program, ProgramMessages.PROGRAM_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(program.getId(), ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         Program foundProgram = programOutputPort.findProgramById(program.getId());
-        programOutputPort.deleteProgram(foundProgram.getId());
-        decreaseNumberOfProgramInOrganization(foundProgram);
+
+        boolean loaneeExistInProgram = programOutputPort.checkIfLoaneeExistInProgram(foundProgram.getId());
+                if (loaneeExistInProgram) {
+                    throw new EducationException(ProgramMessages.PROGRAM_WITH_LOANEE_CANNOT_BE_DELETED.getMessage());
+                }
+                else {
+                    loanBreakdownOutputPort.deleteAllBreakDownAssociateWithProgram(foundProgram.getId());
+                    cohortLoanDetailOutputPort.deleteAllCohortLoanDetailAssociateWithProgram(foundProgram.getId());
+                    int numberOfDeletedCohort = cohortOutputPort.deleteAllCohortAssociateWithProgram(foundProgram.getId());
+                    programLoanDetailOutputPort.deleteByProgramId(foundProgram.getId());
+                    programOutputPort.deleteProgram(foundProgram.getId());
+                    decreaseNumberOfProgramInOrganization(foundProgram,numberOfDeletedCohort);
+                }
     }
 
-    private void decreaseNumberOfProgramInOrganization(Program foundProgram) throws MeedlException {
+    private void decreaseNumberOfProgramInOrganization(Program foundProgram,int numberOfDeletedCohort) throws MeedlException {
         OrganizationIdentity  organizationIdentity =
                 organizationIdentityOutputPort.findById(foundProgram.getOrganizationId());
         organizationIdentity.setNumberOfPrograms(organizationIdentity.getNumberOfPrograms() - 1);
+        organizationIdentity.setNumberOfCohort(organizationIdentity.getNumberOfCohort() - numberOfDeletedCohort);
         organizationIdentityOutputPort.save(organizationIdentity);
     }
 

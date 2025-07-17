@@ -504,6 +504,7 @@ public class LoaneeService implements LoaneeUseCase {
                 setAmountRequested(totalLoanBreakDown.add(cohort.getTuitionAmount()).
                         subtract(loanee.getLoaneeLoanDetail().getInitialDeposit()));
         loanee.getLoaneeLoanDetail().setTuitionAmount(cohort.getTuitionAmount());
+        loanee.getLoaneeLoanDetail().setAmountRepaid(BigDecimal.ZERO);
         if (loanee.getLoaneeLoanDetail().getAmountRequested().compareTo(BigDecimal.ZERO)  <= 0){
             log.info("Loanee amount request is zero or negative {}", loanee.getLoaneeLoanDetail().getAmountRequested());
             throw new LoanException(LoaneeMessages.LOANEE_WITH_ZERO_OR_NEGATIVE_AMOUNT_REQUEST_CANNOT_BE_ADDED_TO_COHORT.getMessage());

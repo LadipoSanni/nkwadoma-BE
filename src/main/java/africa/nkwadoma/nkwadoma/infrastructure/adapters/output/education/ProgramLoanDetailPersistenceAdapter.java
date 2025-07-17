@@ -11,6 +11,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mappe
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.ProgramLoanDetailRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -44,5 +45,12 @@ public class ProgramLoanDetailPersistenceAdapter implements ProgramLoanDetailOut
     public void delete(String  loanDetailsId) throws MeedlException {
         MeedlValidator.validateUUID(loanDetailsId,"Program loan detail id cannot be empty");
         programLoanDetailRepository.deleteById(loanDetailsId);
+    }
+
+    @Transactional
+    @Override
+    public void deleteByProgramId(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
+        programLoanDetailRepository.deleteProgramLoanDetailEntityByProgramId(id);
     }
 }

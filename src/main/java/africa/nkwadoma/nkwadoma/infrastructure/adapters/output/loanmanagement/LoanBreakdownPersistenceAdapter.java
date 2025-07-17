@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -9,6 +10,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanBreakdownMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanBreakdownRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -41,7 +43,12 @@ public class LoanBreakdownPersistenceAdapter implements LoanBreakdownOutputPort 
         return loanBreakdownMapper.toLoanBreakdownList(loanBreakdownEntities);
     }
 
-
+    @Transactional
+    @Override
+    public void deleteAllBreakDownAssociateWithProgram(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
+        loanBreakdownRepository.deleteAllLoanBreakdownByProgramId(id);
+    }
 
 
 }
