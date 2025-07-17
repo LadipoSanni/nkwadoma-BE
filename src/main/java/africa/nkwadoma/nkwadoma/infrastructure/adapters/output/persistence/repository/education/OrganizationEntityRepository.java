@@ -58,7 +58,16 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
                     o.status as status,o.email as email,
                     o.numberOfLoanees as numberOfLoanees,
                     o.numberOfCohort as numberOfCohort,o.websiteAddress as websiteAddress,
-                    o.numberOfPrograms as numberOfPrograms
+                    o.numberOfPrograms as numberOfPrograms,
+                    CASE
+                      WHEN ld.totalAmountReceived = 0 THEN 0
+                      ELSE (ld.totalOutstandingAmount / ld.totalAmountReceived * 100)
+                   END as debtPercentage ,
+                   CASE
+                      WHEN ld.totalAmountReceived = 0 THEN 0
+                      ELSE (ld.totalAmountRepaid / ld.totalAmountReceived * 100)
+                   END as repaymentRate
+                                
                    from OrganizationEntity o
                                
                    left join OrganizationLoanDetailEntity ld on ld.organization.id = o.id        
@@ -115,7 +124,15 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
            o.status as status,o.email as email,
            o.numberOfLoanees as numberOfLoanees, o.websiteAddress as websiteAddress,
            o.numberOfCohort as numberOfCohort,
-           o.numberOfPrograms as numberOfPrograms
+           o.numberOfPrograms as numberOfPrograms,
+           CASE
+           WHEN ld.totalAmountReceived = 0 THEN 0
+           ELSE (ld.totalOutstandingAmount / ld.totalAmountReceived * 100)
+           END as debtPercentage,
+                   CASE
+                      WHEN ld.totalAmountReceived = 0 THEN 0
+                      ELSE (ld.totalAmountRepaid / ld.totalAmountReceived * 100)
+                   END as repaymentRate
 
          
           from OrganizationEntity o
