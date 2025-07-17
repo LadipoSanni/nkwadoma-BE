@@ -348,19 +348,33 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         OrganizationLoanDetail organizationLoanDetail =
                 organizationLoanDetailOutputPort.findByOrganizationId(organizationIdentity.getId());
         organizationIdentityMapper.mapOrganizationLoanDetailsToOrganization(organizationIdentity,organizationLoanDetail);
-        BigDecimal totalAmountReceived = organizationIdentity.getTotalAmountReceived();
-        if (totalAmountReceived !=  null && totalAmountReceived.compareTo(BigDecimal.ZERO) > 0) {
-            organizationIdentity.setDebtPercentage(organizationLoanDetail.getTotalOutstandingAmount()
-                    .divide(organizationLoanDetail.getTotalAmountReceived(), RoundingMode.UP).multiply(BigDecimal.valueOf(100)));
-            organizationIdentity.setRepaymentRate(organizationLoanDetail.getTotalAmountRepaid()
-                    .divide(organizationLoanDetail.getTotalAmountReceived(), RoundingMode.UP).multiply(BigDecimal.valueOf(100)));
-        }else {
-            organizationIdentity.setDebtPercentage(BigDecimal.ZERO);
-            organizationIdentity.setRepaymentRate(BigDecimal.ZERO);
-        }
+        getLoanPercentage(organizationIdentity, organizationLoanDetail);
         int pendingLoanOffer = loanOfferOutputPort.countNumberOfPendingLoanOfferForOrganization(organizationIdentity.getId());
         organizationIdentity.setPendingLoanOfferCount(pendingLoanOffer);
         return organizationIdentity;
+    }
+
+    private static void getLoanPercentage(OrganizationIdentity organizationIdentity, OrganizationLoanDetail organizationLoanDetail) {
+        BigDecimal totalAmountReceived = organizationIdentity.getTotalAmountReceived();
+        if (totalAmountReceived != null && totalAmountReceived.compareTo(BigDecimal.ZERO) > 0 &&
+                organizationLoanDetail.getTotalOutstandingAmount() != null &&
+                organizationLoanDetail.getTotalAmountRepaid() != null) {
+            organizationIdentity.setDebtPercentage(
+                    organizationLoanDetail.getTotalOutstandingAmount()
+                            .divide(totalAmountReceived, 4, RoundingMode.HALF_UP)
+                            .multiply(BigDecimal.valueOf(100))
+                            .doubleValue()
+            );
+            organizationIdentity.setRepaymentRate(
+                    organizationLoanDetail.getTotalAmountRepaid()
+                            .divide(totalAmountReceived, 4, RoundingMode.HALF_UP)
+                            .multiply(BigDecimal.valueOf(100))
+                            .doubleValue()
+            );
+        } else {
+            organizationIdentity.setDebtPercentage(0.0);
+            organizationIdentity.setRepaymentRate(0.0);
+        }
     }
 
     @Override

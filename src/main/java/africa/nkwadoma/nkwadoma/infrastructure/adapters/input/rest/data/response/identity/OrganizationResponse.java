@@ -40,8 +40,8 @@ public class OrganizationResponse {
     private BigDecimal totalHistoricalDebt;
     private BigDecimal totalAmountReceived = BigDecimal.ZERO;
     private BigDecimal totalAmountRequested = BigDecimal.ZERO;
-    private BigDecimal repaymentRate;
-    private BigDecimal debtPercentage;
+    private double repaymentRate;
+    private double debtPercentage;
     private int pendingLoanOfferCount;
     private List<ServiceOffering> serviceOfferings;
     private List<OrganizationEmployeeIdentity> organizationEmployees;
