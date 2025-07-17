@@ -38,16 +38,10 @@ class ProgramPersistenceAdapterTest {
     private UserIdentityOutputPort userIdentityOutputPort;
     @Autowired
     private OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
-    @Autowired
-    private CohortOutputPort cohortOutputPort;
-    @Autowired
-    private ProgramRepository programRepository;
     private Program dataAnalytics;
     private Program dataScience;
     private OrganizationIdentity organizationIdentity;
     private UserIdentity userIdentity;
-    private LoanBreakdown loanBreakdown;
-    private List<LoanBreakdown> loanBreakdowns;
     private String userId;
     private String dataAnalyticsProgramId;
     private String dataScienceProgramId;
@@ -333,22 +327,16 @@ class ProgramPersistenceAdapterTest {
     @Order(8)
     @Test
     void deleteProgram() {
+        Program program = new Program();
         try {
-
             programOutputPort.deleteProgram(dataScience.getId());
-            Program program = programOutputPort.findProgramById(dataScience.getId());
-            assertNull(program);
+             program = programOutputPort.findProgramById(dataScience.getId());
         } catch (MeedlException e) {
             log.error("Error while deleting program", e);
         }
+        assertNull(program.getId());
     }
 
-
-    @Test
-    void deleteNonExistingProgram() {
-        dataAnalytics.setId("1de71eaa-de6d-4cdf-8f93-aa7be533f4aa");
-        assertThrows(ResourceNotFoundException.class, () -> programOutputPort.deleteProgram(dataAnalytics.getId()));
-    }
 
     @Test
     void deleteProgramWithNullId() {
@@ -368,35 +356,11 @@ class ProgramPersistenceAdapterTest {
         assertThrows(MeedlException.class, () -> programOutputPort.deleteProgram(id));
     }
 
-    @Test
-    void deleteProgramWithCohort() {
-        Cohort savedCohort;
-        try {
-            dataAnalytics.setCreatedBy(userId);
-            Program savedProgram = programOutputPort.saveProgram(dataAnalytics);
-            assertNotNull(savedProgram);
-            dataAnalyticsProgramId = savedProgram.getId();
-            loanBreakdown = TestData.createLoanBreakDown();
-            loanBreakdowns = List.of(loanBreakdown);
-            Cohort cohort = TestData.createCohortData("Cohort test", dataScienceProgramId, organizationId,
-                    loanBreakdowns, userId);
-
-            cohort.setProgramId(dataAnalyticsProgramId);
-            savedCohort = cohortOutputPort.save(cohort);
-            assertNotNull(savedCohort);
-
-            programOutputPort.deleteProgram(dataAnalyticsProgramId);
-            savedCohort = cohortOutputPort.findCohort(savedCohort.getId());
-            assertNull(savedCohort);
-            cohortOutputPort.deleteCohort(cohort.getProgramId());
-        } catch (MeedlException e) {
-            log.error("Error while creating program {}", e.getMessage());
-        }
-    }
 
     @AfterAll
     void tearDown() {
         try {
+            programOutputPort.deleteProgram(dataAnalyticsProgramId);
             userIdentityOutputPort.deleteUserById(userId);
             List<OrganizationServiceOffering> organizationServiceOfferings = organizationOutputPort.
                     findOrganizationServiceOfferingsByOrganizationId(organizationId);

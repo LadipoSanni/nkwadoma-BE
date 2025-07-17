@@ -36,6 +36,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PR
 public class ProgramPersistenceAdapter implements ProgramOutputPort {
     private final ProgramRepository programRepository;
     private final ProgramMapper programMapper;
+    @Lazy
     @Autowired
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final OrganizationIdentityMapper organizationIdentityMapper;
