@@ -3,14 +3,18 @@
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.LoanMetricsUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOfferOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanMetrics;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
@@ -26,6 +30,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -69,6 +74,8 @@ class OrganizationIdentityServiceTest {
     private int pageNumber = 0;
     @Mock
     private OrganizationLoanDetailOutputPort organizationLoanDetailOutputPort;
+    @Mock
+    private LoanOfferOutputPort loanOfferOutputPort;
 
     @BeforeEach
     void setUp() {
@@ -334,9 +341,70 @@ class OrganizationIdentityServiceTest {
         assertNull(organizationIdentities);
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "nfkjdnjnf"})
-    void viewOrganizationWithInvalidId(String id) {
-        assertThrows(MeedlException.class, ()->organizationIdentityService.viewOrganizationDetails(id));
+    @Test
+    void shouldReturnOrganizationDetails_WhenUserIsOrganizationAdmin() throws MeedlException {
+
+        OrganizationLoanDetail loanDetail = OrganizationLoanDetail.builder()
+                .totalAmountRepaid(BigDecimal.valueOf(5000))
+                .totalAmountRequested(BigDecimal.valueOf(5000))
+                .totalOutstandingAmount(BigDecimal.valueOf(10000))
+                .build();
+
+        when(userIdentityOutputPort.findById(mockId)).thenReturn(sarah);
+        sarah.setRole(IdentityRole.ORGANIZATION_ADMIN);
+        employeeSarah.setOrganization(roseCouture.getId());
+        when(organizationEmployeeIdentityOutputPort.findByCreatedBy(mockId)).thenReturn(employeeSarah);
+        when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
+
+        when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
+        when(organizationIdentityOutputPort.getServiceOfferings(roseCouture.getId())).thenReturn(roseCouture.getServiceOfferings());
+        when(organizationLoanDetailOutputPort.findByOrganizationId(roseCouture.getId())).thenReturn(loanDetail);
+        when(loanOfferOutputPort.countNumberOfPendingLoanOfferForOrganization(roseCouture.getId())).thenReturn(3);
+        OrganizationIdentity result = organizationIdentityService.viewOrganizationDetails(null, mockId);
+
+        assertNotNull(result);
+        assertEquals(roseCouture.getId(), result.getId());
+        assertEquals(roseCouture.getName(), result.getName());
+        assertEquals(1, result.getOrganizationEmployees().size());
+        assertEquals(1, result.getServiceOfferings().size());
+        verify(userIdentityOutputPort).findById(mockId);
+        verify(organizationIdentityOutputPort).findById(roseCouture.getId());
     }
+
+    @Test
+    void shouldReturnOrganizationDetails_WhenUserIsPortfolioManager() throws MeedlException {
+        sarah.setRole(IdentityRole.PORTFOLIO_MANAGER);
+
+        OrganizationLoanDetail loanDetail = OrganizationLoanDetail.builder()
+                .totalAmountRepaid(BigDecimal.valueOf(5000))
+                .totalAmountRequested(BigDecimal.valueOf(5000))
+                .totalOutstandingAmount(BigDecimal.valueOf(10000))
+                .build();
+        when(userIdentityOutputPort.findById(mockId)).thenReturn(sarah);
+        when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
+        when(organizationIdentityOutputPort.getServiceOfferings(roseCouture.getId())).thenReturn(roseCouture.getServiceOfferings());
+        when(organizationLoanDetailOutputPort.findByOrganizationId(roseCouture.getId())).thenReturn(loanDetail);
+        when(loanOfferOutputPort.countNumberOfPendingLoanOfferForOrganization(roseCouture.getId())).thenReturn(3);
+        OrganizationIdentity result = organizationIdentityService.viewOrganizationDetails(roseCouture.getId(), mockId);
+        assertNotNull(result);
+        assertEquals(roseCouture.getId(), result.getId());
+        assertEquals(3, result.getPendingLoanOfferCount());
+        verify(userIdentityOutputPort).findById(mockId);
+        verify(organizationLoanDetailOutputPort).findByOrganizationId(roseCouture.getId());
+        verify(loanOfferOutputPort).countNumberOfPendingLoanOfferForOrganization(roseCouture.getId());
+    }
+
+    @Test
+    void shouldThrowException_WhenOrganizationIdIsNullForPortfolioManager() {
+        sarah.setRole(IdentityRole.PORTFOLIO_MANAGER);
+        try {
+            when(userIdentityOutputPort.findById(mockId)).thenReturn(sarah);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertThrows(MeedlException.class, () ->
+                organizationIdentityService.viewOrganizationDetails(null, mockId)
+        );
+    }
+
 }
