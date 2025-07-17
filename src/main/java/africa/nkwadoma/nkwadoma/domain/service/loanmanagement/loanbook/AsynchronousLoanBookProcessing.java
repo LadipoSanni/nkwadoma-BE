@@ -536,6 +536,13 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
             userIdentityOutputPort.save(userIdentity);
         } catch (MeedlException e) {
             log.warn("Loanee been added already exist on platform");
+            try {
+                UserIdentity foundUser = userIdentityOutputPort.findByEmail(cohortLoanee.getLoanee().getUserIdentity().getEmail());
+                cohortLoanee.getLoanee().getUserIdentity().setId(foundUser.getId());
+            } catch (MeedlException ex) {
+               log.error("Unable to find user on bd by email on the platform in upload data flow after being unable to save user with email :{}", cohortLoanee.getLoanee().getUserIdentity().getEmail());
+
+            }
         }
     }
 

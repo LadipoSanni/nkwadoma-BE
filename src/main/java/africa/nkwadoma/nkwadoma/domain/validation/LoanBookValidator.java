@@ -68,9 +68,9 @@ public class LoanBookValidator {
             if (MeedlValidator.isNotEmptyString(row.get("middlename"))){
                 validateName(rowCount, row.get("middlename"), "Middle name");
             }
-            validateLoanProductExist(row.get("loanproductname"), rowCount);
-            validateMonetaryValue(row.get("amountpaid"), rowCount);
+            validateLoanProductExist(row.get("loanproduct"), rowCount);
 
+            log.info("initial deposit --- {}, amount requested ---- {}, amount received {}",row.get("initialdeposit"), row.get("amountrequested"), row.get("amountreceived"));
             validateMonetaryValue(row.get("initialdeposit"), rowCount);
             validateMonetaryValue(row.get("amountrequested"), rowCount);
             validateMonetaryValue(row.get("amountreceived"), rowCount);
@@ -119,6 +119,8 @@ public class LoanBookValidator {
         boolean isNotInitialDepositValid = moneyStringIsNotValid(initialDepositString);
         boolean isNotAmountReceivedValid = moneyStringIsNotValid(amountReceivedString);
         if (isNotInitialDepositValid || isNotAmountReceivedValid){
+            log.error("Error : Values passed for monetary values are {} ----- and ------ {}", initialDepositString
+            , amountReceivedString);
             validationErrorMessage.append("Error row : ")
                     .append(rowCount).append(" Monetary value is required.")
                     .append("\n");
@@ -187,7 +189,7 @@ public class LoanBookValidator {
             MeedlValidator.validateElevenDigits(elevenDigitNumber, errorMessage);
         } catch (MeedlException e) {
             validationErrorMessage.append(errorMessage)
-                    .append("\n");
+                    .append(" \n");
         }
         log.info("Eleven digit number successfully validated and encrypted ");
 
@@ -236,7 +238,7 @@ public class LoanBookValidator {
             isCohortValid = checkIfCohortTuitionDetailsHaveBeenUpdated(foundCohort);
         } catch (MeedlException e) {
             log.error("Cohort in upload repayment validation not found. error : {}", e.getMessage());
-            validationErrorMessage.append("Error finding cohort with message: ").append(e.getMessage()).append(". \n ");
+            validationErrorMessage.append("Error uploading data : ").append(e.getMessage()).append(". \n ");
             isCohortValid = Boolean.FALSE;
         }
         return isCohortValid;
@@ -262,7 +264,7 @@ public class LoanBookValidator {
 
     private void hasFailure(LoanBook loanBook, UploadType uploadType) throws MeedlException {
         if (validationErrorMessage!= null && !validationErrorMessage.toString().isBlank()) {
-            log.warn("Validation Error: {}", validationErrorMessage);
+            log.warn("Validation Error ---> {}", validationErrorMessage);
             buildFailureNotification(loanBook, uploadType);
             throw new MeedlException("One or multiple Errors Occures.");
         }
@@ -272,8 +274,10 @@ public class LoanBookValidator {
     private void buildFailureNotification(LoanBook loanBook, UploadType uploadType) throws MeedlException {
         UserIdentity foundActor = userIdentityOutputPort.findById(loanBook.getActorId());
         if (uploadType.equals(UploadType.REPAYMENT)){
+            log.info("Notify pm of REPAYMENT data upload failure");
             asynchronousNotificationOutputPort.notifyPmForLoanRepaymentUploadFailure(foundActor, validationErrorMessage, loanBook.getFile().getName());
         }else if (uploadType.equals(UploadType.USER_DATA)){
+            log.info("Notify pm of USER data upload failure");
             asynchronousNotificationOutputPort.notifyPmForUserDataUploadFailure(foundActor, validationErrorMessage, loanBook.getFile().getName());
         }
     }
@@ -286,6 +290,7 @@ public class LoanBookValidator {
     }
     private void validateMonetaryValue(String moneyStringValue, int rowCount) {
         if (moneyStringIsNotValid(moneyStringValue)) {
+            log.error("Error : Value passed for monetary value string is : {}", moneyStringValue);
             validationErrorMessage.append("Error row : ")
                     .append(rowCount).append(" Monetary value is required.")
                     .append("\n");

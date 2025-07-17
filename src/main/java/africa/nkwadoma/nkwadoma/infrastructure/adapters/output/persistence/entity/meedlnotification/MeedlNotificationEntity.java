@@ -29,7 +29,7 @@ public class MeedlNotificationEntity {
     private String senderMail;
     private String senderFullName;
 //    @Lob
-//    @Column(name = "content_detail", columnDefinition = "TEXT")
+    @Column(name = "content_detail", columnDefinition = "TEXT")
     private String contentDetail;
     @Enumerated(EnumType.STRING)
     private NotificationFlag notificationFlag;
