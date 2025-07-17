@@ -355,6 +355,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
             log.info("Total number Programs {}",organizationIdentity.getNumberOfPrograms());
             organizationIdentity.setServiceOfferings(serviceOfferings);
         } else {
+            MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
             organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
             List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity.getId());
             organizationIdentity.setServiceOfferings(serviceOfferings);

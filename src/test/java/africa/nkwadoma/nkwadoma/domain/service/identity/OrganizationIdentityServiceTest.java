@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOffe
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
@@ -356,6 +357,42 @@ class OrganizationIdentityServiceTest {
         assertEquals(1, result.getServiceOfferings().size());
         verify(userIdentityOutputPort).findById(mockId);
         verify(organizationIdentityOutputPort).findById(roseCouture.getId());
+    }
+
+    @Test
+    void shouldReturnOrganizationDetails_WhenUserIsPortfolioManager() throws MeedlException {
+        sarah.setRole(IdentityRole.PORTFOLIO_MANAGER);
+
+        OrganizationLoanDetail loanDetail = OrganizationLoanDetail.builder()
+                .totalAmountRepaid(BigDecimal.valueOf(5000))
+                .totalAmountRequested(BigDecimal.valueOf(5000))
+                .totalOutstandingAmount(BigDecimal.valueOf(10000))
+                .build();
+        when(userIdentityOutputPort.findById(mockId)).thenReturn(sarah);
+        when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
+        when(organizationIdentityOutputPort.getServiceOfferings(roseCouture.getId())).thenReturn(roseCouture.getServiceOfferings());
+        when(organizationLoanDetailOutputPort.findByOrganizationId(roseCouture.getId())).thenReturn(loanDetail);
+        when(loanOfferOutputPort.countNumberOfPendingLoanOfferForOrganization(roseCouture.getId())).thenReturn(3);
+        OrganizationIdentity result = organizationIdentityService.viewOrganizationDetails(roseCouture.getId(), mockId);
+        assertNotNull(result);
+        assertEquals(roseCouture.getId(), result.getId());
+        assertEquals(3, result.getPendingLoanOfferCount());
+        verify(userIdentityOutputPort).findById(mockId);
+        verify(organizationLoanDetailOutputPort).findByOrganizationId(roseCouture.getId());
+        verify(loanOfferOutputPort).countNumberOfPendingLoanOfferForOrganization(roseCouture.getId());
+    }
+
+    @Test
+    void shouldThrowException_WhenOrganizationIdIsNullForPortfolioManager() {
+        sarah.setRole(IdentityRole.PORTFOLIO_MANAGER);
+        try {
+            when(userIdentityOutputPort.findById(mockId)).thenReturn(sarah);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertThrows(MeedlException.class, () ->
+                organizationIdentityService.viewOrganizationDetails(null, mockId)
+        );
     }
 
 }
