@@ -139,19 +139,7 @@ public class OrganizationController {
         );
     }
 
-    @GetMapping("organization/{id}")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    @Operation(summary = "View organization details by organization id")
-    public ResponseEntity<ApiResponse<?>> viewOrganizationDetails(@PathVariable @Valid @NotBlank(message = "Organization id is required") String id)
-            throws MeedlException {
-        OrganizationIdentity organizationIdentity = viewOrganizationUseCase.viewOrganizationDetails(id);
-        log.info("Organization retrieved: {}", organizationIdentity);
-        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.name()).
-                data(organizationRestMapper.toOrganizationResponse(organizationIdentity)).
-                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
-                 HttpStatus.OK
-        );
-    }
+
 
     @GetMapping("organization")
     @Operation(summary = "View top organization with the highest number of loan requests")
@@ -165,21 +153,6 @@ public class OrganizationController {
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
                 HttpStatus.OK
         );
-    }
-
-    @GetMapping("organization/details")
-     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
-    public ResponseEntity<ApiResponse<?>> viewOrganizationDetails(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
-        String adminId = meedlUser.getClaimAsString("sub");
-        OrganizationIdentity organizationIdentity =
-                viewOrganizationUseCase.viewOrganizationDetailsByOrganizationAdmin(adminId);
-        OrganizationResponse organizationResponse = organizationRestMapper.toOrganizationResponse(organizationIdentity);
-        ApiResponse<OrganizationResponse> apiResponse = ApiResponse.<OrganizationResponse>builder()
-                .data(organizationResponse)
-                .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage())
-                .statusCode(HttpStatus.OK.name())
-                .build();
-        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
 
 
