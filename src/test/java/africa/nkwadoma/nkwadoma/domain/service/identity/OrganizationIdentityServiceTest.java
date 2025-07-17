@@ -3,6 +3,7 @@
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.LoanMetricsUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOfferOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
@@ -26,6 +27,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -69,6 +71,8 @@ class OrganizationIdentityServiceTest {
     private int pageNumber = 0;
     @Mock
     private OrganizationLoanDetailOutputPort organizationLoanDetailOutputPort;
+    @Mock
+    private LoanOfferOutputPort loanOfferOutputPort;
 
     @BeforeEach
     void setUp() {
@@ -334,9 +338,24 @@ class OrganizationIdentityServiceTest {
         assertNull(organizationIdentities);
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "nfkjdnjnf"})
-    void viewOrganizationWithInvalidId(String id) {
-        assertThrows(MeedlException.class, ()->organizationIdentityService.viewOrganizationDetails(id, mockId));
+    @Test
+    void shouldReturnOrganizationDetails_WhenUserIsOrganizationAdmin() throws MeedlException {
+        sarah.setRole(IdentityRole.ORGANIZATION_ADMIN);
+        employeeSarah.setOrganization(roseCouture.getId());
+        when(userIdentityOutputPort.findById(mockId)).thenReturn(sarah);
+        when(organizationEmployeeIdentityOutputPort.findByCreatedBy(mockId)).thenReturn(employeeSarah);
+        when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
+        when(organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(roseCouture.getId())).thenReturn(orgEmployee);
+        when(organizationIdentityOutputPort.getServiceOfferings(roseCouture.getId())).thenReturn(roseCouture.getServiceOfferings());
+        OrganizationIdentity result = organizationIdentityService.viewOrganizationDetails(null, mockId);
+
+        assertNotNull(result);
+        assertEquals(roseCouture.getId(), result.getId());
+        assertEquals(roseCouture.getName(), result.getName());
+        assertEquals(1, result.getOrganizationEmployees().size());
+        assertEquals(1, result.getServiceOfferings().size());
+        verify(userIdentityOutputPort).findById(mockId);
+        verify(organizationIdentityOutputPort).findById(roseCouture.getId());
     }
+
 }

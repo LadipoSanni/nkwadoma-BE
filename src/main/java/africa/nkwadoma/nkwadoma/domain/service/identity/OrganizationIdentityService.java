@@ -340,20 +340,6 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     }
 
     @Override
-    public OrganizationIdentity viewOrganizationDetailsByOrganizationAdmin(String adminId) throws MeedlException {
-        MeedlValidator.validateUUID(adminId, MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
-        OrganizationEmployeeIdentity organizationEmployeeIdentity =
-                organizationEmployeeIdentityOutputPort.findByCreatedBy(adminId);
-        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
-        organizationIdentity.setOrganizationEmployees(organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId()));
-        List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity.getId());
-        log.info("Total number loanees {}",organizationIdentity.getNumberOfLoanees());
-        log.info("Total number Programs {}",organizationIdentity.getNumberOfPrograms());
-        organizationIdentity.setServiceOfferings(serviceOfferings);
-        return organizationIdentity;
-    }
-
-    @Override
     public OrganizationIdentity viewOrganizationDetails(String organizationId, String userId) throws MeedlException {
         MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
         IdentityRole identityRole = userIdentityOutputPort.findById(userId).getRole();

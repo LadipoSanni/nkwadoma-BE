@@ -14,5 +14,4 @@ public interface ViewOrganizationUseCase {
     Page<OrganizationIdentity> viewAllOrganizationsLoanMetrics(LoanType loanType,int pageSize , int pageNumber) throws MeedlException;
     Page<OrganizationIdentity> viewAllOrganization(OrganizationIdentity organizationIdentity) throws MeedlException;
     Page<OrganizationIdentity> viewAllOrganizationByStatus(OrganizationIdentity organizationIdentity, ActivationStatus activationStatus) throws MeedlException;
-    OrganizationIdentity viewOrganizationDetailsByOrganizationAdmin(String adminId) throws MeedlException;
 }
