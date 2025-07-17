@@ -118,12 +118,30 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                 .senderMail(foundActor.getEmail())
                 .senderFullName(foundActor.getFirstName())
                 .contentDetail(validationErrorMessage.toString())
-                .notificationFlag(NotificationFlag.REPAYMENT_UPLOAD_FAILURE)
+                .notificationFlag(NotificationFlag.LOAN_USER_DATA)
                 .build();
 
         log.info("Failure notification sent to the actor with email : {} ", foundActor.getEmail());
         meedlNotificationUsecase.sendNotification(meedlNotification);
 
+    }
+
+    @Override
+    public void notifyPmForUserDataUploadFailure(UserIdentity foundActor, StringBuilder validationErrorMessage, String fileName) throws MeedlException {
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .user(foundActor)
+                .timestamp(LocalDateTime.now())
+                .contentId(foundActor.getId())
+                .title("Failed to upload user data: " + fileName)
+                .callToAction(Boolean.FALSE)
+                .senderMail(foundActor.getEmail())
+                .senderFullName(foundActor.getFirstName())
+                .contentDetail(validationErrorMessage.toString())
+                .notificationFlag(NotificationFlag.REPAYMENT_UPLOAD_FAILURE)
+                .build();
+
+        log.info("Failure notification sent to the actor with email : {} ", foundActor.getEmail());
+        meedlNotificationUsecase.sendNotification(meedlNotification);
     }
 
     private void notifyPortfolioManagers(MeedlNotification meedlNotification) throws MeedlException {

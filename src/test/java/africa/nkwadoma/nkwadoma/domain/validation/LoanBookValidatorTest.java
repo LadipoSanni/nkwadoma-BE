@@ -254,7 +254,7 @@ class LoanBookValidatorTest {
         when(loaneeOutputPort.findByLoaneeEmail("test@example.com")).thenReturn(mockLoanee);
 
         assertDoesNotThrow(() ->
-                loanBookValidator.validateUserExistByEmail(row, "email", rowCount)
+                loanBookValidator.validateUserExistByEmail(row.get("email"), rowCount)
         );
     }
 //    @Test
@@ -264,7 +264,7 @@ class LoanBookValidatorTest {
         when(loaneeOutputPort.findByLoaneeEmail("nonexistent@example.com")).thenReturn(null);
 
         MeedlException ex = assertThrows(MeedlException.class, () ->
-                loanBookValidator.validateUserExistByEmail(row, "email", rowCount)
+                loanBookValidator.validateUserExistByEmail(row.get("email"), rowCount)
         );
         assertTrue(ex.getMessage().contains("does not exist for repayment"));
     }
@@ -276,7 +276,7 @@ class LoanBookValidatorTest {
                 .thenThrow(new MeedlException("Unexpected error"));
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                loanBookValidator.validateUserExistByEmail(row, "email", rowCount)
+                loanBookValidator.validateUserExistByEmail(row.get("email"), rowCount)
         );
         assertTrue(ex.getMessage().contains("Unexpected error"));
     }

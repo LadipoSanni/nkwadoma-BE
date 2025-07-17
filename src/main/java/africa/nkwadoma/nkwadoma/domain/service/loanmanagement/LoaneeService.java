@@ -177,7 +177,7 @@ public class LoaneeService implements LoaneeUseCase {
         return cohortLoanee.getLoanee();
     }
 
-    private static void validateAmountRequested(Loanee loanee, BigDecimal totalLoanBreakDown, Cohort cohort) throws MeedlException {
+    private void validateAmountRequested(Loanee loanee, BigDecimal totalLoanBreakDown, Cohort cohort) throws MeedlException {
         calculateAmountRequested(loanee, totalLoanBreakDown, cohort);
         checkIfAmountRequestedIsNotGreaterThanTotalCohortFee(loanee, cohort);
     }
@@ -498,7 +498,7 @@ public class LoaneeService implements LoaneeUseCase {
         return null;
     }
 
-    private static void calculateAmountRequested(Loanee loanee, BigDecimal totalLoanBreakDown, Cohort cohort) throws LoanException {
+    private void calculateAmountRequested(Loanee loanee, BigDecimal totalLoanBreakDown, Cohort cohort) throws LoanException {
         log.info("Calculating amount requested for loanee {}", loanee.getUserIdentity().getEmail());
         loanee.getLoaneeLoanDetail().
                 setAmountRequested(totalLoanBreakDown.add(cohort.getTuitionAmount()).
@@ -510,7 +510,7 @@ public class LoaneeService implements LoaneeUseCase {
         }
     }
 
-    private static BigDecimal getTotalLoanBreakdown(Loanee loanee) throws MeedlException {
+    private BigDecimal getTotalLoanBreakdown(Loanee loanee) throws MeedlException {
         for (LoaneeLoanBreakdown loaneeLoanBreakdown : loanee.getLoanBreakdowns()){
             loaneeLoanBreakdown.validate();
         }
@@ -535,21 +535,20 @@ public class LoaneeService implements LoaneeUseCase {
         return loanee;
     }
 
-    private static void checkIfAmountRequestedIsNotGreaterThanTotalCohortFee(Loanee loanee, Cohort cohort) throws MeedlException {
+    private void checkIfAmountRequestedIsNotGreaterThanTotalCohortFee(Loanee loanee, Cohort cohort) throws MeedlException {
         if (loanee.getLoaneeLoanDetail().getAmountRequested().compareTo(cohort.getTotalCohortFee()) > 0) {
             log.info("{}. Cohort id: {}", CohortMessages.AMOUNT_REQUESTED_CANNOT_BE_GREATER_THAT_TOTAL_COHORT_FEE.getMessage(), cohort.getId());
             throw new LoanException(CohortMessages.AMOUNT_REQUESTED_CANNOT_BE_GREATER_THAT_TOTAL_COHORT_FEE.getMessage());
         }
     }
 
-    private static void checkIfInitialDepositIsNotGreaterThanTotalCohortFee(Loanee loanee, Cohort cohort) throws LoanException {
+    public void checkIfInitialDepositIsNotGreaterThanTotalCohortFee(Loanee loanee, Cohort cohort) throws LoanException {
         if (loanee.getLoaneeLoanDetail().getInitialDeposit().compareTo(cohort.getTotalCohortFee()) > 0) {
             log.info("{}. Cohort id: {}",CohortMessages.INITIAL_DEPOSIT_CANNOT_BE_GREATER_THAT_TOTAL_COHORT_FEE.getMessage(), cohort.getId());
             throw new LoanException(CohortMessages.INITIAL_DEPOSIT_CANNOT_BE_GREATER_THAT_TOTAL_COHORT_FEE.getMessage());
         }
     }
-
-    private static void checkIfCohortTuitionDetailsHaveBeenUpdated(Cohort cohort) throws LoanException {
+    public void checkIfCohortTuitionDetailsHaveBeenUpdated(Cohort cohort) throws LoanException {
         if (ObjectUtils.isEmpty(cohort.getTuitionAmount())) {
             log.info("Cohort does not have any cohort tuition details. Cohort id: {}", cohort.getId());
             throw new LoanException(CohortMessages.COHORT_TUITION_DETAILS_MUST_HAVE_BEEN_UPDATED.getMessage());

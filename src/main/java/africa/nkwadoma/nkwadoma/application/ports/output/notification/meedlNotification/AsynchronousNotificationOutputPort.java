@@ -25,4 +25,6 @@ public interface AsynchronousNotificationOutputPort {
 
     @Async
     void notifyPmForLoanRepaymentUploadFailure(UserIdentity foundActor, StringBuilder validationErrorMessage, String fileName) throws MeedlException;
+
+    void notifyPmForUserDataUploadFailure(UserIdentity foundActor, StringBuilder validationErrorMessage, String name) throws MeedlException;
 }

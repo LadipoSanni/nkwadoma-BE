@@ -1,12 +1,15 @@
 package africa.nkwadoma.nkwadoma.domain.validation;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.LoaneeUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.UploadType;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
@@ -16,7 +19,6 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -36,19 +38,29 @@ public class LoanBookValidator {
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final CohortUseCase cohortUseCase;
+    private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
+    private final LoaneeUseCase loaneeUseCase;
     private StringBuilder validationErrorMessage;
 
     public void validateUserDataUploadFile(LoanBook loanBook, List<Map<String, String>> data, List<String> requiredHeaders) throws MeedlException {
         validationErrorMessage = new StringBuilder();
-        validateCohortExists(loanBook.getCohort());
+        boolean isValidCohort = validateCohortDetails(loanBook.getCohort());
 
+        if (isValidCohort){
+            validateLoaneeDetails(loanBook, data);
+        }
+        hasFailure(loanBook, UploadType.USER_DATA);
+    }
+
+    private void validateLoaneeDetails(LoanBook loanBook, List<Map<String, String>> data) {
         int rowCount = 1;
         for (Map<String, String> row : data) {
 
             validateElevenDigit(row.get("bvn"), "Invalid bvn : "+rowCount);
             validateElevenDigit(row.get("nin"), "Invalid nin row : "+rowCount);
             validateElevenDigit(row.get("phonenumber"), "Invalid phone number row : "+rowCount);
-            validateUserExistByEmail(row, "email", rowCount );
+
+            validateLoaneeDoesNotExistInTheSameCohort(row.get("email"), loanBook.getCohort(), rowCount );
 
             validateName(rowCount, row.get("firstname"), "First name");
             validateName(rowCount, row.get("lastname"), "Last name");
@@ -56,9 +68,9 @@ public class LoanBookValidator {
             if (MeedlValidator.isNotEmptyString(row.get("middlename"))){
                 validateName(rowCount, row.get("middlename"), "Middle name");
             }
-            validateLoanProductExist(row.get("loanproductname"), rowCount);
-            validateMonetaryValue(row.get("amountpaid"), rowCount);
+            validateLoanProductExist(row.get("loanproduct"), rowCount);
 
+            log.info("initial deposit --- {}, amount requested ---- {}, amount received {}",row.get("initialdeposit"), row.get("amountrequested"), row.get("amountreceived"));
             validateMonetaryValue(row.get("initialdeposit"), rowCount);
             validateMonetaryValue(row.get("amountrequested"), rowCount);
             validateMonetaryValue(row.get("amountreceived"), rowCount);
@@ -66,7 +78,36 @@ public class LoanBookValidator {
             validateInitialDepositAndAmountApproved(row.get("initialdeposit"), row.get("amountreceived"), rowCount);
             rowCount++;
         }
-        hasFailure(loanBook);
+    }
+
+    private void validateLoaneeDoesNotExistInTheSameCohort(String email, Cohort cohort, int rowCount) {
+        Loanee loaneeFound = null;
+        try {
+            loaneeFound = loaneeOutputPort.findByLoaneeEmail(email);
+        } catch (MeedlException e) {
+            log.info("Loanee with email {} does not exist on the platform. Proceed to upload user data ", email, e);
+        }
+        if (ObjectUtils.isNotEmpty(loaneeFound)){
+            checkIfLoaneeExistInTheSameCohort(cohort, loaneeFound, rowCount);
+        }
+    }
+
+    private void checkIfLoaneeExistInTheSameCohort(Cohort cohort, Loanee loanee, int rowCount) {
+        CohortLoanee cohortLoanee = null;
+        try {
+            cohortLoanee = cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(loanee.getId(), cohort.getId());
+        } catch (MeedlException e) {
+            log.info("Uploaded loanee {} does not exist in this cohort {}", loanee.getId(), cohort.getId());
+        }
+
+        if (ObjectUtils.isNotEmpty(cohortLoanee)) {
+            validationErrorMessage
+                    .append("Error in row : ")
+                    .append(rowCount)
+                    .append(" ")
+                    .append(LoaneeMessages.LOANEE_WITH_EMAIL_EXIST_IN_COHORT.getMessage())
+                    .append("\n");
+        }
     }
 
     public void setValidationErrorMessage(){
@@ -78,6 +119,8 @@ public class LoanBookValidator {
         boolean isNotInitialDepositValid = moneyStringIsNotValid(initialDepositString);
         boolean isNotAmountReceivedValid = moneyStringIsNotValid(amountReceivedString);
         if (isNotInitialDepositValid || isNotAmountReceivedValid){
+            log.error("Error : Values passed for monetary values are {} ----- and ------ {}", initialDepositString
+            , amountReceivedString);
             validationErrorMessage.append("Error row : ")
                     .append(rowCount).append(" Monetary value is required.")
                     .append("\n");
@@ -146,7 +189,7 @@ public class LoanBookValidator {
             MeedlValidator.validateElevenDigits(elevenDigitNumber, errorMessage);
         } catch (MeedlException e) {
             validationErrorMessage.append(errorMessage)
-                    .append("\n");
+                    .append(" \n");
         }
         log.info("Eleven digit number successfully validated and encrypted ");
 
@@ -174,28 +217,44 @@ public class LoanBookValidator {
 
     public void repaymentHistoryValidation(List<Map<String, String>> data, LoanBook repaymentHistoryBook) throws MeedlException {
         validationErrorMessage = new StringBuilder();
-        validateCohortExists(repaymentHistoryBook.getCohort());
+        validateCohortDetails(repaymentHistoryBook.getCohort());
         int rowCount = 1;
         for (Map<String, String> row : data) {
 
             validateDateTimeFormat(row, "paymentdate", rowCount);
             validateMonetaryValue(row.get("amountpaid"), rowCount);
-            validateUserExistByEmail(row, "email", rowCount);
+            validateUserExistByEmail(row.get("email"), rowCount);
             rowCount++;
         }
-        hasFailure(repaymentHistoryBook);
+        hasFailure(repaymentHistoryBook, UploadType.REPAYMENT);
 
     }
 
-    private void validateCohortExists(Cohort cohort) {
+    private boolean validateCohortDetails(Cohort cohort) {
+        boolean isCohortValid = Boolean.TRUE;
         try {
             Cohort foundCohort = findCohort(cohort);
             log.info("Cohort was found successfully in upload repayment history validation {}", foundCohort);
+            isCohortValid = checkIfCohortTuitionDetailsHaveBeenUpdated(foundCohort);
         } catch (MeedlException e) {
             log.error("Cohort in upload repayment validation not found. error : {}", e.getMessage());
-            validationErrorMessage.append("Error finding cohort with message: ").append(e.getMessage()).append(". \n ");
+            validationErrorMessage.append("Error uploading data : ").append(e.getMessage()).append(". \n ");
+            isCohortValid = Boolean.FALSE;
         }
+        return isCohortValid;
+
     }
+
+    private Boolean checkIfCohortTuitionDetailsHaveBeenUpdated(Cohort cohort) {
+        if (ObjectUtils.isEmpty(cohort.getTuitionAmount())) {
+            log.info("Cohort does not have any cohort tuition details. Cohort id: {}", cohort.getId());
+            validationErrorMessage.append(CohortMessages.COHORT_TUITION_DETAILS_MUST_HAVE_BEEN_UPDATED.getMessage());
+            return Boolean.FALSE;
+        }
+        return Boolean.TRUE;
+    }
+
+
     private Cohort findCohort(Cohort cohort) throws MeedlException {
         MeedlValidator.validateObjectInstance(cohort, CohortMessages.COHORT_CANNOT_BE_EMPTY.getMessage());
         return cohortUseCase.viewCohortDetails(cohort.getCreatedBy(), cohort.getId());
@@ -203,19 +262,24 @@ public class LoanBookValidator {
 
 
 
-    private void hasFailure(LoanBook repaymentHistoryBook) throws MeedlException {
+    private void hasFailure(LoanBook loanBook, UploadType uploadType) throws MeedlException {
         if (validationErrorMessage!= null && !validationErrorMessage.toString().isBlank()) {
-            log.warn("Validation Error: {}", validationErrorMessage);
-            buildFailureNotification(repaymentHistoryBook);
+            log.warn("Validation Error ---> {}", validationErrorMessage);
+            buildFailureNotification(loanBook, uploadType);
             throw new MeedlException("One or multiple Errors Occures.");
         }
         log.info("No errors was found during the upload.");
     }
 
-    private void buildFailureNotification(LoanBook repaymentHistoryBook) throws MeedlException {
-        UserIdentity foundActor = userIdentityOutputPort.findById(repaymentHistoryBook.getActorId());
-        asynchronousNotificationOutputPort.notifyPmForLoanRepaymentUploadFailure(foundActor, validationErrorMessage, repaymentHistoryBook.getFile().getName());
-
+    private void buildFailureNotification(LoanBook loanBook, UploadType uploadType) throws MeedlException {
+        UserIdentity foundActor = userIdentityOutputPort.findById(loanBook.getActorId());
+        if (uploadType.equals(UploadType.REPAYMENT)){
+            log.info("Notify pm of REPAYMENT data upload failure");
+            asynchronousNotificationOutputPort.notifyPmForLoanRepaymentUploadFailure(foundActor, validationErrorMessage, loanBook.getFile().getName());
+        }else if (uploadType.equals(UploadType.USER_DATA)){
+            log.info("Notify pm of USER data upload failure");
+            asynchronousNotificationOutputPort.notifyPmForUserDataUploadFailure(foundActor, validationErrorMessage, loanBook.getFile().getName());
+        }
     }
 
     public void validateDateTimeFormat(Map<String, String> row, String dateName, int rowCount) throws MeedlException {
@@ -226,6 +290,7 @@ public class LoanBookValidator {
     }
     private void validateMonetaryValue(String moneyStringValue, int rowCount) {
         if (moneyStringIsNotValid(moneyStringValue)) {
+            log.error("Error : Value passed for monetary value string is : {}", moneyStringValue);
             validationErrorMessage.append("Error row : ")
                     .append(rowCount).append(" Monetary value is required.")
                     .append("\n");
@@ -276,14 +341,11 @@ public class LoanBookValidator {
     }
 
 
-    public void validateUserExistByEmail(Map<String, String> row, String email, int rowCount) {
-
-        String emailToCheck = row.get(email);
-
+    public void validateUserExistByEmail(String email,int rowCount) {
         Loanee loanee = null;
         try {
 
-            loanee = loaneeOutputPort.findByLoaneeEmail(emailToCheck);
+            loanee = loaneeOutputPort.findByLoaneeEmail(email);
         } catch (MeedlException exception) {
             validationErrorMessage.append("Error in row : ")
                     .append(rowCount)
@@ -295,15 +357,15 @@ public class LoanBookValidator {
 
         log.info("loanee found in repayment history : {}", loanee);
         if (loanee == null) {
-            log.error("Loanee with email {} does not exist for repayment. For row {}", emailToCheck, rowCount);
+            log.error("Loanee with email {} does not exist for repayment. For row {}", email, rowCount);
             validationErrorMessage.append("Error in row : ")
                     .append(rowCount)
                     .append(" ").append("Loanee with email : ")
-                    .append(emailToCheck)
+                    .append(email)
                     .append(" does not exist for repayment.")
                     .append("\n ");
         }
-        log.info("Loanee with email {} on row {} exist. ", emailToCheck, rowCount);
+        log.info("Loanee with email {} on row {} exist. ", email, rowCount);
 
     }
     private LocalDateTime parseFlexibleDateTime(String dateStr, int rowCount) throws MeedlException {
