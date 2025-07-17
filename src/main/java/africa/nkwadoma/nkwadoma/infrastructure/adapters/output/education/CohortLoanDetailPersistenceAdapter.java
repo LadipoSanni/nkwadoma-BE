@@ -13,6 +13,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -50,6 +51,7 @@ public class CohortLoanDetailPersistenceAdapter implements CohortLoanDetailOutpu
         return cohortLoanDetailMapper.toCohortLoanDetail(cohortLoanDetailEntity);
     }
 
+    @Transactional
     @Override
     public void deleteAllCohortLoanDetailAssociateWithProgram(String id) throws MeedlException {
         MeedlValidator.validateUUID(id,CohortMessages.INVALID_COHORT_ID.getMessage());

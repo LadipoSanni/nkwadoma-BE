@@ -54,7 +54,7 @@ public interface ProgramRepository extends JpaRepository<ProgramEntity, String> 
              join CohortEntity cohort on cohort.programId = p.id 
              join CohortLoaneeEntity cle on cle.cohort.id = cohort.id
                      
-             where p.id =: programId
+             where p.id = :programId
              
         """)
     boolean checkIfLaoneeExistsByProgramId(@Param("programId") String programId);

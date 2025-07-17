@@ -23,6 +23,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.*;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.*;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -141,6 +142,7 @@ public class ProgramService implements AddProgramUseCase {
         return programOutputPort.findProgramByName(program.getName(),program.getPageNumber(),program.getPageSize());
     }
 
+    @Transactional
     @Override
     public void deleteProgram(Program program) throws MeedlException {
         MeedlValidator.validateObjectInstance(program, ProgramMessages.PROGRAM_CANNOT_BE_EMPTY.getMessage());
@@ -155,6 +157,7 @@ public class ProgramService implements AddProgramUseCase {
                     loanBreakdownOutputPort.deleteAllBreakDownAssociateWithProgram(foundProgram.getId());
                     cohortLoanDetailOutputPort.deleteAllCohortLoanDetailAssociateWithProgram(foundProgram.getId());
                     int numberOfDeletedCohort = cohortOutputPort.deleteAllCohortAssociateWithProgram(foundProgram.getId());
+                    programLoanDetailOutputPort.deleteByProgramId(foundProgram.getId());
                     programOutputPort.deleteProgram(foundProgram.getId());
                     decreaseNumberOfProgramInOrganization(foundProgram,numberOfDeletedCohort);
                 }

@@ -134,6 +134,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         return cohortEntities.map(cohortMapper::toCohort);
     }
 
+    @Transactional
     @Override
     public int deleteAllCohortAssociateWithProgram(String id) throws MeedlException {
         MeedlValidator.validateUUID(id , ProgramMessages.INVALID_PROGRAM_ID.getMessage());
