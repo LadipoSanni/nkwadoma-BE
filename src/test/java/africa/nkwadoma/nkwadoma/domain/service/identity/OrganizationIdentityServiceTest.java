@@ -337,6 +337,6 @@ class OrganizationIdentityServiceTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "nfkjdnjnf"})
     void viewOrganizationWithInvalidId(String id) {
-        assertThrows(MeedlException.class, ()->organizationIdentityService.viewOrganizationDetails(id));
+        assertThrows(MeedlException.class, ()->organizationIdentityService.viewOrganizationDetails(id, mockId));
     }
 }
