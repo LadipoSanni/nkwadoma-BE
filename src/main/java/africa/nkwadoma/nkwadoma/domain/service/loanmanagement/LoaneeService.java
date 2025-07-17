@@ -99,28 +99,10 @@ public class LoaneeService implements LoaneeUseCase {
                     try {
                         id = loanee.getId();
                         loanee = loaneeOutputPort.findLoaneeById(id);
-                        if (loanee == null){
-                            log.error("Loanee with id {} was not found. There email cannot be sent ", loanee.getId());
-                        }
-                        if (loanee != null && !loanee.getUserIdentity().getRole().equals(IdentityRole.LOANEE)){
-                            log.warn("The user is not a loanee but {}",loanee.getUserIdentity().getRole());
-                            throw new LoanException("User with id "+id+" is not a loanee");
-                        }
-                        UserIdentity userIdentity = identityManagerOutputPort.getUserByEmail(loanee.getUserIdentity().getEmail())
-                                .orElseThrow(()-> new MeedlException("Loanee does not exist on the platform"));
-                        if (userIdentity.isEnabled()){
-                            log.error("User with email {} is already active on th platform", userIdentity.getEmail());
-                            throw new LoanException("User with email "+userIdentity.getEmail() +" is already active on the platform.");
-                        }
-                        if (loanee == null){
-                            log.error("Loanee not found with email {}", userIdentity.getEmail());
-                            throw new LoanException("Loanee not found with email "+userIdentity.getEmail());
-                        }
-                        if (!loanee.getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)) {
-                            log.warn("The loanee being invited is not from file upload {}", userIdentity.getEmail());
-                        }
+                        validationsForInvitingLoanee(loanee, id);
                         loanee.setUploadedStatus(UploadedStatus.INVITED);
                         loanee = loaneeOutputPort.save(loanee);
+//                        getLoaneeLoanReferral(loanee);
                     } catch (MeedlException e) {
                         log.error("Loanee with id doesn't exist");
                         notifyPmLoaneeDoesNotExist(e.getMessage(), id);
@@ -131,6 +113,39 @@ public class LoaneeService implements LoaneeUseCase {
 
          sendLoaneesEmail(loaneesVerified);
          return loaneesVerified;
+    }
+
+    private void getLoaneeLoanReferral(Loanee loanee) throws MeedlException {
+        Page<LoanReferral> loanReferralPage = loanReferralOutputPort.findAllLoanReferralsForLoanee(loanee.getId(), 0, 100 );
+        loanReferralPage.stream()
+                .filter(loanReferral -> loanReferral.getLoanReferralStatus().equals(LoanReferralStatus.PENDING))
+                .findFirst()
+                .ifPresent(loanReferral -> loanee.setLoanReferralId(loanReferral.getId()));
+    }
+
+    private void validationsForInvitingLoanee(Loanee loanee, String id) throws MeedlException {
+        if (loanee == null){
+            log.error("Loanee not found for loanee with id : {}", id);
+            throw new LoanException("Loanee not found with id : "+ id);
+        }
+        if (ObjectUtils.isEmpty(loanee.getUserIdentity())){
+            log.error("Unable to determine loanee identity. User identity is null.");
+            throw new MeedlException("Unable to determine loanee identity.");
+        }
+        if (!loanee.getUserIdentity().getRole().equals(IdentityRole.LOANEE)){
+            log.warn("The user is not a loanee but {}", loanee.getUserIdentity().getRole());
+            throw new LoanException("User with id "+ id +" is not a loanee");
+        }
+        UserIdentity userIdentity = identityManagerOutputPort.getUserByEmail(loanee.getUserIdentity().getEmail())
+                .orElseThrow(()-> new MeedlException("Loanee does not exist on the platform"));
+        if (userIdentity.isEnabled()){
+            log.error("User with email {} is already active on th platform", userIdentity.getEmail());
+            throw new LoanException("User with email "+userIdentity.getEmail() +" is already active on the platform.");
+        }
+
+        if (!loanee.getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)) {
+            log.warn("The loanee being invited is not from file upload {}", userIdentity.getEmail());
+        }
     }
 
     private void sendLoaneesEmail(List<Loanee> loanees) {
