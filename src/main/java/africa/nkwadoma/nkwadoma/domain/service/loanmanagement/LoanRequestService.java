@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.service.loanmanagement;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlnotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoanDetailOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
@@ -19,6 +20,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -53,6 +55,9 @@ public class LoanRequestService implements LoanRequestUseCase {
     private final CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
     private final CohortOutputPort cohortOutputPort;
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
+    private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
+    private final LoanReferralOutputPort loanReferralOutputPort;
+    private final LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
 
     @Override
     public Page<LoanRequest> viewAllLoanRequests(LoanRequest loanRequest, String userId) throws MeedlException {
@@ -122,6 +127,7 @@ public class LoanRequestService implements LoanRequestUseCase {
             }
             updatedLoanRequest = approveLoanRequest(loanRequest, foundLoanRequest);
             updateLoanRequestOnMetrics(foundLoanRequest);
+            updateLoaneeLoanDetailInterestRate(updatedLoanRequest);
             LoanOffer loanOffer = loanOfferUseCase.createLoanOffer(updatedLoanRequest);
             updatedLoanRequest.setLoanOfferId(loanOffer.getId());
             updatedLoanRequest.setDateTimeOffered(loanOffer.getDateTimeOffered());
@@ -148,6 +154,16 @@ public class LoanRequestService implements LoanRequestUseCase {
 
             return loanRequestOutputPort.save(updatedLoanRequest);
         }
+    }
+
+    private void updateLoaneeLoanDetailInterestRate(LoanRequest updatedLoanRequest) throws MeedlException {
+        CohortLoanee cohortLoanee = cohortLoaneeOutputPort.findCohortLoaneeByLoanRequestId(updatedLoanRequest.getId());
+
+        LoanReferral loanReferral = loanReferralOutputPort.findById(updatedLoanRequest.getId());
+        LoaneeLoanDetail loaneeLoanDetail = loaneeLoanDetailsOutputPort.findByCohortLoaneeId(loanReferral.getCohortLoanee().getId());
+        loaneeLoanDetail.setInterestRate(updatedLoanRequest.getLoanProduct().getInterestRate());
+        loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
+
     }
 
     private void updateNumberOfLoanRequestOnCohort(String cohortId) throws MeedlException {
@@ -240,7 +256,7 @@ public class LoanRequestService implements LoanRequestUseCase {
         foundLoanRequest.setStatus(LoanRequestStatus.APPROVED);
         log.info("found loan request == {}",foundLoanRequest.getLoaneeId());
         String loaneeId = foundLoanRequest.getLoaneeId();
-        foundLoanRequest.setLoaneeId(foundLoanRequest.getLoaneeId());
+//        foundLoanRequest.setLoaneeId(foundLoanRequest.getLoaneeId());
         foundLoanRequest = loanRequestMapper.updateLoanRequest(loanRequest, foundLoanRequest);
         loanRequestOutputPort.save(foundLoanRequest);
 
