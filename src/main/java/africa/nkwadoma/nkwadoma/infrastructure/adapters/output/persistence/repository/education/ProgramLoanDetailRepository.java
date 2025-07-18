@@ -5,4 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ProgramLoanDetailRepository extends JpaRepository<ProgramLoanDetailEntity, String> {
     ProgramLoanDetailEntity findByProgramId(String id);
+
+    void deleteProgramLoanDetailEntityByProgramId(String id);
 }

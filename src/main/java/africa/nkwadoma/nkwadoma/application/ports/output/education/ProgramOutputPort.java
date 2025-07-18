@@ -20,4 +20,5 @@ public interface ProgramOutputPort {
 
     Page<Program> findAllProgramByOrganizationId(String organizationId, int pageSize, int pageNumber) throws MeedlException;
 
+    boolean checkIfLoaneeExistInProgram(String id) throws MeedlException;
 }
