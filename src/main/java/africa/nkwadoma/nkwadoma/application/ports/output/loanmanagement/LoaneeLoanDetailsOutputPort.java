@@ -12,4 +12,6 @@ public interface LoaneeLoanDetailsOutputPort {
     LoaneeLoanDetail findByCohortLoaneeId(String cohortLoaneeId) throws MeedlException;
 
     LoanSummaryProjection getLoanSummary(String userId) throws MeedlException;
+
+    LoaneeLoanDetail findByCohortAndLoaneeId(String cohortId, String loaneeId) throws MeedlException;
 }
