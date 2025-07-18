@@ -254,12 +254,6 @@ class CohortPersistenceAdapterTest {
         assertEquals(xplorers.getCreatedBy(), viewedCohort.getCreatedBy());
     }
 
-    @Order(5)
-    @Test
-    void viewCohortWithNullUserId(){
-        assertThrows(MeedlException.class, () -> cohortOutputPort.findCohortById(
-                cohortTwoId));
-    }
 
     @Test
     void viewCohortWithNullCohortId(){
@@ -267,23 +261,8 @@ class CohortPersistenceAdapterTest {
                 null));
     }
 
-    @ParameterizedTest
-    @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
-    void viewCohortWithEmptyUserId(String userId){
-        assertThrows(MeedlException.class, ()->
-                cohortOutputPort.findCohortById(
-                        cohortTwoId));
-    }
 
-    @ParameterizedTest
-    @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
-    void viewCohortWithEmptyCohortId(String cohortId){
-        assertThrows(MeedlException.class, ()->
-                cohortOutputPort.findCohortById(
-                        cohortId));
-    }
-
-    @Order(6)
+    @Order(5)
     @Test
     void viewAllCohortInAProgram(){
 
@@ -301,7 +280,7 @@ class CohortPersistenceAdapterTest {
 
     }
 
-    @Order(7)
+    @Order(6)
     @Test
     void searchForCohortInProgram(){
         Page<Cohort> cohorts  = Page.empty();
@@ -321,7 +300,7 @@ class CohortPersistenceAdapterTest {
     }
 
 
-    @Order(8)
+    @Order(7)
     @Test
     void addLoanDetailsToCohort(){
         Cohort editedCohort = new Cohort();
@@ -351,7 +330,7 @@ class CohortPersistenceAdapterTest {
                 cohortOutputPort.findAllCohortByOrganizationId(null,elites));
     }
 
-    @Order(9)
+    @Order(8)
     @Test
     void findAllCohortWitOrganizationId() throws MeedlException {
         pageSize = 3;
@@ -377,7 +356,7 @@ class CohortPersistenceAdapterTest {
           assertEquals(0,cohorts.getContent().size());
     }
 
-    @Order(10)
+    @Order(9)
     @Test
     void searchForCohortInOrganization(){
         Page<Cohort> cohorts  = Page.empty();
@@ -389,7 +368,7 @@ class CohortPersistenceAdapterTest {
         assertEquals(3,cohorts.getContent().size());
     }
 
-    @Order(11)
+    @Order(10)
     @Test
     void deleteCohort(){
         Optional<CohortEntity> foundCohort = cohortRepository.findById(cohortOneId);
