@@ -154,18 +154,32 @@ public class ProgramService implements AddProgramUseCase {
         MeedlValidator.validateUUID(program.getId(), ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         program = programOutputPort.findProgramById(program.getId());
         ProgramLoanDetail programLoanDetail = programLoanDetailOutputPort.findByProgramId(program.getId());
-        BigDecimal totalAmountReceived = programLoanDetail.getTotalAmountReceived();
-        if (totalAmountReceived !=  null && totalAmountReceived.compareTo(BigDecimal.ZERO) > 0) {
-            programMapper.mapProgramLoanDetailsToProgram(program, programLoanDetail);
-            program.setDebtPercentage(programLoanDetail.getTotalOutstandingAmount()
-                    .divide(programLoanDetail.getTotalAmountReceived(), RoundingMode.UP));
-            program.setRepaymentRate(programLoanDetail.getTotalAmountRepaid()
-                    .divide(programLoanDetail.getTotalAmountReceived(), RoundingMode.UP).multiply(BigDecimal.valueOf(100)));
-        }else {
-            program.setRepaymentRate(BigDecimal.ZERO);
-            program.setDebtPercentage(BigDecimal.ZERO);
-        }
+        programMapper.mapProgramLoanDetailsToProgram(program,programLoanDetail);
+        getLoanPercentage(program,programLoanDetail);
         return program;
     }
 
+
+    private static void getLoanPercentage(Program program, ProgramLoanDetail programLoanDetail) {
+        BigDecimal totalAmountReceived = programLoanDetail.getTotalAmountReceived();
+        if (totalAmountReceived != null && totalAmountReceived.compareTo(BigDecimal.ZERO) > 0 &&
+                programLoanDetail.getTotalOutstandingAmount() != null &&
+                programLoanDetail.getTotalAmountRepaid() != null) {
+            program.setDebtPercentage(
+                    programLoanDetail.getTotalOutstandingAmount()
+                            .divide(totalAmountReceived, 4, RoundingMode.HALF_UP)
+                            .multiply(BigDecimal.valueOf(100))
+                            .doubleValue()
+            );
+            program.setRepaymentRate(
+                    programLoanDetail.getTotalAmountRepaid()
+                            .divide(totalAmountReceived, 4, RoundingMode.HALF_UP)
+                            .multiply(BigDecimal.valueOf(100))
+                            .doubleValue()
+            );
+        } else {
+            program.setDebtPercentage(0.0);
+            program.setRepaymentRate(0.0);
+        }
+    }
 }
