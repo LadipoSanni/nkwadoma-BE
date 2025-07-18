@@ -189,6 +189,12 @@ public class LoaneeService implements LoaneeUseCase {
         return cohortLoanee.getLoanee();
     }
 
+    @Override
+    public LoaneeLoanDetail viewLoaneeLoanDetail(String cohortLoaneeId) throws MeedlException {
+        MeedlValidator.validateUUID(cohortLoaneeId, "Provide valid loanee loan detail id");
+        log.info("Finding loanee loan details with cohort loanee id  {}", cohortLoaneeId);
+        return loaneeLoanDetailsOutputPort.findByCohortLoaneeId(cohortLoaneeId);
+    }
     private void validateAmountRequested(Loanee loanee, BigDecimal totalLoanBreakDown, Cohort cohort) throws MeedlException {
         calculateAmountRequested(loanee, totalLoanBreakDown, cohort);
         checkIfAmountRequestedIsNotGreaterThanTotalCohortFee(loanee, cohort);
