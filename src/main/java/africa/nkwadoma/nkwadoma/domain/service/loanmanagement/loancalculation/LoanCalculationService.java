@@ -90,7 +90,7 @@ public class LoanCalculationService implements LoanCalculationUseCase {
             runningTotal = runningTotal.add(repayment.getAmountPaid());
             repayment.setTotalAmountRepaid(runningTotal);
         }
-        log.info("The repayment histories after adding up total amount repaid");
+        log.info("The repayment histories after adding up total amount repaid {}", runningTotal);
 
         return runningTotal;
     }
