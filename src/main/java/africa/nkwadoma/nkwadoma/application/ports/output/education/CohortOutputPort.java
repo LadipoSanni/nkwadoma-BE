@@ -6,12 +6,9 @@ import org.springframework.data.domain.Page;
 
 public interface CohortOutputPort {
 
-    Cohort viewCohortDetails(String userId,  String cohortId) throws MeedlException;
-
+    Cohort findCohortById(String cohortId) throws MeedlException;
     void deleteCohort(String id) throws MeedlException;
     Page<Cohort> findAllCohortInAProgram(Cohort cohort) throws MeedlException;
-
-    Cohort findCohort(String cohortId) throws MeedlException;
 
     Cohort save(Cohort cohort) throws MeedlException;
 
@@ -24,4 +21,6 @@ public interface CohortOutputPort {
     Cohort checkIfCohortExistWithName(String name) throws MeedlException;
 
     Page<Cohort> searchCohortInOrganization(String organizationId, String name,int pageSize,int pageNumber) throws MeedlException;
+
+    int deleteAllCohortAssociateWithProgram(String id) throws MeedlException;
 }

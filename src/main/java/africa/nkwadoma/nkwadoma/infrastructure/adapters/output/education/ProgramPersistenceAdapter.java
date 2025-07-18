@@ -39,12 +39,10 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     @Lazy
     @Autowired
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
-    private final CohortRepository cohortRepository;
     private final OrganizationIdentityMapper organizationIdentityMapper;
     private final OrganizationEntityRepository organizationEntityRepository;
     private final OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
-    private final LoanBreakdownRepository loanBreakdownRepository;
-    private final ProgramCohortRepository programCohortRepository;
+
 
     @Override
     public Page<Program> findProgramByNameWithinOrganization(Program program, String organizationId) throws MeedlException {
@@ -132,6 +130,12 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     }
 
     @Override
+    public boolean checkIfLoaneeExistInProgram(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id,ProgramMessages.INVALID_PROGRAM_ID.getMessage());
+        return programRepository.checkIfLaoneeExistsByProgramId(id);
+    }
+
+    @Override
     public boolean programExistsInOrganization(Program program) throws MeedlException {
         MeedlValidator.validateDataElement(program.getName(),ProgramMessages.PROGRAM_NAME_REQUIRED.getMessage());
         log.error("Checking if this program name : {}, exists in organization: {}", program.getName(), program.getOrganizationId());
@@ -142,23 +146,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     @Transactional
     public void deleteProgram(String programId) throws MeedlException {
         MeedlValidator.validateUUID(programId, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
-        ProgramEntity program = programRepository.findById(programId).
-                orElseThrow(()-> new ResourceNotFoundException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage()));
-        List<CohortEntity> cohortEntities = cohortRepository.findAllByProgramId(program.getId());
-
-        if (CollectionUtils.isNotEmpty(cohortEntities)) {
-            for (CohortEntity cohortEntity : cohortEntities) {
-                if (cohortEntity.getNumberOfLoanees() > 0) {
-                    throw new EducationException("Program with loanee cannot be deleted");
-                }
-                else {
-                    programCohortRepository.deleteAllByCohort(cohortEntity);
-                    loanBreakdownRepository.deleteAllByCohort(cohortEntity);
-                    cohortRepository.deleteById(cohortEntity.getId());
-                }
-            }
-        }
-        programRepository.delete(program);
+        programRepository.deleteById(programId);
     }
 
     @Override

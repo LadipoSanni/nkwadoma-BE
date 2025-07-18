@@ -15,14 +15,13 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanOfferStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -36,6 +35,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -45,7 +45,6 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.LOANEE_HAS_BEEN_REFERED;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -136,7 +135,7 @@ public class CohortService implements CohortUseCase {
     @Override
     public Cohort editCohort(Cohort cohort) throws MeedlException {
         cohort.updateValidation();
-        Cohort foundCohort = cohortOutputPort.findCohort(cohort.getId());
+        Cohort foundCohort = cohortOutputPort.findCohortById(cohort.getId());
         Program program = programOutputPort.findProgramById(foundCohort.getProgramId());
         checkIfCohortNameExist(cohort, foundCohort);
         if (!ObjectUtils.isEmpty(foundCohort.getLoanDetail())) {
@@ -197,13 +196,14 @@ public class CohortService implements CohortUseCase {
     public Cohort viewCohortDetails(String userId,  String cohortId) throws MeedlException {
         MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
         MeedlValidator.validateUUID(cohortId, CohortMessages.INVALID_COHORT_ID.getMessage());
-        Cohort cohort = cohortOutputPort.viewCohortDetails(userId, cohortId);
+        Cohort cohort = cohortOutputPort.findCohortById(cohortId);
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
         cohort.setProgramName(program.getName());
         CohortLoanDetail cohortLoanDetail = cohortLoanDetailOutputPort.findByCohortId(cohort.getId());
         log.info("cohort loan details == {}", cohortLoanDetail);
         log.info("cohort before mapping == {}", cohort);
         cohortMapper.mapCohortLoanDetailToCohort(cohort,cohortLoanDetail);
+        getLoanPercentage(cohort,cohortLoanDetail);
         log.info("mapped cohort == {}", cohort);
         int pendingLoanOffers = loanOfferOutputPort.countNumberOfPendingLoanOfferForCohort(cohort.getId());
         log.info("pendingLoanOffers == {}", pendingLoanOffers);
@@ -212,6 +212,28 @@ public class CohortService implements CohortUseCase {
         return cohort;
     }
 
+    private static void getLoanPercentage(Cohort cohort, CohortLoanDetail cohortLoanDetail) {
+        BigDecimal totalAmountReceived = cohortLoanDetail.getTotalAmountReceived();
+        if (totalAmountReceived != null && totalAmountReceived.compareTo(BigDecimal.ZERO) > 0 &&
+                cohortLoanDetail.getTotalOutstandingAmount() != null &&
+                cohortLoanDetail.getTotalAmountRepaid() != null) {
+            cohort.setDebtPercentage(
+                    cohortLoanDetail.getTotalOutstandingAmount()
+                            .divide(totalAmountReceived, 4, RoundingMode.HALF_UP)
+                            .multiply(BigDecimal.valueOf(100))
+                            .doubleValue()
+            );
+            cohort.setRepaymentRate(
+                    cohortLoanDetail.getTotalAmountRepaid()
+                            .divide(totalAmountReceived, 4, RoundingMode.HALF_UP)
+                            .multiply(BigDecimal.valueOf(100))
+                            .doubleValue()
+            );
+        } else {
+            cohort.setDebtPercentage(0.0);
+            cohort.setRepaymentRate(0.0);
+        }
+    }
 
     @Override
     public Page<Cohort> viewAllCohortInAProgram(Cohort cohort) throws MeedlException {
@@ -234,7 +256,7 @@ public class CohortService implements CohortUseCase {
         if (ObjectUtils.isNotEmpty(loanees)) {
             throw new EducationException(CohortMessages.COHORT_WITH_LOANEE_CANNOT_BE_DELETED.getMessage());
         }
-        Cohort cohort = cohortOutputPort.findCohort(id);
+        Cohort cohort = cohortOutputPort.findCohortById(id);
         cohortOutputPort.deleteCohort(cohort.getId());
         Program program = decreaseNumberOfCohortInProgram(cohort);
         decreaseNumberOfCohortInOrganization(program);
@@ -297,7 +319,7 @@ public class CohortService implements CohortUseCase {
 
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
 
-        Cohort foundCohort = cohortOutputPort.findCohort(cohortId);
+        Cohort foundCohort = cohortOutputPort.findCohortById(cohortId);
         List<CohortLoanee> cohortLoanees = cohortLoaneeOutputPort.findSelectedLoaneesInCohort(foundCohort.getId(), loaneeIds);
         if (cohortLoanees == null || cohortLoanees.isEmpty()){
             log.info("Loanee(s) selected is/are not referable.");

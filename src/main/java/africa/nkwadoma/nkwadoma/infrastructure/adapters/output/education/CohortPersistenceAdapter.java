@@ -6,12 +6,9 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.CohortMapper;
@@ -29,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages.*;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.USER_NOT_FOUND;
 
 
 @Slf4j
@@ -37,20 +33,16 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.U
 public class CohortPersistenceAdapter implements CohortOutputPort {
     private final CohortRepository cohortRepository;
     private final CohortMapper cohortMapper;
-    private final UserIdentityOutputPort userIdentityOutputPort;
     private final ProgramCohortOutputPort programCohortOutputPort;
     private final LoanBreakdownRepository loanBreakdownRepository;
 
 
     @Override
-    public Cohort viewCohortDetails(String userId, String cohortId) throws MeedlException {
-        MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
+    public Cohort findCohortById(String cohortId) throws MeedlException {
         MeedlValidator.validateUUID(cohortId, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
-        UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
-        if (userIdentity == null){
-            throw new ResourceNotFoundException(USER_NOT_FOUND.getMessage());
-        }
-        return findCohort(cohortId);
+        CohortEntity cohortEntity = cohortRepository.findById(cohortId).orElseThrow(() -> new EducationException(COHORT_DOES_NOT_EXIST.getMessage()));
+        log.info("cohort entity {}", cohortEntity);
+        return cohortMapper.toCohort(cohortEntity);
     }
 
     @Transactional
@@ -61,14 +53,6 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         programCohortOutputPort.deleteAllByCohort(cohortEntity);
         loanBreakdownRepository.deleteAllByCohort(cohortEntity);
         cohortRepository.deleteById(id);
-    }
-
-    @Override
-    public Cohort findCohort(String cohortId) throws MeedlException {
-        MeedlValidator.validateUUID(cohortId, INVALID_COHORT_ID.getMessage());
-        CohortEntity cohortEntity = cohortRepository.findById(cohortId).orElseThrow(() -> new EducationException(COHORT_DOES_NOT_EXIST.getMessage()));
-        log.info("cohort entity {}", cohortEntity);
-        return cohortMapper.toCohort(cohortEntity);
     }
 
     @Override
@@ -132,6 +116,13 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
             return Page.empty();
         }
         return cohortEntities.map(cohortMapper::toCohort);
+    }
+
+    @Transactional
+    @Override
+    public int deleteAllCohortAssociateWithProgram(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id , ProgramMessages.INVALID_PROGRAM_ID.getMessage());
+        return cohortRepository.deleteAllCohortAssociateWithProgramIdAndGetCount(id);
     }
 
     private static Cohort getCohort(String cohortId, List<ProgramCohort> programCohorts) throws EducationException {

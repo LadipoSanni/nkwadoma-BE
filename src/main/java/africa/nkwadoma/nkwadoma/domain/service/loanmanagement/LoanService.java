@@ -190,7 +190,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
         updateCohortLoanDetail(loanOffer);
 
-        Cohort cohort = cohortOutputPort.findCohort(loanOffer.getCohortId());
+        Cohort cohort = cohortOutputPort.findCohortById(loanOffer.getCohortId());
 
         updateProgramDetail(loanOffer, cohort);
 

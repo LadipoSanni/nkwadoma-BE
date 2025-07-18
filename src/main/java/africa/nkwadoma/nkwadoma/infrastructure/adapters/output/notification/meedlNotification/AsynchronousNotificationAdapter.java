@@ -82,7 +82,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
     @Async
     @Override
     public void sendDeferralNotificationToEmployee(Loanee loanee, String loanId, NotificationFlag notificationFlag) throws MeedlException {
-        Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
+        Cohort cohort = cohortOutputPort.findCohortById(loanee.getCohortId());
         List<OrganizationEmployeeIdentity> organizationEmployeeIdentities = organizationEmployeeIdentityOutputPort
                 .findAllByOrganization(cohort.getOrganizationId());
         for (OrganizationEmployeeIdentity organizationEmployeeIdentity : organizationEmployeeIdentities){

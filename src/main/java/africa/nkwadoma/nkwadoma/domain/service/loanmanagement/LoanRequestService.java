@@ -19,7 +19,6 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
-import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -29,7 +28,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
 import lombok.*;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
-import org.apache.commons.logging.Log;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.*;
 
@@ -151,7 +149,7 @@ public class LoanRequestService implements LoanRequestUseCase {
     }
 
     private void updateNumberOfLoanRequestOnCohort(String cohortId) throws MeedlException {
-        Cohort cohort = cohortOutputPort.findCohort(cohortId);
+        Cohort cohort = cohortOutputPort.findCohortById(cohortId);
         log.info("found cohort == {}",cohort);
         log.info("current number of loan request == {}",cohort.getNumberOfLoanRequest());
         cohort.setNumberOfLoanRequest(cohort.getNumberOfLoanRequest() - 1);
