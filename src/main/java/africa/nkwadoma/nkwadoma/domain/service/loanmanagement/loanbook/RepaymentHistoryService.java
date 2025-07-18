@@ -4,12 +4,14 @@ import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.RepaymentHistoryUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.RepaymentHistoryOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import africa.nkwadoma.nkwadoma.domain.validation.LoanBookValidator;
@@ -29,6 +31,7 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
     private final CohortUseCase cohortUseCase;
     private final RepaymentHistoryOutputPort repaymentHistoryOutputPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
+    private final LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
     private LoanBookValidator loanBookValidator;
     private final LoaneeOutputPort loaneeOutputPort;
 
@@ -98,10 +101,14 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
                     try {
                         log.info("Email of the loanee being searched for {}", repaymentHistory.getLoanee().getUserIdentity().getEmail());
                         Loanee loanee = loaneeOutputPort.findByLoaneeEmail(repaymentHistory.getLoanee().getUserIdentity().getEmail());
+//                        log.info("cohort id == {} -- loanee id == {}",loanBook.getCohort().getId(),loanee.getId());
+//                        LoaneeLoanDetail loaneeLoanDetail = loaneeLoanDetailsOutputPort.findByCohortAndLoaneeId(loanBook.getCohort().getId(),loanee.getId());
+//                        log.info("loaneeLoanDetail == {}", loaneeLoanDetail);
                         log.info("loanee found in repayment history : {}",loanee);
                         if (loanee != null) {
                             repaymentHistory.setLoanee(loanee);
                             repaymentHistory.setCohort(loanBook.getCohort());
+//                            repaymentHistory.setAmountOutstanding(loaneeLoanDetail.getAmountOutstanding());
                             repaymentHistoryOutputPort.save(repaymentHistory);
                         }
                     } catch (MeedlException e) {

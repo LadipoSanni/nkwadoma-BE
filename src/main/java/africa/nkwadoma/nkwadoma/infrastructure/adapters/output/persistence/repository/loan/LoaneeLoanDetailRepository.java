@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan;
 
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoaneeLoanDetailEntity;
 import jakarta.persistence.Tuple;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -34,4 +35,13 @@ public interface LoaneeLoanDetailRepository extends JpaRepository<LoaneeLoanDeta
 """)
     LoanSummaryProjection getLoanSummary(@Param("userId") String userId);
 
+
+    @Query("""
+     SELECT loaneeLoanDetail
+    
+          from CohortLoaneeEntity cohortLoanee
+          join LoaneeLoanDetailEntity loaneeLoanDetail on loaneeLoanDetail.id = cohortLoanee.loaneeLoanDetail.id
+          where cohortLoanee.cohort.id = :cohortId and cohortLoanee.loanee.id = :loaneeId
+     """)
+    LoaneeLoanDetailEntity findByCohortAndLoaneeId(@Param("cohortId") String cohortId, @Param("loaneeId")String loaneeId);
 }
