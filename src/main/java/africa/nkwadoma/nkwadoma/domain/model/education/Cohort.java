@@ -48,6 +48,8 @@ public class Cohort {
     private LoanDetail loanDetail;
     private int numberOfLoanees = 0;
     private int numberOfReferredLoanee = 0;
+    private double repaymentRate;
+    private double debtPercentage;
     private String programName;
     private int stillInTraining ;
     private int numberOfDropout ;

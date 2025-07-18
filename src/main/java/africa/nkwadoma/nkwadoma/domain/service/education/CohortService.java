@@ -20,6 +20,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
@@ -34,6 +35,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -201,6 +203,7 @@ public class CohortService implements CohortUseCase {
         log.info("cohort loan details == {}", cohortLoanDetail);
         log.info("cohort before mapping == {}", cohort);
         cohortMapper.mapCohortLoanDetailToCohort(cohort,cohortLoanDetail);
+        getLoanPercentage(cohort,cohortLoanDetail);
         log.info("mapped cohort == {}", cohort);
         int pendingLoanOffers = loanOfferOutputPort.countNumberOfPendingLoanOfferForCohort(cohort.getId());
         log.info("pendingLoanOffers == {}", pendingLoanOffers);
@@ -209,6 +212,28 @@ public class CohortService implements CohortUseCase {
         return cohort;
     }
 
+    private static void getLoanPercentage(Cohort cohort, CohortLoanDetail cohortLoanDetail) {
+        BigDecimal totalAmountReceived = cohortLoanDetail.getTotalAmountReceived();
+        if (totalAmountReceived != null && totalAmountReceived.compareTo(BigDecimal.ZERO) > 0 &&
+                cohortLoanDetail.getTotalOutstandingAmount() != null &&
+                cohortLoanDetail.getTotalAmountRepaid() != null) {
+            cohort.setDebtPercentage(
+                    cohortLoanDetail.getTotalOutstandingAmount()
+                            .divide(totalAmountReceived, 4, RoundingMode.HALF_UP)
+                            .multiply(BigDecimal.valueOf(100))
+                            .doubleValue()
+            );
+            cohort.setRepaymentRate(
+                    cohortLoanDetail.getTotalAmountRepaid()
+                            .divide(totalAmountReceived, 4, RoundingMode.HALF_UP)
+                            .multiply(BigDecimal.valueOf(100))
+                            .doubleValue()
+            );
+        } else {
+            cohort.setDebtPercentage(0.0);
+            cohort.setRepaymentRate(0.0);
+        }
+    }
 
     @Override
     public Page<Cohort> viewAllCohortInAProgram(Cohort cohort) throws MeedlException {
