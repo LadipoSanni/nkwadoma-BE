@@ -197,8 +197,6 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         OrganizationLoanDetail organizationLoanDetail = updateOrganizationLoanDetail(programLoanDetail, currentAmountPaid);
         log.info("Organization loan details after saving {}",organizationLoanDetail);
 
-
-
     }
 
     private OrganizationLoanDetail updateOrganizationLoanDetail(ProgramLoanDetail programLoanDetail, BigDecimal currentAmountPaid) throws MeedlException {
