@@ -144,6 +144,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         log.info("Number of loanees in a cohort on upload {}", savedCohort.getNumberOfLoanees() + loanees.size());
         savedCohort.setNumberOfLoanees(savedCohort.getNumberOfLoanees() + loanees.size());
         savedCohort.setNumberOfLoanRequest(savedCohort.getNumberOfLoanRequest() + loanees.size());
+        savedCohort.setStillInTraining(savedCohort.getStillInTraining() + loanees.size());
         savedCohort.setNumberOfReferredLoanee(savedCohort.getNumberOfReferredLoanee() + loanees.size());
         log.info("Number of loanees in the cohort updated before save {}", savedCohort.getNumberOfLoanees());
         cohortOutputPort.save(savedCohort);
