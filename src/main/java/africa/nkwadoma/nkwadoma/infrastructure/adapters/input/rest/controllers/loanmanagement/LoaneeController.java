@@ -42,14 +42,15 @@ public class LoaneeController {
     private final LoaneeRestMapper loaneeRestMapper;
     private final LoaneeUseCase loaneeUseCase;
 
-    @PostMapping("/invite")
+    @PostMapping("/invite/{cohortId}")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> inviteLoanees(
                                                     @AuthenticationPrincipal Jwt meedlUser,
+                                                    @PathVariable String cohortId,
                                                     @RequestBody List<String> ids) {
 
         List<Loanee> loanees = loaneeRestMapper.map(ids, meedlUser.getClaimAsString("sub"));
-        loanees = loaneeUseCase.inviteLoanees(loanees);
+        loanees = loaneeUseCase.inviteLoanees(loanees, cohortId);
         List<LoaneeResponse> loaneeResponse =
                 loaneeRestMapper.toLoaneeResponse(loanees);
         ApiResponse<List<LoaneeResponse>> apiResponse = ApiResponse.<List<LoaneeResponse>>builder()

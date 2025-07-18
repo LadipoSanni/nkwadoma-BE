@@ -92,7 +92,7 @@ public class LoaneeService implements LoaneeUseCase {
 
 
     @Override
-    public List<Loanee> inviteLoanees(List<Loanee> loanees){
+    public List<Loanee> inviteLoanees(List<Loanee> loanees, String cohortId){
         List<Loanee> loaneesVerified = loanees.stream()
                 .map(loanee -> {
                     String id = null;
@@ -102,6 +102,7 @@ public class LoaneeService implements LoaneeUseCase {
                         validationsForInvitingLoanee(loanee, id);
                         loanee.setUploadedStatus(UploadedStatus.INVITED);
                         loanee = loaneeOutputPort.save(loanee);
+                        getLoanInCohort(loanee, cohortId);
 //                        getLoaneeLoanReferral(loanee);
                     } catch (MeedlException e) {
                         log.error("Loanee with id doesn't exist");
@@ -113,6 +114,18 @@ public class LoaneeService implements LoaneeUseCase {
 
          sendLoaneesEmail(loaneesVerified);
          return loaneesVerified;
+    }
+
+    private void getLoanInCohort(Loanee loanee, String cohortId) {
+
+        try {
+            LoanReferral loanReferral = loanReferralOutputPort.findLoanReferralByLoaneeIdAndCohortId(loanee.getId(), cohortId);
+            LoanOffer loanOffer = loanOfferOutputPort.findLoanOfferById(loanReferral.getId());
+            loanee.setLoanOfferId(loanOffer.getId());
+        } catch (MeedlException e) {
+            log.error("Unable to find loan referral for loanee with id {}", loanee.getId());
+//            throw new RuntimeException(e);
+        }
     }
 
     private void getLoaneeLoanReferral(Loanee loanee) throws MeedlException {
