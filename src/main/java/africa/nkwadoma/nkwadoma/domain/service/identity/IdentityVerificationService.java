@@ -340,7 +340,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
 
     private void handleFailedVerification(UserIdentity userIdentity, PremblyResponse premblyResponse) throws MeedlException {
         log.info("Identity verification failed. {}", premblyResponse);
-        log.info("Identity: Loan referral id {}. Not verified", userIdentity.getId());
+//        log.info("Identity: Loan referral id {}. Not verified", userIdentity.getId());
         createVerificationFailure(userIdentity, premblyResponse.getDetail(), ServiceProvider.PREMBLY);
         premblyResponse.setVerificationResponse(IDENTITY_NOT_VERIFIED.getMessage());
     }
