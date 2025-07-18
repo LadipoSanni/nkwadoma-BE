@@ -65,7 +65,7 @@ public class Loanee {
     private int tenor;
     private String institutionName;
     private String loanReferralId;
-    private String loanOfferId;
+    private String cohortLoaneeId;
 
 
     public void validate() throws MeedlException {

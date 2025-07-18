@@ -7,10 +7,10 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 public interface LoaneeEmailUsecase {
 
     void referLoaneeEmail(String loanReferralId , Loanee loanee) throws MeedlException;
+    void inviteLoaneeEmail(String cohortLoaneeId , Loanee loanee) throws MeedlException;
 
     void sendLoaneeHasBeenReferEmail(UserIdentity userIdentity) throws MeedlException;
 
     void sendLoanRequestApprovalEmail(LoanRequest loanRequest) throws MeedlException;
 
-    void inviteLoaneeEmail(Loanee loanee) throws MeedlException;
 }

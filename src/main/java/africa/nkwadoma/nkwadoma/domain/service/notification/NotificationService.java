@@ -14,7 +14,6 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanDecision;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.meedlexception.MeedlNotificationException;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.notification.Email;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -140,6 +139,21 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
         sendMail(loanee.getUserIdentity(), email);
     }
 
+    @Override
+    public void inviteLoaneeEmail(String cohortLoaneeId, Loanee loanee) throws MeedlException {
+        Context context = emailOutputPort.getNameAndLinkContextAndIndustryNameAndCohortLoaneeId(getLink(loanee.getUserIdentity()),
+                cohortLoaneeId,
+                loanee.getUserIdentity().getFirstName(),
+                loanee.getReferredBy());
+        Email email = Email.builder()
+                .context(context)
+                .subject(LoaneeMessages.LOANEE_REFERRAL_SUBJECT.getMessage())
+                .to(loanee.getUserIdentity().getEmail())
+                .template(LoaneeMessages.LOANEE_REFERRAL.getMessage())
+                .firstName(loanee.getUserIdentity().getFirstName())
+                .build();
+        sendMail(loanee.getUserIdentity(), email);
+    }
 
 
     @Override
@@ -170,21 +184,6 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
                 .build();
 
         sendMail(loanRequest.getUserIdentity(), email);
-    }
-
-    @Override
-    public void inviteLoaneeEmail(Loanee loanee) throws MeedlException {
-        Context context = emailOutputPort.getNameAndLinkContextAndIndustryName(getLink(loanee.getUserIdentity()),
-                loanee.getUserIdentity().getFirstName(),
-                loanee.getReferredBy());
-        Email email = Email.builder()
-                .context(context)
-                .subject(LoaneeMessages.LOANEE_REFERRAL_SUBJECT.getMessage())
-                .to(loanee.getUserIdentity().getEmail())
-                .template(LoaneeMessages.LOANEE_REFERRAL.getMessage())
-                .firstName(loanee.getUserIdentity().getFirstName())
-                .build();
-        sendMail(loanee.getUserIdentity(), email);
     }
 
     @Override

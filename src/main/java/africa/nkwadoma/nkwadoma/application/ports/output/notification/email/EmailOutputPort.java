@@ -19,5 +19,7 @@ public interface EmailOutputPort {
     Context getNameAndLinkContextAndIndustryNameAndLoanReferralId(String link,String loanReferralId, String firstName, String organizationName);
 
 
+    Context getNameAndLinkContextAndIndustryNameAndCohortLoaneeId(String link, String cohortLoaneeId, String firstName, String organizationName);
+
     Context getNameAndDeactivationReasonContext(String firstName, String deactivationReason);
 }
