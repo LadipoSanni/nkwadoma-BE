@@ -130,7 +130,9 @@ public class LoanRequestService implements LoanRequestUseCase {
 
             log.info("Loan request updated: {}", updatedLoanRequest.getUserIdentity());
 
-            sendNotification(loanRequest, loanOffer, updatedLoanRequest);
+            if (!foundLoanRequest.getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)){
+                sendNotification(loanRequest, loanOffer, updatedLoanRequest);
+            }
             return updatedLoanRequest;
         }
         else {

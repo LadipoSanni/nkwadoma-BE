@@ -82,6 +82,15 @@ public class EmailAdapter implements EmailOutputPort {
         context.setVariable(ContextMessages.CONTEXT_ORGANIZATION_NAME.getMessage(),organizationName);
         return context;
     }
+    @Override
+    public Context getNameAndLinkContextAndIndustryNameAndCohortLoaneeId(String link, String cohortLoaneeId, String firstName, String organizationName) {
+        String requestParam = "?cohortLoaneeId=" + cohortLoaneeId;
+        Context context = new Context();
+        context.setVariable(ContextMessages.CONTEXT_TOKEN.getMessage(), link+requestParam);
+        context.setVariable(ContextMessages.CONTEXT_FIRST_NAME.getMessage(), firstName);
+        context.setVariable(ContextMessages.CONTEXT_ORGANIZATION_NAME.getMessage(),organizationName);
+        return context;
+    }
 
     @Override
     public Context getNameAndDeactivationReasonContext(String firstName, String deactivationReason) {
