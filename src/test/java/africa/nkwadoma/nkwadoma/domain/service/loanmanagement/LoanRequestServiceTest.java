@@ -4,7 +4,6 @@ import africa.nkwadoma.nkwadoma.application.ports.input.notification.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlnotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoanDetailOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
@@ -217,7 +216,7 @@ class LoanRequestServiceTest {
                     .thenReturn(Optional.of(new LoanMetrics()));
             when(loanMetricsOutputPort.save(any())).thenReturn(new LoanMetrics());
 
-            when(cohortOutputPort.findCohort(loanRequest.getCohortId())).thenReturn(cohort);
+            when(cohortOutputPort.findCohortById(loanRequest.getCohortId())).thenReturn(cohort);
             when(cohortOutputPort.save(cohort)).thenReturn(cohort);
             when(userIdentityOutputPort.findById(loanRequestBuilt.getActorId()))
                     .thenReturn(new UserIdentity());
@@ -315,7 +314,7 @@ class LoanRequestServiceTest {
         try {
             when(loanRequestOutputPort.findById(loanRequest.getId())).thenReturn(loanRequest);
             when(loanRequestOutputPort.save(any())).thenReturn(loanRequest);
-            when(cohortOutputPort.findCohort(loanRequest.getCohortId())).thenReturn(cohort);
+            when(cohortOutputPort.findCohortById(loanRequest.getCohortId())).thenReturn(cohort);
             when(cohortOutputPort.save(cohort)).thenReturn(cohort);
             when(userIdentityOutputPort.findById(loanRequest.getActorId()))
                     .thenReturn(new UserIdentity());

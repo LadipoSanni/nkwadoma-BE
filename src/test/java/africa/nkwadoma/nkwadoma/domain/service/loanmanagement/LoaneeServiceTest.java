@@ -218,7 +218,7 @@ class LoaneeServiceTest {
     void addNewLoaneeToCohort() throws MeedlException {
         OrganizationEmployeeIdentity mockEmployeeIdentity = new OrganizationEmployeeIdentity();
         mockEmployeeIdentity.setId(mockId);
-        when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
+        when(cohortOutputPort.findCohortById(mockId)).thenReturn(elites);
         when(loaneeOutputPort.findByLoaneeEmail(userIdentity.getEmail())).thenReturn(null);
         firstLoanee.getUserIdentity().setRole(IdentityRole.LOANEE);
         firstLoanee.setActivationStatus(ActivationStatus.ACTIVE);
@@ -248,7 +248,7 @@ class LoaneeServiceTest {
         loaneeLoanDetails.setInitialDeposit(BigDecimal.valueOf(800));
         loaneeLoanDetails.setAmountRequested(BigDecimal.valueOf(0));
         when(loaneeOutputPort.findByLoaneeEmail(firstLoanee.getUserIdentity().getEmail())).thenReturn(null);
-        when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
+        when(cohortOutputPort.findCohortById(mockId)).thenReturn(elites);
         assertThrows(MeedlException.class, () -> loaneeService.addLoaneeToCohort(firstLoanee));
     }
 
@@ -257,7 +257,7 @@ class LoaneeServiceTest {
         loaneeLoanDetails.setAmountRequested(BigDecimal.valueOf(7000));
         elites.setTotalCohortFee(BigDecimal.valueOf(200));
         firstLoanee.setLoaneeLoanDetail(loaneeLoanDetails);
-        when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
+        when(cohortOutputPort.findCohortById(mockId)).thenReturn(elites);
         assertThrows(MeedlException.class, () -> loaneeService.addLoaneeToCohort(firstLoanee));
     }
 
@@ -266,7 +266,7 @@ class LoaneeServiceTest {
         loaneeLoanDetails.setInitialDeposit(BigDecimal.valueOf(7000));
         elites.setTotalCohortFee(BigDecimal.valueOf(200));
         firstLoanee.setLoaneeLoanDetail(loaneeLoanDetails);
-        when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
+        when(cohortOutputPort.findCohortById(mockId)).thenReturn(elites);
         assertThrows(MeedlException.class, () -> loaneeService.addLoaneeToCohort(firstLoanee));
     }
 
@@ -274,7 +274,7 @@ class LoaneeServiceTest {
     @Test
     void cohortTutionHaveToBeUpdatedBeforeAddingALoaneeToACohort() throws MeedlException {
         elites.setTuitionAmount(null);
-        when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
+        when(cohortOutputPort.findCohortById(mockId)).thenReturn(elites);
         assertThrows(MeedlException.class, () -> loaneeService.addLoaneeToCohort(firstLoanee));
     }
 
@@ -397,7 +397,7 @@ class LoaneeServiceTest {
 //            when(creditRegistryOutputPort.getCreditScoreWithBvn(any())).thenReturn(10);
 //            when(aesOutputPort.decryptAES(anyString(), anyString())).thenReturn("decrypted-bvn");
 //            when(loaneeOutputPort.save(any(Loanee.class))).thenReturn(firstLoanee);
-            when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
+            when(cohortOutputPort.findCohortById(mockId)).thenReturn(elites);
             when(programOutputPort.findProgramById(mockId)).thenReturn(atlasProgram);
             when(loanOfferOutputPort.findLoanOfferByLoaneeId(mockId)).thenReturn(loanOffer);
             when(organizationIdentityOutputPort.findById(anyString())).thenReturn(organizationIdentity);
@@ -437,7 +437,7 @@ class LoaneeServiceTest {
             when(userIdentityOutputPort.findById(mockId)).thenReturn(firstLoanee.getUserIdentity());
             when(creditRegistryOutputPort.getCreditScoreWithBvn(any())).thenReturn(10);
             when(loaneeOutputPort.save(any(Loanee.class))).thenReturn(firstLoanee);
-            when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
+            when(cohortOutputPort.findCohortById(mockId)).thenReturn(elites);
             when(programOutputPort.findProgramById(mockId)).thenReturn(atlasProgram);
             when(loanOfferOutputPort.findLoanOfferByLoaneeId(mockId)).thenReturn(loanOffer);
             when(organizationIdentityOutputPort.findById(anyString()))
@@ -460,7 +460,7 @@ class LoaneeServiceTest {
         firstLoanee.getUserIdentity().setBvn("12345678910");
         when(loaneeOutputPort.findByUserId(mockId)).thenReturn(Optional.ofNullable(firstLoanee));
         when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
-        when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
+        when(cohortOutputPort.findCohortById(mockId)).thenReturn(elites);
         when(programOutputPort.findProgramById(mockId)).thenReturn(atlasProgram);
         when(loanOfferOutputPort.findLoanOfferByLoaneeId(mockId)).thenReturn(loanOffer);
         when(organizationIdentityOutputPort.findById(mockId)).thenReturn(organizationIdentity);
@@ -481,7 +481,7 @@ class LoaneeServiceTest {
             when(loaneeOutputPort.findByUserId(mockId)).thenReturn(Optional.ofNullable(firstLoanee));
             when(loaneeOutputPort.findByUserId(mockId)).thenReturn(Optional.of(firstLoanee));
             when(userIdentityOutputPort.findById(mockId)).thenReturn(firstLoanee.getUserIdentity());
-            when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
+            when(cohortOutputPort.findCohortById(mockId)).thenReturn(elites);
             when(programOutputPort.findProgramById(mockId)).thenReturn(atlasProgram);
             when(loanOfferOutputPort.findLoanOfferByLoaneeId(mockId)).thenReturn(loanOffer);
 
@@ -594,7 +594,7 @@ class LoaneeServiceTest {
         try{
             when(loanOutputPort.findLoanById(mockId)).thenReturn(loan);
             when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(foundLoanee);
-            when(cohortOutputPort.findCohort(mockId)).thenReturn(cohort);
+            when(cohortOutputPort.findCohortById(mockId)).thenReturn(cohort);
         } catch (MeedlException e){
             log.info("Error: {}", e.getMessage());
         }
@@ -625,7 +625,7 @@ class LoaneeServiceTest {
         try{
             when(loanOutputPort.findLoanById(mockId)).thenReturn(loan);
             when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(foundLoanee);
-            when(cohortOutputPort.findCohort(mockId)).thenReturn(cohort);
+            when(cohortOutputPort.findCohortById(mockId)).thenReturn(cohort);
         } catch (MeedlException e){
             log.info("Error: {}", e.getMessage());
         }
@@ -678,7 +678,7 @@ class LoaneeServiceTest {
         try{
             when(loanOutputPort.findLoanById(mockId)).thenReturn(loan);
             when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
-            when(cohortOutputPort.findCohort(anyString())).thenReturn(elites);
+            when(cohortOutputPort.findCohortById(anyString())).thenReturn(elites);
             when(loanOutputPort.save(any(Loan.class))).thenReturn(loan);
             when(programOutputPort.findProgramById(mockId)).thenReturn(atlasProgram);
             result = loaneeService.deferLoan(mockId, mockId, reasonForDeferral);
@@ -724,7 +724,7 @@ class LoaneeServiceTest {
         try{
             when(loanOutputPort.findLoanById(mockId)).thenReturn(loan);
             when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(foundLoanee);
-            when(cohortOutputPort.findCohort(anyString())).thenReturn(cohort);
+            when(cohortOutputPort.findCohortById(anyString())).thenReturn(cohort);
             when(loanOutputPort.save(any(Loan.class))).thenReturn(loan);
             result = loaneeService.resumeProgram(mockId, cohort.getId(), userId);
         } catch (Exception e) {
@@ -751,7 +751,7 @@ class LoaneeServiceTest {
         try{
             when(loanOutputPort.findLoanById(mockId)).thenReturn(loan);
             when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(foundLoanee);
-            when(cohortOutputPort.findCohort(anyString())).thenReturn(cohort);
+            when(cohortOutputPort.findCohortById(anyString())).thenReturn(cohort);
         } catch (Exception e) {
             log.info("Error: {}", e.getMessage());
         }
@@ -775,7 +775,7 @@ class LoaneeServiceTest {
                 .thenReturn(true);
 
         when(loanOutputPort.findLoanByLoanOfferId(firstLoanee.getId())).thenReturn(Optional.of(loan));
-        when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
+        when(cohortOutputPort.findCohortById(mockId)).thenReturn(elites);
         when(programOutputPort.findProgramById(mockId)).thenReturn(atlasProgram);
         when(userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER))
                 .thenReturn(Collections.singletonList(userIdentity));
@@ -833,7 +833,7 @@ class LoaneeServiceTest {
             String reason = "School na scam";
             when(loaneeOutputPort.findLoaneeById(any())).thenReturn(firstLoanee);
             elites.setStartDate(LocalDate.now());
-            when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
+            when(cohortOutputPort.findCohortById(mockId)).thenReturn(elites);
             firstLoanee.setCohortId(elites.getId());
             elites.setProgramId(atlasProgram.getId());
             atlasProgram.setDuration(4);
@@ -888,7 +888,7 @@ class LoaneeServiceTest {
         try {
             when(loaneeOutputPort.findLoaneeById(any())).thenReturn(firstLoanee);
             elites.setStartDate(LocalDate.now().minusMonths(6));
-            when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
+            when(cohortOutputPort.findCohortById(mockId)).thenReturn(elites);
             when(loanOutputPort.findLoanById(mockId)).thenReturn(loan);
             firstLoanee.setCohortId(elites.getId());
             elites.setProgramId(atlasProgram.getId());
