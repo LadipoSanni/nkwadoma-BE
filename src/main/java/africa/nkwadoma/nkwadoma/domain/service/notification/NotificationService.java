@@ -14,7 +14,6 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanDecision;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.meedlexception.MeedlNotificationException;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.notification.Email;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -141,9 +140,9 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
     }
 
     @Override
-    public void inviteLoaneeEmail(String loanOfferId, Loanee loanee) throws MeedlException {
-        Context context = emailOutputPort.getNameAndLinkContextAndIndustryNameAndLoanOfferId(getLink(loanee.getUserIdentity()),
-                loanOfferId,
+    public void inviteLoaneeEmail(String loaneeLoanDetailId, Loanee loanee) throws MeedlException {
+        Context context = emailOutputPort.getNameAndLinkContextAndIndustryNameAndLoaneeLoanDetailId(getLink(loanee.getUserIdentity()),
+                loaneeLoanDetailId,
                 loanee.getUserIdentity().getFirstName(),
                 loanee.getReferredBy());
         Email email = Email.builder()
