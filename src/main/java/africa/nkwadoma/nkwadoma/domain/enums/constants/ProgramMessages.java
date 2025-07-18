@@ -13,7 +13,8 @@ public enum ProgramMessages {
     COHORT_EXISTS("Program with cohort cannot be deleted"),
     INVALID_SERVICE_OFFERING("Service Offering must be TRAINING"),
     PROGRAM_DURATION_CANNOT_BE_NEGATIVE("Program duration cannot be zero or negative"),
-    PROGRAM_WITH_LOANEE_CANNOT_BE_EDITED("Program with loanees cannot be edited");
+    PROGRAM_WITH_LOANEE_CANNOT_BE_EDITED("Program with loanees cannot be edited"),
+    PROGRAM_WITH_LOANEE_CANNOT_BE_DELETED("Program with loanees cannot be deleted");
     private final String message;
 
     ProgramMessages(String message) {

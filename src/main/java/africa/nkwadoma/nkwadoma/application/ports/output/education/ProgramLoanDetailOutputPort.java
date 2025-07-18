@@ -10,4 +10,6 @@ public interface ProgramLoanDetailOutputPort {
     ProgramLoanDetail findByProgramId(String id) throws MeedlException;
 
     void delete(String loanDetailsId) throws MeedlException;
+
+    void deleteByProgramId(String id) throws MeedlException;
 }

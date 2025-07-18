@@ -13,4 +13,5 @@ public interface LoanBreakdownOutputPort {
     List<LoanBreakdown> saveAllLoanBreakDown(List<LoanBreakdown> loanBreakdown);
 
 
+    void deleteAllBreakDownAssociateWithProgram(String id) throws MeedlException;
 }
