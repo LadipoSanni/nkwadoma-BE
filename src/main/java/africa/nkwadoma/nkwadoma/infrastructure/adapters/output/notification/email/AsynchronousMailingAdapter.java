@@ -135,8 +135,7 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
     }
 
     private void invite(Loanee loanee) throws MeedlException {
-//        loaneeEmailUsecase.inviteLoaneeEmail(loanee);
-        loaneeEmailUsecase.referLoaneeEmail(loanee.getLoanOfferId(),loanee);
+        loaneeEmailUsecase.inviteLoaneeEmail(loanee.getLoanOfferId(),loanee);
 
     }
 
