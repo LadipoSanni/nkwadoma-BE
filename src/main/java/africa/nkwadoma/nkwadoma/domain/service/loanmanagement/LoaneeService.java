@@ -120,8 +120,8 @@ public class LoaneeService implements LoaneeUseCase {
 
         try {
             CohortLoanee cohortLoanee = cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(loanee.getId(), cohortId);
-            LoaneeLoanDetail loaneeLoanDetail = loaneeLoanDetailsOutputPort.findByCohortLoaneeId(cohortLoanee.getId());
-            loanee.setLoaneeLoaneeDetailId(loaneeLoanDetail.getId());
+//            LoaneeLoanDetail loaneeLoanDetail = loaneeLoanDetailsOutputPort.findByCohortLoaneeId(cohortLoanee.getId());
+            loanee.setCohortLoaneeId(cohortLoanee.getId());
         } catch (MeedlException e) {
             log.error("Unable to find loan referral for loanee with id {}", loanee.getId());
         }
