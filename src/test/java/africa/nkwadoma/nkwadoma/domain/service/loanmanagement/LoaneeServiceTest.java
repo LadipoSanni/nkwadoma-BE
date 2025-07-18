@@ -926,6 +926,27 @@ class LoaneeServiceTest {
         assertEquals(UploadedStatus.ADDED, loaneeCohort.getUploadedStatus());
         verify(cohortLoaneeOutputPort, times(1)).findAllLoaneeInCohort(cohortLoanee, pageSize, pageNumber);
     }
+    @Test
+    void viewLoaneeLoanDetail_withValidId_returnsLoanDetail() throws MeedlException {
+        when(loaneeLoanDetailsOutputPort.findByCohortLoaneeId(mockId))
+                .thenReturn(loaneeLoanDetails);
+
+        LoaneeLoanDetail result = loaneeService.viewLoaneeLoanDetail(mockId);
+
+        assertNotNull(result);
+        assertEquals(loaneeLoanDetails.getAmountRequested(), result.getAmountRequested());
+        verify(loaneeLoanDetailsOutputPort, times(1)).findByCohortLoaneeId(mockId);
+    }
+    @Test
+    void viewLoaneeLoanDetail_withInvalidUUID_throwsMeedlException() {
+        String invalidId = "not-a-uuid";
+
+        MeedlException exception = assertThrows(MeedlException.class,
+                () -> loaneeService.viewLoaneeLoanDetail(invalidId));
+
+        assertEquals("Provide valid loanee loan detail id", exception.getMessage());
+    }
+
 
     @Test
     void viewAllLoaneeInCohortWithUploadedInvited() throws MeedlException {
