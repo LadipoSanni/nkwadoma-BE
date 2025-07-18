@@ -102,20 +102,20 @@ class IdentityVerificationServiceTest {
     @Test
     void verifyIdentityWithInvalidBvn() {
         identityVerification.setEncryptedBvn(StringUtils.EMPTY);
-        assertThrows(MeedlException.class, () -> identityVerificationService.verifyIdentity(identityVerification));
+        assertThrows(MeedlException.class, () -> identityVerificationService.verifyIdentity(testId,identityVerification));
     }
 
     @Test
     void verifyIdentityWithInvalidNin() {
         identityVerification.setEncryptedNin(StringUtils.SPACE);
-        assertThrows(MeedlException.class, () -> identityVerificationService.verifyIdentity(identityVerification));
+        assertThrows(MeedlException.class, () -> identityVerificationService.verifyIdentity(testId,identityVerification));
     }
 
     @Test
     void verifyIdentityOfBlacklistedReferral() throws MeedlException {
         when(loanReferralOutputPort.findLoanReferralById(identityVerification.getLoanReferralId())).thenReturn(Optional.of(loanReferral));
         when(identityVerificationFailureRecordOutputPort.countByReferralId(loanReferral.getId())).thenReturn(5L);
-        assertThrows(IdentityException.class, () -> identityVerificationService.verifyIdentity(identityVerification));
+        assertThrows(IdentityException.class, () -> identityVerificationService.verifyIdentity(testId,identityVerification));
     }
 
     @Test
@@ -133,7 +133,7 @@ class IdentityVerificationServiceTest {
                 premblyBvnResponse);
 //        when(userIdentityOutputPort.findById(loanReferral.getLoanee().getUserIdentity().getId()
 //        )).thenReturn(favour);
-        String response = identityVerificationService.verifyIdentity(identityVerification);
+        String response = identityVerificationService.verifyIdentity(testId,identityVerification);
         assertEquals(IDENTITY_NOT_VERIFIED.getMessage(), response);
     }
 
@@ -141,7 +141,7 @@ class IdentityVerificationServiceTest {
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invalid-uuid"})
     void verifyIdentityWithInvalidLoanReferralId(String invalidId) {
         identityVerification.setLoanReferralId(invalidId);
-        assertThrows(MeedlException.class, () -> identityVerificationService.verifyIdentity(identityVerification));
+        assertThrows(MeedlException.class, () -> identityVerificationService.verifyIdentity(testId,identityVerification));
     }
 
     @ParameterizedTest
