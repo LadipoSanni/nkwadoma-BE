@@ -2,9 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.enti
 
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortLoaneeEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -19,6 +17,7 @@ import java.math.BigDecimal;
 public class LoaneeLoanBreakdownEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String loaneeLoanBreakdownId;
     private String itemName;
     private BigDecimal itemAmount = BigDecimal.ZERO;

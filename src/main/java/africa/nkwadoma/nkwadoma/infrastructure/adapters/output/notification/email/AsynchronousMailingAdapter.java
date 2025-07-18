@@ -47,6 +47,7 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
             try {
                 boolean previoslyReferred = cohortLoaneeOutputPort.checkIfLoaneeHasBeenPreviouslyReferred(
                         loanees.get(loaneeCount).getId());
+                log.info("previosly referred: {}", previoslyReferred);
                 if (previoslyReferred){
                     sendNotification(loanReferrals.get(loaneeCount).getId(),userIdentity, loanees.get(loaneeCount));
                 }else {
