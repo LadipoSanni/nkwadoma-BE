@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -52,11 +53,48 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
                 }else {
                     refer(loanReferrals.get(loaneeCount).getId(),loanees.get(loaneeCount));
                 }
-                notifyAllPortfolioManager();
+                notifyAllPortfolioManagerForLoanReferral(loanReferrals);
             } catch (MeedlException e) {
                 log.warn("Error sending actor email on loan referral {}", e.getMessage());
             }
         };
+    }
+
+    private void notifyAllPortfolioManagerForLoanReferral(List<LoanReferral> loanReferrals) throws MeedlException {
+        String message = getEmailsOfUsersReferred(loanReferrals);
+        for (UserIdentity userIdentity : userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER)) {
+
+            notifyPortfolioManagerForLoanReferral(userIdentity, message);
+        }
+    }
+    public String getEmailsOfUsersReferred(List<LoanReferral> loanReferrals) {
+        String initialMessage = """
+                We are pleased to inform you that a new loanee has been referred for a loan under your management.\s
+                
+                Review the referral details and validate the applicant's information.\s
+                Initiate the loan assessment process to evaluate the applicant's eligibility.\s
+                Contact the applicant to gather any additional required documentation.""";
+        String emails = loanReferrals.stream()
+                .map(referral -> referral.getLoanee().getUserIdentity().getEmail())
+                .collect(Collectors.joining("\n"));
+
+        return initialMessage + "\n" + emails + "\n";
+    }
+
+
+    private void notifyPortfolioManagerForLoanReferral(UserIdentity userIdentity, String message) throws MeedlException {
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .user(userIdentity)
+                .title("A New Loan Referral Has Been Made")
+                .notificationFlag(NotificationFlag.LOAN_REFERRAL)
+                .contentDetail(message)
+                .timestamp(LocalDateTime.now())
+                .senderMail(userIdentity.getEmail())
+                .senderFullName(userIdentity.getFirstName()+" "+ userIdentity.getLastName())
+                .callToAction(true)
+                .contentId(userIdentity.getId())
+                .build();
+        meedlNotificationOutputPort.save(meedlNotification);
     }
 
     private void sendNotification(String loanReferralId,UserIdentity userIdentity, Loanee loanee) throws MeedlException {
@@ -64,7 +102,7 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
                 .user(loanee.getUserIdentity())
                 .title("Loan Referral")
                 .notificationFlag(NotificationFlag.LOAN_REFERRAL)
-                .contentDetail("Loan Referral sent")
+                .contentDetail("We’re excited to inform you that you’ve been referred for another loan.")
                 .timestamp(LocalDateTime.now())
                 .senderMail(userIdentity.getEmail())
                 .senderFullName(userIdentity.getFirstName()+" "+ userIdentity.getLastName())
@@ -81,6 +119,7 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
     }
     private void notifyPortfolioManager(UserIdentity userIdentity) throws MeedlException {
         loaneeEmailUsecase.sendLoaneeHasBeenReferEmail(userIdentity);
+
     }
 
     private void refer(String loanReferralId,Loanee loanee) throws MeedlException {
