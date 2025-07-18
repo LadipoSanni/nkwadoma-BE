@@ -1,5 +1,6 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanee;
 
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanBreakdownResponse;
 import lombok.Getter;
 import lombok.Setter;
 

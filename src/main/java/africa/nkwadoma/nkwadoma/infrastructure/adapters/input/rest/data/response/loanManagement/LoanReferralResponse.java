@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement;
 
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.*;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanBreakdown;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanee.LoaneeLoanBreakDownResponse;
 import lombok.*;
 
 import java.math.*;

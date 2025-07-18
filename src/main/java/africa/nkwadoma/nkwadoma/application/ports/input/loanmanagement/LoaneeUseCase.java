@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -14,6 +15,8 @@ public interface LoaneeUseCase {
     List<Loanee> inviteLoanees(List<Loanee> loanees, String cohortId);
 
     Loanee addLoaneeToCohort(Loanee loanee) throws MeedlException;
+
+    LoaneeLoanDetail viewLoaneeLoanDetail(String cohortLoaneeId) throws MeedlException;
 
     void increaseNumberOfLoaneesInOrganization(Cohort cohort, int size) throws MeedlException;
 

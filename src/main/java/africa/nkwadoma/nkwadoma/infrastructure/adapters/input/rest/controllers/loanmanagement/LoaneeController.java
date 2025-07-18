@@ -8,14 +8,16 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeDeferRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeStatusRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.CohortLoaneeResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.CohortLoaneeResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanBeneficiaryResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoaneeResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanee.LoaneeLoanDetailResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanee.LoaneeResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loanManagement.LoaneeRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.constants.ControllerConstant;
 import jakarta.validation.Valid;
@@ -164,6 +166,22 @@ public class LoaneeController {
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
+
+    @GetMapping("loan/detail")
+    @PreAuthorize("hasRole('LOANEE')")
+    public ResponseEntity<ApiResponse<?>> viewLoaneeLoanDetail(@RequestParam("cohortLoaneeId")String cohortLoaneeId) throws MeedlException {
+        log.info("request that came in  for view loanee loan detail with cohort loanee id {}", cohortLoaneeId);
+        LoaneeLoanDetail loaneeLoanDetail = loaneeUseCase.viewLoaneeLoanDetail(cohortLoaneeId);
+        LoaneeLoanDetailResponse loanDetailResponse = loaneeRestMapper.toLoaneeLoanDetail(loaneeLoanDetail);
+
+        ApiResponse<LoaneeLoanDetailResponse> apiResponse = ApiResponse.<LoaneeLoanDetailResponse>builder()
+                .data(loanDetailResponse)
+                .message(LOANEE_LOAN_DETAIL_VIEW)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+
 
     @GetMapping("loanProduct/loanees/{loanProductId}")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
