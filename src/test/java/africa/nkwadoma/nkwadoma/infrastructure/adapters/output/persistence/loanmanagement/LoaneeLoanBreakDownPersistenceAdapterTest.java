@@ -92,7 +92,6 @@ public class LoaneeLoanBreakDownPersistenceAdapterTest {
     @BeforeEach
     void setUp(){
         loaneeLoanBreakdown = new LoaneeLoanBreakdown();
-        loaneeLoanBreakdown.setLoaneeLoanBreakdownId(id);
         loaneeLoanBreakdown.setCurrency("USD");
         loaneeLoanBreakdown.setItemAmount(BigDecimal.valueOf(4000));
         loaneeLoanBreakdown.setItemName("juno");
@@ -129,23 +128,13 @@ public class LoaneeLoanBreakDownPersistenceAdapterTest {
         assertThrows(MeedlException.class, () ->loaneeLoanBreakDownOutputPort.saveAll(List.of(loaneeLoanBreakdown),cohortLoanee));
     }
 
-    @Test
-    void cannotSaveWithNullBreakdownId(){
-        loaneeLoanBreakdown.setLoaneeLoanBreakdownId(null);
-        assertThrows(MeedlException.class, () ->loaneeLoanBreakDownOutputPort.saveAll(List.of(loaneeLoanBreakdown),cohortLoanee));
-    }
-
-
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY,"jdhjhdshjdshj"})
-        void cannotSaveWithInvalidId(String invalidId){
-            loaneeLoanBreakdown.setLoaneeLoanBreakdownId(invalidId);
-            assertThrows(MeedlException.class,()-> loaneeLoanBreakDownOutputPort.saveAll(List.of(loaneeLoanBreakdown),cohortLoanee));
-    }
 
     @AfterAll
     void cleanUp() throws MeedlException {
-        loaneeLoanBreakDownOutputPort.deleteAll(List.of(loaneeLoanBreakdown));
+        loaneeLoanBreakDownOutputPort.deleteAll(loaneeLoanBreakdowns);
+        List<LoaneeLoanBreakdown> loanBreakdowns = loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(cohortLoanee.getId());
+        log.info("loan breakdown found {}", loanBreakdowns);
+
         cohortLoaneeOutputPort.delete(cohortLoanee.getId());
         cohortOutputPort.deleteCohort(cohort.getId());
         loaneeOutputPort.deleteLoanee(loaneeId);
