@@ -1,5 +1,4 @@
-name: Deploy Systest to Local
-
+name: QA Automation Tests
 on:
   push:
     branches: [dev]
