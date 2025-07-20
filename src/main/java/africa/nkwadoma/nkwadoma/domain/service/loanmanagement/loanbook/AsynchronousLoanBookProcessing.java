@@ -307,7 +307,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                         log.info("loan referral is {}", loanReferral);
                         LoanRequest loanRequest = acceptLoanRequest(cohortLoanee, loanReferral, loanBook);
                         log.info("loan request is {}", loanRequest);
-//                        loanRequest.setLoanee(cohortLoanee.getLoanee());
+                        loanRequest.setLoanee(cohortLoanee.getLoanee());
                         acceptLoanOffer(loanRequest);
                         startLoan(loanRequest,cohortLoanee.getUpdatedAt() );
                     } catch (MeedlException e) {
