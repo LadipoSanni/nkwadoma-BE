@@ -23,4 +23,6 @@ public class LoaneeLoanDetailEntity {
     private BigDecimal amountReceived;
     private BigDecimal amountRepaid;
     private BigDecimal amountOutstanding;
+    private double interestRate;
+    private BigDecimal interestIncurred;
 }

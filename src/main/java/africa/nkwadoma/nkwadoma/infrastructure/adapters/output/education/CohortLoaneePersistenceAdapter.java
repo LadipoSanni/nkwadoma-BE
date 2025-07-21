@@ -157,4 +157,11 @@ public class CohortLoaneePersistenceAdapter implements CohortLoaneeOutputPort {
         }
         cohortLoaneeRepository.updateStatusByIds(cohortId,loaneeIds, loaneeStatus);
     }
+
+    @Override
+    public CohortLoanee findCohortLoaneeByLoanRequestId(String loanRequestId) throws MeedlException {
+        MeedlValidator.validateUUID(loanRequestId, "Loan request id is required");
+        CohortLoaneeEntity cohortLoaneeEntity = cohortLoaneeRepository.findCohortLoaneeByLoanRequestId(loanRequestId);
+        return cohortLoaneeMapper.toCohortLoanee(cohortLoaneeEntity);
+    }
 }

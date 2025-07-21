@@ -209,6 +209,7 @@ public class TestData {
         loanRequest.setLoanAmountRequested(BigDecimal.valueOf(900000));
         loanRequest.setStatus(LoanRequestStatus.NEW);
         loanRequest.setLoanReferralStatus(LoanReferralStatus.ACCEPTED);
+        loanRequest.setOnboardingMode(OnboardingMode.EMAIL_REFERRED);
         loanRequest.setReferredBy("Brown Hills Institute");
         loanRequest.setDateTimeApproved(LocalDateTime.now());
         loanRequest.setCreatedDate(LocalDateTime.now());
