@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -105,6 +106,10 @@ public interface RepaymentHistoryRepository extends JpaRepository<RepaymentHisto
     );
 
     List<RepaymentHistoryEntity> findAllByLoanee_IdAndCohortIdOrderByPaymentDateTimeAsc(String loaneeId, String cohortId);
+
+    @Modifying
+    @Query("DELETE FROM RepaymentHistoryEntity r WHERE r.id IN :ids")
+    void deleteByIds(@Param("ids") List<String> ids);
 
 
 }

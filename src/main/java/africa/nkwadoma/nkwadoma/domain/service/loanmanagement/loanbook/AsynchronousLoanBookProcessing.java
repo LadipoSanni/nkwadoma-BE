@@ -39,6 +39,7 @@ import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.stereotype.Component;
@@ -123,7 +124,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         log.info("Set of loanees that made payments size : {}, set",loaneesThatMadePayment.size());
         Map<String, List<RepaymentHistory>> mapOfRepaymentHistoriesForEachLoanee = getRepaymentHistoriesForLoanees(loaneesThatMadePayment, convertedRepaymentHistories);
 //        printRepaymentCountsPerLoanee(mapOfRepaymentHistoriesForEachLoanee);
-        processRepaymentCalculation(mapOfRepaymentHistoriesForEachLoanee, repaymentHistoryBook.getCohort().getId(), repaymentHistoryBook);
+        processRepaymentCalculation(mapOfRepaymentHistoriesForEachLoanee, repaymentHistoryBook.getCohort(), repaymentHistoryBook);
         log.info("Repayment record uploaded..");
     }
 
@@ -166,29 +167,27 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
 
     public void processRepaymentCalculation(
             Map<String, List<RepaymentHistory>> mapOfRepaymentHistoriesForEachLoanee,
-            String cohortId,
+            Cohort cohort,
             LoanBook repaymentRecordBook) throws MeedlException {
 
         for (Map.Entry<String, List<RepaymentHistory>> entry : mapOfRepaymentHistoriesForEachLoanee.entrySet()) {
             String loaneeId = entry.getKey();
             List<RepaymentHistory> repaymentHistories = entry.getValue();
-            BigDecimal totalAmountRepaid = loanCalculationUseCase.calculateCurrentTotalAmountRepaid(repaymentHistories, loaneeId, cohortId);
-//            repaymentRecordBook.setRepaymentHistories(repaymentHistories);
-
-            calculateLoaneeLoanDetails(cohortId, loaneeId, totalAmountRepaid);
-
+            Loanee loanee = loaneeOutputPort.findLoaneeById(loaneeId);
+            if(ObjectUtils.isNotEmpty(loanee)){
+                BigDecimal currentAmountRepaid = loanCalculationUseCase.calculateCurrentAmountPaid(repaymentHistories);
+                loanCalculationUseCase.calculateLoaneeLoanRepaymentHistory(repaymentHistories, loanee, cohort);
+                calculateLoaneeLoanDetails(cohort.getId(), currentAmountRepaid);
+            }
         }
         List<RepaymentHistory> savedRepaymentHistories = repaymentHistoryUseCase.saveCohortRepaymentHistory(repaymentRecordBook);
         log.info("repayment histories for loanees {}", savedRepaymentHistories);
         log.info("Done processing accumulated repayments.");
     }
 
-    private void calculateLoaneeLoanDetails(String cohortId, String loaneeId, BigDecimal totalAmountRepaid) throws MeedlException {
-
-        BigDecimal currentAmountPaid = updateLoaneeLoanDetail(totalAmountRepaid,cohortId, loaneeId);
+    private void calculateLoaneeLoanDetails(String cohortId,BigDecimal currentAmountPaid) throws MeedlException {
 
         CohortLoanDetail cohortLoanDetail = updateCohortLoanDetail(cohortId, currentAmountPaid);
-
         ProgramLoanDetail programLoanDetail = updateProgramLoanDetail(cohortLoanDetail, currentAmountPaid);
 
         OrganizationLoanDetail organizationLoanDetail = updateOrganizationLoanDetail(programLoanDetail, currentAmountPaid);

@@ -8,7 +8,6 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 public interface RepaymentHistoryUseCase {
-    List<RepaymentHistory> saveCohortRepaymentHistory(LoanBook loanBook) throws MeedlException;
 
     Page<RepaymentHistory>  findAllRepaymentHistory(RepaymentHistory repaymentHistory, int pageSize, int pageNumber) throws MeedlException;
 

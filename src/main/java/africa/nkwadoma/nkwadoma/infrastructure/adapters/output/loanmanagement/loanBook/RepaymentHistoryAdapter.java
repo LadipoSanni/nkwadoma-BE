@@ -14,6 +14,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.loanBook.RepaymentHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -125,6 +126,19 @@ public class RepaymentHistoryAdapter implements RepaymentHistoryOutputPort {
                 .stream()
                 .map(repaymentHistoryMapper::map)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void deleteMultipleRepaymentHistory(List<String> repaymentHistoryIds) {
+        repaymentHistoryRepository.deleteByIds(repaymentHistoryIds
+                                        .stream()
+                                        .filter(StringUtils::isNotEmpty)
+                                        .toList());
+    }
+
+    @Override
+    public List<RepaymentHistory> saveAllRepaymentHistory(List<RepaymentHistory> currentRepaymentHistories) {
+        return List.of();
     }
 
 }

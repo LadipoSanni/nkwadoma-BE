@@ -22,4 +22,8 @@ public interface RepaymentHistoryOutputPort {
     RepaymentHistory findLatestRepayment(String loaneeId, String cohortId) throws MeedlException;
 
     List<RepaymentHistory> findAllRepaymentHistoryForLoan(String loaneeId, String cohortId) throws MeedlException;
+
+    void deleteMultipleRepaymentHistory(List<String> repaymentHistoryIds);
+
+    List<RepaymentHistory> saveAllRepaymentHistory(List<RepaymentHistory> currentRepaymentHistories);
 }
