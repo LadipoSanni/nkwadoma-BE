@@ -117,12 +117,12 @@ public class LoanRequestService implements LoanRequestUseCase {
     }
 
     private LoanRequest respondToLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
-        log.info("Responding to loan request : {} , loan request decision : {}", loanRequest,loanRequest.getLoanRequestDecision());
+        log.info("Responding to loan request : {} \n loan request decision : {}", loanRequest,loanRequest.getLoanRequestDecision());
         LoanRequest updatedLoanRequest;
         if (loanRequest.getLoanRequestDecision() == LoanDecision.ACCEPTED) {
             if (!foundLoanRequest.isVerified() &&
-            !foundLoanRequest.getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)){
-                log.info("The loanee for this loan request is not verified. Onboarding mode is: {}. {}", foundLoanRequest.getOnboardingMode(), LoanMessages.LOAN_REQUEST_CANNOT_BE_APPROVED.getMessage());
+                    !foundLoanRequest.getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)){
+                log.error("The loanee for this loan request is not verified. {} \n Onboarding mode is: {}  }", LoanMessages.LOAN_REQUEST_CANNOT_BE_APPROVED.getMessage(), foundLoanRequest.getOnboardingMode());
                 throw new LoanException(LoanMessages.LOAN_REQUEST_CANNOT_BE_APPROVED.getMessage());
             }
             updatedLoanRequest = approveLoanRequest(loanRequest, foundLoanRequest);
@@ -137,6 +137,7 @@ public class LoanRequestService implements LoanRequestUseCase {
             log.info("Loan request updated: {}", updatedLoanRequest.getUserIdentity());
 
             if (!foundLoanRequest.getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)){
+                log.info("Loanee is not uploaded for disbursed loan, notification is sent");
                 sendNotification(loanRequest, loanOffer, updatedLoanRequest);
             }
             return updatedLoanRequest;
@@ -157,7 +158,7 @@ public class LoanRequestService implements LoanRequestUseCase {
     }
 
     private void updateLoaneeLoanDetailInterestRate(LoanRequest updatedLoanRequest) throws MeedlException {
-        CohortLoanee cohortLoanee = cohortLoaneeOutputPort.findCohortLoaneeByLoanRequestId(updatedLoanRequest.getId());
+//        CohortLoanee cohortLoanee = cohortLoaneeOutputPort.findCohortLoaneeByLoanRequestId(updatedLoanRequest.getId());
 
         LoanReferral loanReferral = loanReferralOutputPort.findById(updatedLoanRequest.getId());
         LoaneeLoanDetail loaneeLoanDetail = loaneeLoanDetailsOutputPort.findByCohortLoaneeId(loanReferral.getCohortLoanee().getId());

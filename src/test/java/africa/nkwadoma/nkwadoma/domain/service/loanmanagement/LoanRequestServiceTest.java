@@ -16,6 +16,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -47,6 +48,8 @@ class LoanRequestServiceTest {
     @Mock
     private LoanRequestOutputPort loanRequestOutputPort;
     @Mock
+    private LoanReferralOutputPort loanReferralOutputPort;
+    @Mock
     private LoanProductOutputPort loanProductOutputPort;
     @Mock
     private AsynchronousMailingOutputPort asynchronousMailingOutputPort;
@@ -65,6 +68,8 @@ class LoanRequestServiceTest {
     @Mock
     private LoanRequestMapper loanRequestMapper;
     @Mock
+    private LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
+    @Mock
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     @Mock
     private LoanMetricsOutputPort loanMetricsOutputPort;
@@ -76,6 +81,7 @@ class LoanRequestServiceTest {
     @Mock
     private LoaneeOutputPort loaneeOutputPort;
     private UserIdentity userIdentity;
+    private LoanReferral loanReferral;
     @Mock
     private CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
     @Mock
@@ -93,6 +99,8 @@ class LoanRequestServiceTest {
 
         LoaneeLoanDetail loaneeLoanDetail = TestData.createTestLoaneeLoanDetail();
         Loanee loanee = TestData.createTestLoanee(userIdentity, loaneeLoanDetail);
+        CohortLoanee cohortLoanee = TestData.buildCohortLoanee(loanee, cohort, loaneeLoanDetail, "1886df42-1f75-4d17-bdef-e0b016707885" );
+        loanReferral = TestData.buildLoanReferral(cohortLoanee, LoanReferralStatus.PENDING);
         loanee.setOnboardingMode(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS);
         LoaneeLoanBreakdown loaneeLoanBreakdown =
                 TestData.createTestLoaneeLoanBreakdown("1886df42-1f75-4d17-bdef-e0b016707885");
@@ -199,14 +207,15 @@ class LoanRequestServiceTest {
         try {
             Loanee loanee = Loanee.builder().onboardingMode(OnboardingMode.EMAIL_REFERRED).userIdentity(UserIdentity.builder().build()).build();
             // Setup stubs
-            LoanRequest loanRequestBuilt = LoanRequest.builder().id(testId).isVerified(true)
+            LoanRequest loanRequestBuilt = LoanRequest.builder().id(testId).isVerified(Boolean.TRUE)
                     .onboardingMode(OnboardingMode.EMAIL_REFERRED).loanProductId(testId)
                     .status(LoanRequestStatus.NEW).loanAmountApproved(BigDecimal.valueOf(5000))
                     .loanRequestDecision(LoanDecision.ACCEPTED).loanAmountRequested(BigDecimal.valueOf(5000))
-                    .loaneeId(testId).userIdentity(UserIdentity.builder().firstName("first name").lastName("hshsh")
+                    .loaneeId(testId).userIdentity(UserIdentity.builder().isIdentityVerified(Boolean.TRUE).firstName("first name").lastName("hshsh")
                             .email("email@gmail.com").build()).loanee(loanee).build();
-            when(loanRequestOutputPort.findById(anyString())).thenReturn(loanRequestBuilt);
+//            when(loanRequestOutputPort.findById(anyString())).thenReturn(loanRequestBuilt);
             when(loanProductOutputPort.findById(loanRequestBuilt.getLoanProductId())).thenReturn(loanProduct);
+            when(loanProductOutputPort.save(any())).thenReturn(loanProduct);
             when(loanOfferUseCase.createLoanOffer(any())).thenReturn(loanOffer);
             when(loanRequestMapper.updateLoanRequest(any(), any())).thenReturn(loanRequestBuilt);
             when(loanRequestOutputPort.save(any())).thenReturn(loanRequestBuilt);
@@ -216,10 +225,20 @@ class LoanRequestServiceTest {
                     .thenReturn(Optional.of(new LoanMetrics()));
             when(loanMetricsOutputPort.save(any())).thenReturn(new LoanMetrics());
 
+
+//            when(loanRequestOutputPort.findById(any())).thenReturn(loanReferral)
+            when(loanRequestOutputPort.findById(any())).thenReturn(loanRequestBuilt);
+            when(loanReferralOutputPort.findById(any())).thenReturn(loanReferral);
+            when(loaneeLoanDetailsOutputPort.findByCohortLoaneeId(any())).thenReturn(new LoaneeLoanDetail());
+            when(loaneeLoanDetailsOutputPort.save(any())).thenReturn(new LoaneeLoanDetail());
+
+
             when(cohortOutputPort.findCohortById(loanRequest.getCohortId())).thenReturn(cohort);
             when(cohortOutputPort.save(cohort)).thenReturn(cohort);
             when(userIdentityOutputPort.findById(loanRequestBuilt.getActorId()))
                     .thenReturn(new UserIdentity());
+            when(loaneeLoanDetailsOutputPort.findByCohortLoaneeId(any())).thenReturn(new LoaneeLoanDetail());
+            when(loaneeLoanDetailsOutputPort.save(any())).thenReturn(new LoaneeLoanDetail());
 
             when(loaneeOutputPort.findLoaneeById(loanRequestBuilt.getLoaneeId())).thenReturn(loanee);
             LoanRequest response = loanRequestService.respondToLoanRequest(loanRequestBuilt);
