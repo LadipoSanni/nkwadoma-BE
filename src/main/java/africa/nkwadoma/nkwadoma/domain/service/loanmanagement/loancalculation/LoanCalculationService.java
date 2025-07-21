@@ -24,6 +24,7 @@ import java.util.List;
 public class LoanCalculationService implements LoanCalculationUseCase {
     private final RepaymentHistoryOutputPort repaymentHistoryOutputPort;
 
+
     @Override
     public List<RepaymentHistory> sortRepaymentsByDateTimeAscending(List<RepaymentHistory> repayments) throws MeedlException {
         log.info("Started the sorting ");
@@ -102,6 +103,10 @@ public class LoanCalculationService implements LoanCalculationUseCase {
         log.info("The repayment histories after adding up total amount repaid {}", runningTotal);
 
         return runningTotal;
+    }
+    public static BigDecimal calculateInterest(BigDecimal outstanding, long daysBetween) {
+        BigDecimal dailyRate = MONTHLY_INTEREST_RATE.divide(BigDecimal.valueOf(DAYS_IN_MONTH), 10, RoundingMode.HALF_UP);
+        return outstanding.multiply(dailyRate).multiply(BigDecimal.valueOf(daysBetween)).setScale(2, RoundingMode.HALF_UP);
     }
 
     private static BigDecimal calculateTotalAmountRepaidPerRepayment(RepaymentHistory repayment, BigDecimal runningTotal) {
