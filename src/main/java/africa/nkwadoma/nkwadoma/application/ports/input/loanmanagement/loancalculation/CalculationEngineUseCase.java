@@ -6,7 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import java.math.BigDecimal;
 import java.util.List;
 
-public interface LoanCalculationUseCase {
+public interface CalculationEngineUseCase {
 
     List<RepaymentHistory> sortRepaymentsByDateTimeAscending(List<RepaymentHistory> repayments)throws MeedlException;
 
