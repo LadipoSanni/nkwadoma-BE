@@ -96,7 +96,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
         repaymentHistories = sortRepaymentsByDateTimeAscending(repaymentHistories);
 
         LocalDateTime lastDate = repaymentHistories.getLast().getPaymentDateTime();
-        BigDecimal previousOutstandingAmount = BigDecimal.ZERO;
+        BigDecimal previousOutstandingAmount = null;
 
         LoaneeLoanDetail loaneeLoanDetail = getLoaneeLoanDetail(loaneeId, cohortId);
         
@@ -129,6 +129,9 @@ public class CalculationEngine implements CalculationEngineUseCase {
     }
 
     private BigDecimal getPreviousAmountOutstanding(BigDecimal previousOutstanding, LoaneeLoanDetail loaneeLoanDetail) {
+        if (ObjectUtils.isNotEmpty(previousOutstanding)){
+            return previousOutstanding;
+        }
         return loaneeLoanDetail.getAmountReceived();
     }
 
