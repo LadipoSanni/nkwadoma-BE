@@ -23,7 +23,7 @@ public class LoaneeLoanDetail {
     private BigDecimal amountRepaid;
     private BigDecimal amountOutstanding;
     private double interestRate;
-    private double interestIncurred;
+    private BigDecimal interestIncurred;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateNegativeAmount(initialDeposit,"Initial deposit");
