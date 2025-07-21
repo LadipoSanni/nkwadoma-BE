@@ -5,7 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.AsynchronousLoanBookProcessingUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.LoanUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.RepaymentHistoryUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loancalculation.LoanCalculationUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loancalculation.CalculationEngineUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
@@ -39,7 +39,6 @@ import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.stereotype.Component;
@@ -72,7 +71,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     private final CohortOutputPort cohortOutputPort;
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
     private final LoanReferralOutputPort loanReferralOutputPort;
-    private final LoanCalculationUseCase loanCalculationUseCase;
+    private final CalculationEngineUseCase loanCalculationUseCase;
     private final LoanUseCase loanUseCase;
     private final AesOutputPort aesOutputPort;
     private final CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
@@ -285,15 +284,14 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     }
 
     private Set<String> getSetOfLoanees(List<RepaymentHistory> repaymentHistories) {
-        Set<String> repayingUserEmails = repaymentHistories.stream()
-                .map(RepaymentHistory::getLoanee)
-                .filter(Objects::nonNull)
-                .map(Loanee::getUserIdentity)
-                .filter(Objects::nonNull)
-                .map(UserIdentity::getEmail)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-        return repayingUserEmails;
+        return repaymentHistories.stream()
+                            .map(RepaymentHistory::getLoanee)
+                            .filter(Objects::nonNull)
+                            .map(Loanee::getUserIdentity)
+                            .filter(Objects::nonNull)
+                            .map(UserIdentity::getEmail)
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toSet());
     }
 
     private void completeLoanProcessing(LoanBook loanBook) {
