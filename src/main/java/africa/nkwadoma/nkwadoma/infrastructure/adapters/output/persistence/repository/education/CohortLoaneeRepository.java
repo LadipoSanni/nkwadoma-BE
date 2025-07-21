@@ -149,4 +149,14 @@ public interface CohortLoaneeRepository extends JpaRepository<CohortLoaneeEntity
     void updateStatusByIds(@Param("cohortId") String cohortId,
                            @Param("loaneeIds") List<String> loaneeIds,
                            @Param("loaneeStatus") LoaneeStatus loaneeStatus);
+
+    @Query("""
+    
+       select cl from CohortLoaneeEntity cl
+       JOIN LoanReferralEntity lr on lr.cohortLoanee.id = cl.id
+       join LoanRequestEntity lre on lre.id = lre.id
+   
+      where lre.id = : id
+    """)
+    CohortLoaneeEntity findCohortLoaneeByLoanRequestId(@Param("id") String id);
 }
