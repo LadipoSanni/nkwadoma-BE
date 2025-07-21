@@ -4,6 +4,8 @@ import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loancalcu
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.RepaymentHistoryOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanCalculationMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -92,7 +94,10 @@ public class LoanCalculationService implements LoanCalculationUseCase {
         for (RepaymentHistory repayment : repaymentHistories) {
             validateAmountRepaid(repayment);
             runningTotal = calculateTotalAmountRepaidPerRepayment(repayment, runningTotal);
-kl
+            CohortLoanee cohortLoanee = cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(loaneeId, cohortId);
+            LoaneeLoanDetail loaneeLoanDetail = loaneeLoanDetailsOutputPort.findByCohortLoaneeId(cohortLoanee.getId());
+            loaneeLoanDetail.getInterestRate();
+
         }
         log.info("The repayment histories after adding up total amount repaid {}", runningTotal);
 

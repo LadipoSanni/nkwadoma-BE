@@ -184,10 +184,8 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     }
 
     private void calculateLoaneeLoanDetails(String cohortId, String loaneeId, BigDecimal totalAmountRepaid) throws MeedlException {
-        CohortLoanee cohortLoanee = cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(loaneeId, cohortId);
-        log.info("cohort loanee found {}",cohortLoanee);
 
-        BigDecimal currentAmountPaid = updateLoaneeLoanDetail(totalAmountRepaid, cohortLoanee);
+        BigDecimal currentAmountPaid = updateLoaneeLoanDetail(totalAmountRepaid,cohortId, loaneeId);
 
         CohortLoanDetail cohortLoanDetail = updateCohortLoanDetail(cohortId, currentAmountPaid);
 
@@ -234,7 +232,9 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         return cohortLoanDetail;
     }
 
-    private BigDecimal updateLoaneeLoanDetail(BigDecimal totalAmountRepaid, CohortLoanee cohortLoanee) throws MeedlException {
+    private BigDecimal updateLoaneeLoanDetail(BigDecimal totalAmountRepaid, String cohortId, String loaneeId) throws MeedlException {
+        CohortLoanee cohortLoanee = cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(loaneeId, cohortId);
+        log.info("cohort loanee found {}",cohortLoanee);
         LoaneeLoanDetail loaneeLoanDetail = loaneeLoanDetailsOutputPort.findByCohortLoaneeId(cohortLoanee.getId());
 
         BigDecimal currentAmountPaid = totalAmountRepaid.subtract(loaneeLoanDetail.getAmountRepaid());
