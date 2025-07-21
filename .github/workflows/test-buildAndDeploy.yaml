@@ -1,5 +1,4 @@
-name: Deploy Systest to Local
-
+name: QA Automation Tests
 on:
   push:
     branches: [dev]
@@ -7,34 +6,6 @@ on:
   #   branches: [dev]
 
 jobs:
-
-  build-and-push:
-    name: Build and Push Docker Image
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/dev'
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Set up Java 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Build Application (Skip Tests)
-        run: mvn clean package -DskipTests
-
-      - name: Log in to Docker Hub
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
-      - name: Build and Push Docker Image
-        run: |
-          IMAGE_TAG=${{ secrets.DOCKER_USERNAME }}/nkwadoma:alpha
-          docker build -t $IMAGE_TAG .
-          docker push $IMAGE_TAG
-
   run_tests:
     name: Run Automation Tests
     runs-on: ubuntu-latest

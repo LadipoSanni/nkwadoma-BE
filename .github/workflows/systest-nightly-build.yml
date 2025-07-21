@@ -1,0 +1,105 @@
+name: Systest Build
+
+on:
+  push:
+    branches:
+      - systest
+  workflow_dispatch:
+  schedule:
+    - cron: '0 22 * * *'  # Runs at 10 PM UTC daily
+
+env:
+  ECR_REPO_URL: 357586184453.dkr.ecr.us-east-1.amazonaws.com/nkwadoma
+  DOCKER_IMAGE_NAME: nkwadoma-service
+
+jobs:
+  systest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for changes
+        id: check_changes
+        run: |
+          # For scheduled runs, only proceed if there are changes
+          if [[ ${{ github.event_name }} == 'schedule' ]]; then
+            LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+            if [ -z "$LATEST_TAG" ]; then
+              echo "changes=true" >> $GITHUB_OUTPUT
+            else
+              CHANGES=$(git diff --name-only $LATEST_TAG HEAD)
+              if [ -z "$CHANGES" ]; then
+                echo "changes=false" >> $GITHUB_OUTPUT
+                echo "No changes detected - skipping build"
+              else
+                echo "changes=true" >> $GITHUB_OUTPUT
+              fi
+            fi
+          else
+            # Always proceed for push events (merges to systest)
+            echo "changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup Git
+        if: steps.check_changes.outputs.changes == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Get Version Tag
+        if: steps.check_changes.outputs.changes == 'true'
+        id: version
+        run: |
+          chmod +x .github/workflows/scripts/get-version.sh
+          .github/workflows/scripts/get-version.sh systest
+
+      - name: Build App
+        if: steps.check_changes.outputs.changes == 'true'
+        run: ./build.sh || echo "No build script found."
+
+      - name: Tag and Push (GitHub)
+        if: steps.check_changes.outputs.changes == 'true' && github.event_name == 'schedule'
+        run: |
+          TAG=${{ steps.version.outputs.VERSION_TAG }}
+          echo "Tagging commit with: $TAG"
+          git tag -f "$TAG"
+          git push origin -f "$TAG"
+
+      - name: Configure AWS Credentials
+        if: steps.check_changes.outputs.changes == 'true' && github.event_name != 'schedule'
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Login to Docker Hub
+        if: steps.check_changes.outputs.changes == 'true' && github.event_name != 'schedule'
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Login to ECR
+        if: steps.check_changes.outputs.changes == 'true' && github.event_name != 'schedule'
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+        with:
+          mask-password: true
+          registry-type: private
+          skip-logout: false
+
+      - name: Build and Push to Docker Hub
+        if: steps.check_changes.outputs.changes == 'true' && github.event_name != 'schedule'
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ steps.version.outputs.VERSION_TAG }} .
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ steps.version.outputs.VERSION_TAG }}
+
+      - name: Build and Push to ECR
+        if: steps.check_changes.outputs.changes == 'true' && github.event_name != 'schedule'
+        run: |
+          docker build -t ${{ env.ECR_REPO_URL }}:${{ steps.version.outputs.VERSION_TAG }} .
+          docker push ${{ env.ECR_REPO_URL }}:${{ steps.version.outputs.VERSION_TAG }}

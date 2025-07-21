@@ -16,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.IDENTITY_VERIFICATION;
@@ -36,9 +38,9 @@ public class IdentityVerificationController {
                 .statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("/verify")
-    public ResponseEntity<ApiResponse<?>> verifyIdentity(@RequestBody @Valid IdentityVerificationRequest identityVerificationRequest) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> verifyIdentity(@AuthenticationPrincipal Jwt meedlUser,@RequestBody @Valid IdentityVerificationRequest identityVerificationRequest) throws MeedlException {
         IdentityVerification identityVerification = identityVerificationMapper.toIdentityVerification(identityVerificationRequest);
-        String response = identityVerificationUseCase.verifyIdentity(identityVerification);
+        String response = identityVerificationUseCase.verifyIdentity(meedlUser.getClaimAsString("sub"),identityVerification);
         return ResponseEntity.ok(ApiResponse.<String>builder()
                 .data(response)
                 .statusCode(HttpStatus.OK.name()).build());

@@ -102,20 +102,20 @@ class IdentityVerificationServiceTest {
     @Test
     void verifyIdentityWithInvalidBvn() {
         identityVerification.setEncryptedBvn(StringUtils.EMPTY);
-        assertThrows(MeedlException.class, () -> identityVerificationService.verifyIdentity(identityVerification));
+        assertThrows(MeedlException.class, () -> identityVerificationService.verifyIdentity(testId,identityVerification));
     }
 
     @Test
     void verifyIdentityWithInvalidNin() {
         identityVerification.setEncryptedNin(StringUtils.SPACE);
-        assertThrows(MeedlException.class, () -> identityVerificationService.verifyIdentity(identityVerification));
+        assertThrows(MeedlException.class, () -> identityVerificationService.verifyIdentity(testId,identityVerification));
     }
 
     @Test
     void verifyIdentityOfBlacklistedReferral() throws MeedlException {
         when(loanReferralOutputPort.findLoanReferralById(identityVerification.getLoanReferralId())).thenReturn(Optional.of(loanReferral));
         when(identityVerificationFailureRecordOutputPort.countByReferralId(loanReferral.getId())).thenReturn(5L);
-        assertThrows(IdentityException.class, () -> identityVerificationService.verifyIdentity(identityVerification));
+        assertThrows(IdentityException.class, () -> identityVerificationService.verifyIdentity(testId,identityVerification));
     }
 
     @Test
@@ -125,7 +125,7 @@ class IdentityVerificationServiceTest {
         when(tokenUtils.decryptAES(testBvn, "Error processing identity verification")).thenReturn("12345678901");
         when(tokenUtils.decryptAES(testNin, "Error processing identity verification")).thenReturn("12345678901");
         when(loanReferralOutputPort.findLoanReferralById(identityVerification.getLoanReferralId())).thenReturn(Optional.of(loanReferral));
-        when(userIdentityOutputPort.findByBvn(testBvn)).thenReturn(null);
+        when(userIdentityOutputPort.findByBvn(testBvn)).thenReturn(favour);
 //        when(identityVerificationOutputPort.verifyBvn(identityVerification)).thenReturn(premblyResponse);
         PremblyNinResponse premblyBvnResponse = new PremblyNinResponse();
         premblyBvnResponse.setVerification(Verification.builder().status("NOT-VERIFIED").build());
@@ -133,16 +133,10 @@ class IdentityVerificationServiceTest {
                 premblyBvnResponse);
 //        when(userIdentityOutputPort.findById(loanReferral.getLoanee().getUserIdentity().getId()
 //        )).thenReturn(favour);
-        String response = identityVerificationService.verifyIdentity(identityVerification);
+        String response = identityVerificationService.verifyIdentity(testId,identityVerification);
         assertEquals(IDENTITY_NOT_VERIFIED.getMessage(), response);
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invalid-uuid"})
-    void verifyIdentityWithInvalidLoanReferralId(String invalidId) {
-        identityVerification.setLoanReferralId(invalidId);
-        assertThrows(MeedlException.class, () -> identityVerificationService.verifyIdentity(identityVerification));
-    }
 
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "iurei"})

@@ -31,6 +31,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.commons.IdentityV
 //import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.keycloak.jose.jwk.JWK;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -91,13 +92,18 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         log.info("Added to Loanee loan to loanee's list of loans {} ", loanReferralId);
     }
     @Override
-    public String verifyIdentity(IdentityVerification identityVerification) throws MeedlException {
+    public String verifyIdentity(String actorId,IdentityVerification identityVerification) throws MeedlException {
         LoanReferral loanReferral = validateIdentity(identityVerification);
-        UserIdentity userIdentity = userIdentityOutputPort.findByBvn(identityVerification.getEncryptedBvn());
+        UserIdentity userIdentity = null;
+        if (ObjectUtils.isNotEmpty(loanReferral)) {
+             userIdentity = userIdentityOutputPort.findByBvn(identityVerification.getEncryptedBvn());
+        }else {
+            userIdentity = userIdentityOutputPort.findById(actorId);
+        }
 
         if (isVerificationRequired(userIdentity)){
             log.info("User requires identity verification");
-            return processNewVerification(identityVerification, loanReferral);
+            return processNewVerification(identityVerification, loanReferral,userIdentity);
         }else{
             log.warn("User attempted to verify again {}", loanReferral.getLoanee().getUserIdentity().getEmail());
 //            processAnotherVerification(identityVerification, loanReferral);
@@ -110,9 +116,12 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         validateIdentityVerification(identityVerification);
         decryptEncryptedIdentification(identityVerification);
 
-        LoanReferral loanReferral = fetchLoanReferral(identityVerification.getLoanReferralId());
-        checkIfAboveThreshold(loanReferral.getId());
-        return loanReferral;
+        if (identityVerification.getLoanReferralId() != null) {
+            LoanReferral loanReferral = fetchLoanReferral(identityVerification.getLoanReferralId());
+            checkIfAboveThreshold(loanReferral.getId());
+            return loanReferral;
+        }
+        return null;
     }
 
     private void updateLoaneeDetail(IdentityVerification identityVerification, String userId, PremblyNinResponse premblyResponse) throws MeedlException {
@@ -138,10 +147,10 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         return identityManagerOutputPort.updateUserData(userIdentity);
     }
 
-    private void createVerificationFailure(LoanReferral loanReferral, String message, ServiceProvider serviceProvider) throws MeedlException {
+    private void createVerificationFailure(UserIdentity userIdentity, String message, ServiceProvider serviceProvider) throws MeedlException {
         IdentityVerificationFailureRecord identityVerificationFailureRecord = new IdentityVerificationFailureRecord();
-        identityVerificationFailureRecord.setEmail(loanReferral.getLoanee().getUserIdentity().getEmail());
-        identityVerificationFailureRecord.setReferralId(loanReferral.getId());
+        identityVerificationFailureRecord.setEmail(userIdentity.getEmail());
+        identityVerificationFailureRecord.setReferralId(userIdentity.getId());
         identityVerificationFailureRecord.setServiceProvider(serviceProvider);
         identityVerificationFailureRecord.setReason(message);
         createIdentityVerificationFailureRecord(identityVerificationFailureRecord);
@@ -171,8 +180,8 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         MeedlValidator.validateObjectInstance(identityVerification, IdentityVerificationMessage.IDENTITY_VERIFICATION_CANNOT_BE_NULL.getMessage());
         MeedlValidator.validateDataElement(identityVerification.getEncryptedBvn(), IdentityVerificationMessage.INVALID_BVN.getMessage());
         MeedlValidator.validateDataElement(identityVerification.getEncryptedNin(), IdentityVerificationMessage.INVALID_NIN.getMessage());
-        MeedlValidator.validateUUID(identityVerification.getLoanReferralId(), LoanMessages.INVALID_LOAN_REFERRAL_ID.getMessage());
-        log.info("Verifying user identity. Loan referral id: {}", identityVerification.getLoanReferralId());
+//        MeedlValidator.validateUUID(identityVerification.getLoanReferralId(), LoanMessages.INVALID_LOAN_REFERRAL_ID.getMessage());
+//        log.info("Verifying user identity. Loan referral id: {}", identityVerification.getLoanReferralId());
     }
 
     private String decrypt(String encryptedData) throws MeedlException {
@@ -191,23 +200,26 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         return ObjectUtils.isEmpty(userIdentity) || !userIdentity.isIdentityVerified();
     }
 
-    private String processNewVerification(IdentityVerification identityVerification,LoanReferral loanReferral) throws MeedlException {
+    private String processNewVerification(IdentityVerification identityVerification,LoanReferral loanReferral,UserIdentity userIdentity) throws MeedlException {
         String verificationResponse;
         try {
             log.info("Identity verification process ongoing. ");
-            PremblyNinResponse premblyNinResponse = ninLikenessVerification(identityVerification, loanReferral); // Checked
+            PremblyNinResponse premblyNinResponse = ninLikenessVerification(identityVerification, userIdentity); // Checked
             if (premblyNinResponse.isLikenessCheckSuccessful()){
                 log.info("Proceeding to bvn verification");
-                PremblyBvnResponse  premblyBvnResponse = bvnLikenessVerification(identityVerification, loanReferral);  // Checked
+                PremblyBvnResponse  premblyBvnResponse = bvnLikenessVerification(identityVerification, userIdentity);  // Checked
                 if (premblyBvnResponse.isLikenessCheckSuccessful()){
-                    handleSuccessfulVerification(identityVerification, loanReferral.getLoaneeUserId(), premblyNinResponse);
+                    handleSuccessfulVerification(identityVerification, userIdentity.getId(), premblyNinResponse);
                     verificationResponse = IdentityMessages.IDENTITY_VERIFIED.getMessage();
 
-                    log.info("verification done successfully. {}", verificationResponse);
-                    log.info("about to increase loan request count  {}", loanReferral);
-                    log.info("refer by {}", loanReferral.getReferredBy());
-                    updateLoanMetricsLoanRequestCount(loanReferral.getReferredBy());
-                    log.info("done with loan request count on {}",loanReferral.getReferredBy());
+                    if (ObjectUtils.isNotEmpty(loanReferral)) {
+                        log.info("verification done successfully. {}", verificationResponse);
+                        log.info("about to increase loan request count  {}", loanReferral);
+                        log.info("refer by {}", loanReferral.getReferredBy());
+                        updateLoanMetricsLoanRequestCount(loanReferral.getReferredBy());
+                        log.info("done with loan request count on {}", loanReferral.getReferredBy());
+                    }
+
                 }else {
                     log.warn("Identity verification not successful, failed at the bvn level");
                     verificationResponse = IdentityMessages.IDENTITY_NOT_VERIFIED.getMessage();
@@ -218,7 +230,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
             }
         } catch (IdentityException exception) {
             log.error("Error verifying user's identity... {}", exception.getMessage());
-            createVerificationFailure(loanReferral, exception.getMessage(), ServiceProvider.PREMBLY);
+            createVerificationFailure(userIdentity, exception.getMessage(), ServiceProvider.PREMBLY);
             throw new IdentityException(exception.getMessage());
         }
         return verificationResponse;
@@ -241,7 +253,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         loanMetricsOutputPort.save(loanMetrics.get());
     }
 
-    private PremblyNinResponse ninLikenessVerification(IdentityVerification identityVerification,LoanReferral loanReferral) throws MeedlException {
+    private PremblyNinResponse ninLikenessVerification(IdentityVerification identityVerification,UserIdentity loanReferral) throws MeedlException {
         PremblyNinResponse premblyNinResponse =
                 identityVerificationOutputPort.verifyNinLikeness(identityVerification);
         log.info("prembly nin response: {}", premblyNinResponse);
@@ -257,7 +269,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         return premblyNinResponse;
     }
 
-    private PremblyBvnResponse bvnLikenessVerification(IdentityVerification identityVerification, LoanReferral loanReferral) throws MeedlException {
+    private PremblyBvnResponse bvnLikenessVerification(IdentityVerification identityVerification, UserIdentity userIdentity) throws MeedlException {
         PremblyBvnResponse premblyBvnResponse =
                 identityVerificationOutputPort.verifyBvnLikeness(identityVerification);
         log.info("prembly bvn response at identity verification service: {}", premblyBvnResponse);
@@ -268,7 +280,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         } else {
             log.error("FAILED: Identity verification failed with BVN.");
             premblyBvnResponse.setLikenessCheckSuccessful(Boolean.FALSE);
-            handleFailedVerification(loanReferral, premblyBvnResponse);
+            handleFailedVerification(userIdentity, premblyBvnResponse);
         }
         return premblyBvnResponse;
     }
@@ -326,10 +338,10 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         log.info("Identity is verified: Loan referral id {}. Verified", identityVerification.getLoanReferralId());
     }
 
-    private void handleFailedVerification(LoanReferral loanReferral, PremblyResponse premblyResponse) throws MeedlException {
+    private void handleFailedVerification(UserIdentity userIdentity, PremblyResponse premblyResponse) throws MeedlException {
         log.info("Identity verification failed. {}", premblyResponse);
-        log.info("Identity: Loan referral id {}. Not verified", loanReferral.getId());
-        createVerificationFailure(loanReferral, premblyResponse.getDetail(), ServiceProvider.PREMBLY);
+//        log.info("Identity: Loan referral id {}. Not verified", userIdentity.getId());
+        createVerificationFailure(userIdentity, premblyResponse.getDetail(), ServiceProvider.PREMBLY);
         premblyResponse.setVerificationResponse(IDENTITY_NOT_VERIFIED.getMessage());
     }
     private void decryptEncryptedIdentification(IdentityVerification identityVerification) throws MeedlException {
