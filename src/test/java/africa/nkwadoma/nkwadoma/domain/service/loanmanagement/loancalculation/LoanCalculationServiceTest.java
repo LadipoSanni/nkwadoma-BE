@@ -96,7 +96,7 @@ public class LoanCalculationServiceTest {
                 createRepayment(LocalDateTime.of(2025, 3, 1, 10, 0), new BigDecimal("5000"))
         );
 
-        BigDecimal totalAmountRepaid = loanCalculation.calculateTotalRepayment(repayments, loaneeId, cohortId);
+        BigDecimal totalAmountRepaid = loanCalculation.calculateCurrentTotalAmountRepaid(repayments, loaneeId, cohortId);
         log.info("Updated repayment history in test after both sorting \n {}", totalAmountRepaid);
         assertEquals(new BigDecimal("1000"), repayments.get(0).getTotalAmountRepaid());
         assertEquals(new BigDecimal("3000"), repayments.get(1).getTotalAmountRepaid());
@@ -119,7 +119,7 @@ public class LoanCalculationServiceTest {
         when(repaymentHistoryOutputPort.findAllRepaymentHistoryForLoan(loaneeId, cohortId))
                 .thenReturn(previousRepayments);
 
-        BigDecimal totalAmountRepaid = loanCalculation.calculateTotalRepayment(newRepayments, loaneeId, cohortId);
+        BigDecimal totalAmountRepaid = loanCalculation.calculateCurrentTotalAmountRepaid(newRepayments, loaneeId, cohortId);
 
 
         assertEquals(new BigDecimal("10000"), totalAmountRepaid);

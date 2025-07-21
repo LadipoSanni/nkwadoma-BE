@@ -50,7 +50,7 @@ public class LoanCalculationService implements LoanCalculationUseCase {
         }
     }
 
-    public BigDecimal calculateTotalAmountRepaid(List<RepaymentHistory> repayments) throws MeedlException {
+    public BigDecimal calculateTotalAmountRepaidPerRepayment(List<RepaymentHistory> repayments) throws MeedlException {
         if (repayments == null || repayments.isEmpty()) {
             log.warn("Repayments was null when calculating total amount repaid");
             return BigDecimal.ZERO;
@@ -66,7 +66,7 @@ public class LoanCalculationService implements LoanCalculationUseCase {
     }
 
     @Override
-    public BigDecimal calculateTotalRepayment(
+    public BigDecimal calculateCurrentTotalAmountRepaid(
             List<RepaymentHistory> repaymentHistories,
             String loaneeId,
             String cohortId
@@ -84,14 +84,24 @@ public class LoanCalculationService implements LoanCalculationUseCase {
             repaymentHistories = combinePreviousAndNewRepaymentHistory(previousRepaymentHistory, repaymentHistories);
         }
         repaymentHistories = sortRepaymentsByDateTimeAscending(repaymentHistories);
+//        return repaymentHistories.stream()
+//                .map(RepaymentHistory::getAmountPaid)
+//                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
 
         for (RepaymentHistory repayment : repaymentHistories) {
             validateAmountRepaid(repayment);
-            runningTotal = runningTotal.add(repayment.getAmountPaid());
-            repayment.setTotalAmountRepaid(runningTotal);
+            runningTotal = calculateTotalAmountRepaidPerRepayment(repayment, runningTotal);
+kl
         }
         log.info("The repayment histories after adding up total amount repaid {}", runningTotal);
 
+        return runningTotal;
+    }
+
+    private static BigDecimal calculateTotalAmountRepaidPerRepayment(RepaymentHistory repayment, BigDecimal runningTotal) {
+        runningTotal = runningTotal.add(repayment.getAmountPaid());
+        repayment.setTotalAmountRepaid(runningTotal);
         return runningTotal;
     }
 

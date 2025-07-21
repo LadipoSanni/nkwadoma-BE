@@ -39,7 +39,6 @@ import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.stereotype.Component;
@@ -124,7 +123,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         log.info("Set of loanees that made payments size : {}, set",loaneesThatMadePayment.size());
         Map<String, List<RepaymentHistory>> mapOfRepaymentHistoriesForEachLoanee = getRepaymentHistoriesForLoanees(loaneesThatMadePayment, convertedRepaymentHistories);
 //        printRepaymentCountsPerLoanee(mapOfRepaymentHistoriesForEachLoanee);
-        processAccumulatedRepayments(mapOfRepaymentHistoriesForEachLoanee, repaymentHistoryBook.getCohort().getId(), repaymentHistoryBook);
+        processRepaymentCalculation(mapOfRepaymentHistoriesForEachLoanee, repaymentHistoryBook.getCohort().getId(), repaymentHistoryBook);
         log.info("Repayment record uploaded..");
     }
 
@@ -165,7 +164,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         }
     }
 
-    public void processAccumulatedRepayments(
+    public void processRepaymentCalculation(
             Map<String, List<RepaymentHistory>> mapOfRepaymentHistoriesForEachLoanee,
             String cohortId,
             LoanBook repaymentRecordBook) throws MeedlException {
@@ -173,14 +172,14 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         for (Map.Entry<String, List<RepaymentHistory>> entry : mapOfRepaymentHistoriesForEachLoanee.entrySet()) {
             String loaneeId = entry.getKey();
             List<RepaymentHistory> repaymentHistories = entry.getValue();
-            BigDecimal totalAmountRepaid = loanCalculationUseCase.calculateTotalRepayment(repaymentHistories, loaneeId, cohortId);
-            repaymentRecordBook.setRepaymentHistories(repaymentHistories);
+            BigDecimal totalAmountRepaid = loanCalculationUseCase.calculateCurrentTotalAmountRepaid(repaymentHistories, loaneeId, cohortId);
+//            repaymentRecordBook.setRepaymentHistories(repaymentHistories);
 
             calculateLoaneeLoanDetails(cohortId, loaneeId, totalAmountRepaid);
 
-            List<RepaymentHistory> savedRepaymentHistories = repaymentHistoryUseCase.saveCohortRepaymentHistory(repaymentRecordBook);
-            log.info("repayment histories for loanee {} -- {}", loaneeId, savedRepaymentHistories);
         }
+        List<RepaymentHistory> savedRepaymentHistories = repaymentHistoryUseCase.saveCohortRepaymentHistory(repaymentRecordBook);
+        log.info("repayment histories for loanees {}", savedRepaymentHistories);
         log.info("Done processing accumulated repayments.");
     }
 
