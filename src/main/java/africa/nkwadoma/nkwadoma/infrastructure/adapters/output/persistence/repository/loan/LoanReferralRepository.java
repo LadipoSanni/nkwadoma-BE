@@ -84,5 +84,15 @@ public interface LoanReferralRepository extends JpaRepository<LoanReferralEntity
             Pageable pageRequest
     );
 
-    List<LoanReferralEntity> findAllByCohortLoanee_Loanee_UserIdentity_idAndLoanReferralStatus(String id, LoanReferralStatus loanReferralStatus);
+    @Query("""
+            select lre from LoanReferralEntity lre
+                join LoanRequestEntity lr on lr.id = lre.id
+                join CohortLoaneeEntity  cle on cle.id = lre.cohortLoanee.id
+    
+                 where cle.loanee.userIdentity.id = :id  and lre.loanReferralStatus = :loanReferralStatus 
+                     and lr.status = 'NEW'
+    """)
+    List<LoanReferralEntity> findAllByCohortLoanee_Loanee_UserIdentity_idAndLoanReferralStatus(@Param("id") String id,
+                                                                                               @Param("loanReferralStatus")
+                                                                                               LoanReferralStatus loanReferralStatus);
 }
