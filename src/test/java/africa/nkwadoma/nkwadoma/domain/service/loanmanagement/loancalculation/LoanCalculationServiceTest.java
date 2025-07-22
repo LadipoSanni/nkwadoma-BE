@@ -655,9 +655,6 @@ public class LoanCalculationServiceTest {
     }
 
 
-
-
-
     @Test
     public void calculateTotalRepaymentForThreePayments() throws MeedlException {
         List<BigDecimal> repayments = List.of(
@@ -737,56 +734,6 @@ public class LoanCalculationServiceTest {
     }
 
     @Test
-    void accumulateTotalRepaidWIthNoPreviousRepayment() throws MeedlException {
-        List<RepaymentHistory> repayments = List.of(
-                createRepayment(LocalDateTime.of(2025, 1, 1, 10, 0), new BigDecimal("1000")),
-                createRepayment(LocalDateTime.of(2025, 2, 1, 10, 0), new BigDecimal("2000")),
-                createRepayment(LocalDateTime.of(2025, 3, 1, 10, 0), new BigDecimal("5000"))
-        );
-        BigDecimal totalAmountRepaid = calculationEngine
-                                        .calculateTotalRepayment(repayments
-                                                                    .stream()
-                                                                    .map(RepaymentHistory::getAmountPaid)
-                                                                    .toList());assertEquals(new BigDecimal("1000"), repayments.get(0).getTotalAmountRepaid());
-        assertEquals(new BigDecimal("3000"), repayments.get(1).getTotalAmountRepaid());
-        assertEquals(new BigDecimal("8000"), repayments.get(2).getTotalAmountRepaid());
-//        assertEquals(new BigDecimal("8000"), totalAmountRepaid);
-    }
-
-    @Test
-    void accumulateTotalRepaidWithPreviousRepayments() throws MeedlException {
-        List<RepaymentHistory> previousRepayments = new ArrayList<>(List.of(
-                createRepayment(LocalDateTime.of(2025, 1, 1, 10, 0), new BigDecimal("1000")),
-                createRepayment(LocalDateTime.of(2025, 2, 1, 10, 0), new BigDecimal("2000"))
-        ));
-
-        List<RepaymentHistory> newRepayments = new ArrayList<>(List.of(
-                createRepayment(LocalDateTime.of(2025, 3, 1, 10, 0), new BigDecimal("3000")),
-                createRepayment(LocalDateTime.of(2025, 4, 1, 10, 0), new BigDecimal("4000"))
-        ));
-
-        when(repaymentHistoryOutputPort.findAllRepaymentHistoryForLoan(loaneeId, cohortId))
-                .thenReturn(previousRepayments);
-
-
-        BigDecimal totalAmountRepaid = calculationEngine
-                                                    .calculateTotalRepayment(newRepayments
-                                                            .stream()
-                                                            .map(RepaymentHistory::getAmountPaid)
-                                                            .toList());
-        assertEquals(new BigDecimal("10000"), totalAmountRepaid);
-    }
-
-
-
-
-
-
-    // ==============================
-// My Tests Start Here
-// ==============================
-
-    @Test
     void shouldNotProcessWhenRepaymentHistoriesIsEmpty() throws MeedlException {
         Loanee loanee = Loanee.builder().id(loaneeId).build();
         Cohort cohort = Cohort.builder().id(cohortId).build();
@@ -807,7 +754,7 @@ public class LoanCalculationServiceTest {
     }
 
     @Test
-    void shouldCombinePreviousAndNewRepaymentHistoriesCorrectly() {
+    void combinePreviousAndNewRepaymentHistoriesCorrectly() {
         List<RepaymentHistory> previous = List.of(
                 createRepayment(LocalDateTime.of(2024, 1, 1, 10, 0), BigDecimal.valueOf(100)),
                 createRepayment(LocalDateTime.of(2024, 2, 1, 10, 0), BigDecimal.valueOf(150))
@@ -824,7 +771,7 @@ public class LoanCalculationServiceTest {
     }
 
     @Test
-    void shouldReturnOnlyNewWhenPreviousIsEmpty() {
+    void combineHistoriesWithEmptyRepayments() {
         List<RepaymentHistory> previous = new ArrayList<>();
         List<RepaymentHistory> current = List.of(
                 createRepayment(LocalDateTime.of(2024, 3, 1, 10, 0), BigDecimal.valueOf(200))
@@ -837,7 +784,7 @@ public class LoanCalculationServiceTest {
     }
 
     @Test
-    void shouldCalculateOutstandingAndInterestCorrectlyForRepayment() throws MeedlException {
+    void calculateOutstandingAndInterestCorrectlyForRepayment() throws MeedlException {
         Loanee loanee = Loanee.builder().id(loaneeId).build();
         Cohort cohort = Cohort.builder().id(cohortId).build();
 
@@ -872,7 +819,7 @@ public class LoanCalculationServiceTest {
 
 
     @Test
-    void testGetPreviousOutstanding_whenNotNull_shouldReturnSame() {
+    void getPreviousOutstandingWhenNotNull() {
         BigDecimal previousOutstanding = BigDecimal.valueOf(3000);
         LoaneeLoanDetail loanDetail = LoaneeLoanDetail.builder()
                 .amountReceived(BigDecimal.valueOf(5000))
@@ -884,7 +831,7 @@ public class LoanCalculationServiceTest {
     }
 
     @Test
-    void testGetPreviousOutstanding_whenNull_shouldReturnAmountReceivedFromLoanDetail() {
+    void getPreviousOutstandingWhenNull() {
         LoaneeLoanDetail loanDetail = LoaneeLoanDetail.builder()
                 .amountReceived(BigDecimal.valueOf(5000))
                 .build();
@@ -893,9 +840,5 @@ public class LoanCalculationServiceTest {
 
         assertEquals(BigDecimal.valueOf(5000), result);
     }
-
-// ==============================
-// My Tests End Here
-// ==============================
 
 }

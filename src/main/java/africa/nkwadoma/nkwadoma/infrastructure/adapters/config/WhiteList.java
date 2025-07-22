@@ -1,7 +1,5 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.config;
 
-import org.springframework.beans.factory.annotation.Value;
-
 
 public class WhiteList {
 
