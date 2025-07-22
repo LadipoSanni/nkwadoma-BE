@@ -2,6 +2,9 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.IdentityVerificationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoanDetailOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramLoanDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
@@ -16,12 +19,14 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
-import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerificationFailureRecord;
+import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.education.ProgramLoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanMetrics;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanRequest;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.identity.IdentityVerificationMapper;
@@ -66,6 +71,14 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     @Autowired
     private LoanRequestOutputPort loanRequestOutputPort;
+    @Autowired
+    private ProgramLoanDetailOutputPort programLoanDetailOutputPort;
+    @Autowired
+    private OrganizationLoanDetailOutputPort organizationLoanDetailOutputPort;
+    @Autowired
+    private CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
+    @Autowired
+    private CohortOutputPort cohortOutputPort;
 
     @Override
     public String verifyIdentity(String loanReferralId) throws IdentityException, MeedlException {
@@ -234,7 +247,51 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
             log.info("refer by {}", loanReferral.getCohortLoanee().getReferredBy());
             updateLoanMetricsLoanRequestCount(loanReferral.getCohortLoanee().getReferredBy());
             log.info("done with loan request count on loan referral by  {}", loanReferral.getCohortLoanee().getReferredBy());
+            Cohort cohort = updateLoanRequestCountOnCohort(loanReferral);
+
+            updateLoanAmountRequestedOnCohortLoanDetail(loanReferral.getCohortLoanee().getLoaneeLoanDetail(), cohort);
+
+            updateLoanAmountRequestedOnProgramLoanDetail(loanReferral.getCohortLoanee().getLoaneeLoanDetail(), cohort);
+
+            updateLoanAmountRequestOnOrganizationLoanDetail(loanReferral.getCohortLoanee().getLoaneeLoanDetail(), cohort);
         }
+    }
+
+    private void updateLoanAmountRequestOnOrganizationLoanDetail(LoaneeLoanDetail loaneeLoanDetail, Cohort cohort) throws MeedlException {
+        OrganizationLoanDetail organizationLoanDetail = organizationLoanDetailOutputPort.findByOrganizationId(cohort.getOrganizationId());
+        organizationLoanDetail.setTotalAmountRequested(organizationLoanDetail.getTotalAmountRequested()
+                .add(loaneeLoanDetail.getAmountRequested()));
+        organizationLoanDetailOutputPort.save(organizationLoanDetail);
+    }
+
+    private void updateLoanAmountRequestedOnProgramLoanDetail(LoaneeLoanDetail loaneeLoanDetail, Cohort cohort) throws MeedlException {
+        ProgramLoanDetail programLoanDetail = programLoanDetailOutputPort.findByProgramId(cohort.getProgramId());
+        log.info("program loan details id {}", programLoanDetail.getId());
+        programLoanDetail.setTotalAmountRequested(programLoanDetail.getTotalAmountRequested()
+                .add(loaneeLoanDetail.getAmountRequested()));
+        programLoanDetailOutputPort.save(programLoanDetail);
+    }
+
+    private void updateLoanAmountRequestedOnCohortLoanDetail(LoaneeLoanDetail loaneeLoanDetail, Cohort cohort) throws MeedlException {
+        CohortLoanDetail foundCohort = cohortLoanDetailOutputPort.findByCohortId(cohort.getId());
+        log.info("current total amount requested for cohort {}", foundCohort.getTotalAmountRequested());
+        log.info("loanee amount requested {}", loaneeLoanDetail.getAmountRequested());
+        foundCohort.setTotalAmountRequested(foundCohort.getTotalAmountRequested().
+                add(loaneeLoanDetail.getAmountRequested()));
+        cohortLoanDetailOutputPort.save(foundCohort);
+        log.info("total amount requested updated for cohort after adding == {} is {}",
+                loaneeLoanDetail.getAmountRequested(), foundCohort.getTotalAmountRequested());
+    }
+
+    private Cohort updateLoanRequestCountOnCohort(LoanReferral loanReferral) throws MeedlException {
+        log.info("Updating number of loan request on cohort: {}", loanReferral.getCohortLoanee());
+        Cohort cohort = loanReferral.getCohortLoanee().getCohort();
+        log.info("found cohort == {}", cohort);
+        log.info("current number of loan request == {}", cohort.getNumberOfLoanRequest());
+        cohort.setNumberOfLoanRequest(cohort.getNumberOfLoanRequest() + 1);
+        cohort = cohortOutputPort.save(cohort);
+        log.info(" number of loan request after adding 1 == {}", cohort.getNumberOfLoanRequest());
+        return cohort;
     }
 
     private void updateLoanMetricsLoanRequestCount(String referBy) throws MeedlException {
