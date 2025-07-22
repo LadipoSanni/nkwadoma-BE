@@ -822,7 +822,7 @@ public class LoanCalculationServiceTest {
     void getPreviousOutstandingWhenNotNull() {
         BigDecimal previousOutstanding = BigDecimal.valueOf(3000);
         LoaneeLoanDetail loanDetail = LoaneeLoanDetail.builder()
-                .amountReceived(BigDecimal.valueOf(5000))
+                .amountReceived(decimalPlaceRoundUp(BigDecimal.valueOf(5000)))
                 .build();
 
         BigDecimal result = ReflectionTestUtils.invokeMethod(calculationEngine, "getPreviousAmountOutstanding", previousOutstanding, loanDetail);
@@ -838,7 +838,7 @@ public class LoanCalculationServiceTest {
 
         BigDecimal result = ReflectionTestUtils.invokeMethod(calculationEngine, "getPreviousAmountOutstanding", null, loanDetail);
 
-        assertEquals(BigDecimal.valueOf(5000), result);
+        assertEquals(decimalPlaceRoundUp(BigDecimal.valueOf(5000)), result);
     }
 
 }
