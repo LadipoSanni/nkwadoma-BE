@@ -167,8 +167,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
 
     public void processRepaymentCalculation(
             Map<String, List<RepaymentHistory>> mapOfRepaymentHistoriesForEachLoanee,
-            Cohort cohort,
-            LoanBook repaymentRecordBook) throws MeedlException {
+            Cohort cohort) throws MeedlException {
 
         for (Map.Entry<String, List<RepaymentHistory>> entry : mapOfRepaymentHistoriesForEachLoanee.entrySet()) {
             String loaneeId = entry.getKey();
