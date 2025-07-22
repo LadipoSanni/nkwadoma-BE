@@ -105,6 +105,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     }
     @Override
     public String verifyIdentity(String actorId,IdentityVerification identityVerification) throws MeedlException {
+        log.info("identity verification == {}", identityVerification);
         checkIfAboveThreshold(actorId);
 
         UserIdentity userIdentity = userIdentityOutputPort.findByBvn(identityVerification.getEncryptedBvn());
@@ -204,7 +205,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     private String processNewVerification(IdentityVerification identityVerification,UserIdentity userIdentity) throws MeedlException {
         String verificationResponse;
         try {
-            log.info("Identity verification process ongoing. user identity {} ",userIdentity);
+            log.info("Identity verification process ongoing. user identity {} /n identity verification == {}",userIdentity,identityVerification);
             PremblyNinResponse premblyNinResponse = ninLikenessVerification(identityVerification, userIdentity); // Checked
             if (premblyNinResponse.isLikenessCheckSuccessful()){
                 log.info("Proceeding to bvn verification");

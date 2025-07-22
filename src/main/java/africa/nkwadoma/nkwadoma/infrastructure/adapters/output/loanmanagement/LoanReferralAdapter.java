@@ -55,6 +55,7 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
         MeedlValidator.validateUUID(loanReferralId, LoanMessages.LOAN_REFERRAL_ID_MUST_NOT_BE_EMPTY.getMessage());
         LoanReferralEntity loanReferralEntity = loanReferralRepository
                 .findById(loanReferralId).orElseThrow(()-> new LoanException("Loan referral not found"));
+        log.info("before mapping loan referral entity : loanne verification is   {}", loanReferralEntity.getCohortLoanee().getLoanee().getUserIdentity().isIdentityVerified());
         return loanReferralMapper.toLoanReferral(loanReferralEntity);
     }
 

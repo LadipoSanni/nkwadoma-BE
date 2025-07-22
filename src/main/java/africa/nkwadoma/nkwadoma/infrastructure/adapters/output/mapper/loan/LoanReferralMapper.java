@@ -16,6 +16,7 @@ public interface LoanReferralMapper {
     LoanReferralEntity toLoanReferralEntity(LoanReferral loanReferral);
 
     @InheritInverseConfiguration
+    @Mapping(target = "cohortLoanee.loanee.userIdentity.isIdentityVerified", source = "cohortLoanee.loanee.userIdentity.identityVerified")
     LoanReferral toLoanReferral(LoanReferralEntity savedLoanReferralEntity);
 
     @Mapping(target = "id", source = "id")

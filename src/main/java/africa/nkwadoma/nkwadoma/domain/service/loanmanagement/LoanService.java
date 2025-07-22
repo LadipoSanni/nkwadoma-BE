@@ -392,6 +392,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             log.info("FoundLoanReferral is null");
             throw new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage());
         }
+        log.info("loanee verification state === {}", foundLoanReferral.getCohortLoanee().getLoanee().getUserIdentity().isIdentityVerified());
+
         checkLoanReferralHasBeenAcceptedOrDeclined(foundLoanReferral);
         loanReferral.validateLoanReferralStatus();
 
@@ -436,15 +438,21 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (loanReferral.getCohortLoanee().getLoanee().getUserIdentity().isIdentityVerified()
                 || loanReferral.getCohortLoanee().getLoanee().getOnboardingMode()
                 .equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)) {
+            log.info("about to update loan request count on loan metrics: {}", loanReferral.getCohortLoanee().getReferredBy());
             updateLoanMetricsLoanRequestCount(loanReferral.getCohortLoanee().getReferredBy());
+            log.info("done with loan metrics update");
 
             Cohort cohort = updateLoanRequestCountOnCohort(loanReferral);
 
+            log.info("done with cohort update");
             updateLoanAmountRequestedOnCohortLoanDetail(loanRequest, cohort);
 
+            log.info("done with cohort loan details update");
             updateLoanAmountRequestedOnProgramLoanDetail(loanRequest, cohort);
 
+            log.info("done with program loan details update");
             updateLoanAmountRequestOnOrganizationLoanDetail(loanRequest, cohort);
+            log.info("done with organization loan details update");
         }
     }
 
