@@ -168,6 +168,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
     }
 
     private void calculateOutstandingPerRepayment(BigDecimal previousOutstandingAmount,RepaymentHistory repaymentHistory) {
+        log.info("Calculating outstanding per repayment. previous outstanding amount is : {}", previousOutstandingAmount);
         BigDecimal totalDue = previousOutstandingAmount.add(repaymentHistory.getInterestIncurred());
         BigDecimal newOutstandingAmount =  totalDue.subtract(repaymentHistory.getAmountPaid()).max(BigDecimal.ZERO);
         repaymentHistory.setAmountOutstanding(newOutstandingAmount);
