@@ -12,6 +12,6 @@ public class IdentityVerificationFailureRecord {
     private String id;
     private String email;
     private String reason;
-    private String referralId;
+    private String userId;
     private ServiceProvider serviceProvider;
 }

@@ -12,7 +12,6 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanRequ
 import africa.nkwadoma.nkwadoma.domain.enums.ServiceProvider;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
@@ -22,7 +21,6 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerificationFailureRecord;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanMetrics;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoanRequest;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.identity.IdentityVerificationMapper;
@@ -31,7 +29,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.commons.IdentityV
 //import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
-import org.keycloak.jose.jwk.JWK;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -151,14 +148,14 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     private void createVerificationFailure(UserIdentity userIdentity, String message, ServiceProvider serviceProvider) throws MeedlException {
         IdentityVerificationFailureRecord identityVerificationFailureRecord = new IdentityVerificationFailureRecord();
         identityVerificationFailureRecord.setEmail(userIdentity.getEmail());
-        identityVerificationFailureRecord.setReferralId(userIdentity.getId());
+        identityVerificationFailureRecord.setUserId(userIdentity.getId());
         identityVerificationFailureRecord.setServiceProvider(serviceProvider);
         identityVerificationFailureRecord.setReason(message);
         createIdentityVerificationFailureRecord(identityVerificationFailureRecord);
     }
 
     private void checkIfAboveThreshold(String loanReferralId) throws IdentityException {
-        Long numberOfAttempts = identityVerificationFailureRecordOutputPort.countByReferralId(loanReferralId);
+        Long numberOfAttempts = identityVerificationFailureRecordOutputPort.countByUserId(loanReferralId);
         if (numberOfAttempts >= 5L){
             log.error("You have reached the maximum number of verification attempts for this referral code: {}", loanReferralId);
             throw new IdentityException(String.format("You have reached the maximum number of verification attempts for this referral code: %s", loanReferralId));
@@ -168,12 +165,12 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     @Override
     public String createIdentityVerificationFailureRecord(IdentityVerificationFailureRecord identityVerificationFailureRecord) throws IdentityException {
         identityVerificationFailureRecordOutputPort.createIdentityVerificationFailureRecord(identityVerificationFailureRecord);
-        Long numberOfFailedVerifications = identityVerificationFailureRecordOutputPort.countByReferralId(identityVerificationFailureRecord.getReferralId());
+        Long numberOfFailedVerifications = identityVerificationFailureRecordOutputPort.countByUserId(identityVerificationFailureRecord.getUserId());
         if (numberOfFailedVerifications >= 5){
-            log.error("Number of failure verification exceeded for {}", identityVerificationFailureRecord.getReferralId());
+            log.error("Number of failure verification exceeded for {}", identityVerificationFailureRecord.getUserId());
             throw new IdentityException(BLACKLISTED_REFERRAL.getMessage());
         }
-        log.info("Verification failure saved successfully for {}", identityVerificationFailureRecord.getReferralId());
+        log.info("Verification failure saved successfully for {}", identityVerificationFailureRecord.getUserId());
         return IDENTITY_VERIFICATION_FAILURE_SAVED.getMessage();
     }
 

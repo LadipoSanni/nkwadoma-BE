@@ -75,7 +75,7 @@ class IdentityVerificationServiceTest {
         identityVerificationFailureRecord = IdentityVerificationFailureRecord.builder()
                 .email("test@example.com")
                 .reason("wrong bvn")
-                .referralId(testId)
+                .userId(testId)
                 .serviceProvider(ServiceProvider.SMILEID)
                 .build();
     }
@@ -114,7 +114,7 @@ class IdentityVerificationServiceTest {
     @Test
     void verifyIdentityOfBlacklistedReferral() throws MeedlException {
         when(loanReferralOutputPort.findLoanReferralById(identityVerification.getLoanReferralId())).thenReturn(Optional.of(loanReferral));
-        when(identityVerificationFailureRecordOutputPort.countByReferralId(loanReferral.getId())).thenReturn(5L);
+        when(identityVerificationFailureRecordOutputPort.countByUserId(loanReferral.getId())).thenReturn(5L);
         assertThrows(IdentityException.class, () -> identityVerificationService.verifyIdentity(testId,identityVerification));
     }
 
@@ -169,14 +169,14 @@ class IdentityVerificationServiceTest {
     @Test
     void failedVerificationBlackListed(){
         when(identityVerificationFailureRecordOutputPort.createIdentityVerificationFailureRecord(identityVerificationFailureRecord)).thenReturn(identityVerificationFailureRecord);
-        when(identityVerificationFailureRecordOutputPort.countByReferralId(identityVerificationFailureRecord.getReferralId())).thenReturn(5L);
+        when(identityVerificationFailureRecordOutputPort.countByUserId(identityVerificationFailureRecord.getUserId())).thenReturn(5L);
 
         assertThrows(IdentityException.class, ()->identityVerificationService.createIdentityVerificationFailureRecord(identityVerificationFailureRecord));
     }
     @Test
     void failedVerificationNotBlackListed() {
         when(identityVerificationFailureRecordOutputPort.createIdentityVerificationFailureRecord(identityVerificationFailureRecord)).thenReturn(identityVerificationFailureRecord);
-        when(identityVerificationFailureRecordOutputPort.countByReferralId(identityVerificationFailureRecord.getReferralId())).thenReturn(4L);
+        when(identityVerificationFailureRecordOutputPort.countByUserId(identityVerificationFailureRecord.getUserId())).thenReturn(4L);
         try {
             String response = identityVerificationService.createIdentityVerificationFailureRecord(identityVerificationFailureRecord);
             assertNotNull(response);
