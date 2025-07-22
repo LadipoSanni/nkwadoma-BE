@@ -12,6 +12,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanRequ
 import africa.nkwadoma.nkwadoma.domain.enums.ServiceProvider;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
@@ -33,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
@@ -90,37 +92,25 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     }
     @Override
     public String verifyIdentity(String actorId,IdentityVerification identityVerification) throws MeedlException {
-        LoanReferral loanReferral = validateIdentity(identityVerification);
+        checkIfAboveThreshold(actorId);
 
         UserIdentity userIdentity = userIdentityOutputPort.findByBvn(identityVerification.getEncryptedBvn());
-        if (ObjectUtils.isEmpty(userIdentity) && ObjectUtils.isEmpty(loanReferral)) {
+        if (ObjectUtils.isEmpty(userIdentity)) {
             userIdentity = userIdentityOutputPort.findById(actorId);
-        }else {
-            userIdentity = loanReferral.getLoanee().getUserIdentity();
         }
         if (isVerificationRequired(userIdentity)){
             log.info("User requires identity verification");
             log.info("user identity === -- == {}",userIdentity);
-            return processNewVerification(identityVerification, loanReferral,userIdentity);
+            return processNewVerification(identityVerification,userIdentity);
         }else{
-            log.warn("User attempted to verify again {}", loanReferral.getLoanee().getUserIdentity().getEmail());
+            log.warn("User attempted to verify again {}", userIdentity.getEmail());
 //            processAnotherVerification(identityVerification, loanReferral);
 //            addedToLoaneeLoan(loanReferral.getId());
 //            log.info("Verification previously done and was successful");
                 return IDENTITY_VERIFIED.getMessage();
         }
     }
-    private LoanReferral validateIdentity(IdentityVerification identityVerification) throws MeedlException {
-        validateIdentityVerification(identityVerification);
-        decryptEncryptedIdentification(identityVerification);
 
-        if (identityVerification.getLoanReferralId() != null) {
-            LoanReferral loanReferral = fetchLoanReferral(identityVerification.getLoanReferralId());
-            checkIfAboveThreshold(loanReferral.getId());
-            return loanReferral;
-        }
-        return null;
-    }
 
     private void updateLoaneeDetail(IdentityVerification identityVerification, String userId, PremblyNinResponse premblyResponse) throws MeedlException {
        UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
@@ -154,11 +144,11 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         createIdentityVerificationFailureRecord(identityVerificationFailureRecord);
     }
 
-    private void checkIfAboveThreshold(String loanReferralId) throws IdentityException {
-        Long numberOfAttempts = identityVerificationFailureRecordOutputPort.countByUserId(loanReferralId);
+    private void checkIfAboveThreshold(String actorId) throws IdentityException {
+        Long numberOfAttempts = identityVerificationFailureRecordOutputPort.countByUserId(actorId);
         if (numberOfAttempts >= 5L){
-            log.error("You have reached the maximum number of verification attempts for this referral code: {}", loanReferralId);
-            throw new IdentityException(String.format("You have reached the maximum number of verification attempts for this referral code: %s", loanReferralId));
+            log.error("You have reached the maximum number of verification attempts for this user: {}", actorId);
+            throw new IdentityException(String.format("You have reached the maximum number of verification attempts for this user code: %s", actorId));
         }
     }
 
@@ -198,10 +188,10 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         return ObjectUtils.isEmpty(userIdentity) || !userIdentity.isIdentityVerified();
     }
 
-    private String processNewVerification(IdentityVerification identityVerification,LoanReferral loanReferral,UserIdentity userIdentity) throws MeedlException {
+    private String processNewVerification(IdentityVerification identityVerification,UserIdentity userIdentity) throws MeedlException {
         String verificationResponse;
         try {
-            log.info("Identity verification process ongoing. user identity {} ---- loan referral {}  ",userIdentity,loanReferral);
+            log.info("Identity verification process ongoing. user identity {} ",userIdentity);
             PremblyNinResponse premblyNinResponse = ninLikenessVerification(identityVerification, userIdentity); // Checked
             if (premblyNinResponse.isLikenessCheckSuccessful()){
                 log.info("Proceeding to bvn verification");
@@ -210,13 +200,8 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
                     handleSuccessfulVerification(identityVerification, userIdentity.getId(), premblyNinResponse);
                     verificationResponse = IdentityMessages.IDENTITY_VERIFIED.getMessage();
 
-                    if (ObjectUtils.isNotEmpty(loanReferral)) {
-                        log.info("verification done successfully. {}", verificationResponse);
-                        log.info("about to increase loan request count  {}", loanReferral);
-                        log.info("refer by {}", loanReferral.getReferredBy());
-                        updateLoanMetricsLoanRequestCount(loanReferral.getReferredBy());
-                        log.info("done with loan request count on {}", loanReferral.getReferredBy());
-                    }
+                    log.info("verification done successfully. {}", verificationResponse);
+                    makeUpdateToUserLoaNReferrals(userIdentity);
 
                 }else {
                     log.warn("Identity verification not successful, failed at the bvn level");
@@ -232,6 +217,24 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
             throw new IdentityException(exception.getMessage());
         }
         return verificationResponse;
+    }
+
+    private void makeUpdateToUserLoaNReferrals(UserIdentity userIdentity) throws MeedlException {
+        List<LoanReferral> loanReferrals =
+                loanReferralOutputPort.findAllLoanReferralsByUserIdAndStatus(userIdentity.getId(),
+                        LoanReferralStatus.AUTHORIZED);
+        log.info("Found {} loanReferrals", loanReferrals.size());
+        log.info("Loan referrals found {}",loanReferrals);
+        updateLoanRequestCountForEachLoanReferralThatHasBeenAccepted(loanReferrals);
+    }
+
+    private void updateLoanRequestCountForEachLoanReferralThatHasBeenAccepted(List<LoanReferral> loanReferrals) throws MeedlException {
+        for (LoanReferral loanReferral : loanReferrals) {
+            log.info("about to increase loan request count  {}", loanReferral);
+            log.info("refer by {}", loanReferral.getCohortLoanee().getReferredBy());
+            updateLoanMetricsLoanRequestCount(loanReferral.getCohortLoanee().getReferredBy());
+            log.info("done with loan request count on loan referral by  {}", loanReferral.getCohortLoanee().getReferredBy());
+        }
     }
 
     private void updateLoanMetricsLoanRequestCount(String referBy) throws MeedlException {

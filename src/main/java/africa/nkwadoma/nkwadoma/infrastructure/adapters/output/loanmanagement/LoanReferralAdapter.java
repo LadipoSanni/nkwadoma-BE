@@ -3,7 +3,6 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
@@ -20,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -117,6 +117,14 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
         Page<LoanReferralProjection> loanReferralEntities = loanReferralRepository.findAllLoanReferralsForLoanee(loaneeId, pageRequest);
         return loanReferralEntities.map(loanReferralMapper::mapProjectionToLoanReferralEntity);
+    }
+
+    @Override
+    public List<LoanReferral> findAllLoanReferralsByUserIdAndStatus(String id, LoanReferralStatus loanReferralStatus) throws MeedlException {
+        MeedlValidator.validateUUID(id,UserMessages.INVALID_USER_ID.getMessage());
+        List<LoanReferralEntity> loanReferralEntities =
+                loanReferralRepository.findAllByCohortLoanee_Loanee_UserIdentity_idAndLoanReferralStatus(id,loanReferralStatus);
+        return loanReferralEntities.stream().map(loanReferralMapper::toLoanReferral).collect(Collectors.toList());
     }
 }
 
