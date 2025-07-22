@@ -507,6 +507,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                     .amountReceived(new BigDecimal(row.get("amountreceived")))
                     .amountOutstanding(new BigDecimal(row.get("amountreceived")).subtract(new BigDecimal(row.get("initialdeposit"))))
                     .amountRepaid(BigDecimal.ZERO)
+                    .interestIncurred(BigDecimal.ZERO)
                     .tuitionAmount(cohort.getTuitionAmount())
                     .build();
             log.info("loan product name found from csv {}", row.get("loanproduct"));

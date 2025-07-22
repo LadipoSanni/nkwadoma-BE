@@ -107,10 +107,5 @@ public interface RepaymentHistoryRepository extends JpaRepository<RepaymentHisto
 
     List<RepaymentHistoryEntity> findAllByLoanee_IdAndCohortIdOrderByPaymentDateTimeAsc(String loaneeId, String cohortId);
 
-    @Modifying
-    @Query("DELETE FROM RepaymentHistoryEntity r WHERE r.id IN :ids")
-    void deleteByIds(@Param("ids") List<String> ids);
-
-
 }
 

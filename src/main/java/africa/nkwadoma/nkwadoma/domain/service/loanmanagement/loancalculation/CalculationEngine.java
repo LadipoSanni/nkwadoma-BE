@@ -2,7 +2,6 @@ package africa.nkwadoma.nkwadoma.domain.service.loanmanagement.loancalculation;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loancalculation.CalculationEngineUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.RepaymentHistoryOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanCalculationMessages;
@@ -104,6 +103,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
         for (RepaymentHistory repayment : repaymentHistories) {
             validateAmountRepaid(repayment);
             previousOutstandingAmount = getPreviousAmountOutstanding(previousOutstandingAmount, loaneeLoanDetail);
+            log.info("Outstanding before processing this repayment {} ", previousOutstandingAmount);
 
             runningTotal = calculateTotalAmountRepaidPerRepayment(repayment, runningTotal);
             calculateIncurredInterestPerRepayment(repayment, previousOutstandingAmount, lastDate, loaneeLoanDetail);
@@ -113,20 +113,23 @@ public class CalculationEngine implements CalculationEngineUseCase {
             repayment.setLoanee(loanee);
             lastDate = repayment.getPaymentDateTime();
             previousOutstandingAmount = repayment.getAmountOutstanding();
-            loaneeLoanDetail.setAmountOutstanding(previousOutstandingAmount);
-            loaneeLoanDetail.setAmountRepaid(runningTotal);
+            loaneeLoanDetail.setAmountOutstanding(decimalPlaceRoundUp(previousOutstandingAmount));
+            loaneeLoanDetail.setAmountRepaid(decimalPlaceRoundUp(runningTotal));
+            log.info("Outstanding per payment {}", previousOutstandingAmount);
         }
         calculateTotalInterestIncurred(loaneeLoanDetail , repaymentHistories);
         log.info("The repayment histories after adding up total amount repaid ----> {}", repaymentHistories);
         log.info("Last payment date {} , total amount outstanding {}, total amount repaid {}", lastDate, previousOutstandingAmount, runningTotal);
 
         LoaneeLoanDetail updatedLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
+        log.info("Loanee loan details updated with repayment calculations. {}", updatedLoaneeLoanDetail);
         updateLoaneeRepaymentHistory(repaymentHistories, previousRepaymentHistory);
         log.info("Updated Loanee loan detail after repayment {}", updatedLoaneeLoanDetail);
 
     }
 
     private void updateLoaneeRepaymentHistory(List<RepaymentHistory> currentRepaymentHistories, List<RepaymentHistory> previousRepaymentHistory) {
+        log.info("updating list of loanee repayment histories {}", currentRepaymentHistories);
         List<String> repaymentHistoryIds = previousRepaymentHistory.stream()
                         .map(RepaymentHistory::getId)
                                 .toList();
@@ -146,14 +149,17 @@ public class CalculationEngine implements CalculationEngineUseCase {
         BigDecimal totalInterestIncurred = repaymentHistories.stream()
                                                     .map(RepaymentHistory::getInterestIncurred)
                                                     .reduce(BigDecimal.ZERO, BigDecimal::add);
-        loaneeLoanDetail.setInterestIncurred(totalInterestIncurred);
+        loaneeLoanDetail.setInterestIncurred(decimalPlaceRoundUp(totalInterestIncurred));
+        log.info("Total interest incurred {}", loaneeLoanDetail.getInterestIncurred());
     }
 
     private BigDecimal getPreviousAmountOutstanding(BigDecimal previousOutstanding, LoaneeLoanDetail loaneeLoanDetail) {
         if (ObjectUtils.isNotEmpty(previousOutstanding)){
-            return previousOutstanding;
+            log.info("Getting the previous amount outstanding as the previous in the calculation {}", previousOutstanding);
+            return decimalPlaceRoundUp(previousOutstanding);
         }
-        return loaneeLoanDetail.getAmountReceived();
+        log.info("Getting the previous amount outstanding as amount received {}", loaneeLoanDetail.getAmountReceived());
+        return decimalPlaceRoundUp(loaneeLoanDetail.getAmountReceived());
     }
 
     private  LoaneeLoanDetail getLoaneeLoanDetail(String loaneeId, String cohortId) throws MeedlException {
@@ -169,7 +175,9 @@ public class CalculationEngine implements CalculationEngineUseCase {
 
     private void calculateIncurredInterestPerRepayment(RepaymentHistory repayment, BigDecimal previousOutstandingAmount, LocalDateTime lastDate, LoaneeLoanDetail loaneeLoanDetail) {
         long daysBetween = calculateDaysBetween(lastDate, repayment.getPaymentDateTime());
+        log.info("How many days a between the last payment {}", daysBetween);
         BigDecimal incurredInterest = calculateInterest(loaneeLoanDetail.getInterestRate(), previousOutstandingAmount, daysBetween);
+        log.info("Previous out standing amount after calculating interest incurred {} outstanding is {}", incurredInterest, previousOutstandingAmount);
         repayment.setInterestIncurred(incurredInterest);
     }
 

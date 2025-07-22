@@ -130,15 +130,28 @@ public class RepaymentHistoryAdapter implements RepaymentHistoryOutputPort {
 
     @Override
     public void deleteMultipleRepaymentHistory(List<String> repaymentHistoryIds) {
-        repaymentHistoryRepository.deleteByIds(repaymentHistoryIds
-                                        .stream()
-                                        .filter(StringUtils::isNotEmpty)
-                                        .toList());
+        List<RepaymentHistoryEntity> repaymentHistories = repaymentHistoryRepository.findAllById(
+                repaymentHistoryIds.stream()
+                        .filter(StringUtils::isNotEmpty)
+                        .toList()
+        );
+
+        log.info("List of repayments deleted {}", repaymentHistories);
+
+        repaymentHistoryRepository.deleteAll(repaymentHistories);
     }
 
     @Override
     public List<RepaymentHistory> saveAllRepaymentHistory(List<RepaymentHistory> currentRepaymentHistories) {
-        return List.of();
+        List<RepaymentHistoryEntity> entitiesToSave = currentRepaymentHistories.stream()
+                .map(repaymentHistoryMapper::map)
+                .toList();
+
+        List<RepaymentHistoryEntity> savedEntities = repaymentHistoryRepository.saveAll(entitiesToSave);
+
+        return savedEntities.stream()
+                .map(repaymentHistoryMapper::map)
+                .toList();
     }
 
 }
