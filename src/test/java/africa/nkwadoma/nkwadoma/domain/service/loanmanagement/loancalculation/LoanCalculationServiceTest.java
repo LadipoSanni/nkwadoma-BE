@@ -1,8 +1,14 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanmanagement.loancalculation;
 
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.RepaymentHistoryOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanCalculationMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanPeriodRecord;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import lombok.extern.slf4j.Slf4j;
@@ -12,14 +18,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.util.ReflectionUtils;
 
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.BiFunction;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
@@ -27,7 +38,11 @@ public class LoanCalculationServiceTest {
     @InjectMocks
     private CalculationEngine calculationEngine;
     @Mock
+    private LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
+    @Mock
     private RepaymentHistoryOutputPort repaymentHistoryOutputPort;
+    @Mock
+    private CohortLoaneeOutputPort cohortLoaneeOutputPort;
     private String loaneeId;
     private String cohortId;
     private final BigDecimal ZERO = new BigDecimal("0.00");
@@ -728,14 +743,11 @@ public class LoanCalculationServiceTest {
                 createRepayment(LocalDateTime.of(2025, 2, 1, 10, 0), new BigDecimal("2000")),
                 createRepayment(LocalDateTime.of(2025, 3, 1, 10, 0), new BigDecimal("5000"))
         );
-//
-//<<<<<<< HEAD
-//        BigDecimal totalAmountRepaid = loanCalculation.calculateCurrentTotalAmountRepaid(repayments, loaneeId, cohortId);
-//=======
-//        BigDecimal totalAmountRepaid = calculationEngine.calculateTotalRepayment(repayments, loaneeId, cohortId);
-//>>>>>>> 1a1c63d492ab096a7e06f5edfebc079fca10780b
-//        log.info("Updated repayment history in test after both sorting \n {}", totalAmountRepaid);
-        assertEquals(new BigDecimal("1000"), repayments.get(0).getTotalAmountRepaid());
+        BigDecimal totalAmountRepaid = calculationEngine
+                                        .calculateTotalRepayment(repayments
+                                                                    .stream()
+                                                                    .map(RepaymentHistory::getAmountPaid)
+                                                                    .toList());assertEquals(new BigDecimal("1000"), repayments.get(0).getTotalAmountRepaid());
         assertEquals(new BigDecimal("3000"), repayments.get(1).getTotalAmountRepaid());
         assertEquals(new BigDecimal("8000"), repayments.get(2).getTotalAmountRepaid());
 //        assertEquals(new BigDecimal("8000"), totalAmountRepaid);
@@ -756,15 +768,134 @@ public class LoanCalculationServiceTest {
         when(repaymentHistoryOutputPort.findAllRepaymentHistoryForLoan(loaneeId, cohortId))
                 .thenReturn(previousRepayments);
 
-//<<<<<<< HEAD
-//        BigDecimal totalAmountRepaid = loanCalculation.calculateCurrentTotalAmountRepaid(newRepayments, loaneeId, cohortId);
-//=======
-//        BigDecimal totalAmountRepaid = calculationEngine.calculateTotalRepayment(newRepayments, loaneeId, cohortId);
-//>>>>>>> 1a1c63d492ab096a7e06f5edfebc079fca10780b
 
-
-//        assertEquals(new BigDecimal("10000"), totalAmountRepaid);
+        BigDecimal totalAmountRepaid = calculationEngine
+                                                    .calculateTotalRepayment(newRepayments
+                                                            .stream()
+                                                            .map(RepaymentHistory::getAmountPaid)
+                                                            .toList());
+        assertEquals(new BigDecimal("10000"), totalAmountRepaid);
     }
 
+
+
+
+
+
+    // ==============================
+// My Tests Start Here
+// ==============================
+
+    @Test
+    void shouldNotProcessWhenRepaymentHistoriesIsEmpty() throws MeedlException {
+        Loanee loanee = Loanee.builder().id(loaneeId).build();
+        Cohort cohort = Cohort.builder().id(cohortId).build();
+
+        calculationEngine.calculateLoaneeLoanRepaymentHistory(new ArrayList<>(), loanee, cohort);
+
+        verifyNoInteractions(repaymentHistoryOutputPort);
+    }
+
+    @Test
+    void shouldNotProcessWhenLoaneeIsNull() throws MeedlException {
+        List<RepaymentHistory> repayments = List.of(createRepayment(LocalDateTime.now(), BigDecimal.TEN));
+        Cohort cohort = Cohort.builder().id(cohortId).build();
+
+        calculationEngine.calculateLoaneeLoanRepaymentHistory(repayments, null, cohort);
+
+        verifyNoInteractions(repaymentHistoryOutputPort);
+    }
+
+    @Test
+    void shouldCombinePreviousAndNewRepaymentHistoriesCorrectly() {
+        List<RepaymentHistory> previous = List.of(
+                createRepayment(LocalDateTime.of(2024, 1, 1, 10, 0), BigDecimal.valueOf(100)),
+                createRepayment(LocalDateTime.of(2024, 2, 1, 10, 0), BigDecimal.valueOf(150))
+        );
+        List<RepaymentHistory> current = List.of(
+                createRepayment(LocalDateTime.of(2024, 3, 1, 10, 0), BigDecimal.valueOf(200))
+        );
+
+        List<RepaymentHistory> combined = calculationEngine.combinePreviousAndNewRepaymentHistory(previous, current);
+
+        assertEquals(3, combined.size());
+        assertEquals(BigDecimal.valueOf(100), combined.get(0).getAmountPaid());
+        assertEquals(BigDecimal.valueOf(200), combined.get(2).getAmountPaid());
+    }
+
+    @Test
+    void shouldReturnOnlyNewWhenPreviousIsEmpty() {
+        List<RepaymentHistory> previous = new ArrayList<>();
+        List<RepaymentHistory> current = List.of(
+                createRepayment(LocalDateTime.of(2024, 3, 1, 10, 0), BigDecimal.valueOf(200))
+        );
+
+        List<RepaymentHistory> combined = calculationEngine.combinePreviousAndNewRepaymentHistory(previous, current);
+
+        assertEquals(1, combined.size());
+        assertEquals(BigDecimal.valueOf(200), combined.get(0).getAmountPaid());
+    }
+
+    @Test
+    void shouldCalculateOutstandingAndInterestCorrectlyForRepayment() throws MeedlException {
+        Loanee loanee = Loanee.builder().id(loaneeId).build();
+        Cohort cohort = Cohort.builder().id(cohortId).build();
+
+        List<RepaymentHistory> repayments = List.of(
+                createRepayment(LocalDateTime.of(2025, 1, 1, 0, 0), BigDecimal.valueOf(1000)),
+                createRepayment(LocalDateTime.of(2025, 2, 1, 0, 0), BigDecimal.valueOf(1000))
+        );
+
+        LoaneeLoanDetail loanDetail = LoaneeLoanDetail.builder()
+                .id(UUID.randomUUID().toString())
+                .amountReceived(BigDecimal.valueOf(5000))
+                .amountOutstanding(BigDecimal.valueOf(5000))
+                .amountRepaid(BigDecimal.ZERO)
+                .interestRate(0.03)
+                .build();
+
+        CohortLoanee cohortLoanee = CohortLoanee.builder().id("cohortLoaneeId").build();
+
+        when(cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(loaneeId, cohortId)).thenReturn(cohortLoanee);
+        when(loaneeLoanDetailsOutputPort.findByCohortLoaneeId("cohortLoaneeId")).thenReturn(loanDetail);
+
+        when(repaymentHistoryOutputPort.findAllRepaymentHistoryForLoan(loaneeId, cohortId)).thenReturn(new ArrayList<>());
+        when(loaneeLoanDetailsOutputPort.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(repaymentHistoryOutputPort.saveAllRepaymentHistory(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        doNothing().when(repaymentHistoryOutputPort).deleteMultipleRepaymentHistory(any());
+
+        calculationEngine.calculateLoaneeLoanRepaymentHistory(repayments, loanee, cohort);
+
+        verify(repaymentHistoryOutputPort).saveAllRepaymentHistory(any());
+        verify(loaneeLoanDetailsOutputPort).save(any());
+    }
+
+
+    @Test
+    void testGetPreviousOutstanding_whenNotNull_shouldReturnSame() {
+        BigDecimal previousOutstanding = BigDecimal.valueOf(3000);
+        LoaneeLoanDetail loanDetail = LoaneeLoanDetail.builder()
+                .amountReceived(BigDecimal.valueOf(5000))
+                .build();
+
+        BigDecimal result = ReflectionTestUtils.invokeMethod(calculationEngine, "getPreviousAmountOutstanding", previousOutstanding, loanDetail);
+
+        assertEquals(previousOutstanding, result);
+    }
+
+    @Test
+    void testGetPreviousOutstanding_whenNull_shouldReturnAmountReceivedFromLoanDetail() {
+        LoaneeLoanDetail loanDetail = LoaneeLoanDetail.builder()
+                .amountReceived(BigDecimal.valueOf(5000))
+                .build();
+
+        BigDecimal result = ReflectionTestUtils.invokeMethod(calculationEngine, "getPreviousAmountOutstanding", null, loanDetail);
+
+        assertEquals(BigDecimal.valueOf(5000), result);
+    }
+
+// ==============================
+// My Tests End Here
+// ==============================
 
 }

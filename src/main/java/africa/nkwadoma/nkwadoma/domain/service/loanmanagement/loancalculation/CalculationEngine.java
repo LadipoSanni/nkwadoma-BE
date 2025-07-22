@@ -85,13 +85,13 @@ public class CalculationEngine implements CalculationEngineUseCase {
             Cohort cohort
     ) throws MeedlException {
 
-        LoaneeLoanDetail loaneeLoanDetail = getLoaneeLoanDetail(loanee.getId(), cohort.getId());
         if (ObjectUtils.isEmpty(repaymentHistories) || repaymentHistories.isEmpty()) {
             return;
         }
         if (ObjectUtils.isEmpty(loanee)){
             return;
         }
+        LoaneeLoanDetail loaneeLoanDetail = getLoaneeLoanDetail(loanee.getId(), cohort.getId());
 
         List<RepaymentHistory> previousRepaymentHistory = repaymentHistoryOutputPort.findAllRepaymentHistoryForLoan(loanee.getId(), cohort.getId());
         repaymentHistories = combinePreviousAndNewRepaymentHistory(previousRepaymentHistory, repaymentHistories);
