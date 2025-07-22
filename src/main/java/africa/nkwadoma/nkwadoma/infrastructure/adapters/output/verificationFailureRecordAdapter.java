@@ -22,7 +22,7 @@ public class verificationFailureRecordAdapter implements IdentityVerificationFai
     }
 
     @Override
-    public Long countByReferralId(String referralId) {
-        return verificationFailureRecordRepository.countByReferralId(referralId);
+    public Long countByUserId(String userId) {
+        return verificationFailureRecordRepository.countByUserId(userId);
     }
 }
