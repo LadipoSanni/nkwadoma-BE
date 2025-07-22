@@ -94,15 +94,16 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     @Override
     public String verifyIdentity(String actorId,IdentityVerification identityVerification) throws MeedlException {
         LoanReferral loanReferral = validateIdentity(identityVerification);
-        UserIdentity userIdentity = null;
-        if (ObjectUtils.isNotEmpty(loanReferral)) {
-             userIdentity = userIdentityOutputPort.findByBvn(identityVerification.getEncryptedBvn());
-        }else {
-            userIdentity = userIdentityOutputPort.findById(actorId);
-        }
 
+        UserIdentity userIdentity = userIdentityOutputPort.findByBvn(identityVerification.getEncryptedBvn());
+        if (ObjectUtils.isEmpty(userIdentity) && ObjectUtils.isEmpty(loanReferral)) {
+            userIdentity = userIdentityOutputPort.findById(actorId);
+        }else {
+            userIdentity = loanReferral.getLoanee().getUserIdentity();
+        }
         if (isVerificationRequired(userIdentity)){
             log.info("User requires identity verification");
+            log.info("user identity === -- == {}",userIdentity);
             return processNewVerification(identityVerification, loanReferral,userIdentity);
         }else{
             log.warn("User attempted to verify again {}", loanReferral.getLoanee().getUserIdentity().getEmail());
@@ -203,7 +204,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     private String processNewVerification(IdentityVerification identityVerification,LoanReferral loanReferral,UserIdentity userIdentity) throws MeedlException {
         String verificationResponse;
         try {
-            log.info("Identity verification process ongoing. ");
+            log.info("Identity verification process ongoing. user identity {} ---- loan referral {}  ",userIdentity,loanReferral);
             PremblyNinResponse premblyNinResponse = ninLikenessVerification(identityVerification, userIdentity); // Checked
             if (premblyNinResponse.isLikenessCheckSuccessful()){
                 log.info("Proceeding to bvn verification");
@@ -253,7 +254,8 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         loanMetricsOutputPort.save(loanMetrics.get());
     }
 
-    private PremblyNinResponse ninLikenessVerification(IdentityVerification identityVerification,UserIdentity loanReferral) throws MeedlException {
+    private PremblyNinResponse ninLikenessVerification(IdentityVerification identityVerification,UserIdentity userIdentity) throws MeedlException {
+        log.info("prembly nin likeness verification about to start  {}",identityVerification);
         PremblyNinResponse premblyNinResponse =
                 identityVerificationOutputPort.verifyNinLikeness(identityVerification);
         log.info("prembly nin response: {}", premblyNinResponse);
@@ -264,7 +266,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         } else {
             log.error("FAILED: Identity verification failed with NIN.");
             premblyNinResponse.setLikenessCheckSuccessful(Boolean.FALSE);
-            handleFailedVerification(loanReferral, premblyNinResponse);
+            handleFailedVerification(userIdentity, premblyNinResponse);
         }
         return premblyNinResponse;
     }
