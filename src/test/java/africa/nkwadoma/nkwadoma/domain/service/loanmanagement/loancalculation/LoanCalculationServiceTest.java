@@ -820,7 +820,7 @@ public class LoanCalculationServiceTest {
 
     @Test
     void getPreviousOutstandingWhenNotNull() {
-        BigDecimal previousOutstanding = BigDecimal.valueOf(3000);
+        BigDecimal previousOutstanding = decimalPlaceRoundUp(BigDecimal.valueOf(3000));
         LoaneeLoanDetail loanDetail = LoaneeLoanDetail.builder()
                 .amountReceived(decimalPlaceRoundUp(BigDecimal.valueOf(5000)))
                 .build();
