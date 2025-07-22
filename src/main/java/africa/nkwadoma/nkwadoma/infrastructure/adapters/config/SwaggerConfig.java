@@ -48,7 +48,7 @@ public class SwaggerConfig {
     private List<Server> getServerList() {
         return List.of(
                 new Server()
-                        .url((swaggerEnvPath != null ? swaggerEnvPath : "http://localhost:8060") + contextPath)
+                        .url((swaggerEnvPath != null ? swaggerEnvPath : "http://localhost:") + serverPort + contextPath)
                         .description("Environment Server"),
                 new Server()
                         .url("http://localhost:" + serverPort + contextPath)
