@@ -19,6 +19,7 @@ public interface IdentityVerificationMapper {
     @Mapping(target = "residentialAddress", source = "residenceAddress")
     @Mapping(target = "stateOfResidence", source = "residenceState")
     @Mapping(target = "firstName", source = "firstname")
+    @Mapping(target = "phoneNumber", source = "telephoneNo")
     @Mapping(target = "lastName", source = "lastname")
     UserIdentity updateUserIdentity(PremblyNinResponse.NinData premblyBvnResponse, @MappingTarget UserIdentity userIdentity);
 

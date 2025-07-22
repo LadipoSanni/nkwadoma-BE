@@ -15,7 +15,7 @@ public class IdentityVerificationFailureRecordEntity {
     private String id;
     private String email;
     private String reason;
-    private String referralId;
+    private String userId;
     @Enumerated(EnumType.STRING)
     private ServiceProvider serviceProvider;
 }

@@ -4,5 +4,5 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface IdentityVerificationFailureRecordRepository extends JpaRepository<IdentityVerificationFailureRecordEntity, String> {
-    Long countByReferralId(String referralId);
+    Long countByUserId(String referralId);
 }

@@ -5,5 +5,5 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerificationFailur
 public interface IdentityVerificationFailureRecordOutputPort {
     IdentityVerificationFailureRecord createIdentityVerificationFailureRecord(IdentityVerificationFailureRecord record);
 
-    Long countByReferralId(String referralId);
+    Long countByUserId(String referralId);
 }
