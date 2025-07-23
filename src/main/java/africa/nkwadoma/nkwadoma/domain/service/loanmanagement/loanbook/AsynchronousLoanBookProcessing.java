@@ -14,6 +14,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanReferralOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanDecision;
@@ -72,6 +73,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
     private final LoanReferralOutputPort loanReferralOutputPort;
     private final CalculationEngineUseCase loanCalculationUseCase;
+    private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
     private final LoanUseCase loanUseCase;
     private final AesOutputPort aesOutputPort;
     private final CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
@@ -124,7 +126,12 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         Map<String, List<RepaymentHistory>> mapOfRepaymentHistoriesForEachLoanee = getRepaymentHistoriesForLoanees(loaneesThatMadePayment, convertedRepaymentHistories);
 //        printRepaymentCountsPerLoanee(mapOfRepaymentHistoriesForEachLoanee);
         processAccumulatedRepayments(mapOfRepaymentHistoriesForEachLoanee, repaymentHistoryBook.getCohort().getId(), repaymentHistoryBook);
+        sendRepaymentUploadSuccessNotification();
         log.info("Repayment record uploaded..");
+    }
+
+    private void sendRepaymentUploadSuccessNotification() {
+        asynchronousNotificationOutputPort.notifyPmOnRepaymentUploadSuccess();
     }
 
     private void validateStartDates(List<Loanee> convertedLoanees, Cohort savedCohort) throws MeedlException {
