@@ -14,6 +14,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanReferralOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanDecision;
@@ -73,6 +74,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
     private final LoanReferralOutputPort loanReferralOutputPort;
     private final CalculationEngineUseCase loanCalculationUseCase;
+    private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
     private final LoanUseCase loanUseCase;
     private final AesOutputPort aesOutputPort;
     private final CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
@@ -100,8 +102,12 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         referCohort(loanBook);
         completeLoanProcessing(loanBook);
         updateLoaneeCount(savedCohort,convertedCohortLoanees);
+        sendUserDataUploadSuccessNotification(loanBook);
     }
-
+    private void sendUserDataUploadSuccessNotification(LoanBook loanBook) throws MeedlException {
+        UserIdentity foundActor = identityManagerOutputPort.getUserById(loanBook.getActorId());
+        asynchronousNotificationOutputPort.notifyPmOnUserDataUploadSuccess(foundActor, loanBook);
+    }
 
     @Override
     public void uploadRepaymentHistory(LoanBook repaymentHistoryBook) throws MeedlException {
@@ -112,7 +118,6 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         List<Map<String, String>>  data = readFile(repaymentHistoryBook, requiredHeaders);
         repaymentHistoryBook.setMeedlNotification(new MeedlNotification());
         log.info("Repayment record book read is {}", data);
-
 
         loanBookValidator.repaymentHistoryValidation(data, repaymentHistoryBook);
         Cohort savedCohort = findCohort(repaymentHistoryBook.getCohort());
@@ -125,7 +130,14 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         Map<String, List<RepaymentHistory>> mapOfRepaymentHistoriesForEachLoanee = getRepaymentHistoriesForLoanees(loaneesThatMadePayment, convertedRepaymentHistories);
 //        printRepaymentCountsPerLoanee(mapOfRepaymentHistoriesForEachLoanee);
         processRepaymentCalculation(mapOfRepaymentHistoriesForEachLoanee, repaymentHistoryBook.getCohort());
+        sendRepaymentUploadSuccessNotification(repaymentHistoryBook);
+
         log.info("Repayment record uploaded..");
+    }
+
+    private void sendRepaymentUploadSuccessNotification(LoanBook loanBook) throws MeedlException {
+        UserIdentity foundActor = identityManagerOutputPort.getUserById(loanBook.getActorId());
+        asynchronousNotificationOutputPort.notifyPmOnRepaymentUploadSuccess(foundActor, loanBook);
     }
 
     private void validateStartDates(List<Loanee> convertedLoanees, Cohort savedCohort) throws MeedlException {
@@ -323,7 +335,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         loanOffer.setId(loanRequest.getId());
         loanOffer.setLoaneeResponse(LoanDecision.ACCEPTED);
         loanOffer.setUserId(loanRequest.getLoanee().getUserIdentity().getId());
-        loanOfferUseCase.acceptLoanOffer(loanOffer);
+        loanOfferUseCase.acceptLoanOffer(loanOffer, OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS);
     }
 
     private LoanReferral acceptLoanReferral(CohortLoanee cohortLoanee) throws MeedlException {

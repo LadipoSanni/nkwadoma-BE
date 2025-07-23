@@ -600,7 +600,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     @Override
-    public LoaneeLoanAccount acceptLoanOffer(LoanOffer loanOffer) throws MeedlException {
+    public LoaneeLoanAccount acceptLoanOffer(LoanOffer loanOffer, OnboardingMode onboardingMode) throws MeedlException {
         loanOffer.validateForAcceptOffer();
         log.info("Loan offer identity validated : {}", loanOffer);
         LoanOffer offer = loanOfferOutputPort.findLoanOfferById(loanOffer.getId());
@@ -624,7 +624,13 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
         if (loanOffer.getLoaneeResponse().equals(LoanDecision.ACCEPTED)){
             log.info("accept offer abt to start : {}", loanOffer);
-            return acceptLoanOffer(loanee.getUserIdentity(), loanOffer, offer,referBy);
+            LoaneeLoanAccount loaneeLoanAccount = acceptLoanOffer(loanee.getUserIdentity(), loanOffer, offer,referBy);
+            if (!OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS.equals(onboardingMode)){
+                log.info("Sending pm notification on accepting loan offer, loanee is not via file upload.");
+                notifyPortfolioManager(offer, loanee.getUserIdentity());
+            }
+            return loaneeLoanAccount;
+
         }
         decreaseLoanOfferOnLoanMetrics(referBy);
         declineLoanOffer(loanee.getUserIdentity(), loanOffer, offer);
@@ -647,7 +653,6 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         offer.setLoanProduct(loanProduct);
         loanOfferOutputPort.save(offer);
         log.info("after saving offer : {}", offer);
-        notifyPortfolioManager(offer, userIdentity);
         log.info("Loanee account abt to create : {}", loanOffer);
         LoaneeLoanAccount loaneeLoanAccount = loaneeLoanAccountOutputPort.findByLoaneeId(offer.getLoaneeId());
         log.info("Loanee account is found : {}", loaneeLoanAccount);
