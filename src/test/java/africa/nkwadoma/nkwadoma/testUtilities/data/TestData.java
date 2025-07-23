@@ -632,6 +632,7 @@ public class TestData {
                         .userIdentity(UserIdentity.builder().email(TestUtils.generateEmail(7)).build())
                         .build())
                 .paymentDateTime(LocalDateTime.now())
+                .interestIncurred(BigDecimal.ZERO)
                 .build();
     }
     public static RepaymentHistory buildRepaymentHistory(String cohortId, String amountPaid, LocalDateTime paymentTime) {
@@ -644,6 +645,7 @@ public class TestData {
                         .userIdentity(UserIdentity.builder().email(TestUtils.generateEmail(7)).build())
                         .build())
                 .paymentDateTime(paymentTime)
+                .interestIncurred(BigDecimal.ZERO)
                 .build();
     }
 
