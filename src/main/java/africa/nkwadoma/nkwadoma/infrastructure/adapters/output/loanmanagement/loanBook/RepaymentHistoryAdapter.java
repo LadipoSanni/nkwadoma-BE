@@ -14,6 +14,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.loanBook.RepaymentHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -125,6 +126,32 @@ public class RepaymentHistoryAdapter implements RepaymentHistoryOutputPort {
                 .stream()
                 .map(repaymentHistoryMapper::map)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void deleteMultipleRepaymentHistory(List<String> repaymentHistoryIds) {
+        List<RepaymentHistoryEntity> repaymentHistories = repaymentHistoryRepository.findAllById(
+                repaymentHistoryIds.stream()
+                        .filter(StringUtils::isNotEmpty)
+                        .toList()
+        );
+
+        log.info("List of repayments to be deleted {}", repaymentHistories);
+
+        repaymentHistoryRepository.deleteAll(repaymentHistories);
+    }
+
+    @Override
+    public List<RepaymentHistory> saveAllRepaymentHistory(List<RepaymentHistory> currentRepaymentHistories) {
+        List<RepaymentHistoryEntity> entitiesToSave = currentRepaymentHistories.stream()
+                .map(repaymentHistoryMapper::map)
+                .toList();
+
+        List<RepaymentHistoryEntity> savedEntities = repaymentHistoryRepository.saveAll(entitiesToSave);
+
+        return savedEntities.stream()
+                .map(repaymentHistoryMapper::map)
+                .toList();
     }
 
 }

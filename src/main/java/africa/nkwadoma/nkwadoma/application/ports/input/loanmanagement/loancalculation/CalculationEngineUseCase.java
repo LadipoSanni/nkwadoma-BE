@@ -1,6 +1,8 @@
 package africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loancalculation;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 
 import java.math.BigDecimal;
@@ -10,9 +12,11 @@ public interface CalculationEngineUseCase {
 
     List<RepaymentHistory> sortRepaymentsByDateTimeAscending(List<RepaymentHistory> repayments)throws MeedlException;
 
-    BigDecimal calculateTotalRepayment(
+    void calculateLoaneeLoanRepaymentHistory(
             List<RepaymentHistory> sortedRepayments,
-            String loaneeId,
-            String cohortId
+            Loanee loanee,
+            Cohort cohort
     ) throws MeedlException;
+
+    BigDecimal calculateCurrentAmountPaid(List<RepaymentHistory> repaymentHistories);
 }

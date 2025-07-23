@@ -251,8 +251,8 @@ public class UserIdentityService implements CreateUserUseCase {
         if (foundUser != null && StringUtils.isNotEmpty(foundUser.getAlternateEmail())){
             log.info("Additional details has been added.");
             foundUser.setAdditionalDetailsCompleted(Boolean.TRUE);
+            log.info("Alternate email {}", foundUser.getAlternateEmail());
         }
-        log.info("Alternate email {}", foundUser.getAlternateEmail());
         return foundUser;
     }
 

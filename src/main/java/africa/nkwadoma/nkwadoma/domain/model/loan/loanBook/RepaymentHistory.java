@@ -28,6 +28,7 @@ public class RepaymentHistory {
     private ModeOfPayment modeOfPayment;
     private BigDecimal totalAmountRepaid;
     private BigDecimal amountOutstanding;
+    private BigDecimal interestIncurred;
     private Cohort cohort;
     private String actorId;
     private String loaneeId;

@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan;
 
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoanReferralEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -83,4 +84,15 @@ public interface LoanReferralRepository extends JpaRepository<LoanReferralEntity
             Pageable pageRequest
     );
 
+    @Query("""
+            select lre from LoanReferralEntity lre
+                join LoanRequestEntity lr on lr.id = lre.id
+                join CohortLoaneeEntity  cle on cle.id = lre.cohortLoanee.id
+    
+                 where cle.loanee.userIdentity.id = :id  and lre.loanReferralStatus = :loanReferralStatus 
+                     and lr.status = 'NEW'
+    """)
+    List<LoanReferralEntity> findAllByCohortLoanee_Loanee_UserIdentity_idAndLoanReferralStatus(@Param("id") String id,
+                                                                                               @Param("loanReferralStatus")
+                                                                                               LoanReferralStatus loanReferralStatus);
 }

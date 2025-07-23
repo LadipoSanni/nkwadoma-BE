@@ -25,4 +25,5 @@ public class RepaymentHistoryEntity {
     private BigDecimal amountOutstanding;
     @Enumerated(EnumType.STRING)
     private ModeOfPayment modeOfPayment;
+     private BigDecimal interestIncurred;
 }

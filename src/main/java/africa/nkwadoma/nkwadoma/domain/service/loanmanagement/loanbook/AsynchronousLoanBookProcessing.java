@@ -14,6 +14,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanReferralOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanDecision;
@@ -39,6 +40,7 @@ import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.stereotype.Component;
@@ -72,6 +74,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
     private final LoanReferralOutputPort loanReferralOutputPort;
     private final CalculationEngineUseCase loanCalculationUseCase;
+    private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
     private final LoanUseCase loanUseCase;
     private final AesOutputPort aesOutputPort;
     private final CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
@@ -99,8 +102,12 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         referCohort(loanBook);
         completeLoanProcessing(loanBook);
         updateLoaneeCount(savedCohort,convertedCohortLoanees);
+        sendUserDataUploadSuccessNotification(loanBook);
     }
-
+    private void sendUserDataUploadSuccessNotification(LoanBook loanBook) throws MeedlException {
+        UserIdentity foundActor = identityManagerOutputPort.getUserById(loanBook.getActorId());
+        asynchronousNotificationOutputPort.notifyPmOnUserDataUploadSuccess(foundActor, loanBook);
+    }
 
     @Override
     public void uploadRepaymentHistory(LoanBook repaymentHistoryBook) throws MeedlException {
@@ -112,7 +119,6 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         repaymentHistoryBook.setMeedlNotification(new MeedlNotification());
         log.info("Repayment record book read is {}", data);
 
-
         loanBookValidator.repaymentHistoryValidation(data, repaymentHistoryBook);
         Cohort savedCohort = findCohort(repaymentHistoryBook.getCohort());
         repaymentHistoryBook.setCohort(savedCohort);
@@ -123,8 +129,15 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         log.info("Set of loanees that made payments size : {}, set",loaneesThatMadePayment.size());
         Map<String, List<RepaymentHistory>> mapOfRepaymentHistoriesForEachLoanee = getRepaymentHistoriesForLoanees(loaneesThatMadePayment, convertedRepaymentHistories);
 //        printRepaymentCountsPerLoanee(mapOfRepaymentHistoriesForEachLoanee);
-        processAccumulatedRepayments(mapOfRepaymentHistoriesForEachLoanee, repaymentHistoryBook.getCohort().getId(), repaymentHistoryBook);
+        processRepaymentCalculation(mapOfRepaymentHistoriesForEachLoanee, repaymentHistoryBook.getCohort());
+        sendRepaymentUploadSuccessNotification(repaymentHistoryBook);
+
         log.info("Repayment record uploaded..");
+    }
+
+    private void sendRepaymentUploadSuccessNotification(LoanBook loanBook) throws MeedlException {
+        UserIdentity foundActor = identityManagerOutputPort.getUserById(loanBook.getActorId());
+        asynchronousNotificationOutputPort.notifyPmOnRepaymentUploadSuccess(foundActor, loanBook);
     }
 
     private void validateStartDates(List<Loanee> convertedLoanees, Cohort savedCohort) throws MeedlException {
@@ -164,33 +177,26 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         }
     }
 
-    public void processAccumulatedRepayments(
+    public void processRepaymentCalculation(
             Map<String, List<RepaymentHistory>> mapOfRepaymentHistoriesForEachLoanee,
-            String cohortId,
-            LoanBook repaymentRecordBook) throws MeedlException {
+            Cohort cohort) throws MeedlException {
 
         for (Map.Entry<String, List<RepaymentHistory>> entry : mapOfRepaymentHistoriesForEachLoanee.entrySet()) {
             String loaneeId = entry.getKey();
             List<RepaymentHistory> repaymentHistories = entry.getValue();
-            BigDecimal totalAmountRepaid = loanCalculationUseCase.calculateTotalRepayment(repaymentHistories, loaneeId, cohortId);
-            repaymentRecordBook.setRepaymentHistories(repaymentHistories);
-
-            calculateLoaneeLoanDetails(cohortId, loaneeId, totalAmountRepaid);
-
-            List<RepaymentHistory> savedRepaymentHistories = repaymentHistoryUseCase.saveCohortRepaymentHistory(repaymentRecordBook);
-            log.info("repayment histories for loanee {} -- {}", loaneeId, savedRepaymentHistories);
+            Loanee loanee = loaneeOutputPort.findLoaneeById(loaneeId);
+            if(ObjectUtils.isNotEmpty(loanee)){
+                BigDecimal currentAmountRepaid = loanCalculationUseCase.calculateCurrentAmountPaid(repaymentHistories);
+                loanCalculationUseCase.calculateLoaneeLoanRepaymentHistory(repaymentHistories, loanee, cohort);
+                calculateLoaneeLoanDetails(cohort.getId(), currentAmountRepaid);
+            }
         }
         log.info("Done processing accumulated repayments.");
     }
 
-    private void calculateLoaneeLoanDetails(String cohortId, String loaneeId, BigDecimal totalAmountRepaid) throws MeedlException {
-        CohortLoanee cohortLoanee = cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(loaneeId, cohortId);
-        log.info("cohort loanee found {}",cohortLoanee);
-
-        BigDecimal currentAmountPaid = updateLoaneeLoanDetail(totalAmountRepaid, cohortLoanee);
+    private void calculateLoaneeLoanDetails(String cohortId,BigDecimal currentAmountPaid) throws MeedlException {
 
         CohortLoanDetail cohortLoanDetail = updateCohortLoanDetail(cohortId, currentAmountPaid);
-
         ProgramLoanDetail programLoanDetail = updateProgramLoanDetail(cohortLoanDetail, currentAmountPaid);
 
         OrganizationLoanDetail organizationLoanDetail = updateOrganizationLoanDetail(programLoanDetail, currentAmountPaid);
@@ -234,7 +240,9 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         return cohortLoanDetail;
     }
 
-    private BigDecimal updateLoaneeLoanDetail(BigDecimal totalAmountRepaid, CohortLoanee cohortLoanee) throws MeedlException {
+    private BigDecimal updateLoaneeLoanDetail(BigDecimal totalAmountRepaid, String cohortId, String loaneeId) throws MeedlException {
+        CohortLoanee cohortLoanee = cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(loaneeId, cohortId);
+        log.info("cohort loanee found {}",cohortLoanee);
         LoaneeLoanDetail loaneeLoanDetail = loaneeLoanDetailsOutputPort.findByCohortLoaneeId(cohortLoanee.getId());
 
         BigDecimal currentAmountPaid = totalAmountRepaid.subtract(loaneeLoanDetail.getAmountRepaid());
@@ -327,7 +335,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         loanOffer.setId(loanRequest.getId());
         loanOffer.setLoaneeResponse(LoanDecision.ACCEPTED);
         loanOffer.setUserId(loanRequest.getLoanee().getUserIdentity().getId());
-        loanOfferUseCase.acceptLoanOffer(loanOffer);
+        loanOfferUseCase.acceptLoanOffer(loanOffer, OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS);
     }
 
     private LoanReferral acceptLoanReferral(CohortLoanee cohortLoanee) throws MeedlException {
@@ -511,6 +519,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                     .amountReceived(new BigDecimal(row.get("amountreceived")))
                     .amountOutstanding(new BigDecimal(row.get("amountreceived")).subtract(new BigDecimal(row.get("initialdeposit"))))
                     .amountRepaid(BigDecimal.ZERO)
+                    .interestIncurred(BigDecimal.ZERO)
                     .tuitionAmount(cohort.getTuitionAmount())
                     .build();
             log.info("loan product name found from csv {}", row.get("loanproduct"));
