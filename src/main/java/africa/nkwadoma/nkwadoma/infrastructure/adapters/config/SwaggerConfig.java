@@ -48,28 +48,15 @@ public class SwaggerConfig {
     private List<Server> getServerList() {
         return List.of(
                 new Server()
-                        .url((swaggerEnvPath != null ? swaggerEnvPath : "http://localhost:") + serverPort + contextPath)
+                        .url(("https://api-dev-meedl.learnspace.africa:") + serverPort + contextPath)
                         .description("Environment Server"),
                 new Server()
                         .url("http://localhost:" + serverPort + contextPath)
                         .description("Local Development"),
                 new Server()
-                        .url("https://api-systest.meedl.africa" + contextPath)
+                        .url("https://api-systest.meedl.africa:" + contextPath)
                         .description("Test Environment")
         );
     }
-
-//    private List<Server> getServerList() {
-//        Server server = new Server();
-//        server.setUrl(swaggerEnvPath);
-//        Server localServer1 = new Server();
-//        localServer1.setUrl("http://localhost:8081");
-//        Server localServer2 = new Server();
-//        localServer2.setUrl("http://localhost:8080");
-//        Server devServer = new Server();
-//        devServer.setUrl("https://api-systest.meedl.africa");
-//
-//        return List.of(server, localServer1, localServer2, devServer);
-//    }
 
 }
