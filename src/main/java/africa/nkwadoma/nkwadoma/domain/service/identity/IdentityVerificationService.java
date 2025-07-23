@@ -107,7 +107,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     public String verifyIdentity(String actorId,IdentityVerification identityVerification) throws MeedlException {
         log.info("identity verification == {}", identityVerification);
         checkIfAboveThreshold(actorId);
-
+        decryptEncryptedIdentification(identityVerification);
         UserIdentity userIdentity = userIdentityOutputPort.findByBvn(identityVerification.getEncryptedBvn());
         if (ObjectUtils.isEmpty(userIdentity)) {
             userIdentity = userIdentityOutputPort.findById(actorId);
@@ -124,7 +124,6 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
                 return IDENTITY_VERIFIED.getMessage();
         }
     }
-
 
     private void updateLoaneeDetail(IdentityVerification identityVerification, String userId, PremblyNinResponse premblyResponse) throws MeedlException {
        UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
