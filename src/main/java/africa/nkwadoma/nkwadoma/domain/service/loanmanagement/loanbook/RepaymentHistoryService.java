@@ -28,25 +28,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RepaymentHistoryService implements RepaymentHistoryUseCase {
 
-    private final CohortUseCase cohortUseCase;
     private final RepaymentHistoryOutputPort repaymentHistoryOutputPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
-    private final LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
-    private LoanBookValidator loanBookValidator;
     private final LoaneeOutputPort loaneeOutputPort;
-
-
-    @Override
-    public List<RepaymentHistory> saveCohortRepaymentHistory(LoanBook loanBook) throws MeedlException {
-        MeedlValidator.validateUUID(loanBook.getActorId(), "Actor id is required.");
-        MeedlValidator.validateUUID(loanBook.getCohort().getId(), "Cohort id is required.");
-        MeedlValidator.validateCollection(loanBook.getRepaymentHistories(), "Please provide at least one repayment history.");
-        Cohort cohort = cohortUseCase.viewCohortDetails(loanBook.getActorId(), loanBook.getCohort().getId());
-        log.info("Cohort found when trying to save repayment record in service {}", cohort);
-        loanBook.setCohort(cohort);
-
-        return verifyUserByEmailAndAddCohort(loanBook);
-    }
 
     @Override
     public Page<RepaymentHistory> findAllRepaymentHistory(RepaymentHistory repaymentHistory, int pageSize, int pageNumber) throws MeedlException {
@@ -94,29 +78,4 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
         return repaymentHistoryOutputPort.getFirstAndLastYear(loanee.getId());
     }
 
-    private List<RepaymentHistory> verifyUserByEmailAndAddCohort(LoanBook loanBook) {
-        log.info("Verifying loanees exist before saving their repayment records:\n {}", loanBook.getRepaymentHistories());
-        return loanBook.getRepaymentHistories().stream()
-                .peek(repaymentHistory -> {
-                    try {
-                        log.info("Email of the loanee being searched for {}", repaymentHistory.getLoanee().getUserIdentity().getEmail());
-                        Loanee loanee = loaneeOutputPort.findByLoaneeEmail(repaymentHistory.getLoanee().getUserIdentity().getEmail());
-//                        log.info("cohort id == {} -- loanee id == {}",loanBook.getCohort().getId(),loanee.getId());
-//                        LoaneeLoanDetail loaneeLoanDetail = loaneeLoanDetailsOutputPort.findByCohortAndLoaneeId(loanBook.getCohort().getId(),loanee.getId());
-//                        log.info("loaneeLoanDetail == {}", loaneeLoanDetail);
-                        log.info("loanee found in repayment history : {}",loanee);
-                        if (loanee != null) {
-                            repaymentHistory.setLoanee(loanee);
-                            repaymentHistory.setCohort(loanBook.getCohort());
-//                            repaymentHistory.setAmountOutstanding(loaneeLoanDetail.getAmountOutstanding());
-                            repaymentHistoryOutputPort.save(repaymentHistory);
-                        }
-                    } catch (MeedlException e) {
-                        //TODO notify user doesn't exist on the platform.
-//                        updateFailureNotification(loanBook);
-                        log.error("Error in repayment service. Either saving repayment or finding loanee", e);
-                        log.error("Error occurred while verifying user exist on platform. {}", repaymentHistory.getLoanee().getUserIdentity().getEmail());
-                    }
-                }).toList();
-    }
 }
