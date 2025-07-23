@@ -626,6 +626,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             log.info("accept offer abt to start : {}", loanOffer);
             LoaneeLoanAccount loaneeLoanAccount = acceptLoanOffer(loanee.getUserIdentity(), loanOffer, offer,referBy);
             if (!OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS.equals(onboardingMode)){
+                log.info("Sending pm notification on accepting loan offer, loanee is not via file upload.");
                 notifyPortfolioManager(offer, loanee.getUserIdentity());
             }
             return loaneeLoanAccount;
