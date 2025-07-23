@@ -136,7 +136,7 @@ public class RepaymentHistoryAdapter implements RepaymentHistoryOutputPort {
                         .toList()
         );
 
-        log.info("List of repayments deleted {}", repaymentHistories);
+        log.info("List of repayments to be deleted {}", repaymentHistories);
 
         repaymentHistoryRepository.deleteAll(repaymentHistories);
     }

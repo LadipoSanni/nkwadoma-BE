@@ -183,11 +183,13 @@ public class CalculationEngine implements CalculationEngineUseCase {
     }
 
     private long calculateDaysBetween(LocalDateTime lastDate, LocalDateTime currentDate) {
+        log.info("Last date {} current date {}", lastDate, currentDate);
         return ChronoUnit.DAYS.between(lastDate, currentDate);
     }
 
     public BigDecimal calculateInterest(double interestRate, BigDecimal outstanding, long daysBetween) {
         BigDecimal dailyRate = BigDecimal.valueOf(interestRate).divide(BigDecimal.valueOf(DAYS_IN_MONTH), NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
+        log.info("What is daily rate ==== {} interest rate is at {}",dailyRate, interestRate);
         return outstanding.multiply(dailyRate).multiply(BigDecimal.valueOf(daysBetween));
     }
     private BigDecimal calculateTotalAmountRepaidPerRepayment(RepaymentHistory repayment, BigDecimal previousTotalAmountRepaid) {
