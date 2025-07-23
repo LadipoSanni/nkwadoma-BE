@@ -645,6 +645,7 @@ public class TestData {
                         .userIdentity(UserIdentity.builder().email(TestUtils.generateEmail(7)).build())
                         .build())
                 .paymentDateTime(paymentTime)
+                .interestIncurred(BigDecimal.ZERO)
                 .build();
     }
 
