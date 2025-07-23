@@ -245,6 +245,7 @@ class LoanServiceTest {
     void acceptLoanReferral() {
         LoanReferral referral = null;
         try {
+            loanReferral.getCohortLoanee().getLoanee().getUserIdentity().setIdentityVerified(true);
             when(loanReferralOutputPort.findById(loanReferral.getId())).thenReturn(loanReferral);
             when(cohortOutputPort.save(cohortLoanee.getCohort())).thenReturn(cohortLoanee.getCohort());
             when(loanRequestMapper.mapLoanReferralToLoanRequest(loanReferral)).thenReturn(loanRequest);
