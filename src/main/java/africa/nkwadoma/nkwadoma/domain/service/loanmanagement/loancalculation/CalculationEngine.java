@@ -31,6 +31,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
     private final RepaymentHistoryOutputPort repaymentHistoryOutputPort;
     private final int NUMBER_OF_DECIMAL_PLACE = 8;
     private final int DAYS_IN_MONTH = 30;
+    private final int DAYS_IN_YEAR = 365;
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
     private final LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
 
@@ -176,7 +177,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
 
     private void calculateIncurredInterestPerRepayment(RepaymentHistory repayment, BigDecimal previousOutstandingAmount, LocalDateTime lastDate, LoaneeLoanDetail loaneeLoanDetail) {
         long daysBetween = calculateDaysBetween(lastDate, repayment.getPaymentDateTime());
-        log.info("How many days a between the last payment {}", daysBetween);
+        log.info("How many days a between the last payment {} \n -------------- >>>>>>>> interest rate {}", daysBetween, loaneeLoanDetail.getInterestRate());
         BigDecimal incurredInterest = calculateInterest(loaneeLoanDetail.getInterestRate(), previousOutstandingAmount, daysBetween);
         log.info("Previous out standing amount after calculating interest incurred {} outstanding is {}", incurredInterest, previousOutstandingAmount);
         repayment.setInterestIncurred(incurredInterest);
@@ -188,8 +189,14 @@ public class CalculationEngine implements CalculationEngineUseCase {
     }
 
     public BigDecimal calculateInterest(double interestRate, BigDecimal outstanding, long daysBetween) {
-        BigDecimal dailyRate = BigDecimal.valueOf(interestRate).divide(BigDecimal.valueOf(DAYS_IN_MONTH), NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
-        log.info("What is daily rate ==== {} interest rate is at {}",dailyRate, interestRate);
+//        BigDecimal dailyRate = BigDecimal.valueOf(interestRate).divide(BigDecimal.valueOf(DAYS_IN_MONTH), NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
+//        log.info("What is daily rate ==== {} interest rate is at {}",dailyRate, interestRate);
+        BigDecimal interestRateInPercent = BigDecimal.valueOf(interestRate)
+                .divide(BigDecimal.valueOf(100), NUMBER_OF_DECIMAL_PLACE + 4, RoundingMode.HALF_UP) ;
+        BigDecimal dailyRate = interestRateInPercent.divide(BigDecimal.valueOf(DAYS_IN_YEAR), NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
+
+        log.info("Calculated daily rate ==== {} for annual interest rate {}, interest rate in percent {}", dailyRate, interestRate, interestRateInPercent);
+
         return outstanding.multiply(dailyRate).multiply(BigDecimal.valueOf(daysBetween));
     }
     private BigDecimal calculateTotalAmountRepaidPerRepayment(RepaymentHistory repayment, BigDecimal previousTotalAmountRepaid) {
