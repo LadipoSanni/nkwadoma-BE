@@ -55,62 +55,8 @@ jobs:
       - name: Push Docker image to Amazon ECR
         run: docker push $DOCKER_TAG
 
+
   # ======================= DEPLOY TO SYSTEST =======================
-  # deploy-to-systest:
-  #   runs-on: self-hosted
-  #   needs: build-and-push
-  #   steps:
-  #     - name: Configure AWS credentials
-  #       uses: aws-actions/configure-aws-credentials@v1
-  #       with:
-  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #         aws-region: ${{ env.AWS_REGION }}
-
-  #     - name: Authenticate with Amazon ECR
-  #       run: |
-  #         aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${{ env.REPO_URL }}
-
-  #     - name: Pull latest Docker image
-  #       run: |
-  #         docker pull ${{ env.REPO_URL }}:alpha
-
-  #     - name: Download .env file from S3
-  #       run: |
-  #         ENV_FILE_PATH="/tmp/nkwadoma.env"
-  #         aws s3 cp s3://semicolon-delivery/nkwadoma/backend/systest/nkwadoma.env $ENV_FILE_PATH --region eu-west-1
-
-  #     - name: Free port if in use
-  #       run: |
-  #         sudo fuser -k ${{ env.CONTAINER_PORT }}/tcp || true
-
-  #     - name: Restart container with auto-restart policy
-  #       run: |
-  #         CONTAINER_NAME=nkwadoma_container
-  #         if [ "$(docker ps -aq -f name=$CONTAINER_NAME)" ]; then
-  #           docker stop $CONTAINER_NAME || true
-  #           docker rm $CONTAINER_NAME || true
-  #         fi
-  #         docker network inspect downloads_pulsar >/dev/null 2>&1 || docker network create downloads_pulsar
-  #         nohup docker run -d --env-file /tmp/nkwadoma.env --network downloads_pulsar --name $CONTAINER_NAME -p ${{ env.CONTAINER_PORT }}:${{ env.CONTAINER_PORT }} \
-  #           --restart unless-stopped \
-  #           ${{ env.REPO_URL }}:alpha > /dev/null 2>&1 &
-
-  #     - name: Confirm Deployment Success
-  #       run: |
-  #         sleep 10
-  #         if docker ps --format '{{.Names}}' | grep -q "nkwadoma_container"; then
-  #           echo "✅ Deployment to systest successful!"
-  #           exit 0
-  #         else
-  #           echo "❌ Deployment failed!"
-  #           exit 1
-  #         fi
-
-  #     - name: Prune unused images (systest)
-  #       run: docker image prune -af
-
-  # ======================= DEPLOY TO SYSTEST-2 =======================
   deploy-to-systest2:
     runs-on: [ovh]
     needs: build-and-push
@@ -168,19 +114,19 @@ jobs:
             --restart unless-stopped \
             ${{ env.REPO_URL }}:alpha
             
-      # - name: Health check new container
-      #   run: |
-      #     for i in {1..30}; do
-      #       if curl -s http://localhost:${{ env.NEW_PORT }}/actuator/health | grep -q "UP"; then
-      #         echo "New container is healthy!"
-      #         exit 0
-      #       fi
-      #       sleep 5
-      #     done
-      #     echo "Health check failed!"
-      #     sudo docker stop nkwadoma_${{ env.NEW_ENV }}
-      #     sudo docker rm nkwadoma_${{ env.NEW_ENV }}
-      #     exit 1
+      - name: Health check new container
+        run: |
+          for i in {1..30}; do
+            if curl -s http://localhost:${{ env.NEW_PORT }}/actuator/health | grep -q "UP"; then
+              echo "New container is healthy!"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Health check failed!"
+          sudo docker stop nkwadoma_${{ env.NEW_ENV }}
+          sudo docker rm nkwadoma_${{ env.NEW_ENV }}
+          exit 1
           
       - name: Update Nginx configuration for api-systest
         run: |
