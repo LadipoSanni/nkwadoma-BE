@@ -231,7 +231,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         return verificationResponse;
     }
 
-    private void makeUpdateToUserLoaNReferrals(UserIdentity userIdentity) throws MeedlException {
+    private void makeUpdateToUserLoanReferrals(UserIdentity userIdentity) throws MeedlException {
         List<LoanReferral> loanReferrals =
                 loanReferralOutputPort.findAllLoanReferralsByUserIdAndStatus(userIdentity.getId(),
                         LoanReferralStatus.AUTHORIZED);
