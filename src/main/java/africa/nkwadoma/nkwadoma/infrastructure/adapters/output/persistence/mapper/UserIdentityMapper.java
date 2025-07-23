@@ -14,6 +14,7 @@ public interface UserIdentityMapper {
     @Mapping(source = "bankDetail", target = "bankDetailEntity")
     UserEntity toUserEntity(UserIdentity userIdentity);
 
+    @Mapping(source = "identityVerified", target = "isIdentityVerified")
     @Mapping(source = "firstName", target = "firstName")
     @Mapping(source = "nextOfKinEntity", target = "nextOfKin")
     @Mapping(source = "bankDetailEntity", target = "bankDetail")

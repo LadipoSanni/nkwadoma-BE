@@ -1,9 +1,10 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement;
 
 import java.util.*;
+
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
-import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import org.springframework.data.domain.Page;
 
 public interface LoanReferralOutputPort {
@@ -26,4 +27,6 @@ public interface LoanReferralOutputPort {
     LoanReferral findLoanReferralByCohortLoaneeId(String id) throws MeedlException;
 
     Page<LoanReferral> findAllLoanReferralsForLoanee(String loaneeId, int pageNumber, int pageSize) throws MeedlException;
+
+    List<LoanReferral> findAllLoanReferralsByUserIdAndStatus(String id,LoanReferralStatus loanReferralStatus) throws MeedlException;
 }

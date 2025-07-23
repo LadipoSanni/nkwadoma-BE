@@ -2,6 +2,9 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.IdentityVerificationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoanDetailOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramLoanDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
@@ -12,15 +15,18 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanRequ
 import africa.nkwadoma.nkwadoma.domain.enums.ServiceProvider;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
-import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerificationFailureRecord;
+import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.education.ProgramLoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanMetrics;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanRequest;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.identity.IdentityVerificationMapper;
@@ -33,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
@@ -64,6 +71,14 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     @Autowired
     private LoanRequestOutputPort loanRequestOutputPort;
+    @Autowired
+    private ProgramLoanDetailOutputPort programLoanDetailOutputPort;
+    @Autowired
+    private OrganizationLoanDetailOutputPort organizationLoanDetailOutputPort;
+    @Autowired
+    private CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
+    @Autowired
+    private CohortOutputPort cohortOutputPort;
 
     @Override
     public String verifyIdentity(String loanReferralId) throws IdentityException, MeedlException {
@@ -90,36 +105,25 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     }
     @Override
     public String verifyIdentity(String actorId,IdentityVerification identityVerification) throws MeedlException {
-        LoanReferral loanReferral = validateIdentity(identityVerification);
-
+        log.info("identity verification == {}", identityVerification);
+        checkIfAboveThreshold(actorId);
+        validateIdentityVerification(identityVerification);
+        decryptEncryptedIdentification(identityVerification);
         UserIdentity userIdentity = userIdentityOutputPort.findByBvn(identityVerification.getEncryptedBvn());
-        if (ObjectUtils.isEmpty(userIdentity) && ObjectUtils.isEmpty(loanReferral)) {
+        if (ObjectUtils.isEmpty(userIdentity)) {
             userIdentity = userIdentityOutputPort.findById(actorId);
-        }else {
-            userIdentity = loanReferral.getLoanee().getUserIdentity();
         }
         if (isVerificationRequired(userIdentity)){
             log.info("User requires identity verification");
             log.info("user identity === -- == {}",userIdentity);
-            return processNewVerification(identityVerification, loanReferral,userIdentity);
+            return processNewVerification(identityVerification,userIdentity);
         }else{
-            log.warn("User attempted to verify again {}", loanReferral.getLoanee().getUserIdentity().getEmail());
+            log.warn("User attempted to verify again {}", userIdentity.getEmail());
 //            processAnotherVerification(identityVerification, loanReferral);
 //            addedToLoaneeLoan(loanReferral.getId());
 //            log.info("Verification previously done and was successful");
                 return IDENTITY_VERIFIED.getMessage();
         }
-    }
-    private LoanReferral validateIdentity(IdentityVerification identityVerification) throws MeedlException {
-        validateIdentityVerification(identityVerification);
-        decryptEncryptedIdentification(identityVerification);
-
-        if (identityVerification.getLoanReferralId() != null) {
-            LoanReferral loanReferral = fetchLoanReferral(identityVerification.getLoanReferralId());
-            checkIfAboveThreshold(loanReferral.getId());
-            return loanReferral;
-        }
-        return null;
     }
 
     private void updateLoaneeDetail(IdentityVerification identityVerification, String userId, PremblyNinResponse premblyResponse) throws MeedlException {
@@ -154,11 +158,11 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         createIdentityVerificationFailureRecord(identityVerificationFailureRecord);
     }
 
-    private void checkIfAboveThreshold(String loanReferralId) throws IdentityException {
-        Long numberOfAttempts = identityVerificationFailureRecordOutputPort.countByUserId(loanReferralId);
+    private void checkIfAboveThreshold(String actorId) throws IdentityException {
+        Long numberOfAttempts = identityVerificationFailureRecordOutputPort.countByUserId(actorId);
         if (numberOfAttempts >= 5L){
-            log.error("You have reached the maximum number of verification attempts for this referral code: {}", loanReferralId);
-            throw new IdentityException(String.format("You have reached the maximum number of verification attempts for this referral code: %s", loanReferralId));
+            log.error("You have reached the maximum number of verification attempts for this user: {}", actorId);
+            throw new IdentityException(String.format("You have reached the maximum number of verification attempts for this user code: %s", actorId));
         }
     }
 
@@ -178,8 +182,6 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         MeedlValidator.validateObjectInstance(identityVerification, IdentityVerificationMessage.IDENTITY_VERIFICATION_CANNOT_BE_NULL.getMessage());
         MeedlValidator.validateDataElement(identityVerification.getEncryptedBvn(), IdentityVerificationMessage.INVALID_BVN.getMessage());
         MeedlValidator.validateDataElement(identityVerification.getEncryptedNin(), IdentityVerificationMessage.INVALID_NIN.getMessage());
-//        MeedlValidator.validateUUID(identityVerification.getLoanReferralId(), LoanMessages.INVALID_LOAN_REFERRAL_ID.getMessage());
-//        log.info("Verifying user identity. Loan referral id: {}", identityVerification.getLoanReferralId());
     }
 
     private String decrypt(String encryptedData) throws MeedlException {
@@ -198,10 +200,10 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         return ObjectUtils.isEmpty(userIdentity) || !userIdentity.isIdentityVerified();
     }
 
-    private String processNewVerification(IdentityVerification identityVerification,LoanReferral loanReferral,UserIdentity userIdentity) throws MeedlException {
+    private String processNewVerification(IdentityVerification identityVerification,UserIdentity userIdentity) throws MeedlException {
         String verificationResponse;
         try {
-            log.info("Identity verification process ongoing. user identity {} ---- loan referral {}  ",userIdentity,loanReferral);
+            log.info("Identity verification process ongoing. user identity {} /n identity verification == {}",userIdentity,identityVerification);
             PremblyNinResponse premblyNinResponse = ninLikenessVerification(identityVerification, userIdentity); // Checked
             if (premblyNinResponse.isLikenessCheckSuccessful()){
                 log.info("Proceeding to bvn verification");
@@ -210,13 +212,8 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
                     handleSuccessfulVerification(identityVerification, userIdentity.getId(), premblyNinResponse);
                     verificationResponse = IdentityMessages.IDENTITY_VERIFIED.getMessage();
 
-                    if (ObjectUtils.isNotEmpty(loanReferral)) {
-                        log.info("verification done successfully. {}", verificationResponse);
-                        log.info("about to increase loan request count  {}", loanReferral);
-                        log.info("refer by {}", loanReferral.getReferredBy());
-                        updateLoanMetricsLoanRequestCount(loanReferral.getReferredBy());
-                        log.info("done with loan request count on {}", loanReferral.getReferredBy());
-                    }
+                    log.info("verification done successfully. {}", verificationResponse);
+                    makeUpdateToUserLoaNReferrals(userIdentity);
 
                 }else {
                     log.warn("Identity verification not successful, failed at the bvn level");
@@ -232,6 +229,68 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
             throw new IdentityException(exception.getMessage());
         }
         return verificationResponse;
+    }
+
+    private void makeUpdateToUserLoaNReferrals(UserIdentity userIdentity) throws MeedlException {
+        List<LoanReferral> loanReferrals =
+                loanReferralOutputPort.findAllLoanReferralsByUserIdAndStatus(userIdentity.getId(),
+                        LoanReferralStatus.AUTHORIZED);
+        log.info("Found {} loanReferrals", loanReferrals.size());
+        log.info("Loan referrals found {}",loanReferrals);
+        updateLoanRequestCountForEachLoanReferralThatHasBeenAccepted(loanReferrals);
+    }
+
+    private void updateLoanRequestCountForEachLoanReferralThatHasBeenAccepted(List<LoanReferral> loanReferrals) throws MeedlException {
+        for (LoanReferral loanReferral : loanReferrals) {
+            log.info("about to increase loan request count  {}", loanReferral);
+            log.info("refer by {}", loanReferral.getCohortLoanee().getReferredBy());
+            updateLoanMetricsLoanRequestCount(loanReferral.getCohortLoanee().getReferredBy());
+            log.info("done with loan request count on loan referral by  {}", loanReferral.getCohortLoanee().getReferredBy());
+            Cohort cohort = updateLoanRequestCountOnCohort(loanReferral);
+
+            updateLoanAmountRequestedOnCohortLoanDetail(loanReferral.getCohortLoanee().getLoaneeLoanDetail(), cohort);
+
+            updateLoanAmountRequestedOnProgramLoanDetail(loanReferral.getCohortLoanee().getLoaneeLoanDetail(), cohort);
+
+            updateLoanAmountRequestOnOrganizationLoanDetail(loanReferral.getCohortLoanee().getLoaneeLoanDetail(), cohort);
+        }
+    }
+
+    private void updateLoanAmountRequestOnOrganizationLoanDetail(LoaneeLoanDetail loaneeLoanDetail, Cohort cohort) throws MeedlException {
+        OrganizationLoanDetail organizationLoanDetail = organizationLoanDetailOutputPort.findByOrganizationId(cohort.getOrganizationId());
+        organizationLoanDetail.setTotalAmountRequested(organizationLoanDetail.getTotalAmountRequested()
+                .add(loaneeLoanDetail.getAmountRequested()));
+        organizationLoanDetailOutputPort.save(organizationLoanDetail);
+    }
+
+    private void updateLoanAmountRequestedOnProgramLoanDetail(LoaneeLoanDetail loaneeLoanDetail, Cohort cohort) throws MeedlException {
+        ProgramLoanDetail programLoanDetail = programLoanDetailOutputPort.findByProgramId(cohort.getProgramId());
+        log.info("program loan details id {}", programLoanDetail.getId());
+        programLoanDetail.setTotalAmountRequested(programLoanDetail.getTotalAmountRequested()
+                .add(loaneeLoanDetail.getAmountRequested()));
+        programLoanDetailOutputPort.save(programLoanDetail);
+    }
+
+    private void updateLoanAmountRequestedOnCohortLoanDetail(LoaneeLoanDetail loaneeLoanDetail, Cohort cohort) throws MeedlException {
+        CohortLoanDetail foundCohort = cohortLoanDetailOutputPort.findByCohortId(cohort.getId());
+        log.info("current total amount requested for cohort {}", foundCohort.getTotalAmountRequested());
+        log.info("loanee amount requested {}", loaneeLoanDetail.getAmountRequested());
+        foundCohort.setTotalAmountRequested(foundCohort.getTotalAmountRequested().
+                add(loaneeLoanDetail.getAmountRequested()));
+        cohortLoanDetailOutputPort.save(foundCohort);
+        log.info("total amount requested updated for cohort after adding == {} is {}",
+                loaneeLoanDetail.getAmountRequested(), foundCohort.getTotalAmountRequested());
+    }
+
+    private Cohort updateLoanRequestCountOnCohort(LoanReferral loanReferral) throws MeedlException {
+        log.info("Updating number of loan request on cohort: {}", loanReferral.getCohortLoanee());
+        Cohort cohort = loanReferral.getCohortLoanee().getCohort();
+        log.info("found cohort == {}", cohort);
+        log.info("current number of loan request == {}", cohort.getNumberOfLoanRequest());
+        cohort.setNumberOfLoanRequest(cohort.getNumberOfLoanRequest() + 1);
+        cohort = cohortOutputPort.save(cohort);
+        log.info(" number of loan request after adding 1 == {}", cohort.getNumberOfLoanRequest());
+        return cohort;
     }
 
     private void updateLoanMetricsLoanRequestCount(String referBy) throws MeedlException {

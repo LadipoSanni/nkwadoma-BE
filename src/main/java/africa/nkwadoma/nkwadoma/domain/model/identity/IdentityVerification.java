@@ -17,6 +17,7 @@ import java.util.regex.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ToString
 public class IdentityVerification {
 
     private String identityId;
