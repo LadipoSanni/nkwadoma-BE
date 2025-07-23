@@ -161,7 +161,7 @@ public class LoanOfferServiceTest {
             when(loanProductOutputPort.findById(loanOffer.getLoanProduct().getId())).thenReturn(loanProduct);
             when(loanOfferOutputPort.save(loanOffer)).thenReturn(loanOffer);
             when(loaneeLoanAccountOutputPort.save(any())).thenReturn(loaneeLoanAccount);
-            doNothing().when(asynchronousNotificationOutputPort).notifyPortfolioManagerOfNewLoanOfferWithDecision(any(), any());
+//            doNothing().when(asynchronousNotificationOutputPort).notifyPortfolioManagerOfNewLoanOfferWithDecision(any(), any());
             when(loaneeLoanAccountOutputPort.findByLoaneeId(any())).thenReturn(null);
             loaneeLoanAccount = loanService.acceptLoanOffer(loanOffer2, OnboardingMode.EMAIL_REFERRED);
         }catch (MeedlException exception){
