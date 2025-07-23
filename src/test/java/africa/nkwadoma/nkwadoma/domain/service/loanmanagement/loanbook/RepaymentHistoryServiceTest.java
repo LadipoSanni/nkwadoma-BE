@@ -75,38 +75,6 @@ class RepaymentHistoryServiceTest {
     }
 
     @Test
-    void saveRepaymentHistory() throws MeedlException {
-        when(cohortUseCase.viewCohortDetails(actorId,cohortId)).thenReturn(new Cohort());
-        when(repaymentHistoryOutputPort.save(repaymentHistory)).thenReturn(repaymentHistory);
-        when(loaneeOutputPort.findByLoaneeEmail(repaymentHistory.getLoanee().getUserIdentity().getEmail()))
-                .thenReturn(repaymentHistory.getLoanee());
-        repaymentHistoryService.saveCohortRepaymentHistory(loanBook);
-    }
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invalid-id"})
-    void saveRepaymentHistoryInvalidCohortId(String cohortId){
-        loanBook.getCohort().setId(cohortId);
-        assertThrows(MeedlException.class, ()-> repaymentHistoryService.saveCohortRepaymentHistory(loanBook));
-    }
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invalid-id"})
-    void saveRepaymentHistoryInvalidActorId(String actorId){
-        loanBook.setActorId(actorId);
-        assertThrows(MeedlException.class, ()-> repaymentHistoryService.saveCohortRepaymentHistory(loanBook));
-    }
-    @Test
-    void saveRepaymentHistoryWithEmptyRepaymentHistory(){
-        loanBook.setRepaymentHistories(null);
-        assertThrows(MeedlException.class, ()->repaymentHistoryService.saveCohortRepaymentHistory(loanBook));
-    }
-    @Test
-    void saveRepaymentHistoryOfNunExistingCohort() throws MeedlException {
-        when(cohortUseCase.viewCohortDetails(actorId, cohortId)).thenThrow(MeedlException.class);
-        assertThrows(MeedlException.class, ()-> repaymentHistoryService.saveCohortRepaymentHistory(loanBook));
-    }
-
-
-    @Test
     void findAllRepaymentHistoryByPM_WithNullLoaneeIdReturnAllRepaymentHistory() {
         Page<RepaymentHistory> repaymentHistoryPage = null;
         try {

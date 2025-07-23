@@ -1,8 +1,14 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanmanagement.loancalculation;
 
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.RepaymentHistoryOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanCalculationMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanPeriodRecord;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -19,15 +26,20 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-public class LoanCalculationServiceTest {
+public class LoanCalculationEngineTest {
     @InjectMocks
     private CalculationEngine calculationEngine;
     @Mock
+    private LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
+    @Mock
     private RepaymentHistoryOutputPort repaymentHistoryOutputPort;
+    @Mock
+    private CohortLoaneeOutputPort cohortLoaneeOutputPort;
     private String loaneeId;
     private String cohortId;
     private final BigDecimal ZERO = new BigDecimal("0.00");
@@ -640,9 +652,6 @@ public class LoanCalculationServiceTest {
     }
 
 
-
-
-
     @Test
     public void calculateTotalRepaymentForThreePayments() throws MeedlException {
         List<BigDecimal> repayments = List.of(
@@ -722,41 +731,162 @@ public class LoanCalculationServiceTest {
     }
 
     @Test
-    void accumulateTotalRepaidWIthNoPreviousRepayment() throws MeedlException {
-        List<RepaymentHistory> repayments = List.of(
-                createRepayment(LocalDateTime.of(2025, 1, 1, 10, 0), new BigDecimal("1000")),
-                createRepayment(LocalDateTime.of(2025, 2, 1, 10, 0), new BigDecimal("2000")),
-                createRepayment(LocalDateTime.of(2025, 3, 1, 10, 0), new BigDecimal("5000"))
-        );
+    void shouldNotProcessWhenRepaymentHistoriesIsEmpty() throws MeedlException {
+        Loanee loanee = Loanee.builder().id(loaneeId).build();
+        Cohort cohort = Cohort.builder().id(cohortId).build();
 
-        BigDecimal totalAmountRepaid = calculationEngine.calculateTotalRepayment(repayments, loaneeId, cohortId);
-        log.info("Updated repayment history in test after both sorting \n {}", totalAmountRepaid);
-        assertEquals(new BigDecimal("1000"), repayments.get(0).getTotalAmountRepaid());
-        assertEquals(new BigDecimal("3000"), repayments.get(1).getTotalAmountRepaid());
-        assertEquals(new BigDecimal("8000"), repayments.get(2).getTotalAmountRepaid());
-        assertEquals(new BigDecimal("8000"), totalAmountRepaid);
+        calculationEngine.calculateLoaneeLoanRepaymentHistory(new ArrayList<>(), loanee, cohort);
+
+        verifyNoInteractions(repaymentHistoryOutputPort);
     }
 
     @Test
-    void accumulateTotalRepaidWithPreviousRepayments() throws MeedlException {
-        List<RepaymentHistory> previousRepayments = new ArrayList<>(List.of(
-                createRepayment(LocalDateTime.of(2025, 1, 1, 10, 0), new BigDecimal("1000")),
-                createRepayment(LocalDateTime.of(2025, 2, 1, 10, 0), new BigDecimal("2000"))
-        ));
+    void shouldNotProcessWhenLoaneeIsNull() throws MeedlException {
+        List<RepaymentHistory> repayments = List.of(createRepayment(LocalDateTime.now(), BigDecimal.TEN));
+        Cohort cohort = Cohort.builder().id(cohortId).build();
 
-        List<RepaymentHistory> newRepayments = new ArrayList<>(List.of(
-                createRepayment(LocalDateTime.of(2025, 3, 1, 10, 0), new BigDecimal("3000")),
-                createRepayment(LocalDateTime.of(2025, 4, 1, 10, 0), new BigDecimal("4000"))
-        ));
+        calculationEngine.calculateLoaneeLoanRepaymentHistory(repayments, null, cohort);
 
-        when(repaymentHistoryOutputPort.findAllRepaymentHistoryForLoan(loaneeId, cohortId))
-                .thenReturn(previousRepayments);
-
-        BigDecimal totalAmountRepaid = calculationEngine.calculateTotalRepayment(newRepayments, loaneeId, cohortId);
-
-
-        assertEquals(new BigDecimal("10000"), totalAmountRepaid);
+        verifyNoInteractions(repaymentHistoryOutputPort);
     }
 
+    @Test
+    void combinePreviousAndNewRepaymentHistoriesCorrectly() {
+        List<RepaymentHistory> previous = List.of(
+                createRepayment(LocalDateTime.of(2024, 1, 1, 10, 0), BigDecimal.valueOf(100)),
+                createRepayment(LocalDateTime.of(2024, 2, 1, 10, 0), BigDecimal.valueOf(150))
+        );
+        List<RepaymentHistory> current = List.of(
+                createRepayment(LocalDateTime.of(2024, 3, 1, 10, 0), BigDecimal.valueOf(200))
+        );
+
+        List<RepaymentHistory> combined = calculationEngine.combinePreviousAndNewRepaymentHistory(previous, current);
+
+        assertEquals(3, combined.size());
+        assertEquals(BigDecimal.valueOf(100), combined.get(0).getAmountPaid());
+        assertEquals(BigDecimal.valueOf(200), combined.get(2).getAmountPaid());
+    }
+
+    @Test
+    void combineHistoriesWithEmptyRepayments() {
+        List<RepaymentHistory> previous = new ArrayList<>();
+        List<RepaymentHistory> current = List.of(
+                createRepayment(LocalDateTime.of(2024, 3, 1, 10, 0), BigDecimal.valueOf(200))
+        );
+
+        List<RepaymentHistory> combined = calculationEngine.combinePreviousAndNewRepaymentHistory(previous, current);
+
+        assertEquals(1, combined.size());
+        assertEquals(BigDecimal.valueOf(200), combined.get(0).getAmountPaid());
+    }
+
+    @Test
+    void calculateOutstandingAndInterestCorrectlyForRepayment() throws MeedlException {
+        Loanee loanee = Loanee.builder().id(loaneeId).build();
+        Cohort cohort = Cohort.builder().id(cohortId).build();
+
+        List<RepaymentHistory> repayments = List.of(
+                createRepayment(LocalDateTime.of(2025, 1, 1, 0, 0), BigDecimal.valueOf(1000)),
+                createRepayment(LocalDateTime.of(2025, 2, 1, 0, 0), BigDecimal.valueOf(1000))
+        );
+
+        LoaneeLoanDetail loanDetail = LoaneeLoanDetail.builder()
+                .id(UUID.randomUUID().toString())
+                .amountReceived(BigDecimal.valueOf(5000))
+                .amountOutstanding(BigDecimal.valueOf(5000))
+                .amountRepaid(BigDecimal.ZERO)
+                .interestRate(0.03)
+                .build();
+
+        CohortLoanee cohortLoanee = CohortLoanee.builder().id("cohortLoaneeId").build();
+
+        when(cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(loaneeId, cohortId)).thenReturn(cohortLoanee);
+        when(loaneeLoanDetailsOutputPort.findByCohortLoaneeId("cohortLoaneeId")).thenReturn(loanDetail);
+
+        when(repaymentHistoryOutputPort.findAllRepaymentHistoryForLoan(loaneeId, cohortId)).thenReturn(new ArrayList<>());
+        when(loaneeLoanDetailsOutputPort.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(repaymentHistoryOutputPort.saveAllRepaymentHistory(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        doNothing().when(repaymentHistoryOutputPort).deleteMultipleRepaymentHistory(any());
+
+        calculationEngine.calculateLoaneeLoanRepaymentHistory(repayments, loanee, cohort);
+
+        verify(repaymentHistoryOutputPort).saveAllRepaymentHistory(any());
+        verify(loaneeLoanDetailsOutputPort).save(any());
+    }
+
+
+    @Test
+    void getPreviousOutstandingWhenNotNull() {
+        BigDecimal previousOutstanding = decimalPlaceRoundUp(BigDecimal.valueOf(3000));
+        LoaneeLoanDetail loanDetail = LoaneeLoanDetail.builder()
+                .amountReceived(decimalPlaceRoundUp(BigDecimal.valueOf(5000)))
+                .build();
+
+        BigDecimal result = ReflectionTestUtils.invokeMethod(calculationEngine, "getPreviousAmountOutstanding", previousOutstanding, loanDetail);
+
+        assertEquals(previousOutstanding, result);
+    }
+
+    @Test
+    void getPreviousOutstandingWhenNull() {
+        LoaneeLoanDetail loanDetail = LoaneeLoanDetail.builder()
+                .amountReceived(BigDecimal.valueOf(5000))
+                .build();
+
+        BigDecimal result = ReflectionTestUtils.invokeMethod(calculationEngine, "getPreviousAmountOutstanding", null, loanDetail);
+
+        assertEquals(decimalPlaceRoundUp(BigDecimal.valueOf(5000)), result);
+    }
+
+
+
+//    @Test
+//    public void calculateIncurredInterestPerRepayment_correctlyCalculatesInterest() {
+//        LocalDateTime lastDate = LocalDateTime.of(2024, 1, 1, 0, 0);
+//        LocalDateTime currentDate = LocalDateTime.of(2024, 1, 31, 0, 0); // 30 days later
+//
+//        BigDecimal outstandingAmount = new BigDecimal("10000.00");
+//        double annualInterestRate = 12.0; // 12% per annum
+//
+//        LoaneeLoanDetail loaneeLoanDetail = new LoaneeLoanDetail();
+//        loaneeLoanDetail.setInterestRate(annualInterestRate);
+//
+//        RepaymentHistory repayment = RepaymentHistory.builder()
+//                .paymentDateTime(currentDate)
+//                .build();
+//
+//        calculationEngine.calculateIncurredInterestPerRepayment(
+//                repayment,
+//                outstandingAmount,
+//                lastDate,
+//                loaneeLoanDetail
+//        );
+//        // Expected interest:
+//        // dailyRate = (12 / 100) / 365 = 0.0003287671 (approx)
+//        // incurredInterest = 10000 * dailyRate * 30 = ~98.6
+//        BigDecimal expectedInterest = outstandingAmount
+//                .multiply(BigDecimal.valueOf(annualInterestRate)
+//                        .divide(BigDecimal.valueOf(100), NUMBER_OF_DECIMAL_PLACE + 4, RoundingMode.HALF_UP))
+//                .divide(BigDecimal.valueOf(365), NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP)
+//                .multiply(BigDecimal.valueOf(30))
+//                .setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
+//
+//        BigDecimal actualInterest = repayment.getInterestIncurred().setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
+//        assertEquals(expectedInterest, actualInterest, "Incurred interest should be correctly calculated.");
+//    }
+    @Test
+    public void calculateIncurredInterest_shouldReturnZeroWhenOutstandingIsZero() {
+        BigDecimal previousOutstanding = BigDecimal.ZERO;
+        LocalDateTime lastDate = LocalDateTime.of(2024, 1, 1, 0, 0);
+        LocalDateTime currentDate = LocalDateTime.of(2024, 1, 31, 0, 0);
+
+        RepaymentHistory repayment = createRepayment(currentDate, new BigDecimal("1000.00"));
+        LoaneeLoanDetail loaneeLoanDetail = new LoaneeLoanDetail();
+        loaneeLoanDetail.setInterestRate(15.0);
+
+        calculationEngine.calculateIncurredInterestPerRepayment(repayment, previousOutstanding, lastDate, loaneeLoanDetail);
+
+        assertEquals(BigDecimal.ZERO.setScale(NUMBER_OF_DECIMAL_PLACE), repayment.getInterestIncurred());
+    }
 
 }
