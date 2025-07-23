@@ -107,6 +107,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     public String verifyIdentity(String actorId,IdentityVerification identityVerification) throws MeedlException {
         log.info("identity verification == {}", identityVerification);
         checkIfAboveThreshold(actorId);
+        validateIdentityVerification(identityVerification);
         decryptEncryptedIdentification(identityVerification);
         UserIdentity userIdentity = userIdentityOutputPort.findByBvn(identityVerification.getEncryptedBvn());
         if (ObjectUtils.isEmpty(userIdentity)) {
@@ -181,8 +182,6 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         MeedlValidator.validateObjectInstance(identityVerification, IdentityVerificationMessage.IDENTITY_VERIFICATION_CANNOT_BE_NULL.getMessage());
         MeedlValidator.validateDataElement(identityVerification.getEncryptedBvn(), IdentityVerificationMessage.INVALID_BVN.getMessage());
         MeedlValidator.validateDataElement(identityVerification.getEncryptedNin(), IdentityVerificationMessage.INVALID_NIN.getMessage());
-//        MeedlValidator.validateUUID(identityVerification.getLoanReferralId(), LoanMessages.INVALID_LOAN_REFERRAL_ID.getMessage());
-//        log.info("Verifying user identity. Loan referral id: {}", identityVerification.getLoanReferralId());
     }
 
     private String decrypt(String encryptedData) throws MeedlException {
