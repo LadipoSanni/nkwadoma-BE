@@ -71,8 +71,8 @@ public interface RepaymentHistoryRepository extends JpaRepository<RepaymentHisto
             SELECT
                 u.firstName as firstName,
                 u.lastName as lastName,
+                u.email as email,
                 r.paymentDateTime as paymentDateTime,
-                
                 r.amountPaid as amountPaid,
                 r.totalAmountRepaid as totalAmountRepaid,
                 r.amountOutstanding as amountOutstanding,
@@ -87,13 +87,17 @@ public interface RepaymentHistoryRepository extends JpaRepository<RepaymentHisto
                   (:year IS NULL OR YEAR(r.paymentDateTime) = :year) AND
                   (:name IS NULL OR
                    LOWER(u.firstName) LIKE LOWER(CONCAT('%', :name, '%')) OR
-                   LOWER(u.lastName) LIKE LOWER(CONCAT('%', :name, '%')))
+                   LOWER(u.lastName) LIKE LOWER(CONCAT('%', :name, '%'))) OR
+                   LOWER(CONCAT(u.firstName, ' ', u.lastName)) LIKE LOWER(CONCAT('%', :name, '%')) OR 
+                   LOWER(CONCAT(u.lastName, ' ', u.firstName)) LIKE LOWER(CONCAT('%', :name, '%')) OR
+                   LOWER(u.email) LIKE LOWER(CONCAT('%', :name, '%'))
             """)
     Page<RepaymentHistoryProjection> searchRepaymentHistory(
             @Param("month") Integer month,
             @Param("year") Integer year,
             @Param("name") String name,
             Pageable pageable);
+
     @Query("""
     SELECT r FROM RepaymentHistoryEntity r 
     WHERE r.loanee.id = :loaneeId AND r.cohortId = :cohortId 
