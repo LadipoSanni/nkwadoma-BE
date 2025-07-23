@@ -838,4 +838,55 @@ public class LoanCalculationEngineTest {
         assertEquals(decimalPlaceRoundUp(BigDecimal.valueOf(5000)), result);
     }
 
+
+
+//    @Test
+//    public void calculateIncurredInterestPerRepayment_correctlyCalculatesInterest() {
+//        LocalDateTime lastDate = LocalDateTime.of(2024, 1, 1, 0, 0);
+//        LocalDateTime currentDate = LocalDateTime.of(2024, 1, 31, 0, 0); // 30 days later
+//
+//        BigDecimal outstandingAmount = new BigDecimal("10000.00");
+//        double annualInterestRate = 12.0; // 12% per annum
+//
+//        LoaneeLoanDetail loaneeLoanDetail = new LoaneeLoanDetail();
+//        loaneeLoanDetail.setInterestRate(annualInterestRate);
+//
+//        RepaymentHistory repayment = RepaymentHistory.builder()
+//                .paymentDateTime(currentDate)
+//                .build();
+//
+//        calculationEngine.calculateIncurredInterestPerRepayment(
+//                repayment,
+//                outstandingAmount,
+//                lastDate,
+//                loaneeLoanDetail
+//        );
+//        // Expected interest:
+//        // dailyRate = (12 / 100) / 365 = 0.0003287671 (approx)
+//        // incurredInterest = 10000 * dailyRate * 30 = ~98.6
+//        BigDecimal expectedInterest = outstandingAmount
+//                .multiply(BigDecimal.valueOf(annualInterestRate)
+//                        .divide(BigDecimal.valueOf(100), NUMBER_OF_DECIMAL_PLACE + 4, RoundingMode.HALF_UP))
+//                .divide(BigDecimal.valueOf(365), NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP)
+//                .multiply(BigDecimal.valueOf(30))
+//                .setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
+//
+//        BigDecimal actualInterest = repayment.getInterestIncurred().setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
+//        assertEquals(expectedInterest, actualInterest, "Incurred interest should be correctly calculated.");
+//    }
+    @Test
+    public void calculateIncurredInterest_shouldReturnZeroWhenOutstandingIsZero() {
+        BigDecimal previousOutstanding = BigDecimal.ZERO;
+        LocalDateTime lastDate = LocalDateTime.of(2024, 1, 1, 0, 0);
+        LocalDateTime currentDate = LocalDateTime.of(2024, 1, 31, 0, 0);
+
+        RepaymentHistory repayment = createRepayment(currentDate, new BigDecimal("1000.00"));
+        LoaneeLoanDetail loaneeLoanDetail = new LoaneeLoanDetail();
+        loaneeLoanDetail.setInterestRate(15.0);
+
+        calculationEngine.calculateIncurredInterestPerRepayment(repayment, previousOutstanding, lastDate, loaneeLoanDetail);
+
+        assertEquals(BigDecimal.ZERO.setScale(NUMBER_OF_DECIMAL_PLACE), repayment.getInterestIncurred());
+    }
+
 }
