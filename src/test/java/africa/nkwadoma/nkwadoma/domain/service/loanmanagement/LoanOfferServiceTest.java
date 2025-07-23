@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanRequestStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -147,7 +148,7 @@ public class LoanOfferServiceTest {
         loanOffer.setLoanProduct(loanProduct);
         when(loanOfferOutputPort.findLoanOfferById(mockId)).thenReturn(loanOffer);
         when(loaneeOutputPort.findByUserId(any())).thenReturn(Optional.ofNullable(loanee));
-        assertThrows(MeedlException.class, () -> loanService.acceptLoanOffer(loanOffer));
+        assertThrows(MeedlException.class, () -> loanService.acceptLoanOffer(loanOffer, OnboardingMode.EMAIL_REFERRED));
     }
 
     @Test
@@ -162,7 +163,7 @@ public class LoanOfferServiceTest {
             when(loaneeLoanAccountOutputPort.save(any())).thenReturn(loaneeLoanAccount);
             doNothing().when(asynchronousNotificationOutputPort).notifyPortfolioManagerOfNewLoanOfferWithDecision(any(), any());
             when(loaneeLoanAccountOutputPort.findByLoaneeId(any())).thenReturn(null);
-            loaneeLoanAccount = loanService.acceptLoanOffer(loanOffer2);
+            loaneeLoanAccount = loanService.acceptLoanOffer(loanOffer2, OnboardingMode.EMAIL_REFERRED);
         }catch (MeedlException exception){
             log.error(exception.getMessage());
         }
@@ -186,7 +187,7 @@ public class LoanOfferServiceTest {
                     .thenReturn(Optional.of(loanMetrics));
             when(loanMetricsOutputPort.save(loanMetrics)).thenReturn(loanMetrics);
             when(loanOfferOutputPort.save(loanOffer)).thenReturn(loanOffer);
-             loaneeLoanAccount1 = loanService.acceptLoanOffer(loanOffer2);
+             loaneeLoanAccount1 = loanService.acceptLoanOffer(loanOffer2, OnboardingMode.EMAIL_REFERRED);
         }catch (MeedlException exception){
             log.error(exception.getMessage());
         }
@@ -199,7 +200,7 @@ public class LoanOfferServiceTest {
         when(loanOfferOutputPort.findLoanOfferById(mockId)).thenReturn(loanOffer);
         when(loaneeOutputPort.findByUserId(mockId)).thenReturn(Optional.ofNullable(loanee));
         loanOffer.setLoaneeResponse(LoanDecision.DECLINED);
-        assertThrows(MeedlException.class, () -> loanService.acceptLoanOffer(loanOffer));
+        assertThrows(MeedlException.class, () -> loanService.acceptLoanOffer(loanOffer, OnboardingMode.EMAIL_REFERRED));
     }
 
     @Test

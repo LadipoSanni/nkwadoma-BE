@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.LoaneeUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
@@ -40,6 +41,7 @@ public class LoanBookValidator {
     private final CohortUseCase cohortUseCase;
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
     private final LoaneeUseCase loaneeUseCase;
+    private final IdentityManagerOutputPort identityManagerOutputPort;
     private StringBuilder validationErrorMessage;
 
     public void validateUserDataUploadFile(LoanBook loanBook, List<Map<String, String>> data, List<String> requiredHeaders) throws MeedlException {
@@ -272,13 +274,13 @@ public class LoanBookValidator {
     }
 
     private void buildFailureNotification(LoanBook loanBook, UploadType uploadType) throws MeedlException {
-        UserIdentity foundActor = userIdentityOutputPort.findById(loanBook.getActorId());
+        UserIdentity foundActor = identityManagerOutputPort.getUserById(loanBook.getActorId());
         if (uploadType.equals(UploadType.REPAYMENT)){
             log.info("Notify pm of REPAYMENT data upload failure");
             asynchronousNotificationOutputPort.notifyPmForLoanRepaymentUploadFailure(foundActor, validationErrorMessage, loanBook.getFile().getName());
         }else if (uploadType.equals(UploadType.USER_DATA)){
             log.info("Notify pm of USER data upload failure");
-            asynchronousNotificationOutputPort.notifyPmForUserDataUploadFailure(foundActor, validationErrorMessage, loanBook.getFile().getName());
+            asynchronousNotificationOutputPort.notifyPmForUserDataUploadFailure(foundActor, validationErrorMessage, loanBook);
         }
     }
 

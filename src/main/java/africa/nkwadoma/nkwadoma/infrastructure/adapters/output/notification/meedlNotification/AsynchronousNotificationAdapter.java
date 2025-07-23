@@ -16,6 +16,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -118,7 +119,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                 .senderMail(foundActor.getEmail())
                 .senderFullName(foundActor.getFirstName())
                 .contentDetail(validationErrorMessage.toString())
-                .notificationFlag(NotificationFlag.LOAN_USER_DATA)
+                .notificationFlag(NotificationFlag.LOANEE_DATA_UPLOAD_FAILURE)
                 .build();
 
         log.info("Failure notification sent to the actor with email : {} ", foundActor.getEmail());
@@ -127,12 +128,13 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
     }
 
     @Override
-    public void notifyPmForUserDataUploadFailure(UserIdentity foundActor, StringBuilder validationErrorMessage, String fileName) throws MeedlException {
+    public void notifyPmForUserDataUploadFailure(UserIdentity foundActor, StringBuilder validationErrorMessage, LoanBook loanBook) throws MeedlException {
+        String contentId = getContentIdFromLoanBook(foundActor.getId(), loanBook);
         MeedlNotification meedlNotification = MeedlNotification.builder()
                 .user(foundActor)
                 .timestamp(LocalDateTime.now())
-                .contentId(foundActor.getId())
-                .title("Failed to upload user data: " + fileName)
+                .contentId(contentId)
+                .title("Failed to upload user data: " + loanBook.getFile().getName())
                 .callToAction(Boolean.FALSE)
                 .senderMail(foundActor.getEmail())
                 .senderFullName(foundActor.getFirstName())
@@ -142,6 +144,47 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
 
         log.info("Failure notification sent to the actor with email : {} ", foundActor.getEmail());
         meedlNotificationUsecase.sendNotification(meedlNotification);
+    }
+    @Override
+    public void notifyPmOnRepaymentUploadSuccess(UserIdentity foundActor, LoanBook loanBook) throws MeedlException {
+        String contentId = getContentIdFromLoanBook(loanBook.getActorId(), loanBook);
+
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .timestamp(LocalDateTime.now())
+                .contentId(contentId)
+                .title("Successfully Uploaded Repayment History")
+                .callToAction(Boolean.TRUE)
+                .senderMail(foundActor.getEmail())
+                .senderFullName(foundActor.getFirstName())
+                .contentDetail("Repayment history upload completed")
+                .notificationFlag(NotificationFlag.REPAYMENT_UPLOAD_SUCCESS)
+                .build();
+        notifyPortfolioManagers(meedlNotification);
+    }
+
+    @Override
+    public void notifyPmOnUserDataUploadSuccess(UserIdentity foundActor, LoanBook loanBook) throws MeedlException {
+        String contentId = getContentIdFromLoanBook(loanBook.getActorId(), loanBook);
+
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .timestamp(LocalDateTime.now())
+                .contentId(contentId)
+                .title("Successfully Uploaded User Data")
+                .callToAction(Boolean.TRUE)
+                .senderMail(foundActor.getEmail())
+                .senderFullName(foundActor.getFirstName())
+                .contentDetail("User data upload completed")
+                .notificationFlag(NotificationFlag.LOANEE_DATA_UPLOAD_SUCCESS)
+                .build();
+        notifyPortfolioManagers(meedlNotification);
+    }
+
+    private static String getContentIdFromLoanBook(String actorId, LoanBook loanBook) {
+        String contentId = actorId;
+        if (ObjectUtils.isNotEmpty(loanBook.getCohort()) && ObjectUtils.isNotEmpty(loanBook.getCohort().getId())){
+            contentId = loanBook.getCohort().getId();
+        }
+        return contentId;
     }
 
     private void notifyPortfolioManagers(MeedlNotification meedlNotification) throws MeedlException {
