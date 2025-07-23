@@ -101,13 +101,13 @@ class IdentityVerificationServiceTest {
 
     @Test
     void verifyIdentityWithInvalidBvn() {
-        identityVerification.setEncryptedBvn(StringUtils.EMPTY);
+        identityVerification.setDecryptedBvn(StringUtils.EMPTY);
         assertThrows(MeedlException.class, () -> identityVerificationService.verifyIdentity(testId,identityVerification));
     }
 
     @Test
     void verifyIdentityWithInvalidNin() {
-        identityVerification.setEncryptedNin(StringUtils.SPACE);
+        identityVerification.setDecryptedNin(StringUtils.SPACE);
         assertThrows(MeedlException.class, () -> identityVerificationService.verifyIdentity(testId,identityVerification));
     }
 
