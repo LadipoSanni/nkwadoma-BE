@@ -178,6 +178,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
         BigDecimal firstAmountOutstanding = null;
         if (!loanStartDate.toLocalDate().equals(repaymentFirstDate.toLocalDate())) {
             daysBetween = calculateDaysBetween(loanStartDate, repaymentFirstDate);
+            log.info("The first repayment was not made the same day loan starts. days between loan start and repayment is {}", daysBetween);
         }
         BigDecimal incurredInterest = calculateInterest(loaneeLoanDetail.getInterestRate(), loaneeLoanDetail.getAmountReceived(), daysBetween);
         firstAmountOutstanding = loaneeLoanDetail.getAmountReceived().add(incurredInterest);
