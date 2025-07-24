@@ -263,6 +263,17 @@ public class InvestmentVehicleController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
+    @GetMapping("fund-stack-holders")
+    public ResponseEntity<ApiResponse<?>> viewFundShareHolders() throws MeedlException {
 
+        FundStakeHolder fundStakeHolder =
+                investmentVehicleUseCase.viewFundStakeHolders();
+        ApiResponse<FundStakeHolder> apiResponse = ApiResponse.<FundStakeHolder>builder()
+                .data(fundStakeHolder)
+                .message("Fund stake holder returned successfully")
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
 
 }
