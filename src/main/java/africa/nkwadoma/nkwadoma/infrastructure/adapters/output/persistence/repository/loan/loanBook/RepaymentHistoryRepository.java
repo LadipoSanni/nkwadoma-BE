@@ -24,6 +24,7 @@ public interface RepaymentHistoryRepository extends JpaRepository<RepaymentHisto
                 r.totalAmountRepaid as totalAmountRepaid,
                 r.amountOutstanding as amountOutstanding,
                 r.modeOfPayment as modeOfPayment,
+                r.interestIncurred as interestIncurred,
                 r.id as id,
                 (CASE WHEN :loaneeId IS NULL THEN
                     (SELECT MIN(YEAR(r2.paymentDateTime)) FROM RepaymentHistoryEntity r2)
@@ -77,6 +78,7 @@ public interface RepaymentHistoryRepository extends JpaRepository<RepaymentHisto
                 r.totalAmountRepaid as totalAmountRepaid,
                 r.amountOutstanding as amountOutstanding,
                 r.modeOfPayment as modeOfPayment,
+                r.interestIncurred as interestIncurred,
                 r.id as id,
                 (SELECT MIN(YEAR(r2.paymentDateTime)) FROM RepaymentHistoryEntity r2 WHERE r2.loanee.id = l.id) as firstYear,
                 (SELECT MAX(YEAR(r2.paymentDateTime)) FROM RepaymentHistoryEntity r2 WHERE r2.loanee.id = l.id) as lastYear
