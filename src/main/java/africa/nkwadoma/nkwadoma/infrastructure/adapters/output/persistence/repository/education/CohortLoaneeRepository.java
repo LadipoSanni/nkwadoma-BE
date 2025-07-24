@@ -159,4 +159,13 @@ public interface CohortLoaneeRepository extends JpaRepository<CohortLoaneeEntity
       where lre.id = : id
     """)
     CohortLoaneeEntity findCohortLoaneeByLoanRequestId(@Param("id") String id);
+
+    @Query("""
+    
+       select cl from CohortLoaneeEntity cl
+       JOIN LoaneeLoanDetailEntity  lld on lld.id = cl.loaneeLoanDetail.id
+          
+       where lld.id = :id  and lld.amountOutstanding is not null and lld.amountOutstanding > 0
+    """)
+    CohortLoaneeEntity findByLoaneeLoanDetailId(@Param("id") String id);
 }

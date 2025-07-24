@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -44,4 +46,9 @@ public interface LoaneeLoanDetailRepository extends JpaRepository<LoaneeLoanDeta
           where cohortLoanee.cohort.id = :cohortId and cohortLoanee.loanee.id = :loaneeId
      """)
     LoaneeLoanDetailEntity findByCohortAndLoaneeId(@Param("cohortId") String cohortId, @Param("loaneeId")String loaneeId);
+
+
+
+    @Query("SELECT l FROM LoaneeLoanDetailEntity l WHERE l.amountOutstanding IS NOT NULL OR l.amountOutstanding >= 0")
+    List<LoaneeLoanDetailEntity> findAllLoaneeLoanDetailByAmountOutstandingNotNullOrNonNegative();
 }

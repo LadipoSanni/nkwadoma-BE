@@ -58,4 +58,11 @@ public class LoaneeLoanDetailPersistenceAdapter implements LoaneeLoanDetailsOutp
         LoaneeLoanDetailEntity loaneeLoanDetailEntity = loaneeLoanDetailRepository.findByCohortAndLoaneeId(cohortId,loaneeId);
         return loaneeLoanDetailMapper.toLoaneeLoanDetails(loaneeLoanDetailEntity);
     }
+
+    @Override
+    public List<LoaneeLoanDetail> findAllLoaneeLoanDetail() {
+        List<LoaneeLoanDetailEntity> loaneeLoanDetailEntities =
+                loaneeLoanDetailRepository.findAllLoaneeLoanDetailByAmountOutstandingNotNullOrNonNegative();
+        return loaneeLoanDetailEntities.stream().map(loaneeLoanDetailMapper::toLoaneeLoanDetails).toList();
+    }
 }

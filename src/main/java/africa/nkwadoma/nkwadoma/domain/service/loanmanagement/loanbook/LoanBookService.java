@@ -15,7 +15,7 @@ public class LoanBookService implements LoanBookUseCase {
     private final AsynchronousLoanBookProcessingUseCase asynchronousLoanBookProcessingUseCase;
 
 
-//    @Async
+    //    @Async
     @Override
     public LoanBook upLoadUserData(LoanBook loanBook) throws MeedlException {
         asynchronousLoanBookProcessingUseCase.upLoadUserData(loanBook);
@@ -27,6 +27,4 @@ public class LoanBookService implements LoanBookUseCase {
     public void uploadRepaymentRecord(LoanBook repaymentRecordBook) throws MeedlException {
         asynchronousLoanBookProcessingUseCase.uploadRepaymentHistory(repaymentRecordBook);
     }
-
-
 }

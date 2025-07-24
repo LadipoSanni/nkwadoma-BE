@@ -164,4 +164,11 @@ public class CohortLoaneePersistenceAdapter implements CohortLoaneeOutputPort {
         CohortLoaneeEntity cohortLoaneeEntity = cohortLoaneeRepository.findCohortLoaneeByLoanRequestId(loanRequestId);
         return cohortLoaneeMapper.toCohortLoanee(cohortLoaneeEntity);
     }
+
+    @Override
+    public CohortLoanee findCohortLoaneeByLoaneeLoanDetailId(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id, "Loanee loan detail id cannot be empty ");
+        CohortLoaneeEntity cohortLoaneeEntity = cohortLoaneeRepository.findByLoaneeLoanDetailId(id);
+        return cohortLoaneeMapper.toCohortLoanee(cohortLoaneeEntity);
+    }
 }

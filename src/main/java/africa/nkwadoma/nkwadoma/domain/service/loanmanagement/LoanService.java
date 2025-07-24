@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.RepaymentHistoryOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
@@ -38,6 +39,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -78,6 +80,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final LoaneeUseCase loaneeUseCase;
     private final LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
     private final LoanMapper loanMapper;
+    private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
+    private final RepaymentHistoryOutputPort repaymentHistoryOutputPort;
+    private final int DAYS_IN_YEAR = 365;
+    private final int NUMBER_OF_DECIMAL_PLACE = 8;
 
     @Override
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
@@ -825,6 +831,61 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         throw new LoanException(loanOffer.getType().name()+" is not a loan type");
     }
 
+
+    @Override
+    public List<LoaneeLoanDetail> simulateInterestIncurred() throws MeedlException {
+        List<LoaneeLoanDetail> loaneeLoanDetails =  loaneeLoanDetailsOutputPort.findAllLoaneeLoanDetail();
+        List<LoaneeLoanDetail> loanDetailList = new ArrayList<>();
+        log.info("found loanee loanee detail : {}", loaneeLoanDetails);
+        for (LoaneeLoanDetail loaneeLoanDetail : loaneeLoanDetails) {
+            CohortLoanee cohortLoanee = cohortLoaneeOutputPort.findCohortLoaneeByLoaneeLoanDetailId(loaneeLoanDetail.getId());
+            log.info("found cohort loanee : {}", cohortLoanee);
+            LoanProduct loanProduct = loanProductOutputPort.findByCohortLoaneeId(cohortLoanee.getId());
+            log.info("found loanProduct : {}", loanProduct);
+            boolean ifLoaneeHasMadeAnyRepayment =
+                    repaymentHistoryOutputPort.checkIfLoaneeHasMadeAnyRepayment(cohortLoanee.getLoanee().getId()
+                            ,cohortLoanee.getCohort().getId());
+            if (ifLoaneeHasMadeAnyRepayment) {
+                log.info("loanee has made a repayment");
+                LocalDateTime lastRepaymentDate = repaymentHistoryOutputPort.findLatestRepayment(
+                        cohortLoanee.getLoanee().getId(),cohortLoanee.getCohort().getId()).getPaymentDateTime();
+
+                loaneeLoanDetail = addUppInterestIncurredIntoLoaneeLoanDetail(loaneeLoanDetail, lastRepaymentDate, loanProduct);
+                loanDetailList.add(loaneeLoanDetail);
+            }else {
+                LocalDateTime loanStartDate =
+                        loanOutputPort.findLoaneeLoanByCohortLoaneeId(cohortLoanee.getId()).getStartDate();
+                loaneeLoanDetail = addUppInterestIncurredIntoLoaneeLoanDetail(loaneeLoanDetail, loanStartDate, loanProduct);
+                loanDetailList.add(loaneeLoanDetail);
+            }
+        }
+        return loanDetailList;
+    }
+
+    private LoaneeLoanDetail addUppInterestIncurredIntoLoaneeLoanDetail(LoaneeLoanDetail loaneeLoanDetail, LocalDateTime lastRepaymentDate, LoanProduct loanProduct) {
+        long daysBetween = ChronoUnit.DAYS.between(lastRepaymentDate, LocalDateTime.now());
+        BigDecimal interestAccrued =
+                calculateInterest(loanProduct.getInterestRate(), loaneeLoanDetail.getAmountOutstanding(),daysBetween);
+        log.info("interest accrued {}", interestAccrued);
+        loaneeLoanDetail.setAmountOutstanding(loaneeLoanDetail.getAmountOutstanding().add(interestAccrued));
+        loaneeLoanDetail.setInterestIncurred(loaneeLoanDetail.getInterestIncurred().add(interestAccrued));
+        return loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
+    }
+
+    public BigDecimal calculateInterest(double interestRate, BigDecimal outstanding, long daysBetween) {
+        BigDecimal interestRateInPercent = BigDecimal.valueOf(interestRate)
+                .divide(BigDecimal.valueOf(100), NUMBER_OF_DECIMAL_PLACE + 4, RoundingMode.HALF_UP) ;
+        log.info("interest rate in percentage {}", interestRateInPercent);
+        BigDecimal dailyRate = interestRateInPercent.divide(BigDecimal.valueOf(DAYS_IN_YEAR), NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
+
+        log.info("daily rate in percentage {}", dailyRate);
+
+        log.info("Calculated daily rate ==== {} for annual interest rate {}, interest rate in percent {}", dailyRate, interestRate, interestRateInPercent);
+
+        BigDecimal newOutstanding = outstanding.multiply(dailyRate).multiply(BigDecimal.valueOf(daysBetween));
+        log.info("New outstanding {}", newOutstanding);
+        return newOutstanding;
+    }
 
 
 
