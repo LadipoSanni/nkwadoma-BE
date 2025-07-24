@@ -1,3 +1,28 @@
+-- Step 1: Drop the foreign key constraint dynamically
+DO $$
+DECLARE
+constraint_name text;
+BEGIN
+SELECT tc.constraint_name INTO constraint_name
+FROM information_schema.table_constraints tc
+         JOIN information_schema.constraint_column_usage ccu
+              ON tc.constraint_name = ccu.constraint_name
+WHERE tc.constraint_type = 'FOREIGN KEY'
+  AND tc.table_name = 'loan_offer_entity'
+  AND ccu.table_name = 'loan_request_entity'
+  AND ccu.column_name = 'id';
+
+IF constraint_name IS NOT NULL THEN
+        EXECUTE 'ALTER TABLE loan_offer_entity DROP CONSTRAINT ' || quote_ident(constraint_name);
+END IF;
+END $$;
+
+-- Step 2: Recreate the foreign key with ON UPDATE CASCADE
+ALTER TABLE loan_offer_entity
+    ADD CONSTRAINT fk_loan_offer_loan_request
+        FOREIGN KEY (loan_request_id) REFERENCES loan_request_entity (id)
+            ON UPDATE CASCADE;
+
  -- Update loan_request_entity.id to match the corresponding loan_referral_entity.id
 UPDATE loan_request_entity lr
 SET id = (
