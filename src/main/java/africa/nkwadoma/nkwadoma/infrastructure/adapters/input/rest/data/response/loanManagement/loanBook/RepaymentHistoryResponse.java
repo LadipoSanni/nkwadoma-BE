@@ -20,4 +20,5 @@ public class RepaymentHistoryResponse {
     private ModeOfPayment modeOfPayment;
     private BigDecimal totalAmountRepaid;
     private BigDecimal amountOutstanding;
+    private BigDecimal interestIncurred;
 }
