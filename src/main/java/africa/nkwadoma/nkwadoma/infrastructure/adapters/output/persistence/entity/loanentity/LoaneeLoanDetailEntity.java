@@ -8,6 +8,7 @@ import lombok.ToString;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Setter
 @Getter
@@ -25,4 +26,8 @@ public class LoaneeLoanDetailEntity {
     private BigDecimal amountOutstanding;
     private double interestRate;
     private BigDecimal interestIncurred;
+
+    private LocalDateTime loanStartDate;
+    private LocalDateTime updatedAt;
+    private LocalDateTime createXdAt;
 }
