@@ -500,7 +500,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     List<CohortLoanee> convertToLoanees(List<Map<String, String>> data, Cohort cohort, String actorId) throws MeedlException {
         List<CohortLoanee> cohortLoanees = new ArrayList<>();
         for (Map<String, String> row : data) {
-            LocalDateTime loanStartDate = parseFlexibleDateTime(row.get("loanstartdate"), row.get("email");
+            LocalDateTime loanStartDate = parseFlexibleDateTime(row.get("loanstartdate"), row.get("email"));
             UserIdentity userIdentity = UserIdentity.builder()
                     .firstName(row.get("firstname"))
                     .lastName(row.get("lastname"))

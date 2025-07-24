@@ -29,5 +29,5 @@ public class LoaneeLoanDetailEntity {
 
     private LocalDateTime loanStartDate;
     private LocalDateTime updatedAt;
-    private LocalDateTime createXdAt;
+    private LocalDateTime createdAt;
 }

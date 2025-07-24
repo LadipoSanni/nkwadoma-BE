@@ -796,6 +796,7 @@ public class LoanCalculationEngineTest {
                 .amountOutstanding(BigDecimal.valueOf(5000))
                 .amountRepaid(BigDecimal.ZERO)
                 .interestRate(0.03)
+                .loanStartDate(LocalDateTime.now())
                 .build();
 
         CohortLoanee cohortLoanee = CohortLoanee.builder().id("cohortLoaneeId").build();
@@ -887,6 +888,80 @@ public class LoanCalculationEngineTest {
         calculationEngine.calculateIncurredInterestPerRepayment(repayment, previousOutstanding, lastDate, loaneeLoanDetail);
 
         assertEquals(BigDecimal.ZERO.setScale(NUMBER_OF_DECIMAL_PLACE), repayment.getInterestIncurred());
+    }
+
+
+
+
+
+
+//    @Test
+//    void testCalculateInterest_withValidInputs() {
+//        BigDecimal outstanding = new BigDecimal("100000.00");
+//        double interestRate = 12.0; // 12% annually
+//        long daysBetween = 30;
+//
+//        BigDecimal expectedInterest = outstanding
+//                .multiply(BigDecimal.valueOf(0.12)) // annual rate
+//                .divide(BigDecimal.valueOf(365), NUMBER_OF_DECIMAL_PLACE + 4, RoundingMode.HALF_UP)
+//                .multiply(BigDecimal.valueOf(daysBetween))
+//                .setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
+//
+//        BigDecimal actual = calculationEngine.calculateInterest(interestRate, outstanding, daysBetween);
+//
+//        assertEquals(expectedInterest, actual);
+//    }
+
+    @Test
+    void testCalculateInterest_zeroDaysBetween_shouldReturnZero() {
+        BigDecimal actual = calculationEngine.calculateInterest(10.0, new BigDecimal("5000"), 0);
+        assertEquals(BigDecimal.ZERO.setScale(NUMBER_OF_DECIMAL_PLACE), actual);
+    }
+    @Test
+    void testGetPreviousAmountOutstanding_differentDates() {
+        LocalDateTime loanStart = LocalDateTime.of(2025, 1, 1, 10, 0);
+        LocalDateTime repaymentDate = LocalDateTime.of(2025, 1, 16, 10, 0); // 15 days later
+
+        LoaneeLoanDetail loanee = new LoaneeLoanDetail();
+        loanee.setLoanStartDate(loanStart);
+        loanee.setAmountReceived(new BigDecimal("10000.00"));
+        loanee.setInterestRate(12.0);
+
+        BigDecimal interest = calculationEngine.calculateInterest(
+                12.0,
+                loanee.getAmountReceived(),
+                15
+        );
+
+        BigDecimal expectedOutstanding = loanee.getAmountReceived().add(interest)
+                .setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
+
+        BigDecimal result = calculationEngine.getPreviousAmountOutstanding(loanee, repaymentDate);
+
+        assertEquals(expectedOutstanding, decimalPlaceRoundUp(result));
+    }
+
+    @Test
+    void testGetPreviousAmountOutstanding_sameDate_shouldUseOneDayInterest() {
+        LocalDateTime sameDate = LocalDateTime.of(2025, 7, 20, 14, 0);
+
+        LoaneeLoanDetail loanee = new LoaneeLoanDetail();
+        loanee.setLoanStartDate(sameDate);
+        loanee.setAmountReceived(new BigDecimal("8000.00"));
+        loanee.setInterestRate(10.0);
+
+        BigDecimal interest = calculationEngine.calculateInterest(
+                10.0,
+                loanee.getAmountReceived(),
+                1 // as per your default when same day
+        );
+
+        BigDecimal expected = loanee.getAmountReceived().add(interest)
+                .setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
+
+        BigDecimal result = calculationEngine.getPreviousAmountOutstanding(loanee, sameDate);
+
+        assertEquals(expected, decimalPlaceRoundUp(result));
     }
 
 }
