@@ -1,3 +1,14 @@
+-- Step 1: Drop the existing foreign key constraint
+ALTER TABLE loan_offer_entity
+DROP CONSTRAINT fkiguqxekno4kels0kesuwo2bh7;
+
+-- Step 2: Recreate the foreign key with ON UPDATE CASCADE
+ALTER TABLE loan_offer_entity
+    ADD CONSTRAINT fkiguqxekno4kels0kesuwo2bh7
+        FOREIGN KEY (loan_request_id) REFERENCES loan_request_entity (id)
+            ON UPDATE CASCADE;
+
+
  -- Update loan_request_entity.id to match the corresponding loan_referral_entity.id
 UPDATE loan_request_entity lr
 SET id = (
