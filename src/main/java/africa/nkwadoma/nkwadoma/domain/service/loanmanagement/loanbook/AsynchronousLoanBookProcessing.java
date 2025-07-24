@@ -570,6 +570,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         for (CohortLoanee cohortLoanee : cohortLoanees){
             try {
                 saveUploadedUserIdentity(cohortLoanee);
+                log.info("Loanee loan details before saving in add loanee to cohort on upload {}", cohortLoanee.getLoaneeLoanDetail());
                 LoaneeLoanDetail savedLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(cohortLoanee.getLoaneeLoanDetail());
                 cohortLoanee.setLoaneeLoanDetail(savedLoaneeLoanDetail);
                 log.info("Loanee's loan details after saving in file upload {}", savedLoaneeLoanDetail);

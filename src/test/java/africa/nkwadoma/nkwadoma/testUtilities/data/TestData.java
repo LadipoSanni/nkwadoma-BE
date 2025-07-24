@@ -123,6 +123,7 @@ public class TestData {
     public static LoaneeLoanDetail createTestLoaneeLoanDetail(){
         return LoaneeLoanDetail.builder()
                 .amountRequested(BigDecimal.valueOf(9000000))
+                .createdAt(LocalDateTime.now())
                 .initialDeposit(BigDecimal.valueOf(3000000))
                 .build();
     }

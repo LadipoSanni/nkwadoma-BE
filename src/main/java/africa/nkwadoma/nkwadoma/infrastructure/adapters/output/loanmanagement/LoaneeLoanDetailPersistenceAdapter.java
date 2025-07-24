@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.LoanDetailEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoaneeLoanDetailEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoaneeLoanDetailMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanSummaryProjection;
@@ -26,7 +27,9 @@ public class LoaneeLoanDetailPersistenceAdapter implements LoaneeLoanDetailsOutp
     public LoaneeLoanDetail save(LoaneeLoanDetail loaneeLoanDetail) {
         LoaneeLoanDetailEntity loanDetailEntity =
                 loaneeLoanDetailMapper.toLoaneeLoanDetailsEnitity(loaneeLoanDetail);
+        log.info("The loanee loan detail entity {}", loanDetailEntity);
         loanDetailEntity = loaneeLoanDetailRepository.save(loanDetailEntity);
+        log.info("The saved loanee loan detail entity before mapping {}", loanDetailEntity);
         return loaneeLoanDetailMapper.toLoaneeLoanDetails(loanDetailEntity);
     }
 
