@@ -216,7 +216,7 @@ public class LoaneeService implements LoaneeUseCase {
     private CohortLoanee addExistingLoaneeToCohort(Loanee loanee, Loanee existingLoanee, Cohort cohort, CohortLoanee cohortLoanee) throws MeedlException {
         if (ObjectUtils.isNotEmpty(existingLoanee)){
             checkIfLoaneeExistInCohort(cohort, existingLoanee);
-            checkIfLoaneeExistInAnActiveCohortInSameProgram(existingLoanee, cohort);
+             checkIfLoaneeExistInAnActiveCohortInSameProgram(existingLoanee, cohort);
             existingLoanee.setLoaneeLoanDetail(loanee.getLoaneeLoanDetail());
             cohortLoanee = addLoaneeToCohort(existingLoanee, cohort);
             cohortLoanee.setCreatedBy(loanee.getUserIdentity().getCreatedBy());
