@@ -124,6 +124,8 @@ public class TestData {
         return LoaneeLoanDetail.builder()
                 .amountRequested(BigDecimal.valueOf(9000000))
                 .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .loanStartDate(LocalDateTime.now())
                 .initialDeposit(BigDecimal.valueOf(3000000))
                 .build();
     }
