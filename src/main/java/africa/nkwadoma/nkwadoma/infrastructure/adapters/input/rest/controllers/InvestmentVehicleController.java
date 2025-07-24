@@ -236,8 +236,6 @@ public class InvestmentVehicleController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-
-
     @GetMapping("investmentVehicle/search/financier/{investmentVehicleName}")
     @PreAuthorize("hasRole('FINANCIER')")
     public ResponseEntity<ApiResponse<?>> searchMyInvestment(@AuthenticationPrincipal Jwt meedlUser,
@@ -265,7 +263,6 @@ public class InvestmentVehicleController {
 
     @GetMapping("fund-stack-holders")
     public ResponseEntity<ApiResponse<?>> viewFundShareHolders() throws MeedlException {
-
         FundStakeHolder fundStakeHolder =
                 investmentVehicleUseCase.viewFundStakeHolders();
         ApiResponse<FundStakeHolder> apiResponse = ApiResponse.<FundStakeHolder>builder()
