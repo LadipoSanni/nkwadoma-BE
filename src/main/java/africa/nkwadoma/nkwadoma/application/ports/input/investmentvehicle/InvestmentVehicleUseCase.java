@@ -36,4 +36,5 @@ public interface InvestmentVehicleUseCase {
 
     Page<InvestmentVehicle> searchMyInvestment(String userId, InvestmentVehicle investmentVehicle, int pageSize, int pageNumber) throws MeedlException;
 
+    FundStakeHolder viewFundStakeHolders();
 }
