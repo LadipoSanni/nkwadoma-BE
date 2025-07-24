@@ -124,6 +124,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
         log.info("The repayment histories after adding up total amount repaid ----> {}", repaymentHistories);
         log.info("Last payment date {} , total amount outstanding {}, total amount repaid {}", lastDate, previousOutstandingAmount, runningTotal);
 
+        loaneeLoanDetail.setUpdatedAt(LocalDateTime.now());
         LoaneeLoanDetail updatedLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
         log.info("Loanee loan details updated with repayment calculations. {}", updatedLoaneeLoanDetail);
         updateLoaneeRepaymentHistory(repaymentHistories, previousRepaymentHistory);
@@ -183,6 +184,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
         BigDecimal incurredInterest = calculateInterest(loaneeLoanDetail.getInterestRate(), loaneeLoanDetail.getAmountReceived(), daysBetween);
         firstAmountOutstanding = loaneeLoanDetail.getAmountReceived().add(incurredInterest);
         loaneeLoanDetail.setAmountOutstanding(firstAmountOutstanding);
+        log.info("First interest incurred {} \n -------------------> first amount outstanding {}", incurredInterest, firstAmountOutstanding);
         return firstAmountOutstanding;
     }
 
@@ -222,8 +224,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
     }
 
     public BigDecimal calculateInterest(double interestRate, BigDecimal outstanding, long daysBetween) {
-//        BigDecimal dailyRate = BigDecimal.valueOf(interestRate).divide(BigDecimal.valueOf(DAYS_IN_MONTH), NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
-//        log.info("What is daily rate ==== {} interest rate is at {}",dailyRate, interestRate);
+
         BigDecimal interestRateInPercent = BigDecimal.valueOf(interestRate)
                 .divide(BigDecimal.valueOf(100), NUMBER_OF_DECIMAL_PLACE + 4, RoundingMode.HALF_UP) ;
         BigDecimal dailyRate = interestRateInPercent.divide(BigDecimal.valueOf(DAYS_IN_YEAR), NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
