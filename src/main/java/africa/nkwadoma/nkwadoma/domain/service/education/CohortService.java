@@ -20,7 +20,6 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
@@ -55,7 +54,6 @@ public class CohortService implements CohortUseCase {
     private final ProgramOutputPort programOutputPort;
     private final LoaneeOutputPort loaneeOutputPort;
     private final ProgramCohortOutputPort programCohortOutputPort;
-    private final LoanDetailsOutputPort loanDetailsOutputPort;
     private final LoanBreakdownOutputPort loanBreakdownOutputPort;
     private final CohortMapper cohortMapper;
     private final UserIdentityOutputPort userIdentityOutputPort;

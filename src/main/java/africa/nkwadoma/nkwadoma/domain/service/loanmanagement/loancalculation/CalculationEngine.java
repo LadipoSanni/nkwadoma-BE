@@ -7,7 +7,10 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanCalculationMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
+import africa.nkwadoma.nkwadoma.domain.model.education.ProgramLoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanPeriodRecord;
@@ -78,6 +81,49 @@ public class CalculationEngine implements CalculationEngineUseCase {
         processRepaymentHistoryCalculations(allRepayments, loanee, cohort, loaneeLoanDetail);
 
         finalizeRepaymentHistoryCalculation(allRepayments, previousRepaymentHistory, loaneeLoanDetail);
+        calculateLoaneeLoanDetails(cohort.getId(), currentAmountRepaid);
+    }
+    private void calculateLoaneeLoanDetails(String cohortId,BigDecimal currentAmountPaid) throws MeedlException {
+
+        CohortLoanDetail cohortLoanDetail = updateCohortLoanDetail(cohortId, currentAmountPaid);
+        ProgramLoanDetail programLoanDetail = updateProgramLoanDetail(cohortLoanDetail, currentAmountPaid);
+
+        OrganizationLoanDetail organizationLoanDetail = updateOrganizationLoanDetail(programLoanDetail, currentAmountPaid);
+        log.info("Organization loan details after saving {}",organizationLoanDetail);
+
+    }
+    private CohortLoanDetail updateCohortLoanDetail(String cohortId, BigDecimal currentAmountPaid) throws MeedlException {
+        log.info("About to Update Cohort loan detail after repayment ");
+        CohortLoanDetail cohortLoanDetail = cohortLoanDetailOutputPort.findByCohortId(cohortId);
+        log.info("cohort loan detail found {}", cohortLoanDetail);
+        cohortLoanDetail.setTotalAmountRepaid(cohortLoanDetail.getTotalAmountRepaid().add(currentAmountPaid));
+        cohortLoanDetail.setTotalOutstandingAmount(cohortLoanDetail.getTotalOutstandingAmount().subtract(currentAmountPaid));
+        log.info("Updated Cohort loan detail after repayment  {}", cohortLoanDetail);
+        cohortLoanDetail = cohortLoanDetailOutputPort.save(cohortLoanDetail);
+        log.info("cohort loan details after saving {}",cohortLoanDetail);
+        return cohortLoanDetail;
+    }
+    private ProgramLoanDetail updateProgramLoanDetail(CohortLoanDetail cohortLoanDetail, BigDecimal currentAmountPaid) throws MeedlException {
+        log.info("About to Update Program loan detail after repayment ");
+        ProgramLoanDetail programLoanDetail = programLoanDetailOutputPort.findByProgramId(cohortLoanDetail.getCohort().getProgramId());
+        log.info("program loan detail found {}", programLoanDetail);
+        programLoanDetail.setTotalAmountRepaid(programLoanDetail.getTotalAmountRepaid().add(currentAmountPaid));
+        programLoanDetail.setTotalOutstandingAmount(programLoanDetail.getTotalOutstandingAmount().subtract(currentAmountPaid));
+        log.info("Updated Program loan detail after repayment  {}", programLoanDetail);
+        programLoanDetail = programLoanDetailOutputPort.save(programLoanDetail);
+        log.info("Program loan details after saving {}",programLoanDetail);
+        return programLoanDetail;
+    }
+    private OrganizationLoanDetail updateOrganizationLoanDetail(ProgramLoanDetail programLoanDetail, BigDecimal currentAmountPaid) throws MeedlException {
+        log.info("About to Update Organization loan detail after repayment ");
+        OrganizationLoanDetail organizationLoanDetail = organizationLoanDetailOutputPort.findByOrganizationId(
+                programLoanDetail.getProgram().getOrganizationIdentity().getId());
+        log.info("organization loan detail found {}", organizationLoanDetail);
+        organizationLoanDetail.setTotalAmountRepaid(organizationLoanDetail.getTotalAmountRepaid().add(currentAmountPaid));
+        organizationLoanDetail.setTotalOutstandingAmount(organizationLoanDetail.getTotalOutstandingAmount().subtract(currentAmountPaid));
+        log.info("Updated Organization loan detail after repayment  {}", organizationLoanDetail);
+        organizationLoanDetail = organizationLoanDetailOutputPort.save(organizationLoanDetail);
+        return organizationLoanDetail;
     }
     private void finalizeRepaymentHistoryCalculation(
             List<RepaymentHistory> currentRepayments,
