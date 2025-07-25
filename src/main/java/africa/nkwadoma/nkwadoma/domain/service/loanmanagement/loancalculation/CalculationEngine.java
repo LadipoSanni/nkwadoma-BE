@@ -98,15 +98,17 @@ public class CalculationEngine implements CalculationEngineUseCase {
 
         BigDecimal runningTotal = BigDecimal.ZERO;;
         BigDecimal totalInterestIncurred = BigDecimal.ZERO;;
-        LocalDateTime lastDate = repaymentHistories.get(0).getPaymentDateTime();
-        BigDecimal previousOutstandingAmount = getPreviousAmountOutstanding(loaneeLoanDetail, lastDate);
+        LocalDateTime lastDate = loaneeLoanDetail.getLoanStartDate();
+        BigDecimal previousOutstandingAmount = null;
 
+        log.info("Total interest incurred before repayment history calculations begin {}", totalInterestIncurred);
         for (RepaymentHistory repayment : repaymentHistories) {
             validateAmountRepaid(repayment);
             previousOutstandingAmount = getPreviousAmountOutstanding(previousOutstandingAmount, loaneeLoanDetail);
             log.info("Outstanding before processing this repayment {} ", previousOutstandingAmount);
 
             runningTotal = calculateTotalAmountRepaidPerRepayment(repayment, runningTotal);
+
             BigDecimal interestIncurred = calculateIncurredInterestPerRepayment(repayment, previousOutstandingAmount, lastDate, loaneeLoanDetail);
             totalInterestIncurred = totalInterestIncurred.add(interestIncurred);
             calculateOutstandingPerRepayment(previousOutstandingAmount, repayment);
@@ -171,24 +173,10 @@ public class CalculationEngine implements CalculationEngineUseCase {
 
         totalInterestIncurred = totalInterestIncurred.add(interestIncurredFromLastPaymentTillDate);
         loaneeLoanDetail.setInterestIncurred(decimalPlaceRoundUp(totalInterestIncurred));
-        log.info("Total interest incurred {}", loaneeLoanDetail.getInterestIncurred());
-    }
-    public BigDecimal getPreviousAmountOutstanding(LoaneeLoanDetail loaneeLoanDetail, LocalDateTime repaymentFirstDate) {
-        LocalDateTime loanStartDate = loaneeLoanDetail.getLoanStartDate();
-        long daysBetween = 1;
-        BigDecimal firstAmountOutstanding = null;
-        if (!loanStartDate.toLocalDate().equals(repaymentFirstDate.toLocalDate())) {
-            daysBetween = calculateDaysBetween(loanStartDate, repaymentFirstDate);
-            log.info("The first repayment was not made the same day loan starts. days between loan start and repayment is {}", daysBetween);
-        }
-        BigDecimal incurredInterest = calculateInterest(loaneeLoanDetail.getInterestRate(), loaneeLoanDetail.getAmountReceived(), daysBetween);
-        firstAmountOutstanding = loaneeLoanDetail.getAmountReceived().add(incurredInterest);
-        loaneeLoanDetail.setAmountOutstanding(firstAmountOutstanding);
-        log.info("First interest incurred {} \n -------------------> first amount outstanding {}", incurredInterest, firstAmountOutstanding);
-        return firstAmountOutstanding;
+        log.info("Total interest incurred in loanee loan details after all calculations are done ===> {}", loaneeLoanDetail.getInterestIncurred());
     }
 
-    private BigDecimal getPreviousAmountOutstanding(BigDecimal previousOutstanding, LoaneeLoanDetail loaneeLoanDetail) {
+    BigDecimal getPreviousAmountOutstanding(BigDecimal previousOutstanding, LoaneeLoanDetail loaneeLoanDetail) {
         if (ObjectUtils.isNotEmpty(previousOutstanding)){
             log.info("Getting the previous amount outstanding as the previous in the calculation {}", previousOutstanding);
             return decimalPlaceRoundUp(previousOutstanding);
