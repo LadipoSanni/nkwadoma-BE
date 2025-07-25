@@ -219,6 +219,8 @@ class LoanRequestServiceTest {
             when(loanOfferUseCase.createLoanOffer(any())).thenReturn(loanOffer);
             when(loanRequestMapper.updateLoanRequest(any(), any())).thenReturn(loanRequestBuilt);
             when(loanRequestOutputPort.save(any())).thenReturn(loanRequestBuilt);
+            when(loaneeLoanDetailsOutputPort.findByLoanRequestId(loanRequestBuilt.getId())).thenReturn(new LoaneeLoanDetail());
+            when(loaneeLoanDetailsOutputPort.save(any())).thenReturn(new LoaneeLoanDetail());
             when(organizationIdentityOutputPort.findOrganizationByName(any()))
                     .thenReturn(Optional.of(OrganizationIdentity.builder().id(testId).build()));
             when(loanMetricsOutputPort.findByOrganizationId(anyString()))

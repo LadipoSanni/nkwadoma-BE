@@ -796,6 +796,7 @@ public class LoanCalculationEngineTest {
                 .amountOutstanding(BigDecimal.valueOf(5000))
                 .amountRepaid(BigDecimal.ZERO)
                 .interestRate(0.03)
+                .loanStartDate(LocalDateTime.now())
                 .build();
 
         CohortLoanee cohortLoanee = CohortLoanee.builder().id("cohortLoaneeId").build();
@@ -887,6 +888,34 @@ public class LoanCalculationEngineTest {
         calculationEngine.calculateIncurredInterestPerRepayment(repayment, previousOutstanding, lastDate, loaneeLoanDetail);
 
         assertEquals(BigDecimal.ZERO.setScale(NUMBER_OF_DECIMAL_PLACE), repayment.getInterestIncurred());
+    }
+
+
+
+
+
+
+//    @Test
+//    void testCalculateInterest_withValidInputs() {
+//        BigDecimal outstanding = new BigDecimal("100000.00");
+//        double interestRate = 12.0; // 12% annually
+//        long daysBetween = 30;
+//
+//        BigDecimal expectedInterest = outstanding
+//                .multiply(BigDecimal.valueOf(0.12)) // annual rate
+//                .divide(BigDecimal.valueOf(365), NUMBER_OF_DECIMAL_PLACE + 4, RoundingMode.HALF_UP)
+//                .multiply(BigDecimal.valueOf(daysBetween))
+//                .setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
+//
+//        BigDecimal actual = calculationEngine.calculateInterest(interestRate, outstanding, daysBetween);
+//
+//        assertEquals(expectedInterest, actual);
+//    }
+
+    @Test
+    void testCalculateInterest_zeroDaysBetween_shouldReturnZero() {
+        BigDecimal actual = calculationEngine.calculateInterest(10.0, new BigDecimal("5000"), 0);
+        assertEquals(BigDecimal.ZERO.setScale(NUMBER_OF_DECIMAL_PLACE), actual);
     }
 
 }

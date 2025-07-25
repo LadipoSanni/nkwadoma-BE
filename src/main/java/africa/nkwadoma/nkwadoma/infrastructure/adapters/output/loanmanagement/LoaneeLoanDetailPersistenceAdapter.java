@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.LoanDetailEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoaneeLoanDetailEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoaneeLoanDetailMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanSummaryProjection;
@@ -26,7 +27,9 @@ public class LoaneeLoanDetailPersistenceAdapter implements LoaneeLoanDetailsOutp
     public LoaneeLoanDetail save(LoaneeLoanDetail loaneeLoanDetail) {
         LoaneeLoanDetailEntity loanDetailEntity =
                 loaneeLoanDetailMapper.toLoaneeLoanDetailsEnitity(loaneeLoanDetail);
+        log.info("The loanee loan detail entity {}", loanDetailEntity);
         loanDetailEntity = loaneeLoanDetailRepository.save(loanDetailEntity);
+        log.info("The saved loanee loan detail entity before mapping {}", loanDetailEntity);
         return loaneeLoanDetailMapper.toLoaneeLoanDetails(loanDetailEntity);
     }
 
@@ -56,6 +59,13 @@ public class LoaneeLoanDetailPersistenceAdapter implements LoaneeLoanDetailsOutp
         MeedlValidator.validateUUID(cohortId,CohortMessages.INVALID_COHORT_ID.getMessage());
         MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
         LoaneeLoanDetailEntity loaneeLoanDetailEntity = loaneeLoanDetailRepository.findByCohortAndLoaneeId(cohortId,loaneeId);
+        return loaneeLoanDetailMapper.toLoaneeLoanDetails(loaneeLoanDetailEntity);
+    }
+
+    @Override
+    public LoaneeLoanDetail findByLoanRequestId(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id,"Loan request id cannot be empty");
+        LoaneeLoanDetailEntity loaneeLoanDetailEntity = loaneeLoanDetailRepository.findByLoanRequestId(id);
         return loaneeLoanDetailMapper.toLoaneeLoanDetails(loaneeLoanDetailEntity);
     }
 }
