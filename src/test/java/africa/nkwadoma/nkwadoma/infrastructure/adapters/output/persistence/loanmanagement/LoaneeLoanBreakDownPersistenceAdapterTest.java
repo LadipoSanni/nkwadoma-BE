@@ -68,7 +68,7 @@ public class LoaneeLoanBreakDownPersistenceAdapterTest {
         userIdentity = UserIdentity.builder().id(id).email("lekan@gmail.com").firstName("qudus").lastName("lekan")
                 .createdBy(id).role(IdentityRole.LOANEE).build();
         loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(4000))
-                .initialDeposit(BigDecimal.valueOf(200)).build();
+                .initialDeposit(BigDecimal.valueOf(200)).loanStartDate(LocalDateTime.now()).createdAt(LocalDateTime.now()).build();
         cohort = TestData.createCohortData("X-men",id,id,null,id);
         try{
             userIdentity = identityOutputPort.save(userIdentity);

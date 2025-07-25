@@ -19,4 +19,5 @@ public interface RepaymentHistoryProjection {
     ModeOfPayment getModeOfPayment();
     Integer getFirstYear();
     Integer getLastYear();
+    BigDecimal getInterestIncurred();
 }

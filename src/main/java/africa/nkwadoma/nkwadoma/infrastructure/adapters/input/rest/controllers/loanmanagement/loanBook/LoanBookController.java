@@ -25,7 +25,7 @@ import java.io.File;
 import java.io.IOException;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ControllerConstant.*;
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.LOAN_BOOK_UPLOADED_SUCCESS;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.LOAN_BOOK_UPLOADED_PROCESSING;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.REPAYMENT_RECORD_BOOK_UPLOADED_SUCCESS;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.*;
 
@@ -49,17 +49,12 @@ public class LoanBookController {
                                                          @PathVariable String cohortId
                                                             ) throws MeedlException {
         log.info("Upload loan book. Api called .... ");
-//        LoanBook loanBook = loanBookRestMapper.map(cohortId, convertToTempFile(file), meedlUser.getClaimAsString("sub") );
-//        LoanBook loanBook = loanBookRestMapper.map(convertToTempFile(file));
+
         LoanBook loanBook = mapLoanBookRequest(meedlUser, file, cohortId);
-//        loanBook.setLoanProductId(loanProductId);
-        LoanBook loanBookReturned = loanBookUseCase.upLoadUserData(loanBook);
-        LoanBookResponse loanBookResponse = new LoanBookResponse();
-        loanBookResponse.setCohort(loanBookReturned.getCohort());
-        loanBookResponse.setLoanees(loanBookReturned.getCohortLoanees());
-        ApiResponse<LoanBookResponse> apiResponse = ApiResponse.<LoanBookResponse>builder()
-                .data(loanBookResponse)
-                .message(LOAN_BOOK_UPLOADED_SUCCESS)
+        loanBook = loanBookUseCase.upLoadUserData(loanBook);
+        log.info("The loan book returned after processing {}", loanBook);
+        ApiResponse<String> apiResponse = ApiResponse.<String>builder()
+                .message(LOAN_BOOK_UPLOADED_PROCESSING)
                 .statusCode(HttpStatus.CREATED.toString())
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);

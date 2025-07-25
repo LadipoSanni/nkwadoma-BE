@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Setter
 @Getter
@@ -18,14 +19,18 @@ public class LoaneeLoanDetail {
     private String id;
     private BigDecimal tuitionAmount;
     private BigDecimal initialDeposit;
-    private BigDecimal amountRequested;
+    private BigDecimal amountRequested ;
     private BigDecimal amountReceived = BigDecimal.ZERO;
-    private BigDecimal amountApproved;
-    private BigDecimal amountRepaid;
-    private BigDecimal amountOutstanding;
+    private BigDecimal amountApproved = BigDecimal.ZERO;
+    private BigDecimal amountRepaid = BigDecimal.ZERO;
+    private BigDecimal amountOutstanding = BigDecimal.ZERO;
     private double interestRate;
     @JsonSerialize(using = com.fasterxml.jackson.databind.ser.std.ToStringSerializer.class)
     private BigDecimal interestIncurred = BigDecimal.ZERO;
+
+    private LocalDateTime loanStartDate;
+    private LocalDateTime updatedAt;
+    private LocalDateTime createdAt;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateNegativeAmount(initialDeposit,"Initial deposit");

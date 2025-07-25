@@ -63,70 +63,99 @@ public class CalculationEngine implements CalculationEngineUseCase {
         }
     }
 
-    public BigDecimal calculateTotalAmountRepaid(List<RepaymentHistory> repayments) throws MeedlException {
-        if (repayments == null || repayments.isEmpty()) {
-            log.warn("Repayments was null when calculating total amount repaid");
-            return BigDecimal.ZERO;
-        }
-        BigDecimal totalRepaymentAmount = BigDecimal.ZERO;
-
-        for (RepaymentHistory repayment : repayments) {
-            validationForCalculatingTotalAmountRepaid(repayment);
-             totalRepaymentAmount = totalRepaymentAmount.add(repayment.getAmountPaid());
-        }
-        repayments.get(0).setTotalAmountRepaid(totalRepaymentAmount);
-        return totalRepaymentAmount;
-    }
-
     @Override
     public void calculateLoaneeLoanRepaymentHistory(
             List<RepaymentHistory> repaymentHistories,
             Loanee loanee,
             Cohort cohort
     ) throws MeedlException {
+        if (isSkipableCalculation(repaymentHistories, loanee)) return;
 
-        if (ObjectUtils.isEmpty(repaymentHistories) || repaymentHistories.isEmpty()) {
-            return;
-        }
-        if (ObjectUtils.isEmpty(loanee)){
-            return;
-        }
         LoaneeLoanDetail loaneeLoanDetail = getLoaneeLoanDetail(loanee.getId(), cohort.getId());
-
         List<RepaymentHistory> previousRepaymentHistory = repaymentHistoryOutputPort.findAllRepaymentHistoryForLoan(loanee.getId(), cohort.getId());
-        repaymentHistories = combinePreviousAndNewRepaymentHistory(previousRepaymentHistory, repaymentHistories);
-        repaymentHistories = sortRepaymentsByDateTimeAscending(repaymentHistories);
+        List<RepaymentHistory> allRepayments = combineAndSortRepaymentHistories(repaymentHistories, previousRepaymentHistory);
 
-        BigDecimal runningTotal = BigDecimal.ZERO;;
-        LocalDateTime lastDate = repaymentHistories.get(0).getPaymentDateTime();
+        processRepaymentHistoryCalculations(allRepayments, loanee, cohort, loaneeLoanDetail);
+
+        finalizeRepaymentHistoryCalculation(allRepayments, previousRepaymentHistory, loaneeLoanDetail);
+    }
+    private void finalizeRepaymentHistoryCalculation(
+            List<RepaymentHistory> currentRepayments,
+            List<RepaymentHistory> previousRepayments,
+            LoaneeLoanDetail loaneeLoanDetail
+    ) {
+        loaneeLoanDetail.setUpdatedAt(LocalDateTime.now());
+        LoaneeLoanDetail updatedLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
+        log.info("Loanee loan details updated with repayment calculations. {}", updatedLoaneeLoanDetail);
+        updateLoaneeRepaymentHistory(currentRepayments, previousRepayments);
+        log.info("Updated Loanee loan detail after repayment {}", updatedLoaneeLoanDetail);
+    }
+
+    private void updateLoaneeLoanDetailWithRunningTotals(
+            LoaneeLoanDetail loaneeLoanDetail,
+            BigDecimal outstanding,
+            BigDecimal repaid
+    ) {
+        loaneeLoanDetail.setAmountOutstanding(decimalPlaceRoundUp(outstanding));
+        loaneeLoanDetail.setAmountRepaid(decimalPlaceRoundUp(repaid));
+    }
+
+    private void updateRepaymentMeta(RepaymentHistory repayment, Loanee loanee, Cohort cohort) {
+        repayment.setCohort(cohort);
+        repayment.setLoanee(loanee);
+    }
+
+    private boolean isSkipableCalculation(List<RepaymentHistory> repaymentHistories, Loanee loanee) {
+        return ObjectUtils.isEmpty(repaymentHistories) || repaymentHistories.isEmpty() || ObjectUtils.isEmpty(loanee);
+    }
+    private void processRepaymentHistoryCalculations(
+            List<RepaymentHistory> repaymentHistories,
+            Loanee loanee,
+            Cohort cohort,
+            LoaneeLoanDetail loaneeLoanDetail
+    ) throws MeedlException {
+
+        BigDecimal runningTotal = BigDecimal.ZERO;
+        BigDecimal totalInterestIncurred = BigDecimal.ZERO;
+        LocalDateTime lastDate = loaneeLoanDetail.getLoanStartDate();
         BigDecimal previousOutstandingAmount = null;
 
+        log.info("Total interest incurred before repayment history calculations begin {}", totalInterestIncurred);
         for (RepaymentHistory repayment : repaymentHistories) {
             validateAmountRepaid(repayment);
             previousOutstandingAmount = getPreviousAmountOutstanding(previousOutstandingAmount, loaneeLoanDetail);
             log.info("Outstanding before processing this repayment {} ", previousOutstandingAmount);
 
             runningTotal = calculateTotalAmountRepaidPerRepayment(repayment, runningTotal);
-            calculateIncurredInterestPerRepayment(repayment, previousOutstandingAmount, lastDate, loaneeLoanDetail);
+
+            BigDecimal interestIncurred = calculateIncurredInterestPerRepayment(repayment, previousOutstandingAmount, lastDate, loaneeLoanDetail);
+            totalInterestIncurred = totalInterestIncurred.add(interestIncurred);
+
             calculateOutstandingPerRepayment(previousOutstandingAmount, repayment);
 
-            repayment.setCohort(cohort);
-            repayment.setLoanee(loanee);
+            updateRepaymentMeta(repayment, loanee, cohort);
             lastDate = repayment.getPaymentDateTime();
             previousOutstandingAmount = repayment.getAmountOutstanding();
-            loaneeLoanDetail.setAmountOutstanding(decimalPlaceRoundUp(previousOutstandingAmount));
-            loaneeLoanDetail.setAmountRepaid(decimalPlaceRoundUp(runningTotal));
+
+            updateLoaneeLoanDetailWithRunningTotals(loaneeLoanDetail, previousOutstandingAmount, runningTotal);
             log.info("Outstanding per payment {}", previousOutstandingAmount);
         }
-        calculateTotalInterestIncurred(loaneeLoanDetail , repaymentHistories);
-        log.info("The repayment histories after adding up total amount repaid ----> {}", repaymentHistories);
-        log.info("Last payment date {} , total amount outstanding {}, total amount repaid {}", lastDate, previousOutstandingAmount, runningTotal);
 
-        LoaneeLoanDetail updatedLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
-        log.info("Loanee loan details updated with repayment calculations. {}", updatedLoaneeLoanDetail);
-        updateLoaneeRepaymentHistory(repaymentHistories, previousRepaymentHistory);
-        log.info("Updated Loanee loan detail after repayment {}", updatedLoaneeLoanDetail);
+        calculateTotalInterestIncurred(loaneeLoanDetail, totalInterestIncurred, lastDate);
+    }
 
+    private BigDecimal calculateInterestIncurredFromLastPaymentTillDate(LoaneeLoanDetail loaneeLoanDetail, LocalDateTime lastDate) {
+        long daysBetween = calculateDaysBetween(lastDate, LocalDateTime.now());
+        BigDecimal incurredInterest = calculateInterest(loaneeLoanDetail.getInterestRate(), loaneeLoanDetail.getAmountOutstanding(), daysBetween);
+        log.info("Interest incurred from last payment till today {}, \n ------------------------------> outstanding before adding the interest incurred from last payment {}, ------------------>    total days between from last payment till now is {}", incurredInterest, loaneeLoanDetail.getAmountOutstanding(), daysBetween);
+        return incurredInterest;
+    }
+
+
+    private List<RepaymentHistory> combineAndSortRepaymentHistories(List<RepaymentHistory> repaymentHistories, List<RepaymentHistory> previousRepaymentHistory) throws MeedlException {
+        repaymentHistories = combinePreviousAndNewRepaymentHistory(previousRepaymentHistory, repaymentHistories);
+        repaymentHistories = sortRepaymentsByDateTimeAscending(repaymentHistories);
+        return repaymentHistories;
     }
 
     private void updateLoaneeRepaymentHistory(List<RepaymentHistory> currentRepaymentHistories, List<RepaymentHistory> previousRepaymentHistory) {
@@ -146,15 +175,18 @@ public class CalculationEngine implements CalculationEngineUseCase {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private void calculateTotalInterestIncurred(LoaneeLoanDetail loaneeLoanDetail, List<RepaymentHistory> repaymentHistories) {
-        BigDecimal totalInterestIncurred = repaymentHistories.stream()
-                                                    .map(RepaymentHistory::getInterestIncurred)
-                                                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+    private void calculateTotalInterestIncurred(LoaneeLoanDetail loaneeLoanDetail, BigDecimal totalInterestIncurred, LocalDateTime lastDate) {
+
+        BigDecimal interestIncurredFromLastPaymentTillDate = calculateInterestIncurredFromLastPaymentTillDate(loaneeLoanDetail, lastDate);
+        loaneeLoanDetail.setAmountOutstanding(loaneeLoanDetail.getAmountOutstanding().add(interestIncurredFromLastPaymentTillDate));
+        log.info("Outstanding loan amount after adding interest incurred from last payment till date is {}", loaneeLoanDetail.getAmountOutstanding());
+
+        totalInterestIncurred = totalInterestIncurred.add(interestIncurredFromLastPaymentTillDate);
         loaneeLoanDetail.setInterestIncurred(decimalPlaceRoundUp(totalInterestIncurred));
-        log.info("Total interest incurred {}", loaneeLoanDetail.getInterestIncurred());
+        log.info("Total interest incurred in loanee loan details after all calculations are done ===> {}", loaneeLoanDetail.getInterestIncurred());
     }
 
-    private BigDecimal getPreviousAmountOutstanding(BigDecimal previousOutstanding, LoaneeLoanDetail loaneeLoanDetail) {
+    BigDecimal getPreviousAmountOutstanding(BigDecimal previousOutstanding, LoaneeLoanDetail loaneeLoanDetail) {
         if (ObjectUtils.isNotEmpty(previousOutstanding)){
             log.info("Getting the previous amount outstanding as the previous in the calculation {}", previousOutstanding);
             return decimalPlaceRoundUp(previousOutstanding);
@@ -175,12 +207,13 @@ public class CalculationEngine implements CalculationEngineUseCase {
         repaymentHistory.setAmountOutstanding(newOutstandingAmount);
     }
 
-    public void calculateIncurredInterestPerRepayment(RepaymentHistory repayment, BigDecimal previousOutstandingAmount, LocalDateTime lastDate, LoaneeLoanDetail loaneeLoanDetail) {
+    public BigDecimal calculateIncurredInterestPerRepayment(RepaymentHistory repayment, BigDecimal previousOutstandingAmount, LocalDateTime lastDate, LoaneeLoanDetail loaneeLoanDetail) {
         long daysBetween = calculateDaysBetween(lastDate, repayment.getPaymentDateTime());
         log.info("How many days a between the last payment {} \n -------------- >>>>>>>> interest rate {}", daysBetween, loaneeLoanDetail.getInterestRate());
         BigDecimal incurredInterest = calculateInterest(loaneeLoanDetail.getInterestRate(), previousOutstandingAmount, daysBetween);
         log.info("Previous out standing amount after calculating interest incurred {} outstanding is {}", incurredInterest, previousOutstandingAmount);
         repayment.setInterestIncurred(incurredInterest);
+        return incurredInterest;
     }
 
     private long calculateDaysBetween(LocalDateTime lastDate, LocalDateTime currentDate) {
@@ -189,8 +222,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
     }
 
     public BigDecimal calculateInterest(double interestRate, BigDecimal outstanding, long daysBetween) {
-//        BigDecimal dailyRate = BigDecimal.valueOf(interestRate).divide(BigDecimal.valueOf(DAYS_IN_MONTH), NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
-//        log.info("What is daily rate ==== {} interest rate is at {}",dailyRate, interestRate);
+
         BigDecimal interestRateInPercent = BigDecimal.valueOf(interestRate)
                 .divide(BigDecimal.valueOf(100), NUMBER_OF_DECIMAL_PLACE + 4, RoundingMode.HALF_UP) ;
         BigDecimal dailyRate = interestRateInPercent.divide(BigDecimal.valueOf(DAYS_IN_YEAR), NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);

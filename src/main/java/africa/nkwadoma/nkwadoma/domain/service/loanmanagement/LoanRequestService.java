@@ -20,7 +20,6 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
-import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -260,9 +259,15 @@ public class LoanRequestService implements LoanRequestUseCase {
 //        foundLoanRequest.setLoaneeId(foundLoanRequest.getLoaneeId());
         foundLoanRequest = loanRequestMapper.updateLoanRequest(loanRequest, foundLoanRequest);
         loanRequestOutputPort.save(foundLoanRequest);
-
+        setLoaneeLoanDetailInterestRate(foundLoanRequest, loanProduct);
         foundLoanRequest.setLoanProduct(loanProduct);
         foundLoanRequest.setLoaneeId(loaneeId);
         return foundLoanRequest;
+    }
+
+    private void setLoaneeLoanDetailInterestRate(LoanRequest foundLoanRequest, LoanProduct loanProduct) throws MeedlException {
+        LoaneeLoanDetail loaneeLoanDetail = loaneeLoanDetailsOutputPort.findByLoanRequestId(foundLoanRequest.getId());
+        loaneeLoanDetail.setInterestRate(loanProduct.getInterestRate());
+        loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
     }
 }
