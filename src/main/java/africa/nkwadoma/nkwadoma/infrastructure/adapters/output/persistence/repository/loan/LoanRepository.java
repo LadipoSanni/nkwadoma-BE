@@ -111,7 +111,6 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           c.name as cohortName, c.startDate as cohortStartDate, loe.dateTimeOffered as offerDate,
           p.name as programName,lr.loanAmountApproved as loanAmountApproved,c.tuitionAmount as tuitionAmount
 
-    
           from LoanEntity le
           join LoanOfferEntity loe on loe.id = le.loanOfferId
           join LoanRequestEntity lr on lr.id = loe.id
