@@ -33,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -832,6 +833,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
 
+    @Scheduled(cron = "0 0 0 L * ?")
     @Override
     public List<LoaneeLoanDetail> simulateInterestIncurred() throws MeedlException {
         List<LoaneeLoanDetail> loaneeLoanDetails =  loaneeLoanDetailsOutputPort.findAllLoaneeLoanDetail();
