@@ -1,7 +1,9 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanmanagement.loancalculation;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loancalculation.CalculationEngineUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoanDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramLoanDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.RepaymentHistoryOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanCalculationMessages;
@@ -13,6 +15,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.ProgramLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.CalculationContext;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanPeriodRecord;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +40,8 @@ public class CalculationEngine implements CalculationEngineUseCase {
     private final int DAYS_IN_YEAR = 365;
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
     private final LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
+    private final CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
+    private final ProgramLoanDetailOutputPort programLoanDetailOutputPort;
 
     @Override
     public List<RepaymentHistory> sortRepaymentsByDateTimeAscending(List<RepaymentHistory> repayments) throws MeedlException {
@@ -73,46 +78,117 @@ public class CalculationEngine implements CalculationEngineUseCase {
             Cohort cohort
     ) throws MeedlException {
         if (isSkipableCalculation(repaymentHistories, loanee)) return;
+        CalculationContext context = CalculationContext.builder().cohort(cohort).loanee(loanee).build();
 
-        LoaneeLoanDetail loaneeLoanDetail = getLoaneeLoanDetail(loanee.getId(), cohort.getId());
+        LoaneeLoanDetail loaneeLoanDetail = getLoaneeLoanDetail(context);
         List<RepaymentHistory> previousRepaymentHistory = repaymentHistoryOutputPort.findAllRepaymentHistoryForLoan(loanee.getId(), cohort.getId());
         List<RepaymentHistory> allRepayments = combineAndSortRepaymentHistories(repaymentHistories, previousRepaymentHistory);
 
         processRepaymentHistoryCalculations(allRepayments, loanee, cohort, loaneeLoanDetail);
 
-        finalizeRepaymentHistoryCalculation(allRepayments, previousRepaymentHistory, loaneeLoanDetail);
-        calculateLoaneeLoanDetails(cohort.getId(), currentAmountRepaid);
+        loaneeLoanDetail = finalizeRepaymentHistoryCalculation(allRepayments, previousRepaymentHistory, loaneeLoanDetail);
+        context.setLoaneeLoanDetail(loaneeLoanDetail);
+        updateLoanDetails(context);
     }
-    private void calculateLoaneeLoanDetails(String cohortId,BigDecimal currentAmountPaid) throws MeedlException {
-
-        CohortLoanDetail cohortLoanDetail = updateCohortLoanDetail(cohortId, currentAmountPaid);
-        ProgramLoanDetail programLoanDetail = updateProgramLoanDetail(cohortLoanDetail, currentAmountPaid);
+    private void updateLoanDetails(CalculationContext context) throws MeedlException {
+        calculateCohortLoanDetail(context);
+        ProgramLoanDetail programLoanDetail = updateProgramLoanDetail(context);
 
         OrganizationLoanDetail organizationLoanDetail = updateOrganizationLoanDetail(programLoanDetail, currentAmountPaid);
         log.info("Organization loan details after saving {}",organizationLoanDetail);
 
     }
-    private CohortLoanDetail updateCohortLoanDetail(String cohortId, BigDecimal currentAmountPaid) throws MeedlException {
+    private void calculateCohortLoanDetail(CalculationContext context) throws MeedlException {
         log.info("About to Update Cohort loan detail after repayment ");
-        CohortLoanDetail cohortLoanDetail = cohortLoanDetailOutputPort.findByCohortId(cohortId);
-        log.info("cohort loan detail found {}", cohortLoanDetail);
-        cohortLoanDetail.setTotalAmountRepaid(cohortLoanDetail.getTotalAmountRepaid().add(currentAmountPaid));
-        cohortLoanDetail.setTotalOutstandingAmount(cohortLoanDetail.getTotalOutstandingAmount().subtract(currentAmountPaid));
-        log.info("Updated Cohort loan detail after repayment  {}", cohortLoanDetail);
+        CohortLoanDetail cohortLoanDetail = cohortLoanDetailOutputPort.findByCohortId(context.getCohort().getId());
+        log.info("Cohort loan detail found {} \n  ---------------------> previous cohort total amount outstanding {}", cohortLoanDetail, cohortLoanDetail.getTotalOutstandingAmount());
+
+        context.setCohortLoanDetail(cohortLoanDetail);
+        BigDecimal newCohortTotalOutstandingAmount = calculateCohortTotalOutstandingAmount(context);
+        cohortLoanDetail.setTotalOutstandingAmount(newCohortTotalOutstandingAmount);
+        log.info("new cohort total outstanding amount {}, \n -------------------------------> Previous cohort total amount repaid {} ", newCohortTotalOutstandingAmount,  cohortLoanDetail.getTotalAmountRepaid());
+
+        BigDecimal newCohortTotalAmountRepaid = calculateCohortTotalAmountRepaid(context);
+        cohortLoanDetail.setTotalAmountRepaid(newCohortTotalAmountRepaid);
+        log.info("New cohort total amount repaid {} \n --------------------------------> previous cohort interest incurred {} ", newCohortTotalAmountRepaid, cohortLoanDetail.getTotalInterestIncurred());
+
+        BigDecimal newCohortTotalInterestIncurred = calculateCohortTotalInterestIncurred(context);
+        cohortLoanDetail.setTotalInterestIncurred(newCohortTotalInterestIncurred);
+        log.info("New Cohort total interest incurred  {}", newCohortTotalInterestIncurred);
+
         cohortLoanDetail = cohortLoanDetailOutputPort.save(cohortLoanDetail);
         log.info("cohort loan details after saving {}",cohortLoanDetail);
-        return cohortLoanDetail;
     }
-    private ProgramLoanDetail updateProgramLoanDetail(CohortLoanDetail cohortLoanDetail, BigDecimal currentAmountPaid) throws MeedlException {
+
+    private BigDecimal calculateCohortTotalInterestIncurred(CalculationContext context) {
+        return context.getCohortLoanDetail()
+                .getTotalInterestIncurred()
+                .subtract(context.getPreviousTotalInterestIncurred())
+                .add(context.getLoaneeLoanDetail().getInterestIncurred());
+    }
+
+    private BigDecimal calculateCohortTotalAmountRepaid(CalculationContext context) {
+        return context.getCohortLoanDetail()
+                .getTotalAmountRepaid()
+                .subtract(context.getPreviousTotalAmountPaid())
+                .add(context.getLoaneeLoanDetail().getAmountRepaid());
+    }
+
+    private BigDecimal calculateCohortTotalOutstandingAmount(CalculationContext context) {
+        return context.getCohortLoanDetail()
+                    .getTotalOutstandingAmount()
+                    .subtract(context.getPreviousTotalInterestIncurred())
+                    .add(context.getPreviousTotalAmountPaid())
+                    .add(context.getLoaneeLoanDetail().getInterestIncurred())
+                    .subtract(context.getLoaneeLoanDetail().getAmountRepaid());
+    }
+
+
+    private BigDecimal calculateProgramTotalInterestIncurred(CalculationContext context) {
+        return context.getCohortLoanDetail()
+                .getTotalInterestIncurred()
+                .subtract(context.getPreviousTotalInterestIncurred())
+                .add(context.getLoaneeLoanDetail().getInterestIncurred());
+    }
+
+    private BigDecimal calculateProgramTotalAmountRepaid(CalculationContext context) {
+        return context.getCohortLoanDetail()
+                .getTotalAmountRepaid()
+                .subtract(context.getPreviousTotalAmountPaid())
+                .add(context.getLoaneeLoanDetail().getAmountRepaid());
+    }
+
+    private BigDecimal calculateProgramTotalOutstandingAmount(CalculationContext context) {
+        return context.getProgramLoanDetail()
+                .getTotalOutstandingAmount()
+                .subtract(context.getPreviousTotalInterestIncurred())
+                .add(context.getPreviousTotalAmountPaid())
+                .add(context.getCohortLoanDetail().getTotalInterestIncurred())
+                .subtract(context.getLoaneeLoanDetail().getAmountRepaid());
+    }
+
+    private ProgramLoanDetail updateProgramLoanDetail(CalculationContext context) throws MeedlException {
+
         log.info("About to Update Program loan detail after repayment ");
-        ProgramLoanDetail programLoanDetail = programLoanDetailOutputPort.findByProgramId(cohortLoanDetail.getCohort().getProgramId());
-        log.info("program loan detail found {}", programLoanDetail);
-        programLoanDetail.setTotalAmountRepaid(programLoanDetail.getTotalAmountRepaid().add(currentAmountPaid));
-        programLoanDetail.setTotalOutstandingAmount(programLoanDetail.getTotalOutstandingAmount().subtract(currentAmountPaid));
-        log.info("Updated Program loan detail after repayment  {}", programLoanDetail);
+        ProgramLoanDetail programLoanDetail = programLoanDetailOutputPort.findByProgramId(context.getCohortLoanDetail().getCohort().getProgramId());
+        log.info("Program loan detail found {} \n  ---------------------> previous program total amount outstanding {}", programLoanDetail, programLoanDetail.getTotalOutstandingAmount());
+
+        context.setProgramLoanDetail(programLoanDetail);
+        BigDecimal newProgramTotalOutstandingAmount = calculateProgramTotalOutstandingAmount(context);
+        programLoanDetail.setTotalOutstandingAmount(newProgramTotalOutstandingAmount);
+        log.info("new program total outstanding amount {}, \n -------------------------------> Previous program total amount repaid {} ", newProgramTotalOutstandingAmount,  programLoanDetail.getTotalAmountRepaid());
+
+        BigDecimal newProgramTotalAmountRepaid = calculateProgramTotalAmountRepaid(context);
+        programLoanDetail.setTotalAmountRepaid(newProgramTotalAmountRepaid);
+        log.info("New program total amount repaid {} \n --------------------------------> previous program interest incurred {} ", newProgramTotalAmountRepaid, programLoanDetail.getTotalInterestIncurred());
+
+        BigDecimal newProgramTotalInterestIncurred = calculateProgramTotalInterestIncurred(context);
+        programLoanDetail.setTotalInterestIncurred(newProgramTotalInterestIncurred);
+        log.info("New program total interest incurred  {}", newProgramTotalInterestIncurred);
+
         programLoanDetail = programLoanDetailOutputPort.save(programLoanDetail);
-        log.info("Program loan details after saving {}",programLoanDetail);
-        return programLoanDetail;
+        log.info("program loan details after saving {}",programLoanDetail);
+
     }
     private OrganizationLoanDetail updateOrganizationLoanDetail(ProgramLoanDetail programLoanDetail, BigDecimal currentAmountPaid) throws MeedlException {
         log.info("About to Update Organization loan detail after repayment ");
@@ -125,7 +201,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
         organizationLoanDetail = organizationLoanDetailOutputPort.save(organizationLoanDetail);
         return organizationLoanDetail;
     }
-    private void finalizeRepaymentHistoryCalculation(
+    private LoaneeLoanDetail finalizeRepaymentHistoryCalculation(
             List<RepaymentHistory> currentRepayments,
             List<RepaymentHistory> previousRepayments,
             LoaneeLoanDetail loaneeLoanDetail
@@ -134,7 +210,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
         LoaneeLoanDetail updatedLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
         log.info("Loanee loan details updated with repayment calculations. {}", updatedLoaneeLoanDetail);
         updateLoaneeRepaymentHistory(currentRepayments, previousRepayments);
-        log.info("Updated Loanee loan detail after repayment {}", updatedLoaneeLoanDetail);
+        return updatedLoaneeLoanDetail;
     }
 
     private void updateLoaneeLoanDetailWithRunningTotals(
@@ -241,9 +317,12 @@ public class CalculationEngine implements CalculationEngineUseCase {
         return decimalPlaceRoundUp(loaneeLoanDetail.getAmountReceived());
     }
 
-    private  LoaneeLoanDetail getLoaneeLoanDetail(String loaneeId, String cohortId) throws MeedlException {
-        CohortLoanee cohortLoanee = cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(loaneeId, cohortId);
-        return loaneeLoanDetailsOutputPort.findByCohortLoaneeId(cohortLoanee.getId());
+    private  LoaneeLoanDetail getLoaneeLoanDetail(CalculationContext context) throws MeedlException {
+        CohortLoanee cohortLoanee = cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(context.getLoanee().getId(), context.getCohort().getId());
+        LoaneeLoanDetail loaneeLoanDetail = loaneeLoanDetailsOutputPort.findByCohortLoaneeId(cohortLoanee.getId());
+        context.setPreviousTotalAmountPaid(loaneeLoanDetail.getAmountRepaid());
+        context.setPreviousTotalInterestIncurred(loaneeLoanDetail.getInterestIncurred());
+        return loaneeLoanDetail;
     }
 
     private void calculateOutstandingPerRepayment(BigDecimal previousOutstandingAmount,RepaymentHistory repaymentHistory) {

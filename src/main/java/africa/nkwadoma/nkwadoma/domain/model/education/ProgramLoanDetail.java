@@ -22,6 +22,7 @@ public class ProgramLoanDetail {
     private BigDecimal totalOutstandingAmount = BigDecimal.ZERO;
     private BigDecimal totalAmountReceived = BigDecimal.ZERO;
     private BigDecimal totalAmountRepaid = BigDecimal.ZERO;
+    private BigDecimal totalInterestIncurred = BigDecimal.ZERO;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(program, ProgramMessages.PROGRAM_CANNOT_BE_EMPTY.getMessage());

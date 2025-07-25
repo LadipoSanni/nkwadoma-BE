@@ -20,7 +20,8 @@ public class CohortLoanDetail {
     private BigDecimal totalAmountRequested = BigDecimal.ZERO;
     private BigDecimal totalOutstandingAmount = BigDecimal.ZERO;
     private BigDecimal totalAmountReceived  = BigDecimal.ZERO;
-    private BigDecimal totalAmountRepaid   = BigDecimal.ZERO;
+    private BigDecimal totalAmountRepaid = BigDecimal.ZERO;
+    private BigDecimal totalInterestIncurred  = BigDecimal.ZERO;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(cohort, CohortMessages.CREATED_BY_CANNOT_BE_EMPTY.getMessage());
