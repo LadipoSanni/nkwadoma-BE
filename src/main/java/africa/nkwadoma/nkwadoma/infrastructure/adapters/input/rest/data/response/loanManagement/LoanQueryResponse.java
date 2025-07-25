@@ -44,4 +44,5 @@ public class LoanQueryResponse {
     private UserIdentityResponse userIdentity;
     private NextOfKinResponse nextOfKin;
     private List<LoaneeLoanBreakDownResponse> loaneeLoanBreakDowns;
+
 }
