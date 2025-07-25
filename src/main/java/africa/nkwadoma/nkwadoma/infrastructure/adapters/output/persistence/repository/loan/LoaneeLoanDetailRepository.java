@@ -44,4 +44,16 @@ public interface LoaneeLoanDetailRepository extends JpaRepository<LoaneeLoanDeta
           where cohortLoanee.cohort.id = :cohortId and cohortLoanee.loanee.id = :loaneeId
      """)
     LoaneeLoanDetailEntity findByCohortAndLoaneeId(@Param("cohortId") String cohortId, @Param("loaneeId")String loaneeId);
+
+    @Query("""
+    SELECT loaneeLoanDetail
+    
+          from CohortLoaneeEntity cohortLoanee
+          join LoaneeLoanDetailEntity loaneeLoanDetail on loaneeLoanDetail.id = cohortLoanee.loaneeLoanDetail.id 
+          join LoanReferralEntity lre on lre.cohortLoanee.id = cohortLoanee.id
+          join LoanRequestEntity lr on lr.id = lre.id
+              
+          where lr.id = :id             
+    """)
+    LoaneeLoanDetailEntity findByLoanRequestId(@Param("id") String id);
 }
