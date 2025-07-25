@@ -23,5 +23,6 @@ public interface RepaymentHistoryMapper {
     @Mapping(target = "firstYear", source = "firstYear")
     @Mapping(target = "lastYear", source = "lastYear")
     @Mapping(target = "id", source = "id")
+    @Mapping(target = "interestIncurred", source = "interestIncurred")
     RepaymentHistory mapProjecttionToRepaymentHistory(RepaymentHistoryProjection repaymentHistoryProjection);
 }

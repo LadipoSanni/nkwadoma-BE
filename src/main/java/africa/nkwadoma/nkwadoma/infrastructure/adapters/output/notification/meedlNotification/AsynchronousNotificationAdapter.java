@@ -119,7 +119,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                 .senderMail(foundActor.getEmail())
                 .senderFullName(foundActor.getFirstName())
                 .contentDetail(validationErrorMessage.toString())
-                .notificationFlag(NotificationFlag.LOANEE_DATA_UPLOAD_FAILURE)
+                .notificationFlag(NotificationFlag.REPAYMENT_UPLOAD_FAILURE)
                 .build();
 
         log.info("Failure notification sent to the actor with email : {} ", foundActor.getEmail());
@@ -139,7 +139,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                 .senderMail(foundActor.getEmail())
                 .senderFullName(foundActor.getFirstName())
                 .contentDetail(validationErrorMessage.toString())
-                .notificationFlag(NotificationFlag.REPAYMENT_UPLOAD_FAILURE)
+                .notificationFlag(NotificationFlag.LOANEE_DATA_UPLOAD_FAILURE)
                 .build();
 
         log.info("Failure notification sent to the actor with email : {} ", foundActor.getEmail());
@@ -190,7 +190,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
     private void notifyPortfolioManagers(MeedlNotification meedlNotification) throws MeedlException {
         for (UserIdentity userIdentity : userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER)) {
             meedlNotification.setUser(userIdentity);
-            log.info("Notifying portfolio manager on financier ");
+            log.info("Notifying portfolio manager on {} ", meedlNotification.getTitle());
         meedlNotificationUsecase.sendNotification(meedlNotification);
         }
     }
