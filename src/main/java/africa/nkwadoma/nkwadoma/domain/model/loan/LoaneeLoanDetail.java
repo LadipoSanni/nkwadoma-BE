@@ -18,11 +18,11 @@ public class LoaneeLoanDetail {
     private String id;
     private BigDecimal tuitionAmount;
     private BigDecimal initialDeposit;
-    private BigDecimal amountRequested;
+    private BigDecimal amountRequested ;
     private BigDecimal amountReceived = BigDecimal.ZERO;
-    private BigDecimal amountApproved;
-    private BigDecimal amountRepaid;
-    private BigDecimal amountOutstanding;
+    private BigDecimal amountApproved = BigDecimal.ZERO;
+    private BigDecimal amountRepaid = BigDecimal.ZERO;
+    private BigDecimal amountOutstanding = BigDecimal.ZERO;
     private double interestRate;
     private BigDecimal interestIncurred = BigDecimal.ZERO;
 
