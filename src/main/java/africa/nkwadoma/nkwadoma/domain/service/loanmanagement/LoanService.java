@@ -177,15 +177,15 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }
         Loan savedLoan = loanOutputPort.save(loan);
         log.info("Saved loan: {}", savedLoan);
-        updateLoanDetail(loanOffer);
+        updateLoanDetail(loanOffer,savedLoan.getStartDate());
         String referBy = loanOutputPort.findLoanReferal(savedLoan.getId());
         updateLoanDisbursalOnLoamMatrics(referBy);
         updateInvestmentVehicleTalentFunded(savedLoan);
         return savedLoan;
     }
 
-    private void updateLoanDetail(LoanOffer loanOffer) throws MeedlException {
-        updateLoaneeLoanDetail(loanOffer);
+    private void updateLoanDetail(LoanOffer loanOffer,LocalDateTime localDateTime) throws MeedlException {
+        updateLoaneeLoanDetail(loanOffer,localDateTime);
 
         updateCohortLoanDetail(loanOffer);
 
@@ -236,12 +236,13 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
                 cohortLoanDetail.getCohort().getProgramId(),cohortLoanDetail.getCohort().getOrganizationId());
     }
 
-    private void updateLoaneeLoanDetail(LoanOffer loanOffer) throws MeedlException {
+    private void updateLoaneeLoanDetail(LoanOffer loanOffer,LocalDateTime localDateTime) throws MeedlException {
         LoaneeLoanDetail loaneeLoanDetail =
                 loaneeLoanDetailsOutputPort.findByCohortLoaneeId(loanOffer.getCohortLoaneeId());
 
         loaneeLoanDetail.setAmountReceived(loanOffer.getAmountApproved());
         loaneeLoanDetail.setAmountOutstanding(loanOffer.getAmountApproved());
+        loaneeLoanDetail.setLoanStartDate(localDateTime);
         loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
     }
 

@@ -61,4 +61,11 @@ public class LoaneeLoanDetailPersistenceAdapter implements LoaneeLoanDetailsOutp
         LoaneeLoanDetailEntity loaneeLoanDetailEntity = loaneeLoanDetailRepository.findByCohortAndLoaneeId(cohortId,loaneeId);
         return loaneeLoanDetailMapper.toLoaneeLoanDetails(loaneeLoanDetailEntity);
     }
+
+    @Override
+    public LoaneeLoanDetail findByLoanRequestId(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id,"Loan request id cannot be empty");
+        LoaneeLoanDetailEntity loaneeLoanDetailEntity = loaneeLoanDetailRepository.findByLoanRequestId(id);
+        return loaneeLoanDetailMapper.toLoaneeLoanDetails(loaneeLoanDetailEntity);
+    }
 }
