@@ -50,6 +50,7 @@ public interface LoanMapper {
     @Mapping(target = "loanAmountOutstanding", source = "amountOutstanding")
     @Mapping(target = "loanAmountRepaid", source = "amountRepaid")
     @Mapping(target = "interestRate", source = "interestRate")
+    @Mapping(target = "interestIncurred", source = "interestIncurred")
     Loan mapProjectionToLoan(LoanProjection loanProjection);
 
     LoanDetailSummary toLoanDetailSummary(LoanSummaryProjection loanSummaryProjection);
