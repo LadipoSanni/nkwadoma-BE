@@ -109,6 +109,7 @@ public interface LoaneeRestMapper {
     @Mapping(target = "interestRate", source = "interestRate")
     @Mapping(target = "repaymentPercentage", source = "repaymentPercentage")
     @Mapping(target = "cohortName", source = "cohort.name")
+    @Mapping(target = "interestIncurred", source = "interestIncurred")
     CohortLoaneeResponse toCohortLoaneeResponse(CohortLoanee cohortLoanee);
 
     LoaneeLoanDetailResponse toLoaneeLoanDetail(LoaneeLoanDetail loaneeLoanDetail);

@@ -57,6 +57,7 @@ public class CohortLoanee {
     private String highestLevelOfEducation;
     private String programName;
     private String organizationName;
+    private String interestIncurred;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(cohort, CohortMessages.COHORT_CANNOT_BE_EMPTY.getMessage());

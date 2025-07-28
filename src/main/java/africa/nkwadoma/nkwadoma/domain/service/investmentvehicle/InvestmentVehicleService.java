@@ -5,7 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutp
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FundRaisingStatus;
@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -360,6 +361,17 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         }
         log.info("Link generated {} for investment vehicle with name {}.",uniqueSlug, name);
         return uniqueSlug;
+    }
+
+    @Override
+    public FundStakeHolder viewFundStakeHolders() {
+        FundStakeHolder fundStakeHolder = new FundStakeHolder();
+
+        fundStakeHolder.setBankPartners(Arrays.asList(BankPartner.values()));
+        fundStakeHolder.setFundManagers(Arrays.asList(FundManager.values()));
+        fundStakeHolder.setTrustees(Arrays.asList(Trustee.values()));
+        fundStakeHolder.setCustodians(Arrays.asList(Custodian.values()));
+        return fundStakeHolder;
     }
 
 }

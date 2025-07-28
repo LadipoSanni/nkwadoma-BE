@@ -16,11 +16,11 @@ public class OrganizationLoanDetailEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
+    private BigDecimal amountRequested = BigDecimal.ZERO;
+    private BigDecimal outstandingAmount = BigDecimal.ZERO;
+    private BigDecimal amountReceived = BigDecimal.ZERO;
+    private BigDecimal amountRepaid = BigDecimal.ZERO;
+    private BigDecimal interestIncurred = BigDecimal.ZERO;
     @OneToOne
     private OrganizationEntity organization;
-    private BigDecimal totalAmountRequested = BigDecimal.ZERO;
-    private BigDecimal totalOutstandingAmount = BigDecimal.ZERO;
-    private BigDecimal totalAmountReceived = BigDecimal.ZERO;
-    private BigDecimal totalAmountRepaid = BigDecimal.ZERO;
-
 }

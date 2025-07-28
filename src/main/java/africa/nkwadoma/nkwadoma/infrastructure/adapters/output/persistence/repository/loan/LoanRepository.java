@@ -22,7 +22,7 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
                  l.userIdentity.dateOfBirth as dateOfBirth, l.userIdentity.residentialAddress as residentialAddress, l.userIdentity.nationality as nationality,
                  l.userIdentity.stateOfOrigin as stateOfOrigin, l.userIdentity.stateOfResidence as stateOfResidence,
                  cle.id as cohortLoaneeId,loe.amountApproved as loanAmountApproved,lld.amountOutstanding as amountOutstanding,
-                 lld.amountRepaid as amountRepaid ,lp.interestRate as interestRate
+                 lld.amountRepaid as amountRepaid ,lp.interestRate as interestRate, lld.interestIncurred as interestIncurred
 
           from LoanEntity le
           join LoanOfferEntity lo on lo.id = le.loanOfferId
@@ -111,7 +111,6 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           c.name as cohortName, c.startDate as cohortStartDate, loe.dateTimeOffered as offerDate,
           p.name as programName,lr.loanAmountApproved as loanAmountApproved,c.tuitionAmount as tuitionAmount
 
-    
           from LoanEntity le
           join LoanOfferEntity loe on loe.id = le.loanOfferId
           join LoanRequestEntity lr on lr.id = loe.id

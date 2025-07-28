@@ -205,39 +205,39 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     private void updateOrganizationLoanDetail(LoanOffer loanOffer, Cohort cohort) throws MeedlException {
         OrganizationLoanDetail organizationLoanDetail = organizationLoanDetailOutputPort.findByOrganizationId(cohort.getOrganizationId());
-        log.info("current total amount received for organization  {}",organizationLoanDetail.getTotalAmountReceived());
+        log.info("current total amount received for organization  {}",organizationLoanDetail.getAmountReceived());
         log.info("loanee amount disbursed {}", loanOffer.getAmountApproved());
-        organizationLoanDetail.setTotalAmountReceived(organizationLoanDetail.getTotalAmountReceived()
+        organizationLoanDetail.setAmountReceived(organizationLoanDetail.getAmountReceived()
                 .add(loanOffer.getAmountApproved()));
-        organizationLoanDetail.setTotalOutstandingAmount(organizationLoanDetail.getTotalOutstandingAmount()
+        organizationLoanDetail.setOutstandingAmount(organizationLoanDetail.getOutstandingAmount()
                 .add(loanOffer.getAmountApproved()));
         organizationLoanDetailOutputPort.save(organizationLoanDetail);
     }
 
     private void updateProgramDetail(LoanOffer loanOffer, Cohort cohort) throws MeedlException {
         ProgramLoanDetail programLoanDetail = programLoanDetailOutputPort.findByProgramId(cohort.getProgramId());
-        log.info("current total amount received for program  {}",programLoanDetail.getTotalAmountReceived());
+        log.info("current total amount received for program  {}",programLoanDetail.getAmountReceived());
         log.info("loanee amount disbursed {}", loanOffer.getAmountApproved());
-        programLoanDetail.setTotalAmountReceived(programLoanDetail.getTotalAmountReceived()
+        programLoanDetail.setAmountReceived(programLoanDetail.getAmountReceived()
                 .add(loanOffer.getAmountApproved()));
-        programLoanDetail.setTotalOutstandingAmount(programLoanDetail.getTotalOutstandingAmount()
+        programLoanDetail.setOutstandingAmount(programLoanDetail.getOutstandingAmount()
                 .add(loanOffer.getAmountApproved()));
         programLoanDetailOutputPort.save(programLoanDetail);
     }
 
     private void updateCohortLoanDetail(LoanOffer loanOffer) throws MeedlException {
         CohortLoanDetail cohortLoanDetail = cohortLoanDetailOutputPort.findByCohortId(loanOffer.getCohortId());
-        log.info("current total amount received for cohort {}",cohortLoanDetail.getTotalAmountReceived());
+        log.info("current total amount received for cohort {}",cohortLoanDetail.getAmountReceived());
         log.info("loanee amount disbursed {}", loanOffer.getAmountApproved());
-        cohortLoanDetail.setTotalAmountReceived(cohortLoanDetail.getTotalAmountReceived().
+        cohortLoanDetail.setAmountReceived(cohortLoanDetail.getAmountReceived().
                 add(loanOffer.getAmountApproved()));
-        cohortLoanDetail.setTotalOutstandingAmount(cohortLoanDetail.getTotalOutstandingAmount().
+        cohortLoanDetail.setOutstandingAmount(cohortLoanDetail.getOutstandingAmount().
                 add(loanOffer.getAmountApproved()));
         cohortLoanDetail = cohortLoanDetailOutputPort.save(cohortLoanDetail);
         log.info("total amount received updated for cohort after adding == {} is {}",
-                cohortLoanDetail.getTotalAmountReceived(), loanOffer.getAmountApproved());
+                cohortLoanDetail.getAmountReceived(), loanOffer.getAmountApproved());
         log.info("total amount outstanding updated for cohort after adding == {} is {}",
-                cohortLoanDetail.getTotalOutstandingAmount(), loanOffer.getAmountApproved());
+                cohortLoanDetail.getOutstandingAmount(), loanOffer.getAmountApproved());
 
         log.info("cohort program id == {} cohort organization id == {}",
                 cohortLoanDetail.getCohort().getProgramId(),cohortLoanDetail.getCohort().getOrganizationId());
@@ -466,7 +466,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     private void updateLoanAmountRequestOnOrganizationLoanDetail(LoanRequest loanRequest, Cohort cohort) throws MeedlException {
         OrganizationLoanDetail organizationLoanDetail = organizationLoanDetailOutputPort.findByOrganizationId(cohort.getOrganizationId());
-        organizationLoanDetail.setTotalAmountRequested(organizationLoanDetail.getTotalAmountRequested()
+        organizationLoanDetail.setAmountRequested(organizationLoanDetail.getAmountRequested()
                 .add(loanRequest.getLoanAmountRequested()));
         organizationLoanDetailOutputPort.save(organizationLoanDetail);
     }
@@ -474,20 +474,20 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private void updateLoanAmountRequestedOnProgramLoanDetail(LoanRequest loanRequest, Cohort cohort) throws MeedlException {
         ProgramLoanDetail programLoanDetail = programLoanDetailOutputPort.findByProgramId(cohort.getProgramId());
         log.info("program loan details id {}", programLoanDetail.getId());
-        programLoanDetail.setTotalAmountRequested(programLoanDetail.getTotalAmountRequested()
+        programLoanDetail.setAmountRequested(programLoanDetail.getAmountRequested()
                 .add(loanRequest.getLoanAmountRequested()));
         programLoanDetailOutputPort.save(programLoanDetail);
     }
 
     private void updateLoanAmountRequestedOnCohortLoanDetail(LoanRequest loanRequest, Cohort cohort) throws MeedlException {
         CohortLoanDetail foundCohort = cohortLoanDetailOutputPort.findByCohortId(cohort.getId());
-        log.info("current total amount requested for cohort {}", foundCohort.getTotalAmountRequested());
+        log.info("current total amount requested for cohort {}", foundCohort.getAmountRequested());
         log.info("loanee amount requested {}", loanRequest.getLoanAmountRequested());
-        foundCohort.setTotalAmountRequested(foundCohort.getTotalAmountRequested().
+        foundCohort.setAmountRequested(foundCohort.getAmountRequested().
                 add(loanRequest.getLoanAmountRequested()));
         cohortLoanDetailOutputPort.save(foundCohort);
         log.info("total amount requested updated for cohort after adding == {} is {}",
-                loanRequest.getLoanAmountRequested(), foundCohort.getTotalAmountRequested());
+                loanRequest.getLoanAmountRequested(), foundCohort.getAmountRequested());
     }
 
     private Cohort updateLoanRequestCountOnCohort(LoanReferral loanReferral) throws MeedlException {

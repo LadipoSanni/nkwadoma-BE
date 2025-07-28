@@ -9,8 +9,10 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationLoanDetailMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.identity.OrganizationLoanDetailRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class OrganizationLoanDetailPersistenceAdapter  implements OrganizationLoanDetailOutputPort {
@@ -34,9 +36,12 @@ public class OrganizationLoanDetailPersistenceAdapter  implements OrganizationLo
     public OrganizationLoanDetail findByOrganizationId(String id) throws MeedlException {
         MeedlValidator.validateUUID(id, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
 
-        OrganizationLoanDetailEntity programLoanDetailEntity =
+        OrganizationLoanDetailEntity organizationLoanDetailEntity =
                 organizationLoanDetailRepository.findByOrganizationId(id);
-        return organizationLoanDetailMapper.toOrganizationLoanDetail(programLoanDetailEntity);
+        log.info("Organization loan detail entity found at adapter level interest incurred {} ", organizationLoanDetailEntity.getInterestIncurred());
+        OrganizationLoanDetail organizationLoanDetail=  organizationLoanDetailMapper.toOrganizationLoanDetail(organizationLoanDetailEntity);
+        organizationLoanDetail.setInterestIncurred(organizationLoanDetailEntity.getInterestIncurred());
+        return organizationLoanDetail;
     }
 
     @Override

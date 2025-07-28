@@ -142,11 +142,13 @@ class LoanProductServiceTest {
         loanProduct.setLoanProductSize(new BigDecimal(-1));
         assertThrows(MeedlException.class,()-> loanService.createLoanProduct(loanProduct));
     }
+
     @Test
     void createLoanProductWithNoObligorLimit(){
         loanProduct.setObligorLoanLimit(new BigDecimal(-1));
         assertThrows(MeedlException.class,()-> loanService.createLoanProduct(loanProduct));
     }
+
     @Test
     void createLoanProductWithNoTermsAndConditions(){
         loanProduct.setTermsAndCondition(null);
