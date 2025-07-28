@@ -1,0 +1,32 @@
+-- -- Flyway script to calculate and update interest for loanee_loan_detail_entity
+-- -- File: V1__Update_Interest_In_Loanee_Loan_Detail.sql
+--
+-- UPDATE loanee_loan_detail_entity llde
+-- SET
+--     llde.interest_incurred = COALESCE(llde.interest_incurred, 0) + (
+--         SELECT
+--             CASE
+--                 -- Case 1: updated_at is not null and (interest_incurred != 0 or amount_outstanding <= 0)
+--                 WHEN llde.updated_at IS NOT NULL AND (llde.interest_incurred != 0 OR llde.amount_outstanding <= 0)
+--                     THEN llde.amount_outstanding *
+--                          ((llde.interest_rate / 100.0) / 365.0) *
+--                          DATEDIFF(DAY, llde.updated_at, CURRENT_DATE - INTERVAL 1 DAY)
+--                 -- Case 2: updated_at is not null, loan_start_date is not null, interest_incurred = 0, amount_outstanding > 0
+--                 WHEN llde.updated_at IS NOT NULL AND llde.loan_start_date IS NOT NULL
+--                     AND llde.interest_incurred = 0 AND llde.amount_outstanding > 0
+--                     THEN llde.amount_outstanding *
+--                          ((llde.interest_rate / 100.0) / 365.0) *
+--                          DATEDIFF(DAY, llde.loan_start_date, CURRENT_DATE - INTERVAL 1 DAY)
+--                 -- Case 3: updated_at is null and loan_start_date is not null
+--                 WHEN llde.updated_at IS NULL AND llde.loan_start_date IS NOT NULL
+--                     THEN llde.amount_outstanding *
+--                          ((llde.interest_rate / 100.0) / 365.0) *
+--                          DATEDIFF(DAY, llde.loan_start_date, CURRENT_DATE - INTERVAL 1 DAY)
+--                 ELSE 0
+--                 END AS calculated_interest
+--     ),
+--     llde.updated_at = CURRENT_TIMESTAMP
+-- WHERE
+--     llde.amount_outstanding IS NOT NULL
+--   AND llde.amount_outstanding > 0
+--   AND llde.interest_rate IS NOT NULL;
