@@ -35,4 +35,5 @@ public interface CohortLoaneeProjection {
     String getOrganizationName();
     String getCohortName();
     String getLoaneeLoanDetailId();
+    String getInterestIncurred();
 }
