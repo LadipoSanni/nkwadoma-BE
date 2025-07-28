@@ -40,4 +40,5 @@ public class CohortLoaneeResponse {
     private String programName;
     private String cohortName;
     private String organizationName;
+    private String interestIncurred;
 }
