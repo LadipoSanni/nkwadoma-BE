@@ -32,6 +32,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.ProgramLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.CalculationContext;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
@@ -186,75 +187,14 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
             Loanee loanee = loaneeOutputPort.findLoaneeById(loaneeId);
             if(ObjectUtils.isNotEmpty(loanee)){
                 BigDecimal currentAmountRepaid = loanCalculationUseCase.calculateCurrentAmountPaid(repaymentHistories);
-                loanCalculationUseCase.calculateLoaneeLoanRepaymentHistory(repaymentHistories, loanee, cohort);
-                calculateLoaneeLoanDetails(cohort.getId(), currentAmountRepaid);
+                CalculationContext calculationContext = CalculationContext.builder()
+                        .cohort(cohort)
+                        .loanee(loanee)
+                        .repaymentHistories(repaymentHistories).build();
+                loanCalculationUseCase.calculateLoaneeLoanRepaymentHistory(calculationContext);
             }
         }
         log.info("Done processing accumulated repayments.");
-    }
-
-    private void calculateLoaneeLoanDetails(String cohortId,BigDecimal currentAmountPaid) throws MeedlException {
-
-        CohortLoanDetail cohortLoanDetail = updateCohortLoanDetail(cohortId, currentAmountPaid);
-        ProgramLoanDetail programLoanDetail = updateProgramLoanDetail(cohortLoanDetail, currentAmountPaid);
-
-        OrganizationLoanDetail organizationLoanDetail = updateOrganizationLoanDetail(programLoanDetail, currentAmountPaid);
-        log.info("Organization loan details after saving {}",organizationLoanDetail);
-
-    }
-
-    private OrganizationLoanDetail updateOrganizationLoanDetail(ProgramLoanDetail programLoanDetail, BigDecimal currentAmountPaid) throws MeedlException {
-        log.info("About to Update Organization loan detail after repayment ");
-        OrganizationLoanDetail organizationLoanDetail = organizationLoanDetailOutputPort.findByOrganizationId(
-                programLoanDetail.getProgram().getOrganizationIdentity().getId());
-        log.info("organization loan detail found {}", organizationLoanDetail);
-        organizationLoanDetail.setTotalAmountRepaid(organizationLoanDetail.getTotalAmountRepaid().add(currentAmountPaid));
-        organizationLoanDetail.setTotalOutstandingAmount(organizationLoanDetail.getTotalOutstandingAmount().subtract(currentAmountPaid));
-        log.info("Updated Organization loan detail after repayment  {}", organizationLoanDetail);
-        organizationLoanDetail = organizationLoanDetailOutputPort.save(organizationLoanDetail);
-        return organizationLoanDetail;
-    }
-
-    private ProgramLoanDetail updateProgramLoanDetail(CohortLoanDetail cohortLoanDetail, BigDecimal currentAmountPaid) throws MeedlException {
-        log.info("About to Update Program loan detail after repayment ");
-        ProgramLoanDetail programLoanDetail = programLoanDetailOutputPort.findByProgramId(cohortLoanDetail.getCohort().getProgramId());
-        log.info("program loan detail found {}", programLoanDetail);
-        programLoanDetail.setTotalAmountRepaid(programLoanDetail.getTotalAmountRepaid().add(currentAmountPaid));
-        programLoanDetail.setTotalOutstandingAmount(programLoanDetail.getTotalOutstandingAmount().subtract(currentAmountPaid));
-        log.info("Updated Program loan detail after repayment  {}", programLoanDetail);
-        programLoanDetail = programLoanDetailOutputPort.save(programLoanDetail);
-        log.info("Program loan details after saving {}",programLoanDetail);
-        return programLoanDetail;
-    }
-
-    private CohortLoanDetail updateCohortLoanDetail(String cohortId, BigDecimal currentAmountPaid) throws MeedlException {
-        log.info("About to Update Cohort loan detail after repayment ");
-        CohortLoanDetail cohortLoanDetail = cohortLoanDetailOutputPort.findByCohortId(cohortId);
-        log.info("cohort loan detail found {}", cohortLoanDetail);
-        cohortLoanDetail.setTotalAmountRepaid(cohortLoanDetail.getTotalAmountRepaid().add(currentAmountPaid));
-        cohortLoanDetail.setTotalOutstandingAmount(cohortLoanDetail.getTotalOutstandingAmount().subtract(currentAmountPaid));
-        log.info("Updated Cohort loan detail after repayment  {}", cohortLoanDetail);
-        cohortLoanDetail = cohortLoanDetailOutputPort.save(cohortLoanDetail);
-        log.info("cohort loan details after saving {}",cohortLoanDetail);
-        return cohortLoanDetail;
-    }
-
-    private BigDecimal updateLoaneeLoanDetail(BigDecimal totalAmountRepaid, String cohortId, String loaneeId) throws MeedlException {
-        CohortLoanee cohortLoanee = cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(loaneeId, cohortId);
-        log.info("cohort loanee found {}",cohortLoanee);
-        LoaneeLoanDetail loaneeLoanDetail = loaneeLoanDetailsOutputPort.findByCohortLoaneeId(cohortLoanee.getId());
-
-        BigDecimal currentAmountPaid = totalAmountRepaid.subtract(loaneeLoanDetail.getAmountRepaid());
-        log.info("total amount repaid {}", totalAmountRepaid);
-        log.info("Current amount paid {}",currentAmountPaid);
-
-        log.info("loanee loan details {}",loaneeLoanDetail);
-        loaneeLoanDetail.setAmountRepaid(loaneeLoanDetail.getAmountRepaid().add(currentAmountPaid));
-        loaneeLoanDetail.setAmountOutstanding(loaneeLoanDetail.getAmountOutstanding().subtract(currentAmountPaid));
-        log.info("loanee loan detail after setting repayment  {}", loaneeLoanDetail);
-        LoaneeLoanDetail updatedLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
-        log.info("Updated Loanee loan detail after repayment {}", updatedLoaneeLoanDetail);
-        return currentAmountPaid;
     }
 
     public Map<String, List<RepaymentHistory>> getRepaymentHistoriesForLoanees(

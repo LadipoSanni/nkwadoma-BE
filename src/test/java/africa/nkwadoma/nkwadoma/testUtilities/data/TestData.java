@@ -16,6 +16,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.CalculationContext;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentRecordBook;
@@ -24,6 +25,7 @@ import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
 import africa.nkwadoma.nkwadoma.testUtilities.TestUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -148,15 +150,31 @@ public class TestData {
         elites.setCohortStatus(CohortStatus.GRADUATED);
         return elites;
     }
-
     public static Program createProgramTestData(String programName){
-         return Program.builder().name(programName).
-                programStatus(ActivationStatus.ACTIVE).programDescription("Program description").
-                mode(ProgramMode.FULL_TIME).duration(2).durationType(DurationType.YEARS).
-                deliveryType(DeliveryType.ONSITE).
-                createdAt(LocalDateTime.now()).programStartDate(LocalDate.now()).build();
+        return createProgramTestData(programName, null);
     }
 
+    public static Program createProgramTestData(String programName, OrganizationIdentity organizationIdentity){
+        if (ObjectUtils.isEmpty(organizationIdentity)){
+            organizationIdentity = createOrganizationTestData(
+                    TestUtils.generateName(4),
+                    "Rc043953443",
+                    List.of(createOrganizationEmployeeIdentityTestData(
+                            createTestUserIdentity(TestUtils.generateEmail(5)))));
+        }
+        return Program.builder()
+                .name(programName)
+                .programStatus(ActivationStatus.ACTIVE)
+                .programDescription("Program description")
+                .mode(ProgramMode.FULL_TIME)
+                .duration(2)
+                .durationType(DurationType.YEARS)
+                .deliveryType(DeliveryType.ONSITE)
+                .createdAt(LocalDateTime.now())
+                .programStartDate(LocalDate.now())
+                .organizationIdentity(organizationIdentity)
+                .build();
+    }
     public static africa.nkwadoma.nkwadoma.domain.model.education.LoanDetail createLoanDetail(){
       return africa.nkwadoma.nkwadoma.domain.model.education.LoanDetail.builder().debtPercentage(0.34).repaymentPercentage(0.67).monthlyExpected(BigDecimal.valueOf(450))
                 .totalAmountRepaid(BigDecimal.valueOf(500)).totalInterestIncurred(BigDecimal.valueOf(600))
@@ -168,7 +186,16 @@ public class TestData {
         return LoanBreakdown.builder().currency("USD").itemAmount(new BigDecimal("50000"))
                 .itemName("Accommodation").build();
     }
+    public static CalculationContext createCalculationContext(List<RepaymentHistory> repaymentHistories, Loanee loanee, Cohort cohort){
+        return CalculationContext.builder()
+                .previousTotalAmountPaid(new BigDecimal(1000))
+                .previousTotalInterestIncurred(new BigDecimal(100000))
+                .repaymentHistories(repaymentHistories)
+                .loanee(loanee)
+                .cohort(cohort)
+                .build();
 
+    }
     public static LoanProduct buildTestLoanProduct() {
         Vendor vendor = TestData.createTestVendor(TestUtils.generateName(6));
         LoanProduct loanProduct = new LoanProduct();
@@ -682,30 +709,34 @@ public class TestData {
 
     public static CohortLoanDetail buildCohortLoanDetail(Cohort elites) {
         return CohortLoanDetail.builder()
-                .totalAmountReceived(BigDecimal.valueOf(30000))
-                .totalOutstandingAmount(BigDecimal.valueOf(30000))
-                .totalAmountRequested(BigDecimal.valueOf(30000))
-                .totalAmountRepaid(BigDecimal.valueOf(30000))
+                .amountReceived(BigDecimal.valueOf(30000))
+                .outstandingAmount(BigDecimal.valueOf(30000))
+                .amountRequested(BigDecimal.valueOf(30000))
+                .amountRepaid(BigDecimal.valueOf(30000))
+                .interestIncurred(BigDecimal.valueOf(100000))
                 .cohort(elites).build();
     }
 
     public static ProgramLoanDetail buildProgramLoanDetail(Program program) {
         return ProgramLoanDetail.builder()
                 .program(program)
-                .totalAmountReceived(BigDecimal.valueOf(30000))
-                .totalOutstandingAmount(BigDecimal.valueOf(30000))
-                .totalAmountRequested(BigDecimal.valueOf(30000))
-                .totalAmountRepaid(BigDecimal.valueOf(30000))
+                .amountReceived(BigDecimal.valueOf(30000))
+                .outstandingAmount(BigDecimal.valueOf(30000))
+                .amountRequested(BigDecimal.valueOf(30000))
+                .amountRepaid(BigDecimal.valueOf(30000))
+                .interestIncurred(BigDecimal.valueOf(100000))
                 .build();
     }
+
 
     public static OrganizationLoanDetail buildOrganizationLoanDetail(OrganizationIdentity organizationIdentity) {
         return OrganizationLoanDetail.builder()
                 .organization(organizationIdentity)
-                .totalAmountReceived(BigDecimal.valueOf(30000))
-                .totalOutstandingAmount(BigDecimal.valueOf(30000))
-                .totalAmountRequested(BigDecimal.valueOf(30000))
-                .totalAmountRepaid(BigDecimal.valueOf(30000))
+                .amountReceived(BigDecimal.valueOf(30000))
+                .outstandingAmount(BigDecimal.valueOf(30000))
+                .amountRequested(BigDecimal.valueOf(30000))
+                .amountRepaid(BigDecimal.valueOf(30000))
+                .interestIncurred(BigDecimal.valueOf(100000))
                 .build();
     }
 }

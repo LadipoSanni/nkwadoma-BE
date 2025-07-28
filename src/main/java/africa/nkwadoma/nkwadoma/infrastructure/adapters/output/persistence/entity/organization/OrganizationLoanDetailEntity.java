@@ -18,9 +18,10 @@ public class OrganizationLoanDetailEntity {
     private String id;
     @OneToOne
     private OrganizationEntity organization;
-    private BigDecimal totalAmountRequested = BigDecimal.ZERO;
-    private BigDecimal totalOutstandingAmount = BigDecimal.ZERO;
-    private BigDecimal totalAmountReceived = BigDecimal.ZERO;
-    private BigDecimal totalAmountRepaid = BigDecimal.ZERO;
+    private BigDecimal amountRequested = BigDecimal.ZERO;
+    private BigDecimal outstandingAmount = BigDecimal.ZERO;
+    private BigDecimal amountReceived = BigDecimal.ZERO;
+    private BigDecimal amountRepaid = BigDecimal.ZERO;
+    private BigDecimal interestIncurred = BigDecimal.ZERO;
 
 }

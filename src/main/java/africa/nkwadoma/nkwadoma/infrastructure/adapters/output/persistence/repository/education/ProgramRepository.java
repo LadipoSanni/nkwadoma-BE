@@ -23,10 +23,10 @@ public interface ProgramRepository extends JpaRepository<ProgramEntity, String> 
     @Query("""
    
        SELECT p.id as id,
-                   pd.totalAmountReceived as totalAmountDisbursed,
-                   pd.totalAmountRequested as totalAmountRequested,
-                   pd.totalAmountRepaid as totalAmountRepaid,
-                   pd.totalOutstandingAmount as totalAmountOutstanding,
+                   pd.amountReceived as totalAmountDisbursed,
+                   pd.amountRequested as totalAmountRequested,
+                   pd.amountRepaid as totalAmountRepaid,
+                   pd.outstandingAmount as totalAmountOutstanding,
                    p.name as name,
                    p.objectives as objectives,
                    p.programDescription as programDescription,

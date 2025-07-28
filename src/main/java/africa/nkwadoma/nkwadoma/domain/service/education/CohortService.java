@@ -99,10 +99,10 @@ public class CohortService implements CohortUseCase {
     private static CohortLoanDetail buildCohortLoanDetail(Cohort savedCohort) {
         return CohortLoanDetail.builder()
                 .cohort(savedCohort)
-                .totalAmountRequested(BigDecimal.valueOf(0))
-                .totalAmountReceived(BigDecimal.valueOf(0))
-                .totalOutstandingAmount(BigDecimal.valueOf(0))
-                .totalAmountRepaid(BigDecimal.valueOf(0))
+                .amountRequested(BigDecimal.valueOf(0))
+                .amountReceived(BigDecimal.valueOf(0))
+                .outstandingAmount(BigDecimal.valueOf(0))
+                .amountRepaid(BigDecimal.valueOf(0))
                 .build();
     }
 
@@ -211,18 +211,18 @@ public class CohortService implements CohortUseCase {
     }
 
     private static void getLoanPercentage(Cohort cohort, CohortLoanDetail cohortLoanDetail) {
-        BigDecimal totalAmountReceived = cohortLoanDetail.getTotalAmountReceived();
+        BigDecimal totalAmountReceived = cohortLoanDetail.getAmountReceived();
         if (totalAmountReceived != null && totalAmountReceived.compareTo(BigDecimal.ZERO) > 0 &&
-                cohortLoanDetail.getTotalOutstandingAmount() != null &&
-                cohortLoanDetail.getTotalAmountRepaid() != null) {
+                cohortLoanDetail.getOutstandingAmount() != null &&
+                cohortLoanDetail.getAmountRepaid() != null) {
             cohort.setDebtPercentage(
-                    cohortLoanDetail.getTotalOutstandingAmount()
+                    cohortLoanDetail.getOutstandingAmount()
                             .divide(totalAmountReceived, 4, RoundingMode.HALF_UP)
                             .multiply(BigDecimal.valueOf(100))
                             .doubleValue()
             );
             cohort.setRepaymentRate(
-                    cohortLoanDetail.getTotalAmountRepaid()
+                    cohortLoanDetail.getAmountRepaid()
                             .divide(totalAmountReceived, 4, RoundingMode.HALF_UP)
                             .multiply(BigDecimal.valueOf(100))
                             .doubleValue()

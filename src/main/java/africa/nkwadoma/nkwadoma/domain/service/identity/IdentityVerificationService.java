@@ -25,7 +25,6 @@ import africa.nkwadoma.nkwadoma.domain.model.education.ProgramLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanMetrics;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoanRequest;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
@@ -258,7 +257,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
 
     private void updateLoanAmountRequestOnOrganizationLoanDetail(LoaneeLoanDetail loaneeLoanDetail, Cohort cohort) throws MeedlException {
         OrganizationLoanDetail organizationLoanDetail = organizationLoanDetailOutputPort.findByOrganizationId(cohort.getOrganizationId());
-        organizationLoanDetail.setTotalAmountRequested(organizationLoanDetail.getTotalAmountRequested()
+        organizationLoanDetail.setAmountRequested(organizationLoanDetail.getAmountRequested()
                 .add(loaneeLoanDetail.getAmountRequested()));
         organizationLoanDetailOutputPort.save(organizationLoanDetail);
     }
@@ -266,20 +265,20 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     private void updateLoanAmountRequestedOnProgramLoanDetail(LoaneeLoanDetail loaneeLoanDetail, Cohort cohort) throws MeedlException {
         ProgramLoanDetail programLoanDetail = programLoanDetailOutputPort.findByProgramId(cohort.getProgramId());
         log.info("program loan details id {}", programLoanDetail.getId());
-        programLoanDetail.setTotalAmountRequested(programLoanDetail.getTotalAmountRequested()
+        programLoanDetail.setAmountRequested(programLoanDetail.getAmountRequested()
                 .add(loaneeLoanDetail.getAmountRequested()));
         programLoanDetailOutputPort.save(programLoanDetail);
     }
 
     private void updateLoanAmountRequestedOnCohortLoanDetail(LoaneeLoanDetail loaneeLoanDetail, Cohort cohort) throws MeedlException {
         CohortLoanDetail foundCohort = cohortLoanDetailOutputPort.findByCohortId(cohort.getId());
-        log.info("current total amount requested for cohort {}", foundCohort.getTotalAmountRequested());
+        log.info("current total amount requested for cohort {}", foundCohort.getAmountRequested());
         log.info("loanee amount requested {}", loaneeLoanDetail.getAmountRequested());
-        foundCohort.setTotalAmountRequested(foundCohort.getTotalAmountRequested().
+        foundCohort.setAmountRequested(foundCohort.getAmountRequested().
                 add(loaneeLoanDetail.getAmountRequested()));
         cohortLoanDetailOutputPort.save(foundCohort);
         log.info("total amount requested updated for cohort after adding == {} is {}",
-                loaneeLoanDetail.getAmountRequested(), foundCohort.getTotalAmountRequested());
+                loaneeLoanDetail.getAmountRequested(), foundCohort.getAmountRequested());
     }
 
     private Cohort updateLoanRequestCountOnCohort(LoanReferral loanReferral) throws MeedlException {

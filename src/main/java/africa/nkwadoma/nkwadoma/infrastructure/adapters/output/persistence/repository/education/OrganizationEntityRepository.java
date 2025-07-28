@@ -51,21 +51,21 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
     @Query(""" 
             SELECT o.id as organizationId,
                    o.name as name,
-                   ld.totalAmountReceived as totalAmountReceived,
-                   ld.totalAmountRequested as totalAmountRequested,
-                   ld.totalAmountRepaid as totalDebtRepaid,
-                   ld.totalOutstandingAmount as totalCurrentDebt,
+                   ld.amountReceived as totalAmountReceived,
+                   ld.amountRequested as totalAmountRequested,
+                   ld.amountRepaid as totalDebtRepaid,
+                   ld.outstandingAmount as totalCurrentDebt,
                     o.status as status,o.email as email,
                     o.numberOfLoanees as numberOfLoanees,
                     o.numberOfCohort as numberOfCohort,o.websiteAddress as websiteAddress,
                     o.numberOfPrograms as numberOfPrograms,
                       CASE
-            WHEN COALESCE(ld.totalAmountReceived, 0) = 0 THEN 0.0 
-            ELSE (ld.totalOutstandingAmount / ld.totalAmountReceived * 100.0) 
+            WHEN COALESCE(ld.amountReceived, 0) = 0 THEN 0.0 
+            ELSE (ld.outstandingAmount / ld.amountReceived * 100.0) 
         END as debtPercentage,
         CASE 
-            WHEN COALESCE(ld.totalAmountReceived, 0) = 0 THEN 0.0 
-            ELSE (ld.totalAmountRepaid / ld.totalAmountReceived * 100.0) 
+            WHEN COALESCE(ld.amountReceived, 0) = 0 THEN 0.0 
+            ELSE (ld.amountRepaid / ld.amountReceived * 100.0) 
         END as repaymentRate
                                 
                    from OrganizationEntity o
@@ -118,10 +118,10 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
     SELECT 
         o.id as organizationId,
         o.name as name,
-        ld.totalAmountReceived as totalAmountReceived,
-        ld.totalAmountRequested as totalAmountRequested,
-        ld.totalAmountRepaid as totalDebtRepaid,
-        ld.totalOutstandingAmount as totalCurrentDebt,
+        ld.amountReceived as totalAmountReceived,
+        ld.amountRequested as totalAmountRequested,
+        ld.amountRepaid as totalDebtRepaid,
+        ld.outstandingAmount as totalCurrentDebt,
         o.status as status,
         o.email as email,
         o.numberOfLoanees as numberOfLoanees,
@@ -129,12 +129,12 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
         o.numberOfCohort as numberOfCohort,
         o.numberOfPrograms as numberOfPrograms,
         CASE 
-            WHEN COALESCE(ld.totalAmountReceived, 0) = 0 THEN 0.0 
-            ELSE (ld.totalOutstandingAmount / ld.totalAmountReceived * 100.0) 
+            WHEN COALESCE(ld.amountReceived, 0) = 0 THEN 0.0 
+            ELSE (ld.outstandingAmount / ld.amountReceived * 100.0) 
         END as debtPercentage,
         CASE 
-            WHEN COALESCE(ld.totalAmountReceived, 0) = 0 THEN 0.0 
-            ELSE (ld.totalAmountRepaid / ld.totalAmountReceived * 100.0) 
+            WHEN COALESCE(ld.amountReceived, 0) = 0 THEN 0.0 
+            ELSE (ld.amountRepaid / ld.amountReceived * 100.0) 
         END as repaymentRate
     FROM OrganizationEntity o
     LEFT JOIN OrganizationLoanDetailEntity ld ON ld.organization.id = o.id

@@ -81,11 +81,11 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         return organizationIdentity;
     }
 
-    private static OrganizationLoanDetail buildOrganizationLoanDetail(OrganizationIdentity organizationIdentity) {
+    private OrganizationLoanDetail buildOrganizationLoanDetail(OrganizationIdentity organizationIdentity) {
         return OrganizationLoanDetail.builder()
-                .organization(organizationIdentity).totalAmountReceived(BigDecimal.valueOf(0))
-                .totalAmountRequested(BigDecimal.valueOf(0)).totalAmountRepaid(BigDecimal.valueOf(0))
-                .totalOutstandingAmount(BigDecimal.valueOf(0)).build();
+                .organization(organizationIdentity).amountReceived(BigDecimal.valueOf(0))
+                .amountRequested(BigDecimal.valueOf(0)).amountRepaid(BigDecimal.valueOf(0))
+                .outstandingAmount(BigDecimal.valueOf(0)).build();
     }
 
     private void checkIfOrganizationAndAdminExist(OrganizationIdentity organizationIdentity) throws MeedlException {
@@ -364,16 +364,16 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     private static void getLoanPercentage(OrganizationIdentity organizationIdentity, OrganizationLoanDetail organizationLoanDetail) {
         BigDecimal totalAmountReceived = organizationIdentity.getTotalAmountReceived();
         if (totalAmountReceived != null && totalAmountReceived.compareTo(BigDecimal.ZERO) > 0 &&
-                organizationLoanDetail.getTotalOutstandingAmount() != null &&
-                organizationLoanDetail.getTotalAmountRepaid() != null) {
+                organizationLoanDetail.getOutstandingAmount() != null &&
+                organizationLoanDetail.getAmountRepaid() != null) {
             organizationIdentity.setDebtPercentage(
-                    organizationLoanDetail.getTotalOutstandingAmount()
+                    organizationLoanDetail.getOutstandingAmount()
                             .divide(totalAmountReceived, 4, RoundingMode.HALF_UP)
                             .multiply(BigDecimal.valueOf(100))
                             .doubleValue()
             );
             organizationIdentity.setRepaymentRate(
-                    organizationLoanDetail.getTotalAmountRepaid()
+                    organizationLoanDetail.getAmountRepaid()
                             .divide(totalAmountReceived, 4, RoundingMode.HALF_UP)
                             .multiply(BigDecimal.valueOf(100))
                             .doubleValue()
