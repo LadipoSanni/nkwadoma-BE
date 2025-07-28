@@ -85,6 +85,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         return OrganizationLoanDetail.builder()
                 .organization(organizationIdentity).amountReceived(BigDecimal.valueOf(0))
                 .amountRequested(BigDecimal.valueOf(0)).amountRepaid(BigDecimal.valueOf(0))
+                .interestIncurred(BigDecimal.ZERO)
                 .outstandingAmount(BigDecimal.valueOf(0)).build();
     }
 

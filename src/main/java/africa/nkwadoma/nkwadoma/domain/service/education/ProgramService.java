@@ -59,7 +59,9 @@ public class ProgramService implements AddProgramUseCase {
 
     private static ProgramLoanDetail buildProgramLoanDetail(Program program) {
         return ProgramLoanDetail.builder()
-                .program(program).amountRequested(BigDecimal.valueOf(0)).outstandingAmount(BigDecimal.valueOf(0))
+                .program(program)
+                .interestIncurred(BigDecimal.ZERO)
+                .amountRequested(BigDecimal.valueOf(0)).outstandingAmount(BigDecimal.valueOf(0))
                 .amountReceived(BigDecimal.valueOf(0)).amountRepaid(BigDecimal.valueOf(0)).build();
     }
 
