@@ -24,6 +24,6 @@ public class ProgramLoanDetailEntity {
     private BigDecimal outstandingAmount = BigDecimal.ZERO;
     private BigDecimal amountReceived = BigDecimal.ZERO;
     private BigDecimal amountRepaid = BigDecimal.ZERO;
-
+    private BigDecimal interestIncurred = BigDecimal.ZERO;
 
 }

@@ -198,14 +198,14 @@ public class CalculationEngine implements CalculationEngineUseCase {
 
     /// Program loan detail calculation
     private BigDecimal calculateProgramTotalInterestIncurred(CalculationContext context) {
-        return context.getCohortLoanDetail()
+        return context.getProgramLoanDetail()
                 .getInterestIncurred()
                 .subtract(context.getPreviousTotalInterestIncurred())
                 .add(context.getLoaneeLoanDetail().getInterestIncurred());
     }
 
     private BigDecimal calculateProgramTotalAmountRepaid(CalculationContext context) {
-        return context.getCohortLoanDetail()
+        return context.getProgramLoanDetail()
                 .getAmountRepaid()
                 .subtract(context.getPreviousTotalAmountPaid())
                 .add(context.getLoaneeLoanDetail().getAmountRepaid());
