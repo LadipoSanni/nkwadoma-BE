@@ -103,6 +103,7 @@ public class CohortService implements CohortUseCase {
                 .amountReceived(BigDecimal.valueOf(0))
                 .outstandingAmount(BigDecimal.valueOf(0))
                 .amountRepaid(BigDecimal.valueOf(0))
+                .interestIncurred(BigDecimal.ZERO)
                 .build();
     }
 
