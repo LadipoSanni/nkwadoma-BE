@@ -48,7 +48,10 @@ public class CohortLoanDetailPersistenceAdapter implements CohortLoanDetailOutpu
 
         CohortLoanDetailEntity cohortLoanDetailEntity =
                 cohortLoanDetailRepository.findByCohortId(cohortId);
-        return cohortLoanDetailMapper.toCohortLoanDetail(cohortLoanDetailEntity);
+        log.info("Interest incurred during find cohort loan detail entity {}", cohortLoanDetailEntity.getInterestIncurred());
+        CohortLoanDetail cohortLoanDetail = cohortLoanDetailMapper.toCohortLoanDetail(cohortLoanDetailEntity);
+        cohortLoanDetail.setInterestIncurred(cohortLoanDetailEntity.getInterestIncurred());
+        return cohortLoanDetail;
     }
 
     @Transactional
