@@ -347,16 +347,4 @@ public class LoanController {
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
 
-    @GetMapping("/interest-accrued")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<ApiResponse<?>> getInterestAccrued() throws MeedlException {
-
-        List<LoaneeLoanDetail> loaneeLoanDetails = loanUseCase.simulateInterestIncurred();
-        ApiResponse<List<LoaneeLoanDetail>> loaneeLoanDetailApiResponse = ApiResponse.<List<LoaneeLoanDetail>>builder()
-                .data(loaneeLoanDetails)
-                .message("LOAN INTEREST ACCRUED SUCCESSFULLY")
-                .build();
-        return new ResponseEntity<>(loaneeLoanDetailApiResponse,HttpStatus.OK);
-    }
-
 }

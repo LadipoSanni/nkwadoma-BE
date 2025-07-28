@@ -17,5 +17,4 @@ public interface LoanUseCase {
 
     LoanDetailSummary viewLoanTotal(String actorId) throws MeedlException;
 
-    List<LoaneeLoanDetail> simulateInterestIncurred() throws MeedlException;
 }
