@@ -239,17 +239,4 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
 """)
     BigDecimal getTotalLoanAmountApproved(@Param("id") String id);
 
-    @Query("""
-    select le
-    
-    FROM LoanEntity le
-    join LoanOfferEntity lo on lo.id = le.loanOfferId
-    join LoanReferralEntity lfe on lfe.id = lo.id
-    join CohortLoaneeEntity cle on cle.id = lfe.cohortLoanee.id
-    join LoaneeEntity l on l.id = cle.loanee.id
-        
-    where cle.id = :id               
-            
-    """)
-    LoanEntity findByCohortLoaneeId(@Param("id") String id);
 }

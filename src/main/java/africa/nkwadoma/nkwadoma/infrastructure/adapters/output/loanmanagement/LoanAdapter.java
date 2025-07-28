@@ -139,12 +139,4 @@ public class LoanAdapter implements LoanOutputPort {
                 loanRepository.findAllLoanDisburestToLoanee(id,pageRequest);
         return loanProjection.map(loanMapper::mapProjectionToLoan);
     }
-
-    @Override
-    public Loan findLoaneeLoanByCohortLoaneeId(String id) throws MeedlException {
-        MeedlValidator.validateUUID(id,"Cohort loanee id cannot be empty");
-        LoanEntity loanEntity = loanRepository.findByCohortLoaneeId(id);
-        log.info("Found loan {}", loanEntity);
-        return loanMapper.mapToLoan(loanEntity);
-    }
 }

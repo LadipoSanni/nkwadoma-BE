@@ -26,5 +26,4 @@ public interface LoanOutputPort {
 
     Page<Loan> findAllLoanDisburedToLoanee(String id, int pageNumber, int pageSize) throws MeedlException;
 
-    Loan findLoaneeLoanByCohortLoaneeId(String id) throws MeedlException;
 }
