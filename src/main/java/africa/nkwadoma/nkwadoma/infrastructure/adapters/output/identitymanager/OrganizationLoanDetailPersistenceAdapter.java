@@ -10,6 +10,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mappe
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.identity.OrganizationLoanDetailRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -35,10 +36,14 @@ public class OrganizationLoanDetailPersistenceAdapter  implements OrganizationLo
     @Override
     public OrganizationLoanDetail findByOrganizationId(String id) throws MeedlException {
         MeedlValidator.validateUUID(id, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-
+        log.info("Finding organization loan detail at adapter level with id {}", id);
         OrganizationLoanDetailEntity organizationLoanDetailEntity =
                 organizationLoanDetailRepository.findByOrganizationId(id);
-        log.info("Organization loan detail entity found at adapter level interest incurred {} ", organizationLoanDetailEntity.getInterestIncurred());
+        if (ObjectUtils.isNotEmpty(organizationLoanDetailEntity)) {
+            log.info("Organization loan detail entity found at adapter level interest incurred {} ", organizationLoanDetailEntity.getInterestIncurred());
+        }else {
+            log.warn("No organization loan detail entity was found");
+        }
         OrganizationLoanDetail organizationLoanDetail=  organizationLoanDetailMapper.toOrganizationLoanDetail(organizationLoanDetailEntity);
         organizationLoanDetail.setInterestIncurred(organizationLoanDetailEntity.getInterestIncurred());
         return organizationLoanDetail;

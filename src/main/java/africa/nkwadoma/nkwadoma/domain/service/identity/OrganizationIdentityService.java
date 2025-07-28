@@ -355,6 +355,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
             OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
             List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity.getId());
             organizationIdentity.setServiceOfferings(serviceOfferings);
+            log.info("Service offering has been gotten during view organization detail {}", serviceOfferings);
             OrganizationLoanDetail organizationLoanDetail =
                     organizationLoanDetailOutputPort.findByOrganizationId(organizationIdentity.getId());
             organizationIdentityMapper.mapOrganizationLoanDetailsToOrganization(organizationIdentity,organizationLoanDetail);
