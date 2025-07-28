@@ -16,10 +16,8 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.education.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
 import lombok.*;
 import lombok.extern.slf4j.*;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.*;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.*;
@@ -27,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_ALREADY_EXISTS;
 
@@ -62,8 +59,8 @@ public class ProgramService implements AddProgramUseCase {
 
     private static ProgramLoanDetail buildProgramLoanDetail(Program program) {
         return ProgramLoanDetail.builder()
-                .program(program).totalAmountRequested(BigDecimal.valueOf(0)).totalOutstandingAmount(BigDecimal.valueOf(0))
-                .totalAmountReceived(BigDecimal.valueOf(0)).totalAmountRepaid(BigDecimal.valueOf(0)).build();
+                .program(program).amountRequested(BigDecimal.valueOf(0)).outstandingAmount(BigDecimal.valueOf(0))
+                .amountReceived(BigDecimal.valueOf(0)).amountRepaid(BigDecimal.valueOf(0)).build();
     }
 
     @Override
@@ -184,18 +181,18 @@ public class ProgramService implements AddProgramUseCase {
 
 
     private static void getLoanPercentage(Program program, ProgramLoanDetail programLoanDetail) {
-        BigDecimal totalAmountReceived = programLoanDetail.getTotalAmountReceived();
+        BigDecimal totalAmountReceived = programLoanDetail.getAmountReceived();
         if (totalAmountReceived != null && totalAmountReceived.compareTo(BigDecimal.ZERO) > 0 &&
-                programLoanDetail.getTotalOutstandingAmount() != null &&
-                programLoanDetail.getTotalAmountRepaid() != null) {
+                programLoanDetail.getOutstandingAmount() != null &&
+                programLoanDetail.getAmountRepaid() != null) {
             program.setDebtPercentage(
-                    programLoanDetail.getTotalOutstandingAmount()
+                    programLoanDetail.getOutstandingAmount()
                             .divide(totalAmountReceived, 4, RoundingMode.HALF_UP)
                             .multiply(BigDecimal.valueOf(100))
                             .doubleValue()
             );
             program.setRepaymentRate(
-                    programLoanDetail.getTotalAmountRepaid()
+                    programLoanDetail.getAmountRepaid()
                             .divide(totalAmountReceived, 4, RoundingMode.HALF_UP)
                             .multiply(BigDecimal.valueOf(100))
                             .doubleValue()

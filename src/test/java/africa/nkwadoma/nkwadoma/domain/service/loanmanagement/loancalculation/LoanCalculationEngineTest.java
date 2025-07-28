@@ -1,16 +1,24 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanmanagement.loancalculation;
 
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoanDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramLoanDetailOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationLoanDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.RepaymentHistoryOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanCalculationMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
+import africa.nkwadoma.nkwadoma.domain.model.education.ProgramLoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.CalculationContext;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanPeriodRecord;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
+import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,16 +47,28 @@ public class LoanCalculationEngineTest {
     @Mock
     private RepaymentHistoryOutputPort repaymentHistoryOutputPort;
     @Mock
+    private CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
+    @Mock
+    private ProgramLoanDetailOutputPort programLoanDetailOutputPort;
+    @Mock
+    private OrganizationLoanDetailOutputPort organizationLoanDetailOutputPort;
+    @Mock
     private CohortLoaneeOutputPort cohortLoaneeOutputPort;
     private String loaneeId;
     private String cohortId;
     private final BigDecimal ZERO = new BigDecimal("0.00");
     private final int NUMBER_OF_DECIMAL_PLACE = 8;
-
+    private CalculationContext calculationContext = CalculationContext.builder().build();
+    private CohortLoanDetail cohortLoanDetail;
+    private ProgramLoanDetail programLoanDetail;
+    private OrganizationLoanDetail organizationLoanDetail;
     @BeforeEach
     void setup() {
         loaneeId = UUID.randomUUID().toString();
         cohortId = UUID.randomUUID().toString();
+        cohortLoanDetail = TestData.buildCohortLoanDetail(TestData.createCohortData("cohort mock", cohortId, cohortId, null, loaneeId));
+        programLoanDetail = TestData.buildProgramLoanDetail(TestData.createProgramTestData("Mock test program"));
+        organizationLoanDetail = TestData.buildOrganizationLoanDetail(TestData.createOrganizationTestData("Mock org test name", "random", null));
     }
 
     private RepaymentHistory createRepayment(LocalDateTime time, BigDecimal amount) {
@@ -734,8 +754,8 @@ public class LoanCalculationEngineTest {
     void shouldNotProcessWhenRepaymentHistoriesIsEmpty() throws MeedlException {
         Loanee loanee = Loanee.builder().id(loaneeId).build();
         Cohort cohort = Cohort.builder().id(cohortId).build();
-
-        calculationEngine.calculateLoaneeLoanRepaymentHistory(new ArrayList<>(), loanee, cohort);
+        calculationContext = CalculationContext.builder().repaymentHistories(new ArrayList<>()).loanee(loanee).cohort(cohort).build();
+        calculationEngine.calculateLoaneeLoanRepaymentHistory(calculationContext);
 
         verifyNoInteractions(repaymentHistoryOutputPort);
     }
@@ -744,8 +764,9 @@ public class LoanCalculationEngineTest {
     void shouldNotProcessWhenLoaneeIsNull() throws MeedlException {
         List<RepaymentHistory> repayments = List.of(createRepayment(LocalDateTime.now(), BigDecimal.TEN));
         Cohort cohort = Cohort.builder().id(cohortId).build();
+        calculationContext = CalculationContext.builder().repaymentHistories(repayments).loanee(null).cohort(cohort).build();
 
-        calculationEngine.calculateLoaneeLoanRepaymentHistory(repayments, null, cohort);
+        calculationEngine.calculateLoaneeLoanRepaymentHistory(calculationContext);
 
         verifyNoInteractions(repaymentHistoryOutputPort);
     }
@@ -790,11 +811,12 @@ public class LoanCalculationEngineTest {
                 createRepayment(LocalDateTime.of(2025, 2, 1, 0, 0), BigDecimal.valueOf(1000))
         );
 
-        LoaneeLoanDetail loanDetail = LoaneeLoanDetail.builder()
+        LoaneeLoanDetail loaneeLoanDetail = LoaneeLoanDetail.builder()
                 .id(UUID.randomUUID().toString())
                 .amountReceived(BigDecimal.valueOf(5000))
                 .amountOutstanding(BigDecimal.valueOf(5000))
                 .amountRepaid(BigDecimal.ZERO)
+                .interestIncurred(BigDecimal.valueOf(100000))
                 .interestRate(0.03)
                 .loanStartDate(LocalDateTime.now())
                 .build();
@@ -802,14 +824,23 @@ public class LoanCalculationEngineTest {
         CohortLoanee cohortLoanee = CohortLoanee.builder().id("cohortLoaneeId").build();
 
         when(cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(loaneeId, cohortId)).thenReturn(cohortLoanee);
-        when(loaneeLoanDetailsOutputPort.findByCohortLoaneeId("cohortLoaneeId")).thenReturn(loanDetail);
+
+        when(cohortLoanDetailOutputPort.findByCohortId(anyString())).thenReturn(cohortLoanDetail);
+        when(programLoanDetailOutputPort.findByProgramId(anyString())).thenReturn(programLoanDetail);
+        when(organizationLoanDetailOutputPort.findByOrganizationId(anyString())).thenReturn(organizationLoanDetail);
+
+        when(cohortLoanDetailOutputPort.save(cohortLoanDetail)).thenReturn(cohortLoanDetail);
+        when(programLoanDetailOutputPort.save(programLoanDetail)).thenReturn(programLoanDetail);
+        when(organizationLoanDetailOutputPort.save(organizationLoanDetail)).thenReturn(organizationLoanDetail);
+
+        when(loaneeLoanDetailsOutputPort.findByCohortLoaneeId(any())).thenReturn(loaneeLoanDetail);
 
         when(repaymentHistoryOutputPort.findAllRepaymentHistoryForLoan(loaneeId, cohortId)).thenReturn(new ArrayList<>());
         when(loaneeLoanDetailsOutputPort.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(repaymentHistoryOutputPort.saveAllRepaymentHistory(any())).thenAnswer(invocation -> invocation.getArgument(0));
         doNothing().when(repaymentHistoryOutputPort).deleteMultipleRepaymentHistory(any());
-
-        calculationEngine.calculateLoaneeLoanRepaymentHistory(repayments, loanee, cohort);
+        calculationContext = TestData.createCalculationContext(repayments, loanee, cohort);
+        calculationEngine.calculateLoaneeLoanRepaymentHistory(calculationContext);
 
         verify(repaymentHistoryOutputPort).saveAllRepaymentHistory(any());
         verify(loaneeLoanDetailsOutputPort).save(any());

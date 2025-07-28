@@ -31,10 +31,10 @@ public interface ProgramMapper {
     Program mapFromProgramProjectionToProgram(ProgramProjection programProjection);
 
 
-    @Mapping(target = "totalAmountRequested", source = "totalAmountRequested")
-    @Mapping(target = "totalAmountOutstanding", source = "totalOutstandingAmount")
-    @Mapping(target = "totalAmountDisbursed", source = "totalAmountReceived")
-    @Mapping(target = "totalAmountRepaid", source = "totalAmountRepaid")
+    @Mapping(target = "totalAmountRequested", source = "amountRequested")
+    @Mapping(target = "totalAmountOutstanding", source = "outstandingAmount")
+    @Mapping(target = "totalAmountDisbursed", source = "amountReceived")
+    @Mapping(target = "totalAmountRepaid", source = "amountRepaid")
     @Mapping(target = "id", ignore = true)
     void mapProgramLoanDetailsToProgram(@MappingTarget Program program, ProgramLoanDetail programLoanDetail);
 }

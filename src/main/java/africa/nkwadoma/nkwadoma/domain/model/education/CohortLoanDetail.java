@@ -17,10 +17,11 @@ import java.math.BigDecimal;
 public class CohortLoanDetail {
     private String id;
     private Cohort cohort;
-    private BigDecimal totalAmountRequested = BigDecimal.ZERO;
-    private BigDecimal totalOutstandingAmount = BigDecimal.ZERO;
-    private BigDecimal totalAmountReceived  = BigDecimal.ZERO;
-    private BigDecimal totalAmountRepaid   = BigDecimal.ZERO;
+    private BigDecimal amountRequested = BigDecimal.ZERO;
+    private BigDecimal outstandingAmount = BigDecimal.ZERO;
+    private BigDecimal amountReceived  = BigDecimal.ZERO;
+    private BigDecimal amountRepaid = BigDecimal.ZERO;
+    private BigDecimal interestIncurred  = BigDecimal.ZERO;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(cohort, CohortMessages.CREATED_BY_CANNOT_BE_EMPTY.getMessage());
