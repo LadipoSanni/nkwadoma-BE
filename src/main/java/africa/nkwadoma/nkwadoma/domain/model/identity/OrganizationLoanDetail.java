@@ -16,15 +16,13 @@ import java.math.BigDecimal;
 @Builder
 public class OrganizationLoanDetail {
 
-
-
     private String id;
-    private OrganizationIdentity organization;
     private BigDecimal amountRequested = BigDecimal.ZERO;
     private BigDecimal outstandingAmount = BigDecimal.ZERO;
     private BigDecimal amountReceived = BigDecimal.ZERO;
     private BigDecimal amountRepaid = BigDecimal.ZERO;
     private BigDecimal interestIncurred = BigDecimal.ZERO;
+    private OrganizationIdentity organization;
 
 
     public void validate() throws MeedlException {
