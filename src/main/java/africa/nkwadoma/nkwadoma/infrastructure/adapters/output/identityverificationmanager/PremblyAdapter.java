@@ -10,7 +10,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.pre
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyNinResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityverificationmanager.prembly.PremblyParameter;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityverificationmanager.verificaitonmockdata.VerificationMock;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -68,32 +67,8 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
         MeedlValidator.validateObjectInstance(identityVerification, IdentityMessages.IDENTITY_CANNOT_BE_NULL.getMessage());
         identityVerification.validate();
         identityVerification.validateImageUrl();
-        if (isTestVerification(identityVerification)){
-            log.info("Value is a meant for mocking in verification adapter");
-            return getNinMockVerificationData(identityVerification);
-        }
         log.info("Value is meant for actual call to verification service.");
         return getNinDetails(identityVerification);
-    }
-
-    private PremblyNinResponse getNinMockVerificationData(IdentityVerification identityVerification) {
-        return VerificationMock.createPremblyNinTestResponse(identityVerification.getDecryptedNin());
-    }
-    private PremblyBvnResponse getBvnMockVerificationData(IdentityVerification identityVerification) {
-        return VerificationMock.createPremblyBvnTestResponse(identityVerification.getDecryptedBvn(), identityVerification.getDecryptedNin());
-    }
-
-    private boolean isTestVerification(IdentityVerification identityVerification) {
-        return startWithTestValues(identityVerification.getDecryptedBvn()) && startWithTestValues(identityVerification.getDecryptedNin());
-    }
-
-    private boolean startWithTestValues(String valueToCheck) {
-        log.info("checking if bvn or nin starts with 01 --- {}", valueToCheck);
-        if (valueToCheck == null || valueToCheck.length() != 11 || !valueToCheck.matches("\\d{11}")) {
-            return false;
-        }
-
-        return valueToCheck.startsWith("01");
     }
 
     public PremblyNinResponse getNinDetails(IdentityVerification identityVerification) {
@@ -151,9 +126,6 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
         MeedlValidator.validateObjectInstance(identityVerification, IdentityMessages.IDENTITY_CANNOT_BE_NULL.getMessage());
         identityVerification.validate();
         identityVerification.validateImageUrl();
-        if (isTestVerification(identityVerification)){
-            return getBvnMockVerificationData(identityVerification);
-        }
         return getBvnDetails(identityVerification);
     }
 
