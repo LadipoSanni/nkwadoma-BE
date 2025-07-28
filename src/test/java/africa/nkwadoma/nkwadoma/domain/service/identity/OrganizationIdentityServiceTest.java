@@ -345,9 +345,9 @@ class OrganizationIdentityServiceTest {
     void shouldReturnOrganizationDetails_WhenUserIsOrganizationAdmin() throws MeedlException {
 
         OrganizationLoanDetail loanDetail = OrganizationLoanDetail.builder()
-                .totalAmountRepaid(BigDecimal.valueOf(5000))
-                .totalAmountRequested(BigDecimal.valueOf(5000))
-                .totalOutstandingAmount(BigDecimal.valueOf(10000))
+                .amountRepaid(BigDecimal.valueOf(5000))
+                .amountRequested(BigDecimal.valueOf(5000))
+                .outstandingAmount(BigDecimal.valueOf(10000))
                 .build();
 
         when(userIdentityOutputPort.findById(mockId)).thenReturn(sarah);
@@ -376,9 +376,9 @@ class OrganizationIdentityServiceTest {
         sarah.setRole(IdentityRole.PORTFOLIO_MANAGER);
 
         OrganizationLoanDetail loanDetail = OrganizationLoanDetail.builder()
-                .totalAmountRepaid(BigDecimal.valueOf(5000))
-                .totalAmountRequested(BigDecimal.valueOf(5000))
-                .totalOutstandingAmount(BigDecimal.valueOf(10000))
+                .amountRepaid(BigDecimal.valueOf(5000))
+                .amountRequested(BigDecimal.valueOf(5000))
+                .outstandingAmount(BigDecimal.valueOf(10000))
                 .build();
         when(userIdentityOutputPort.findById(mockId)).thenReturn(sarah);
         when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
