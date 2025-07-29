@@ -145,6 +145,8 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
                 cohortLoaneeId,
                 loanee.getUserIdentity().getFirstName(),
                 loanee.getReferredBy());
+        log.info("cohort loanee id  {}", cohortLoaneeId);
+
         Email email = Email.builder()
                 .context(context)
                 .subject(LoaneeMessages.LOANEE_REFERRAL_SUBJECT.getMessage())
