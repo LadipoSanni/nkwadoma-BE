@@ -104,10 +104,11 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           select
           le.id as id,
           le.startDate as startDate,
-          l.userIdentity.firstName as firstName,
-          l.userIdentity.lastName as lastName,
+          u.firstName as firstName,
+          u.lastName as lastName,
           cle.loaneeLoanDetail.initialDeposit as initialDeposit,
-          lr.createdDate as createdDate, lr.loanAmountRequested as loanAmountRequested,
+          lr.createdDate as createdDate,
+          lr.loanAmountRequested as loanAmountRequested,
           c.name as cohortName, c.startDate as cohortStartDate, loe.dateTimeOffered as offerDate,
           p.name as programName,lr.loanAmountApproved as loanAmountApproved,c.tuitionAmount as tuitionAmount
 
@@ -119,7 +120,9 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           join LoaneeEntity l on l.id = cle.loanee.id
           join CohortEntity c on c.id = cle.cohort.id
           join ProgramEntity p on p.id = c.programId
+          join UserEntity u on u.id = l.userIdentity.id
           join OrganizationEntity o on o.id = p.organizationIdentity.id
+          order by le.startDate desc
     """)
     Page<LoanProjection> findAllLoan(Pageable pageRequest);
 
@@ -146,6 +149,7 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           join ProgramEntity p on p.id = c.programId
           join OrganizationEntity o on o.id = p.organizationIdentity.id
           where o.id = :organizationId
+          order by le.startDate desc
     """)
     Page<LoanProjection> findAllLoanInOrganization(@Param("organizationId") String organizationId, Pageable pageRequest);
 
@@ -223,6 +227,7 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           join ProgramEntity p on p.id = c.programId
           join OrganizationEntity o on o.id = p.organizationIdentity.id
           where u.id = :id
+          order by le.startDate desc
     """)
     Page<LoanProjection> findAllLoanDisburestToLoanee(@Param("id") String id, Pageable pageRequest);
 
