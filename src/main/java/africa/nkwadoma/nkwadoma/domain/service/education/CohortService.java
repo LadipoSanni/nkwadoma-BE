@@ -256,6 +256,7 @@ public class CohortService implements CohortUseCase {
             throw new EducationException(CohortMessages.COHORT_WITH_LOANEE_CANNOT_BE_DELETED.getMessage());
         }
         Cohort cohort = cohortOutputPort.findCohortById(id);
+        cohortLoanDetailOutputPort.deleteByCohortId(cohort.getId());
         cohortOutputPort.deleteCohort(cohort.getId());
         Program program = decreaseNumberOfCohortInProgram(cohort);
         decreaseNumberOfCohortInOrganization(program);
@@ -270,7 +271,10 @@ public class CohortService implements CohortUseCase {
     }
 
     private Program decreaseNumberOfCohortInProgram(Cohort cohort) throws MeedlException {
+        log.info("cohort {}",cohort);
+        log.info("program id {}",cohort.getProgramId());
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
+        log.info("found program {}", program);
         program.setNumberOfCohort(program.getNumberOfCohort() - 1);
         programOutputPort.saveProgram(program);
         return program;
