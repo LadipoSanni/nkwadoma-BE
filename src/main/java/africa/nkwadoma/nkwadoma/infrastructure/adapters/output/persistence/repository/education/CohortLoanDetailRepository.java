@@ -13,4 +13,7 @@ public interface CohortLoanDetailRepository extends JpaRepository<CohortLoanDeta
     @Modifying
     @Query("DELETE FROM CohortLoanDetailEntity cld WHERE cld.cohort.programId = :id")
     void deleteAllByProgramId(String id);
+
+    void deleteByCohortId(String id);
+
 }
