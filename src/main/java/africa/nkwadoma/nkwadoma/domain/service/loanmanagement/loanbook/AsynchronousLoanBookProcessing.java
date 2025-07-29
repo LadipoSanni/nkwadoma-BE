@@ -80,10 +80,6 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     @Override
     public void upLoadUserData(LoanBook loanBook) throws MeedlException {
         loanBookValidator.validateLoanBookObjectValues(loanBook, UploadType.USER_DATA);
-
-        MeedlValidator.validateObjectInstance(loanBook, "Loan book cannot be empty.");
-        loanBook.validateLoanBook();
-
         List<String> requiredHeaders = getUserDataUploadHeaders();
 
         List<Map<String, String>> data = readFile(loanBook, requiredHeaders);
@@ -183,7 +179,6 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
             List<RepaymentHistory> repaymentHistories = entry.getValue();
             Loanee loanee = loaneeOutputPort.findLoaneeById(loaneeId);
             if(ObjectUtils.isNotEmpty(loanee)){
-                BigDecimal currentAmountRepaid = loanCalculationUseCase.calculateCurrentAmountPaid(repaymentHistories);
                 CalculationContext calculationContext = CalculationContext.builder()
                         .cohort(cohort)
                         .loanee(loanee)

@@ -25,11 +25,4 @@ public class LoanBook {
     private MeedlNotification meedlNotification;
     private List<RepaymentHistory> repaymentHistories;
     private List<CohortLoanee> cohortLoanees;
-
-    public void validateLoanBook() throws MeedlException {
-        MeedlValidator.validateObjectInstance(this.getCohort(), "Cohort details can not be empty.");
-        MeedlValidator.validateUUID(this.getCohort().getId(), "Cohort id cannot be null.");
-        MeedlValidator.validateObjectInstance(this.file, "Please provide file to upload");
-
-    }
 }

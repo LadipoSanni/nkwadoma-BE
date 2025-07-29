@@ -364,6 +364,10 @@ public class CalculationEngine implements CalculationEngineUseCase {
     public BigDecimal calculateIncurredInterestPerRepayment(RepaymentHistory repayment, BigDecimal previousOutstandingAmount, LocalDateTime lastDate, LoaneeLoanDetail loaneeLoanDetail) {
         long daysBetween = calculateDaysBetween(lastDate, repayment.getPaymentDateTime());
         log.info("How many days a between the last payment {} \n -------------- >>>>>>>> interest rate {}", daysBetween, loaneeLoanDetail.getInterestRate());
+        if (daysBetween < 0){
+            log.warn("Days between payment is negative {} therefore days between is now 0", daysBetween);
+            daysBetween = 0;
+        }
         BigDecimal incurredInterest = calculateInterest(loaneeLoanDetail.getInterestRate(), previousOutstandingAmount, daysBetween);
         log.info("Previous out standing amount after calculating interest incurred {} outstanding is {}", incurredInterest, previousOutstandingAmount);
         repayment.setInterestIncurred(incurredInterest);
