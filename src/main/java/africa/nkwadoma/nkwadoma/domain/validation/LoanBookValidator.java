@@ -20,6 +20,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -29,6 +30,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -37,12 +39,63 @@ public class LoanBookValidator {
     private final LoaneeOutputPort loaneeOutputPort;
     private final LoanProductOutputPort loanProductOutputPort;
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
-    private final UserIdentityOutputPort userIdentityOutputPort;
     private final CohortUseCase cohortUseCase;
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
-    private final LoaneeUseCase loaneeUseCase;
     private final IdentityManagerOutputPort identityManagerOutputPort;
     private StringBuilder validationErrorMessage;
+
+
+    public void validateLoanBookObjectValues(LoanBook loanBook, UploadType uploadType) throws MeedlException {
+        validationErrorMessage = new StringBuilder();
+
+        if (ObjectUtils.isEmpty(loanBook)){
+            validationErrorMessage.append("Loan book cannot be empty.");
+            log.error("{} Loan book was passed to upload {} ", loanBook, uploadType);
+            try{
+                sendFailureNotificationInitialLevel(uploadType);
+            }catch (MeedlException e){
+                log.warn("Possibly failed to send notification on upload failure initial level of ---> {}", uploadType);
+                log.error("",e);
+            }
+            throw new MeedlException("Loan book cannot be empty");
+        }
+        if (ObjectUtils.isEmpty(loanBook.getCohort())){
+            log.error("Cohort is empty on upload loan book. \n");
+            validationErrorMessage.append("Unable to determine cohort detail. \n");
+        }else if (StringUtils.isEmpty(loanBook.getCohort().getId()) || isNotValidUUID(loanBook.getCohort().getId())){
+            log.error("Cohort id is not a valid uuid or its empty.");
+            validationErrorMessage.append("Invalid cohort id provided. \n");
+        }
+        if (ObjectUtils.isEmpty(loanBook.getFile())){
+            validationErrorMessage.append("Please provide file to upload \n");
+        }
+
+        if (!validationErrorMessage.toString().isBlank()) {
+            log.warn("Validation Error at the top upload layer ---> {}", validationErrorMessage);
+            try{
+                sendFailureNotification(loanBook, uploadType);
+            }catch (MeedlException e){
+                log.warn("Second layer of initial validation --- Possibly failed to send notification on upload failure initial level of ---> {}", uploadType);
+                log.error("",e);
+            }
+            throw new MeedlException("One or multiple Errors Occures.");
+        }
+    }
+
+
+
+    private static boolean isNotValidUUID(String id) {
+        if (id == null || id.isEmpty()) {
+            return true;
+        }
+        try {
+            UUID.fromString(id);
+            return false;
+        } catch (IllegalArgumentException e) {
+            return true;
+        }
+    }
+
 
     public void validateUserDataUploadFile(LoanBook loanBook, List<Map<String, String>> data, List<String> requiredHeaders) throws MeedlException {
         validationErrorMessage = new StringBuilder();
@@ -265,22 +318,31 @@ public class LoanBookValidator {
 
 
     private void hasFailure(LoanBook loanBook, UploadType uploadType) throws MeedlException {
-        if (validationErrorMessage!= null && !validationErrorMessage.toString().isBlank()) {
+        if (ObjectUtils.isNotEmpty(validationErrorMessage) && !validationErrorMessage.toString().isBlank()) {
             log.warn("Validation Error ---> {}", validationErrorMessage);
-            buildFailureNotification(loanBook, uploadType);
+            sendFailureNotification(loanBook, uploadType);
             throw new MeedlException("One or multiple Errors Occures.");
         }
         log.info("No errors was found during the upload.");
     }
 
-    private void buildFailureNotification(LoanBook loanBook, UploadType uploadType) throws MeedlException {
+    private void sendFailureNotification(LoanBook loanBook, UploadType uploadType) throws MeedlException {
         UserIdentity foundActor = identityManagerOutputPort.getUserById(loanBook.getActorId());
         if (uploadType.equals(UploadType.REPAYMENT)){
             log.info("Notify pm of REPAYMENT data upload failure");
-            asynchronousNotificationOutputPort.notifyPmForLoanRepaymentUploadFailure(foundActor, validationErrorMessage, loanBook.getFile().getName());
+            asynchronousNotificationOutputPort.notifyPmForLoanRepaymentUploadFailure(foundActor, validationErrorMessage, loanBook);
         }else if (uploadType.equals(UploadType.USER_DATA)){
             log.info("Notify pm of USER data upload failure");
             asynchronousNotificationOutputPort.notifyPmForUserDataUploadFailure(foundActor, validationErrorMessage, loanBook);
+        }
+    }
+    private void sendFailureNotificationInitialLevel(UploadType uploadType) throws MeedlException {
+        if (uploadType.equals(UploadType.REPAYMENT)){
+            log.info("Notify all pm of REPAYMENT data upload failure with possible malicious attempt");
+            asynchronousNotificationOutputPort.notifyAllPmForLoanRepaymentUploadFailure(validationErrorMessage);
+        }else if (uploadType.equals(UploadType.USER_DATA)){
+            log.info("Notify pm of USER data upload failure, with possible malicious attempt");
+            asynchronousNotificationOutputPort.notifyAllPmForUserDataUploadFailure(validationErrorMessage);
         }
     }
 
@@ -407,4 +469,5 @@ public class LoanBookValidator {
 //        throw new MeedlException("Date doesn't match format. Date: "+dateStr + " Example format : 21/10/2019");
         return null;
     }
+
 }
