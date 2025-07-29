@@ -11,6 +11,7 @@ public interface LoanProductEntityRepository extends JpaRepository<LoanProductEn
     boolean existsByName(String name);
 
     Optional<LoanProductEntity> findByName(String name);
+    Optional<LoanProductEntity> findByNameIgnoreCase(String name);
 
     Page<LoanProductEntity> findByNameContainingIgnoreCase(String loanProductName, Pageable pageable);
     boolean existsByNameIgnoreCase(String name);
