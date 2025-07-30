@@ -76,10 +76,13 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
 
     @Override
     public void upLoadUserData(LoanBook loanBook) throws MeedlException {
-        loanBookValidator.validateLoanBookObjectValues(loanBook, UploadType.USER_DATA);
+        loanBookValidator.validateLoanBookObjectValues(loanBook);
         List<String> requiredHeaders = getUserDataUploadHeaders();
 
-        List<Map<String, String>> data = readFile(loanBook, requiredHeaders);
+        loanBook.setUploadType(UploadType.USER_DATA);
+        loanBook.setRequiredHeaders(requiredHeaders);
+
+        List<Map<String, String>> data = readFile(loanBook);
         log.info("The data at the top layer {}", data);
         loanBookValidator.validateUserDataUploadFile(loanBook, data, requiredHeaders);
         log.info("Loan book read is {}", data);
@@ -100,11 +103,13 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
 
     @Override
     public void uploadRepaymentHistory(LoanBook repaymentHistoryBook) throws MeedlException {
-        loanBookValidator.validateLoanBookObjectValues(repaymentHistoryBook, UploadType.REPAYMENT);
-
+        loanBookValidator.validateLoanBookObjectValues(repaymentHistoryBook);
         List<String> requiredHeaders = getRepaymentRecordUploadRequiredHeaders();
 
-        List<Map<String, String>>  data = readFile(repaymentHistoryBook, requiredHeaders);
+        repaymentHistoryBook.setUploadType(UploadType.REPAYMENT);
+        repaymentHistoryBook.setRequiredHeaders(requiredHeaders);
+
+        List<Map<String, String>>  data = readFile(repaymentHistoryBook);
         repaymentHistoryBook.setMeedlNotification(new MeedlNotification());
         log.info("Repayment record book read is {}", data);
 
@@ -582,12 +587,12 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     }
 
 
-    private List<Map<String, String>> readFile(LoanBook loanBook, List<String> requiredHeaders) throws MeedlException {
+    private List<Map<String, String>> readFile(LoanBook loanBook) throws MeedlException {
         List<Map<String, String>> data;
         if (loanBook.getFile().getName().endsWith(".csv")) {
             log.info("the file type is .csv");
             try {
-                data = validateAndReadCSV(loanBook, requiredHeaders);
+                data = validateAndReadCSV(loanBook);
             }catch (IOException e){
                 log.error("Error occurred reading csv",e);
                 throw new MeedlException(e.getMessage());
@@ -607,13 +612,13 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         return data;
     }
 
-    private List<Map<String, String>> validateAndReadCSV(LoanBook loanBook, List<String> requiredHeaders) throws IOException, MeedlException {
+    private List<Map<String, String>> validateAndReadCSV(LoanBook loanBook) throws IOException, MeedlException {
         List<Map<String, String>> records = new ArrayList<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(loanBook.getFile()))) {
             String headerLine = br.readLine();
 
-            Map<String, Integer> headerIndexMap = getAndValidateFileHeaderMap(requiredHeaders, headerLine);
+            Map<String, Integer> headerIndexMap = getAndValidateFileHeaderMap(loanBook, headerLine);
 
             String line;
             while ((line = br.readLine()) != null) {
@@ -623,7 +628,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                 log.info("The row line to get has {}", Arrays.toString(values));
                 Map<String, String> rowMap = new HashMap<>();
 
-                for (String header : requiredHeaders) {
+                for (String header : loanBook.getRequiredHeaders()) {
                     log.info("The header to get its value : {}", header);
                     if (!headerIndexMap.containsKey(header)) {
                         log.warn("Skipping missing header: {}", header);
@@ -650,7 +655,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         return records;
     }
 
-    private static Map<String, Integer> getAndValidateFileHeaderMap(List<String> requiredHeaders, String headerLine) throws MeedlException {
+    private Map<String, Integer> getAndValidateFileHeaderMap(LoanBook loanBook, String headerLine) throws MeedlException {
         if (headerLine == null) {
             log.info("CSV file is empty or missing headers.");
             throw new LoanException("CSV file is empty or missing headers.");
@@ -663,7 +668,8 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
 
         extractFileHeaderMap(headers, headerIndexMap);
 
-        validateFileHeader(requiredHeaders, headerIndexMap);
+        loanBookValidator.validateFileHeader(loanBook, headerIndexMap);
+//        validateFileHeader(requiredHeaders, headerIndexMap);
         return headerIndexMap;
     }
 
@@ -686,7 +692,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         log.info("Validation file headers with the required headers which are : {}", requiredHeaders);
         for (String required : requiredHeaders) {
             if (required.equals("bvn") || required.equals("nin")
-                    || required.equals("modeofpayment") || required.equals("middlename")){
+                    || required.equals("middlename")){
                 continue;
             }
             if (!headerIndexMap.containsKey(required)) {
