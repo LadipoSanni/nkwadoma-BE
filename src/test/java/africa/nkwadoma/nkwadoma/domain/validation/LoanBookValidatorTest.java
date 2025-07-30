@@ -32,7 +32,7 @@ class LoanBookValidatorTest {
 
     @BeforeEach
     public void setUp(){
-        loanBookValidator.setValidationErrorMessage();
+        loanBookValidator.initializeValidationErrorMessage();
     }
 
     private Map<String, String> createRow(String key, String value) {

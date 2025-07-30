@@ -83,7 +83,6 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         loanBook.setRequiredHeaders(requiredHeaders);
 
         List<Map<String, String>> data = readFile(loanBook);
-        log.info("The data at the top layer {}", data);
         loanBookValidator.validateUserDataUploadFile(loanBook, data, requiredHeaders);
         log.info("Loan book read is {}", data);
 
@@ -92,7 +91,6 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         convertedCohortLoanees = addUploadedLoaneeToCohort(convertedCohortLoanees);
 
         log.info("Converted loanees size {}", convertedCohortLoanees.size());
-//        validateStartDates(convertedCohortLoanees, savedCohort);
         loanBook.setCohortLoanees(convertedCohortLoanees);
         referCohort(loanBook);
         completeLoanProcessing(loanBook);
@@ -122,7 +120,6 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         Set<String> loaneesThatMadePayment = getSetOfLoanees(convertedRepaymentHistories);
         log.info("Set of loanees that made payments size : {}, set",loaneesThatMadePayment.size());
         Map<String, List<RepaymentHistory>> mapOfRepaymentHistoriesForEachLoanee = getRepaymentHistoriesForLoanees(loaneesThatMadePayment, convertedRepaymentHistories);
-//        printRepaymentCountsPerLoanee(mapOfRepaymentHistoriesForEachLoanee);
         processRepaymentCalculation(mapOfRepaymentHistoriesForEachLoanee, repaymentHistoryBook.getCohort());
         sendRepaymentUploadSuccessNotification(repaymentHistoryBook);
 
@@ -137,22 +134,6 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         asynchronousNotificationOutputPort.notifyPmOnRepaymentUploadSuccess(foundActor, loanBook);
     }
 
-    private void validateStartDates(List<Loanee> convertedLoanees, Cohort savedCohort) throws MeedlException {
-        for (Loanee loanee : convertedLoanees) {
-            validateStartDate(loanee.getUpdatedAt(), savedCohort.getStartDate());
-        }
-
-    }
-
-    private void validateStartDate(LocalDateTime loanStartDate, LocalDate cohortStartDate) throws MeedlException {
-        LocalDate loanStartAsDate = loanStartDate.toLocalDate();
-
-        if (loanStartAsDate.isBefore(cohortStartDate)) {
-            log.info("Loan start date {} cannot be before cohort start date {}.", loanStartAsDate, cohortStartDate);
-            throw new LoanException("Loan start date " +loanStartAsDate +" cannot be before cohort start date "+cohortStartDate );
-        }
-    }
-
     private void updateLoaneeCount(Cohort savedCohort, List<CohortLoanee> loanees) throws MeedlException {
         savedCohort = findCohort(savedCohort);
         log.info("Number of loanees in a cohort on upload {}", savedCohort.getNumberOfLoanees() + loanees.size());
@@ -164,14 +145,6 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         cohortOutputPort.save(savedCohort);
         loaneeUseCase.increaseNumberOfLoaneesInOrganization(savedCohort, loanees.size());
         loaneeUseCase.increaseNumberOfLoaneesInProgram(savedCohort, loanees.size());
-    }
-    public void printRepaymentCountsPerLoanee(Map<String, List<RepaymentHistory>> mapOfRepaymentHistoriesForEachLoanee) {
-        for (Map.Entry<String, List<RepaymentHistory>> entry : mapOfRepaymentHistoriesForEachLoanee.entrySet()) {
-            String loaneeId = entry.getKey();
-            int numberOfRepayments = entry.getValue() != null ? entry.getValue().size() : 0;
-
-            log.info("Loanee: {} | Repayments: {}", loaneeId, numberOfRepayments);
-        }
     }
 
     public void processRepaymentCalculation(
@@ -586,30 +559,52 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         }
     }
 
-
     private List<Map<String, String>> readFile(LoanBook loanBook) throws MeedlException {
         List<Map<String, String>> data;
-        if (loanBook.getFile().getName().endsWith(".csv")) {
-            log.info("the file type is .csv");
-            try {
+        loanBookValidator.validateFileType(loanBook);
+        File file = loanBook.getFile();
+
+        try {
+            if (file.getName().endsWith(".csv")) {
+                log.info("The file type is .csv");
                 data = validateAndReadCSV(loanBook);
-            }catch (IOException e){
-                log.error("Error occurred reading csv",e);
-                throw new MeedlException(e.getMessage());
+            } else if (file.getName().endsWith(".xlsx") || file.getName().endsWith(".xls")) {
+                log.info("The file is an Excel file, converting to CSV");
+                File convertedCsv = convertExcelToCsv(file);
+                loanBook.setFile(convertedCsv);
+                data = validateAndReadCSV(loanBook);
+                convertedCsv.deleteOnExit();
+            } else {
+                log.error("Unsupported file type.");
+                throw new LoanException("Unsupported file type.");
             }
-        } else if (loanBook.getFile().getName().endsWith(".xlsx")) {
-            try{
-                log.info("the file is a .xlsx file");
-                data = validateAndReadExcel(loanBook.getFile());
-            }catch (IOException e){
-                log.error("Error occurred reading excel",e);
-                throw new LoanException(e.getMessage());
-            }
-        } else {
-            log.error("Unsupported file type.");
-            throw new LoanException("Unsupported file type.");
+        } catch (IOException e) {
+            log.error("Error occurred while processing file", e);
+            throw new MeedlException(e.getMessage());
         }
+
         return data;
+    }
+    private File convertExcelToCsv(File excelFile) throws IOException {
+        Workbook workbook = WorkbookFactory.create(excelFile);
+        Sheet sheet = workbook.getSheetAt(0);
+
+        File tempCsvFile = File.createTempFile("converted-", ".csv");
+        try (PrintWriter writer = new PrintWriter(tempCsvFile)) {
+            for (Row row : sheet) {
+                List<String> cells = new ArrayList<>();
+                for (Cell cell : row) {
+                    cell.setCellType(CellType.STRING);
+                    cells.add(cell.getStringCellValue().replaceAll(",", " "));
+                }
+                String csvLine = String.join(",", cells);
+                log.info("Writing CSV line: {}", csvLine);
+                writer.println(csvLine);
+            }
+        } finally {
+            workbook.close();
+        }
+        return tempCsvFile;
     }
 
     private List<Map<String, String>> validateAndReadCSV(LoanBook loanBook) throws IOException, MeedlException {

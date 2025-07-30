@@ -79,10 +79,9 @@ public class LoanBookValidator {
                 log.warn("Second layer of initial validation --- Possibly failed to send notification on upload failure initial level of ---> {}", loanBook.getUploadType());
                 log.error("",e);
             }
-            throw new MeedlException("One or multiple Errors Occures.");
+            throw new MeedlException("One or multiple Errors Occurred validating cohort/file initial validations. ");
         }
     }
-
 
 
     private static boolean isNotValidUUID(String id) {
@@ -121,9 +120,7 @@ public class LoanBookValidator {
                 validateElevenDigit(row.get("nin"), "Invalid nin row : "+rowCount);
             }
             validatePhoneNumber(row.get("phonenumber"), "Invalid phone number row : "+rowCount);
-
             validateLoaneeDoesNotExistInTheSameCohort(row.get("email"), loanBook.getCohort(), rowCount );
-
             validateName(rowCount, row.get("firstname"), "First name");
             validateName(rowCount, row.get("lastname"), "Last name");
 
@@ -131,7 +128,6 @@ public class LoanBookValidator {
                 validateName(rowCount, row.get("middlename"), "Middle name");
             }
             validateLoanProductExist(row.get("loanproduct"), rowCount);
-
             log.info("initial deposit --- {}, amount requested ---- {}, amount received {}",row.get("initialdeposit"), row.get("amountrequested"), row.get("amountreceived"));
             validateMonetaryValue(row.get("initialdeposit"), rowCount);
             validateMonetaryValue(row.get("amountrequested"), rowCount);
@@ -172,11 +168,6 @@ public class LoanBookValidator {
                     .append("\n");
         }
     }
-
-    public void setValidationErrorMessage(){
-        validationErrorMessage = new StringBuilder();
-    }
-
 
     private void validateInitialDepositAndAmountApproved(String initialDepositString, String amountReceivedString, int rowCount){
         boolean isNotInitialDepositValid = moneyStringIsNotValid(initialDepositString);
@@ -337,7 +328,7 @@ public class LoanBookValidator {
         if (ObjectUtils.isNotEmpty(validationErrorMessage) && !validationErrorMessage.toString().isBlank()) {
             log.warn("Validation Error ---> {}", validationErrorMessage);
             sendFailureNotification(loanBook);
-            throw new MeedlException("One or multiple Errors Occures.");
+            throw new MeedlException("One or multiple Errors Occurred!");
         }
         log.info("No errors was found during the upload.");
     }
@@ -488,9 +479,7 @@ public class LoanBookValidator {
 
     public void validateFileHeader(LoanBook loanBook, Map<String, Integer> headerIndexMap) throws MeedlException {
         log.info("Validation file headers with the required headers which are : {}", loanBook.getRequiredHeaders());
-        if (ObjectUtils.isEmpty(validationErrorMessage)){
-            validationErrorMessage = new StringBuilder();
-        }
+        initializeValidationErrorMessage();
         for (String required : loanBook.getRequiredHeaders()) {
             if (required.equals("bvn") || required.equals("nin")
                     || required.equals("middlename")){
@@ -503,10 +492,33 @@ public class LoanBookValidator {
                         .append(" \n");
             }
         }
+        log.error("Failed to read file due to missing column headers {} for upload type {}", validationErrorMessage, loanBook.getUploadType());
+        endProcessIfValidationFailed(loanBook);
+    }
+
+    private void endProcessIfValidationFailed(LoanBook loanBook) throws MeedlException {
         if (ObjectUtils.isNotEmpty(validationErrorMessage)){
             sendFailureNotification(loanBook);
-            log.error("Failed to read file due to missing column headers {}", validationErrorMessage);
-            throw new MeedlException("Missing require columns");
+            log.error("Failed to read file due to \n{} \nFor upload type {}", validationErrorMessage, loanBook.getUploadType());
+            throw new MeedlException("One or multiple errors occurred!");
+        }
+    }
+
+    public void initializeValidationErrorMessage() {
+        if (ObjectUtils.isEmpty(validationErrorMessage)){
+            validationErrorMessage = new StringBuilder();
+
+        }
+    }
+
+    public void validateFileType(LoanBook loanBook) throws MeedlException {
+        log.info("Validating file type for upload {}", loanBook.getUploadType());
+        if (loanBook.getFile().getName().endsWith(".xlsx") || loanBook.getFile().getName().endsWith(".xls")){
+            initializeValidationErrorMessage();
+            validationErrorMessage.append("Unable to process file upload. Only csv format currently supported. Other formats are still in development.")
+                    .append("\n");
+            log.error("Unable to read file due to file upload type.");
+            endProcessIfValidationFailed(loanBook);
         }
     }
 }
