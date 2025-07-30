@@ -25,7 +25,12 @@ public interface LoaneeRepository extends JpaRepository<LoaneeEntity,String> {
             @Param("loaneeIds") List<String> loaneeIds
     );
 
-    @Query("select l from CohortLoaneeEntity l where l.id = :id ")
+    @Query("""
+        select l from LoaneeEntity l
+                join CohortLoaneeEntity cle on  cle.loanee.id = l.id
+                        where cle.cohort.id = :id 
+                                """)
+
     List<LoaneeEntity> findAllLoaneesByCohortId(String id);
 
     @Query("""

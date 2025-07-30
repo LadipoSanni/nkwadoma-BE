@@ -1,0 +1,1 @@
+ALTER TABLE meedl_notification_entity DROP CONSTRAINT IF EXISTS meedl_notification_entity_notification_flag_check;
