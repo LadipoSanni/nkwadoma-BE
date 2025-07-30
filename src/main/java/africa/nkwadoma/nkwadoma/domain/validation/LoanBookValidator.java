@@ -98,7 +98,7 @@ public class LoanBookValidator {
 
 
     public void validateUserDataUploadFile(LoanBook loanBook, List<Map<String, String>> data, List<String> requiredHeaders) throws MeedlException {
-        validationErrorMessage = new StringBuilder();
+        initializeValidationErrorMessage();
         boolean isValidCohort = validateCohortDetails(loanBook.getCohort());
 
         if (isValidCohort){
@@ -134,6 +134,7 @@ public class LoanBookValidator {
             validateMonetaryValue(row.get("amountreceived"), rowCount);
 
             validateInitialDepositAndAmountApproved(row.get("initialdeposit"), row.get("amountreceived"), rowCount);
+            validateDateTimeFormat(row, "loanstartdate", rowCount);
             rowCount++;
         }
         log.info("Done validating user data during upload ... ");
@@ -353,7 +354,7 @@ public class LoanBookValidator {
         }
     }
 
-    public void validateDateTimeFormat(Map<String, String> row, String dateName, int rowCount) throws MeedlException {
+    public void validateDateTimeFormat(Map<String, String> row, String dateName, int rowCount) {
                 String dateStr = row.get(dateName);
 
                 LocalDateTime parsedDate = parseFlexibleDateTime(dateStr, rowCount);
@@ -439,9 +440,10 @@ public class LoanBookValidator {
         log.info("Loanee with email {} on row {} exist. ", email, rowCount);
 
     }
-    private LocalDateTime parseFlexibleDateTime(String dateStr, int rowCount) throws MeedlException {
+    private LocalDateTime parseFlexibleDateTime(String dateStr, int rowCount) {
         log.info("Repayment date before formating in validation service {}", dateStr);
         if (dateStr == null || MeedlValidator.isEmptyString(dateStr)) {
+            validationErrorMessage.append("Empty date value in file. \n");
             return null;
         }
 
