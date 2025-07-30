@@ -109,11 +109,17 @@ public class LoanBookValidator {
 
     private void validateLoaneeDetails(LoanBook loanBook, List<Map<String, String>> data) {
         int rowCount = 1;
+        log.info("started the validation of loanee data during upload");
         for (Map<String, String> row : data) {
-
-            validateElevenDigit(row.get("bvn"), "Invalid bvn : "+rowCount);
-            validateElevenDigit(row.get("nin"), "Invalid nin row : "+rowCount);
-            validateElevenDigit(row.get("phonenumber"), "Invalid phone number row : "+rowCount);
+            if (StringUtils.isNotEmpty(row.get("bvn"))){
+                log.info("Found bvn in the filed uploaded during validation {}",row.get("bvn"));
+                validateElevenDigit(row.get("bvn"), "Invalid bvn : "+rowCount);
+            }
+            if (StringUtils.isNotEmpty(row.get("nin"))){
+                log.info("Found nin in the filed uploaded during validation {}",row.get("nin"));
+                validateElevenDigit(row.get("nin"), "Invalid nin row : "+rowCount);
+            }
+            validatePhoneNumber(row.get("phonenumber"), "Invalid phone number row : "+rowCount);
 
             validateLoaneeDoesNotExistInTheSameCohort(row.get("email"), loanBook.getCohort(), rowCount );
 
@@ -133,6 +139,7 @@ public class LoanBookValidator {
             validateInitialDepositAndAmountApproved(row.get("initialdeposit"), row.get("amountreceived"), rowCount);
             rowCount++;
         }
+        log.info("Done validating user data during upload ... ");
     }
 
     private void validateLoaneeDoesNotExistInTheSameCohort(String email, Cohort cohort, int rowCount) {
@@ -238,8 +245,11 @@ public class LoanBookValidator {
         }
     }
 
-    private void validateElevenDigit(String elevenDigitNumber, String errorMessage)  {
+    private void validatePhoneNumber(String elevenDigitNumber, String errorMessage)  {
         elevenDigitNumber = formatPhoneNumber(elevenDigitNumber);
+        validateElevenDigit(elevenDigitNumber, errorMessage);
+    }
+    private void validateElevenDigit(String elevenDigitNumber, String errorMessage)  {
         try {
             MeedlValidator.validateElevenDigits(elevenDigitNumber, errorMessage);
         } catch (MeedlException e) {

@@ -4,12 +4,10 @@ import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.AsynchronousLoanBookProcessingUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.LoanUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.RepaymentHistoryUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loancalculation.CalculationEngineUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationLoanDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanReferralOutputPort;
@@ -67,7 +65,6 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     private final RespondToLoanReferralUseCase respondToLoanReferralUseCase;
     private final LoanRequestUseCase loanRequestUseCase;
     private final LoanOfferUseCase loanOfferUseCase;
-    private final RepaymentHistoryUseCase repaymentHistoryUseCase;
     private final LoanProductOutputPort loanProductOutputPort;
     private final CohortOutputPort cohortOutputPort;
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
@@ -83,6 +80,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         List<String> requiredHeaders = getUserDataUploadHeaders();
 
         List<Map<String, String>> data = readFile(loanBook, requiredHeaders);
+        log.info("The data at the top layer {}", data);
         loanBookValidator.validateUserDataUploadFile(loanBook, data, requiredHeaders);
         log.info("Loan book read is {}", data);
 
@@ -97,6 +95,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         completeLoanProcessing(loanBook);
         updateLoaneeCount(savedCohort, convertedCohortLoanees);
         sendUserDataUploadSuccessNotification(loanBook);
+        log.info("Upload of user data done!");
     }
 
     @Override
@@ -432,6 +431,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     List<CohortLoanee> convertToLoanees(List<Map<String, String>> data, Cohort cohort, String actorId) throws MeedlException {
         List<CohortLoanee> cohortLoanees = new ArrayList<>();
         for (Map<String, String> row : data) {
+            log.info("Bvn {} and nin {} for each loanee", row.get("bvn"), row.get("nin"));
             LocalDateTime loanStartDate = parseFlexibleDateTime(row.get("loanstartdate"), row.get("email"));
             UserIdentity userIdentity = UserIdentity.builder()
                     .firstName(row.get("firstname"))
@@ -772,7 +772,8 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                 "email", "phonenumber", "initialdeposit",
                 "loanstartdate",
                 "amountrequested", "amountreceived",
-                "bvn", "nin", "loanproduct");
+                "bvn", "nin",
+                "loanproduct");
     }
     private List<String> getRepaymentRecordUploadRequiredHeaders() {
         return List.of(

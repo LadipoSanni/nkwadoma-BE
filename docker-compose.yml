@@ -22,29 +22,29 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
 
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    restart: always
-    ports:
-      - "8050:80"
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@pgadmin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    depends_on:
-      - postgres
+#  pgadmin:
+#    image: dpage/pgadmin4:latest
+#    restart: always
+#    ports:
+#      - "8050:80"
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: admin@pgadmin.com
+#      PGADMIN_DEFAULT_PASSWORD: admin
+#    depends_on:
+#      - postgres
 
-  nkwadoma-app:
-    image: ${DOCKER_USERNAME}/nkwadoma:alpha
-    restart: unless-stopped
-    ports:
-      - "8768:8768"
-    env_file:
-      - /home/cloud-group/nkwadoma-systest.env
-    networks:
-      - meedl-network
-    depends_on:
-      - postgres
-      - keycloak
+#  nkwadoma-app:
+#    image: ${DOCKER_USERNAME}/nkwadoma:alpha
+#    restart: unless-stopped
+#    ports:
+#      - "8768:8768"
+#    env_file:
+#      - /home/cloud-group/nkwadoma-systest.env
+#    networks:
+#      - meedl-network
+#    depends_on:
+#      - postgres
+#      - keycloak
 
 volumes:
   pg_data:
