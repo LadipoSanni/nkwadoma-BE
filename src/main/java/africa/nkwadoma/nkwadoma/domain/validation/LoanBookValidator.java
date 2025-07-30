@@ -264,7 +264,8 @@ public class LoanBookValidator {
             validationErrorMessage.append("Loan product with name ")
                     .append(loanProductName)
                     .append(" does not exist. Row ")
-                    .append(rowCount);
+                    .append(rowCount)
+                    .append(".\n");
 //            throw new MeedlException("Loan product with name " + loanProductName + " does not exist  ");
         }
         log.info("Loan product exists with name {}", loanProductName);
