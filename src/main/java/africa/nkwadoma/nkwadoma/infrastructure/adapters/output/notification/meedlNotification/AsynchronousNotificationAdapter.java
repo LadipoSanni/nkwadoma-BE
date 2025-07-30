@@ -109,12 +109,52 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
     }
 
     @Override
-    public void notifyPmForLoanRepaymentUploadFailure(UserIdentity foundActor, StringBuilder validationErrorMessage, String fileName) throws MeedlException {
+    public void notifyAllPmForLoanRepaymentUploadFailure(StringBuilder validationErrorMessage) throws MeedlException {
+        List<UserIdentity> portfolioManagers = userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
+        for (UserIdentity portfolioManager : portfolioManagers) {
+            MeedlNotification notification = MeedlNotification.builder()
+                    .user(portfolioManager)
+                    .timestamp(LocalDateTime.now())
+                    .contentId(portfolioManager.getId())
+                    .title("Failed to upload repayment history")
+                    .callToAction(Boolean.TRUE)
+                    .senderMail(portfolioManager.getEmail())
+                    .senderFullName(portfolioManager.getFirstName() + " "+ portfolioManager.getLastName())
+                    .contentDetail(validationErrorMessage.toString())
+                    .notificationFlag(NotificationFlag.REPAYMENT_UPLOAD_FAILURE)
+                    .build();
+            meedlNotificationUsecase.sendNotification(notification);
+        }
+        log.info("Failure notification has been sent to all on possible malicious upload of repayment history. ");
+    }
+    @Override
+    public void notifyAllPmForUserDataUploadFailure(StringBuilder validationErrorMessage) throws MeedlException {
+        List<UserIdentity> portfolioManagers = userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
+        for (UserIdentity portfolioManager : portfolioManagers) {
+            MeedlNotification notification = MeedlNotification.builder()
+                    .user(portfolioManager)
+                    .timestamp(LocalDateTime.now())
+                    .contentId(portfolioManager.getId())
+                    .title("Failed to upload User data")
+                    .callToAction(Boolean.TRUE)
+                    .senderMail(portfolioManager.getEmail())
+                    .senderFullName(portfolioManager.getFirstName() + " "+ portfolioManager.getLastName())
+                    .contentDetail(validationErrorMessage.toString())
+                    .notificationFlag(NotificationFlag.LOANEE_DATA_UPLOAD_FAILURE)
+                    .build();
+            meedlNotificationUsecase.sendNotification(notification);
+        }
+        log.info("Failure notification has been sent to all on possible malicious upload of user data. ");
+    }
+    @Override
+    public void notifyPmForLoanRepaymentUploadFailure(UserIdentity foundActor, StringBuilder validationErrorMessage, LoanBook loanBook) throws MeedlException {
+        String contentId = getContentIdFromLoanBook(loanBook.getActorId(), loanBook);
+
         MeedlNotification meedlNotification = MeedlNotification.builder()
                 .user(foundActor)
                 .timestamp(LocalDateTime.now())
-                .contentId(foundActor.getId())
-                .title("Failed to upload repayment history: " + fileName)
+                .contentId(contentId)
+                .title("Failed to upload repayment history: " + loanBook.getFile().getName())
                 .callToAction(Boolean.FALSE)
                 .senderMail(foundActor.getEmail())
                 .senderFullName(foundActor.getFirstName())

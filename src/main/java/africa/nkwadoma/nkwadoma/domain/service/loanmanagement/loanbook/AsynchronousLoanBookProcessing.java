@@ -17,6 +17,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLo
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.UploadType;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanDecision;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
@@ -26,10 +27,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanee.UploadedStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanRequestStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
-import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
-import africa.nkwadoma.nkwadoma.domain.model.education.ProgramLoanDetail;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.CalculationContext;
@@ -78,15 +76,10 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
     private final LoanUseCase loanUseCase;
     private final AesOutputPort aesOutputPort;
-    private final CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
-    private final ProgramLoanDetailOutputPort programLoanDetailOutputPort;
-    private final OrganizationLoanDetailOutputPort organizationLoanDetailOutputPort;
 
     @Override
     public void upLoadUserData(LoanBook loanBook) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanBook, "Loan book cannot be empty.");
-        loanBook.validateLoanBook();
-
+        loanBookValidator.validateLoanBookObjectValues(loanBook, UploadType.USER_DATA);
         List<String> requiredHeaders = getUserDataUploadHeaders();
 
         List<Map<String, String>> data = readFile(loanBook, requiredHeaders);
@@ -108,8 +101,8 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
 
     @Override
     public void uploadRepaymentHistory(LoanBook repaymentHistoryBook) throws MeedlException {
-        MeedlValidator.validateObjectInstance(repaymentHistoryBook, "Repayment record book cannot be empty.");
-        repaymentHistoryBook.validateRepaymentRecord();
+        loanBookValidator.validateLoanBookObjectValues(repaymentHistoryBook, UploadType.REPAYMENT);
+
         List<String> requiredHeaders = getRepaymentRecordUploadRequiredHeaders();
 
         List<Map<String, String>>  data = readFile(repaymentHistoryBook, requiredHeaders);
@@ -186,7 +179,6 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
             List<RepaymentHistory> repaymentHistories = entry.getValue();
             Loanee loanee = loaneeOutputPort.findLoaneeById(loaneeId);
             if(ObjectUtils.isNotEmpty(loanee)){
-                BigDecimal currentAmountRepaid = loanCalculationUseCase.calculateCurrentAmountPaid(repaymentHistories);
                 CalculationContext calculationContext = CalculationContext.builder()
                         .cohort(cohort)
                         .loanee(loanee)

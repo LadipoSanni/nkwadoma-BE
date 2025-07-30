@@ -14,7 +14,7 @@ public class WhiteList {
             "/actuator/health",
             "/auth/login",
             "/auth/password/create",
-            "/auth/password/forgotPassword",
+            "/auth/password/forgotPassword/**",
             "/auth/refresh-token",
             "/auth/password/reset",
             "/identity/verification/failure-record/create",

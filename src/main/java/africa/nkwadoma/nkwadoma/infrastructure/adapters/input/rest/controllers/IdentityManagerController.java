@@ -80,7 +80,7 @@ public class IdentityManagerController {
 
     @PostMapping("auth/password/create")
     public ResponseEntity<ApiResponse<?>> createPassword(@RequestBody @Valid PasswordCreateRequest passwordCreateRequest) throws MeedlException {
-        log.info("got the request {}", passwordCreateRequest.getPassword());
+        log.info("got the request to create password {}", passwordCreateRequest.getPassword());
         UserIdentity userIdentity = identityMapper.toPasswordCreateRequest(passwordCreateRequest);
         userIdentity = createUserUseCase.createPassword(userIdentity.getEmail(), userIdentity.getPassword());
         if (ObjectUtils.isNotEmpty(userIdentity) && ObjectUtils.isNotEmpty(userIdentity.getRole())){
@@ -125,8 +125,9 @@ public class IdentityManagerController {
     }
 
 
-    @PostMapping("auth/password/forgotPassword")
-    public ResponseEntity<ApiResponse<?>> forgotPassword(@RequestParam String email) throws MeedlException {
+    @PostMapping("auth/password/forgotPassword/{email}")
+    public ResponseEntity<ApiResponse<?>> forgotPassword(@PathVariable String email) throws MeedlException {
+        log.info("got the request {}", email);
         createUserUseCase.forgotPassword(email);
         return ResponseEntity.ok(ApiResponse.<String>builder().
                 message("Please check your email to create new password. "+email).

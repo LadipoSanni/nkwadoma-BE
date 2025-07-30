@@ -826,7 +826,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             loanDetails = loans.map(loanMetricsMapper::mapToLoans);
             return loanDetails;
         }
-        throw new LoanException(loanOffer.getType().name()+" is not a loan type");
+         throw new LoanException(loanOffer.getType().name()+" is not a loan type");
     }
 
 

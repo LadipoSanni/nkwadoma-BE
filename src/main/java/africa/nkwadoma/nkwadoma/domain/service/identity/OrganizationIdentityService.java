@@ -273,6 +273,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         MeedlValidator.validateObjectInstance(organizationIdentity, OrganizationMessages.ORGANIZATION_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validateObjectInstance(organizationIdentity.getUserIdentity(), UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
         UserIdentity foundUserIdentity = userIdentityOutputPort.findById(organizationIdentity.getUserIdentity().getId());
+        log.info("Updating organization status during create password flow {} \n -------------------------------------> found user role is {}", organizationIdentity, foundUserIdentity.getRole());
         if(ObjectUtils.isNotEmpty(foundUserIdentity) &&
                 foundUserIdentity.getRole() == IdentityRole.ORGANIZATION_ADMIN ||
                 foundUserIdentity.getRole() == IdentityRole.PORTFOLIO_MANAGER)
@@ -344,6 +345,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     public OrganizationIdentity viewOrganizationDetails(String organizationId, String userId) throws MeedlException {
         MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
+        log.info("Viewing organization detail for user with role {}", userIdentity.getRole());
         if(userIdentity.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)){
             OrganizationEmployeeIdentity organizationEmployeeIdentity =
                     organizationEmployeeIdentityOutputPort.findByCreatedBy(userIdentity.getId());
@@ -353,11 +355,13 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
             OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
             List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity.getId());
             organizationIdentity.setServiceOfferings(serviceOfferings);
+            log.info("Service offering has been gotten during view organization detail {}", serviceOfferings);
             OrganizationLoanDetail organizationLoanDetail =
                     organizationLoanDetailOutputPort.findByOrganizationId(organizationIdentity.getId());
             organizationIdentityMapper.mapOrganizationLoanDetailsToOrganization(organizationIdentity,organizationLoanDetail);
             getLoanPercentage(organizationIdentity, organizationLoanDetail);
             int pendingLoanOffer = loanOfferOutputPort.countNumberOfPendingLoanOfferForOrganization(organizationIdentity.getId());
+            log.info("Number of pending loan offer in organization with id {} -------> is {}",organizationId, pendingLoanOffer);
             organizationIdentity.setPendingLoanOfferCount(pendingLoanOffer);
         return organizationIdentity;
     }
