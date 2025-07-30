@@ -630,10 +630,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                         continue;
                     }
                     int index = headerIndexMap.get(header);
-                    if (index >= values.length) {
-                        log.error("Missing value for column: {}", header);
-                        throw new LoanException("Missing value for column: " + header);
-                    }
+                    if (loanBookValidator.isValueNotPresentInColumn(header, index, values)) continue;
                     rowMap.put(header, values[index].trim());
                 }
                 log.info("The row map is :{}", rowMap);
@@ -647,6 +644,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         }
         return records;
     }
+
 
     private Map<String, Integer> getAndValidateFileHeaderMap(LoanBook loanBook, String headerLine) throws MeedlException {
         if (headerLine == null) {

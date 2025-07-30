@@ -1,18 +1,15 @@
 package africa.nkwadoma.nkwadoma.domain.validation;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.LoaneeUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UploadType;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -191,9 +188,19 @@ public class LoanBookValidator {
                 validationErrorMessage.append("Initial deposit cannot be greater than amount received. Row : ")
                         .append(rowCount)
                         .append("\n");
-//                throw new MeedlException("Initial deposit cannot be greater than amount received");
             }
         }
+    }
+    public boolean isValueNotPresentInColumn(String header, int index, String[] values) {
+        if (index >= values.length) {
+            initializeValidationErrorMessage();
+            log.error("Missing value for column: {}", header);
+            validationErrorMessage.append("Missing value for column ")
+                    .append(header)
+                    .append("\n");
+            return true;
+        }
+        return false;
     }
 
     public String formatPhoneNumber(String input) {
@@ -509,7 +516,6 @@ public class LoanBookValidator {
     public void initializeValidationErrorMessage() {
         if (ObjectUtils.isEmpty(validationErrorMessage)){
             validationErrorMessage = new StringBuilder();
-
         }
     }
 
