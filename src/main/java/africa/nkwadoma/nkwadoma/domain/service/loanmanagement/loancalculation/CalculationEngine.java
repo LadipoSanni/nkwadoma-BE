@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeO
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramLoanDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationLoanDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.DailyInterestOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.RepaymentHistoryOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanCalculationMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -44,6 +45,8 @@ public class CalculationEngine implements CalculationEngineUseCase {
     private final CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
     private final ProgramLoanDetailOutputPort programLoanDetailOutputPort;
     private final OrganizationLoanDetailOutputPort organizationLoanDetailOutputPort;
+    private final DailyInterestOutputPort dailyInterestOutputPort;
+
 
     @Override
     public List<RepaymentHistory> sortRepaymentsByDateTimeAscending(List<RepaymentHistory> repayments) throws MeedlException {
@@ -624,6 +627,13 @@ public class CalculationEngine implements CalculationEngineUseCase {
             log.error( "{} must not be negative. In validate amount", name);
             throw new MeedlException(name + " must not be negative.");
         }
+    }
+
+
+    public void calculateDailyInterest(){
+//        List<LoaneeLoanDetail> loaneeLoanDetails = loaneeLoanDetailsOutputPort
+        //for each loanee loan detail that has amount outstanding calculate interest
+        //
     }
 
 
