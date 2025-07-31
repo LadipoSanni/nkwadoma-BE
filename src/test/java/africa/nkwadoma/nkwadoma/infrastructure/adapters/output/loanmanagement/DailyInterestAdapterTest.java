@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 @Slf4j
@@ -38,6 +39,30 @@ public class DailyInterestAdapterTest {
         loaneeLoanDetail = TestData.createTestLoaneeLoanDetail();
         loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
         dailyInterest = TestData.buildDailyInterest(loaneeLoanDetail);
+    }
+
+
+    @Test
+    void cannotSaveNullDailyInterest() {
+        assertThrows(MeedlException.class, () -> dailyInterestOutputPort.save(null));
+    }
+
+    @Test
+    void cannotSaveDailyInterestWithNullLoaneeLoanDetail() {
+        dailyInterest.setLoaneeLoanDetail(null);
+        assertThrows(MeedlException.class, () -> dailyInterestOutputPort.save(dailyInterest));
+    }
+
+    @Test
+    void cannotSaveDailyInterestWithNullInterest() {
+        dailyInterest.setInterest(null);
+        assertThrows(MeedlException.class, () -> dailyInterestOutputPort.save(dailyInterest));
+    }
+
+     @Test
+    void cannotSaveDailyInterestWithNullCreatedAt() {
+        dailyInterest.setCreatedAt(null);
+        assertThrows(MeedlException.class, () -> dailyInterestOutputPort.save(dailyInterest));
     }
 
 

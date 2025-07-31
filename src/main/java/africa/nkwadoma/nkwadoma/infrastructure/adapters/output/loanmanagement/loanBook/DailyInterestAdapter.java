@@ -21,6 +21,7 @@ public class DailyInterestAdapter implements DailyInterestOutputPort {
 
     @Override
     public DailyInterest save(DailyInterest dailyInterest) throws MeedlException {
+        MeedlValidator.validateObjectInstance(dailyInterest,"Daily Interest cannot be empty");
         dailyInterest.validate();
 
         DailyInterestEntity dailyInterestEntity =
