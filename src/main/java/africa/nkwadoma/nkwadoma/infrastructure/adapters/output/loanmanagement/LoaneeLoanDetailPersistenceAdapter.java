@@ -15,6 +15,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 @Slf4j
@@ -67,5 +68,12 @@ public class LoaneeLoanDetailPersistenceAdapter implements LoaneeLoanDetailsOutp
         MeedlValidator.validateUUID(id,"Loan request id cannot be empty");
         LoaneeLoanDetailEntity loaneeLoanDetailEntity = loaneeLoanDetailRepository.findByLoanRequestId(id);
         return loaneeLoanDetailMapper.toLoaneeLoanDetails(loaneeLoanDetailEntity);
+    }
+
+    @Override
+    public List<LoaneeLoanDetail> findAllByNotNullAmountOutStanding() {
+        List<LoaneeLoanDetailEntity> loaneeLoanDetailEntities =
+                loaneeLoanDetailRepository.findAllByAmountOutstandingGreaterThanZero();
+        return loaneeLoanDetailEntities.stream().map(loaneeLoanDetailMapper::toLoaneeLoanDetails).toList();
     }
 }

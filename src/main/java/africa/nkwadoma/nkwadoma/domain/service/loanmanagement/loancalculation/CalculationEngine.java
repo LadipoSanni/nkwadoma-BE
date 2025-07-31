@@ -631,7 +631,8 @@ public class CalculationEngine implements CalculationEngineUseCase {
 
 
     public void calculateDailyInterest(){
-//        List<LoaneeLoanDetail> loaneeLoanDetails = loaneeLoanDetailsOutputPort
+        List<LoaneeLoanDetail> loaneeLoanDetails = loaneeLoanDetailsOutputPort.findAllByNotNullAmountOutStanding();
+
         //for each loanee loan detail that has amount outstanding calculate interest
         //
     }

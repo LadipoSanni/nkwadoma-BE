@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -56,4 +58,11 @@ public interface LoaneeLoanDetailRepository extends JpaRepository<LoaneeLoanDeta
           where lr.id = :id             
     """)
     LoaneeLoanDetailEntity findByLoanRequestId(@Param("id") String id);
+
+    @Query("""
+        SELECT loaneeLoanDetail
+                from LoaneeLoanDetailEntity loaneeLoanDetail
+            where loaneeLoanDetail.amountOutstanding > 0
+    """)
+    List<LoaneeLoanDetailEntity> findAllByAmountOutstandingGreaterThanZero();
 }
