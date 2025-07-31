@@ -172,6 +172,16 @@ public class MeedlValidator {
             throw new MeedlException(attributeName+" name must include letters and can only contain letters, numbers, spaces - _ '");
         }
     }
+    public static void validateBankPartnerName(String name,  String message, String attributeName) throws MeedlException {
+        MeedlValidator.validateDataElement(name, message);
+        String regex =  "^(?=.*[A-Za-z])(?=.*['A-Za-z])[A-Za-z0-9' ()_-]+$";
+        Pattern pattern = Pattern.compile(regex);
+        boolean isValid = pattern.matcher(name).matches();
+        if (!isValid){
+            log.error("Invalid name pattern: {}", name);
+            throw new MeedlException(attributeName+" name must include letters and can only contain letters, numbers, spaces - _ '");
+        }
+    }
     public static void validateEmailDomain(String inviteeEmail, String inviterEmail) throws MeedlException {
         MeedlValidator.validateEmail(inviteeEmail);
         MeedlValidator.validateEmail(inviterEmail);
