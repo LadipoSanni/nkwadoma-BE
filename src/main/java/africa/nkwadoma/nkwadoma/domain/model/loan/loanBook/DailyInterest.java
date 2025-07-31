@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.model.loan.loanBook;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 
 @Setter
 @Getter
+@Builder
 public class DailyInterest {
 
     private String id;

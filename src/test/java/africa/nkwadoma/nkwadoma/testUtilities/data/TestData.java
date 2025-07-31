@@ -16,10 +16,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetail;
-import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.CalculationContext;
-import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
-import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
-import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentRecordBook;
+import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.*;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
@@ -737,6 +734,14 @@ public class TestData {
                 .amountRequested(BigDecimal.valueOf(30000))
                 .amountRepaid(BigDecimal.valueOf(30000))
                 .interestIncurred(BigDecimal.valueOf(100000))
+                .build();
+    }
+
+    public static DailyInterest buildDailyInterest(LoaneeLoanDetail loaneeLoanDetail) {
+        return DailyInterest.builder()
+                .interest(BigDecimal.valueOf(5000.00))
+                .createdAt(LocalDateTime.now())
+                .loaneeLoanDetail(loaneeLoanDetail)
                 .build();
     }
 }

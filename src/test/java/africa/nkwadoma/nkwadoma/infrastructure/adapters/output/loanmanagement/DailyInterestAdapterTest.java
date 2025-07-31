@@ -3,7 +3,9 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.DailyInterestOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.DailyInterest;
+import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +13,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
 
-import static org.springframework.test.util.AssertionErrors.assertEquals;
-import static org.springframework.test.util.AssertionErrors.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 @Slf4j
 @SpringBootTest
@@ -22,24 +24,29 @@ import static org.springframework.test.util.AssertionErrors.assertNotNull;
 public class DailyInterestAdapterTest {
 
     private DailyInterest dailyInterest;
+    private LoaneeLoanDetail loaneeLoanDetail;
     @Autowired
     private DailyInterestOutputPort dailyInterestOutputPort;
 
 
+    @BeforeAll
+    void setUp() {
+        loaneeLoanDetail = TestData.createTestLoaneeLoanDetail();
+        dailyInterest = TestData.buildDailyInterest(loaneeLoanDetail);
+    }
 
 
     @Order(1)
     @Test
     void saveDailyInterest() {
 
-        DailyInterest savedDailyInterest = new DailyInterest();
+        DailyInterest savedDailyInterest = DailyInterest.builder().build();
         try {
             savedDailyInterest = dailyInterestOutputPort.save(dailyInterest);
         }catch (MeedlException meedlException) {
             log.error(meedlException.getMessage());
         }
-        assertEquals("",savedDailyInterest.getInterest(),BigDecimal.valueOf(2000));
-
+        assertEquals(savedDailyInterest.getInterest(),BigDecimal.valueOf(2000));
     }
 
 
