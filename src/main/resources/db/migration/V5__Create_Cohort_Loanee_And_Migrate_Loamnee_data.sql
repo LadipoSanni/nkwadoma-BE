@@ -56,7 +56,7 @@ SELECT
     loanee_loan_detail_id,
     loanee_status,
     COALESCE(onboarding_mode, 'EMAIL_REFERRED') AS onboarding_mode,
-    COALESCE(uploaded_status, 'ADDED') AS uploaded_status,
+     COALESCE(uploaded_status, 'ADDED') AS uploaded_status,
     referral_date_time,
     referred_by,
     reason_for_dropout,
