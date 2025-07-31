@@ -12,6 +12,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanReferralOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
@@ -73,6 +74,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
     private final LoanUseCase loanUseCase;
     private final AesOutputPort aesOutputPort;
+    private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
 
     @Override
     public void upLoadUserData(LoanBook loanBook) throws MeedlException {
@@ -300,9 +302,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                 iterator.remove();
             }
         }
-
         log.info("Number of referable loanees :{} ",  loanBook.getCohortLoanees().size());
-//        asynchronousMailingOutputPort.notifyLoanReferralActors(loanBook.getLoanees());
     }
     private void inviteTrainee (CohortLoanee loanee) throws MeedlException {
         log.info("Single loanee is being referred...");
