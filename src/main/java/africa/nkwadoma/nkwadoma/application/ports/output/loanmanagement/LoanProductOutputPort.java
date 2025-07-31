@@ -18,4 +18,6 @@ public interface LoanProductOutputPort {
     Page<LoanProduct> findAllLoanProduct(LoanProduct loanProduct);
 
     Page<LoanProduct> search(String loanProductName, int pageSize, int pageNumber) throws MeedlException;
+
+    LoanProduct findByCohortLoaneeId(String id) throws MeedlException;
 }

@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.model.loan;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -24,6 +25,7 @@ public class LoaneeLoanDetail {
     private BigDecimal amountRepaid = BigDecimal.ZERO;
     private BigDecimal amountOutstanding = BigDecimal.ZERO;
     private double interestRate;
+    @JsonSerialize(using = com.fasterxml.jackson.databind.ser.std.ToStringSerializer.class)
     private BigDecimal interestIncurred = BigDecimal.ZERO;
 
     private LocalDateTime loanStartDate;

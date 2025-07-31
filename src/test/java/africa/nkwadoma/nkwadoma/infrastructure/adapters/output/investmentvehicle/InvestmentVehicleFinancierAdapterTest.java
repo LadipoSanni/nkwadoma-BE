@@ -41,8 +41,8 @@ class InvestmentVehicleFinancierAdapterTest {
     private InvestmentVehicleFinancier investmentVehicleFinancier;
     private InvestmentVehicle investmentVehicle;
     private UserIdentity userIdentity;
-    private String investmentVehicleId;
-    private Financier financier;
+     private String investmentVehicleId;
+     private Financier financier;
     private String financierId;
     private final Pageable pageRequest = PageRequest.of(0, 10);
     @BeforeAll

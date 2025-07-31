@@ -139,5 +139,4 @@ public class LoanAdapter implements LoanOutputPort {
                 loanRepository.findAllLoanDisburestToLoanee(id,pageRequest);
         return loanProjection.map(loanMapper::mapProjectionToLoan);
     }
-
 }

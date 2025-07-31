@@ -26,4 +26,6 @@ public interface RepaymentHistoryOutputPort {
     void deleteMultipleRepaymentHistory(List<String> repaymentHistoryIds);
 
     List<RepaymentHistory> saveAllRepaymentHistory(List<RepaymentHistory> currentRepaymentHistories);
+
+    boolean checkIfLoaneeHasMadeAnyRepayment(String id, String cohortId) throws MeedlException;
 }
