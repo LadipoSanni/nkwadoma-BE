@@ -10,7 +10,6 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.RepaymentHistoryOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanCalculationMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.education.ProgramLoanDetail;
@@ -21,14 +20,18 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.CalculationContext;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.DailyInterest;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanPeriodRecord;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.math3.stat.StatUtils;
+import org.jobrunr.scheduling.JobScheduler;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -47,6 +50,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
     private final ProgramLoanDetailOutputPort programLoanDetailOutputPort;
     private final OrganizationLoanDetailOutputPort organizationLoanDetailOutputPort;
     private final DailyInterestOutputPort dailyInterestOutputPort;
+    private final JobScheduler jobScheduler;
 
 
     @Override
@@ -57,7 +61,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
             return Collections.emptyList();
         }
         List<RepaymentHistory> mutableRepayments = new ArrayList<>(repayments);
-        log.info("The repayment list before sorting {} \n --------------------------------------------    Repayments are not empty and the sorting has started. The number of the repayment is :{}",mutableRepayments, repayments.size());
+        log.info("The repayment list before sorting {} \n --------------------------------------------    Repayments are not empty and the sorting has started. The number of the repayment is :{}", mutableRepayments, repayments.size());
         validateRepaymentHistoriesBeforeSorting(mutableRepayments);
         mutableRepayments.sort(Comparator.comparing(RepaymentHistory::getPaymentDateTime));
         return mutableRepayments;
@@ -102,6 +106,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
         log.info("Loanee loan details updated with repayment calculations. {}", updatedLoaneeLoanDetail);
         updateLoaneeRepaymentHistory(currentRepayments, previousRepayments);
     }
+
     private void calculateCohortLoanDetail(CalculationContext calculationContext) throws MeedlException {
         log.info("About to Update Cohort loan detail after repayment ");
         CohortLoanDetail cohortLoanDetail = cohortLoanDetailOutputPort.findByCohortId(calculationContext.getCohort().getId());
@@ -110,7 +115,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
         calculationContext.setCohortLoanDetail(cohortLoanDetail);
         BigDecimal newCohortTotalOutstandingAmount = calculateCohortTotalOutstandingAmount(calculationContext);
         cohortLoanDetail.setOutstandingAmount(newCohortTotalOutstandingAmount);
-        log.info("new cohort total outstanding amount {}, \n -------------------------------> Previous cohort total amount repaid {} ", newCohortTotalOutstandingAmount,  cohortLoanDetail.getAmountRepaid());
+        log.info("new cohort total outstanding amount {}, \n -------------------------------> Previous cohort total amount repaid {} ", newCohortTotalOutstandingAmount, cohortLoanDetail.getAmountRepaid());
 
         BigDecimal newCohortTotalAmountRepaid = calculateCohortTotalAmountRepaid(calculationContext);
         cohortLoanDetail.setAmountRepaid(newCohortTotalAmountRepaid);
@@ -121,13 +126,15 @@ public class CalculationEngine implements CalculationEngineUseCase {
         log.info("New Cohort total interest incurred  {}", newCohortTotalInterestIncurred);
 
         cohortLoanDetail = cohortLoanDetailOutputPort.save(cohortLoanDetail);
-        log.info("cohort loan details after saving {}",cohortLoanDetail);
+        log.info("cohort loan details after saving {}", cohortLoanDetail);
     }
+
     private void updateLoanDetails(CalculationContext calculationContext) throws MeedlException {
         calculateCohortLoanDetail(calculationContext);
         calculateProgramLoanDetail(calculationContext);
         calculateOrganizationLoanDetail(calculationContext);
     }
+
     private void calculateProgramLoanDetail(CalculationContext calculationContext) throws MeedlException {
 
         log.info("About to Update Program loan detail after repayment ");
@@ -137,7 +144,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
         calculationContext.setProgramLoanDetail(programLoanDetail);
         BigDecimal newProgramTotalOutstandingAmount = calculateProgramTotalOutstandingAmount(calculationContext);
         programLoanDetail.setOutstandingAmount(newProgramTotalOutstandingAmount);
-        log.info("new program total outstanding amount {}, \n -------------------------------> Previous program total amount repaid {} ", newProgramTotalOutstandingAmount,  programLoanDetail.getAmountRepaid());
+        log.info("new program total outstanding amount {}, \n -------------------------------> Previous program total amount repaid {} ", newProgramTotalOutstandingAmount, programLoanDetail.getAmountRepaid());
 
         BigDecimal newProgramTotalAmountRepaid = calculateProgramTotalAmountRepaid(calculationContext);
         programLoanDetail.setAmountRepaid(newProgramTotalAmountRepaid);
@@ -148,9 +155,10 @@ public class CalculationEngine implements CalculationEngineUseCase {
         log.info("New program total interest incurred  {}", newProgramTotalInterestIncurred);
 
         programLoanDetail = programLoanDetailOutputPort.save(programLoanDetail);
-        log.info("program loan details after saving {}",programLoanDetail);
+        log.info("program loan details after saving {}", programLoanDetail);
 
     }
+
     private void calculateOrganizationLoanDetail(CalculationContext calculationContext) throws MeedlException {
         log.info("About to Update organization's loan detail after repayment ");
         OrganizationLoanDetail organizationLoanDetail = organizationLoanDetailOutputPort.findByOrganizationId(calculationContext.getProgramLoanDetail().getProgram().getOrganizationIdentity().getId());
@@ -159,7 +167,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
         calculationContext.setOrganizationLoanDetail(organizationLoanDetail);
         BigDecimal newOrganizationTotalOutstandingAmount = calculateOrganizationTotalOutstandingAmount(calculationContext);
         organizationLoanDetail.setOutstandingAmount(newOrganizationTotalOutstandingAmount);
-        log.info("Organization's new total outstanding amount {}, \n ------------------------------->  Organization previous total amount repaid {} ", newOrganizationTotalOutstandingAmount,  organizationLoanDetail.getAmountRepaid());
+        log.info("Organization's new total outstanding amount {}, \n ------------------------------->  Organization previous total amount repaid {} ", newOrganizationTotalOutstandingAmount, organizationLoanDetail.getAmountRepaid());
 
         BigDecimal newOrganizationTotalAmountRepaid = calculateOrganizationTotalAmountRepaid(calculationContext);
         organizationLoanDetail.setAmountRepaid(newOrganizationTotalAmountRepaid);
@@ -170,7 +178,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
         log.info("organization's new total interest incurred  {}", newOrganizationTotalInterestIncurred);
 
         organizationLoanDetail = organizationLoanDetailOutputPort.save(organizationLoanDetail);
-        log.info("Organization's loan detail after saving {}",organizationLoanDetail);
+        log.info("Organization's loan detail after saving {}", organizationLoanDetail);
 
     }
 
@@ -190,14 +198,14 @@ public class CalculationEngine implements CalculationEngineUseCase {
     }
 
     private BigDecimal calculateCohortTotalOutstandingAmount(CalculationContext context) {
-        log.info("Cohort loan detail outstanding amount {}",context.getCohortLoanDetail().getOutstandingAmount());
-        log.info("loanee previous interest incurred is {}",context.getPreviousTotalInterestIncurred());
+        log.info("Cohort loan detail outstanding amount {}", context.getCohortLoanDetail().getOutstandingAmount());
+        log.info("loanee previous interest incurred is {}", context.getPreviousTotalInterestIncurred());
         return context.getCohortLoanDetail()
-                    .getOutstandingAmount()
-                    .subtract(context.getPreviousTotalInterestIncurred())
-                    .add(context.getPreviousTotalAmountPaid())
-                    .add(context.getLoaneeLoanDetail().getInterestIncurred())
-                    .subtract(context.getLoaneeLoanDetail().getAmountRepaid());
+                .getOutstandingAmount()
+                .subtract(context.getPreviousTotalInterestIncurred())
+                .add(context.getPreviousTotalAmountPaid())
+                .add(context.getLoaneeLoanDetail().getInterestIncurred())
+                .subtract(context.getLoaneeLoanDetail().getAmountRepaid());
     }
 
     /// Program loan detail calculation
@@ -266,8 +274,9 @@ public class CalculationEngine implements CalculationEngineUseCase {
     private boolean isSkipableCalculation(List<RepaymentHistory> repaymentHistories, Loanee loanee) {
         return ObjectUtils.isEmpty(repaymentHistories) || repaymentHistories.isEmpty() || ObjectUtils.isEmpty(loanee);
     }
+
     private void processRepaymentHistoryCalculations(
-          CalculationContext calculationContext
+            CalculationContext calculationContext
     ) throws MeedlException {
 
         BigDecimal runningTotal = BigDecimal.ZERO;
@@ -316,8 +325,8 @@ public class CalculationEngine implements CalculationEngineUseCase {
     private void updateLoaneeRepaymentHistory(List<RepaymentHistory> currentRepaymentHistories, List<RepaymentHistory> previousRepaymentHistory) {
         log.info("updating list of loanee repayment histories {}", currentRepaymentHistories);
         List<String> repaymentHistoryIds = previousRepaymentHistory.stream()
-                        .map(RepaymentHistory::getId)
-                                .toList();
+                .map(RepaymentHistory::getId)
+                .toList();
         repaymentHistoryOutputPort.deleteMultipleRepaymentHistory(repaymentHistoryIds);
         currentRepaymentHistories = repaymentHistoryOutputPort.saveAllRepaymentHistory(currentRepaymentHistories);
         log.info("After saving multiple repayment history for a loanee {}", currentRepaymentHistories);
@@ -342,7 +351,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
     }
 
     BigDecimal getPreviousAmountOutstanding(BigDecimal previousOutstanding, LoaneeLoanDetail loaneeLoanDetail) {
-        if (ObjectUtils.isNotEmpty(previousOutstanding)){
+        if (ObjectUtils.isNotEmpty(previousOutstanding)) {
             log.info("Getting the previous amount outstanding as the previous in the calculation {}", previousOutstanding);
             return decimalPlaceRoundUp(previousOutstanding);
         }
@@ -350,7 +359,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
         return decimalPlaceRoundUp(loaneeLoanDetail.getAmountReceived());
     }
 
-    private  LoaneeLoanDetail getLoaneeLoanDetail(CalculationContext context) throws MeedlException {
+    private LoaneeLoanDetail getLoaneeLoanDetail(CalculationContext context) throws MeedlException {
         CohortLoanee cohortLoanee = cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(context.getLoanee().getId(), context.getCohort().getId());
         LoaneeLoanDetail loaneeLoanDetail = loaneeLoanDetailsOutputPort.findByCohortLoaneeId(cohortLoanee.getId());
         context.setPreviousTotalAmountPaid(loaneeLoanDetail.getAmountRepaid());
@@ -358,17 +367,17 @@ public class CalculationEngine implements CalculationEngineUseCase {
         return loaneeLoanDetail;
     }
 
-    private void calculateOutstandingPerRepayment(BigDecimal previousOutstandingAmount,RepaymentHistory repaymentHistory) {
+    private void calculateOutstandingPerRepayment(BigDecimal previousOutstandingAmount, RepaymentHistory repaymentHistory) {
         log.info("Calculating outstanding per repayment. previous outstanding amount is : {}", previousOutstandingAmount);
         BigDecimal totalDue = previousOutstandingAmount.add(repaymentHistory.getInterestIncurred());
-        BigDecimal newOutstandingAmount =  totalDue.subtract(repaymentHistory.getAmountPaid()).max(BigDecimal.ZERO);
+        BigDecimal newOutstandingAmount = totalDue.subtract(repaymentHistory.getAmountPaid()).max(BigDecimal.ZERO);
         repaymentHistory.setAmountOutstanding(newOutstandingAmount);
     }
 
     public BigDecimal calculateIncurredInterestPerRepayment(RepaymentHistory repayment, BigDecimal previousOutstandingAmount, LocalDateTime lastDate, LoaneeLoanDetail loaneeLoanDetail) {
         long daysBetween = calculateDaysBetween(lastDate, repayment.getPaymentDateTime());
         log.info("How many days a between the last payment {} \n -------------- >>>>>>>> interest rate {}", daysBetween, loaneeLoanDetail.getInterestRate());
-        if (daysBetween < 0){
+        if (daysBetween < 0) {
             log.warn("Days between payment is negative {} therefore days between is now 0", daysBetween);
             daysBetween = 0;
         }
@@ -386,13 +395,14 @@ public class CalculationEngine implements CalculationEngineUseCase {
     public BigDecimal calculateInterest(double interestRate, BigDecimal outstanding, long daysBetween) {
 
         BigDecimal interestRateInPercent = BigDecimal.valueOf(interestRate)
-                .divide(BigDecimal.valueOf(100), NUMBER_OF_DECIMAL_PLACE + 4, RoundingMode.HALF_UP) ;
+                .divide(BigDecimal.valueOf(100), NUMBER_OF_DECIMAL_PLACE + 4, RoundingMode.HALF_UP);
         BigDecimal dailyRate = interestRateInPercent.divide(BigDecimal.valueOf(DAYS_IN_YEAR), NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
 
         log.info("Calculated daily rate ==== {} for annual interest rate {}, interest rate in percent {}", dailyRate, interestRate, interestRateInPercent);
 
         return outstanding.multiply(dailyRate).multiply(BigDecimal.valueOf(daysBetween));
     }
+
     private BigDecimal calculateTotalAmountRepaidPerRepayment(RepaymentHistory repayment, BigDecimal previousTotalAmountRepaid) {
         BigDecimal newTotalAmountRepaid = previousTotalAmountRepaid.add(repayment.getAmountPaid());
         repayment.setTotalAmountRepaid(newTotalAmountRepaid);
@@ -420,7 +430,6 @@ public class CalculationEngine implements CalculationEngineUseCase {
     }
 
 
-
     private static void validationForCalculatingTotalAmountRepaid(RepaymentHistory repayment) throws MeedlException {
         if (repayment == null) {
             log.warn("Repayment history cannot be null, while calculating total amount repaid");
@@ -433,19 +442,20 @@ public class CalculationEngine implements CalculationEngineUseCase {
         }
         if (repayment.getAmountPaid().compareTo(BigDecimal.ZERO) < 0) {
             log.warn("Amount paid on {} can not be negative: {}", repayment.getPaymentDateTime(), repayment.getAmountPaid());
-            throw new MeedlException("Amount paid can not be negative : "+ repayment.getAmountPaid());
+            throw new MeedlException("Amount paid can not be negative : " + repayment.getAmountPaid());
         }
     }
 
 
-//    @Override
+    //    @Override
     public BigDecimal calculateLoanAmountRequested(BigDecimal programFee, BigDecimal initialDeposit) throws MeedlException {
         validateAmount(programFee, "Program Fee");
         validateAmount(initialDeposit, "Initial Deposit");
 
         return programFee.subtract(initialDeposit);
     }
-//    @Override
+
+    //    @Override
     public BigDecimal calculateLoanAmountDisbursed(BigDecimal loanAmountRequested, BigDecimal loanDisbursementFees) throws MeedlException {
         validateAmount(loanAmountRequested, "Loan Amount Requested");
         validateAmount(loanDisbursementFees, "Loan Disbursement Fees");
@@ -453,7 +463,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
         return loanAmountRequested.add(loanDisbursementFees);
     }
 
-//    @Override
+    //    @Override
     public BigDecimal calculateLoanAmountOutstanding(
             BigDecimal loanAmountOutstanding,
             BigDecimal monthlyRepayment,
@@ -467,7 +477,8 @@ public class CalculationEngine implements CalculationEngineUseCase {
                 .subtract(monthlyRepayment)
                 .add(BigDecimal.valueOf(moneyWeightedPeriodicInterest));
     }
-//    @Override
+
+    //    @Override
     public BigDecimal calculateMoneyWeightedPeriodicInterest(int interestRate, List<LoanPeriodRecord> periods) throws MeedlException {
         validateInterestRate(interestRate, "Interest rate");
 
@@ -483,12 +494,13 @@ public class CalculationEngine implements CalculationEngineUseCase {
         return rateFraction.multiply(sumProduct);
     }
 
-//    @Override
+    //    @Override
     public int calculateMonthlyInterestRate(int interestRate) throws MeedlException {
         validateInterestRate(interestRate, "Interest rate");
         return interestRate / 12;
     }
-//    @Override
+
+    //    @Override
     public BigDecimal calculateManagementOrProcessingFee(BigDecimal loanAmountRequested, double mgtFeeInPercentage) throws MeedlException {
         validateAmount(loanAmountRequested, "Loan Amount Requested");
         validateInterestRate(mgtFeeInPercentage, "Management Fee Percentage");
@@ -497,7 +509,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
         return decimalPlaceRoundUp(loanAmountRequested.multiply(percentageDecimal));
     }
 
-//    @Override
+    //    @Override
     public BigDecimal calculateCreditLife(BigDecimal loanAmountRequested, int creditLifePercentage, int loanTenureMonths) throws MeedlException {
         validateAmount(loanAmountRequested, "Loan Amount Requested");
         validateInterestRate(creditLifePercentage, "Credit Life Percentage");
@@ -535,7 +547,8 @@ public class CalculationEngine implements CalculationEngineUseCase {
         double sum = StatUtils.sum(values);
         return decimalPlaceRoundUp(BigDecimal.valueOf(sum));
     }
-//    @Override
+
+    //    @Override
     public BigDecimal calculateLoanDisbursementFees(Map<String, BigDecimal> feeMap) throws MeedlException {
         if (feeMap == null || feeMap.isEmpty()) {
             return decimalPlaceRoundUp(BigDecimal.ZERO);
@@ -553,7 +566,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
         return decimalPlaceRoundUp(total);
     }
 
-//    @Override
+    //    @Override
     public BigDecimal calculateTotalRepayment(List<BigDecimal> monthlyRepayments) throws MeedlException {
         if (monthlyRepayments == null || monthlyRepayments.isEmpty()) {
             log.warn("The monthly repayment list was empty. Returned zero. ");
@@ -564,23 +577,26 @@ public class CalculationEngine implements CalculationEngineUseCase {
 
         for (int i = 0; i < monthlyRepayments.size(); i++) {
             BigDecimal repayment = monthlyRepayments.get(i);
-            validateAmount(repayment, "Monthly Repayment "+i );
+            validateAmount(repayment, "Monthly Repayment " + i);
             total = total.add(repayment);
         }
         return decimalPlaceRoundUp(total);
     }
+
     private BigDecimal decimalPlaceRoundUp(BigDecimal bigDecimal) {
         return bigDecimal.setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
     }
+
     private void validateLoanTenure(int tenure) throws MeedlException {
         if (tenure < 0) {
             log.error("Loan Tenure must not be negative. Validation in loan calculation service.");
             throw new MeedlException("Loan Tenure must not be negative.");
         }
     }
+
     private void validateLoanPeriodRecord(LoanPeriodRecord record) throws MeedlException {
-        if (record == null){
-            log.error("Loan period record must not be null - {}. ",record);
+        if (record == null) {
+            log.error("Loan period record must not be null - {}. ", record);
             throw new MeedlException("Loan period record must not be null.");
         }
         if (record.getLoanAmountOutstanding() == null) {
@@ -599,43 +615,48 @@ public class CalculationEngine implements CalculationEngineUseCase {
 
     private void validateInterestRate(int interestRate, String name) throws MeedlException {
         if (interestRate < 0) {
-            log.error("{} must not be negative. In validate interest rate.",name);
-            throw new MeedlException(name+" must not be negative.");
+            log.error("{} must not be negative. In validate interest rate.", name);
+            throw new MeedlException(name + " must not be negative.");
         }
         if (interestRate > 100) {
-            log.error("{} must not exceed 100. In validate interest rate.", name );
-            throw new MeedlException(name+" must not exceed 100.");
+            log.error("{} must not exceed 100. In validate interest rate.", name);
+            throw new MeedlException(name + " must not exceed 100.");
         }
     }
 
     private void validateInterestRate(double interestRate, String name) throws MeedlException {
         if (interestRate < 0) {
-            log.error("{} must not be negative. In validate interest rate as double",name);
-            throw new MeedlException(name+" must not be negative.");
+            log.error("{} must not be negative. In validate interest rate as double", name);
+            throw new MeedlException(name + " must not be negative.");
         }
         if (interestRate > 100) {
-            log.error("{} must not exceed 100. In validate interest rate. as double", name );
-            throw new MeedlException(name+" must not exceed 100.");
+            log.error("{} must not exceed 100. In validate interest rate. as double", name);
+            throw new MeedlException(name + " must not exceed 100.");
         }
     }
 
     public void validateAmount(BigDecimal amount, String name) throws MeedlException {
         if (amount == null) {
-            log.error( "{} must not be null. In validate amount", name);
+            log.error("{} must not be null. In validate amount", name);
             throw new MeedlException(name + " must not be null.");
         }
         if (amount.compareTo(BigDecimal.ZERO) < 0) {
-            log.error( "{} must not be negative. In validate amount", name);
+            log.error("{} must not be negative. In validate amount", name);
             throw new MeedlException(name + " must not be negative.");
         }
     }
 
 
+    @PostConstruct
+    public void init() {
+        // Schedule the first execution 2 minutes from now
+        jobScheduler.schedule(Instant.now().plus(Duration.ofMinutes(2)), this::calculateDailyInterest);
+    }
 
-
-
-
-
+    @Override
+    public void scheduleDailyInterestCalculation() {
+        jobScheduler.scheduleRecurrently("daily-interest-calculation", "0 */2 * * * *", this::calculateDailyInterest);
+    }
 
 
     public void calculateDailyInterest() throws MeedlException {
@@ -643,8 +664,8 @@ public class CalculationEngine implements CalculationEngineUseCase {
 
         for (LoaneeLoanDetail loaneeLoanDetail : loaneeLoanDetails) {
             BigDecimal dailyInterestIncurred =
-                    calculateInterest(loaneeLoanDetail.getInterestRate(),loaneeLoanDetail.getAmountOutstanding(),1);
-            log.info("daily interest {}",dailyInterestIncurred);
+                    calculateInterest(loaneeLoanDetail.getInterestRate(), loaneeLoanDetail.getAmountOutstanding(), 1);
+            log.info("daily interest {}", dailyInterestIncurred);
             DailyInterest dailyInterest = DailyInterest.builder()
                     .interest(dailyInterestIncurred)
                     .createdAt(LocalDateTime.now())
@@ -652,9 +673,8 @@ public class CalculationEngine implements CalculationEngineUseCase {
                     .build();
             log.info("daily interest before saving === : {}", dailyInterest);
             dailyInterest = dailyInterestOutputPort.save(dailyInterest);
-            log.info("saved daily interest === : {}",dailyInterest);
+            log.info("saved daily interest === : {}", dailyInterest);
         }
     }
-
-
 }
+

@@ -203,5 +203,6 @@ public class AdminInitializer {
         loanMetricsUseCase.correctLoanRequestCount();
         Portfolio portfolio = createMeedlPortfolio(getPortfolio());
         log.info("Meedl portfolio process done-- {}", portfolio);
+
     }
 }
