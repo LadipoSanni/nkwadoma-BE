@@ -33,4 +33,6 @@ public interface CohortLoaneeOutputPort {
     void archiveOrUnArchiveByIds(String cohortId, List<String> loaneeIds, LoaneeStatus loaneeStatus) throws MeedlException;
 
     CohortLoanee findCohortLoaneeByLoanRequestId(String id) throws MeedlException;
+
+    CohortLoanee findCohortLoaneeByLoaneeLoanDetailId(String id) throws MeedlException;
 }
