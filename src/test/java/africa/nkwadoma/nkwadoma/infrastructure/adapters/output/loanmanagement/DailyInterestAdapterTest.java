@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement;
 
 
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.DailyInterestOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
@@ -27,11 +28,14 @@ public class DailyInterestAdapterTest {
     private LoaneeLoanDetail loaneeLoanDetail;
     @Autowired
     private DailyInterestOutputPort dailyInterestOutputPort;
+    @Autowired
+    private LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
 
 
     @BeforeAll
     void setUp() {
         loaneeLoanDetail = TestData.createTestLoaneeLoanDetail();
+        loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
         dailyInterest = TestData.buildDailyInterest(loaneeLoanDetail);
     }
 
@@ -47,6 +51,12 @@ public class DailyInterestAdapterTest {
             log.error(meedlException.getMessage());
         }
         assertEquals(savedDailyInterest.getInterest(),BigDecimal.valueOf(2000));
+    }
+
+
+    @AfterAll
+    void tearDown() throws MeedlException {
+        loaneeLoanDetailsOutputPort.delete(loaneeLoanDetail.getId());
     }
 
 
