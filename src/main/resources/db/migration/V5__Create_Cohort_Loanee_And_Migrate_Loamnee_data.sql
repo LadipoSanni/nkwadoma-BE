@@ -1,6 +1,6 @@
 -- Creating cohort_loanee table
 CREATE TABLE IF NOT EXISTS cohort_loanee_entity (
-                                                    id VARCHAR(36) PRIMARY KEY,
+    id VARCHAR(36) PRIMARY KEY,
     cohort_id VARCHAR(36) NOT NULL,
     loanee_id VARCHAR(36) NOT NULL,
     created_by VARCHAR(255),
