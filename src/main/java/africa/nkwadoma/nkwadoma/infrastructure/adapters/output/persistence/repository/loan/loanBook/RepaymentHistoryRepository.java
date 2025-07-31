@@ -113,5 +113,13 @@ public interface RepaymentHistoryRepository extends JpaRepository<RepaymentHisto
 
     List<RepaymentHistoryEntity> findAllByLoanee_IdAndCohortIdOrderByPaymentDateTimeAsc(String loaneeId, String cohortId);
 
+
+
+    @Query("""
+            SELECT CASE WHEN COUNT(r) > 0 THEN true ELSE false END
+                    from RepaymentHistoryEntity r 
+                    where r.loanee.id = :id and r.cohortId = :cohortId               
+        """)
+    boolean checkIfLoaneeHaveAnyRepayment( @Param("id") String id, @Param("cohortId") String cohortId);
 }
 

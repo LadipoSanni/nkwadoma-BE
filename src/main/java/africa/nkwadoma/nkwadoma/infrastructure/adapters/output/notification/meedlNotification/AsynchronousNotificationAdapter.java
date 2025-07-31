@@ -15,6 +15,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -107,6 +109,30 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
         notifyPortfolioManagers(meedlNotification);
         
     }
+    @Async
+    @Override
+    public void notifyAllPortfolioManagerForLoanReferral(String message) throws MeedlException {
+        for (UserIdentity userIdentity : userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER)) {
+            notifyPortfolioManagerForLoanReferral(userIdentity, message);
+        }
+    }
+    private void notifyPortfolioManagerForLoanReferral(UserIdentity userIdentity, String message) throws MeedlException {
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .user(userIdentity)
+                .title("A New Loan Referral Has Been Made")
+                .notificationFlag(NotificationFlag.LOAN_REFERRAL)
+                .contentDetail(message)
+                .timestamp(LocalDateTime.now())
+                .senderMail(userIdentity.getEmail())
+                .senderFullName(userIdentity.getFirstName()+" "+ userIdentity.getLastName())
+                .callToAction(true)
+                .contentId(userIdentity.getId())
+                .build();
+        meedlNotificationUsecase.sendNotification(meedlNotification);
+
+//        meedlNotificationOutputPort.save(meedlNotification);
+    }
+
 
     @Override
     public void notifyAllPmForLoanRepaymentUploadFailure(StringBuilder validationErrorMessage) throws MeedlException {
@@ -146,6 +172,28 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
         }
         log.info("Failure notification has been sent to all on possible malicious upload of user data. ");
     }
+
+    @Override
+    public void notifyAllPortfolioManagerForDeactivatedAccount(OrganizationIdentity organization) throws MeedlException {
+        List<UserIdentity> portfolioManagers = userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
+        for (UserIdentity portfolioManager : portfolioManagers) {
+            MeedlNotification notification = MeedlNotification.builder()
+                    .user(portfolioManager)
+                    .timestamp(LocalDateTime.now())
+                    .contentId(portfolioManager.getId())
+                    .title("Organization has been deactivated")
+                    .callToAction(Boolean.TRUE)
+                    .senderMail(portfolioManager.getEmail())
+                    .senderFullName(portfolioManager.getFirstName() + " "+ portfolioManager.getLastName())
+                    .contentDetail("Organization with name "+ organization.getName() +" has been deactivated")
+                    .notificationFlag(NotificationFlag.ORGANIZATION_DEACTIVATED)
+                    .build();
+            meedlNotificationUsecase.sendNotification(notification);
+        }
+        log.info("Organization has been deactivated and all its admin. Notification sent.");
+
+    }
+
     @Override
     public void notifyPmForLoanRepaymentUploadFailure(UserIdentity foundActor, StringBuilder validationErrorMessage, LoanBook loanBook) throws MeedlException {
         String contentId = getContentIdFromLoanBook(loanBook.getActorId(), loanBook);

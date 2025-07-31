@@ -154,4 +154,11 @@ public class RepaymentHistoryAdapter implements RepaymentHistoryOutputPort {
                 .toList();
     }
 
+    @Override
+    public boolean checkIfLoaneeHasMadeAnyRepayment(String id, String cohortId) throws MeedlException {
+        MeedlValidator.validateUUID(id, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+        MeedlValidator.validateUUID(cohortId, CohortMessages.INVALID_COHORT_ID.getMessage());
+        return repaymentHistoryRepository.checkIfLoaneeHaveAnyRepayment(id,cohortId);
+    }
+
 }

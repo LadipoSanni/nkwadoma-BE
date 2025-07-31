@@ -125,4 +125,13 @@ public class LoanProductAdapter implements LoanProductOutputPort {
         return loanProductEntities.map(loanProductMapper::mapEntityToLoanProduct);
     }
 
+    @Override
+    public LoanProduct findByCohortLoaneeId(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id, LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
+
+        LoanProductEntity loanProductEntity = loanProductEntityRepository.findByCohortLoaneeId(id);
+
+        return loanProductMapper.mapEntityToLoanProduct(loanProductEntity);
+    }
+
 }

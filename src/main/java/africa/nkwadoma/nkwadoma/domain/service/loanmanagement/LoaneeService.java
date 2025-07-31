@@ -102,12 +102,13 @@ public class LoaneeService implements LoaneeUseCase {
                         validationsForInvitingLoanee(loanee, id);
                         loanee.setUploadedStatus(UploadedStatus.INVITED);
                         loanee = loaneeOutputPort.save(loanee);
+                        log.info("Loanees found after save on loanee invite {}", loanee);
                         getLoanInCohort(loanee, cohortId);
-//                        getLoaneeLoanReferral(loanee);
                     } catch (MeedlException e) {
                         log.error("Loanee with id doesn't exist");
                         notifyPmLoaneeDoesNotExist(e.getMessage(), id);
                     }
+                    log.info("Loanee to be invited to the platform is {}", loanee);
                     return loanee;
                 })
                 .filter(Objects::nonNull).toList();
@@ -122,17 +123,10 @@ public class LoaneeService implements LoaneeUseCase {
             CohortLoanee cohortLoanee = cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(loanee.getId(), cohortId);
 //            LoaneeLoanDetail loaneeLoanDetail = loaneeLoanDetailsOutputPort.findByCohortLoaneeId(cohortLoanee.getId());
             loanee.setCohortLoaneeId(cohortLoanee.getId());
+            log.info("Cohort loanee found during the email loanee invite is {}", cohortLoanee);
         } catch (MeedlException e) {
             log.error("Unable to find loan referral for loanee with id {}", loanee.getId());
         }
-    }
-
-    private void getLoaneeLoanReferral(Loanee loanee) throws MeedlException {
-        Page<LoanReferral> loanReferralPage = loanReferralOutputPort.findAllLoanReferralsForLoanee(loanee.getId(), 0, 100 );
-        loanReferralPage.stream()
-                .filter(loanReferral -> loanReferral.getLoanReferralStatus().equals(LoanReferralStatus.PENDING))
-                .findFirst()
-                .ifPresent(loanReferral -> loanee.setLoanReferralId(loanReferral.getId()));
     }
 
     private void validationsForInvitingLoanee(Loanee loanee, String id) throws MeedlException {
@@ -161,10 +155,12 @@ public class LoaneeService implements LoaneeUseCase {
     }
 
     private void sendLoaneesEmail(List<Loanee> loanees) {
+        log.info("About to start sending invites to the loanees. {}",loanees);
         asynchronousMailingOutputPort.sendLoaneeInvite(loanees);
     }
 
     private void notifyPmLoaneeDoesNotExist(String message, String email) {
+        log.warn("Pm is not warned that loanee invited does not exist on the platform and is trying to be invited. {} --- {}", email, message);
     }
 
     @Override

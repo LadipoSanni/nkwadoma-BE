@@ -347,5 +347,4 @@ public class LoanController {
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
 
-
 }
