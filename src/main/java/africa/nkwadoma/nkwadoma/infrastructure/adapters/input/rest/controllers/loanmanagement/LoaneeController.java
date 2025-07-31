@@ -51,6 +51,7 @@ public class LoaneeController {
                                                     @PathVariable String cohortId,
                                                     @RequestBody List<String> ids) {
 
+        log.info("Gotten to the controller to invite loanee(s) to the platform...");
         List<Loanee> loanees = loaneeRestMapper.map(ids, meedlUser.getClaimAsString("sub"));
         loanees = loaneeUseCase.inviteLoanees(loanees, cohortId);
         List<LoaneeResponse> loaneeResponse =

@@ -17,27 +17,37 @@ import java.util.List;
 public interface AsynchronousNotificationOutputPort {
     @Async
     void notifyPortfolioManagerOfNewFinancier(List<Financier> financiersToMail, InvestmentVehicle investmentVehicle, UserIdentity actor);
+
     @Async
     void notifyPortfolioManagerOfNewOrganization(OrganizationIdentity organizationIdentity, NotificationFlag notificationFlag) throws MeedlException;
 
     @Async
     void sendDeferralNotificationToEmployee(Loanee loanee, String loanId, NotificationFlag notificationFlag) throws MeedlException;
+
     @Async
     void notifyPortfolioManagerOfNewLoanOfferWithDecision(LoanOffer loanOffer, UserIdentity userIdentity) throws MeedlException;
 
     @Async
     void notifyPmForLoanRepaymentUploadFailure(UserIdentity foundActor, StringBuilder validationErrorMessage, LoanBook loanBook) throws MeedlException;
 
+    @Async
     void notifyPmForUserDataUploadFailure(UserIdentity foundActor, StringBuilder validationErrorMessage, LoanBook name) throws MeedlException;
 
+    @Async
     void notifyPmOnRepaymentUploadSuccess(UserIdentity foundActor, LoanBook loanBook) throws MeedlException;
 
+    @Async
     void notifyPmOnUserDataUploadSuccess(UserIdentity foundActor, LoanBook loanBook) throws MeedlException;
 
     @Async
     void notifyAllPortfolioManagerForLoanReferral(List<LoanReferral> loanReferrals) throws MeedlException;
 
+    @Async
     void notifyAllPmForLoanRepaymentUploadFailure(StringBuilder validationErrorMessage) throws MeedlException;
 
+    @Async
     void notifyAllPmForUserDataUploadFailure(StringBuilder validationErrorMessage) throws MeedlException;
+
+    @Async
+    void notifyAllPortfolioManagerForDeactivatedAccount(OrganizationIdentity organization) throws MeedlException;
 }

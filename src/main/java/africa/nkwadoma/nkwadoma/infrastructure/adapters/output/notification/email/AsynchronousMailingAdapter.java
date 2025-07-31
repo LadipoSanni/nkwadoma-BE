@@ -47,18 +47,22 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
     public void notifyLoanReferralActors(List<LoanReferral> loanReferrals,List<Loanee> loanees, UserIdentity userIdentity){
         for (int loaneeCount = 0; loaneeCount < loanees.size(); loaneeCount++) {
             try {
-                boolean previoslyReferred = cohortLoaneeOutputPort.checkIfLoaneeHasBeenPreviouslyReferred(
+                boolean previouslyReferred = cohortLoaneeOutputPort.checkIfLoaneeHasBeenPreviouslyReferred(
                         loanees.get(loaneeCount).getId());
-                log.info("previosly referred: {}", previoslyReferred);
-                if (previoslyReferred){
+                log.info("previosly referred: {}", previouslyReferred);
+                if (previouslyReferred){
                     sendNotification(loanReferrals.get(loaneeCount).getId(),userIdentity, loanees.get(loaneeCount));
                 }else {
                     refer(loanReferrals.get(loaneeCount).getId(),loanees.get(loaneeCount));
                 }
-                asynchronousNotificationOutputPort.notifyAllPortfolioManagerForLoanReferral(loanReferrals);
             } catch (MeedlException e) {
                 log.warn("Error sending actor email on loan referral {}", e.getMessage());
             }
+        }
+        try {
+            asynchronousNotificationOutputPort.notifyAllPortfolioManagerForLoanReferral(loanReferrals);
+        } catch (MeedlException e) {
+            log.error("Warning: unable to send notifications to portfolio managers on loanee referred, for loan. ", e);
         }
     }
 
@@ -73,7 +77,12 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
             }
             return LoanReferral.builder().loanee(loanee).build();
         }).toList();
-        asynchronousNotificationOutputPort.notifyAllPortfolioManagerForLoanReferral(loanReferrals);
+        try {
+            log.info("Sending notifications to portfolio managers for inviting loanee ");
+            asynchronousNotificationOutputPort.notifyAllPortfolioManagerForLoanReferral(loanReferrals);
+        } catch (MeedlException e) {
+            log.error("Warning: unable to send notifications to portfolio managers on loanee invites to the platform. ", e);
+        }
     }
     private void invite(Loanee loanee) throws MeedlException {
         loaneeEmailUsecase.inviteLoaneeEmail(loanee.getCohortLoaneeId(),loanee);
@@ -148,7 +157,7 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
     public void sendDeactivatedEmployeesEmailNotification(List<OrganizationEmployeeIdentity> organizationEmployees, OrganizationIdentity organization) throws MeedlException {
         organizationEmployees
                 .forEach(this::notifyDeactivatedEmployee);
-        asynchronousNotificationOutputPort.notifyAllPortfolioManagerForDeactivatedAccount();
+        asynchronousNotificationOutputPort.notifyAllPortfolioManagerForDeactivatedAccount(organization);
     }
 
     private void notifyDeactivatedEmployee(OrganizationEmployeeIdentity employee) {

@@ -188,6 +188,28 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
         }
         log.info("Failure notification has been sent to all on possible malicious upload of user data. ");
     }
+
+    @Override
+    public void notifyAllPortfolioManagerForDeactivatedAccount(OrganizationIdentity organization) throws MeedlException {
+        List<UserIdentity> portfolioManagers = userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
+        for (UserIdentity portfolioManager : portfolioManagers) {
+            MeedlNotification notification = MeedlNotification.builder()
+                    .user(portfolioManager)
+                    .timestamp(LocalDateTime.now())
+                    .contentId(portfolioManager.getId())
+                    .title("Organization has been deactivated")
+                    .callToAction(Boolean.TRUE)
+                    .senderMail(portfolioManager.getEmail())
+                    .senderFullName(portfolioManager.getFirstName() + " "+ portfolioManager.getLastName())
+                    .contentDetail("Organization with name "+ organization.getName() +" has been deactivated")
+                    .notificationFlag(NotificationFlag.ORGANIZATION_DEACTIVATED)
+                    .build();
+            meedlNotificationUsecase.sendNotification(notification);
+        }
+        log.info("Organization has been deactivated and all its admin. Notification sent.");
+
+    }
+
     @Override
     public void notifyPmForLoanRepaymentUploadFailure(UserIdentity foundActor, StringBuilder validationErrorMessage, LoanBook loanBook) throws MeedlException {
         String contentId = getContentIdFromLoanBook(loanBook.getActorId(), loanBook);
