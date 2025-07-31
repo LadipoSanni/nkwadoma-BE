@@ -4,16 +4,15 @@ import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.AsynchronousLoanBookProcessingUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.LoanUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.RepaymentHistoryUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loancalculation.CalculationEngineUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationLoanDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanReferralOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
@@ -67,7 +66,6 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     private final RespondToLoanReferralUseCase respondToLoanReferralUseCase;
     private final LoanRequestUseCase loanRequestUseCase;
     private final LoanOfferUseCase loanOfferUseCase;
-    private final RepaymentHistoryUseCase repaymentHistoryUseCase;
     private final LoanProductOutputPort loanProductOutputPort;
     private final CohortOutputPort cohortOutputPort;
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
@@ -76,13 +74,17 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
     private final LoanUseCase loanUseCase;
     private final AesOutputPort aesOutputPort;
+    private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
 
     @Override
     public void upLoadUserData(LoanBook loanBook) throws MeedlException {
-        loanBookValidator.validateLoanBookObjectValues(loanBook, UploadType.USER_DATA);
+        loanBookValidator.validateLoanBookObjectValues(loanBook);
         List<String> requiredHeaders = getUserDataUploadHeaders();
 
-        List<Map<String, String>> data = readFile(loanBook, requiredHeaders);
+        loanBook.setUploadType(UploadType.USER_DATA);
+        loanBook.setRequiredHeaders(requiredHeaders);
+
+        List<Map<String, String>> data = readFile(loanBook);
         loanBookValidator.validateUserDataUploadFile(loanBook, data, requiredHeaders);
         log.info("Loan book read is {}", data);
 
@@ -91,21 +93,23 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         convertedCohortLoanees = addUploadedLoaneeToCohort(convertedCohortLoanees);
 
         log.info("Converted loanees size {}", convertedCohortLoanees.size());
-//        validateStartDates(convertedCohortLoanees, savedCohort);
         loanBook.setCohortLoanees(convertedCohortLoanees);
         referCohort(loanBook);
         completeLoanProcessing(loanBook);
         updateLoaneeCount(savedCohort, convertedCohortLoanees);
         sendUserDataUploadSuccessNotification(loanBook);
+        log.info("Upload of user data done!");
     }
 
     @Override
     public void uploadRepaymentHistory(LoanBook repaymentHistoryBook) throws MeedlException {
-        loanBookValidator.validateLoanBookObjectValues(repaymentHistoryBook, UploadType.REPAYMENT);
-
+        loanBookValidator.validateLoanBookObjectValues(repaymentHistoryBook);
         List<String> requiredHeaders = getRepaymentRecordUploadRequiredHeaders();
 
-        List<Map<String, String>>  data = readFile(repaymentHistoryBook, requiredHeaders);
+        repaymentHistoryBook.setUploadType(UploadType.REPAYMENT);
+        repaymentHistoryBook.setRequiredHeaders(requiredHeaders);
+
+        List<Map<String, String>>  data = readFile(repaymentHistoryBook);
         repaymentHistoryBook.setMeedlNotification(new MeedlNotification());
         log.info("Repayment record book read is {}", data);
 
@@ -118,7 +122,6 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         Set<String> loaneesThatMadePayment = getSetOfLoanees(convertedRepaymentHistories);
         log.info("Set of loanees that made payments size : {}, set",loaneesThatMadePayment.size());
         Map<String, List<RepaymentHistory>> mapOfRepaymentHistoriesForEachLoanee = getRepaymentHistoriesForLoanees(loaneesThatMadePayment, convertedRepaymentHistories);
-//        printRepaymentCountsPerLoanee(mapOfRepaymentHistoriesForEachLoanee);
         processRepaymentCalculation(mapOfRepaymentHistoriesForEachLoanee, repaymentHistoryBook.getCohort());
         sendRepaymentUploadSuccessNotification(repaymentHistoryBook);
 
@@ -133,22 +136,6 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         asynchronousNotificationOutputPort.notifyPmOnRepaymentUploadSuccess(foundActor, loanBook);
     }
 
-    private void validateStartDates(List<Loanee> convertedLoanees, Cohort savedCohort) throws MeedlException {
-        for (Loanee loanee : convertedLoanees) {
-            validateStartDate(loanee.getUpdatedAt(), savedCohort.getStartDate());
-        }
-
-    }
-
-    private void validateStartDate(LocalDateTime loanStartDate, LocalDate cohortStartDate) throws MeedlException {
-        LocalDate loanStartAsDate = loanStartDate.toLocalDate();
-
-        if (loanStartAsDate.isBefore(cohortStartDate)) {
-            log.info("Loan start date {} cannot be before cohort start date {}.", loanStartAsDate, cohortStartDate);
-            throw new LoanException("Loan start date " +loanStartAsDate +" cannot be before cohort start date "+cohortStartDate );
-        }
-    }
-
     private void updateLoaneeCount(Cohort savedCohort, List<CohortLoanee> loanees) throws MeedlException {
         savedCohort = findCohort(savedCohort);
         log.info("Number of loanees in a cohort on upload {}", savedCohort.getNumberOfLoanees() + loanees.size());
@@ -160,14 +147,6 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         cohortOutputPort.save(savedCohort);
         loaneeUseCase.increaseNumberOfLoaneesInOrganization(savedCohort, loanees.size());
         loaneeUseCase.increaseNumberOfLoaneesInProgram(savedCohort, loanees.size());
-    }
-    public void printRepaymentCountsPerLoanee(Map<String, List<RepaymentHistory>> mapOfRepaymentHistoriesForEachLoanee) {
-        for (Map.Entry<String, List<RepaymentHistory>> entry : mapOfRepaymentHistoriesForEachLoanee.entrySet()) {
-            String loaneeId = entry.getKey();
-            int numberOfRepayments = entry.getValue() != null ? entry.getValue().size() : 0;
-
-            log.info("Loanee: {} | Repayments: {}", loaneeId, numberOfRepayments);
-        }
     }
 
     public void processRepaymentCalculation(
@@ -323,9 +302,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                 iterator.remove();
             }
         }
-
         log.info("Number of referable loanees :{} ",  loanBook.getCohortLoanees().size());
-//        asynchronousMailingOutputPort.notifyLoanReferralActors(loanBook.getLoanees());
     }
     private void inviteTrainee (CohortLoanee loanee) throws MeedlException {
         log.info("Single loanee is being referred...");
@@ -432,6 +409,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     List<CohortLoanee> convertToLoanees(List<Map<String, String>> data, Cohort cohort, String actorId) throws MeedlException {
         List<CohortLoanee> cohortLoanees = new ArrayList<>();
         for (Map<String, String> row : data) {
+            log.info("Bvn {} and nin {} for each loanee", row.get("bvn"), row.get("nin"));
             LocalDateTime loanStartDate = parseFlexibleDateTime(row.get("loanstartdate"), row.get("email"));
             UserIdentity userIdentity = UserIdentity.builder()
                     .firstName(row.get("firstname"))
@@ -581,39 +559,61 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         }
     }
 
-
-    private List<Map<String, String>> readFile(LoanBook loanBook, List<String> requiredHeaders) throws MeedlException {
+    private List<Map<String, String>> readFile(LoanBook loanBook) throws MeedlException {
         List<Map<String, String>> data;
-        if (loanBook.getFile().getName().endsWith(".csv")) {
-            log.info("the file type is .csv");
-            try {
-                data = validateAndReadCSV(loanBook, requiredHeaders);
-            }catch (IOException e){
-                log.error("Error occurred reading csv",e);
-                throw new MeedlException(e.getMessage());
+        loanBookValidator.validateFileType(loanBook);
+        File file = loanBook.getFile();
+
+        try {
+            if (file.getName().endsWith(".csv")) {
+                log.info("The file type is .csv");
+                data = validateAndReadCSV(loanBook);
+            } else if (file.getName().endsWith(".xlsx") || file.getName().endsWith(".xls")) {
+                log.info("The file is an Excel file, converting to CSV");
+                File convertedCsv = convertExcelToCsv(file);
+                loanBook.setFile(convertedCsv);
+                data = validateAndReadCSV(loanBook);
+                convertedCsv.deleteOnExit();
+            } else {
+                log.error("Unsupported file type.");
+                throw new LoanException("Unsupported file type.");
             }
-        } else if (loanBook.getFile().getName().endsWith(".xlsx")) {
-            try{
-                log.info("the file is a .xlsx file");
-                data = validateAndReadExcel(loanBook.getFile());
-            }catch (IOException e){
-                log.error("Error occurred reading excel",e);
-                throw new LoanException(e.getMessage());
-            }
-        } else {
-            log.error("Unsupported file type.");
-            throw new LoanException("Unsupported file type.");
+        } catch (IOException e) {
+            log.error("Error occurred while processing file", e);
+            throw new MeedlException(e.getMessage());
         }
+
         return data;
     }
+    private File convertExcelToCsv(File excelFile) throws IOException {
+        Workbook workbook = WorkbookFactory.create(excelFile);
+        Sheet sheet = workbook.getSheetAt(0);
 
-    private List<Map<String, String>> validateAndReadCSV(LoanBook loanBook, List<String> requiredHeaders) throws IOException, MeedlException {
+        File tempCsvFile = File.createTempFile("converted-", ".csv");
+        try (PrintWriter writer = new PrintWriter(tempCsvFile)) {
+            for (Row row : sheet) {
+                List<String> cells = new ArrayList<>();
+                for (Cell cell : row) {
+                    cell.setCellType(CellType.STRING);
+                    cells.add(cell.getStringCellValue().replaceAll(",", " "));
+                }
+                String csvLine = String.join(",", cells);
+                log.info("Writing CSV line: {}", csvLine);
+                writer.println(csvLine);
+            }
+        } finally {
+            workbook.close();
+        }
+        return tempCsvFile;
+    }
+
+    private List<Map<String, String>> validateAndReadCSV(LoanBook loanBook) throws IOException, MeedlException {
         List<Map<String, String>> records = new ArrayList<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(loanBook.getFile()))) {
             String headerLine = br.readLine();
 
-            Map<String, Integer> headerIndexMap = getAndValidateFileHeaderMap(requiredHeaders, headerLine);
+            Map<String, Integer> headerIndexMap = getAndValidateFileHeaderMap(loanBook, headerLine);
 
             String line;
             while ((line = br.readLine()) != null) {
@@ -623,17 +623,14 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                 log.info("The row line to get has {}", Arrays.toString(values));
                 Map<String, String> rowMap = new HashMap<>();
 
-                for (String header : requiredHeaders) {
+                for (String header : loanBook.getRequiredHeaders()) {
                     log.info("The header to get its value : {}", header);
                     if (!headerIndexMap.containsKey(header)) {
                         log.warn("Skipping missing header: {}", header);
                         continue;
                     }
                     int index = headerIndexMap.get(header);
-                    if (index >= values.length) {
-                        log.error("Missing value for column: {}", header);
-                        throw new LoanException("Missing value for column: " + header);
-                    }
+                    if (loanBookValidator.isValueNotPresentInColumn(header, index, values)) continue;
                     rowMap.put(header, values[index].trim());
                 }
                 log.info("The row map is :{}", rowMap);
@@ -642,15 +639,14 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                 log.info("The records with row map is : {}", records);
             }
         }
-
         if (records.isEmpty()) {
             throw new LoanException("CSV file has no data rows.");
         }
-
         return records;
     }
 
-    private static Map<String, Integer> getAndValidateFileHeaderMap(List<String> requiredHeaders, String headerLine) throws MeedlException {
+
+    private Map<String, Integer> getAndValidateFileHeaderMap(LoanBook loanBook, String headerLine) throws MeedlException {
         if (headerLine == null) {
             log.info("CSV file is empty or missing headers.");
             throw new LoanException("CSV file is empty or missing headers.");
@@ -663,7 +659,8 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
 
         extractFileHeaderMap(headers, headerIndexMap);
 
-        validateFileHeader(requiredHeaders, headerIndexMap);
+        loanBookValidator.validateFileHeader(loanBook, headerIndexMap);
+//        validateFileHeader(requiredHeaders, headerIndexMap);
         return headerIndexMap;
     }
 
@@ -686,7 +683,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         log.info("Validation file headers with the required headers which are : {}", requiredHeaders);
         for (String required : requiredHeaders) {
             if (required.equals("bvn") || required.equals("nin")
-                    || required.equals("modeofpayment") || required.equals("middlename")){
+                    || required.equals("middlename")){
                 continue;
             }
             if (!headerIndexMap.containsKey(required)) {
@@ -697,82 +694,13 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     }
 
 
-    private List<Map<String, String>> validateAndReadExcel(File file) throws IOException, MeedlException {
-//        List<Map<String, String>> records = new ArrayList<>();
-        throw new MeedlException("Please convert file to csv ");
-//        List<String> requiredHeaders = List.of("firstName", "lastName", "email", "phoneNumber", "DON", "initialDeposit", "amountRequested", "amountReceived");
-//
-//        try (FileInputStream fis = new FileInputStream(file);
-//             Workbook workbook = new XSSFWorkbook(fis)) {
-//
-//            Sheet sheet = workbook.getSheetAt(0);
-//            Iterator<Row> rowIterator = sheet.iterator();
-//
-//            if (!rowIterator.hasNext()) {
-//                throw new MeedlException("Excel file is empty.");
-//            }
-//
-//            // Read header row
-//            Row headerRow = rowIterator.next();
-//            Map<String, Integer> headerIndexMap = new HashMap<>();
-//
-//            for (Cell cell : headerRow) {
-//                String header = cell.getStringCellValue().trim();
-//                headerIndexMap.put(header, cell.getColumnIndex());
-//            }
-
-//            validateFileHeader(requiredHeaders, headerIndexMap);
-
-            // Read and map data rows
-//            while (rowIterator.hasNext()) {
-//                Row row = rowIterator.next();
-//                if (isRowEmpty(row)) continue;
-//
-//                Map<String, String> rowMap = new HashMap<>();
-//                for (String header : requiredHeaders) {
-//                    log.info("Header for excel to get the actual cell : {}", header);
-//                    int colIndex = headerIndexMap.get(header);
-//                    Cell cell = row.getCell(colIndex, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
-//                    if (cell == null) {
-//                        throw new MeedlException("Missing value for column: " + header);
-//                    }
-//                    rowMap.put(header, getCellValueAsString(cell));
-//                }
-//
-//                records.add(rowMap);
-//            }
-//        }
-
-//        if (records.isEmpty()) {
-//            throw new MeedlException("Excel file has no data rows.");
-//        }
-
-//        return records;
-    }
-    private boolean isRowEmpty(Row row) {
-        for (Cell cell : row) {
-            if (cell != null && cell.getCellType() != CellType.BLANK) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private String getCellValueAsString(Cell cell) {
-        return switch (cell.getCellType()) {
-            case STRING -> cell.getStringCellValue().trim();
-            case NUMERIC -> String.valueOf(cell.getNumericCellValue()).replaceAll("\\.0$", "");
-            case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
-            case FORMULA -> cell.getCellFormula();
-            default -> "";
-        };
-    }
     private List<String> getUserDataUploadHeaders() {
         return List.of("firstname", "lastname", "middlename",
                 "email", "phonenumber", "initialdeposit",
                 "loanstartdate",
                 "amountrequested", "amountreceived",
-                "bvn", "nin", "loanproduct");
+                "bvn", "nin",
+                "loanproduct");
     }
     private List<String> getRepaymentRecordUploadRequiredHeaders() {
         return List.of(
