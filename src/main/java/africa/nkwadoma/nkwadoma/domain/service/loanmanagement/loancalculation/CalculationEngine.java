@@ -631,6 +631,13 @@ public class CalculationEngine implements CalculationEngineUseCase {
     }
 
 
+
+
+
+
+
+
+
     public void calculateDailyInterest() throws MeedlException {
         List<LoaneeLoanDetail> loaneeLoanDetails = loaneeLoanDetailsOutputPort.findAllByNotNullAmountOutStanding();
 
