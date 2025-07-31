@@ -40,7 +40,7 @@ public interface AsynchronousNotificationOutputPort {
     void notifyPmOnUserDataUploadSuccess(UserIdentity foundActor, LoanBook loanBook) throws MeedlException;
 
     @Async
-    void notifyAllPortfolioManagerForLoanReferral(List<LoanReferral> loanReferrals) throws MeedlException;
+    void notifyAllPortfolioManagerForLoanReferral(String message) throws MeedlException;
 
     @Async
     void notifyAllPmForLoanRepaymentUploadFailure(StringBuilder validationErrorMessage) throws MeedlException;

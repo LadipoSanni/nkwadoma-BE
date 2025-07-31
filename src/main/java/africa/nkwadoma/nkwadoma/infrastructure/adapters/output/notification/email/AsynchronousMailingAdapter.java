@@ -6,7 +6,6 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
@@ -60,26 +59,51 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
             }
         }
         try {
-            asynchronousNotificationOutputPort.notifyAllPortfolioManagerForLoanReferral(loanReferrals);
+            String message = getEmailsAndMessageOfUsersReferred(loanReferrals);
+            asynchronousNotificationOutputPort.notifyAllPortfolioManagerForLoanReferral(message);
         } catch (MeedlException e) {
             log.error("Warning: unable to send notifications to portfolio managers on loanee referred, for loan. ", e);
         }
     }
+    public String getEmailsAndMessageOfUsersReferred(List<LoanReferral> loanReferrals) {
+        String initialMessage = """
+                We are pleased to inform you that a new loanee has been referred for a loan under your management.\s
+                
+                Review the referral details and validate the applicant's information.\s
+                Initiate the loan assessment process to evaluate the applicant's eligibility.\s
+                Contact the applicant to gather any additional required documentation.""";
+        String emails = loanReferrals.stream()
+                .map(referral -> referral.getLoanee().getUserIdentity().getEmail())
+                .collect(Collectors.joining("\n"));
 
+        return initialMessage + "\n" + emails + "\n";
+    }
+    public String getEmailsAndMessageOfUsersInvited(List<Loanee> loanees) {
+        String initialMessage = """
+                We are pleased to inform you that a new loanee has been invited to the platform.\s
+                
+                Review the loan details and validate the applicant's information.\s
+                Contact the applicant to gather any additional required documentation.""";
+        String emails = loanees.stream()
+                .map(loanee -> loanee.getUserIdentity().getEmail())
+                .collect(Collectors.joining("\n"));
+
+        return initialMessage + "\n" + emails + "\n";
+    }
     @Async
     @Override
     public void sendLoaneeInvite(List<Loanee> loanees) {
-        List<LoanReferral> loanReferrals = loanees.stream().map(loanee -> {
+        loanees.forEach(loanee -> {
             try {
                 invite(loanee);
             } catch (MeedlException e) {
                 log.warn("Error sending actor email on loan referral {}", e.getMessage());
             }
-            return LoanReferral.builder().loanee(loanee).build();
-        }).toList();
+        });
         try {
             log.info("Sending notifications to portfolio managers for inviting loanee ");
-            asynchronousNotificationOutputPort.notifyAllPortfolioManagerForLoanReferral(loanReferrals);
+            String message = getEmailsAndMessageOfUsersInvited(loanees);
+            asynchronousNotificationOutputPort.notifyAllPortfolioManagerForLoanReferral(message);
         } catch (MeedlException e) {
             log.error("Warning: unable to send notifications to portfolio managers on loanee invites to the platform. ", e);
         }
