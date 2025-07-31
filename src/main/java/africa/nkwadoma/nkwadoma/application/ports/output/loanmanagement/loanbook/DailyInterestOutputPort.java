@@ -6,4 +6,6 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.DailyInterest;
 public interface DailyInterestOutputPort {
 
     DailyInterest save(DailyInterest dailyInterest) throws MeedlException;
+
+    void deleteById(String dailyInterestId) throws MeedlException;
 }

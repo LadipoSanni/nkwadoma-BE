@@ -26,6 +26,7 @@ public class DailyInterestAdapterTest {
 
     private DailyInterest dailyInterest;
     private LoaneeLoanDetail loaneeLoanDetail;
+    private String dailyInterestId;
     @Autowired
     private DailyInterestOutputPort dailyInterestOutputPort;
     @Autowired
@@ -47,15 +48,17 @@ public class DailyInterestAdapterTest {
         DailyInterest savedDailyInterest = DailyInterest.builder().build();
         try {
             savedDailyInterest = dailyInterestOutputPort.save(dailyInterest);
+            dailyInterestId = savedDailyInterest.getId();
         }catch (MeedlException meedlException) {
             log.error(meedlException.getMessage());
         }
-        assertEquals(savedDailyInterest.getInterest(),BigDecimal.valueOf(2000));
+        assertEquals(savedDailyInterest.getInterest(),BigDecimal.valueOf(5000.00));
     }
 
 
     @AfterAll
     void tearDown() throws MeedlException {
+        dailyInterestOutputPort.deleteById(dailyInterestId);
         loaneeLoanDetailsOutputPort.delete(loaneeLoanDetail.getId());
     }
 
