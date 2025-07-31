@@ -18,6 +18,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.CalculationContext;
+import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.DailyInterest;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanPeriodRecord;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import lombok.RequiredArgsConstructor;
@@ -630,11 +631,22 @@ public class CalculationEngine implements CalculationEngineUseCase {
     }
 
 
-    public void calculateDailyInterest(){
+    public void calculateDailyInterest() throws MeedlException {
         List<LoaneeLoanDetail> loaneeLoanDetails = loaneeLoanDetailsOutputPort.findAllByNotNullAmountOutStanding();
 
-        //for each loanee loan detail that has amount outstanding calculate interest
-        //
+        for (LoaneeLoanDetail loaneeLoanDetail : loaneeLoanDetails) {
+            BigDecimal dailyInterestIncurred =
+                    calculateInterest(loaneeLoanDetail.getInterestRate(),loaneeLoanDetail.getAmountOutstanding(),1);
+            log.info("daily interest {}",dailyInterestIncurred);
+            DailyInterest dailyInterest = DailyInterest.builder()
+                    .interest(dailyInterestIncurred)
+                    .createdAt(LocalDateTime.now())
+                    .loaneeLoanDetail(loaneeLoanDetail)
+                    .build();
+            log.info("daily interest before saving === : {}", dailyInterest);
+            dailyInterest = dailyInterestOutputPort.save(dailyInterest);
+            log.info("saved daily interest === : {}",dailyInterest);
+        }
     }
 
 
