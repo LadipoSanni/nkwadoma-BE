@@ -27,7 +27,7 @@ ALTER TABLE loan_offer_entity
 WITH ranked_requests AS (
     SELECT
         lr.id,
-        ROW_NUMBER() OVER (PARTITION BY lre.id ORDER BY lr.created_at DESC) AS rn
+        ROW_NUMBER() OVER (PARTITION BY lre.id ORDER BY lr.created_date DESC) AS rn
     FROM loan_request_entity lr
              JOIN cohort_loanee_entity cle ON cle.loanee_id = lr.loanee_entity_id
              JOIN loan_referral_entity lre ON lre.cohort_loanee_id = cle.id
