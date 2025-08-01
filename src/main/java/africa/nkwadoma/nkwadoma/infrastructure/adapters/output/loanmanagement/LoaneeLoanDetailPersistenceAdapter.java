@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
+import java.time.Month;
 import java.util.*;
 
 @Slf4j
@@ -74,6 +75,13 @@ public class LoaneeLoanDetailPersistenceAdapter implements LoaneeLoanDetailsOutp
     public List<LoaneeLoanDetail> findAllByNotNullAmountOutStanding() {
         List<LoaneeLoanDetailEntity> loaneeLoanDetailEntities =
                 loaneeLoanDetailRepository.findAllByAmountOutstandingGreaterThanZero();
+        return loaneeLoanDetailEntities.stream().map(loaneeLoanDetailMapper::toLoaneeLoanDetails).toList();
+    }
+
+    @Override
+    public List<LoaneeLoanDetail> findAllWithDailyInterestByMonthAndYear(Month month, int year) {
+        List<LoaneeLoanDetailEntity> loaneeLoanDetailEntities =
+                loaneeLoanDetailRepository.findAllWithDailyInterestByMonthAndYear(month,year);
         return loaneeLoanDetailEntities.stream().map(loaneeLoanDetailMapper::toLoaneeLoanDetails).toList();
     }
 }

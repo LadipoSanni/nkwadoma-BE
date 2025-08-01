@@ -11,6 +11,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.time.Month;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -34,5 +38,14 @@ public class DailyInterestAdapter implements DailyInterestOutputPort {
     public void deleteById(String dailyInterestId) throws MeedlException {
         MeedlValidator.validateUUID(dailyInterestId,"Daily interest id cannot be empty");
         dailyInterestRepository.deleteById(dailyInterestId);
+    }
+
+    @Override
+    public List<DailyInterest> findAllInterestForAMonth(Month month, int year, String id) throws MeedlException {
+        MeedlValidator.validateUUID(id,"Loanee loan detail id cannot be empty");
+        List<DailyInterestEntity> dailyInterestEntities =
+                dailyInterestRepository.findAllByLoaneeLoanDetailIdAndCreatedAtMonthAndCreatedAtYear(id,month,year);
+
+        return dailyInterestEntities.stream().map(dailyInterestMapper::toDailyInterest).collect(Collectors.toList());
     }
 }

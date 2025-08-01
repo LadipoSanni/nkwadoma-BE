@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.time.Month;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
@@ -65,4 +66,13 @@ public interface LoaneeLoanDetailRepository extends JpaRepository<LoaneeLoanDeta
             where loaneeLoanDetail.amountOutstanding > 0
     """)
     List<LoaneeLoanDetailEntity> findAllByAmountOutstandingGreaterThanZero();
+
+    @Query("""
+        SELECT DISTINCT l FROM LoaneeLoanDetailEntity l 
+        LEFT JOIN DailyInterestEntity di on di.loaneeLoanDetail.id = l.id
+        WHERE FUNCTION('MONTH', di.createdAt) = :month AND FUNCTION('YEAR', di.createdAt) = :year
+""")
+    List<LoaneeLoanDetailEntity> findAllWithDailyInterestByMonthAndYear(
+            @Param("month") Month month,
+            @Param("year") int year);
 }

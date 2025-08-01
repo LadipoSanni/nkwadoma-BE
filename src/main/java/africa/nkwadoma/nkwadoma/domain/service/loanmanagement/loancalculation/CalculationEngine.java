@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramLoanDe
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationLoanDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.DailyInterestOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.MonthlyInterestOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.RepaymentHistoryOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanCalculationMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -16,10 +17,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.ProgramLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
-import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.CalculationContext;
-import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.DailyInterest;
-import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanPeriodRecord;
-import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
+import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -29,6 +27,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -47,6 +46,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
     private final ProgramLoanDetailOutputPort programLoanDetailOutputPort;
     private final OrganizationLoanDetailOutputPort organizationLoanDetailOutputPort;
     private final DailyInterestOutputPort dailyInterestOutputPort;
+    private final MonthlyInterestOutputPort monthlyInterestOutputPort;
     private final JobScheduler jobScheduler;
 
 
@@ -650,6 +650,83 @@ public class CalculationEngine implements CalculationEngineUseCase {
                 "0 30 23 * * *",  // every day at 11:30 PM
                 this::calculateDailyInterest
         );
+    }
+
+    public void calculateMonthlyInterest() throws MeedlException {
+        List<LoaneeLoanDetail> loaneeLoanDetails =
+                loaneeLoanDetailsOutputPort.findAllWithDailyInterestByMonthAndYear(LocalDate.now().getMonth(), LocalDate.now().getYear());
+        for (LoaneeLoanDetail loaneeLoanDetail : loaneeLoanDetails) {
+            BigDecimal accumulatedInterestForTheMonth = dailyInterestOutputPort
+                    .findAllInterestForAMonth(LocalDate.now().getMonth(), LocalDate.now().getYear(), loaneeLoanDetail.getId())
+                    .stream()
+                    .map(DailyInterest::getInterest)
+                    .filter(Objects::nonNull)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            log.info("Done calculating accumulated interest for the month == {} year == {} for {}. Accumulated interest is {}",
+                    LocalDate.now().getMonth(), LocalDate.now().getYear(), loaneeLoanDetail.getId(), accumulatedInterestForTheMonth);
+
+            MonthlyInterest monthlyInterest = MonthlyInterest.builder()
+                    .interest(accumulatedInterestForTheMonth)
+                    .createdAt(LocalDateTime.now())
+                    .loaneeLoanDetail(loaneeLoanDetail)
+                    .build();
+
+            log.info("Monthly interest before saving == {}", monthlyInterest);
+            monthlyInterest = monthlyInterestOutputPort.save(monthlyInterest);
+            log.info("Monthly interest after saving == {}", monthlyInterest);
+
+            log.info("Interest incurred as at last month == {} before adding this month incurred == {}",
+                    loaneeLoanDetail.getInterestIncurred(), accumulatedInterestForTheMonth);
+            log.info("Amount outstanding as at last month == {} before adding this month incurred == {}",
+                    loaneeLoanDetail.getAmountOutstanding(), accumulatedInterestForTheMonth);
+
+            loaneeLoanDetail.setInterestIncurred(loaneeLoanDetail.getInterestIncurred().add(monthlyInterest.getInterest()));
+            loaneeLoanDetail.setAmountOutstanding(loaneeLoanDetail.getAmountOutstanding().add(monthlyInterest.getInterest()));
+
+            log.info("Interest incurred after adding this month incurred == {}", loaneeLoanDetail.getInterestIncurred());
+            log.info("Amount outstanding after adding this month incurred == {}", loaneeLoanDetail.getAmountOutstanding());
+            loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
+
+            CohortLoanDetail cohortLoanDetail = cohortLoanDetailOutputPort.findByLoaneeLoanDetailId(loaneeLoanDetail.getId());
+            log.info("Cohort interest incurred as at last month == {} before adding this month incurred == {}",
+                    cohortLoanDetail.getInterestIncurred(), monthlyInterest.getInterest());
+            log.info("Cohort amount outstanding as at last month == {} before adding this month incurred == {}",
+                    cohortLoanDetail.getOutstandingAmount(), monthlyInterest.getInterest());
+
+            cohortLoanDetail.setInterestIncurred(cohortLoanDetail.getInterestIncurred().add(monthlyInterest.getInterest()));
+            cohortLoanDetail.setOutstandingAmount(cohortLoanDetail.getOutstandingAmount().add(monthlyInterest.getInterest()));
+
+            log.info("Cohort interest incurred after adding this month incurred == {}", cohortLoanDetail.getInterestIncurred());
+            log.info("Cohort amount outstanding after adding this month incurred == {}", cohortLoanDetail.getOutstandingAmount());
+            cohortLoanDetailOutputPort.save(cohortLoanDetail);
+
+            ProgramLoanDetail programLoanDetail = programLoanDetailOutputPort.findByProgramId(cohortLoanDetail.getCohort().getProgramId());
+            log.info("Program interest incurred as at last month == {} before adding this month incurred == {}",
+                    programLoanDetail.getInterestIncurred(), monthlyInterest.getInterest());
+            log.info("Program amount outstanding as at last month == {} before adding this month incurred == {}",
+                    programLoanDetail.getOutstandingAmount(), monthlyInterest.getInterest());
+
+            programLoanDetail.setInterestIncurred(programLoanDetail.getInterestIncurred().add(monthlyInterest.getInterest()));
+            programLoanDetail.setOutstandingAmount(programLoanDetail.getOutstandingAmount().add(monthlyInterest.getInterest()));
+
+            log.info("Program interest incurred after adding this month incurred == {}", programLoanDetail.getInterestIncurred());
+            log.info("Program amount outstanding after adding this month incurred == {}", programLoanDetail.getOutstandingAmount());
+            programLoanDetailOutputPort.save(programLoanDetail);
+
+            OrganizationLoanDetail organizationLoanDetail = organizationLoanDetailOutputPort.findByOrganizationId(programLoanDetail.getProgram().getOrganizationId());
+            log.info("Organization interest incurred as at last month == {} before adding this month incurred == {}",
+                    organizationLoanDetail.getInterestIncurred(), monthlyInterest.getInterest());
+            log.info("Organization amount outstanding as at last month == {} before adding this month incurred == {}",
+                    organizationLoanDetail.getOutstandingAmount(), monthlyInterest.getInterest());
+
+            organizationLoanDetail.setInterestIncurred(organizationLoanDetail.getInterestIncurred().add(monthlyInterest.getInterest()));
+            organizationLoanDetail.setOutstandingAmount(organizationLoanDetail.getOutstandingAmount().add(monthlyInterest.getInterest()));
+
+            log.info("Organization interest incurred after adding this month incurred == {}", organizationLoanDetail.getInterestIncurred());
+            log.info("Organization amount outstanding after adding this month incurred == {}", organizationLoanDetail.getOutstandingAmount());
+            organizationLoanDetailOutputPort.save(organizationLoanDetail);
+        }
+
     }
 
 
