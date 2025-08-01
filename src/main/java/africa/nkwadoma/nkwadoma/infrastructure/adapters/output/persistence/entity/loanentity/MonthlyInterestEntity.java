@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 @Getter
 public class MonthlyInterestEntity {
 
-
     @Id
     @UuidGenerator
     private String id;
