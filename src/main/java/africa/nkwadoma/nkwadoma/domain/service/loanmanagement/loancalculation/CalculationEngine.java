@@ -20,7 +20,6 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.CalculationContext;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.DailyInterest;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanPeriodRecord;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -30,8 +29,6 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -646,17 +643,17 @@ public class CalculationEngine implements CalculationEngineUseCase {
         }
     }
 
-
-    @PostConstruct
-    public void init() {
-        // Schedule the first execution 2 minutes from now
-        jobScheduler.schedule(Instant.now().plus(Duration.ofMinutes(2)), this::calculateDailyInterest);
-    }
-
     @Override
     public void scheduleDailyInterestCalculation() {
-        jobScheduler.scheduleRecurrently("daily-interest-calculation", "0 */2 * * * *", this::calculateDailyInterest);
+        jobScheduler.scheduleRecurrently(
+                "daily-interest-calculation-11-30-PM",
+                "0 30 23 * * *",  // every day at 11:30 PM
+                this::calculateDailyInterest
+        );
     }
+
+
+
 
 
     public void calculateDailyInterest() throws MeedlException {

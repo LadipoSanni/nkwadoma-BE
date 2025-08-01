@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeO
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramLoanDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationLoanDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.DailyInterestOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.RepaymentHistoryOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanCalculationMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -16,10 +17,13 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.CalculationContext;
+import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.DailyInterest;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanPeriodRecord;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
+import org.jobrunr.jobs.lambdas.JobLambda;
+import org.jobrunr.scheduling.JobScheduler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,6 +66,12 @@ public class LoanCalculationEngineTest {
     private CohortLoanDetail cohortLoanDetail;
     private ProgramLoanDetail programLoanDetail;
     private OrganizationLoanDetail organizationLoanDetail;
+    @Mock
+    private JobScheduler jobScheduler;
+    @Mock
+    private DailyInterestOutputPort dailyInterestOutputPort;
+
+
     @BeforeEach
     void setup() {
         loaneeId = UUID.randomUUID().toString();
@@ -949,4 +959,33 @@ public class LoanCalculationEngineTest {
         assertEquals(BigDecimal.ZERO.setScale(NUMBER_OF_DECIMAL_PLACE), actual);
     }
 
+
+    @Test
+    void calculateDailyInterest(){
+//        when(jobScheduler.scheduleRecurrently())
+        try {
+            BigDecimal expectedInterest = new BigDecimal("10.00"); // Adjust based on your calculateInterest logic
+            LoaneeLoanDetail loanDetail = TestData.createTestLoaneeLoanDetail();
+            loanDetail.setAmountOutstanding(BigDecimal.valueOf(30416.67));
+            loanDetail.setInterestRate(12);
+            when(loaneeLoanDetailsOutputPort.findAllByNotNullAmountOutStanding()).thenReturn(List.of(loanDetail));
+            DailyInterest dailyInterest = TestData.buildDailyInterest(loanDetail);
+            when(dailyInterestOutputPort.save(dailyInterest)).thenReturn(dailyInterest);
+
+
+            // Since scheduleDailyInterestCalculation doesn't run the job immediately,
+            // you may need to invoke calculateDailyInterest directly for testing its logic
+            calculationEngine.calculateDailyInterest();
+
+            // Verify output port interactions
+            verify(loaneeLoanDetailsOutputPort).findAllByNotNullAmountOutStanding();
+            verify(dailyInterestOutputPort).save(argThat(savedDailyInterest ->
+                    savedDailyInterest.getInterest().equals(expectedInterest) &&
+                            savedDailyInterest.getLoaneeLoanDetail().equals(loanDetail) &&
+                            savedDailyInterest.getCreatedAt() != null
+            ));
+        }catch (MeedlException meedlException){
+            log.error(meedlException.getMessage());
+        }
+    }
 }

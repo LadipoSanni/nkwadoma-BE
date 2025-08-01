@@ -744,4 +744,12 @@ public class TestData {
                 .loaneeLoanDetail(loaneeLoanDetail)
                 .build();
     }
+
+    public static MonthlyInterest buildMonthlyInterest(LoaneeLoanDetail loaneeLoanDetail) {
+        return MonthlyInterest.builder()
+                .interest(BigDecimal.valueOf(5000.00))
+                .createdAt(LocalDateTime.now())
+                .loaneeLoanDetail(loaneeLoanDetail)
+                .build();
+    }
 }
