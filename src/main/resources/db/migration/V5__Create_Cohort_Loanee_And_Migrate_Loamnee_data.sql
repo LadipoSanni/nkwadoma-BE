@@ -27,7 +27,11 @@ CREATE TABLE IF NOT EXISTS cohort_loanee_entity (
 -- Backfill created_at in loanee_entity from meedl_user only when NULL
 UPDATE loanee_entity l
 SET created_at = COALESCE(
-        TO_TIMESTAMP(u.created_at, 'YYYY-MM-DD HH24:MI:SS'),
+        CASE
+            WHEN u.created_at IS NOT NULL AND u.created_at ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}$'
+        THEN TO_TIMESTAMP(u.created_at, 'YYYY-MM-DD"T"HH24:MI:SS')
+            ELSE CURRENT_TIMESTAMP
+            END,
         CURRENT_TIMESTAMP
                  )
     FROM meedl_user u
@@ -63,7 +67,11 @@ SELECT
     l.created_by,
     COALESCE(
             l.created_at,
-            TO_TIMESTAMP(u.created_at, 'YYYY-MM-DD HH24:MI:SS'),
+            CASE
+                WHEN u.created_at IS NOT NULL AND u.created_at ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}$'
+            THEN TO_TIMESTAMP(u.created_at, 'YYYY-MM-DD"T"HH24:MI:SS')
+                ELSE CURRENT_TIMESTAMP
+                END,
             CURRENT_TIMESTAMP
     ) AS created_at,
     l.updated_at,
