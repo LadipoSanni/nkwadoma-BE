@@ -31,7 +31,7 @@ public class CohortLoaneeEntity {
     private String createdBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    @ManyToOne
+    @OneToOne
     private LoaneeLoanDetailEntity loaneeLoanDetail;
     @Enumerated(EnumType.STRING)
     private LoaneeStatus loaneeStatus;
