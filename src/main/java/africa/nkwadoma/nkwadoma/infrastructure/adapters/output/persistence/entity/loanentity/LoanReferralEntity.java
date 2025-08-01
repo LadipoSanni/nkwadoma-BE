@@ -18,7 +18,7 @@ public class LoanReferralEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     private String reasonForDeclining;
-    @ManyToOne
+    @OneToOne
     private CohortLoaneeEntity cohortLoanee;
     @Enumerated(EnumType.STRING)
     private LoanReferralStatus loanReferralStatus;
