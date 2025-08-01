@@ -23,7 +23,24 @@ ALTER TABLE loan_offer_entity
         FOREIGN KEY (loan_request_id) REFERENCES loan_request_entity (id)
             ON UPDATE CASCADE;
 
- -- Update loan_request_entity.id to match the corresponding loan_referral_entity.id
+-- Step 3: Delete duplicate loan_request_entity rows, keeping the most recent
+WITH ranked_requests AS (
+    SELECT
+        lr.id,
+        ROW_NUMBER() OVER (PARTITION BY lre.id ORDER BY lr.created_date DESC) AS rn
+    FROM loan_request_entity lr
+             JOIN cohort_loanee_entity cle ON cle.loanee_id = lr.loanee_entity_id
+             JOIN loan_referral_entity lre ON lre.cohort_loanee_id = cle.id
+    WHERE lr.loanee_entity_id IS NOT NULL
+)
+DELETE FROM loan_request_entity
+WHERE id IN (
+    SELECT id
+    FROM ranked_requests
+    WHERE rn > 1
+);
+
+-- Step 4: Update loan_request_entity.id to match loan_referral_entity.id
 UPDATE loan_request_entity lr
 SET id = (
     SELECT lre.id
@@ -39,11 +56,10 @@ WHERE lr.loanee_entity_id IS NOT NULL
     WHERE cle.loanee_id = lr.loanee_entity_id
 );
 
-
--- Drop the foreign key constraint on loanee_entity_id
+-- Step 5: Drop the foreign key constraint on loanee_entity_id
 ALTER TABLE loan_request_entity
 DROP CONSTRAINT IF EXISTS fk_loan_request_loanee;
 
--- Drop the loanee_entity_id column
+-- Step 6: Drop the loanee_entity_id column
 ALTER TABLE loan_request_entity
 DROP COLUMN loanee_entity_id;
