@@ -1,6 +1,6 @@
 -- Creating cohort_loanee table
 CREATE TABLE IF NOT EXISTS cohort_loanee_entity (
-    id VARCHAR(36) PRIMARY KEY,
+                                                    id VARCHAR(36) PRIMARY KEY,
     cohort_id VARCHAR(36) NOT NULL,
     loanee_id VARCHAR(36) NOT NULL,
     created_by VARCHAR(255),
@@ -27,14 +27,14 @@ CREATE TABLE IF NOT EXISTS cohort_loanee_entity (
 -- Backfill created_at in loanee_entity from meedl_user only when NULL
 UPDATE loanee_entity l
 SET created_at = COALESCE(
-        TO_TIMESTAMP(u.createdAt, 'YYYY-MM-DD HH24:MI:SS'),
+        TO_TIMESTAMP(u.created_at, 'YYYY-MM-DD HH24:MI:SS'),
         CURRENT_TIMESTAMP
                  )
     FROM meedl_user u
 WHERE l.user_identity_id = u.id
   AND l.created_at IS NULL;
 
---  Migrating data from loanee to cohort_loanee
+-- Migrating data from loanee to cohort_loanee
 INSERT INTO cohort_loanee_entity (
     id,
     cohort_id,
@@ -63,7 +63,7 @@ SELECT
     l.created_by,
     COALESCE(
             l.created_at,
-            TO_TIMESTAMP(u.createdAt, 'YYYY-MM-DD HH24:MI:SS'),
+            TO_TIMESTAMP(u.created_at, 'YYYY-MM-DD HH24:MI:SS'),
             CURRENT_TIMESTAMP
     ) AS created_at,
     l.updated_at,
