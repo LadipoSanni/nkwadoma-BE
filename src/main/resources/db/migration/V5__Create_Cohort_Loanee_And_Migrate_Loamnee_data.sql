@@ -1,6 +1,6 @@
 -- Creating cohort_loanee table
 CREATE TABLE IF NOT EXISTS cohort_loanee_entity (
-                                             id VARCHAR(36) PRIMARY KEY,
+    id VARCHAR(36) PRIMARY KEY,
     cohort_id VARCHAR(36) NOT NULL,
     loanee_id VARCHAR(36) NOT NULL,
     created_by VARCHAR(255),
@@ -55,9 +55,8 @@ SELECT
     updated_at,
     loanee_loan_detail_id,
     loanee_status,
-    COALESCE(onboarding_mode, 'EMAIL_REFERRED'),
---     onboarding_mode,
-    uploaded_status,
+    COALESCE(onboarding_mode, 'EMAIL_REFERRED') AS onboarding_mode,
+     COALESCE(uploaded_status, 'ADDED') AS uploaded_status,
     referral_date_time,
     referred_by,
     reason_for_dropout,
