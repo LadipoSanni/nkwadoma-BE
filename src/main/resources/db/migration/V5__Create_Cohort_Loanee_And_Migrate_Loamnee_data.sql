@@ -34,7 +34,7 @@ SET created_at = COALESCE(
 WHERE l.user_identity_id = u.id
   AND l.created_at IS NULL;
 
--- Migrating data from loanee to cohort_loanee
+--  Migrating data from loanee to cohort_loanee
 INSERT INTO cohort_loanee_entity (
     id,
     cohort_id,
