@@ -652,18 +652,20 @@ public class CalculationEngine implements CalculationEngineUseCase {
         );
     }
 
+    @Override
+    public void scheduleMonthlyInterestCalculation(){
+        jobScheduler.scheduleRecurrently(
+                "monthly-interest-calculation-every-last-day-of-the-month-11-40-PM",
+                "0 40 23 L * *", // every ladt day of the month at 11:40 PM
+                this::calculateMonthlyInterest
+        );
+    }
+
     public void calculateMonthlyInterest() throws MeedlException {
         List<LoaneeLoanDetail> loaneeLoanDetails =
                 loaneeLoanDetailsOutputPort.findAllWithDailyInterestByMonthAndYear(LocalDate.now().getMonth(), LocalDate.now().getYear());
         for (LoaneeLoanDetail loaneeLoanDetail : loaneeLoanDetails) {
-            BigDecimal accumulatedInterestForTheMonth = dailyInterestOutputPort
-                    .findAllInterestForAMonth(LocalDate.now().getMonth(), LocalDate.now().getYear(), loaneeLoanDetail.getId())
-                    .stream()
-                    .map(DailyInterest::getInterest)
-                    .filter(Objects::nonNull)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-            log.info("Done calculating accumulated interest for the month == {} year == {} for {}. Accumulated interest is {}",
-                    LocalDate.now().getMonth(), LocalDate.now().getYear(), loaneeLoanDetail.getId(), accumulatedInterestForTheMonth);
+            BigDecimal accumulatedInterestForTheMonth = sumAccumulatedInterestForTheMonth(loaneeLoanDetail);
 
             MonthlyInterest monthlyInterest = MonthlyInterest.builder()
                     .interest(accumulatedInterestForTheMonth)
@@ -675,62 +677,89 @@ public class CalculationEngine implements CalculationEngineUseCase {
             monthlyInterest = monthlyInterestOutputPort.save(monthlyInterest);
             log.info("Monthly interest after saving == {}", monthlyInterest);
 
-            log.info("Interest incurred as at last month == {} before adding this month incurred == {}",
-                    loaneeLoanDetail.getInterestIncurred(), accumulatedInterestForTheMonth);
-            log.info("Amount outstanding as at last month == {} before adding this month incurred == {}",
-                    loaneeLoanDetail.getAmountOutstanding(), accumulatedInterestForTheMonth);
+            updateInterestIncurredOnLoaneeLoanDetail(loaneeLoanDetail, accumulatedInterestForTheMonth, monthlyInterest);
 
-            loaneeLoanDetail.setInterestIncurred(loaneeLoanDetail.getInterestIncurred().add(monthlyInterest.getInterest()));
-            loaneeLoanDetail.setAmountOutstanding(loaneeLoanDetail.getAmountOutstanding().add(monthlyInterest.getInterest()));
+            CohortLoanDetail cohortLoanDetail = updateInterestIncurredOnCohortLoanDetail(loaneeLoanDetail, monthlyInterest);
 
-            log.info("Interest incurred after adding this month incurred == {}", loaneeLoanDetail.getInterestIncurred());
-            log.info("Amount outstanding after adding this month incurred == {}", loaneeLoanDetail.getAmountOutstanding());
-            loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
+            ProgramLoanDetail programLoanDetail = updateInterestIncurredOnProgramLoanDetail(cohortLoanDetail, monthlyInterest);
 
-            CohortLoanDetail cohortLoanDetail = cohortLoanDetailOutputPort.findByLoaneeLoanDetailId(loaneeLoanDetail.getId());
-            log.info("Cohort interest incurred as at last month == {} before adding this month incurred == {}",
-                    cohortLoanDetail.getInterestIncurred(), monthlyInterest.getInterest());
-            log.info("Cohort amount outstanding as at last month == {} before adding this month incurred == {}",
-                    cohortLoanDetail.getOutstandingAmount(), monthlyInterest.getInterest());
-
-            cohortLoanDetail.setInterestIncurred(cohortLoanDetail.getInterestIncurred().add(monthlyInterest.getInterest()));
-            cohortLoanDetail.setOutstandingAmount(cohortLoanDetail.getOutstandingAmount().add(monthlyInterest.getInterest()));
-
-            log.info("Cohort interest incurred after adding this month incurred == {}", cohortLoanDetail.getInterestIncurred());
-            log.info("Cohort amount outstanding after adding this month incurred == {}", cohortLoanDetail.getOutstandingAmount());
-            cohortLoanDetailOutputPort.save(cohortLoanDetail);
-
-            ProgramLoanDetail programLoanDetail = programLoanDetailOutputPort.findByProgramId(cohortLoanDetail.getCohort().getProgramId());
-            log.info("Program interest incurred as at last month == {} before adding this month incurred == {}",
-                    programLoanDetail.getInterestIncurred(), monthlyInterest.getInterest());
-            log.info("Program amount outstanding as at last month == {} before adding this month incurred == {}",
-                    programLoanDetail.getOutstandingAmount(), monthlyInterest.getInterest());
-
-            programLoanDetail.setInterestIncurred(programLoanDetail.getInterestIncurred().add(monthlyInterest.getInterest()));
-            programLoanDetail.setOutstandingAmount(programLoanDetail.getOutstandingAmount().add(monthlyInterest.getInterest()));
-
-            log.info("Program interest incurred after adding this month incurred == {}", programLoanDetail.getInterestIncurred());
-            log.info("Program amount outstanding after adding this month incurred == {}", programLoanDetail.getOutstandingAmount());
-            programLoanDetailOutputPort.save(programLoanDetail);
-
-            OrganizationLoanDetail organizationLoanDetail = organizationLoanDetailOutputPort.findByOrganizationId(programLoanDetail.getProgram().getOrganizationId());
-            log.info("Organization interest incurred as at last month == {} before adding this month incurred == {}",
-                    organizationLoanDetail.getInterestIncurred(), monthlyInterest.getInterest());
-            log.info("Organization amount outstanding as at last month == {} before adding this month incurred == {}",
-                    organizationLoanDetail.getOutstandingAmount(), monthlyInterest.getInterest());
-
-            organizationLoanDetail.setInterestIncurred(organizationLoanDetail.getInterestIncurred().add(monthlyInterest.getInterest()));
-            organizationLoanDetail.setOutstandingAmount(organizationLoanDetail.getOutstandingAmount().add(monthlyInterest.getInterest()));
-
-            log.info("Organization interest incurred after adding this month incurred == {}", organizationLoanDetail.getInterestIncurred());
-            log.info("Organization amount outstanding after adding this month incurred == {}", organizationLoanDetail.getOutstandingAmount());
-            organizationLoanDetailOutputPort.save(organizationLoanDetail);
+            updateInterestIncurredOnOrganizationLoanDetail(programLoanDetail, monthlyInterest);
         }
 
     }
 
+    private BigDecimal sumAccumulatedInterestForTheMonth(LoaneeLoanDetail loaneeLoanDetail) throws MeedlException {
+        BigDecimal accumulatedInterestForTheMonth = dailyInterestOutputPort
+                .findAllInterestForAMonth(LocalDate.now().getMonth(), LocalDate.now().getYear(), loaneeLoanDetail.getId())
+                .stream()
+                .map(DailyInterest::getInterest)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        log.info("Done calculating accumulated interest for the month == {} year == {} for {}. Accumulated interest is {}",
+                LocalDate.now().getMonth(), LocalDate.now().getYear(), loaneeLoanDetail.getId(), accumulatedInterestForTheMonth);
+        return accumulatedInterestForTheMonth;
+    }
 
+    private void updateInterestIncurredOnOrganizationLoanDetail(ProgramLoanDetail programLoanDetail, MonthlyInterest monthlyInterest) throws MeedlException {
+        OrganizationLoanDetail organizationLoanDetail = organizationLoanDetailOutputPort.findByOrganizationId(programLoanDetail.getProgram().getOrganizationIdentity().getId());
+        log.info("Organization interest incurred as at last month == {} before adding this month incurred == {}",
+                organizationLoanDetail.getInterestIncurred(), monthlyInterest.getInterest());
+        log.info("Organization amount outstanding as at last month == {} before adding this month incurred == {}",
+                organizationLoanDetail.getOutstandingAmount(), monthlyInterest.getInterest());
 
+        organizationLoanDetail.setInterestIncurred(organizationLoanDetail.getInterestIncurred().add(monthlyInterest.getInterest()));
+        organizationLoanDetail.setOutstandingAmount(organizationLoanDetail.getOutstandingAmount().add(monthlyInterest.getInterest()));
+
+        log.info("Organization interest incurred after adding this month incurred == {}", organizationLoanDetail.getInterestIncurred());
+        log.info("Organization amount outstanding after adding this month incurred == {}", organizationLoanDetail.getOutstandingAmount());
+        organizationLoanDetailOutputPort.save(organizationLoanDetail);
+    }
+
+    private ProgramLoanDetail updateInterestIncurredOnProgramLoanDetail(CohortLoanDetail cohortLoanDetail, MonthlyInterest monthlyInterest) throws MeedlException {
+        ProgramLoanDetail programLoanDetail = programLoanDetailOutputPort.findByProgramId(cohortLoanDetail.getCohort().getProgramId());
+        log.info("Program interest incurred as at last month == {} before adding this month incurred == {}",
+                programLoanDetail.getInterestIncurred(), monthlyInterest.getInterest());
+        log.info("Program amount outstanding as at last month == {} before adding this month incurred == {}",
+                programLoanDetail.getOutstandingAmount(), monthlyInterest.getInterest());
+
+        programLoanDetail.setInterestIncurred(programLoanDetail.getInterestIncurred().add(monthlyInterest.getInterest()));
+        programLoanDetail.setOutstandingAmount(programLoanDetail.getOutstandingAmount().add(monthlyInterest.getInterest()));
+
+        log.info("Program interest incurred after adding this month incurred == {}", programLoanDetail.getInterestIncurred());
+        log.info("Program amount outstanding after adding this month incurred == {}", programLoanDetail.getOutstandingAmount());
+        programLoanDetailOutputPort.save(programLoanDetail);
+        return programLoanDetail;
+    }
+
+    private CohortLoanDetail updateInterestIncurredOnCohortLoanDetail(LoaneeLoanDetail loaneeLoanDetail, MonthlyInterest monthlyInterest) throws MeedlException {
+        CohortLoanDetail cohortLoanDetail = cohortLoanDetailOutputPort.findByLoaneeLoanDetailId(loaneeLoanDetail.getId());
+        log.info("Cohort interest incurred as at last month == {} before adding this month incurred == {}",
+                cohortLoanDetail.getInterestIncurred(), monthlyInterest.getInterest());
+        log.info("Cohort amount outstanding as at last month == {} before adding this month incurred == {}",
+                cohortLoanDetail.getOutstandingAmount(), monthlyInterest.getInterest());
+
+        cohortLoanDetail.setInterestIncurred(cohortLoanDetail.getInterestIncurred().add(monthlyInterest.getInterest()));
+        cohortLoanDetail.setOutstandingAmount(cohortLoanDetail.getOutstandingAmount().add(monthlyInterest.getInterest()));
+
+        log.info("Cohort interest incurred after adding this month incurred == {}", cohortLoanDetail.getInterestIncurred());
+        log.info("Cohort amount outstanding after adding this month incurred == {}", cohortLoanDetail.getOutstandingAmount());
+        cohortLoanDetailOutputPort.save(cohortLoanDetail);
+        return cohortLoanDetail;
+    }
+
+    private void updateInterestIncurredOnLoaneeLoanDetail(LoaneeLoanDetail loaneeLoanDetail, BigDecimal accumulatedInterestForTheMonth, MonthlyInterest monthlyInterest) {
+        log.info("Interest incurred as at last month == {} before adding this month incurred == {}",
+                loaneeLoanDetail.getInterestIncurred(), accumulatedInterestForTheMonth);
+        log.info("Amount outstanding as at last month == {} before adding this month incurred == {}",
+                loaneeLoanDetail.getAmountOutstanding(), accumulatedInterestForTheMonth);
+
+        loaneeLoanDetail.setInterestIncurred(loaneeLoanDetail.getInterestIncurred().add(monthlyInterest.getInterest()));
+        loaneeLoanDetail.setAmountOutstanding(loaneeLoanDetail.getAmountOutstanding().add(monthlyInterest.getInterest()));
+
+        log.info("Interest incurred after adding this month incurred == {}", loaneeLoanDetail.getInterestIncurred());
+        log.info("Amount outstanding after adding this month incurred == {}", loaneeLoanDetail.getAmountOutstanding());
+        loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
+    }
 
 
     public void calculateDailyInterest() throws MeedlException {

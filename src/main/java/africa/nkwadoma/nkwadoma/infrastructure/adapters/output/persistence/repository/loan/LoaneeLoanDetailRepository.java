@@ -68,11 +68,13 @@ public interface LoaneeLoanDetailRepository extends JpaRepository<LoaneeLoanDeta
     List<LoaneeLoanDetailEntity> findAllByAmountOutstandingGreaterThanZero();
 
     @Query("""
-        SELECT DISTINCT l FROM LoaneeLoanDetailEntity l 
-        LEFT JOIN DailyInterestEntity di on di.loaneeLoanDetail.id = l.id
-        WHERE FUNCTION('MONTH', di.createdAt) = :month AND FUNCTION('YEAR', di.createdAt) = :year
-""")
+    SELECT DISTINCT l 
+    FROM LoaneeLoanDetailEntity l 
+    LEFT JOIN DailyInterestEntity di ON di.loaneeLoanDetail.id = l.id 
+    WHERE EXTRACT(MONTH FROM di.createdAt) = :month 
+    AND EXTRACT(YEAR FROM di.createdAt) = :year
+    """)
     List<LoaneeLoanDetailEntity> findAllWithDailyInterestByMonthAndYear(
-            @Param("month") Month month,
+            @Param("month") int month,
             @Param("year") int year);
 }

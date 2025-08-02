@@ -14,11 +14,11 @@ public interface DailyInterestRepository extends JpaRepository<DailyInterestEnti
 
     @Query("""
             SELECT d FROM DailyInterestEntity d WHERE d.loaneeLoanDetail.id = :loaneeLoanDetailId
-            AND FUNCTION('MONTH', d.createdAt) = :month
-            AND FUNCTION('YEAR', d.createdAt) = :year
+            AND EXTRACT(MONTH FROM d.createdAt) = :month
+            AND EXTRACT(YEAR FROM d.createdAt) = :year
             """)
     List<DailyInterestEntity> findAllByLoaneeLoanDetailIdAndCreatedAtMonthAndCreatedAtYear(
             @Param("loaneeLoanDetailId") String loaneeLoanDetailId,
-            @Param("month") Month month,
+            @Param("month") int month,
             @Param("year") int year);
 }

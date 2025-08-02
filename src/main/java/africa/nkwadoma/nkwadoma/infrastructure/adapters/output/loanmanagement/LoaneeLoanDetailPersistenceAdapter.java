@@ -81,7 +81,7 @@ public class LoaneeLoanDetailPersistenceAdapter implements LoaneeLoanDetailsOutp
     @Override
     public List<LoaneeLoanDetail> findAllWithDailyInterestByMonthAndYear(Month month, int year) {
         List<LoaneeLoanDetailEntity> loaneeLoanDetailEntities =
-                loaneeLoanDetailRepository.findAllWithDailyInterestByMonthAndYear(month,year);
+                loaneeLoanDetailRepository.findAllWithDailyInterestByMonthAndYear(month.getValue(),year);
         return loaneeLoanDetailEntities.stream().map(loaneeLoanDetailMapper::toLoaneeLoanDetails).toList();
     }
 }

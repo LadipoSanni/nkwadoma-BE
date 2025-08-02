@@ -206,5 +206,6 @@ public class AdminInitializer {
         Portfolio portfolio = createMeedlPortfolio(getPortfolio());
         log.info("Meedl portfolio process done-- {}", portfolio);
         calculationEngineUseCase.scheduleDailyInterestCalculation();
+        calculationEngineUseCase.scheduleMonthlyInterestCalculation();
     }
 }

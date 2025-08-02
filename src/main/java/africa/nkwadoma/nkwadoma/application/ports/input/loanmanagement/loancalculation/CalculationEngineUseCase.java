@@ -16,4 +16,6 @@ public interface CalculationEngineUseCase {
     BigDecimal calculateCurrentAmountPaid(List<RepaymentHistory> repaymentHistories);
 
     void scheduleDailyInterestCalculation();
+
+    void scheduleMonthlyInterestCalculation();
 }

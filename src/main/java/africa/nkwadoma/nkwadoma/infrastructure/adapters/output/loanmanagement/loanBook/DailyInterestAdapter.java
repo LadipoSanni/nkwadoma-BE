@@ -44,7 +44,7 @@ public class DailyInterestAdapter implements DailyInterestOutputPort {
     public List<DailyInterest> findAllInterestForAMonth(Month month, int year, String id) throws MeedlException {
         MeedlValidator.validateUUID(id,"Loanee loan detail id cannot be empty");
         List<DailyInterestEntity> dailyInterestEntities =
-                dailyInterestRepository.findAllByLoaneeLoanDetailIdAndCreatedAtMonthAndCreatedAtYear(id,month,year);
+                dailyInterestRepository.findAllByLoaneeLoanDetailIdAndCreatedAtMonthAndCreatedAtYear(id,month.getValue(),year);
 
         return dailyInterestEntities.stream().map(dailyInterestMapper::toDailyInterest).collect(Collectors.toList());
     }
