@@ -98,6 +98,7 @@ public class AdminInitializer {
             log.info("Creating first organization identity {}", organizationIdentity);
             if(foundOrganization.isEmpty()) {
                 savedOrganizationIdentity = organizationIdentityOutputPort.save(organizationIdentity);
+                log.info("Saved organization identity {}", savedOrganizationIdentity);
             }
             else savedOrganizationIdentity = organizationIdentityOutputPort.findByEmail(organizationIdentity.getEmail());
             log.info("Saving organization identity {}", savedOrganizationIdentity);
