@@ -14,7 +14,6 @@ env:
   GREEN_PORT: 8769
   NGINX_PORT: 443
   EMAILS: 'sam@semicolon.africa,joshua.o@semicolon.africa,abigail@semicolon.africa,chukwunenyeebuka@gmail.com,henry@semicolon.africa,augustineezekiel763@gmail.com,paulineyahla@gmail.com,adioldmj@gmail.com,precious@semicolon.africa,emmanuel.e@semicolon.africa,aj@semicolon.africa'
-
 jobs:
   # ======================= BUILD AND PUSH =======================
   build-and-push:
