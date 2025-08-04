@@ -1,0 +1,58 @@
+#version: '3.8'
+
+services:
+  postgres:
+    image: postgres:alpine
+    restart: always
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    command: ['start-dev']
+    ports:
+      - "8094:8080"
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    restart: always
+    ports:
+      - "8050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@pgadmin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    depends_on:
+      - postgres
+
+  nkwadoma-app:
+    build:
+#      context: ..
+      context: .
+      dockerfile: Dockerfile.dev
+    image: nkwadoma_local/nkwadoma:dev
+    restart: unless-stopped
+    ports:
+      - "8768:8768"
+    env_file:
+      - .env.dev
+    networks:
+      - meedl-network
+    depends_on:
+      - postgres
+      - keycloak
+
+volumes:
+  - ~/.m2:/root/.m2
+  pg_data:
+
+networks:
+  meedl-network:
+    driver: bridge

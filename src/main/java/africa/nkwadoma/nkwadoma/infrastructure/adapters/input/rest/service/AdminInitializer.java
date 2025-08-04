@@ -23,6 +23,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.core.env.Environment;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,8 +56,8 @@ public class AdminInitializer {
 
     @Value("${superAdmin.lastName}")
     private String SUPER_ADMIN_LAST_NAME ;
-    @Value("${superAdmin.createdBy}")
-    private String CREATED_BY;
+//    @Value("${superAdmin.createdBy}")
+//    private String CREATED_BY;
 
     private UserIdentity getUserIdentity() {
         return UserIdentity.builder()
@@ -61,7 +65,7 @@ public class AdminInitializer {
                 .firstName(SUPER_ADMIN_FIRST_NAME)
                 .lastName(SUPER_ADMIN_LAST_NAME)
                 .role(PORTFOLIO_MANAGER)
-                .createdBy(CREATED_BY)
+                .createdBy(UUID.randomUUID().toString())
                 .build();
     }
     private OrganizationIdentity getOrganizationIdentity(UserIdentity userIdentity) {
@@ -168,15 +172,21 @@ public class AdminInitializer {
             }
     }
 
-    private UserIdentity saveUserToKeycloak(UserIdentity userIdentity) throws MeedlException {
+    private UserIdentity saveUserToKeycloak(UserIdentity userIdentity) {
         try {
             userIdentity = identityManagerOutPutPort.createUser(userIdentity);
             log.info("User created successfully on keycloak sending email to user");
             sendEmail.sendColleagueEmail("MEEDL",userIdentity);
         } catch (MeedlException e) {
             log.warn("Unable to create user on identity manager, error : {}", e.getMessage());
-            UserRepresentation userRepresentation = identityManagerOutPutPort.getUserRepresentation(userIdentity, Boolean.TRUE);
-            log.info("user representation email {} , id : {}", userRepresentation.getEmail(), userRepresentation.getId() );
+            UserRepresentation userRepresentation = null;
+            try {
+                userRepresentation = identityManagerOutPutPort.getUserRepresentation(userIdentity, Boolean.TRUE);
+            } catch (MeedlException ex) {
+                log.error("unable to get first user from keycloak although i got user already exist on keycloak");
+                throw new RuntimeException(ex);
+            }
+            log.info("user representation email in admin initializer {} , id : {}", userRepresentation.getEmail(), userRepresentation.getId() );
             userIdentity.setId(userRepresentation.getId());
         }
         return userIdentity;
@@ -200,8 +210,20 @@ public class AdminInitializer {
     public void init() throws MeedlException {
         UserIdentity userIdentity = inviteFirstUser(getUserIdentity());
         OrganizationIdentity organizationIdentity = createFirstOrganizationIdentity(getOrganizationIdentity(userIdentity));
+        log.info("First organization ============================> {}", organizationIdentity);
         loanMetricsUseCase.correctLoanRequestCount();
         Portfolio portfolio = createMeedlPortfolio(getPortfolio());
         log.info("Meedl portfolio process done-- {}", portfolio);
     }
+    private final Environment environment;
+    @EventListener(ApplicationReadyEvent.class)
+    public void logContextPath() {
+//        checj
+        String port = environment.getProperty("server.port");
+        String profile = environment.getProperty("spring.profiles.active");
+        String version = environment.getProperty("api.version");
+        String path = environment.getProperty("server.servlet.context-path");
+        log.info("\nOnstart - Context path: {} \nversion ----------> {} \nprofile --------------> {}\nport ------------>{}", path, version, profile, port);
+    }
+
 }
