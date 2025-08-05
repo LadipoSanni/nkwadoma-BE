@@ -219,7 +219,6 @@ public class AdminInitializer {
     private final Environment environment;
     @EventListener(ApplicationReadyEvent.class)
     public void logContextPath() {
-//        checj
         String port = environment.getProperty("server.port");
         String profile = environment.getProperty("spring.profiles.active");
         String version = environment.getProperty("api.version");
