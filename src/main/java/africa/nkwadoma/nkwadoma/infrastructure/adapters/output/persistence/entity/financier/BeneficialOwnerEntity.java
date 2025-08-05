@@ -39,7 +39,6 @@ public class BeneficialOwnerEntity {
     //    Gov ID
     private String votersCard;
     private String nationalIdCard;
-    private String driverLicensetionalIdCard;
     private String driverLicense;
 
 }
