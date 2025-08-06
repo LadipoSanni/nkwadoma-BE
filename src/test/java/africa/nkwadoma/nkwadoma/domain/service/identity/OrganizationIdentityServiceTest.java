@@ -7,14 +7,11 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOffe
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanMetrics;
-import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
@@ -66,6 +63,7 @@ class OrganizationIdentityServiceTest {
     @Mock
     private AsynchronousMailingOutputPort asynchronousMailingOutputPort;
     private UserIdentity sarah;
+    private UserIdentity superAdmin;
     private OrganizationIdentity roseCouture;
     private OrganizationEmployeeIdentity employeeSarah;
     private List<OrganizationEmployeeIdentity> orgEmployee;
@@ -110,6 +108,7 @@ class OrganizationIdentityServiceTest {
         roseCouture.setOrganizationEmployees(orgEmployee);
         roseCouture.setEnabled(Boolean.TRUE);
 
+        superAdmin = TestData.createTestUserIdentity("superAdmin@grr.la");
 
     }
 
@@ -117,6 +116,9 @@ class OrganizationIdentityServiceTest {
     void inviteOrganization() {
         OrganizationIdentity invitedOrganisation = new OrganizationIdentity();
         try {
+            superAdmin.setRole(IdentityRole.MEEDL_SUPER_ADMIN);
+            roseCouture.setCreatedBy(superAdmin.getId());
+            when(userIdentityOutputPort.findById(roseCouture.getCreatedBy())).thenReturn(superAdmin);
             when(identityManagerOutPutPort.createKeycloakClient(roseCouture)).thenReturn(roseCouture);
             when(identityManagerOutPutPort.createUser(sarah)).thenReturn(sarah);
             when(organizationIdentityOutputPort.save(roseCouture)).thenReturn(roseCouture);
@@ -125,7 +127,8 @@ class OrganizationIdentityServiceTest {
             when(identityManagerOutPutPort.getClientRepresentationByName(roseCouture.getName())).thenReturn(new ClientRepresentation());
             when(identityManagerOutPutPort.getUserByEmail(roseCouture.getOrganizationEmployees().get(0).getMeedlUser().getEmail())).thenReturn(Optional.empty());
             doNothing().when(asynchronousMailingOutputPort).sendEmailToInvitedOrganization(any(UserIdentity.class));
-            doNothing().when(asynchronousNotificationOutputPort).notifyPortfolioManagerOfNewOrganization(any(OrganizationIdentity.class), any(NotificationFlag.class));
+//            doNothing().when(asynchronousNotificationOutputPort).notifySuperAdminOfNewOrganization(any(UserIdentity.class),
+//                    any(OrganizationIdentity.class), any(NotificationFlag.class));
             when(loanMetricsUseCase.createLoanMetrics(anyString())).thenReturn(new LoanMetrics());
 
             OrganizationLoanDetail organizationLoanDetail = TestData.buildOrganizationLoanDetail(roseCouture);
