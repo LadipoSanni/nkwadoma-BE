@@ -15,5 +15,5 @@ public interface OrganizationUseCase {
 
     void updateOrganizationStatus(OrganizationIdentity organizationIdentity) throws MeedlException;
 
-    String respondToOrganizationInvite(String organizationId, ActivationStatus activationStatus) throws MeedlException;
+    String respondToOrganizationInvite(String actorId,String organizationId, ActivationStatus activationStatus) throws MeedlException;
 }

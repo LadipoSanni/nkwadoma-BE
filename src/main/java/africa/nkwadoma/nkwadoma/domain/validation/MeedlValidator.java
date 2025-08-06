@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.validation;
 
+import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages;
@@ -306,4 +307,9 @@ public class MeedlValidator {
         }
     }
 
+    public static void validateActivationSatus(ActivationStatus activationStatus) throws MeedlException {
+        if (!activationStatus.equals(ActivationStatus.APPROVED) && !activationStatus.equals(ActivationStatus.DECLINED)){
+            throw new MeedlException(IdentityMessages.RESPONSE_FOR_INVITATION_CAN_EITHER_APPROVED_OR_DECLINED.getMessage());
+        }
+    }
 }
