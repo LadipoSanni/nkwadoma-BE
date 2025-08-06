@@ -20,21 +20,16 @@
         <td style="padding: 20px; font-size: 16px; line-height: 24px;">
             <p>Hi <span th:text="${firstName}"></span>,</p>
             <p>
-                Your account has been reactivated on Meedl platform</p>
-            <p><span th:text="${reactivationReason}"></span></p><br/>
-            <p>Click on the bottom below to login</p>
+                You have been invited to join the Meedl platform as a financier. <br>
+                Please click the link below to set your password and get started. <br>
+                Once onboarded, you can explore available investment opportunities.
+            </p>
             <div style="text-align: left; margin: 20px 0;">
-                <a th:href="@{${link}}" target="_blank"
+                <a th:href="@{${token}}" target="_blank"
                    style="display: inline-block; background-color: #142854; color: #FFFFFF; text-decoration: none;
                     padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 4px; ">
-                    Login
+                    Get Started on Meedl
                 </a>
-            </div>
-
-            <p>
-                Contact Meedl help center for more information.</p>
-            <div style="text-align: left; margin: 20px 0;">
-
             </div>
             <p>Thank you,<br>The Meedl Team</p>
         </td>

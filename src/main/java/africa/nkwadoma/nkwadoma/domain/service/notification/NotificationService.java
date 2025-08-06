@@ -301,8 +301,8 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
     public void inviteFinancierToPlatform(UserIdentity userIdentity) throws MeedlException {
         Context context = emailOutputPort.getNameAndLinkContext(getLink(userIdentity),userIdentity.getFirstName());
         Email email = buildEmail(userIdentity, context,
-                FinancierMessages.FINANCIER_INVITE_TO_VEHICLE.getMessage(),
-                FinancierMessages.FINANCIER_INVITE_TO_VEHICLE.getMessage());
+                FinancierMessages.FINANCIER_INVITE_TO_PLATFORM_TITLE.getMessage(),
+                FinancierMessages.FINANCIER_INVITE_TO_PLATFORM.getMessage());
         sendMail(userIdentity, email);
     }
     @Override
@@ -351,8 +351,9 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
         sendMail(userIdentity, email);
     }
     @Override
-    public void sendDeactivatedUserEmailNotification(UserIdentity userIdentity) {
-        Context context = emailOutputPort.getNameAndDeactivationReasonContext(userIdentity.getFirstName(), userIdentity.getDeactivationReason());
+    public void sendReactivatedUserEmailNotification(UserIdentity userIdentity) {
+        String loginLink = baseUrl + LOGIN_URL;
+        Context context = emailOutputPort.getNameAndReactivationReasonContext(loginLink, userIdentity.getFirstName(), userIdentity.getReactivationReason());
         Email email = buildEmail(userIdentity, context,
                 UserMessages.USER_HAS_BEEN_REACTIVATED.getMessage(),
                 UserMessages.REACTIVATED_USER.getMessage());

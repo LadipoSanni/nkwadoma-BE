@@ -182,14 +182,16 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
         organizationEmployees
                 .forEach(employee -> userEmailUseCase
                         .sendDeactivatedUserEmailNotification(employee.getMeedlUser()));
-        asynchronousNotificationOutputPort.notifyAllPortfolioManagerForDeactivatedAccount(organization);
+        asynchronousNotificationOutputPort
+                .notifyAllPortfolioManagerForDeactivatedAccount(organization);
     }
     @Override
     public void sendReactivatedEmployeesEmailNotification(List<OrganizationEmployeeIdentity> organizationEmployees, OrganizationIdentity organization) throws MeedlException {
         organizationEmployees
                 .forEach(employee -> userEmailUseCase
                         .sendReactivatedUserEmailNotification(employee.getMeedlUser()));
-        asynchronousNotificationOutputPort.notifyAllPortfolioManagerForReactivatedAccount(organization);
+        asynchronousNotificationOutputPort
+                .notifyAllPortfolioManagerForReactivatedAccount(organization);
     }
 
     private void emailInviteNonExistingFinancierToVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
