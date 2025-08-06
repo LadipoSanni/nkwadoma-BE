@@ -65,10 +65,10 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
     @Async
     @Override
     public void notifyPortfolioManagerOfNewOrganization(OrganizationIdentity organizationIdentity, NotificationFlag notificationFlag) throws MeedlException {
-        List<UserIdentity> portfolioManagers = userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
-        for (UserIdentity portfolioManager : portfolioManagers) {
+        List<UserIdentity> superAdmins = userIdentityOutputPort.findAllByRole(IdentityRole.MEEDL_SUPER_ADMIN);
+        for (UserIdentity superAdmin : superAdmins) {
             MeedlNotification notification = MeedlNotification.builder()
-                    .user(portfolioManager)
+                    .user(superAdmin)
                     .timestamp(LocalDateTime.now())
                     .contentId(organizationIdentity.getId())
                     .title("Organization has been invited")

@@ -62,22 +62,29 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         validateOrganizationIdentityDetails(organizationIdentity);
         validateUniqueValues(organizationIdentity);
         checkIfOrganizationAndAdminExist(organizationIdentity);
+
+        UserIdentity userIdentity = userIdentityOutputPort.findById(organizationIdentity.getCreatedBy());
+
         log.info("After success full validation and check that user or organization doesn't exists");
         organizationIdentity = createOrganizationIdentityOnKeycloak(organizationIdentity);
         log.info("OrganizationIdentity created on keycloak {}", organizationIdentity);
-        OrganizationEmployeeIdentity organizationEmployeeIdentity = saveOrganisationIdentityToDatabase(organizationIdentity);
+        OrganizationEmployeeIdentity organizationEmployeeIdentity = saveOrganisationIdentityToDatabase(organizationIdentity,userIdentity.getRole());
         List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity.getId());
         organizationIdentity.setServiceOfferings(serviceOfferings);
         log.info("OrganizationEmployeeIdentity created on the db {}", organizationEmployeeIdentity);
-        asynchronousMailingOutputPort.sendEmailToInvitedOrganization(organizationEmployeeIdentity.getMeedlUser());
-        log.info("sent email");
+
+        if (userIdentity.getRole().equals(IdentityRole.MEEDL_SUPER_ADMIN)){
+            asynchronousMailingOutputPort.sendEmailToInvitedOrganization(organizationEmployeeIdentity.getMeedlUser());
+            log.info("sent email");
+        }
+
         log.info("organization identity saved is : {}", organizationIdentity);
         log.info("about to create Loan Metrics for organization : {}", organizationIdentity);
         LoanMetrics loanMetrics = loanMetricsUseCase.createLoanMetrics(organizationIdentity.getId());
         log.info("loan metrics was created successfully for organiozation : {}", loanMetrics.getOrganizationId());
         OrganizationLoanDetail organizationLoanDetail = buildOrganizationLoanDetail(organizationIdentity);
         organizationLoanDetailOutputPort.save(organizationLoanDetail);
-        asynchronousNotificationOutputPort.notifyPortfolioManagerOfNewOrganization(organizationIdentity, NotificationFlag.INVITE_ORGANIZATION);
+        asynchronousNotificationOutputPort.notifyPortfolioManagerOfNewOrganization(organizationIdentity, NotificationFlag.APPROVE_INVITE_ORGANIZATION);
         return organizationIdentity;
     }
 
@@ -241,10 +248,12 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         return organizationIdentity;
     }
 
-    private OrganizationEmployeeIdentity saveOrganisationIdentityToDatabase(OrganizationIdentity organizationIdentity) throws MeedlException {
+    private OrganizationEmployeeIdentity saveOrganisationIdentityToDatabase(OrganizationIdentity organizationIdentity,IdentityRole identityRole) throws MeedlException {
         organizationIdentity.setEnabled(Boolean.TRUE);
         organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
-        organizationIdentity.setStatus(ActivationStatus.INVITED);
+        if (identityRole.equals(IdentityRole.MEEDL_SUPER_ADMIN)) {
+            organizationIdentity.setStatus(ActivationStatus.INVITED);
+        }
         organizationIdentityOutputPort.save(organizationIdentity);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
         organizationEmployeeIdentity.setStatus(ActivationStatus.INVITED);
