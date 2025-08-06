@@ -84,7 +84,9 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         log.info("loan metrics was created successfully for organiozation : {}", loanMetrics.getOrganizationId());
         OrganizationLoanDetail organizationLoanDetail = buildOrganizationLoanDetail(organizationIdentity);
         organizationLoanDetailOutputPort.save(organizationLoanDetail);
-        asynchronousNotificationOutputPort.notifyPortfolioManagerOfNewOrganization(organizationIdentity, NotificationFlag.APPROVE_INVITE_ORGANIZATION);
+        if (! userIdentity.getRole().equals(IdentityRole.MEEDL_SUPER_ADMIN)) {
+            asynchronousNotificationOutputPort.notifyPortfolioManagerOfNewOrganization(organizationIdentity, NotificationFlag.APPROVE_INVITE_ORGANIZATION);
+        }
         return organizationIdentity;
     }
 

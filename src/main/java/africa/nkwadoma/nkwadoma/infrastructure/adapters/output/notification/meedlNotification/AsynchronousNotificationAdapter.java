@@ -71,7 +71,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                     .user(superAdmin)
                     .timestamp(LocalDateTime.now())
                     .contentId(organizationIdentity.getId())
-                    .title("Organization has been invited")
+                    .title("New Organization Invite Awaiting Approval")
                     .callToAction(Boolean.TRUE)
                     .senderMail(organizationIdentity.getEmail())
                     .senderFullName(organizationIdentity.getName())
