@@ -35,6 +35,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
@@ -235,7 +236,7 @@ public class UserIdentityService implements CreateUserUseCase {
         return userIdentity;
     }
 
-    private void checkIfUserAllowedToDeactivateAccount(UserIdentity userToDeactivate, UserIdentity userIdentity) throws MeedlException {
+    public void checkIfUserAllowedToDeactivateAccount(UserIdentity userToDeactivate, UserIdentity userIdentity) throws MeedlException {
         UserIdentity foundActor = userIdentityOutputPort.findById(userIdentity.getCreatedBy());
         log.info("Is actor with email {} and role {} , allowed to deactivate user with email {} and role {}", foundActor.getEmail(), foundActor.getRole(), userToDeactivate.getEmail(), userToDeactivate.getRole());
         if (foundActor.getId().equals(userToDeactivate.getId())){
@@ -244,6 +245,23 @@ public class UserIdentityService implements CreateUserUseCase {
         }
         if (IdentityRole.ORGANIZATION_SUPER_ADMIN.equals(foundActor.getRole()) ||
                 IdentityRole.ORGANIZATION_ADMIN.equals(foundActor.getRole())) {
+            Optional <OrganizationEmployeeIdentity> deactivatingEmployee = organizationEmployeeIdentityOutputPort.findByMeedlUserId(userToDeactivate.getId());
+                    if (deactivatingEmployee.isEmpty()) {
+                        log.error("User can not perform deactivation as user is not an employee on the platform");
+                        throw new MeedlException("You cannot deactivate this user, please contact Meedl admin!");
+                    };
+            Optional <OrganizationEmployeeIdentity> employeeToDeactivate = organizationEmployeeIdentityOutputPort.findByMeedlUserId(userToDeactivate.getId());
+            if (employeeToDeactivate.isEmpty()) {
+                log.error("User to be deactivated is not an employee, there and organization cannot deactivate this user as user is meant to be an employee in the same organization as the actor.");
+                throw new MeedlException("You can only deactivate employees in your organizations");
+            };
+
+            OrganizationIdentity actorOrganization = organizationIdentityOutputPort.findByEmail(employeeToDeactivate.get().getOrganization());
+            OrganizationIdentity userToDeactivateOrganization = organizationIdentityOutputPort.findByEmail(employeeToDeactivate.get().getOrganization());
+            if (!actorOrganization.getId().equals(userToDeactivateOrganization.getId())){
+                log.error("Attempting to deactivate a user in {} \nWhere as actor is in {}", userToDeactivateOrganization, actorOrganization);
+                throw new MeedlException("You are not allowed to deactivate a user that is not in your organization");
+            }
             checkDeactivationIsAuthorised(
                     foundActor,
                     userToDeactivate,

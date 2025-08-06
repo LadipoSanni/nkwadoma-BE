@@ -6,12 +6,14 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOfferOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanMetrics;
+import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
@@ -74,6 +76,8 @@ class OrganizationIdentityServiceTest {
     private OrganizationLoanDetailOutputPort organizationLoanDetailOutputPort;
     @Mock
     private LoanOfferOutputPort loanOfferOutputPort;
+    @Mock
+    private MeedlNotificationOutputPort meedlNotificationOutputPort;
 
     @BeforeEach
     void setUp() {
@@ -408,6 +412,47 @@ class OrganizationIdentityServiceTest {
         assertThrows(MeedlException.class, () ->
                 organizationIdentityService.viewOrganizationDetails(null, mockId)
         );
+    }
+
+    @Test
+    void approveOrganizationInvitationWithInValidResponse(){
+        assertThrows(MeedlException.class, () ->
+                organizationIdentityService.respondToOrganizationInvite(mockId,mockId,ActivationStatus.ACTIVE));
+    }
+
+    @Test
+    void approveOrganizationInvitationWithNullResponse(){
+        assertThrows(MeedlException.class, () ->
+                organizationIdentityService.respondToOrganizationInvite(mockId,mockId,null));
+    }
+
+    @Test
+    void approveOrganizationInvitationWithNullOrganizationId(){
+        assertThrows(MeedlException.class, () ->
+                organizationIdentityService.respondToOrganizationInvite(mockId,null,ActivationStatus.ACTIVE));
+    }
+
+    @Test
+    void cannotApproveInvitationForActivatedOrganization() throws MeedlException {
+        when(userIdentityOutputPort.findById(anyString())).thenReturn(superAdmin);
+        when(organizationIdentityOutputPort.findById(anyString())).thenReturn(roseCouture);
+        when(userIdentityOutputPort.findById(roseCouture.getCreatedBy())).thenReturn(sarah);
+        roseCouture.setStatus(ActivationStatus.ACTIVE);
+        assertThrows(MeedlException.class, () ->
+                organizationIdentityService.respondToOrganizationInvite(mockId,mockId,ActivationStatus.APPROVED));
+    }
+
+    @Test
+    void approveOrganizationInvitation() throws MeedlException {
+        when(userIdentityOutputPort.findById(anyString())).thenReturn(superAdmin);
+        when(organizationIdentityOutputPort.findById(anyString())).thenReturn(roseCouture);
+        when(userIdentityOutputPort.findById(roseCouture.getCreatedBy())).thenReturn(sarah);
+        roseCouture.setStatus(ActivationStatus.PENDING_APPROVAL);
+        when(organizationEmployeeIdentityOutputPort.save(employeeSarah)).thenReturn(employeeSarah);
+        doNothing().when(asynchronousMailingOutputPort).sendEmailToInvitedOrganization(any(UserIdentity.class));
+        when(meedlNotificationOutputPort.save(any(MeedlNotification.class))).thenReturn(any(MeedlNotification.class));
+        String response = organizationIdentityService.respondToOrganizationInvite(mockId,mockId,ActivationStatus.APPROVED);
+        assertNotNull(response);
     }
 
 }
