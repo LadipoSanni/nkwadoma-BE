@@ -2,7 +2,7 @@ name: Deployment to STAGING environment
 
 on:
   push:
-    branches: [ "staging" ]
+    branches: [ "prod-support" ]
 
 env:
   ECR_REPO_URL: 357586184453.dkr.ecr.us-east-1.amazonaws.com/nkwadoma
