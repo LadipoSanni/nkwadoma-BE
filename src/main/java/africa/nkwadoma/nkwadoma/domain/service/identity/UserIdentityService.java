@@ -165,7 +165,7 @@ public class UserIdentityService implements CreateUserUseCase {
         UserIdentity userIdentity = getUserIdentityFromToken(password, token);
         userIdentity.setNewPassword(password);
         identityManagerOutPutPort.resetPassword(userIdentity);
-//        blackListedTokenAdapter.blackListToken(createBlackList(token));
+        blackListedTokenAdapter.blackListToken(createBlackList(token));
     }
 
     private String validatePassword(String encryptedPassword, String token) throws MeedlException {
