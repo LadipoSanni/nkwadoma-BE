@@ -180,12 +180,18 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
     @Override
     public void sendDeactivatedEmployeesEmailNotification(List<OrganizationEmployeeIdentity> organizationEmployees, OrganizationIdentity organization) throws MeedlException {
         organizationEmployees
-                .forEach(this::notifyDeactivatedEmployee);
-        asynchronousNotificationOutputPort.notifyAllPortfolioManagerForDeactivatedAccount(organization);
+                .forEach(employee -> userEmailUseCase
+                        .sendDeactivatedUserEmailNotification(employee.getMeedlUser()));
+        asynchronousNotificationOutputPort
+                .notifyAllPortfolioManagerForDeactivatedAccount(organization);
     }
-
-    private void notifyDeactivatedEmployee(OrganizationEmployeeIdentity employee) {
-        userEmailUseCase.sendDeactivatedUserEmailNotification(employee.getMeedlUser());
+    @Override
+    public void sendReactivatedEmployeesEmailNotification(List<OrganizationEmployeeIdentity> organizationEmployees, OrganizationIdentity organization) throws MeedlException {
+        organizationEmployees
+                .forEach(employee -> userEmailUseCase
+                        .sendReactivatedUserEmailNotification(employee.getMeedlUser()));
+        asynchronousNotificationOutputPort
+                .notifyAllPortfolioManagerForReactivatedAccount(organization);
     }
 
     private void emailInviteNonExistingFinancierToVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {

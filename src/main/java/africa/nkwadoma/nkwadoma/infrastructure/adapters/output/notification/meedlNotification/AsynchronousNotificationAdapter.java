@@ -138,17 +138,13 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
     public void notifyAllPmForLoanRepaymentUploadFailure(StringBuilder validationErrorMessage) throws MeedlException {
         List<UserIdentity> portfolioManagers = userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
         for (UserIdentity portfolioManager : portfolioManagers) {
-            MeedlNotification notification = MeedlNotification.builder()
-                    .user(portfolioManager)
-                    .timestamp(LocalDateTime.now())
-                    .contentId(portfolioManager.getId())
-                    .title("Failed to upload repayment history")
-                    .callToAction(Boolean.TRUE)
-                    .senderMail(portfolioManager.getEmail())
-                    .senderFullName(portfolioManager.getFirstName() + " "+ portfolioManager.getLastName())
-                    .contentDetail(validationErrorMessage.toString())
-                    .notificationFlag(NotificationFlag.REPAYMENT_UPLOAD_FAILURE)
-                    .build();
+            MeedlNotification notification = buildUploadFailureNotification(
+                    portfolioManager,
+                    "Failed to upload repayment history",
+                    NotificationFlag.REPAYMENT_UPLOAD_FAILURE,
+                    validationErrorMessage.toString()
+            );
+
             meedlNotificationUsecase.sendNotification(notification);
         }
         log.info("Failure notification has been sent to all on possible malicious upload of repayment history. ");
@@ -157,41 +153,81 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
     public void notifyAllPmForUserDataUploadFailure(StringBuilder validationErrorMessage) throws MeedlException {
         List<UserIdentity> portfolioManagers = userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
         for (UserIdentity portfolioManager : portfolioManagers) {
-            MeedlNotification notification = MeedlNotification.builder()
-                    .user(portfolioManager)
-                    .timestamp(LocalDateTime.now())
-                    .contentId(portfolioManager.getId())
-                    .title("Failed to upload User data")
-                    .callToAction(Boolean.TRUE)
-                    .senderMail(portfolioManager.getEmail())
-                    .senderFullName(portfolioManager.getFirstName() + " "+ portfolioManager.getLastName())
-                    .contentDetail(validationErrorMessage.toString())
-                    .notificationFlag(NotificationFlag.LOANEE_DATA_UPLOAD_FAILURE)
-                    .build();
+            MeedlNotification notification =  buildUploadFailureNotification(
+                    portfolioManager,
+                    "Failed to upload User data",
+                    NotificationFlag.LOANEE_DATA_UPLOAD_FAILURE,
+                    validationErrorMessage.toString()
+            );
             meedlNotificationUsecase.sendNotification(notification);
         }
         log.info("Failure notification has been sent to all on possible malicious upload of user data. ");
+    }
+    private MeedlNotification buildUploadFailureNotification(
+            UserIdentity portfolioManager,
+            String title,
+            NotificationFlag flag,
+            String message
+    ) {
+        return MeedlNotification.builder()
+                .user(portfolioManager)
+                .timestamp(LocalDateTime.now())
+                .contentId(portfolioManager.getId())
+                .title(title)
+                .callToAction(Boolean.TRUE)
+                .senderMail(portfolioManager.getEmail())
+                .senderFullName(portfolioManager.getFirstName() + " " + portfolioManager.getLastName())
+                .contentDetail(message)
+                .notificationFlag(flag)
+                .build();
     }
 
     @Override
     public void notifyAllPortfolioManagerForDeactivatedAccount(OrganizationIdentity organization) throws MeedlException {
         List<UserIdentity> portfolioManagers = userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
         for (UserIdentity portfolioManager : portfolioManagers) {
-            MeedlNotification notification = MeedlNotification.builder()
-                    .user(portfolioManager)
-                    .timestamp(LocalDateTime.now())
-                    .contentId(portfolioManager.getId())
-                    .title("Organization has been deactivated")
-                    .callToAction(Boolean.TRUE)
-                    .senderMail(portfolioManager.getEmail())
-                    .senderFullName(portfolioManager.getFirstName() + " "+ portfolioManager.getLastName())
-                    .contentDetail("Organization with name "+ organization.getName() +" has been deactivated")
-                    .notificationFlag(NotificationFlag.ORGANIZATION_DEACTIVATED)
-                    .build();
+            MeedlNotification notification = buildOrganizationStatusNotification(
+                    portfolioManager,
+                    organization,
+                    "deactivated",
+                    NotificationFlag.ORGANIZATION_DEACTIVATED
+            );
             meedlNotificationUsecase.sendNotification(notification);
         }
         log.info("Organization has been deactivated and all its admin. Notification sent.");
+    }
+    @Override
+    public void notifyAllPortfolioManagerForReactivatedAccount(OrganizationIdentity organization) throws MeedlException {
+        List<UserIdentity> portfolioManagers = userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
+        for (UserIdentity portfolioManager : portfolioManagers) {
+            MeedlNotification notification = buildOrganizationStatusNotification(
+                    portfolioManager,
+                    organization,
+                    "reactivated",
+                    NotificationFlag.ORGANIZATION_REACTIVATED
+            );
+            meedlNotificationUsecase.sendNotification(notification);
+        }
+        log.info("Organization has been reactivated and all its admin. Notification sent.");
+    }
 
+    private MeedlNotification buildOrganizationStatusNotification(
+            UserIdentity portfolioManager,
+            OrganizationIdentity organization,
+            String status, // e.g., "deactivated" or "reactivated"
+            NotificationFlag flag
+    ) {
+        return MeedlNotification.builder()
+                .user(portfolioManager)
+                .timestamp(LocalDateTime.now())
+                .contentId(portfolioManager.getId())
+                .title("Organization has been " + status)
+                .callToAction(Boolean.TRUE)
+                .senderMail(portfolioManager.getEmail())
+                .senderFullName(portfolioManager.getFirstName() + " " + portfolioManager.getLastName())
+                .contentDetail("Organization with name " + organization.getName() + " has been " + status)
+                .notificationFlag(flag)
+                .build();
     }
 
     @Override

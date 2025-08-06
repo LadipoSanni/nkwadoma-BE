@@ -22,4 +22,6 @@ public interface EmailOutputPort {
     Context getNameAndLinkContextAndIndustryNameAndCohortLoaneeId(String link, String cohortLoaneeId, String firstName, String organizationName);
 
     Context getNameAndDeactivationReasonContext(String firstName, String deactivationReason);
+
+    Context getNameAndReactivationReasonContext(String link, String firstName, String reactivationReason);
 }
