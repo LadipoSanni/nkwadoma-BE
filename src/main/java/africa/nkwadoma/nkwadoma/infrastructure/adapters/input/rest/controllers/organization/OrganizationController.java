@@ -9,6 +9,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdenti
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.AccountActivationRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.OrganizationDecisionRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.OrganizationRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.OrganizationUpdateRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
@@ -22,7 +23,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.*;
 import io.swagger.v3.oas.annotations.responses.*;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -35,7 +35,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ControllerConstant.*;
@@ -276,6 +275,18 @@ public class OrganizationController {
                 .email(inviteOrganizationRequest.getAdminEmail())
                 .role(inviteOrganizationRequest.getAdminRole())
                 .build();
+    }
+
+
+    @PostMapping("approve/organization/invite")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<?>> respondToOrganizationInvite(OrganizationDecisionRequest organizationDecisionRequest) throws MeedlException {
+
+        String response = createOrganizationUseCase.respondToOrganizationInvite(organizationDecisionRequest.getOrganizationId(),
+                organizationDecisionRequest.getActivationStatus());
+
+
+        return null;
     }
 }
 

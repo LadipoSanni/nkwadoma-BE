@@ -285,6 +285,26 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         }
     }
 
+    @Override
+    public String respondToOrganizationInvite(String organizationId, ActivationStatus activationStatus) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+        MeedlValidator.validateObjectInstance(activationStatus,"Activation status cannot be empty");
+
+        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
+        if (organizationIdentity.getStatus() == ActivationStatus.INVITED) {
+            throw new IdentityException(IdentityMessages.ORGANIZATION_HAS_ALREADY_BEEN_INVITED.getMessage());
+        }if (organizationIdentity.getStatus().equals(ActivationStatus.ACTIVE)) {
+            throw new IdentityException(IdentityMessages.ORGANIZATION_IS_ACTIVE.getMessage());
+        }
+        organizationIdentity.setStatus(ActivationStatus.INVITED);
+        for(OrganizationEmployeeIdentity organizationEmployeeIdentity : organizationIdentity.getOrganizationEmployees()){
+            organizationEmployeeIdentity.setStatus(ActivationStatus.INVITED);
+            organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
+        }
+
+        return "";
+    }
+
     private void updateOrganizationStatus(OrganizationIdentity organizationIdentity, OrganizationEmployeeIdentity employeeIdentity) throws MeedlException {
         OrganizationIdentity foundOrganizationIdentity =
                 viewOrganizationDetails(employeeIdentity.getOrganization(), organizationIdentity.getUserIdentity().getId());
