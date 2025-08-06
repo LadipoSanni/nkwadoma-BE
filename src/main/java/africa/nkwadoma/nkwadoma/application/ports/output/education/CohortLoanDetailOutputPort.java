@@ -15,4 +15,6 @@ public interface CohortLoanDetailOutputPort {
     void deleteAllCohortLoanDetailAssociateWithProgram(String id) throws MeedlException;
 
     void deleteByCohortId(String id) throws MeedlException;
+
+    CohortLoanDetail findByLoaneeLoanDetailId(String id) throws MeedlException;
 }

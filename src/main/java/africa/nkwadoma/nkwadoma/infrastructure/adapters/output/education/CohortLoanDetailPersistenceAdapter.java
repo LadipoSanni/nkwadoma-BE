@@ -69,4 +69,15 @@ public class CohortLoanDetailPersistenceAdapter implements CohortLoanDetailOutpu
         cohortLoanDetailRepository.deleteByCohortId(id);
     }
 
+    @Override
+    public CohortLoanDetail findByLoaneeLoanDetailId(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id,"Loanee loan detail id cannot be empty");
+        CohortLoanDetailEntity cohortLoanDetailEntity =
+                cohortLoanDetailRepository.findByLoaneeLoanDetailId(id);
+        log.info("Interest incurred during find cohort loan detail entity {}", cohortLoanDetailEntity.getInterestIncurred());
+        CohortLoanDetail cohortLoanDetail = cohortLoanDetailMapper.toCohortLoanDetail(cohortLoanDetailEntity);
+        cohortLoanDetail.setInterestIncurred(cohortLoanDetailEntity.getInterestIncurred());
+        return cohortLoanDetail;
+    }
+
 }
