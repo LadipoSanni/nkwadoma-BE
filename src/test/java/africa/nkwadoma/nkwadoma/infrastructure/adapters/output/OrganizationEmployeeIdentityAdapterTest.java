@@ -191,6 +191,24 @@ class OrganizationEmployeeIdentityAdapterTest {
         assertEquals(1, organizationEmployeeIdentities.size());
     }
 
+    @Test
+    void findOrganizationEmployeeByOrganizationIdAndRole(){
+        OrganizationEmployeeIdentity organizationEmployeeIdentity= null;
+        try{
+            organizationEmployeeIdentity =
+                    organizationEmployeeIdentityOutputPort.findByRoleAndOrganizationId(organizationId,IdentityRole.ORGANIZATION_ADMIN);
+        }catch (MeedlException exception){
+            log.error("Error finding organization employees", exception);
+        }
+        assertNotNull(organizationEmployeeIdentity);
+        assertEquals(organizationEmployeeIdentity.getOrganization(), organizationId);
+    }
+
+    @Test
+    void findOrganizationEmployeeByNullOrganizationIdAndRole(){
+        assertThrows(MeedlException.class,()-> organizationEmployeeIdentityOutputPort.findByRoleAndOrganizationId(null,IdentityRole.ORGANIZATION_ADMIN));
+    }
+
     @AfterAll
     void tearDown() {
         try {

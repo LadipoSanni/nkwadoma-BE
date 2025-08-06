@@ -51,4 +51,6 @@ public interface EmployeeAdminEntityRepository extends JpaRepository<Organizatio
                                                                             Pageable pageRequest);
 
     List<OrganizationEmployeeEntity> findOrganizationEmployeeEntityByOrganizationAndMeedlUserRole(String organizationId, IdentityRole identityRole);
+
+    OrganizationEmployeeEntity findByMeedlUserRoleAndOrganization(IdentityRole identityRole, String organizationId);
 }
