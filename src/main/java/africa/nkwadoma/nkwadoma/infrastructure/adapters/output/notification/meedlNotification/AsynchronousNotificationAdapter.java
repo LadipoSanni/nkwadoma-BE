@@ -262,7 +262,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
         for (UserIdentity userIdentity : allActorsForFailureNotification){
             meedlNotification.setUser(userIdentity);
             meedlNotification.setSenderFullName(userIdentity.getFirstName() + " "+userIdentity.getLastName());
-            meedlNotification.setContentDetail("User with email "+foundActor.getEmail()+ " encountered error on file upload. \n\n" +meedlNotification.getContentDetail());
+            meedlNotification.setContentDetail("The user " + foundActor.getFirstName() + " " + foundActor.getFirstName() + " and email "+foundActor.getEmail()+ " encountered error on file upload. \n\n" +meedlNotification.getContentDetail());
             meedlNotification.setSenderMail(userIdentity.getEmail());
             meedlNotificationUsecase.sendNotification(meedlNotification);
         }
