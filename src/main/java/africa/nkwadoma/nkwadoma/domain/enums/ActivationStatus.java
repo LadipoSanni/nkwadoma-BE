@@ -5,5 +5,7 @@ public enum ActivationStatus {
     INACTIVE,
     INVITED,
     DEACTIVATED,
-    PENDING_APPROVAL
+    PENDING_APPROVAL,
+    APPROVED,
+    DECLINED
 }

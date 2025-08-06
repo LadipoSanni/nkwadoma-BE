@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanType;
@@ -16,6 +17,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
@@ -54,6 +56,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
     private final OrganizationLoanDetailOutputPort organizationLoanDetailOutputPort;
     private final LoanOfferOutputPort loanOfferOutputPort;
+    private final MeedlNotificationOutputPort meedlNotificationOutputPort;
 
 
 
@@ -254,9 +257,9 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
 
     private OrganizationEmployeeIdentity saveOrganisationIdentityToDatabase(OrganizationIdentity organizationIdentity,IdentityRole identityRole) throws MeedlException {
         organizationIdentity.setEnabled(Boolean.TRUE);
-        organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
         if (identityRole.equals(IdentityRole.MEEDL_SUPER_ADMIN)) {
             organizationIdentity.setStatus(ActivationStatus.INVITED);
+            organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
         }else {
             organizationIdentity.setStatus(ActivationStatus.PENDING_APPROVAL);
         }
@@ -301,6 +304,72 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
             OrganizationEmployeeIdentity employeeIdentity = updateEmployeeStatus(foundUserIdentity);
             updateOrganizationStatus(organizationIdentity, employeeIdentity);
         }
+    }
+
+    @Override
+    public String respondToOrganizationInvite(String actorId, String organizationId, ActivationStatus activationStatus) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+        MeedlValidator.validateObjectInstance(activationStatus,"Activation status cannot be empty");
+        MeedlValidator.validateActivationSatus(activationStatus);
+
+        UserIdentity actor = userIdentityOutputPort.findById(actorId);
+
+        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
+        UserIdentity organizationCreator = userIdentityOutputPort.findById(organizationIdentity.getCreatedBy());
+
+        checkCurrentStatusOfOrganization(organizationIdentity);
+
+        if (activationStatus.equals(ActivationStatus.APPROVED)){
+            approveInvitation(activationStatus, organizationIdentity, organizationCreator, actor);
+        }else {
+            declineInvitation(activationStatus, organizationCreator, organizationIdentity, actor);
+
+        }
+        organizationIdentityOutputPort.save(organizationIdentity);
+        return "Invitation "+activationStatus.name();
+    }
+
+    private static void checkCurrentStatusOfOrganization(OrganizationIdentity organizationIdentity) throws IdentityException {
+        if (!organizationIdentity.getStatus().equals(ActivationStatus.PENDING_APPROVAL) &&
+                ! organizationIdentity.getStatus().equals( ActivationStatus.DECLINED)) {
+            throw new IdentityException("This organization cannot be activated because its status is neither pending approval nor declined.");
+        }
+    }
+
+    private void declineInvitation(ActivationStatus activationStatus, UserIdentity organizationCreator, OrganizationIdentity organizationIdentity, UserIdentity actor) throws MeedlException {
+        sendNotificationToOrganizationCreator(activationStatus, organizationCreator, organizationIdentity,
+                actor,NotificationFlag.ORGANIZATION_INVITATION_DECLINED);
+        organizationIdentity.setStatus(ActivationStatus.DECLINED);
+    }
+
+    private void approveInvitation(ActivationStatus activationStatus, OrganizationIdentity organizationIdentity, UserIdentity organizationCreator, UserIdentity actor) throws MeedlException {
+        organizationIdentity.setStatus(ActivationStatus.INVITED);
+        organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
+
+        for(OrganizationEmployeeIdentity organizationEmployeeIdentity : organizationIdentity.getOrganizationEmployees()){
+            organizationEmployeeIdentity.setStatus(ActivationStatus.INVITED);
+            organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
+            asynchronousMailingOutputPort.sendEmailToInvitedOrganization(organizationEmployeeIdentity.getMeedlUser());
+        }
+        sendNotificationToOrganizationCreator(activationStatus, organizationCreator, organizationIdentity,
+                actor,NotificationFlag.ORGANIZATION_INVITATION_APPROVED );
+    }
+
+    private void sendNotificationToOrganizationCreator(ActivationStatus activationStatus, UserIdentity organizationCreator, OrganizationIdentity
+            organizationIdentity, UserIdentity actor, NotificationFlag notificationFlag) throws MeedlException {
+        MeedlNotification notification = MeedlNotification.builder()
+                .user(organizationCreator)
+                .contentId(organizationIdentity.getId())
+                .callToAction(true)
+                .notificationFlag(notificationFlag)
+                .timestamp(LocalDateTime.now())
+                .senderMail(actor.getEmail())
+                .title(notificationFlag.name())
+                .senderFullName(actor.getFirstName()+" "+ actor.getLastName())
+                .contentDetail("The Invitation for "+ organizationIdentity.getName()+" has been "+ activationStatus.name())
+                .build();
+
+        meedlNotificationOutputPort.save(notification);
     }
 
     private void updateOrganizationStatus(OrganizationIdentity organizationIdentity, OrganizationEmployeeIdentity employeeIdentity) throws MeedlException {
