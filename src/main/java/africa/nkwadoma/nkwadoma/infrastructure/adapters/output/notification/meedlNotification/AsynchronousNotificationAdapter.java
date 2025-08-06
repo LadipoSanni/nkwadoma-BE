@@ -246,13 +246,26 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                 .title("Failed to upload repayment history: " + loanBook.getFile().getName())
                 .callToAction(Boolean.FALSE)
                 .senderMail(foundActor.getEmail())
-                .senderFullName(foundActor.getFirstName())
+                .senderFullName(foundActor.getFirstName() + " "+foundActor.getLastName())
                 .contentDetail(validationErrorMessage.toString())
                 .notificationFlag(NotificationFlag.REPAYMENT_UPLOAD_FAILURE)
                 .build();
+        notifyUploadFailureActors(List.of(IdentityRole.MEEDL_ADMIN), meedlNotification, foundActor);
+        log.info("Failure notification sent to the actor with email : {}  and other meedl admins", foundActor.getEmail());
 
-        log.info("Failure notification sent to the actor with email : {} ", foundActor.getEmail());
+    }
+
+    private void notifyUploadFailureActors(List<IdentityRole> identityRoles, MeedlNotification meedlNotification, UserIdentity foundActor) throws MeedlException {
         meedlNotificationUsecase.sendNotification(meedlNotification);
+        List<UserIdentity> allActorsForFailureNotification = userIdentityOutputPort
+                .findAllByRoles(identityRoles);
+        for (UserIdentity userIdentity : allActorsForFailureNotification){
+            meedlNotification.setUser(userIdentity);
+            meedlNotification.setSenderFullName(userIdentity.getFirstName() + " "+userIdentity.getLastName());
+            meedlNotification.setContentDetail("User with email "+foundActor.getEmail()+ " encountered error on file upload. \n\n" +meedlNotification.getContentDetail());
+            meedlNotification.setSenderMail(userIdentity.getEmail());
+            meedlNotificationUsecase.sendNotification(meedlNotification);
+        }
 
     }
 
@@ -270,9 +283,8 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                 .contentDetail(validationErrorMessage.toString())
                 .notificationFlag(NotificationFlag.LOANEE_DATA_UPLOAD_FAILURE)
                 .build();
-
+        notifyUploadFailureActors(List.of(IdentityRole.MEEDL_ADMIN), meedlNotification, foundActor);
         log.info("Failure notification sent to the actor with email : {} ", foundActor.getEmail());
-        meedlNotificationUsecase.sendNotification(meedlNotification);
     }
     @Override
     public void notifyPmOnRepaymentUploadSuccess(UserIdentity foundActor, LoanBook loanBook) throws MeedlException {
