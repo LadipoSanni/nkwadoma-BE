@@ -103,6 +103,27 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
         return userEntities.stream().map(userIdentityMapper::toUserIdentity).toList();
     }
 
+    @Override
+    public List<UserIdentity> findAllByRoles(List<IdentityRole> roles) throws MeedlException {
+        validateRoles(roles);
+        List<UserEntity> userEntities = userEntityRepository.findAllByRoles(roles);
+
+        log.info("Found {} back office admins by Role ", userEntities.size());
+        return userEntities.stream().map(userIdentityMapper::toUserIdentity).toList();
+    }
+
+    private void validateRoles(List<IdentityRole> roles) throws MeedlException {
+        MeedlValidator.validateCollection(roles, "Please provide a list of roles for search for.");
+        roles.forEach(identityRole -> {
+            try {
+                MeedlValidator.validateObjectInstance(identityRole, IdentityMessages.INVALID_VALID_ROLE.getMessage());
+            } catch (MeedlException e) {
+                log.error("Identity role invalid in role list validation {}", identityRole);
+            }
+        });
+        log.info("Done validating list of identity roles {}",roles);
+    }
+
     private UserEntity getUserEntityByEmail(String email) throws IdentityException {
         return userEntityRepository.findByEmail(email).orElseThrow(()-> new IdentityException(EMAIL_NOT_FOUND.getMessage()));
     }

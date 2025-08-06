@@ -187,7 +187,7 @@ public class AdminInitializer {
             try {
                 userRepresentation = identityManagerOutPutPort.getUserRepresentation(userIdentity, Boolean.TRUE);
             } catch (MeedlException ex) {
-                log.error("unable to get first user from keycloak although i got user already exist on keycloak");
+                log.error("unable to get first user from keycloak although i got user already exist on keycloak {}", userIdentity);
                 throw new RuntimeException(ex);
             }
             log.info("user representation email in admin initializer {} , id : {}", userRepresentation.getEmail(), userRepresentation.getId() );

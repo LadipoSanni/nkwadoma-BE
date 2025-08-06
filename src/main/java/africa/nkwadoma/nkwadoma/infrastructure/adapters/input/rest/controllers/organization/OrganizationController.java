@@ -171,7 +171,7 @@ public class OrganizationController {
 
 
     @PostMapping("organization/deactivate")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN')")
     @Operation(summary = DEACTIVATE_ORGANIZATION_TITLE, description = DEACTIVATE_ORGANIZATION_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> deactivateOrganization(@RequestBody @Valid AccountActivationRequest accountActivationRequest) throws MeedlException {
             createOrganizationUseCase.deactivateOrganization(accountActivationRequest.getId(), accountActivationRequest.getReason());
@@ -182,7 +182,7 @@ public class OrganizationController {
             return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
     @PostMapping("organization/reactivate")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN')")
     @Operation(summary = REACTIVATE_ORGANIZATION_TITLE, description = REACTIVATE_ORGANIZATION_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> reactivateOrganization(@RequestBody @Valid AccountActivationRequest accountActivationRequest) throws MeedlException {
         createOrganizationUseCase.reactivateOrganization(accountActivationRequest.getId(), accountActivationRequest.getReason());
