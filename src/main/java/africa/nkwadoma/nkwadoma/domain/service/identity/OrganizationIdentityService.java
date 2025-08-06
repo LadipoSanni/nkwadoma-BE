@@ -329,6 +329,61 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         return "Invitation "+activationStatus.name();
     }
 
+    @Override
+    public String inviteColleague(OrganizationIdentity organizationIdentity) throws MeedlException {
+        log.info("Inviting colleague");
+        MeedlValidator.validateObjectInstance(organizationIdentity.getUserIdentity(), IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
+        UserIdentity userIdentity = organizationIdentity.getUserIdentity();
+        userIdentity.validate();
+
+        OrganizationEmployeeIdentity foundActor = organizationEmployeeIdentityOutputPort.findByEmployeeId(userIdentity.getCreatedBy());
+        log.info("Found employee: {}", foundActor);
+
+
+        if (foundActor.getMeedlUser().getRole().equals(IdentityRole.MEEDL_SUPER_ADMIN) || foundActor.getMeedlUser().getRole().equals(IdentityRole.MEEDL_ADMIN)
+                || foundActor.getMeedlUser().getRole().equals(IdentityRole.MEEDL_ASSOCIATE) || foundActor.getMeedlUser().getRole().equals(IdentityRole.PORTFOLIO_MANAGER)) {
+            log.info("validating for meedl staff ");
+            if (foundActor.getMeedlUser().getRole().equals(IdentityRole.MEEDL_SUPER_ADMIN)) {
+                if (!userIdentity.getRole().equals(IdentityRole.PORTFOLIO_MANAGER) && !userIdentity.getRole().equals(IdentityRole.MEEDL_ADMIN) &&
+                        !userIdentity.getRole().equals(IdentityRole.MEEDL_ASSOCIATE)){
+                    throw new IdentityException("You don't have the privilege to invite a colleague with this role "+userIdentity.getRole().name());
+                }
+            }
+            if (foundActor.getMeedlUser().getRole().equals(IdentityRole.MEEDL_ADMIN)) {
+                if (!userIdentity.getRole().equals(IdentityRole.PORTFOLIO_MANAGER) && !userIdentity.getRole().equals(IdentityRole.MEEDL_ASSOCIATE)) {
+                    throw new IdentityException("You don't have the privilege to invite a colleague with this role "+userIdentity.getRole().name());
+                }
+            }
+            if (foundActor.getMeedlUser().getRole().equals(IdentityRole.PORTFOLIO_MANAGER)) {
+                if (!userIdentity.getRole().equals(IdentityRole.MEEDL_ASSOCIATE)) {
+                    throw new IdentityException("You don't have the privilege to invite a colleague with this role "+userIdentity.getRole().name());
+                }
+            }
+        }
+
+
+        if (foundActor.getMeedlUser().getRole().equals(IdentityRole.ORGANIZATION_SUPER_ADMIN) || foundActor.getMeedlUser().getRole().equals(IdentityRole.ORGANIZATION_ADMIN)
+                || foundActor.getMeedlUser().getRole().equals(IdentityRole.ORGANIZATION_ASSOCIATE)) {
+            log.info("validating for organization staff ");
+            if (foundActor.getMeedlUser().getRole().equals(IdentityRole.ORGANIZATION_SUPER_ADMIN)) {
+                if (!userIdentity.getRole().equals(IdentityRole.ORGANIZATION_ADMIN) && !userIdentity.getRole().equals(IdentityRole.ORGANIZATION_ASSOCIATE)){
+                    throw new IdentityException("You don't have the privilege to invite a colleague with this role "+userIdentity.getRole().name());
+                }
+            }
+            if (foundActor.getMeedlUser().getRole().equals(IdentityRole.ORGANIZATION_ADMIN)) {
+                if (!userIdentity.getRole().equals(IdentityRole.ORGANIZATION_ASSOCIATE)) {
+                    throw new IdentityException("You don't have the privilege to invite a colleague with this role "+userIdentity.getRole().name());
+                }
+            }
+        }
+
+
+
+
+
+        return "";
+    }
+
     private static void checkCurrentStatusOfOrganization(OrganizationIdentity organizationIdentity) throws IdentityException {
         if (!organizationIdentity.getStatus().equals(ActivationStatus.PENDING_APPROVAL) &&
                 ! organizationIdentity.getStatus().equals( ActivationStatus.DECLINED)) {

@@ -8,10 +8,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.AccountActivationRequest;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.OrganizationDecisionRequest;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.OrganizationRequest;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.OrganizationUpdateRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ReferenceDataResponse;
@@ -293,7 +290,21 @@ public class OrganizationController {
                 .message(response)
                 .data(response)
                 .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);    }
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+    }
+
+
+    @PostMapping("orgaization/colleague/invite")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') ")
+    public ResponseEntity<ApiResponse<?>> inviteColleague(@AuthenticationPrincipal Jwt meedlUser,
+                                                          @RequestBody InviteColleagueRequest inviteColleagueRequest) throws MeedlException {
+        OrganizationIdentity organizationIdentity =
+                organizationRestMapper.mapInviteColleagueRequestToOrganizationIdentity(inviteColleagueRequest);
+        organizationIdentity.getUserIdentity().setCreatedBy(meedlUser.getClaimAsString("sub"));
+        String response = createOrganizationUseCase.inviteColleague(organizationIdentity);
+        return null;
+    }
+
 }
 
 
