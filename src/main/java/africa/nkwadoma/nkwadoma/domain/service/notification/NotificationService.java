@@ -354,8 +354,8 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
     public void sendDeactivatedUserEmailNotification(UserIdentity userIdentity) {
         Context context = emailOutputPort.getNameAndDeactivationReasonContext(userIdentity.getFirstName(), userIdentity.getDeactivationReason());
         Email email = buildEmail(userIdentity, context,
-                UserMessages.USER_HAS_BEEN_DEACTIVATED.getMessage(),
-                UserMessages.DEACTIVATED_USER.getMessage());
+                UserMessages.USER_HAS_BEEN_REACTIVATED.getMessage(),
+                UserMessages.REACTIVATED_USER.getMessage());
         sendMail(userIdentity, email);
     }
 }
