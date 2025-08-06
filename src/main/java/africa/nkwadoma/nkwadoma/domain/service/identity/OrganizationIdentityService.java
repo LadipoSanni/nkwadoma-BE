@@ -255,10 +255,16 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
         if (identityRole.equals(IdentityRole.MEEDL_SUPER_ADMIN)) {
             organizationIdentity.setStatus(ActivationStatus.INVITED);
+        }else {
+            organizationIdentity.setStatus(ActivationStatus.PENDING_APPROVAL);
         }
         organizationIdentityOutputPort.save(organizationIdentity);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
-        organizationEmployeeIdentity.setStatus(ActivationStatus.INVITED);
+        if (identityRole.equals(IdentityRole.MEEDL_SUPER_ADMIN)) {
+            organizationEmployeeIdentity.setStatus(ActivationStatus.INVITED);
+        }else {
+            organizationEmployeeIdentity.setStatus(ActivationStatus.PENDING_APPROVAL);
+        }
         organizationEmployeeIdentity.getMeedlUser().setCreatedAt(LocalDateTime.now());
         userIdentityOutputPort.save(organizationEmployeeIdentity.getMeedlUser());
         organizationEmployeeIdentity = organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
