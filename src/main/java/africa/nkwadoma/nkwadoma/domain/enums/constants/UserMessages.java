@@ -17,7 +17,9 @@ public enum UserMessages {
     REFRESH_TOKEN_CANNOT_BE_EMPTY("Refresh token cannot be empty"), INVALID_REFRESH_TOKEN("Invalid refresh token"),
     COOPERATION_MUST_NOT_BE_EMPTY("Cooperation cannot be empty"),
     USER_HAS_BEEN_DEACTIVATED("Account Deactivation"),
-    DEACTIVATED_USER("deactivated-user");
+    DEACTIVATED_USER("deactivated-user"),
+    USER_HAS_BEEN_REACTIVATED("Account Reactivation"),
+    REACTIVATED_USER("reactivated-user");
     private final String message;
 
     UserMessages(String message) {

@@ -152,9 +152,10 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findById(organizationId);
         List<OrganizationEmployeeIdentity> organizationEmployees = foundOrganization.getOrganizationEmployees();
         log.info("found organization employees to reactivate: {}",organizationEmployees.size());
-        reactivateOrganizationEmployees(reason, organizationEmployees);
 
+        reactivateOrganizationEmployees(reason, organizationEmployees);
         updateOrganizationActivationStatus(foundOrganization,ActivationStatus.ACTIVE);
+        asynchronousMailingOutputPort.sendReactivatedEmployeesEmailNotification(organizationEmployees, foundOrganization);
         log.info("Updated Organization entity status: {}", foundOrganization.getStatus());
         return foundOrganization;
     }

@@ -50,4 +50,7 @@ public interface AsynchronousNotificationOutputPort {
 
     @Async
     void notifyAllPortfolioManagerForDeactivatedAccount(OrganizationIdentity organization) throws MeedlException;
+
+    @Async
+    void notifyAllPortfolioManagerForReactivatedAccount(OrganizationIdentity organization) throws MeedlException;
 }
