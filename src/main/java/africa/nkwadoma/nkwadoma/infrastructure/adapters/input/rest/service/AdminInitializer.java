@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Value;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.MEEDL_SUPER_ADMIN;
 import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.PORTFOLIO_MANAGER;
 
 @Component
@@ -64,7 +65,7 @@ public class AdminInitializer {
                 .email(SUPER_ADMIN_EMAIL)
                 .firstName(SUPER_ADMIN_FIRST_NAME)
                 .lastName(SUPER_ADMIN_LAST_NAME)
-                .role(PORTFOLIO_MANAGER)
+                .role(MEEDL_SUPER_ADMIN)
                 .createdBy(UUID.randomUUID().toString())
                 .build();
     }
