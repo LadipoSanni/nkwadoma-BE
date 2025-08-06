@@ -300,25 +300,18 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
     @Override
     public void inviteFinancierToPlatform(UserIdentity userIdentity) throws MeedlException {
         Context context = emailOutputPort.getNameAndLinkContext(getLink(userIdentity),userIdentity.getFirstName());
-        Email email = Email.builder()
-                .context(context)
-                .subject(FinancierMessages.FINANCIER_INVITE_TO_VEHICLE.getMessage())
-                .to(userIdentity.getEmail())
-                .template(FinancierMessages.FINANCIER_INVITE_TO_VEHICLE.getMessage())
-                .firstName(userIdentity.getFirstName())
-                .build();
+        Email email = buildEmail(userIdentity, context,
+                FinancierMessages.FINANCIER_INVITE_TO_VEHICLE.getMessage(),
+                FinancierMessages.FINANCIER_INVITE_TO_VEHICLE.getMessage());
         sendMail(userIdentity, email);
     }
     @Override
     public void inviteFinancierToVehicle(UserIdentity userIdentity, InvestmentVehicle investmentVehicle) throws MeedlException {
         Context context = emailOutputPort.getNameAndLinkContextAndInvestmentVehicleName(getLinkFinancierToVehicle(userIdentity, investmentVehicle),userIdentity.getFirstName(), investmentVehicle.getName());
-        Email email = Email.builder()
-                .context(context)
-                .subject(FinancierMessages.FINANCIER_INVITE_TO_VEHICLE.getMessage())
-                .to(userIdentity.getEmail())
-                .template(FinancierMessages.FINANCIER_INVITE_TO_VEHICLE.getMessage())
-                .firstName(userIdentity.getFirstName())
-                .build();
+        Email email = buildEmail(userIdentity, context,
+                FinancierMessages.FINANCIER_INVITE_TO_VEHICLE.getMessage(),
+                FinancierMessages.FINANCIER_INVITE_TO_VEHICLE.getMessage());
+
         sendMail(userIdentity, email);
     }
     private String getLinkFinancierToVehicle(UserIdentity userIdentity, InvestmentVehicle investmentVehicle) throws MeedlException {
@@ -333,17 +326,36 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
         notificationIdList = MeedlValidator.validateNotificationListAndFilter(notificationIdList);
         meedlNotificationOutputPort.deleteMultipleNotification(userId, notificationIdList);
     }
+    private Email buildEmail(
+            UserIdentity userIdentity,
+            Context context,
+            String subject,
+            String template
+    ) {
+        return Email.builder()
+                .context(context)
+                .subject(subject)
+                .to(userIdentity.getEmail())
+                .template(template)
+                .firstName(userIdentity.getFirstName())
+                .build();
+    }
+
 
     @Override
     public void sendDeactivatedUserEmailNotification(UserIdentity userIdentity) {
         Context context = emailOutputPort.getNameAndDeactivationReasonContext(userIdentity.getFirstName(), userIdentity.getDeactivationReason());
-        Email email = Email.builder()
-                .context(context)
-                .subject(UserMessages.USER_HAS_BEEN_DEACTIVATED.getMessage())
-                .to(userIdentity.getEmail())
-                .template(UserMessages.DEACTIVATED_USER.getMessage())
-                .firstName(userIdentity.getFirstName())
-                .build();
+        Email email = buildEmail(userIdentity, context,
+                UserMessages.USER_HAS_BEEN_DEACTIVATED.getMessage(),
+                UserMessages.DEACTIVATED_USER.getMessage());
+        sendMail(userIdentity, email);
+    }
+    @Override
+    public void sendDeactivatedUserEmailNotification(UserIdentity userIdentity) {
+        Context context = emailOutputPort.getNameAndDeactivationReasonContext(userIdentity.getFirstName(), userIdentity.getDeactivationReason());
+        Email email = buildEmail(userIdentity, context,
+                UserMessages.USER_HAS_BEEN_DEACTIVATED.getMessage(),
+                UserMessages.DEACTIVATED_USER.getMessage());
         sendMail(userIdentity, email);
     }
 }
