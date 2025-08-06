@@ -5,6 +5,8 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeO
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramLoanDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationLoanDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.DailyInterestOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.MonthlyInterestOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.RepaymentHistoryOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanCalculationMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -15,11 +17,11 @@ import africa.nkwadoma.nkwadoma.domain.model.education.ProgramLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
-import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.CalculationContext;
-import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanPeriodRecord;
-import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
+import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.*;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
+import org.jobrunr.jobs.lambdas.JobLambda;
+import org.jobrunr.scheduling.JobScheduler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +33,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -62,6 +65,14 @@ public class LoanCalculationEngineTest {
     private CohortLoanDetail cohortLoanDetail;
     private ProgramLoanDetail programLoanDetail;
     private OrganizationLoanDetail organizationLoanDetail;
+    @Mock
+    private JobScheduler jobScheduler;
+    @Mock
+    private DailyInterestOutputPort dailyInterestOutputPort;
+    @Mock
+    private MonthlyInterestOutputPort monthlyInterestOutputPort;
+
+
     @BeforeEach
     void setup() {
         loaneeId = UUID.randomUUID().toString();
@@ -949,4 +960,63 @@ public class LoanCalculationEngineTest {
         assertEquals(BigDecimal.ZERO.setScale(NUMBER_OF_DECIMAL_PLACE), actual);
     }
 
+
+    @Test
+    void testCalculateDailyInterest() {
+        try {
+            BigDecimal expectedInterest = new BigDecimal("10.00");
+            LoaneeLoanDetail loanDetail = TestData.createTestLoaneeLoanDetail();
+            loanDetail.setAmountOutstanding(BigDecimal.valueOf(30416.67));
+            loanDetail.setInterestRate(12);
+            when(loaneeLoanDetailsOutputPort.findAllByNotNullAmountOutStanding()).thenReturn(List.of(loanDetail));
+            DailyInterest savedDailyInterest = DailyInterest.builder()
+                    .interest(expectedInterest)
+                    .loaneeLoanDetail(loanDetail)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+            when(dailyInterestOutputPort.save(any(DailyInterest.class))).thenReturn(savedDailyInterest);
+            calculationEngine.calculateDailyInterest();
+            verify(loaneeLoanDetailsOutputPort, times(1)).findAllByNotNullAmountOutStanding();
+        } catch (MeedlException meedlException) {
+            log.error("Test failed: {}", meedlException.getMessage());
+            fail("Unexpected MeedlException: " + meedlException.getMessage());
+        }
+    }
+
+    @Test
+    void testCalculateMonthlyInterest() throws MeedlException {
+        LoaneeLoanDetail loanDetail = TestData.createTestLoaneeLoanDetail();
+        loanDetail.setId("ea1f2436-fbd4-482a-a370-647f053aeccb");
+        loanDetail.setAmountOutstanding(BigDecimal.valueOf(30416.67));
+        loanDetail.setInterestRate(12);
+        loanDetail.setInterestIncurred(BigDecimal.ZERO);
+        when(loaneeLoanDetailsOutputPort.findAllWithDailyInterestByMonthAndYear(Month.AUGUST,2025))
+                .thenReturn(List.of(loanDetail));
+        when(dailyInterestOutputPort.findAllInterestForAMonth(Month.AUGUST,2025,loanDetail.getId()))
+                .thenReturn(List.of(
+                        DailyInterest.builder().interest(new BigDecimal("50.00")).build(),
+                        DailyInterest.builder().interest(new BigDecimal("50.00")).build()));
+
+
+
+        MonthlyInterest monthlyInterest = TestData.buildMonthlyInterest(loanDetail);
+        when(monthlyInterestOutputPort.save(any(MonthlyInterest.class))).thenReturn(monthlyInterest);
+        when(cohortLoanDetailOutputPort.findByLoaneeLoanDetailId(loanDetail.getId()))
+                .thenReturn(cohortLoanDetail);
+        when(cohortLoanDetailOutputPort.save(any(CohortLoanDetail.class))).thenReturn(cohortLoanDetail);
+
+        when(programLoanDetailOutputPort.findByProgramId(cohortLoanDetail.getCohort().getProgramId()))
+                .thenReturn(programLoanDetail);
+        when(programLoanDetailOutputPort.save(any(ProgramLoanDetail.class))).thenReturn(programLoanDetail);
+
+        when(organizationLoanDetailOutputPort.findByOrganizationId(programLoanDetail.getProgram().getOrganizationIdentity().getId()))
+                .thenReturn(organizationLoanDetail);
+        when(organizationLoanDetailOutputPort.save(any(OrganizationLoanDetail.class))).thenReturn(organizationLoanDetail);
+
+        calculationEngine.calculateMonthlyInterest();
+
+        // Verify interactions
+        verify(loaneeLoanDetailsOutputPort, times(1))
+                .findAllWithDailyInterestByMonthAndYear(Month.AUGUST, 2025);
+    }
 }
