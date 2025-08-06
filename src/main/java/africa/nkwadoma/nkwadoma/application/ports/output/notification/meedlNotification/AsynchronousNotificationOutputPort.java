@@ -52,4 +52,7 @@ public interface AsynchronousNotificationOutputPort {
 
     @Async
     void notifyAllPortfolioManagerForReactivatedAccount(OrganizationIdentity organization) throws MeedlException;
+
+    @Async
+    void notifySuperAdminOfDeactivationAttempt(UserIdentity foundActor) throws MeedlException;
 }

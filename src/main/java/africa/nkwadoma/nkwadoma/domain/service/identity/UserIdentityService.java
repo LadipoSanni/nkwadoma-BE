@@ -1,6 +1,5 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.notification.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
@@ -10,6 +9,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationId
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.EmailTokenOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
@@ -20,10 +20,8 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdenti
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.aes.TokenUtils;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identitymanager.BlackListedTokenAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.BlackListedToken;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
 import com.nimbusds.jwt.*;
 import lombok.*;
 import lombok.extern.slf4j.*;
@@ -31,13 +29,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.keycloak.representations.*;
 import org.keycloak.representations.idm.*;
 import org.springframework.scheduling.annotation.*;
-import org.springframework.security.crypto.password.*;
 
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 
@@ -51,12 +49,10 @@ public class UserIdentityService implements CreateUserUseCase {
     private final OrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
     private final AesOutputPort tokenUtils;
     private final EmailTokenOutputPort emailTokenManager;
-    private final PasswordEncoder passwordEncoder;
-    private final SendColleagueEmailUseCase sendEmail;
-    private final UserIdentityMapper userIdentityMapper;
     private final BlackListedTokenAdapter blackListedTokenAdapter;
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
+    private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
 
 
     @Override
@@ -230,14 +226,53 @@ public class UserIdentityService implements CreateUserUseCase {
         MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
         MeedlValidator.validateUUID(userIdentity.getId(), UserMessages.INVALID_USER_ID.getMessage());
         MeedlValidator.validateDataElement(userIdentity.getDeactivationReason(), "Reason for deactivation required");
-        UserIdentity foundUserIdentity = userIdentityOutputPort.findById(userIdentity.getId());
-//        if (IdentityRole.ORGANIZATION_ADMIN.equals(foundUserIdentity.getRole() )
-        deactivateAssociateForOrganization(foundUserIdentity, userIdentity);
-        foundUserIdentity.setDeactivationReason("User deactivated by : "+ userIdentity.getCreatedBy() + ". Reason : "+userIdentity.getDeactivationReason());
-        userIdentity = identityManagerOutPutPort.disableUserAccount(foundUserIdentity);
+        UserIdentity foundUserToDeactivate = userIdentityOutputPort.findById(userIdentity.getId());
+        checkIfUserAllowedToDeactivateAccount(foundUserToDeactivate, userIdentity);
+        foundUserToDeactivate.setDeactivationReason("User deactivated by : "+ userIdentity.getCreatedBy() + ". Reason : "+userIdentity.getDeactivationReason());
+        userIdentity = identityManagerOutPutPort.disableUserAccount(foundUserToDeactivate);
         log.info("User deactivated successfully {}", userIdentity.getId());
         asynchronousMailingOutputPort.notifyDeactivatedUser(userIdentity);
         return userIdentity;
+    }
+
+    private void checkIfUserAllowedToDeactivateAccount(UserIdentity userToDeactivate, UserIdentity userIdentity) throws MeedlException {
+        UserIdentity foundActor = userIdentityOutputPort.findById(userIdentity.getCreatedBy());
+        log.info("Is actor with email {} and role {} , allowed to deactivate user with email {} and role {}", foundActor.getEmail(), foundActor.getRole(), userToDeactivate.getEmail(), userToDeactivate.getRole());
+        if (foundActor.getId().equals(userToDeactivate.getId())){
+            log.error("User attempts to deactivate self found actor {}, user to deactivate {}", foundActor, userToDeactivate);
+            throw new MeedlException("You are not allowed to deactivate yourself.");
+        }
+        if (IdentityRole.ORGANIZATION_SUPER_ADMIN.equals(foundActor.getRole()) ||
+                IdentityRole.ORGANIZATION_ADMIN.equals(foundActor.getRole())) {
+            checkDeactivationIsAuthorised(
+                    foundActor,
+                    userToDeactivate,
+                    Set.of(IdentityRole.ORGANIZATION_ADMIN, IdentityRole.ORGANIZATION_ASSOCIATE)
+            );
+        }
+
+        if (IdentityRole.PORTFOLIO_MANAGER.equals(foundActor.getRole())) {
+            checkDeactivationIsAuthorised(
+                    foundActor,
+                    userToDeactivate,
+                    Set.of(IdentityRole.PORTFOLIO_MANAGER, IdentityRole.MEEDL_ASSOCIATE)
+            );
+        }
+        if (IdentityRole.MEEDL_SUPER_ADMIN.equals(userToDeactivate.getRole())){
+            log.info("An attempt was made to deactivate Meedl's supper admin {} \n ----------------------------> attempt to deactivate Meedls super admin was made by ------------------------->{}", userToDeactivate, foundActor);
+            asynchronousNotificationOutputPort.notifySuperAdminOfDeactivationAttempt(foundActor);
+            throw new MeedlException("You are not allowed to deactivate the super admin on Meedl");
+        }
+        log.info("Done with validation, actor is allowed to deactivate user.");
+    }
+
+
+    private void checkDeactivationIsAuthorised(UserIdentity foundActor , UserIdentity userToDeactivate, Set<IdentityRole> allowedTargetRoles) throws MeedlException {
+        if (!allowedTargetRoles.contains(userToDeactivate.getRole())) {
+            log.error("You are not authorized to deactivate user with role {} for user with email {}. The actor email is {} and the role of the actor is {}",
+                    userToDeactivate.getRole(), userToDeactivate.getEmail(), foundActor.getEmail(), foundActor.getRole());
+            throw new MeedlException("You are not authorized to deactivate this user");
+        }
     }
 
     @Override
