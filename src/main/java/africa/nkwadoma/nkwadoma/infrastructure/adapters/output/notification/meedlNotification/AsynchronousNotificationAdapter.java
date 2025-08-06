@@ -64,17 +64,17 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
 
     @Async
     @Override
-    public void notifyPortfolioManagerOfNewOrganization(OrganizationIdentity organizationIdentity, NotificationFlag notificationFlag) throws MeedlException {
-        List<UserIdentity> portfolioManagers = userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
-        for (UserIdentity portfolioManager : portfolioManagers) {
+    public void notifySuperAdminOfNewOrganization(UserIdentity userIdentity,OrganizationIdentity organizationIdentity, NotificationFlag notificationFlag) throws MeedlException {
+        List<UserIdentity> superAdmins = userIdentityOutputPort.findAllByRole(IdentityRole.MEEDL_SUPER_ADMIN);
+        for (UserIdentity superAdmin : superAdmins) {
             MeedlNotification notification = MeedlNotification.builder()
-                    .user(portfolioManager)
+                    .user(superAdmin)
                     .timestamp(LocalDateTime.now())
                     .contentId(organizationIdentity.getId())
-                    .title("Organization has been invited")
+                    .title("New Organization Invite Awaiting Approval")
                     .callToAction(Boolean.TRUE)
-                    .senderMail(organizationIdentity.getEmail())
-                    .senderFullName(organizationIdentity.getName())
+                    .senderMail(userIdentity.getEmail())
+                    .senderFullName(userIdentity.getFirstName() + " " + userIdentity.getLastName())
                     .contentDetail("New organization with the name " + organizationIdentity.getName())
                     .notificationFlag(notificationFlag)
                     .build();
