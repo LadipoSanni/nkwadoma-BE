@@ -99,7 +99,14 @@ public class EmailAdapter implements EmailOutputPort {
         context.setVariable(ContextMessages.CONTEXT_DEACTIVATION_REASON.getMessage(), deactivationReason);
         return context;
     }
-
+    @Override
+    public Context getNameAndReactivationReasonContext(String link, String firstName, String reactivationReason) {
+        Context context = new Context();
+        context.setVariable(ContextMessages.CONTEXT_FIRST_NAME.getMessage(), firstName);
+        context.setVariable(ContextMessages.CONTEXT_REACTIVATION_REASON.getMessage(), reactivationReason);
+        context.setVariable(ContextMessages.CONTEXT_LINK.getMessage(), link);
+        return context;
+    }
 
     @Override
     public Context getNameAndLinkContextAndInvestmentVehicleName(String link, String firstName, String investmentVehicleName) {
@@ -113,7 +120,7 @@ public class EmailAdapter implements EmailOutputPort {
     @Override
     public Context getNameAndLinkContextAndLoanOfferId(String firstName, String loanOfferId) {
         Context context = new Context();
-        context.setVariable(ContextMessages.CONTEXT_LINK.getMessage(), loanOfferId);
+        context.setVariable(ContextMessages.CONTEXT_LOAN_OFFER_ID.getMessage(), loanOfferId);
         context.setVariable(ContextMessages.CONTEXT_FIRST_NAME.getMessage(), firstName);
         return context;
     }
@@ -121,7 +128,7 @@ public class EmailAdapter implements EmailOutputPort {
     @Override
     public Context getNameAndLinkContextAndLoanOfferIdAndLoaneeId(String firstName,String loanOfferId) {
         Context context = new Context();
-        context.setVariable(ContextMessages.CONTEXT_LINK.getMessage(), loanOfferId);
+        context.setVariable(ContextMessages.CONTEXT_LOAN_OFFER_ID.getMessage(), loanOfferId);
         context.setVariable(ContextMessages.CONTEXT_FIRST_NAME.getMessage(), firstName);
         return context;
     }
