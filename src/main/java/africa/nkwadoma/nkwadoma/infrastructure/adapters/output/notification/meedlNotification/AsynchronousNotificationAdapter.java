@@ -62,13 +62,6 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
 
     @Async
     @Override
-//<<<<<<< HEAD
-//    public void notifyPortfolioManagerOfNewOrganization(OrganizationIdentity organizationIdentity, NotificationFlag notificationFlag) throws MeedlException {
-
-//        for (UserIdentity backOfficeAdmin : allBackOfficeAdmin) {
-//            MeedlNotification notification = MeedlNotification.builder()
-//                    .user(backOfficeAdmin)
-//=======
     public void notifySuperAdminOfNewOrganization(UserIdentity userIdentity,OrganizationIdentity organizationIdentity, NotificationFlag notificationFlag) throws MeedlException {
         List<UserIdentity> superAdmins = userIdentityOutputPort.findAllByRole(IdentityRole.MEEDL_SUPER_ADMIN);
         for (UserIdentity superAdmin : superAdmins) {
