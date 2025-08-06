@@ -62,18 +62,24 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
 
     @Async
     @Override
-    public void notifyPortfolioManagerOfNewOrganization(OrganizationIdentity organizationIdentity, NotificationFlag notificationFlag) throws MeedlException {
-        List<UserIdentity> allBackOfficeAdmin = userIdentityOutputPort
-                .findAllByRoles(List.of(IdentityRole.MEEDL_ADMIN, IdentityRole.MEEDL_SUPER_ADMIN));
-        for (UserIdentity backOfficeAdmin : allBackOfficeAdmin) {
+//<<<<<<< HEAD
+//    public void notifyPortfolioManagerOfNewOrganization(OrganizationIdentity organizationIdentity, NotificationFlag notificationFlag) throws MeedlException {
+
+//        for (UserIdentity backOfficeAdmin : allBackOfficeAdmin) {
+//            MeedlNotification notification = MeedlNotification.builder()
+//                    .user(backOfficeAdmin)
+//=======
+    public void notifySuperAdminOfNewOrganization(UserIdentity userIdentity,OrganizationIdentity organizationIdentity, NotificationFlag notificationFlag) throws MeedlException {
+        List<UserIdentity> superAdmins = userIdentityOutputPort.findAllByRole(IdentityRole.MEEDL_SUPER_ADMIN);
+        for (UserIdentity superAdmin : superAdmins) {
             MeedlNotification notification = MeedlNotification.builder()
-                    .user(backOfficeAdmin)
+                    .user(superAdmin)
                     .timestamp(LocalDateTime.now())
                     .contentId(organizationIdentity.getId())
-                    .title("Organization has been invited")
+                    .title("New Organization Invite Awaiting Approval")
                     .callToAction(Boolean.TRUE)
-                    .senderMail(organizationIdentity.getEmail())
-                    .senderFullName(organizationIdentity.getName())
+                    .senderMail(userIdentity.getEmail())
+                    .senderFullName(userIdentity.getFirstName() + " " + userIdentity.getLastName())
                     .contentDetail("New organization with the name " + organizationIdentity.getName())
                     .notificationFlag(notificationFlag)
                     .build();
@@ -213,7 +219,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
     private MeedlNotification buildOrganizationStatusNotification(
             UserIdentity portfolioManager,
             OrganizationIdentity organization,
-            String status, // e.g., "deactivated" or "reactivated"
+            String status,
             NotificationFlag flag
     ) {
         return MeedlNotification.builder()
