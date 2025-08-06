@@ -15,7 +15,6 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
@@ -28,7 +27,6 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -65,10 +63,11 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
     @Async
     @Override
     public void notifyPortfolioManagerOfNewOrganization(OrganizationIdentity organizationIdentity, NotificationFlag notificationFlag) throws MeedlException {
-        List<UserIdentity> portfolioManagers = userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
-        for (UserIdentity portfolioManager : portfolioManagers) {
+        List<UserIdentity> allBackOfficeAdmin = userIdentityOutputPort
+                .findAllByRoles(List.of(IdentityRole.MEEDL_ADMIN, IdentityRole.MEEDL_SUPER_ADMIN));
+        for (UserIdentity backOfficeAdmin : allBackOfficeAdmin) {
             MeedlNotification notification = MeedlNotification.builder()
-                    .user(portfolioManager)
+                    .user(backOfficeAdmin)
                     .timestamp(LocalDateTime.now())
                     .contentId(organizationIdentity.getId())
                     .title("Organization has been invited")
