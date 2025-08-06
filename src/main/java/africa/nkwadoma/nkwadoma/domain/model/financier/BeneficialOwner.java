@@ -34,7 +34,6 @@ public class BeneficialOwner {
     //    Gov ID
     private String votersCard;
     private String nationalIdCard;
-    private String driverLicensetionalIdCard;
     private String driverLicense;
 
     public void validate() throws MeedlException {
@@ -62,7 +61,7 @@ public class BeneficialOwner {
         }
     }
     public void validateProofOfBeneficialOwnership(BeneficialOwner beneficialOwner) throws MeedlException {
-        if (MeedlValidator.isEmptyString(beneficialOwner.getVotersCard()) && MeedlValidator.isEmptyString(beneficialOwner.getNationalIdCard()) && MeedlValidator.isEmptyString(beneficialOwner.getDriverLicense()) && MeedlValidator.isEmptyString(beneficialOwner.getDriverLicensetionalIdCard())) {
+        if (MeedlValidator.isEmptyString(beneficialOwner.getVotersCard()) && MeedlValidator.isEmptyString(beneficialOwner.getNationalIdCard()) && MeedlValidator.isEmptyString(beneficialOwner.getDriverLicense())) {
             throw new MeedlException("At least one form of beneficial owner identification must be provided.");
         }
     }
