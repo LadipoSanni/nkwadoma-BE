@@ -634,7 +634,6 @@ public class TestData {
                 .percentageOwnershipOrShare(percentageOwnershipOrShare)
                 .votersCard("Voters card")
                 .nationalIdCard("national id card")
-                .driverLicensetionalIdCard("driver licensetional id card")
                 .driverLicense("Drivers license")
                 .build();
     }
