@@ -52,5 +52,5 @@ public interface EmployeeAdminEntityRepository extends JpaRepository<Organizatio
 
     List<OrganizationEmployeeEntity> findOrganizationEmployeeEntityByOrganizationAndMeedlUserRole(String organizationId, IdentityRole identityRole);
 
-    OrganizationEmployeeEntity findByMeedlUserRoleAndOrganization(IdentityRole identityRole, String organizationId);
+    Optional<OrganizationEmployeeEntity> findByMeedlUserRoleAndOrganization(IdentityRole identityRole, String organizationId);
 }

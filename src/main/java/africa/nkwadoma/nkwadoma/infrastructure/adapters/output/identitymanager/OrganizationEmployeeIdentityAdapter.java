@@ -202,7 +202,8 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
         MeedlValidator.validateObjectInstance(identityRole, IdentityMessages.INVALID_VALID_ROLE.getMessage());
 
         OrganizationEmployeeEntity organizationEmployeeEntity =
-                employeeAdminEntityRepository.findByMeedlUserRoleAndOrganization(identityRole,organizationId);
+                employeeAdminEntityRepository.findByMeedlUserRoleAndOrganization(identityRole,organizationId)
+                        .orElseThrow(()->new IdentityException(USER_NOT_FOUND.getMessage()));
         return organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(organizationEmployeeEntity);
     }
 

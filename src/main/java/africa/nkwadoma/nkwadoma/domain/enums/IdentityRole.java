@@ -10,4 +10,12 @@ public enum IdentityRole {
     ORGANIZATION_SUPER_ADMIN,
     LOANEE,
     FINANCIER,
+    ;
+
+    public boolean isMeedlRole() {
+        return this == MEEDL_SUPER_ADMIN ||
+                this == MEEDL_ADMIN ||
+                this == MEEDL_ASSOCIATE ||
+                this == PORTFOLIO_MANAGER;
+    }
 }
