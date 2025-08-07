@@ -42,7 +42,7 @@ public enum IdentityRole {
         return getOrganizationRoles().contains(role);
     }
 
->>>>>>> 6ce337521ce82d7c36deb3fc3a97e76dbbb7d4fc
+
 
     public boolean isMeedlRole() {
         return this == MEEDL_SUPER_ADMIN ||
