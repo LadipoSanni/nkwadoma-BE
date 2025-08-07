@@ -126,7 +126,9 @@ class LoaneeServiceTest {
     private CohortLoanee loaneeCohort;
     private String reasonForDeferral = "My head no carry coding again";
     private LoanOffer loanOffer;
-
+    @Mock
+    private LoaneeLoanAggregateOutputPort loaneeLoanAggregateOutputPort;
+    private LoaneeLoanAggregate loaneeLoanAggregate;
     @BeforeEach
     void setUpLoanee() {
         userIdentity = UserIdentity.builder()
@@ -212,6 +214,7 @@ class LoaneeServiceTest {
         loanOffer.setLoanProduct(loanProduct);
 
         loaneeCohort = TestData.buildCohortLoanee(firstLoanee,elites,loaneeLoanDetails,mockId);
+        loaneeLoanAggregate = TestData.buildLoaneeLoanAggregate(firstLoanee);
     }
 
     @Test
@@ -227,6 +230,7 @@ class LoaneeServiceTest {
         when(identityManagerOutputPort.createUser(userIdentity)).thenReturn(userIdentity);
         when(userIdentityOutputPort.save(userIdentity)).thenReturn(userIdentity);
         when(loaneeOutputPort.save(any())).thenReturn(firstLoanee);
+        when(loaneeLoanAggregateOutputPort.save(any())).thenReturn(loaneeLoanAggregate);
         when(cohortLoaneeOutputPort.save(any())).thenReturn(loaneeCohort);
 
         when(cohortOutputPort.save(any())).thenReturn(elites);
