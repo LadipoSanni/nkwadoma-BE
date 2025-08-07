@@ -25,8 +25,14 @@ public class InvestmentVehicleFinancierEntity {
     private FinancierEntity financier;
     @ManyToOne
     private InvestmentVehicleEntity investmentVehicle;
+    @ElementCollection(targetClass = InvestmentVehicleDesignation.class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
-    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "investment_vehicle_financier_entity_investment_vehicle_designation",
+            joinColumns = @JoinColumn(name = "investment_vehicle_financier_entity_id")
+    )
+    @Column(name = "investment_vehicle_designation")
     private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
+
     private LocalDate dateInvested;
 }
