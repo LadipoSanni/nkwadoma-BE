@@ -15,7 +15,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 @Slf4j
@@ -55,6 +55,25 @@ public class LoaneeLoanAggregateAdapterTest{
 
 
     @Test
+    void saveLoaneeLoanAggregateWithNullLoanee(){
+        loaneeLoanAggregate.setLoanee(null);
+        assertThrows(MeedlException.class,()-> loaneeLoanAggregateOutputPort.save(loaneeLoanAggregate));
+    }
+
+    @Test
+    void saveLoaneeLoanAggregateWithNullHistoricalAmount(){
+        loaneeLoanAggregate.setHistoricalDebt(null);
+        assertThrows(MeedlException.class,()-> loaneeLoanAggregateOutputPort.save(loaneeLoanAggregate));
+    }
+
+    @Test
+    void saveLoaneeLoanAggregateWithNullAmountOustanding(){
+        loaneeLoanAggregate.setTotalAmountOutstanding(null);
+        assertThrows(MeedlException.class,()-> loaneeLoanAggregateOutputPort.save(loaneeLoanAggregate));
+    }
+
+    @Order(1)
+    @Test
     void saveLoaneeLoanAggregate(){
         LoaneeLoanAggregate saveLoaneeLoanAggregate = null;
         try {
@@ -62,6 +81,7 @@ public class LoaneeLoanAggregateAdapterTest{
         }catch (MeedlException meedlException){
             log.error(meedlException.getMessage());
         }
+        assertNotNull(saveLoaneeLoanAggregate);
         assertEquals(saveLoaneeLoanAggregate.getNumberOfLoans(),loaneeLoanAggregate.getNumberOfLoans());
     }
 
