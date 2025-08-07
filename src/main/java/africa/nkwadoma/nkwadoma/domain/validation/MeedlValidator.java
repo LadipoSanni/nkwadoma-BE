@@ -110,7 +110,7 @@ public class MeedlValidator {
         }
     }
 
-    private static boolean isEmpty(Object obj) {
+    public static boolean isEmpty(Object obj) {
         if (obj instanceof Collection<?>) {
             return ((Collection<?>) obj).isEmpty();
         }

@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
@@ -13,12 +14,15 @@ import org.apache.commons.lang3.*;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.*;
 
+import java.util.Collections;
+
 @RequiredArgsConstructor
 @Slf4j
 @Service
 public class OrganizationEmployeeService implements ViewOrganizationEmployeesUseCase {
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeOutputPort;
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    private final UserIdentityOutputPort userIdentityOutputPort;
 
     @Override
     public Page<OrganizationEmployeeIdentity> viewOrganizationEmployees
@@ -58,13 +62,31 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
     }
 
     @Override
-    public Page<OrganizationEmployeeIdentity> viewAllAdminInOrganization(String userId,int pageSize , int pageNumber) throws MeedlException {
-        MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
-            OrganizationEmployeeIdentity organizationEmployeeIdentity
-                    = organizationEmployeeOutputPort.findByCreatedBy(userId);
+    public Page<OrganizationEmployeeIdentity> viewAllAdminInOrganization(OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(organizationEmployeeIdentity, "Provide an organization employee data.");
+        MeedlValidator.validateObjectInstance(organizationEmployeeIdentity.getMeedlUser(), "Provide a user entity.");
+        MeedlValidator.validateUUID(organizationEmployeeIdentity.getMeedlUser().getId(), UserMessages.INVALID_USER_ID.getMessage());
 
-        return organizationEmployeeOutputPort.findAllAdminInOrganization(organizationEmployeeIdentity.getOrganization(),
-                organizationEmployeeIdentity.getMeedlUser().getRole(),pageSize,pageNumber);
+        UserIdentity foundActor = userIdentityOutputPort.findById(organizationEmployeeIdentity.getMeedlUser().getId());
+
+        OrganizationIdentity organizationIdentity
+                = organizationIdentityOutputPort.findByUserId(organizationEmployeeIdentity.getMeedlUser().getId())
+                    .orElseThrow(()-> new MeedlException("User does not exist in an organization"));
+        setRolesToView(organizationEmployeeIdentity, foundActor);
+        return organizationEmployeeOutputPort.findAllAdminInOrganization(organizationIdentity.getId(),
+                organizationEmployeeIdentity);
+    }
+
+    private static void setRolesToView(OrganizationEmployeeIdentity organizationEmployeeIdentity, UserIdentity foundActor) {
+        if (organizationEmployeeIdentity.getIdentityRoles() == null ||
+                MeedlValidator.isEmpty(organizationEmployeeIdentity.getIdentityRoles())) {
+            if (isMeedlStaff(foundActor.getRole())){
+                organizationEmployeeIdentity.setIdentityRoles(IdentityRole.getMeedlRoles());
+            }
+            if (isOrganizationStaff(foundActor.getRole())){
+                organizationEmployeeIdentity.setIdentityRoles(IdentityRole.getOrganizationRoles());
+            }
+        }
     }
 
     @Override
