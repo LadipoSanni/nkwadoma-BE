@@ -24,21 +24,11 @@ public interface OrganizationEmployeeRestMapper {
         return String.format("%s %s", firstName, lastName);
     }
 
-
-    // 🔁 Main mapping
     @Mapping(target = "meedlUser.id", source = "userId")
     @Mapping(target = "identityRoles", source = "viewOrganizationAdminRequest.identityRoles")
     @Mapping(target = "status", source = "viewOrganizationAdminRequest.status")
     @Mapping(target = "pageNumber", source = "viewOrganizationAdminRequest.pageNumber")
     @Mapping(target = "pageSize", source = "viewOrganizationAdminRequest.pageSize")
     OrganizationEmployeeIdentity toOrganizationEmployeeIdentity(String userId, ViewOrganizationAdminRequest viewOrganizationAdminRequest);
-
-    // 🔁 Convert Set<String> to Set<IdentityRole>
-    default Set<IdentityRole> mapStringSetToIdentityRoleSet(Set<String> roles) {
-        if (roles == null) return null;
-        return roles.stream()
-                .map(IdentityRole::valueOf)
-                .collect(Collectors.toSet());
-    }
 
 }
