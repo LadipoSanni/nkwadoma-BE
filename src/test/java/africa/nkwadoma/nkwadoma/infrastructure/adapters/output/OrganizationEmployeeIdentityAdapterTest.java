@@ -36,6 +36,8 @@ class OrganizationEmployeeIdentityAdapterTest {
     private String organizationId;
     private String userId;
     private String organizationEmployeeIdentityId;
+    private OrganizationEmployeeIdentity organizationEmployeeIdentity;
+
 
     @BeforeAll
     void init() {
@@ -73,15 +75,15 @@ class OrganizationEmployeeIdentityAdapterTest {
             assertNotNull(joel);
             userId = joel.getId();
 
-            OrganizationEmployeeIdentity organizationEmployeeIdentity = new OrganizationEmployeeIdentity();
+             organizationEmployeeIdentity = new OrganizationEmployeeIdentity();
             organizationEmployeeIdentity.setOrganization(organizationId);
             organizationEmployeeIdentity.setMeedlUser(joel);
-            OrganizationEmployeeIdentity savedEmployeeIdentity = organizationEmployeeIdentityOutputPort.
+             organizationEmployeeIdentity = organizationEmployeeIdentityOutputPort.
                     save(organizationEmployeeIdentity);
 
-            assertNotNull(savedEmployeeIdentity);
-            log.info("Saved employee identity: {}", savedEmployeeIdentity.getId());
-            organizationEmployeeIdentityId = savedEmployeeIdentity.getId();
+            assertNotNull(organizationEmployeeIdentity);
+            log.info("Saved employee identity: {}", organizationEmployeeIdentity.getId());
+            organizationEmployeeIdentityId = organizationEmployeeIdentity.getId();
         } catch (MeedlException e) {
             log.error("Error saving organization : {}", e.getMessage());
         }
@@ -158,19 +160,21 @@ class OrganizationEmployeeIdentityAdapterTest {
 
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY,StringUtils.SPACE,"hdhdh"})
-    void findAllAdminInOrganizationWithInvalidId(String invalid){
-        assertThrows(MeedlException.class,()-> organizationEmployeeIdentityOutputPort.findAllAdminInOrganization(invalid,
-                IdentityRole.ORGANIZATION_ADMIN,pageSize,pageNumber));
+    void findAllAdminInOrganizationWithInvalidId(String invalidOrganizationId){
+        assertThrows(MeedlException.class,()-> organizationEmployeeIdentityOutputPort.findAllAdminInOrganization(invalidOrganizationId,
+                organizationEmployeeIdentity));
     }
 
     @Test
     void findAllAdminInOrganization(){
-        pageSize = 1;
-        pageNumber = 0;
+        organizationEmployeeIdentity.setPageSize(1);
+        organizationEmployeeIdentity.setPageNumber(0);
+        organizationEmployeeIdentity.setIdentityRoles(Set.of(IdentityRole.ORGANIZATION_ADMIN));
         Page<OrganizationEmployeeIdentity> organizationEmployeeIdentities = null;
         try{
             organizationEmployeeIdentities =
-                    organizationEmployeeIdentityOutputPort.findAllAdminInOrganization(amazingGrace.getId(),IdentityRole.ORGANIZATION_ADMIN,pageSize,pageNumber);
+                    organizationEmployeeIdentityOutputPort.findAllAdminInOrganization(amazingGrace.getId(),
+                            organizationEmployeeIdentity);
         }catch (MeedlException exception){
             log.error("Error finding organization employees", exception);
         }
@@ -189,6 +193,24 @@ class OrganizationEmployeeIdentityAdapterTest {
         }
         assertNotNull(organizationEmployeeIdentities);
         assertEquals(1, organizationEmployeeIdentities.size());
+    }
+
+    @Test
+    void findOrganizationEmployeeByOrganizationIdAndRole(){
+        OrganizationEmployeeIdentity organizationEmployeeIdentity= null;
+        try{
+            organizationEmployeeIdentity =
+                    organizationEmployeeIdentityOutputPort.findByRoleAndOrganizationId(organizationId,IdentityRole.ORGANIZATION_ADMIN);
+        }catch (MeedlException exception){
+            log.error("Error finding organization employees", exception);
+        }
+        assertNotNull(organizationEmployeeIdentity);
+        assertEquals(organizationEmployeeIdentity.getOrganization(), organizationId);
+    }
+
+    @Test
+    void findOrganizationEmployeeByNullOrganizationIdAndRole(){
+        assertThrows(MeedlException.class,()-> organizationEmployeeIdentityOutputPort.findByRoleAndOrganizationId(null,IdentityRole.ORGANIZATION_ADMIN));
     }
 
     @AfterAll

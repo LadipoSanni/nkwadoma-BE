@@ -1,7 +1,9 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
@@ -16,6 +18,8 @@ import org.springframework.data.domain.*;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @Slf4j
@@ -28,6 +32,8 @@ class OrganizationEmployeeServiceTest {
     private OrganizationEmployeeIdentity organizationEmployeeIdentity;
     @Mock
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    @Mock
+    private UserIdentityOutputPort userIdentityOutputPort;
     private int pageNumber = 0;
     private int pageSize = 10;
     private String mockId = "5756faf2-f3c8-40c4-9af5-5946adcfebd9";
@@ -137,4 +143,115 @@ class OrganizationEmployeeServiceTest {
         }
         assertEquals(employeeIdentities.getContent().size(),1);
     }
+    @Test
+    void viewAllAdminInOrganizationWithValidMeedlStaffRole() throws MeedlException {
+        String userId = UUID.randomUUID().toString();
+        UserIdentity user = new UserIdentity();
+        user.setId(userId);
+        user.setRole(IdentityRole.MEEDL_ADMIN);
+
+        OrganizationEmployeeIdentity request = new OrganizationEmployeeIdentity();
+        request.setMeedlUser(user);
+        request.setPageSize(10);
+        request.setPageNumber(0);
+
+        OrganizationIdentity organization = new OrganizationIdentity();
+        organization.setId("org-123");
+
+        when(userIdentityOutputPort.findById(userId)).thenReturn(user);
+        when(organizationIdentityOutputPort.findByUserId(userId)).thenReturn(Optional.of(organization));
+        when(organizationEmployeeOutputPort.findAllAdminInOrganization(eq("org-123"), any())).thenReturn(Page.empty());
+
+        Page<OrganizationEmployeeIdentity> result = organizationEmployeeService.viewAllAdminInOrganization(request);
+        assertNotNull(result);
+        assertEquals(0, result.getTotalElements());
+        assertTrue(request.getIdentityRoles().contains(IdentityRole.MEEDL_ADMIN));
+    }
+
+    @Test
+    void viewAllAdminInOrganizationWithExplicitRolesProvided() throws MeedlException {
+        String userId = UUID.randomUUID().toString();
+        UserIdentity user = new UserIdentity();
+        user.setId(userId);
+        user.setRole(IdentityRole.ORGANIZATION_ADMIN);
+
+        OrganizationEmployeeIdentity request = new OrganizationEmployeeIdentity();
+        request.setMeedlUser(user);
+        request.setPageSize(10);
+        request.setPageNumber(0);
+        request.setIdentityRoles(Set.of(IdentityRole.ORGANIZATION_ADMIN));
+
+        OrganizationIdentity organization = new OrganizationIdentity();
+        organization.setId("org-456");
+
+
+        when(userIdentityOutputPort.findById(userId)).thenReturn(user);
+        when(organizationIdentityOutputPort.findByUserId(userId)).thenReturn(Optional.of(organization));
+        when(organizationEmployeeOutputPort.findAllAdminInOrganization(eq("org-456"), any())).thenReturn(Page.empty());
+
+        Page<OrganizationEmployeeIdentity> result = organizationEmployeeService.viewAllAdminInOrganization(request);
+        assertNotNull(result);
+        assertEquals(Set.of(IdentityRole.ORGANIZATION_ADMIN), request.getIdentityRoles());
+    }
+
+    @Test
+    void viewAllAdminInOrganizationWhenUserIsNotInOrganization() throws MeedlException {
+        String userId = UUID.randomUUID().toString();
+        UserIdentity user = new UserIdentity();
+        user.setId(userId);
+        user.setRole(IdentityRole.ORGANIZATION_ADMIN);
+
+        OrganizationEmployeeIdentity request = new OrganizationEmployeeIdentity();
+        request.setMeedlUser(user);
+
+        when(userIdentityOutputPort.findById(userId)).thenReturn(user);
+        when(organizationIdentityOutputPort.findByUserId(userId)).thenReturn(Optional.empty());
+
+        assertThrows(MeedlException.class, () -> organizationEmployeeService.viewAllAdminInOrganization(request));
+    }
+
+    @Test
+    void viewAllAdminInOrganizationWhenUserIdIsInvalid() {
+        UserIdentity user = new UserIdentity();
+        user.setId("invalid-uuid");
+
+        OrganizationEmployeeIdentity request = new OrganizationEmployeeIdentity();
+        request.setMeedlUser(user);
+
+        assertThrows(MeedlException.class, () -> organizationEmployeeService.viewAllAdminInOrganization(request));
+    }
+
+    @Test
+    void viewAllAdminInOrganizationWhenMeedlUserIsNull() {
+        OrganizationEmployeeIdentity request = new OrganizationEmployeeIdentity();
+        request.setMeedlUser(null);
+
+        assertThrows(MeedlException.class, () -> organizationEmployeeService.viewAllAdminInOrganization(request));
+    }
+
+    @Test
+    void viewAllAdminInOrganizationWithOrgAdminViewingPortfolioRoleDoesNotSetMeedlRoles() throws MeedlException {
+        String userId = UUID.randomUUID().toString();
+        UserIdentity user = new UserIdentity();
+        user.setId(userId);
+        user.setRole(IdentityRole.ORGANIZATION_ADMIN);
+
+        OrganizationEmployeeIdentity request = new OrganizationEmployeeIdentity();
+        request.setMeedlUser(user);
+        request.setPageSize(10);
+        request.setPageNumber(0);
+        request.setIdentityRoles(Set.of(IdentityRole.PORTFOLIO_MANAGER));
+
+        OrganizationIdentity organization = new OrganizationIdentity();
+        organization.setId("org-789");
+
+        when(userIdentityOutputPort.findById(userId)).thenReturn(user);
+        when(organizationIdentityOutputPort.findByUserId(userId)).thenReturn(Optional.of(organization));
+        when(organizationEmployeeOutputPort.findAllAdminInOrganization(eq("org-789"), any())).thenReturn(Page.empty());
+
+        Page<OrganizationEmployeeIdentity> result = organizationEmployeeService.viewAllAdminInOrganization(request);
+        assertNotNull(result);
+        assertTrue(request.getIdentityRoles().contains(IdentityRole.PORTFOLIO_MANAGER)); // remains as provided
+    }
+
 }

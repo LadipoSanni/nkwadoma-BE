@@ -34,4 +34,20 @@ public enum IdentityRole {
         }
     }
 
+    public static boolean isMeedlStaff(IdentityRole role) {
+        return getMeedlRoles().contains(role);
+    }
+
+    public static boolean isOrganizationStaff(IdentityRole role) {
+        return getOrganizationRoles().contains(role);
+    }
+
+
+    public boolean isMeedlRole() {
+        return this == MEEDL_SUPER_ADMIN ||
+                this == MEEDL_ADMIN ||
+                this == MEEDL_ASSOCIATE ||
+                this == PORTFOLIO_MANAGER;
+    }
+
 }

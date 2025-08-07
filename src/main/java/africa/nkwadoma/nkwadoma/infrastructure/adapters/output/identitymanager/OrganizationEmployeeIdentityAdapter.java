@@ -133,7 +133,7 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
     public Page<OrganizationEmployeeIdentity> findEmployeesByNameAndRole(OrganizationIdentity
             organizationIdentity, IdentityRole identityRole) throws MeedlException {
         MeedlValidator.validateUUID(organizationIdentity.getId(), OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-        MeedlValidator.validateObjectInstance(identityRole, INVALID_VALID_ROLE.getMessage());
+        MeedlValidator.validateObjectInstance(identityRole, INVALID_ROLE.getMessage());
         MeedlValidator.validatePageNumber(organizationIdentity.getPageNumber());
         MeedlValidator.validatePageSize(organizationIdentity.getPageSize());
 
@@ -153,13 +153,18 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
     @Override
     public Page<OrganizationEmployeeIdentity> findAllAdminInOrganization(String organizationId, OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-//        MeedlValidator.validateObjectInstance(identityRole, IdentityMessages.INVALID_VALID_ROLE.getMessage());
+        MeedlValidator.validateCollection(organizationEmployeeIdentity.getIdentityRoles(), IdentityMessages.INVALID_ROLE.getMessage());
         MeedlValidator.validatePageNumber(organizationEmployeeIdentity.getPageNumber());
         MeedlValidator.validatePageSize(organizationEmployeeIdentity.getPageSize());
 
-        Pageable pageRequest = PageRequest.of(organizationEmployeeIdentity.getPageNumber(),organizationEmployeeIdentity.getPageSize());
+        Pageable pageRequest = PageRequest
+                .of(organizationEmployeeIdentity.getPageNumber(),
+                        organizationEmployeeIdentity.getPageSize());
         Page<OrganizationEmployeeEntity> organizationEmployeeEntities =
-                employeeAdminEntityRepository.findAllByOrganizationIdAndMeedlUserRoles(organizationId,organizationEmployeeIdentity.getIdentityRoles(),pageRequest);
+                employeeAdminEntityRepository
+                        .findAllByOrgIdRoleInAndOptionalFilters(organizationId,
+                                organizationEmployeeIdentity.getIdentityRoles(),
+                                organizationEmployeeIdentity.getStatus(), null, pageRequest);
         return organizationEmployeeEntities.map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity);
     }
 
@@ -188,11 +193,22 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
     @Override
     public List<OrganizationEmployeeIdentity> findAllEmployeesInOrganizationByOrganizationIdAndRole(String organizationId, IdentityRole identityRole) throws MeedlException {
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-        MeedlValidator.validateObjectInstance(identityRole, IdentityMessages.INVALID_VALID_ROLE.getMessage());
+        MeedlValidator.validateObjectInstance(identityRole, IdentityMessages.INVALID_ROLE.getMessage());
 
         List<OrganizationEmployeeEntity> organizationEmployeeEntities =
                 employeeAdminEntityRepository.findOrganizationEmployeeEntityByOrganizationAndMeedlUserRole(organizationId,identityRole);
         return organizationEmployeeEntities.stream().map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity).toList();
+    }
+
+    @Override
+    public OrganizationEmployeeIdentity findByRoleAndOrganizationId(String organizationId, IdentityRole identityRole) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+        MeedlValidator.validateObjectInstance(identityRole, IdentityMessages.INVALID_ROLE.getMessage());
+
+        OrganizationEmployeeEntity organizationEmployeeEntity =
+                employeeAdminEntityRepository.findByMeedlUserRoleAndOrganization(identityRole,organizationId)
+                        .orElseThrow(()->new IdentityException(USER_NOT_FOUND.getMessage()));
+        return organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(organizationEmployeeEntity);
     }
 
 

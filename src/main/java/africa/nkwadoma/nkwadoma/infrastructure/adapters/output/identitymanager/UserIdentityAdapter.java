@@ -97,7 +97,7 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
 
     @Override
     public List<UserIdentity> findAllByRole(IdentityRole identityRole) throws MeedlException {
-        MeedlValidator.validateObjectInstance(identityRole, IdentityMessages.INVALID_VALID_ROLE.getMessage());
+        MeedlValidator.validateObjectInstance(identityRole, IdentityMessages.INVALID_ROLE.getMessage());
         List<UserEntity> userEntities = userEntityRepository.findAllByRole(identityRole);
         log.info("Found {} users by Role ", userEntities.size());
         return userEntities.stream().map(userIdentityMapper::toUserIdentity).toList();
@@ -116,7 +116,7 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
         MeedlValidator.validateCollection(roles, "Please provide a list of roles for search for.");
         roles.forEach(identityRole -> {
             try {
-                MeedlValidator.validateObjectInstance(identityRole, IdentityMessages.INVALID_VALID_ROLE.getMessage());
+                MeedlValidator.validateObjectInstance(identityRole, IdentityMessages.INVALID_ROLE.getMessage());
             } catch (MeedlException e) {
                 log.error("Identity role invalid in role list validation {}", identityRole);
             }
