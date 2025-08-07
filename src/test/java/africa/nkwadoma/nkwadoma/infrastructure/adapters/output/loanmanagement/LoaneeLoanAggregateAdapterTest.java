@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -99,6 +100,23 @@ public class LoaneeLoanAggregateAdapterTest{
         assertEquals(foundLoaneeLoanAggregate.getNumberOfLoans(),loaneeLoanAggregate.getNumberOfLoans());
     }
 
+    @Order(3)
+    @Test
+    void findAllLoaneeLoanAggregate(){
+        Page<LoaneeLoanAggregate> loaneeLoanAggregates = null;
+        loaneeLoanAggregates = loaneeLoanAggregateOutputPort.findAllLoanAggregate(10,0);
+        assertNotNull(loaneeLoanAggregates);
+        assertEquals(1, loaneeLoanAggregates.getNumberOfElements());
+    }
+
+    @Order(4)
+    @Test
+    void searchLoaneeLoanAggregate(){
+        Page<LoaneeLoanAggregate> loaneeLoanAggregates = null;
+        loaneeLoanAggregates = loaneeLoanAggregateOutputPort.searchLoanAggregate("q",10,0);
+        assertNotNull(loaneeLoanAggregates);
+        assertEquals(1, loaneeLoanAggregates.getNumberOfElements());
+    }
 
     @AfterAll
     void tearDown() throws MeedlException {

@@ -19,9 +19,13 @@ public interface LoaneeLoanAggregateRepository extends JpaRepository<LoaneeLoanA
                 loaneeLoanAggregate.numberOfLoans as numberOfLoans ,  
                 loanee.userIdentity.firstName as firstName ,
                 loanee.userIdentity.lastName as lastName ,
-                loanee.userIdentity.email as email                
+                loanee.userIdentity.email as email,
+                 loanee.id as loaneeId                   
             from LoaneeLoanAggregateEntity loaneeLoanAggregate
-            join LoaneeEntity loanee
+            join LoaneeEntity loanee on loanee.id = loaneeLoanAggregate.loanee.id
+           
+            order by loaneeLoanAggregate.numberOfLoans desc 
+
     """)
     Page<LoaneeLoanAggregateProjection> findAllByPagination(Pageable pageRequest);
 
@@ -31,12 +35,14 @@ public interface LoaneeLoanAggregateRepository extends JpaRepository<LoaneeLoanA
                loaneeLoanAggregate.numberOfLoans as numberOfLoans,  
                loanee.userIdentity.firstName as firstName,
                loanee.userIdentity.lastName as lastName,
-               loanee.userIdentity.email as email                
+               loanee.userIdentity.email as email  ,
+               loanee.id as loaneeId                   
+              
         from LoaneeLoanAggregateEntity loaneeLoanAggregate
-        join LoaneeEntity loanee
+        join LoaneeEntity loanee on loanee.id = loaneeLoanAggregate.loanee.id
         where loanee.userIdentity.firstName like %:nameFragment% 
            or loanee.userIdentity.lastName like %:nameFragment%
-        order by loaneeLoanAggregate.numberOfLoans desc
+        order by loaneeLoanAggregate.numberOfLoans desc 
 """)
     Page<LoaneeLoanAggregateProjection> searchLoaneeLoanAggregate(@Param("nameFragment") String nameFragment, Pageable pageRequest);
 }

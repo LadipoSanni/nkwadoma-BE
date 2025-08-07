@@ -9,6 +9,6 @@ public interface LoaneeLoanAggregateProjection {
     String getLastName();
     String getEmail();
     BigDecimal getHistoricalDebt();
-    BigDecimal getTotalAmountOutStanding();
+    BigDecimal getTotalAmountOutstanding();
     Integer getNumberOfLoans();
 }

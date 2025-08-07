@@ -15,6 +15,6 @@ public class LoaneeLoanAggregateResponse {
     private String lastName;
     private String email;
     private BigDecimal historicalDebt;
-    private BigDecimal amountOutStanding;
+    private BigDecimal totalAmountOutstanding;
     private int numberOfLoans;
 }
