@@ -25,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -396,25 +397,94 @@ class UserIdentityServiceTest {
             log.error("error occurred {}", e.getMessage());
         }
     }
-    @Test
-    void deactivateAccountAlreadyDisabled() {
-        try {
-            when(userIdentityOutputPort.findById(any())).thenReturn(favour);
-            when(identityManagerOutPutPort.disableUserAccount(favour)).thenThrow(MeedlException.class);
-            assertThrows(MeedlException.class, ()-> userIdentityService.deactivateUserAccount(favour));
-        } catch (MeedlException e) {
-            log.error("error occured {}", e.getMessage());
-        }
 
+
+
+
+
+
+    @Test
+    void shouldThrowExceptionWhenUserTriesToDeactivateSelf() throws MeedlException {
+        favour.setCreatedBy(favour.getId());
+        when(userIdentityOutputPort.findById(favour.getCreatedBy())).thenReturn(favour);
+
+        MeedlException exception = assertThrows(MeedlException.class, () ->
+                userIdentityService.checkIfUserAllowedToDeactivateAccount(favour, favour)
+        );
+
+        assertEquals("You are not allowed to deactivate yourself.", exception.getMessage());
     }
 
+    @Test
+    void shouldThrowExceptionWhenTargetUserIsNotAnEmployee() throws MeedlException {
+        UserIdentity actor = new UserIdentity();
+        actor.setId("actor-id");
+        actor.setEmail("admin@org.com");
+        actor.setRole(IdentityRole.ORGANIZATION_ADMIN);
+        favour.setCreatedBy(actor.getId());
 
+        when(userIdentityOutputPort.findById(actor.getId())).thenReturn(actor);
+        when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(favour.getId())).thenReturn(Optional.empty());
 
+        MeedlException exception = assertThrows(MeedlException.class, () ->
+                userIdentityService.checkIfUserAllowedToDeactivateAccount(favour, favour)
+        );
 
+        assertEquals("You cannot deactivate this user, please contact Meedl admin!", exception.getMessage());
+    }
 
+    @Test
+    void shouldThrowExceptionWhenUserRoleNotInAllowedRoles() throws MeedlException {
+        UserIdentity actor = new UserIdentity();
+        actor.setId("actor-id");
+        actor.setEmail("admin@org.com");
+        actor.setRole(IdentityRole.ORGANIZATION_ADMIN);
+        favour.setCreatedBy(actor.getId());
+        favour.setRole(IdentityRole.FINANCIER);
 
+        OrganizationEmployeeIdentity emp = new OrganizationEmployeeIdentity();
+        emp.setId("emp-id");
+        emp.setMeedlUser(favour);
+        emp.setOrganization("org-A");
 
+        OrganizationIdentity org = OrganizationIdentity.builder().id("org-A").build();
 
+        when(userIdentityOutputPort.findById(actor.getId())).thenReturn(actor);
+        when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(favour.getId())).thenReturn(Optional.of(emp));
+        when(organizationIdentityOutputPort.findByEmail("org-A")).thenReturn(org);
+
+        MeedlException exception = assertThrows(MeedlException.class, () ->
+                userIdentityService.checkIfUserAllowedToDeactivateAccount(favour, favour)
+        );
+
+        assertEquals("You are not authorized to deactivate this user", exception.getMessage());
+    }
+
+    @Test
+    void shouldAllowOrgAdminToDeactivateOrgAssociate() throws MeedlException {
+        UserIdentity actor = new UserIdentity();
+        actor.setId("actor-id");
+        actor.setEmail("admin@org.com");
+        actor.setRole(IdentityRole.ORGANIZATION_ADMIN);
+        favour.setCreatedBy(actor.getId());
+        favour.setRole(IdentityRole.ORGANIZATION_ASSOCIATE);
+
+        OrganizationEmployeeIdentity emp = new OrganizationEmployeeIdentity();
+        emp.setId("emp-id");
+        emp.setMeedlUser(favour);
+        emp.setOrganization("org-A");
+
+        OrganizationIdentity org = OrganizationIdentity.builder().id("org-A").build();
+
+        when(userIdentityOutputPort.findById(actor.getId())).thenReturn(actor);
+        when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(favour.getId())).thenReturn(Optional.of(emp));
+        when(organizationIdentityOutputPort.findByEmail("org-A")).thenReturn(org);
+
+        assertDoesNotThrow(() ->
+                userIdentityService.checkIfUserAllowedToDeactivateAccount(favour, favour)
+        );
+
+    }
 
 
 

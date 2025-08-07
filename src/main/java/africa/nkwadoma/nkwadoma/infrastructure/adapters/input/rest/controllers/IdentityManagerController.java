@@ -141,7 +141,11 @@ public class IdentityManagerController {
                 .statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("auth/user/reactivate")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
+            "or hasRole('MEEDL_ADMIN')" +
+            "or hasRole('PORTFOLIO_MANAGER')" +
+            "or hasRole('ORGANIZATION_SUPER_ADMIN')" +
+            "or hasRole('ORGANIZATION_ADMIN')")
     public ResponseEntity<ApiResponse<?>> reactivateUser(@AuthenticationPrincipal Jwt meedlUser,
                                                          @RequestBody AccountActivationRequest accountActivationRequest) throws MeedlException {
         UserIdentity userIdentity = UserIdentity.builder()
@@ -156,14 +160,18 @@ public class IdentityManagerController {
                 statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("auth/user/deactivate")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
+            "or hasRole('MEEDL_ADMIN')" +
+            "or hasRole('PORTFOLIO_MANAGER')" +
+            "or hasRole('ORGANIZATION_SUPER_ADMIN')" +
+            "or hasRole('ORGANIZATION_ADMIN')")
     public ResponseEntity<ApiResponse<?>> deactivateUser(@AuthenticationPrincipal Jwt meedlUser,
                                                          @RequestBody AccountActivationRequest accountActivationRequest) throws MeedlException {
         UserIdentity userIdentity = UserIdentity.builder()
                 .deactivationReason(accountActivationRequest.getReason())
                 .id(accountActivationRequest.getId())
+                .createdBy(meedlUser.getClaimAsString("sub"))
                 .build();
-        userIdentity.setCreatedBy(meedlUser.getClaimAsString("sub"));
         log.info("The user id of user performing the deactivation: {}",meedlUser.getClaimAsString("sub"));
         UserIdentity createdUserIdentity = createUserUseCase.deactivateUserAccount(userIdentity);
         return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
