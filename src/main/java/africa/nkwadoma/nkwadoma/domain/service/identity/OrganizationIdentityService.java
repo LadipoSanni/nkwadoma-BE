@@ -417,6 +417,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
                 .title("Pending colleague invitation")
                 .contentDetail("Need Approval for colleague invitation")
                 .senderFullName(foundActor.getMeedlUser().getFirstName()+" "+ foundActor.getMeedlUser().getLastName())
+                .senderMail(foundActor.getMeedlUser().getEmail())
                 .notificationFlag(NotificationFlag.INVITE_COLLEAGUE)
                 .timestamp(LocalDateTime.now())
                 .contentId(savedEmployee.getId())

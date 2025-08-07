@@ -300,6 +300,7 @@ public class OrganizationController {
                                                           @RequestBody InviteColleagueRequest inviteColleagueRequest) throws MeedlException {
         OrganizationIdentity organizationIdentity =
                 organizationRestMapper.mapInviteColleagueRequestToOrganizationIdentity(inviteColleagueRequest);
+        log.info("request after mapping {}",organizationIdentity.getUserIdentity());
         organizationIdentity.getUserIdentity().setCreatedBy(meedlUser.getClaimAsString("sub"));
         String response = createOrganizationUseCase.inviteColleague(organizationIdentity);
         ApiResponse<Object> apiResponse = ApiResponse.builder()
