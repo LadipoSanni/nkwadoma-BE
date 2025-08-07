@@ -465,7 +465,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
     }
     public RoleRepresentation getRoleRepresentation(UserIdentity userIdentity) throws MeedlException {
         if (userIdentity.getRole() == null || StringUtils.isEmpty(userIdentity.getRole().name()))
-            throw new IdentityException(INVALID_VALID_ROLE.getMessage());
+            throw new IdentityException(INVALID_ROLE.getMessage());
         RoleRepresentation roleRepresentation;
         try {
             roleRepresentation = keycloak

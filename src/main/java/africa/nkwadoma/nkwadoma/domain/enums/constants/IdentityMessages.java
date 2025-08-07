@@ -18,7 +18,7 @@ public enum IdentityMessages {
     ORGANIZATION_RC_NUMBER_ALREADY_EXIST("Organization with this rcnumber already exists."),
     CLIENT_EXIST("Client already exists"),
     INVALID_REGISTRATION_DETAILS("Invalid registration details"),
-    INVALID_VALID_ROLE("Role is required"),
+    INVALID_ROLE("Role is required"),
     USER_IDENTITY_ALREADY_EXISTS("User with this identity already exists"),
     ENCODING_VALUE("utf-8"),
     PASSWORD_HAS_BEEN_CREATED("Password has been created Already"),

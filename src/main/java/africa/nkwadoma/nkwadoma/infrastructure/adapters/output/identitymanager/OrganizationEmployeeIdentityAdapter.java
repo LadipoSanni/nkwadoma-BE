@@ -133,7 +133,7 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
     public Page<OrganizationEmployeeIdentity> findEmployeesByNameAndRole(OrganizationIdentity
             organizationIdentity, IdentityRole identityRole) throws MeedlException {
         MeedlValidator.validateUUID(organizationIdentity.getId(), OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-        MeedlValidator.validateObjectInstance(identityRole, INVALID_VALID_ROLE.getMessage());
+        MeedlValidator.validateObjectInstance(identityRole, INVALID_ROLE.getMessage());
         MeedlValidator.validatePageNumber(organizationIdentity.getPageNumber());
         MeedlValidator.validatePageSize(organizationIdentity.getPageSize());
 
@@ -153,7 +153,7 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
     @Override
     public Page<OrganizationEmployeeIdentity> findAllAdminInOrganization(String organizationId, IdentityRole identityRole, int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-        MeedlValidator.validateObjectInstance(identityRole, IdentityMessages.INVALID_VALID_ROLE.getMessage());
+        MeedlValidator.validateObjectInstance(identityRole, IdentityMessages.INVALID_ROLE.getMessage());
         MeedlValidator.validatePageNumber(pageNumber);
         MeedlValidator.validatePageSize(pageSize);
 
@@ -188,11 +188,22 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
     @Override
     public List<OrganizationEmployeeIdentity> findAllEmployeesInOrganizationByOrganizationIdAndRole(String organizationId, IdentityRole identityRole) throws MeedlException {
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-        MeedlValidator.validateObjectInstance(identityRole, IdentityMessages.INVALID_VALID_ROLE.getMessage());
+        MeedlValidator.validateObjectInstance(identityRole, IdentityMessages.INVALID_ROLE.getMessage());
 
         List<OrganizationEmployeeEntity> organizationEmployeeEntities =
                 employeeAdminEntityRepository.findOrganizationEmployeeEntityByOrganizationAndMeedlUserRole(organizationId,identityRole);
         return organizationEmployeeEntities.stream().map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity).toList();
+    }
+
+    @Override
+    public OrganizationEmployeeIdentity findByRoleAndOrganizationId(String organizationId, IdentityRole identityRole) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+        MeedlValidator.validateObjectInstance(identityRole, IdentityMessages.INVALID_ROLE.getMessage());
+
+        OrganizationEmployeeEntity organizationEmployeeEntity =
+                employeeAdminEntityRepository.findByMeedlUserRoleAndOrganization(identityRole,organizationId)
+                        .orElseThrow(()->new IdentityException(USER_NOT_FOUND.getMessage()));
+        return organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(organizationEmployeeEntity);
     }
 
 
