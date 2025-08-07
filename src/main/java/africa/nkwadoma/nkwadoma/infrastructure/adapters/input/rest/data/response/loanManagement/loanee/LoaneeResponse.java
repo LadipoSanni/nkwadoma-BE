@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanee;
 
+import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.UploadedStatus;
@@ -37,5 +38,6 @@ public class LoaneeResponse {
     private Double interestRate;
     private int paymentMoratoriumPeriod;
     private String termsAndConditions;
+    private ActivationStatus activationStatus;
     private int tenor;
 }
