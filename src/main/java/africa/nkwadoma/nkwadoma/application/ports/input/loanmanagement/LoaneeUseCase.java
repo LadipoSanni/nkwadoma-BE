@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanAggregate;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import org.springframework.data.domain.Page;
 
@@ -52,4 +53,8 @@ public interface LoaneeUseCase {
     void updateLoaneeStatus(Loanee loanee);
 
     CohortLoanee viewLoaneeDetailInCohort(String cohortId, String loaneeId) throws MeedlException;
+
+    Page<LoaneeLoanAggregate> viewAllLoanee(int pageSize, int pageNumber) throws MeedlException;
+
+    Page<LoaneeLoanAggregate> searchLoanAggregate(String name,int pageSize, int pageNumber) throws MeedlException;
 }

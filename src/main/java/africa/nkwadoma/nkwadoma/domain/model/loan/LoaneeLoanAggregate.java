@@ -15,9 +15,13 @@ import java.math.BigDecimal;
 public class LoaneeLoanAggregate {
 
     private String id;
+    private String loaneeId;
     private BigDecimal historicalDebt;
     private BigDecimal totalAmountOutstanding;
     private int numberOfLoans;
+    private String firstName;
+    private String lastName;
+    private String email;
     private Loanee loanee;
 
 

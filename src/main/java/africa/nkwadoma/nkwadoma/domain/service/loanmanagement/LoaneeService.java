@@ -880,6 +880,20 @@ public class LoaneeService implements LoaneeUseCase {
         return cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(loaneeId,cohortId);
     }
 
+    @Override
+    public Page<LoaneeLoanAggregate> viewAllLoanee(int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+        return loaneeLoanAggregateOutputPort.findAllLoanAggregate(pageSize,pageNumber);
+    }
+
+    @Override
+    public Page<LoaneeLoanAggregate> searchLoanAggregate(String name,int pageSize, int pageNumber) throws MeedlException  {
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+        return loaneeLoanAggregateOutputPort.searchLoanAggregate(name,pageSize,pageNumber);
+    }
+
     private void sendPortfolioManagerDropOutNotification(Loanee loanee, UserIdentity userIdentity) throws MeedlException {
         List<UserIdentity> portfolioManagers =
                 userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);

@@ -6,8 +6,12 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanAggregate;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoaneeLoanAggregateEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoaneeLoanAggregateMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeLoanAggregateProjection;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeLoanAggregateRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -39,4 +43,21 @@ public class LoaneeLoanAggregateAdapter implements LoaneeLoanAggregateOutputPort
                 loaneeLoanAggregateRepository.findByLoaneeId(id);
         return loaneeLoanAggregateMapper.toLoaneeLoanAggregate(loaneeLoanAggregateEntity);
     }
+
+    @Override
+    public Page<LoaneeLoanAggregate> findAllLoanAggregate(int pageSize, int pageNumber) {
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+        Page<LoaneeLoanAggregateProjection> loaneeLoanAggregateProjections =
+                loaneeLoanAggregateRepository.findAllByPagination(pageRequest);
+        return loaneeLoanAggregateProjections.map(loaneeLoanAggregateMapper::mapProjectionToLoaneeLoanAggregate);
+    }
+
+    @Override
+    public Page<LoaneeLoanAggregate> searchLoanAggregate(String name, int pageSize, int pageNumber) {
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+        Page<LoaneeLoanAggregateProjection> loaneeLoanAggregateProjections =
+                loaneeLoanAggregateRepository.searchLoaneeLoanAggregate(name,pageRequest);
+        return loaneeLoanAggregateProjections.map(loaneeLoanAggregateMapper::mapProjectionToLoaneeLoanAggregate);
+    }
+
 }
