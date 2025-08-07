@@ -391,4 +391,22 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                 .notificationFlag(NotificationFlag.LOAN_OFFER_DECISION)
                 .build();
     }
+
+    @Override
+   public void sendNotificationToSuperAdmin(OrganizationEmployeeIdentity foundActor, OrganizationEmployeeIdentity savedEmployee, OrganizationEmployeeIdentity organizationSuperAdmin) throws MeedlException {
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .title("Pending colleague invitation")
+                .contentDetail("Need Approval for colleague invitation")
+                .senderFullName(foundActor.getMeedlUser().getFirstName()+" "+ foundActor.getMeedlUser().getLastName())
+                .senderMail(foundActor.getMeedlUser().getEmail())
+                .notificationFlag(NotificationFlag.INVITE_COLLEAGUE)
+                .timestamp(LocalDateTime.now())
+                .contentId(savedEmployee.getId())
+                .callToAction(true)
+                .user(organizationSuperAdmin.getMeedlUser())
+                .build();
+        log.info("done building notification for super admin to approve colleague invitation{}", meedlNotification);
+        meedlNotificationUsecase.sendNotification(meedlNotification);
+        log.info("notification sent ====---=-=---=-");
+    }
 }

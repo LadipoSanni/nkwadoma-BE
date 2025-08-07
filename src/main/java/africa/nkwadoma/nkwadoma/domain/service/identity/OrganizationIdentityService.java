@@ -377,7 +377,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         OrganizationEmployeeIdentity superAdmin = organizationEmployeeIdentityOutputPort
                 .findByRoleAndOrganizationId(inviter.getOrganization(), superAdminRole);
 
-        sendNotificationToSuperAdmin(inviter, savedEmployee, superAdmin);
+        asynchronousNotificationOutputPort.sendNotificationToSuperAdmin(inviter, savedEmployee, superAdmin);
         return "Invitation needs approval, pending.";
     }
 
@@ -412,22 +412,6 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     }
 
 
-    private void sendNotificationToSuperAdmin(OrganizationEmployeeIdentity foundActor, OrganizationEmployeeIdentity savedEmployee, OrganizationEmployeeIdentity organizationSuperAdmin) throws MeedlException {
-        MeedlNotification meedlNotification = MeedlNotification.builder()
-                .title("Pending colleague invitation")
-                .contentDetail("Need Approval for colleague invitation")
-                .senderFullName(foundActor.getMeedlUser().getFirstName()+" "+ foundActor.getMeedlUser().getLastName())
-                .senderMail(foundActor.getMeedlUser().getEmail())
-                .notificationFlag(NotificationFlag.INVITE_COLLEAGUE)
-                .timestamp(LocalDateTime.now())
-                .contentId(savedEmployee.getId())
-                .callToAction(true)
-                .user(organizationSuperAdmin.getMeedlUser())
-                .build();
-        log.info("done building notification for super admin to approve colleague invitation{}", meedlNotification);
-        meedlNotificationOutputPort.save(meedlNotification);
-        log.info("notification sent ====---=-=---=-");
-    }
 
     private static void checkCurrentStatusOfOrganization(OrganizationIdentity organizationIdentity) throws IdentityException {
         if (!organizationIdentity.getStatus().equals(ActivationStatus.PENDING_APPROVAL) &&

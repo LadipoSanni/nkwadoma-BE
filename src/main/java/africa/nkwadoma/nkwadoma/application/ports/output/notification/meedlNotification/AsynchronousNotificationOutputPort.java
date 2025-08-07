@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNoti
 import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
@@ -55,4 +56,8 @@ public interface AsynchronousNotificationOutputPort {
 
     @Async
     void notifySuperAdminOfDeactivationAttempt(UserIdentity foundActor) throws MeedlException;
+
+    @Async
+    void sendNotificationToSuperAdmin(OrganizationEmployeeIdentity organizationEmployeeIdentity, OrganizationEmployeeIdentity
+            savedEmployee, OrganizationEmployeeIdentity organizationSuperAdmin) throws MeedlException ;
 }
