@@ -180,11 +180,11 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
     }
 
     @Override
-    public void notifyAllPortfolioManagerForDeactivatedAccount(OrganizationIdentity organization) throws MeedlException {
-        List<UserIdentity> portfolioManagers = userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
-        for (UserIdentity portfolioManager : portfolioManagers) {
+    public void notifyAllBackOfficeAdminForDeactivatedAccount(OrganizationIdentity organization) throws MeedlException {
+        List<UserIdentity> backOfficeAdmins = userIdentityOutputPort.findAllByRoles(List.of(IdentityRole.MEEDL_SUPER_ADMIN, IdentityRole.MEEDL_ADMIN, IdentityRole.PORTFOLIO_MANAGER));
+        for (UserIdentity backOfficeAdmin : backOfficeAdmins) {
             MeedlNotification notification = buildOrganizationStatusNotification(
-                    portfolioManager,
+                    backOfficeAdmin,
                     organization,
                     "deactivated",
                     NotificationFlag.ORGANIZATION_DEACTIVATED
@@ -194,11 +194,11 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
         log.info("Organization has been deactivated and all its admin. Notification sent.");
     }
     @Override
-    public void notifyAllPortfolioManagerForReactivatedAccount(OrganizationIdentity organization) throws MeedlException {
-        List<UserIdentity> portfolioManagers = userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
-        for (UserIdentity portfolioManager : portfolioManagers) {
+    public void notifyAllBackOfficeAdminForReactivatedAccount(OrganizationIdentity organization) throws MeedlException {
+        List<UserIdentity> backOfficeAdmins = userIdentityOutputPort.findAllByRoles(List.of(IdentityRole.MEEDL_SUPER_ADMIN, IdentityRole.MEEDL_ADMIN, IdentityRole.PORTFOLIO_MANAGER));
+        for (UserIdentity backOfficeAdmin : backOfficeAdmins) {
             MeedlNotification notification = buildOrganizationStatusNotification(
-                    portfolioManager,
+                    backOfficeAdmin,
                     organization,
                     "reactivated",
                     NotificationFlag.ORGANIZATION_REACTIVATED
