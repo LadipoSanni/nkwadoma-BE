@@ -28,14 +28,26 @@ public interface EmployeeAdminEntityRepository extends JpaRepository<Organizatio
 
     @Query("SELECT o FROM OrganizationEmployeeEntity o " +
             "WHERE o.organization = :organizationId " +
-            "AND o.meedlUser.role = :meedlUserRole " +
-            "AND upper(concat(o.meedlUser.firstName, ' ', o.meedlUser.lastName)) LIKE upper(concat('%', :nameFragment, '%')) " +
+            "AND (:roles IS NULL OR o.meedlUser.role IN :roles) " +
+            "AND (:activationStatus IS NULL OR o.status = :activationStatus) " +
+            "AND (:enabled IS NULL OR o.meedlUser.enabled = :enabled)" +
+            "AND (" +
+            "   upper(concat(o.meedlUser.firstName, ' ', o.meedlUser.lastName)) LIKE upper(concat('%', :nameFragment, '%')) " +
+            "   OR upper(concat(o.meedlUser.lastName, ' ', o.meedlUser.firstName)) LIKE upper(concat('%', :nameFragment, '%')) " +
+            "   OR upper(o.meedlUser.firstName) LIKE upper(concat('%', :nameFragment, '%')) " +
+            "   OR upper(o.meedlUser.lastName) LIKE upper(concat('%', :nameFragment, '%')) " +
+            "   OR upper(o.meedlUser.email) LIKE upper(concat('%', :nameFragment, '%'))" +
+            ") " +
             "ORDER BY o.meedlUser.createdAt ASC")
-    Page<OrganizationEmployeeEntity> findByOrganizationIdAndRoleAndNameFragment(
+    Page<OrganizationEmployeeEntity> findAdminsByNameFilters(
             @Param("organizationId") String organizationId,
-            @Param("meedlUserRole") IdentityRole meedlUserRole,
             @Param("nameFragment") String nameFragment,
-            Pageable pageable);
+            @Param("roles") Set<IdentityRole> roles,
+            @Param("activationStatus") ActivationStatus activationStatus,
+            @Param("onlyEnabled") Boolean onlyEnabled,
+            Pageable pageable
+    );
+
 
     @Query("""
     SELECT e FROM OrganizationEmployeeEntity e

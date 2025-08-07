@@ -145,8 +145,8 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
                 .of(organizationEmployeeIdentity.getPageNumber(),
                         organizationEmployeeIdentity.getPageSize());
         Page<OrganizationEmployeeEntity> organizationEmployeeEntities =
-                employeeAdminEntityRepository.findByOrganizationIdAndRoleAndNameFragment(organizationId,
-                                organizationEmployeeIdentity.getMeedlUser().getFirstName(),
+                employeeAdminEntityRepository.findAdminsByNameFilters(organizationId,
+                                organizationEmployeeIdentity.getName(),
                                 organizationEmployeeIdentity.getIdentityRoles(),
                                 organizationEmployeeIdentity.getStatus(), null, pageRequest);
         return organizationEmployeeEntities.map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity);

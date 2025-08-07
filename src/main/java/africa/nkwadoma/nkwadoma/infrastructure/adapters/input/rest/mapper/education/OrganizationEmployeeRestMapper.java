@@ -27,7 +27,6 @@ public interface OrganizationEmployeeRestMapper {
 
     // 🔁 Main mapping
     @Mapping(target = "meedlUser.id", source = "userId")
-    @Mapping(target = "meedlUser.firstName", source = "viewOrganizationAdminRequest.name")
     @Mapping(target = "identityRoles", source = "viewOrganizationAdminRequest.identityRoles")
     @Mapping(target = "status", source = "viewOrganizationAdminRequest.status")
     @Mapping(target = "pageNumber", source = "viewOrganizationAdminRequest.pageNumber")
