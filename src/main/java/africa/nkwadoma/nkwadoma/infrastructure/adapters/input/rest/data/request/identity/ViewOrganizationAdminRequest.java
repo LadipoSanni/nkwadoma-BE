@@ -13,6 +13,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ViewOrganizationAdminRequest {
+    private String name;
     private ActivationStatus status;
     private Set <IdentityRole> identityRoles;
     private int pageSize;

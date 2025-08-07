@@ -8,7 +8,7 @@ public interface ViewOrganizationEmployeesUseCase {
     Page<OrganizationEmployeeIdentity> viewOrganizationEmployees(OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException;
     OrganizationEmployeeIdentity viewEmployeeDetails(OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException;
 
-    Page<OrganizationEmployeeIdentity> searchOrganizationAdmin(OrganizationIdentity organizationIdentity) throws MeedlException;
+    Page<OrganizationEmployeeIdentity> searchOrganizationAdmin(OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException;
 
     Page<OrganizationEmployeeIdentity> viewAllAdminInOrganization(OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException;
 

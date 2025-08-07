@@ -150,7 +150,7 @@ class OrganizationEmployeeIdentityAdapterTest {
             OrganizationIdentity organization = OrganizationIdentity.builder().name("A").id(amazingGrace.getId())
                     .pageNumber(pageNumber).pageSize(pageSize).build();
             organizationEmployeeIdentities =
-                    organizationEmployeeIdentityOutputPort.findEmployeesByNameAndRole(organization ,IdentityRole.ORGANIZATION_ADMIN);
+                    organizationEmployeeIdentityOutputPort.searchAdmins(organization ,IdentityRole.ORGANIZATION_ADMIN);
         }catch (MeedlException exception){
             log.error("Error finding organization employees", exception);
         }

@@ -56,21 +56,30 @@ public class OrganizationEmployeeController {
     }
 
     @GetMapping("search/admin")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
+            "or hasRole('MEEDL_ADMIN')" +
+            "or hasRole('MEEDL_ASSOCIATE')" +
+            "or hasRole('PORTFOLIO_MANAGER')" +
+            "or hasRole('ORGANIZATION_SUPER_ADMIN')" +
+            "or hasRole('ORGANIZATION_ADMIN')" +
+            "or hasRole('ORGANIZATION_ASSOCIATE')")
     public ResponseEntity<?> searchOrganizationEmployees(@AuthenticationPrincipal Jwt meedlUser,
-                                                         @RequestParam("name") String name,
-                                                         @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
-                                                         @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
-        OrganizationIdentity organizationIdentity = OrganizationIdentity.builder().pageSize(pageSize)
-                .pageNumber(pageNumber).name(name).actorId(meedlUser.getClaimAsString("sub")).build();
+                                                         @RequestBody ViewOrganizationAdminRequest viewOrganizationAdminRequest) throws MeedlException {
+
+        OrganizationEmployeeIdentity  organizationEmployeeIdentity = organizationEmployeeRestMapper.toOrganizationEmployeeIdentity(meedlUser.getClaimAsString("sub"), viewOrganizationAdminRequest);
+
         Page<OrganizationEmployeeIdentity> organizationEmployeeIdentities =
-                viewOrganizationEmployeesUseCase.searchOrganizationAdmin(organizationIdentity);
+                viewOrganizationEmployeesUseCase.searchOrganizationAdmin(organizationEmployeeIdentity);
         List<OrganizationEmployeeResponse> organizationEmployeeResponses =
                 organizationEmployeeIdentities.stream().map(organizationEmployeeRestMapper::toOrganizationEmployeeResponse).toList();
 
         PaginatedResponse<OrganizationEmployeeResponse> paginatedResponse =new PaginatedResponse<>(
-                organizationEmployeeResponses,organizationEmployeeIdentities.hasNext(),
-                organizationEmployeeIdentities.getTotalPages(), organizationEmployeeIdentities.getTotalElements() ,pageNumber,pageSize
+                organizationEmployeeResponses,
+                organizationEmployeeIdentities.hasNext(),
+                organizationEmployeeIdentities.getTotalPages(),
+                organizationEmployeeIdentities.getTotalElements() ,
+                organizationEmployeeIdentity.getPageNumber(),
+                organizationEmployeeIdentity.getPageSize()
         );
 
         ApiResponse<PaginatedResponse<OrganizationEmployeeResponse>> apiResponse = ApiResponse.<PaginatedResponse<OrganizationEmployeeResponse>>builder()

@@ -4,7 +4,6 @@ import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import org.springframework.data.domain.*;
 
 import java.util.*;
@@ -26,9 +25,9 @@ public interface OrganizationEmployeeIdentityOutputPort {
 
     List<OrganizationEmployeeIdentity> findAllByOrganization(String organizationId) throws MeedlException;
 
-    Page<OrganizationEmployeeIdentity> findEmployeesByNameAndRole(OrganizationIdentity organizationIdentity, IdentityRole identityRole) throws MeedlException;
-
     List<OrganizationEmployeeIdentity> findAllOrganizationEmployees(String organizationId);
+
+    Page<OrganizationEmployeeIdentity> searchAdmins(String organizationId, OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException;
     Page<OrganizationEmployeeIdentity> findAllAdminInOrganization(String organizationId, OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException;
 
     Page<OrganizationEmployeeIdentity> findAllEmployeesInOrganization(String organizationId,String name, int pageSize, int pageNumber) throws MeedlException;

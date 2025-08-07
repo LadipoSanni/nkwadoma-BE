@@ -14,8 +14,6 @@ import org.apache.commons.lang3.*;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.*;
 
-import java.util.Collections;
-
 @RequiredArgsConstructor
 @Slf4j
 @Service
@@ -43,16 +41,6 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
         return organizationEmployees;
     }
 
-    @Override
-    public Page<OrganizationEmployeeIdentity> searchOrganizationAdmin(OrganizationIdentity organizationIdentity) throws MeedlException {
-        MeedlValidator.validateUUID(organizationIdentity.getActorId(), UserMessages.INVALID_USER_ID.getMessage());
-        OrganizationEmployeeIdentity organizationEmployeeIdentity
-                = organizationEmployeeOutputPort.findByCreatedBy(organizationIdentity.getActorId());
-        organizationIdentity.setId(organizationEmployeeIdentity.getOrganization());
-
-        return organizationEmployeeOutputPort.findEmployeesByNameAndRole(
-                organizationIdentity, organizationEmployeeIdentity.getMeedlUser().getRole());
-    }
 
     @Override
     public OrganizationEmployeeIdentity viewEmployeeDetails(OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
@@ -61,6 +49,21 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
         return organizationEmployeeOutputPort.findByEmployeeId(organizationEmployeeIdentity.getId());
     }
 
+    @Override
+    public Page<OrganizationEmployeeIdentity> searchOrganizationAdmin(OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(organizationEmployeeIdentity, "Provide an organization employee data.");
+        MeedlValidator.validateObjectInstance(organizationEmployeeIdentity.getMeedlUser(), "Provide a user entity.");
+        MeedlValidator.validateUUID(organizationEmployeeIdentity.getMeedlUser().getId(), UserMessages.INVALID_USER_ID.getMessage());
+
+        UserIdentity foundActor = userIdentityOutputPort.findById(organizationEmployeeIdentity.getMeedlUser().getId());
+
+        OrganizationIdentity organizationIdentity
+                = organizationIdentityOutputPort.findByUserId(organizationEmployeeIdentity.getMeedlUser().getId())
+                .orElseThrow(()-> new MeedlException("User does not exist in an organization"));
+        setRolesToView(organizationEmployeeIdentity, foundActor);
+        return organizationEmployeeOutputPort.searchAdmins(organizationIdentity.getId(),
+                organizationEmployeeIdentity);
+    }
     @Override
     public Page<OrganizationEmployeeIdentity> viewAllAdminInOrganization(OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(organizationEmployeeIdentity, "Provide an organization employee data.");
