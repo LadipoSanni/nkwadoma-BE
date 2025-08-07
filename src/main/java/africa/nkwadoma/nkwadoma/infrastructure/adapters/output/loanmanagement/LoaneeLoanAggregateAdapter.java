@@ -31,4 +31,12 @@ public class LoaneeLoanAggregateAdapter implements LoaneeLoanAggregateOutputPort
         MeedlValidator.validateUUID(loaneeLoanAggregateId,"Loanee loan aggregate id cannot be empty");
         loaneeLoanAggregateRepository.deleteById(loaneeLoanAggregateId);
     }
+
+    @Override
+    public LoaneeLoanAggregate findByLoaneeId(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id,"Loanee id cannot be empty");
+        LoaneeLoanAggregateEntity loaneeLoanAggregateEntity =
+                loaneeLoanAggregateRepository.findByLoaneeId(id);
+        return loaneeLoanAggregateMapper.toLoaneeLoanAggregate(loaneeLoanAggregateEntity);
+    }
 }

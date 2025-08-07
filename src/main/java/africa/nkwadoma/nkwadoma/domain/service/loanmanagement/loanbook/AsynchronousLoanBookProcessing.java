@@ -11,6 +11,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanReferralOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanAggregateOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
@@ -75,6 +76,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
     private final LoanUseCase loanUseCase;
     private final AesOutputPort aesOutputPort;
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
+    private final LoaneeLoanAggregateOutputPort loaneeLoanAggregateOutputPort;
 
     @Override
     public void upLoadUserData(LoanBook loanBook) throws MeedlException {
@@ -513,7 +515,18 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
             cohortLoanee.getLoanee().setId(optionalLoaneeFound.get().getId());
             return cohortLoanee.getLoanee();
         }
-        return loaneeOutputPort.save(cohortLoanee.getLoanee());
+        Loanee loanee = loaneeOutputPort.save(cohortLoanee.getLoanee());
+        setUpLoaneeLoanAggregate(loanee);
+        return loanee;
+    }
+
+    private void setUpLoaneeLoanAggregate(Loanee createdLoanee) throws MeedlException {
+        LoaneeLoanAggregate loaneeLoanAggregate = LoaneeLoanAggregate.builder()
+                .loanee(createdLoanee)
+                .historicalDebt(BigDecimal.ZERO)
+                .numberOfLoans(0)
+                .totalAmountOutstanding(BigDecimal.ZERO).build();
+        loaneeLoanAggregateOutputPort.save(loaneeLoanAggregate);
     }
 
     private void saveUploadedUserIdentity(CohortLoanee cohortLoanee) {

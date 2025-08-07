@@ -86,6 +86,19 @@ public class LoaneeLoanAggregateAdapterTest{
         assertEquals(saveLoaneeLoanAggregate.getNumberOfLoans(),loaneeLoanAggregate.getNumberOfLoans());
     }
 
+    @Order(2)
+    @Test
+    void findLoaneeLoanAggregateByLoaneeId(){
+        LoaneeLoanAggregate foundLoaneeLoanAggregate = null;
+        try {
+            foundLoaneeLoanAggregate = loaneeLoanAggregateOutputPort.findByLoaneeId(loanee.getId());
+        } catch (MeedlException e) {
+            log.error(e.getMessage());
+        }
+        assertNotNull(foundLoaneeLoanAggregate);
+        assertEquals(foundLoaneeLoanAggregate.getNumberOfLoans(),loaneeLoanAggregate.getNumberOfLoans());
+    }
+
 
     @AfterAll
     void tearDown() throws MeedlException {

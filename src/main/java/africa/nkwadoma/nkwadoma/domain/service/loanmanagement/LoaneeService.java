@@ -89,6 +89,7 @@ public class LoaneeService implements LoaneeUseCase {
     private final LoanOfferOutputPort loanOfferOutputPort;
     private final AesOutputPort aesOutputPort;
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
+    private final LoaneeLoanAggregateOutputPort loaneeLoanAggregateOutputPort;
 
 
     @Override
@@ -230,8 +231,18 @@ public class LoaneeService implements LoaneeUseCase {
             loanee.setCreatedAt(LocalDateTime.now());
             Loanee createdLoanee = createLoaneeAccount(loanee);
             cohortLoanee.setLoanee(createdLoanee);
+            setUpLoaneeLoanAggregate(createdLoanee);
         }
         return cohortLoanee;
+    }
+
+    private void setUpLoaneeLoanAggregate(Loanee createdLoanee) throws MeedlException {
+        LoaneeLoanAggregate loaneeLoanAggregate = LoaneeLoanAggregate.builder()
+                .loanee(createdLoanee)
+                .historicalDebt(BigDecimal.ZERO)
+                .numberOfLoans(0)
+                .totalAmountOutstanding(BigDecimal.ZERO).build();
+        loaneeLoanAggregateOutputPort.save(loaneeLoanAggregate);
     }
 
     private CohortLoanee addLoaneeToCohort(Loanee loanee, Cohort cohort) throws MeedlException {
