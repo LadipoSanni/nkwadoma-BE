@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository;
 
+import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEmployeeEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.identity.*;
@@ -36,7 +37,20 @@ public interface EmployeeAdminEntityRepository extends JpaRepository<Organizatio
             @Param("nameFragment") String nameFragment,
             Pageable pageable);
 
-    Page<OrganizationEmployeeEntity> findAllByOrganizationAndMeedlUserRole(String organizationId, IdentityRole identityRole, Pageable pageRequest);
+    @Query("""
+    SELECT e FROM OrganizationEmployeeEntity e
+    WHERE e.organization = :organizationId
+      AND e.meedlUser.role IN :roles
+      AND (:status IS NULL OR e.status = :status)
+      AND (:enabled IS NULL OR e.meedlUser.enabled = :enabled)
+""")
+    Page<OrganizationEmployeeEntity> findAllByOrgIdRoleInAndOptionalFilters(
+            @Param("organizationId") String organizationId,
+            @Param("roles") Set<IdentityRole> roles,
+            @Param("status") ActivationStatus status,
+            @Param("enabled") Boolean enabled,
+            Pageable pageable
+    );
 
     List<OrganizationEmployeeEntity> findByOrganization(String organizationId);
 

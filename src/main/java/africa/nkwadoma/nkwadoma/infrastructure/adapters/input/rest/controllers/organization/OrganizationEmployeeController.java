@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.ViewOrganizationAdminRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.education.*;
@@ -82,17 +83,30 @@ public class OrganizationEmployeeController {
 
 
     @GetMapping("view-all/admin")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
+            "or hasRole('MEEDL_ADMIN')" +
+            "or hasRole('MEEDL_ASSOCIATE')" +
+            "or hasRole('PORTFOLIO_MANAGER')" +
+            "or hasRole('ORGANIZATION_SUPER_ADMIN')" +
+            "or hasRole('ORGANIZATION_ADMIN')" +
+            "or hasRole('ORGANIZATION_ASSOCIATE')")
     public ResponseEntity<?> viewAllAdminInOrganization(@AuthenticationPrincipal Jwt meedlUser,
-                                                        @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
-                                                        @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
+                                                        @RequestBody ViewOrganizationAdminRequest viewOrganizationAdminRequest) throws MeedlException {
+        OrganizationEmployeeIdentity  organizationEmployeeIdentity = organizationEmployeeRestMapper.toOrganizationEmployeeIdentity(meedlUser.getClaimAsString("sub"), viewOrganizationAdminRequest);
+
         Page<OrganizationEmployeeIdentity> organizationEmployeeIdentities =
-                viewOrganizationEmployeesUseCase.viewAllAdminInOrganization(meedlUser.getClaimAsString("sub"),pageSize,pageNumber);
+                viewOrganizationEmployeesUseCase.viewAllAdminInOrganization(organizationEmployeeIdentity);
+
         List<OrganizationEmployeeResponse> organizationEmployeeResponses =
                 organizationEmployeeIdentities.stream().map(organizationEmployeeRestMapper::toOrganizationEmployeeResponse).toList();
+
         PaginatedResponse<OrganizationEmployeeResponse> paginatedResponse =new PaginatedResponse<>(
-                organizationEmployeeResponses,organizationEmployeeIdentities.hasNext(),
-                organizationEmployeeIdentities.getTotalPages(), organizationEmployeeIdentities.getTotalElements() ,pageNumber,pageSize
+                organizationEmployeeResponses,
+                organizationEmployeeIdentities.hasNext(),
+                organizationEmployeeIdentities.getTotalPages(),
+                organizationEmployeeIdentities.getTotalElements() ,
+                organizationEmployeeIdentity.getPageNumber(),
+                organizationEmployeeIdentity.getPageSize()
         );
         ApiResponse<PaginatedResponse<OrganizationEmployeeResponse>> apiResponse = ApiResponse.<PaginatedResponse
                         <OrganizationEmployeeResponse>>builder()

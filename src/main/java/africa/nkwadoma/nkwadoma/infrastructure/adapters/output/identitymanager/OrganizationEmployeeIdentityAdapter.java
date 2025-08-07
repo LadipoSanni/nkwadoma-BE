@@ -151,15 +151,20 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
     }
 
     @Override
-    public Page<OrganizationEmployeeIdentity> findAllAdminInOrganization(String organizationId, IdentityRole identityRole, int pageSize, int pageNumber) throws MeedlException {
+    public Page<OrganizationEmployeeIdentity> findAllAdminInOrganization(String organizationId, OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-        MeedlValidator.validateObjectInstance(identityRole, IdentityMessages.INVALID_ROLE.getMessage());
-        MeedlValidator.validatePageNumber(pageNumber);
-        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validateCollection(organizationEmployeeIdentity.getIdentityRoles(), IdentityMessages.INVALID_ROLE.getMessage());
+        MeedlValidator.validatePageNumber(organizationEmployeeIdentity.getPageNumber());
+        MeedlValidator.validatePageSize(organizationEmployeeIdentity.getPageSize());
 
-        Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
+        Pageable pageRequest = PageRequest
+                .of(organizationEmployeeIdentity.getPageNumber(),
+                        organizationEmployeeIdentity.getPageSize());
         Page<OrganizationEmployeeEntity> organizationEmployeeEntities =
-                employeeAdminEntityRepository.findAllByOrganizationAndMeedlUserRole(organizationId,identityRole,pageRequest);
+                employeeAdminEntityRepository
+                        .findAllByOrgIdRoleInAndOptionalFilters(organizationId,
+                                organizationEmployeeIdentity.getIdentityRoles(),
+                                organizationEmployeeIdentity.getStatus(), null, pageRequest);
         return organizationEmployeeEntities.map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity);
     }
 

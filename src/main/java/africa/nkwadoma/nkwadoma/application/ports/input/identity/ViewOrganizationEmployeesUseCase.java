@@ -10,7 +10,7 @@ public interface ViewOrganizationEmployeesUseCase {
 
     Page<OrganizationEmployeeIdentity> searchOrganizationAdmin(OrganizationIdentity organizationIdentity) throws MeedlException;
 
-    Page<OrganizationEmployeeIdentity> viewAllAdminInOrganization(String userId,int pageSize , int pageNumber) throws MeedlException;
+    Page<OrganizationEmployeeIdentity> viewAllAdminInOrganization(OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException;
 
     Page<OrganizationEmployeeIdentity> searchAdminInOrganization(String organizationId,String name,int pageSize,int pageNumber) throws MeedlException;
 }

@@ -39,5 +39,7 @@ public interface OrganizationIdentityOutputPort {
     OrganizationIdentity findOrganizationByCohortId(String cohortId) throws MeedlException;
 
     List<OrganizationIdentity> findAllOrganization();
+
+    Optional<OrganizationIdentity> findByUserId(String userId) throws MeedlException;
 }
 

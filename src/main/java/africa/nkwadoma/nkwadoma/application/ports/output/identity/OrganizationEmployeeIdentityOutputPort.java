@@ -29,7 +29,7 @@ public interface OrganizationEmployeeIdentityOutputPort {
     Page<OrganizationEmployeeIdentity> findEmployeesByNameAndRole(OrganizationIdentity organizationIdentity, IdentityRole identityRole) throws MeedlException;
 
     List<OrganizationEmployeeIdentity> findAllOrganizationEmployees(String organizationId);
-    Page<OrganizationEmployeeIdentity> findAllAdminInOrganization(String organizationId, IdentityRole identityRole,int pageSize, int pageNumber) throws MeedlException;
+    Page<OrganizationEmployeeIdentity> findAllAdminInOrganization(String organizationId, OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException;
 
     Page<OrganizationEmployeeIdentity> findAllEmployeesInOrganization(String organizationId,String name, int pageSize, int pageNumber) throws MeedlException;
     Optional<OrganizationEmployeeIdentity> findByMeedlUserId(String meedlUserId) throws MeedlException;
