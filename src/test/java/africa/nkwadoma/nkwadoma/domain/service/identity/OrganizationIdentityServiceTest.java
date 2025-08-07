@@ -455,4 +455,100 @@ class OrganizationIdentityServiceTest {
         assertNotNull(response);
     }
 
+
+    @Test
+    void inviteColleague() {
+        String response = "";
+        roseCouture.setUserIdentity(sarah);
+        try {
+            when(organizationEmployeeIdentityOutputPort.findByEmployeeId(sarah.getCreatedBy())).thenReturn(employeeSarah);
+            when(identityManagerOutPutPort.createUser(sarah)).thenReturn(sarah);
+            when(userIdentityOutputPort.save(sarah)).thenReturn(sarah);
+
+            OrganizationEmployeeIdentity savedEmployee = new OrganizationEmployeeIdentity();
+            savedEmployee.setMeedlUser(sarah);
+            savedEmployee.setOrganization(employeeSarah.getOrganization());
+            savedEmployee.setStatus(ActivationStatus.PENDING_APPROVAL);
+
+            when(organizationEmployeeIdentityOutputPort.save(any())).thenReturn(savedEmployee);
+
+            MeedlNotification notification = MeedlNotification.builder()
+                    .title("Pending colleague invitation")
+                    .contentDetail("Need Approval for colleague invitation")
+                    .senderFullName(employeeSarah.getMeedlUser().getFirstName() + " " + employeeSarah.getMeedlUser().getLastName())
+                    .notificationFlag(NotificationFlag.INVITE_COLLEAGUE)
+                    .timestamp(LocalDateTime.now())
+                    .contentId(savedEmployee.getId())
+                    .callToAction(true)
+                    .user(employeeSarah.getMeedlUser())
+                    .build();
+
+            OrganizationEmployeeIdentity superAdmin = new OrganizationEmployeeIdentity();
+            superAdmin.setMeedlUser(new UserIdentity());
+            employeeSarah.setOrganization(mockId);
+            when(organizationEmployeeIdentityOutputPort.findByRoleAndOrganizationId(
+                    eq(employeeSarah.getOrganization()), eq(IdentityRole.MEEDL_SUPER_ADMIN)))
+                    .thenReturn(superAdmin);
+
+
+            response = organizationIdentityService.inviteColleague(roseCouture);
+
+        }catch (MeedlException meedlException){
+            log.info(meedlException.getMessage());
+        }
+        assertNotNull(response);
+        assertEquals("Invitation needs approval, pending.", response);
+    }
+
+    @Test
+    void inviteColleagueWithNullInviterId(){
+        OrganizationIdentity organizationIdentity = new OrganizationIdentity();
+        UserIdentity userIdentity = new UserIdentity();
+        userIdentity.setEmail("linda@grr.la");
+        userIdentity.setFirstName("first name");
+        userIdentity.setLastName("last name");
+        userIdentity.setCreatedBy(null);
+        userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
+        assertThrows(MeedlException.class,()-> organizationIdentityService.inviteColleague(organizationIdentity));
+    }
+    @Test
+    void  inviteColleagueWithNullUserIdentity(){
+        OrganizationIdentity organizationIdentity = new OrganizationIdentity();
+        organizationIdentity.setUserIdentity(null);
+        assertThrows(MeedlException.class,()-> organizationIdentityService.inviteColleague(organizationIdentity));
+    }
+    @Test
+    void  inviteColleagueWitNullEmail(){
+        OrganizationIdentity organizationIdentity = new OrganizationIdentity();
+        UserIdentity userIdentity = new UserIdentity();
+        userIdentity.setEmail(null);
+        userIdentity.setFirstName("first name");
+        userIdentity.setLastName("last name");
+        userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
+        assertThrows(MeedlException.class,()-> organizationIdentityService.inviteColleague(organizationIdentity));
+    }
+
+    @Test
+    void  inviteColleagueWitNullFirstName(){
+        OrganizationIdentity organizationIdentity = new OrganizationIdentity();
+        UserIdentity userIdentity = new UserIdentity();
+        userIdentity.setEmail("linda@grr.la");
+        userIdentity.setFirstName(null);
+        userIdentity.setLastName("last name");
+        userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
+        assertThrows(MeedlException.class,()-> organizationIdentityService.inviteColleague(organizationIdentity));
+    }
+
+    @Test
+    void  inviteColleagueWitNullLastName(){
+        OrganizationIdentity organizationIdentity = new OrganizationIdentity();
+        UserIdentity userIdentity = new UserIdentity();
+        userIdentity.setEmail("linda@grr.la");
+        userIdentity.setFirstName("last name");
+        userIdentity.setLastName(null);
+        userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
+        assertThrows(MeedlException.class,()-> organizationIdentityService.inviteColleague(organizationIdentity));
+    }
+
+
 }

@@ -34,6 +34,7 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 
 
@@ -297,8 +298,8 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         UserIdentity foundUserIdentity = userIdentityOutputPort.findById(organizationIdentity.getUserIdentity().getId());
         log.info("Updating organization status during create password flow {} \n -------------------------------------> found user role is {}", organizationIdentity, foundUserIdentity.getRole());
         if(ObjectUtils.isNotEmpty(foundUserIdentity) &&
-                foundUserIdentity.getRole() == IdentityRole.ORGANIZATION_ADMIN ||
-                foundUserIdentity.getRole() == IdentityRole.PORTFOLIO_MANAGER)
+                foundUserIdentity.getRole() == ORGANIZATION_ADMIN ||
+                foundUserIdentity.getRole() == PORTFOLIO_MANAGER)
         {
 
             OrganizationEmployeeIdentity employeeIdentity = updateEmployeeStatus(foundUserIdentity);
@@ -328,6 +329,89 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         organizationIdentityOutputPort.save(organizationIdentity);
         return "Invitation "+activationStatus.name();
     }
+
+    @Override
+    public String inviteColleague(OrganizationIdentity organizationIdentity) throws MeedlException {
+        log.info("Inviting colleague");
+        MeedlValidator.validateObjectInstance(organizationIdentity.getUserIdentity(), IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
+        UserIdentity newColleague = organizationIdentity.getUserIdentity();
+        newColleague.validate();
+
+        OrganizationEmployeeIdentity inviter = organizationEmployeeIdentityOutputPort.findByEmployeeId(newColleague.getCreatedBy());
+        log.info("Found employee: {}", inviter);
+
+        validateRolePermissions(inviter.getMeedlUser().getRole(), newColleague.getRole());
+
+        newColleague.setCreatedAt(LocalDateTime.now());
+        log.info("about to create colleague on keycloak {}", newColleague);
+        newColleague = identityManagerOutPutPort.createUser(newColleague);
+        log.info("done creating colleague on keycloak {}", newColleague);
+        log.info("about to save colleague to DB  {}", newColleague);
+        UserIdentity savedUserIdentity = userIdentityOutputPort.save(newColleague);
+        log.info("done saving colleague user identity saved to DB: {}", savedUserIdentity);
+
+
+        log.info("about to set up new colleague representation in organization {}", newColleague);
+        OrganizationEmployeeIdentity organizationEmployeeIdentity = buildOrganizationEmployeeIdentity(inviter, newColleague);
+        OrganizationEmployeeIdentity savedEmployee = organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
+        log.info("Saved new colleague employee identity in organization: {}", savedEmployee);
+
+
+        return handleNotificationsAndResponse(inviter, savedEmployee, savedUserIdentity);
+    }
+
+    private String handleNotificationsAndResponse(OrganizationEmployeeIdentity inviter, OrganizationEmployeeIdentity
+            savedEmployee, UserIdentity savedUserIdentity) throws MeedlException {
+
+        IdentityRole inviterRole = inviter.getMeedlUser().getRole();
+
+        if (isSuperAdmin(inviterRole)) {
+            OrganizationIdentity organization = organizationIdentityOutputPort.findById(inviter.getOrganization());
+            asynchronousMailingOutputPort.sendColleagueEmail(organization.getName(), savedUserIdentity);
+            return String.format("Colleague with role %s invited", savedUserIdentity.getRole().name());
+        }
+
+        IdentityRole superAdminRole = inviterRole.isMeedlRole()
+                ? IdentityRole.MEEDL_SUPER_ADMIN
+                : IdentityRole.ORGANIZATION_SUPER_ADMIN;
+        OrganizationEmployeeIdentity superAdmin = organizationEmployeeIdentityOutputPort
+                .findByRoleAndOrganizationId(inviter.getOrganization(), superAdminRole);
+
+        asynchronousNotificationOutputPort.sendNotificationToSuperAdmin(inviter, savedEmployee, superAdmin);
+        return "Invitation needs approval, pending.";
+    }
+
+
+    private void validateRolePermissions(IdentityRole inviterRole, IdentityRole colleagueRole) throws IdentityException {
+        Map<IdentityRole, Set<IdentityRole>> allowedRoles = Map.of(
+                IdentityRole.MEEDL_SUPER_ADMIN, Set.of(PORTFOLIO_MANAGER, MEEDL_ADMIN, IdentityRole.MEEDL_ASSOCIATE),
+                MEEDL_ADMIN, Set.of(PORTFOLIO_MANAGER, IdentityRole.MEEDL_ASSOCIATE,MEEDL_ADMIN),
+                PORTFOLIO_MANAGER, Set.of(IdentityRole.MEEDL_ASSOCIATE,PORTFOLIO_MANAGER),
+                IdentityRole.ORGANIZATION_SUPER_ADMIN, Set.of(ORGANIZATION_ADMIN, IdentityRole.ORGANIZATION_ASSOCIATE),
+                ORGANIZATION_ADMIN, Set.of(IdentityRole.ORGANIZATION_ASSOCIATE,ORGANIZATION_ADMIN)
+        );
+
+        if (!allowedRoles.getOrDefault(inviterRole, Set.of()).contains(colleagueRole)) {
+            throw new IdentityException(String.format("Role %s cannot invite colleague with role %s", inviterRole, colleagueRole));
+        }
+    }
+
+    private OrganizationEmployeeIdentity buildOrganizationEmployeeIdentity(
+            OrganizationEmployeeIdentity inviter, UserIdentity colleague) {
+        OrganizationEmployeeIdentity employeeIdentity = new OrganizationEmployeeIdentity();
+        employeeIdentity.setOrganization(inviter.getOrganization());
+        employeeIdentity.setMeedlUser(colleague);
+        employeeIdentity.setStatus(isSuperAdmin(inviter.getMeedlUser().getRole())
+                ? ActivationStatus.INVITED
+                : ActivationStatus.PENDING_APPROVAL);
+        return employeeIdentity;
+    }
+
+    private boolean isSuperAdmin(IdentityRole role) {
+        return role == IdentityRole.MEEDL_SUPER_ADMIN || role == IdentityRole.ORGANIZATION_SUPER_ADMIN;
+    }
+
+
 
     private static void checkCurrentStatusOfOrganization(OrganizationIdentity organizationIdentity) throws IdentityException {
         if (!organizationIdentity.getStatus().equals(ActivationStatus.PENDING_APPROVAL) &&
@@ -434,7 +518,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
         log.info("Viewing organization detail for user with role {}", userIdentity.getRole());
-        if(userIdentity.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)){
+        if(userIdentity.getRole().equals(ORGANIZATION_ADMIN)){
             OrganizationEmployeeIdentity organizationEmployeeIdentity =
                     organizationEmployeeIdentityOutputPort.findByCreatedBy(userIdentity.getId());
             organizationId = organizationEmployeeIdentity.getOrganization();

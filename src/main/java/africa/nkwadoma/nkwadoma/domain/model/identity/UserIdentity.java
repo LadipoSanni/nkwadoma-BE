@@ -15,7 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.INVALID_VALID_ROLE;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.INVALID_ROLE;
 
 @Slf4j
 @Setter
@@ -72,7 +72,7 @@ public class UserIdentity {
     public void validate() throws MeedlException {
         log.info("Started validating for user identity in validation");
         if (ObjectUtils.isEmpty(this.role)|| StringUtils.isEmpty(this.role.name()))
-            throw new IdentityException(INVALID_VALID_ROLE.getMessage());
+            throw new IdentityException(INVALID_ROLE.getMessage());
         MeedlValidator.validateEmail(this.email);
         MeedlValidator.validateDataElement(this.firstName, UserMessages.INVALID_FIRST_NAME.getMessage());
         MeedlValidator.validateDataElement(this.lastName, UserMessages.INVALID_LAST_NAME.getMessage());
