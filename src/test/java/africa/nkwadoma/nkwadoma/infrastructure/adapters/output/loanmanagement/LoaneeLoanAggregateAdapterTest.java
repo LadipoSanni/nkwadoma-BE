@@ -78,6 +78,7 @@ public class LoaneeLoanAggregateAdapterTest{
         LoaneeLoanAggregate saveLoaneeLoanAggregate = null;
         try {
             saveLoaneeLoanAggregate = loaneeLoanAggregateOutputPort.save(loaneeLoanAggregate);
+            loaneeLoanAggregateId = saveLoaneeLoanAggregate.getId();
         }catch (MeedlException meedlException){
             log.error(meedlException.getMessage());
         }

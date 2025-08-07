@@ -20,6 +20,7 @@ public class LoaneeLoanAggregateAdapter implements LoaneeLoanAggregateOutputPort
     @Override
     public LoaneeLoanAggregate save(LoaneeLoanAggregate loaneeLoanAggregate) throws MeedlException {
         MeedlValidator.validateObjectInstance(loaneeLoanAggregate,"Loanee loan aggregate cannot be empty");
+        loaneeLoanAggregate.validate();
         LoaneeLoanAggregateEntity loaneeLoanAggregateEntity = loaneeLoanAggregateMapper.toLoaneeLoanAggregateEntity(loaneeLoanAggregate);
         loaneeLoanAggregateEntity = loaneeLoanAggregateRepository.save(loaneeLoanAggregateEntity);
         return loaneeLoanAggregateMapper.toLoaneeLoanAggregate(loaneeLoanAggregateEntity);
