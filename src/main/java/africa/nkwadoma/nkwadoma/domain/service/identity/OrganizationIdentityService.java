@@ -34,6 +34,7 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 
 
@@ -297,8 +298,8 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         UserIdentity foundUserIdentity = userIdentityOutputPort.findById(organizationIdentity.getUserIdentity().getId());
         log.info("Updating organization status during create password flow {} \n -------------------------------------> found user role is {}", organizationIdentity, foundUserIdentity.getRole());
         if(ObjectUtils.isNotEmpty(foundUserIdentity) &&
-                foundUserIdentity.getRole() == IdentityRole.ORGANIZATION_ADMIN ||
-                foundUserIdentity.getRole() == IdentityRole.PORTFOLIO_MANAGER)
+                foundUserIdentity.getRole() == ORGANIZATION_ADMIN ||
+                foundUserIdentity.getRole() == PORTFOLIO_MANAGER)
         {
 
             OrganizationEmployeeIdentity employeeIdentity = updateEmployeeStatus(foundUserIdentity);
@@ -383,11 +384,11 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
 
     private void validateRolePermissions(IdentityRole inviterRole, IdentityRole colleagueRole) throws IdentityException {
         Map<IdentityRole, Set<IdentityRole>> allowedRoles = Map.of(
-                IdentityRole.MEEDL_SUPER_ADMIN, Set.of(IdentityRole.PORTFOLIO_MANAGER, IdentityRole.MEEDL_ADMIN, IdentityRole.MEEDL_ASSOCIATE),
-                IdentityRole.MEEDL_ADMIN, Set.of(IdentityRole.PORTFOLIO_MANAGER, IdentityRole.MEEDL_ASSOCIATE),
-                IdentityRole.PORTFOLIO_MANAGER, Set.of(IdentityRole.MEEDL_ASSOCIATE),
-                IdentityRole.ORGANIZATION_SUPER_ADMIN, Set.of(IdentityRole.ORGANIZATION_ADMIN, IdentityRole.ORGANIZATION_ASSOCIATE),
-                IdentityRole.ORGANIZATION_ADMIN, Set.of(IdentityRole.ORGANIZATION_ASSOCIATE)
+                IdentityRole.MEEDL_SUPER_ADMIN, Set.of(PORTFOLIO_MANAGER, MEEDL_ADMIN, IdentityRole.MEEDL_ASSOCIATE),
+                MEEDL_ADMIN, Set.of(PORTFOLIO_MANAGER, IdentityRole.MEEDL_ASSOCIATE,MEEDL_ADMIN),
+                PORTFOLIO_MANAGER, Set.of(IdentityRole.MEEDL_ASSOCIATE,PORTFOLIO_MANAGER),
+                IdentityRole.ORGANIZATION_SUPER_ADMIN, Set.of(ORGANIZATION_ADMIN, IdentityRole.ORGANIZATION_ASSOCIATE),
+                ORGANIZATION_ADMIN, Set.of(IdentityRole.ORGANIZATION_ASSOCIATE,ORGANIZATION_ADMIN)
         );
 
         if (!allowedRoles.getOrDefault(inviterRole, Set.of()).contains(colleagueRole)) {
@@ -532,7 +533,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
         log.info("Viewing organization detail for user with role {}", userIdentity.getRole());
-        if(userIdentity.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)){
+        if(userIdentity.getRole().equals(ORGANIZATION_ADMIN)){
             OrganizationEmployeeIdentity organizationEmployeeIdentity =
                     organizationEmployeeIdentityOutputPort.findByCreatedBy(userIdentity.getId());
             organizationId = organizationEmployeeIdentity.getOrganization();

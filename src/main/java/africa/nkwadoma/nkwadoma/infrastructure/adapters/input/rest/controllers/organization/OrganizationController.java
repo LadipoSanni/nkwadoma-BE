@@ -294,7 +294,7 @@ public class OrganizationController {
     }
 
 
-    @PostMapping("orgaization/colleague/invite")
+    @PostMapping("organization/colleague/invite")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') ")
     public ResponseEntity<ApiResponse<?>> inviteColleague(@AuthenticationPrincipal Jwt meedlUser,
                                                           @RequestBody InviteColleagueRequest inviteColleagueRequest) throws MeedlException {
@@ -302,7 +302,12 @@ public class OrganizationController {
                 organizationRestMapper.mapInviteColleagueRequestToOrganizationIdentity(inviteColleagueRequest);
         organizationIdentity.getUserIdentity().setCreatedBy(meedlUser.getClaimAsString("sub"));
         String response = createOrganizationUseCase.inviteColleague(organizationIdentity);
-        return null;
+        ApiResponse<Object> apiResponse = ApiResponse.builder()
+                .statusCode(HttpStatus.OK.toString())
+                .message(response)
+                .data(response)
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
 }

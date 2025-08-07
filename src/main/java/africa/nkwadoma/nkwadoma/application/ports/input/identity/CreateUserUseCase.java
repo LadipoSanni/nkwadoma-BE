@@ -5,7 +5,6 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import org.keycloak.representations.*;
 
 public interface CreateUserUseCase {
-    UserIdentity inviteColleague(UserIdentity userIdentity) throws MeedlException;
 
     UserIdentity createPassword(String token, String password) throws MeedlException;
 

@@ -66,17 +66,6 @@ public class IdentityManagerController {
                 statusCode(HttpStatus.OK.name()).build()
         );
     }
-    @PostMapping("auth/colleague/invite")
-    public ResponseEntity<ApiResponse<?>> inviteColleague(@AuthenticationPrincipal Jwt meedlUser,
-                                                          @RequestBody UserIdentityRequest userIdentityRequest) throws MeedlException {
-            UserIdentity userIdentity = identityMapper.toIdentity(userIdentityRequest);
-            userIdentity.setCreatedBy(meedlUser.getClaimAsString("sub"));
-            log.info("The user id of user inviting a colleague : {} ",meedlUser.getClaimAsString("sub"));
-            UserIdentity createdUserIdentity = createUserUseCase.inviteColleague(userIdentity);
-            return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
-                    data(createdUserIdentity).message(ControllerConstant.COLLEAGUE_INVITED.getMessage()).
-                    statusCode(HttpStatus.CREATED.name()).build());
-    }
 
     @PostMapping("auth/password/create")
     public ResponseEntity<ApiResponse<?>> createPassword(@RequestBody @Valid PasswordCreateRequest passwordCreateRequest) throws MeedlException {

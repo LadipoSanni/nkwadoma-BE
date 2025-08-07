@@ -57,34 +57,6 @@ public class UserIdentityService implements CreateUserUseCase {
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
 
-
-    @Override
-    public UserIdentity inviteColleague(UserIdentity userIdentity) throws MeedlException {
-        log.info("Inviting colleague");
-        MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
-        userIdentity.validate();
-        OrganizationEmployeeIdentity foundEmployee = organizationEmployeeIdentityOutputPort.findByEmployeeId(userIdentity.getCreatedBy().trim());
-        log.info("Found employee: {}", foundEmployee);
-        userIdentity.setCreatedAt(LocalDateTime.now());
-        userIdentity = identityManagerOutPutPort.createUser(userIdentity);
-        UserIdentity savedUserIdentity = userIdentityOutputPort.save(userIdentity);
-        log.info("Employee user identity saved to DB: {}", savedUserIdentity);
-
-        OrganizationEmployeeIdentity organizationEmployeeIdentity = new OrganizationEmployeeIdentity();
-        organizationEmployeeIdentity.setOrganization(foundEmployee.getOrganization());
-        organizationEmployeeIdentity.setStatus(ActivationStatus.INVITED);
-        organizationEmployeeIdentity.setMeedlUser(userIdentity);
-        OrganizationEmployeeIdentity savedEmployee = organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
-        log.info("Saved organization employee identity: {}", savedEmployee);
-
-        OrganizationIdentity organizationIdentity =
-                organizationIdentityOutputPort.findById(foundEmployee.getOrganization());
-        log.info("Found organization identity: {}", organizationIdentity);
-        asynchronousMailingOutputPort.sendColleagueEmail(organizationIdentity.getName(),userIdentity);
-
-        return userIdentity;
-    }
-
     @Override
     public AccessTokenResponse login(UserIdentity userIdentity)throws MeedlException {
         MeedlValidator.validateDataElement(userIdentity.getPassword(), "Password must be provided to login");
