@@ -9,8 +9,7 @@ public enum IdentityRole {
     ORGANIZATION_ASSOCIATE,
     ORGANIZATION_SUPER_ADMIN,
     LOANEE,
-    FINANCIER,
-    ;
+    FINANCIER;
 
     public boolean isMeedlRole() {
         return this == MEEDL_SUPER_ADMIN ||
