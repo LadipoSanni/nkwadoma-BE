@@ -490,7 +490,7 @@ class OrganizationIdentityServiceTest {
                     eq(employeeSarah.getOrganization()), eq(IdentityRole.MEEDL_SUPER_ADMIN)))
                     .thenReturn(superAdmin);
 
-            when(meedlNotificationOutputPort.save(any(MeedlNotification.class))).thenReturn(notification);
+
             response = organizationIdentityService.inviteColleague(roseCouture);
 
         }catch (MeedlException meedlException){
