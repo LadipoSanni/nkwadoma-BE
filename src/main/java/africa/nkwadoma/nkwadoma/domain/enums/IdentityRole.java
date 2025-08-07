@@ -43,6 +43,7 @@ public enum IdentityRole {
     }
 
 
+
     public boolean isMeedlRole() {
         return this == MEEDL_SUPER_ADMIN ||
                 this == MEEDL_ADMIN ||

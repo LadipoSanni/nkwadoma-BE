@@ -81,7 +81,10 @@ public class OrganizationController {
 
     @GetMapping("organization/search")
     @Operation(summary = "Search for organization(s) by similar or precise name")
-     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
+             "or hasRole('MEEDL_ADMIN')" +
+             "or hasRole('MEEDL_ASSOCIATE')" +
+             "or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> searchOrganizationByName(
                                                                        @RequestParam(name = "name") String name,
                                                                        @RequestParam(name = "status" , required = false) ActivationStatus status,
@@ -136,7 +139,13 @@ public class OrganizationController {
     }
 
     @GetMapping("organization/details")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('ORGANIZATION_ADMIN')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
+            "or hasRole('MEEDL_ADMIN')" +
+            "or hasRole('MEEDL_ASSOCIATE')" +
+            "or hasRole('ORGANIZATION_SUPER_ADMIN')" +
+            "or hasRole('ORGANIZATION_ASSOCIATE')" +
+            "or hasRole('ORGANIZATION_ADMIN')" +
+            "or hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = "View organization details by organization id")
     public ResponseEntity<ApiResponse<?>> viewOrganizationDetails(@RequestParam(required = false) String organizationId,
                                                                   @AuthenticationPrincipal Jwt meedlUser)
@@ -200,7 +209,10 @@ public class OrganizationController {
 
     @GetMapping("organization/all")
     @Operation(summary = "View all Organizations", description = "Fetch all organizations ")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
+            "or hasRole('MEEDL_ADMIN')" +
+            "or hasRole('MEEDL_ASSOCIATE')" +
+            "or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewAllOrganization(@RequestParam int pageNumber, @RequestParam int pageSize)
             throws MeedlException {
         Page<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase
@@ -214,7 +226,10 @@ public class OrganizationController {
 
     @GetMapping("organization/all/status")
     @Operation(summary = "View all Organizations with status", description = "Fetch all organizations with status")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
+            "or hasRole('MEEDL_ADMIN')" +
+            "or hasRole('MEEDL_ASSOCIATE')" +
+            "or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewAllOrganizationByStatus(@RequestParam int pageNumber, @RequestParam int pageSize, @RequestParam ActivationStatus status)
             throws MeedlException {
         Page<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase
