@@ -128,7 +128,6 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                 .build();
         meedlNotificationUsecase.sendNotification(meedlNotification);
 
-//        meedlNotificationOutputPort.save(meedlNotification);
     }
 
 
@@ -181,11 +180,11 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
     }
 
     @Override
-    public void notifyAllPortfolioManagerForDeactivatedAccount(OrganizationIdentity organization) throws MeedlException {
-        List<UserIdentity> portfolioManagers = userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
-        for (UserIdentity portfolioManager : portfolioManagers) {
+    public void notifyAllBackOfficeAdminForDeactivatedAccount(OrganizationIdentity organization) throws MeedlException {
+        List<UserIdentity> backOfficeAdmins = userIdentityOutputPort.findAllByRoles(List.of(IdentityRole.MEEDL_SUPER_ADMIN, IdentityRole.MEEDL_ADMIN, IdentityRole.PORTFOLIO_MANAGER));
+        for (UserIdentity backOfficeAdmin : backOfficeAdmins) {
             MeedlNotification notification = buildOrganizationStatusNotification(
-                    portfolioManager,
+                    backOfficeAdmin,
                     organization,
                     "deactivated",
                     NotificationFlag.ORGANIZATION_DEACTIVATED
@@ -195,11 +194,11 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
         log.info("Organization has been deactivated and all its admin. Notification sent.");
     }
     @Override
-    public void notifyAllPortfolioManagerForReactivatedAccount(OrganizationIdentity organization) throws MeedlException {
-        List<UserIdentity> portfolioManagers = userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
-        for (UserIdentity portfolioManager : portfolioManagers) {
+    public void notifyAllBackOfficeAdminForReactivatedAccount(OrganizationIdentity organization) throws MeedlException {
+        List<UserIdentity> backOfficeAdmins = userIdentityOutputPort.findAllByRoles(List.of(IdentityRole.MEEDL_SUPER_ADMIN, IdentityRole.MEEDL_ADMIN, IdentityRole.PORTFOLIO_MANAGER));
+        for (UserIdentity backOfficeAdmin : backOfficeAdmins) {
             MeedlNotification notification = buildOrganizationStatusNotification(
-                    portfolioManager,
+                    backOfficeAdmin,
                     organization,
                     "reactivated",
                     NotificationFlag.ORGANIZATION_REACTIVATED
@@ -207,6 +206,25 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
             meedlNotificationUsecase.sendNotification(notification);
         }
         log.info("Organization has been reactivated and all its admin. Notification sent.");
+    }
+
+    @Override
+    public void notifySuperAdminOfDeactivationAttempt(UserIdentity foundActor) throws MeedlException {
+        List<UserIdentity> superAdmins = userIdentityOutputPort.findAllByRole(IdentityRole.MEEDL_SUPER_ADMIN);
+        for (UserIdentity superAdmin : superAdmins) {
+            MeedlNotification notification = MeedlNotification.builder()
+                    .user(superAdmin)
+                    .timestamp(LocalDateTime.now())
+                    .contentId(foundActor.getId())
+                    .title("Attempt to deactivate super admin made")
+                    .callToAction(Boolean.TRUE)
+                    .senderMail(foundActor.getEmail())
+                    .senderFullName(superAdmin.getFirstName() + " " + superAdmin.getLastName())
+                    .contentDetail("An attempt was made to deactivate the super admin account of Meedl's platform. \nThe attempt was made by "+foundActor.getFirstName() + " "+ foundActor.getLastName()+ ". User email is "+foundActor.getEmail() + ".\nUser role is "+foundActor.getRole())
+                    .notificationFlag(NotificationFlag.MEEDL_SUPER_ADMIN_DEACTIVATION_ATTEMPT)
+                    .build();
+            meedlNotificationUsecase.sendNotification(notification);
+        }
     }
 
     private MeedlNotification buildOrganizationStatusNotification(

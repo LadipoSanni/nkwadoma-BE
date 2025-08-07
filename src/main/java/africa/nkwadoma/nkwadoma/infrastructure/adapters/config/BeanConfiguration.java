@@ -10,6 +10,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutp
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.EmailTokenOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.domain.service.notification.NotificationService;
@@ -62,15 +63,15 @@ public class BeanConfiguration {
                                                    OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort,
                                                    AesOutputPort tokenUtils, EmailTokenOutputPort emailTokenOutputPort,
                                                    OrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase,
-                                                   PasswordEncoder passwordEncoder,
-                                                   SendColleagueEmailUseCase sendColleagueEmailUseCase,
-                                                   UserIdentityMapper userIdentityMapper,
                                                    BlackListedTokenAdapter blackListedTokenAdapter,
                                                    OrganizationIdentityOutputPort organizationIdentityOutputPort,
-                                                   AsynchronousMailingOutputPort asynchronousMailingOutputPort
+                                                   AsynchronousMailingOutputPort asynchronousMailingOutputPort,
+                                                   AsynchronousNotificationOutputPort asynchronousNotificationOutputPort
                                                    ){
         return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,sendOrganizationEmployeeEmailUseCase,
-                tokenUtils, emailTokenOutputPort, passwordEncoder,sendColleagueEmailUseCase, userIdentityMapper, blackListedTokenAdapter, organizationIdentityOutputPort, asynchronousMailingOutputPort);
+                tokenUtils, emailTokenOutputPort, blackListedTokenAdapter,
+                organizationIdentityOutputPort, asynchronousMailingOutputPort, asynchronousNotificationOutputPort
+        );
     }
 
     @Bean

@@ -48,8 +48,11 @@ public interface AsynchronousNotificationOutputPort {
     void notifyAllPmForUserDataUploadFailure(StringBuilder validationErrorMessage) throws MeedlException;
 
     @Async
-    void notifyAllPortfolioManagerForDeactivatedAccount(OrganizationIdentity organization) throws MeedlException;
+    void notifyAllBackOfficeAdminForDeactivatedAccount(OrganizationIdentity organization) throws MeedlException;
 
     @Async
-    void notifyAllPortfolioManagerForReactivatedAccount(OrganizationIdentity organization) throws MeedlException;
+    void notifyAllBackOfficeAdminForReactivatedAccount(OrganizationIdentity organization) throws MeedlException;
+
+    @Async
+    void notifySuperAdminOfDeactivationAttempt(UserIdentity foundActor) throws MeedlException;
 }
