@@ -15,6 +15,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLo
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UploadType;
@@ -444,6 +445,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                     .loaneeStatus(LoaneeStatus.ADDED)
                     .onboardingMode(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)
                     .uploadedStatus(UploadedStatus.ADDED)
+                    .activationStatus(ActivationStatus.PENDING_INVITE)
                     .cohortId(cohort.getId())
                     .loanProductName(row.get("loanproduct"))
                     .createdAt(LocalDateTime.now())
