@@ -297,4 +297,15 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         List<OrganizationEntity> organizationEntities = organizationEntityRepository.findAll();
         return organizationEntities.stream().map(organizationIdentityMapper::toOrganizationIdentity).toList();
     }
+
+    @Override
+    public Optional<OrganizationIdentity> findByUserId(String userId) throws MeedlException {
+        MeedlValidator.validateUUID(userId, IdentityMessages.INVALID_USER_ID.getMessage());
+        Optional<OrganizationEntity> organizationEntity = organizationEntityRepository.findByUserId(userId);
+        if (organizationEntity.isEmpty()) return Optional.empty();
+        log.info("Organization entity retrieved from DB by user id: {}", organizationEntity.get());
+        OrganizationIdentity organizationIdentity = organizationIdentityMapper.toOrganizationIdentity(organizationEntity.get());
+        log.info("Mapped Organization identity, found with user id: {}", organizationEntity.get());
+        return Optional.of(organizationIdentity);
+    }
 }

@@ -140,4 +140,12 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
     LEFT JOIN OrganizationLoanDetailEntity ld ON ld.organization.id = o.id
 """)
     Page<OrganizationProjection> findAllOrganization(Pageable pageRequest);
+
+    @Query("""
+    SELECT org
+    FROM OrganizationEntity org
+    JOIN OrganizationEmployeeEntity emp ON emp.organization = org.id
+    WHERE emp.meedlUser.id = :userId
+""")
+    Optional<OrganizationEntity> findByUserId(String userId);
 }
