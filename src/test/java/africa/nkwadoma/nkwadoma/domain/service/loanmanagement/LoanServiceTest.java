@@ -95,6 +95,9 @@ class LoanServiceTest {
     @Mock
     private LoanMapper loanMapper;
     LoanDetailSummary loanDetailSummary;
+    @Mock
+    private LoaneeLoanAggregateOutputPort loaneeLoanAggregateOutputPort;
+    private LoaneeLoanAggregate loaneeLoanAggregate;
 
     @BeforeEach
     void setUp() {
@@ -154,6 +157,8 @@ class LoanServiceTest {
                 .totalAmountReceived(BigDecimal.valueOf(5000.00))
                 .totalAmountRepaid(BigDecimal.valueOf(2000.00))
                 .build();
+
+        loaneeLoanAggregate = TestData.buildLoaneeLoanAggregate(loanee);
     }
 
     @Test
@@ -367,6 +372,11 @@ class LoanServiceTest {
             when(loaneeLoanAccountOutputPort.findByLoaneeId(anyString())).thenReturn(loaneeLoanAccount);
             when(loanOutputPort.save(any())).thenReturn(startedLoan);
             cohort.setId(testId);
+
+            when(loaneeLoanAggregateOutputPort.findByLoaneeId(loanee.getId())).thenReturn(loaneeLoanAggregate);
+            when(loaneeLoanAggregateOutputPort.save(loaneeLoanAggregate)).thenReturn(loaneeLoanAggregate);
+
+
             when(loaneeLoanDetailsOutputPort.findByCohortLoaneeId(loanOffer.getCohortLoaneeId()))
                     .thenReturn(loaneeLoanDetail);
             when(loaneeLoanDetailsOutputPort.save(loaneeLoanDetail)).thenReturn(loaneeLoanDetail);

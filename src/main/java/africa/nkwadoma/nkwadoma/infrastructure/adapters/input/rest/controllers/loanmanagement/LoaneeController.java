@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanAggregate;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeDeferRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeRequest;
@@ -16,6 +17,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.CohortLoaneeResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanBeneficiaryResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoaneeLoanAggregateResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanee.LoaneeLoanDetailResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanee.LoaneeResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loanManagement.LoaneeRestMapper;
@@ -325,5 +327,45 @@ public class LoaneeController {
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+
+
+    @GetMapping("all")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<?>> viewAllLoanees( @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                          @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException{
+        Page<LoaneeLoanAggregate> loaneeLoanAggregate  = loaneeUseCase.viewAllLoanee(pageSize,pageNumber);
+        List<LoaneeLoanAggregateResponse> loaneeLoanAggregateResponses =
+                loaneeLoanAggregate.map(loaneeRestMapper::toLoaneeLoanAggregateResponse).stream().toList();
+
+        PaginatedResponse<LoaneeLoanAggregateResponse> loanAggregateResponsePaginatedResponse =
+                new PaginatedResponse<>(loaneeLoanAggregateResponses,loaneeLoanAggregate.hasNext(),loaneeLoanAggregate.getTotalPages(),
+                        loaneeLoanAggregate.getTotalElements(),pageNumber,pageSize);
+        ApiResponse<PaginatedResponse<LoaneeLoanAggregateResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoaneeLoanAggregateResponse>>builder()
+                .data(loanAggregateResponsePaginatedResponse)
+                .message(LOANEE_RETRIEVED)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("all/search")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<?>> searchAllLoanees( @RequestParam(name = "name") String name,
+                                                          @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                          @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException{
+        Page<LoaneeLoanAggregate> loaneeLoanAggregate  = loaneeUseCase.searchLoanAggregate(name,pageSize,pageNumber);
+        List<LoaneeLoanAggregateResponse> loaneeLoanAggregateResponses =
+                loaneeLoanAggregate.map(loaneeRestMapper::toLoaneeLoanAggregateResponse).stream().toList();
+
+        PaginatedResponse<LoaneeLoanAggregateResponse> loanAggregateResponsePaginatedResponse =
+                new PaginatedResponse<>(loaneeLoanAggregateResponses,loaneeLoanAggregate.hasNext(),loaneeLoanAggregate.getTotalPages(),
+                        loaneeLoanAggregate.getTotalElements(),pageNumber,pageSize);
+        ApiResponse<PaginatedResponse<LoaneeLoanAggregateResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoaneeLoanAggregateResponse>>builder()
+                .data(loanAggregateResponsePaginatedResponse)
+                .message(LOANEE_RETRIEVED)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }
