@@ -243,6 +243,27 @@ public class UserIdentityService implements CreateUserUseCase {
             log.error("User attempts to deactivate self found actor {}, user to deactivate {}", foundActor, userToDeactivate);
             throw new MeedlException("You are not allowed to deactivate yourself.");
         }
+        checkIfOrganizationAdminCanDeactivateAccount(userToDeactivate, foundActor);
+        checkIfPortfolioManagerCanDeactivateAccount(userToDeactivate, foundActor);
+        if (IdentityRole.MEEDL_SUPER_ADMIN.equals(userToDeactivate.getRole())){
+            log.info("An attempt was made to deactivate Meedl's supper admin {} \n ----------------------------> attempt to deactivate Meedls super admin was made by ------------------------->{}", userToDeactivate, foundActor);
+            asynchronousNotificationOutputPort.notifySuperAdminOfDeactivationAttempt(foundActor);
+            throw new MeedlException("You are not allowed to deactivate the super admin on Meedl");
+        }
+        log.info("Done with validation, actor is allowed to deactivate user.");
+    }
+
+    private void checkIfPortfolioManagerCanDeactivateAccount(UserIdentity userToDeactivate, UserIdentity foundActor) throws MeedlException {
+        if (IdentityRole.PORTFOLIO_MANAGER.equals(foundActor.getRole())) {
+            checkDeactivationIsAuthorised(
+                    foundActor,
+                    userToDeactivate,
+                    Set.of(IdentityRole.PORTFOLIO_MANAGER, IdentityRole.MEEDL_ASSOCIATE)
+            );
+        }
+    }
+
+    private void checkIfOrganizationAdminCanDeactivateAccount(UserIdentity userToDeactivate, UserIdentity foundActor) throws MeedlException {
         if (IdentityRole.ORGANIZATION_SUPER_ADMIN.equals(foundActor.getRole()) ||
                 IdentityRole.ORGANIZATION_ADMIN.equals(foundActor.getRole())) {
             Optional <OrganizationEmployeeIdentity> deactivatingEmployee = organizationEmployeeIdentityOutputPort.findByMeedlUserId(userToDeactivate.getId());
@@ -268,20 +289,6 @@ public class UserIdentityService implements CreateUserUseCase {
                     Set.of(IdentityRole.ORGANIZATION_ADMIN, IdentityRole.ORGANIZATION_ASSOCIATE)
             );
         }
-
-        if (IdentityRole.PORTFOLIO_MANAGER.equals(foundActor.getRole())) {
-            checkDeactivationIsAuthorised(
-                    foundActor,
-                    userToDeactivate,
-                    Set.of(IdentityRole.PORTFOLIO_MANAGER, IdentityRole.MEEDL_ASSOCIATE)
-            );
-        }
-        if (IdentityRole.MEEDL_SUPER_ADMIN.equals(userToDeactivate.getRole())){
-            log.info("An attempt was made to deactivate Meedl's supper admin {} \n ----------------------------> attempt to deactivate Meedls super admin was made by ------------------------->{}", userToDeactivate, foundActor);
-            asynchronousNotificationOutputPort.notifySuperAdminOfDeactivationAttempt(foundActor);
-            throw new MeedlException("You are not allowed to deactivate the super admin on Meedl");
-        }
-        log.info("Done with validation, actor is allowed to deactivate user.");
     }
 
 
