@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
@@ -81,6 +82,9 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
     }
 
     private void setRolesToView(OrganizationEmployeeIdentity organizationEmployeeIdentity, UserIdentity foundActor) {
+        if (ActivationStatus.PENDING_APPROVAL.equals(organizationEmployeeIdentity.getActivationStatus())){
+
+        }
         if (organizationEmployeeIdentity.getIdentityRoles() == null ||
                 MeedlValidator.isEmpty(organizationEmployeeIdentity.getIdentityRoles())) {
             log.info("No roles were provided for the organization employee... user role is {}", foundActor.getRole());
