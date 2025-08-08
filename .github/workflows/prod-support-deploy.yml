@@ -1,9 +1,9 @@
 name: Deploy Prod-support to Amazon ECR
 
-# on:
-#   push:
-#     branches:
-#       - prod-support
+on:
+  push:
+    branches:
+      - prod-support
 
 
 env:
