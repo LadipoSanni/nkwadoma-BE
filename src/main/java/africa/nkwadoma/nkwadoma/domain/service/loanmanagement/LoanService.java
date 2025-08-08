@@ -331,17 +331,19 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         IdentityRole identityRole = userIdentityOutputPort.findById(actorId).getRole();
         if (identityRole.equals(IdentityRole.LOANEE)) {
             loanDetailSummary = loaneeLoanDetailsOutputPort.getLoaneeLoanSummary(actorId);
+            log.info("Found loanee  loan summary {}", loanDetailSummary);
             return loanDetailSummary;
         }if (identityRole.isMeedlRole()){
             loanDetailSummary = loaneeLoanAggregateOutputPort.getLoanAggregationSummary();
-            return loanDetailSummary;
+            log.info("Found meedl  loan summary {}", loanDetailSummary);
         }else {
             OrganizationEmployeeIdentity organizationEmployeeIdentity =
                     organizationEmployeeIdentityOutputPort.findByMeedlUserId(actorId)
                             .orElseThrow();
             loanDetailSummary = loaneeLoanDetailsOutputPort.getOrganizationLoanSummary(organizationEmployeeIdentity.getOrganization());
-            return loanDetailSummary;
+            log.info("Found organization loan summary {}", loanDetailSummary);
         }
+        return loanDetailSummary;
     }
 
     private String getLoanAccountId(Loanee foundLoanee) throws MeedlException {
