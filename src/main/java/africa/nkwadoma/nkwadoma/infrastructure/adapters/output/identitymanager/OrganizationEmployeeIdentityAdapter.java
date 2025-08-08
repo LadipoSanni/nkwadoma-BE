@@ -128,26 +128,28 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
                 .map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity)
                 .toList();
     }
-
-    @Override
-    public Page<OrganizationEmployeeIdentity> findEmployeesByNameAndRole(OrganizationIdentity
-            organizationIdentity, IdentityRole identityRole) throws MeedlException {
-        MeedlValidator.validateUUID(organizationIdentity.getId(), OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-        MeedlValidator.validateObjectInstance(identityRole, INVALID_ROLE.getMessage());
-        MeedlValidator.validatePageNumber(organizationIdentity.getPageNumber());
-        MeedlValidator.validatePageSize(organizationIdentity.getPageSize());
-
-        Pageable pageRequest = PageRequest.of(organizationIdentity.getPageNumber(),organizationIdentity.getPageSize());
-        Page<OrganizationEmployeeEntity> organizationEmployeeEntities =
-                employeeAdminEntityRepository.findByOrganizationIdAndRoleAndNameFragment
-                        (organizationIdentity.getId(),identityRole,organizationIdentity.getName(),pageRequest);
-        return organizationEmployeeEntities.map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity);
-    }
-
     @Override
     public List<OrganizationEmployeeIdentity> findAllOrganizationEmployees(String organizationId) {
         List<OrganizationEmployeeEntity> organizationEmployeeEntities = employeeAdminEntityRepository.findByOrganization(organizationId);
         return organizationEmployeeEntities.stream().map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity).toList();
+    }
+
+    @Override
+    public Page<OrganizationEmployeeIdentity> searchAdmins(String organizationId, OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+        MeedlValidator.validateCollection(organizationEmployeeIdentity.getIdentityRoles(), IdentityMessages.INVALID_ROLE.getMessage());
+        MeedlValidator.validatePageNumber(organizationEmployeeIdentity.getPageNumber());
+        MeedlValidator.validatePageSize(organizationEmployeeIdentity.getPageSize());
+
+        Pageable pageRequest = PageRequest
+                .of(organizationEmployeeIdentity.getPageNumber(),
+                        organizationEmployeeIdentity.getPageSize());
+        Page<OrganizationEmployeeEntity> organizationEmployeeEntities =
+                employeeAdminEntityRepository.findAdminsByNameFilters(organizationId,
+                                organizationEmployeeIdentity.getName(),
+                                organizationEmployeeIdentity.getIdentityRoles(),
+                                organizationEmployeeIdentity.getStatus(), null, pageRequest);
+        return organizationEmployeeEntities.map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity);
     }
 
     @Override

@@ -17,6 +17,7 @@ import org.springframework.data.domain.*;
 
 import java.util.*;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
@@ -35,6 +36,7 @@ class OrganizationEmployeeIdentityAdapterTest {
     private int pageSize = 10;
     private String organizationId;
     private String userId;
+    private UserIdentity joel;
     private String organizationEmployeeIdentityId;
     private OrganizationEmployeeIdentity organizationEmployeeIdentity;
 
@@ -42,7 +44,7 @@ class OrganizationEmployeeIdentityAdapterTest {
     @BeforeAll
     void init() {
         String testId = "ead0f7cb-5483-4bb8-b371-813970a9c367";
-        UserIdentity joel = TestData.createTestUserIdentity("joel54@johnson.com");
+        joel = TestData.createTestUserIdentity("joel54@johnson.com");
         joel.setId(testId);
         joel.setRole(IdentityRole.ORGANIZATION_ADMIN);
         List<OrganizationEmployeeIdentity> employees = List.of(OrganizationEmployeeIdentity
@@ -150,7 +152,7 @@ class OrganizationEmployeeIdentityAdapterTest {
             OrganizationIdentity organization = OrganizationIdentity.builder().name("A").id(amazingGrace.getId())
                     .pageNumber(pageNumber).pageSize(pageSize).build();
             organizationEmployeeIdentities =
-                    organizationEmployeeIdentityOutputPort.findEmployeesByNameAndRole(organization ,IdentityRole.ORGANIZATION_ADMIN);
+                    organizationEmployeeIdentityOutputPort.searchAdmins(organization.getId(), organizationEmployeeIdentity);
         }catch (MeedlException exception){
             log.error("Error finding organization employees", exception);
         }
@@ -211,6 +213,46 @@ class OrganizationEmployeeIdentityAdapterTest {
     @Test
     void findOrganizationEmployeeByNullOrganizationIdAndRole(){
         assertThrows(MeedlException.class,()-> organizationEmployeeIdentityOutputPort.findByRoleAndOrganizationId(null,IdentityRole.ORGANIZATION_ADMIN));
+    }
+
+
+    @Test
+    @Order(1)
+    void searchAdminsByValidName() throws MeedlException {
+        organizationEmployeeIdentity.setName(joel.getFirstName());
+        organizationEmployeeIdentity.setIdentityRoles(Set.of(joel.getRole()));
+        Page<OrganizationEmployeeIdentity> result = organizationEmployeeIdentityOutputPort.searchAdmins(
+                organizationId, organizationEmployeeIdentity);
+
+        assertThat(result.getTotalElements()).isEqualTo(1);
+    }
+    @Test
+    @Order(2)
+    void searchAdminsByValidEmail() throws MeedlException {
+        organizationEmployeeIdentity.setName(joel.getEmail());
+        Page<OrganizationEmployeeIdentity> result = organizationEmployeeIdentityOutputPort.searchAdmins(
+                organizationId, organizationEmployeeIdentity);
+
+        assertThat(result.getTotalElements()).isEqualTo(1);
+    }
+
+
+    @Test
+    @Order(3)
+    void searchNameWithNoMatch() throws MeedlException {
+        organizationEmployeeIdentity.setName("no match");
+        Page<OrganizationEmployeeIdentity> result = organizationEmployeeIdentityOutputPort.searchAdmins(
+                organizationId, organizationEmployeeIdentity);
+        assertThat(result.getTotalElements()).isZero();
+    }
+
+    @Test
+    @Order(4)
+    void searchWithInvalidOrganizationId() {
+        assertThrows(MeedlException.class, () -> {
+            organizationEmployeeIdentityOutputPort.searchAdmins(
+                    "not-a-uuid", organizationEmployeeIdentity);
+        });
     }
 
     @AfterAll
