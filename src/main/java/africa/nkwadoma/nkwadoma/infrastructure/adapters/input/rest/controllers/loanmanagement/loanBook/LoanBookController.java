@@ -5,7 +5,6 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanBook.LoanBookResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loanManagement.loanBook.LoanBookRestMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -51,7 +50,7 @@ public class LoanBookController {
         log.info("Upload loan book. Api called .... ");
 
         LoanBook loanBook = mapLoanBookRequest(meedlUser, file, cohortId);
-        loanBook = loanBookUseCase.upLoadUserData(loanBook);
+        loanBookUseCase.upLoadUserData(loanBook);
         log.info("The loan book returned after processing {}", loanBook);
         ApiResponse<String> apiResponse = ApiResponse.<String>builder()
                 .message(LOAN_BOOK_UPLOADED_PROCESSING)
@@ -69,7 +68,7 @@ public class LoanBookController {
                                                         ) throws MeedlException {
         log.info("Repayment record book. Api called .... ");
         LoanBook loanBook = mapLoanBookRequest(meedlUser, file, cohortId);
-        loanBookUseCase.uploadRepaymentRecord(loanBook);
+        loanBookUseCase.uploadRepaymentHistory(loanBook);
         ApiResponse<String> apiResponse = ApiResponse.<String>builder()
                 .message(REPAYMENT_RECORD_BOOK_UPLOADED_SUCCESS)
                 .statusCode(HttpStatus.CREATED.toString())
