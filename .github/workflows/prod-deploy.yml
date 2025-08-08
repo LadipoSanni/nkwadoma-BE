@@ -7,12 +7,12 @@ env:
   SERVICE: meedl_prod
   APP: meedl-prod
 
-on:
-  release:
-    types: [published]
 # on:
-#   push:
-#     branches: ['main']
+#   release:
+#     types: [published]
+on:
+  push:
+    branches: ['main']
       
 jobs:
   build-and-deploy:
@@ -61,7 +61,7 @@ jobs:
 
       - name: Tag Docker image with "beta"
         run: |
-         DOCKER_TAG=${{ env.REPO_URL }}:beta
+         DOCKER_TAG=${{ env.REPO_URL }}:beta-08-08-25
 
          docker tag ${{ env.APP }}:$GITHUB_SHA $DOCKER_TAG
          docker tag ${{ env.APP }}:$GITHUB_SHA ${{ env.REPO_URL }}:$GITHUB_SHA
@@ -69,11 +69,11 @@ jobs:
       - name: Push Docker image to ECR
         run: |
 
-          docker push ${{ env.REPO_URL }}:beta
+          docker push ${{ env.REPO_URL }}:beta-08-08-25
 
           docker push ${{ env.REPO_URL }}:$GITHUB_SHA
 
 
-      - name: Update ECS service
-        run: |
-          aws ecs update-service --cluster ${{ env.CLUSTER }}  --service  ${{ env.SERVICE }} --force-new-deployment
+      # - name: Update ECS service
+      #   run: |
+      #     aws ecs update-service --cluster ${{ env.CLUSTER }}  --service  ${{ env.SERVICE }} --force-new-deployment
