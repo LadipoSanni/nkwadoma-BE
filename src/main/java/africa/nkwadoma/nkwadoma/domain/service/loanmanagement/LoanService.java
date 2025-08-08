@@ -7,7 +7,6 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
-import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.RepaymentHistoryOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
@@ -33,14 +32,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -330,8 +327,21 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     @Override
     public LoanDetailSummary viewLoanTotal(String actorId) throws MeedlException {
         MeedlValidator.validateUUID(actorId,UserMessages.INVALID_USER_ID.getMessage());
-        LoanSummaryProjection loanSummaryProjection = loaneeLoanDetailsOutputPort.getLoanSummary(actorId);
-        return loanMapper.toLoanDetailSummary(loanSummaryProjection);
+        LoanDetailSummary loanDetailSummary = null;
+        IdentityRole identityRole = userIdentityOutputPort.findById(actorId).getRole();
+        if (identityRole.equals(IdentityRole.LOANEE)) {
+            loanDetailSummary = loaneeLoanDetailsOutputPort.getLoaneeLoanSummary(actorId);
+            return loanDetailSummary;
+        }if (identityRole.isMeedlRole()){
+            loanDetailSummary = loaneeLoanAggregateOutputPort.getLoanAggregationSummary();
+            return loanDetailSummary;
+        }else {
+            OrganizationEmployeeIdentity organizationEmployeeIdentity =
+                    organizationEmployeeIdentityOutputPort.findByMeedlUserId(actorId)
+                            .orElseThrow();
+            loanDetailSummary = loaneeLoanDetailsOutputPort.getOrganizationLoanSummary(organizationEmployeeIdentity.getOrganization());
+            return loanDetailSummary;
+        }
     }
 
     private String getLoanAccountId(Loanee foundLoanee) throws MeedlException {

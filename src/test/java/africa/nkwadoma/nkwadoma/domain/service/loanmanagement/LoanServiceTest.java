@@ -507,10 +507,8 @@ class LoanServiceTest {
 
     @Test
     void viewLoaneeDetailsTotal(){
-        LoanSummaryProjection loanSummaryProjection = mock(LoanSummaryProjection.class);
         try {
-        when(loaneeLoanDetailsOutputPort.getLoanSummary(testId)).thenReturn(loanSummaryProjection);
-        when(loanMapper.toLoanDetailSummary(loanSummaryProjection)).thenReturn(loanDetailSummary);
+        when(loaneeLoanDetailsOutputPort.getLoaneeLoanSummary(testId)).thenReturn(loanDetailSummary);
         loanDetailSummary = loanService.viewLoanTotal(testId);
     }catch (MeedlException exception){
         log.error(exception.getMessage(), exception);

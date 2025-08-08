@@ -45,4 +45,13 @@ public interface LoaneeLoanAggregateRepository extends JpaRepository<LoaneeLoanA
         order by loaneeLoanAggregate.numberOfLoans desc 
 """)
     Page<LoaneeLoanAggregateProjection> searchLoaneeLoanAggregate(@Param("nameFragment") String nameFragment, Pageable pageRequest);
+
+    @Query("""
+    SELECT 
+        SUM(l.historicalDebt) AS totalAmountReceived,
+        SUM(l.totalAmountOutstanding) AS totalAmountOutstanding,
+        COUNT(l) AS numberOfLoanee
+    FROM LoaneeLoanAggregateEntity l
+""")
+    LoanSummaryProjection getLoanSummary();
 }

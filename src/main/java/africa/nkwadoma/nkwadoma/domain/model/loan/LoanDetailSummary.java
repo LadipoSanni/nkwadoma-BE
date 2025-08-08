@@ -13,4 +13,5 @@ public class LoanDetailSummary {
     private BigDecimal totalAmountReceived;
     private BigDecimal totalAmountRepaid;
     private BigDecimal totalAmountOutstanding;
+    private int numberOfLoanee;
 }
