@@ -44,7 +44,7 @@ public interface EmployeeAdminEntityRepository extends JpaRepository<Organizatio
             @Param("nameFragment") String nameFragment,
             @Param("roles") Set<IdentityRole> roles,
             @Param("activationStatus") ActivationStatus activationStatus,
-            @Param("onlyEnabled") Boolean onlyEnabled,
+            @Param("enabled") Boolean onlyEnabled,
             Pageable pageable
     );
 

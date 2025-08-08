@@ -80,9 +80,10 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
                 organizationEmployeeIdentity);
     }
 
-    private static void setRolesToView(OrganizationEmployeeIdentity organizationEmployeeIdentity, UserIdentity foundActor) {
+    private void setRolesToView(OrganizationEmployeeIdentity organizationEmployeeIdentity, UserIdentity foundActor) {
         if (organizationEmployeeIdentity.getIdentityRoles() == null ||
                 MeedlValidator.isEmpty(organizationEmployeeIdentity.getIdentityRoles())) {
+            log.info("No roles were provided for the organization employee... user role is {}", foundActor.getRole());
             if (IdentityRole.isMeedlStaff(foundActor.getRole())){
                 organizationEmployeeIdentity.setIdentityRoles(IdentityRole.getMeedlRoles());
             }
