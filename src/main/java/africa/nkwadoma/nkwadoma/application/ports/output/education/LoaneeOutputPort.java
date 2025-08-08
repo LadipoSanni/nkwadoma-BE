@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.application.ports.output.education;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanAggregate;
 import org.springframework.data.domain.Page;
 
 import java.util.*;

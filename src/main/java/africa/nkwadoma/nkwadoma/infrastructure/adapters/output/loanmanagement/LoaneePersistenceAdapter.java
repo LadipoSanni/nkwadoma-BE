@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanAggregate;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoaneeEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoaneeMapper;
@@ -98,7 +99,6 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
         Page<LoaneeEntity> loaneeEntities =  loaneeRepository.findAll(pageRequest);
         return loaneeEntities.map(loaneeMapper::toLoanee);
     }
-
 
     @Override
     public List<Loanee> findSelectedLoaneesInCohort(String id, List<String> loaneeIds) throws MeedlException {

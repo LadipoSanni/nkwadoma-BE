@@ -1,0 +1,158 @@
+name: Deployment to PROD environment
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  ECR_REPO_URL: 357586184453.dkr.ecr.us-east-1.amazonaws.com/meedl-prod
+  DOCKER_IMAGE_NAME: nkwadoma-service
+  DOCKERHUB_REPO: ${{ secrets.DOCKER_USERNAME }}/nkwadoma-service
+  AWS_REGION: us-east-1
+  CONTAINER_PORT: 8750
+  BLUE_PORT: 8750
+  GREEN_PORT: 8751
+  NGINX_PORT: 443
+  SERVER_NAME: api.meedl.africa
+  NGINX_CONFIG_PATH: /etc/nginx/sites-available/meedl.africa
+  CONTAINER_NAME_PREFIX: meedl-prod
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    outputs:
+      version-tag: ${{ steps.version.outputs.VERSION_TAG }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get Version Tag
+        id: version
+        run: |
+          chmod +x .github/workflows/scripts/get-version.sh
+          .github/workflows/scripts/get-version.sh prod
+          VERSION_TAG=$(cat $GITHUB_OUTPUT | grep "^VERSION_TAG=" | cut -d= -f2)
+          echo "VERSION_TAG=${VERSION_TAG}" >> $GITHUB_ENV
+          echo "version-tag=${VERSION_TAG}" >> $GITHUB_OUTPUT
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Login to DockerHub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build and tag Docker image
+        run: |
+          docker build -t ${{ env.ECR_REPO_URL }}:${{ env.VERSION_TAG }} .
+          docker tag ${{ env.ECR_REPO_URL }}:${{ env.VERSION_TAG }} ${{ env.DOCKERHUB_REPO }}:${{ env.VERSION_TAG }}
+
+      - name: Push to ECR
+        run: |
+          docker push ${{ env.ECR_REPO_URL }}:${{ env.VERSION_TAG }}
+
+      - name: Push to DockerHub
+        run: |
+          docker push ${{ env.DOCKERHUB_REPO }}:${{ env.VERSION_TAG }}
+
+  deploy-to-prod:
+    runs-on: ovh
+    needs: build-and-push
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Authenticate with Amazon ECR
+        run: |
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${{ env.ECR_REPO_URL }}
+
+      - name: Pull Docker image
+        run: |
+          docker pull ${{ env.ECR_REPO_URL }}:${{ needs.build-and-push.outputs.version-tag }}
+
+      - name: Download .env file from S3
+        run: |
+          sudo mkdir -p /home/ubuntu/semicolon/meedl/prod
+          sudo aws s3 cp s3://semicolon-delivery/nkwadoma/backend/prod/nkwadoma.env /home/ubuntu/semicolon/meedl/prod/nkwadoma.env --region eu-west-1
+          sudo chown ubuntu:ubuntu /home/ubuntu/semicolon/meedl/prod/nkwadoma.env
+
+      - name: Determine active environment
+        id: active_env
+        run: |
+          if sudo docker ps --format '{{.Names}}' | grep -q "${CONTAINER_NAME_PREFIX}_blue"; then
+            echo "ACTIVE_ENV=blue" >> $GITHUB_ENV
+            echo "NEW_ENV=green" >> $GITHUB_ENV
+            echo "NEW_PORT=${{ env.GREEN_PORT }}" >> $GITHUB_ENV
+          else
+            echo "ACTIVE_ENV=green" >> $GITHUB_ENV
+            echo "NEW_ENV=blue" >> $GITHUB_ENV
+            echo "NEW_PORT=${{ env.BLUE_PORT }}" >> $GITHUB_ENV
+          fi
+
+      - name: Clean up stopped conflicting container
+        run: |
+          if [ "$(docker ps -aq -f name=${CONTAINER_NAME_PREFIX}_${{ env.NEW_ENV }} -f status=exited)" ]; then
+            docker rm ${CONTAINER_NAME_PREFIX}_${{ env.NEW_ENV }}
+          fi
+          if [ "$(docker ps -aq -f name=${CONTAINER_NAME_PREFIX}_${{ env.NEW_ENV }} -f status=created)" ]; then
+            docker rm ${CONTAINER_NAME_PREFIX}_${{ env.NEW_ENV }}
+          fi
+
+      - name: Start new container
+        run: |
+          sudo docker run -d --env-file /home/ubuntu/semicolon/meedl/prod/nkwadoma.env \
+            --name ${CONTAINER_NAME_PREFIX}_${{ env.NEW_ENV }} -p ${{ env.NEW_PORT }}:${{ env.CONTAINER_PORT }} \
+            --restart unless-stopped \
+            ${{ env.ECR_REPO_URL }}:${{ needs.build-and-push.outputs.version-tag }}
+
+      - name: Health check new container
+        run: |
+          for i in {1..30}; do
+            if curl -s http://localhost:${{ env.NEW_PORT }}/api/v1/actuator/health | grep -q "UP"; then
+              echo "New container is healthy!"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Health check failed!"
+          sudo docker stop ${CONTAINER_NAME_PREFIX}_${{ env.NEW_ENV }}
+          sudo docker rm ${CONTAINER_NAME_PREFIX}_${{ env.NEW_ENV }}
+          exit 1
+
+      - name: Update Nginx configuration
+        run: |
+          sudo sed -i "/server_name ${{ env.SERVER_NAME }};/,/}/ s/proxy_pass http:\/\/localhost:[0-9]\+;/proxy_pass http:\/\/localhost:${{ env.NEW_PORT }};/" ${{ env.NGINX_CONFIG_PATH }}
+          sudo nginx -t && sudo systemctl reload nginx || exit 1
+
+      - name: Stop and remove old container
+        run: |
+          if [ "${{ env.ACTIVE_ENV }}" != "${{ env.NEW_ENV }}" ]; then
+            sudo docker stop ${CONTAINER_NAME_PREFIX}_${{ env.ACTIVE_ENV }} || true
+            sudo docker rm ${CONTAINER_NAME_PREFIX}_${{ env.ACTIVE_ENV }} || true
+          fi
+
+      - name: Confirm Deployment Success
+        run: |
+          if sudo docker ps --format '{{.Names}}' | grep -q "${CONTAINER_NAME_PREFIX}_${{ env.NEW_ENV }}"; then
+            echo "✅ Blue-Green Deployment to PROD successful!"
+            exit 0
+          else
+            echo "❌ Deployment failed!"
+            exit 1
+          fi
+
+      - name: Prune unused images
+        run: sudo docker image prune -af

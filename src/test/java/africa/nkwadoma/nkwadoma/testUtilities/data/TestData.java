@@ -751,4 +751,14 @@ public class TestData {
                 .loaneeLoanDetail(loaneeLoanDetail)
                 .build();
     }
+
+    public static LoaneeLoanAggregate buildLoaneeLoanAggregate(Loanee loanee) {
+        return LoaneeLoanAggregate.builder()
+                .id(testId)
+                .historicalDebt(BigDecimal.valueOf(5000.00))
+                .totalAmountOutstanding(BigDecimal.valueOf(5000.00))
+                .numberOfLoans(2)
+                .loanee(loanee)
+                .build();
+    }
 }

@@ -16,6 +16,6 @@ public class ViewOrganizationAdminRequest {
     private String name;
     private ActivationStatus status;
     private Set <IdentityRole> identityRoles;
-    private int pageSize;
-    private int pageNumber;
+    private int pageSize=10;
+    private int pageNumber=0;
 }

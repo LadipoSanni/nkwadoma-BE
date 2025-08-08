@@ -81,6 +81,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final LoaneeUseCase loaneeUseCase;
     private final LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
     private final LoanMapper loanMapper;
+    private final LoaneeLoanAggregateOutputPort loaneeLoanAggregateOutputPort;
 
     @Override
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
@@ -178,16 +179,20 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }else {
             loan = loan.buildLoan(foundLoanee, getLoanAccountId(foundLoanee), loan.getLoanOfferId());
         }
+
         Loan savedLoan = loanOutputPort.save(loan);
         log.info("Saved loan: {}", savedLoan);
-        updateLoanDetail(loanOffer,savedLoan.getStartDate());
+        updateLoanDetail(foundLoanee,loanOffer,savedLoan.getStartDate());
         String referBy = loanOutputPort.findLoanReferal(savedLoan.getId());
         updateLoanDisbursalOnLoamMatrics(referBy);
         updateInvestmentVehicleTalentFunded(savedLoan);
         return savedLoan;
     }
 
-    private void updateLoanDetail(LoanOffer loanOffer,LocalDateTime localDateTime) throws MeedlException {
+    private void updateLoanDetail(Loanee loanee ,LoanOffer loanOffer,LocalDateTime localDateTime) throws MeedlException {
+
+        updateLoaneeLoanAggregate(loanee, loanOffer);
+
         updateLoaneeLoanDetail(loanOffer,localDateTime);
 
         updateCohortLoanDetail(loanOffer);
@@ -197,6 +202,14 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         updateProgramDetail(loanOffer, cohort);
 
         updateOrganizationLoanDetail(loanOffer, cohort);
+    }
+
+    private void updateLoaneeLoanAggregate(Loanee loanee, LoanOffer loanOffer) throws MeedlException {
+        LoaneeLoanAggregate loaneeLoanAggregate = loaneeLoanAggregateOutputPort.findByLoaneeId(loanee.getId());
+        loaneeLoanAggregate.setNumberOfLoans(loaneeLoanAggregate.getNumberOfLoans() + 1);
+        loaneeLoanAggregate.setHistoricalDebt(loaneeLoanAggregate.getHistoricalDebt().add(loanOffer.getAmountApproved()));
+        loaneeLoanAggregate.setTotalAmountOutstanding(loaneeLoanAggregate.getTotalAmountOutstanding().add(loanOffer.getAmountApproved()));
+        loaneeLoanAggregateOutputPort.save(loaneeLoanAggregate);
     }
 
     private void updateOrganizationLoanDetail(LoanOffer loanOffer, Cohort cohort) throws MeedlException {
