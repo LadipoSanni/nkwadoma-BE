@@ -24,7 +24,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
@@ -36,7 +35,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.MEEDL_SUPER_ADMIN;
-import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.PORTFOLIO_MANAGER;
 
 @Component
 @RequiredArgsConstructor
@@ -111,7 +109,7 @@ public class AdminInitializer {
         }
         OrganizationEmployeeIdentity employeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
         employeeIdentity.setOrganization(organizationIdentity.getId());
-        employeeIdentity.setStatus(ActivationStatus.ACTIVE);
+        employeeIdentity.setActivationStatus(ActivationStatus.ACTIVE);
         log.info("Organization employee identity {}", employeeIdentity.getMeedlUser());
 
         try{

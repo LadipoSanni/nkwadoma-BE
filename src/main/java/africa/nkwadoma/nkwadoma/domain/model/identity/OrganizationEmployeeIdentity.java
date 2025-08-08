@@ -4,7 +4,6 @@ import africa.nkwadoma.nkwadoma.domain.enums.*;
 import lombok.*;
 
 import java.math.*;
-import java.util.List;
 import java.util.Set;
 
 @Setter
@@ -18,7 +17,7 @@ public class OrganizationEmployeeIdentity {
     private UserIdentity meedlUser;
     private Set<IdentityRole> identityRoles;
     private String organization;
-    private ActivationStatus status;
+    private ActivationStatus activationStatus;
     private int pageNumber;
     private int pageSize;
 
