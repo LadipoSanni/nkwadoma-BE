@@ -15,6 +15,8 @@ import org.apache.commons.lang3.*;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.*;
 
+import java.util.Set;
+
 @RequiredArgsConstructor
 @Slf4j
 @Service
@@ -61,6 +63,13 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
         OrganizationIdentity organizationIdentity
                 = organizationIdentityOutputPort.findByUserId(organizationEmployeeIdentity.getMeedlUser().getId())
                 .orElseThrow(()-> new MeedlException("User does not exist in an organization"));
+        boolean actorHasViewPermission = isActorHavingViewPermission(organizationEmployeeIdentity, foundActor);
+        if (!actorHasViewPermission){
+            return Page.empty(PageRequest.of(
+                    organizationEmployeeIdentity.getPageNumber(),
+                    organizationEmployeeIdentity.getPageSize()
+            ));
+        }
         setRolesToView(organizationEmployeeIdentity, foundActor);
         return organizationEmployeeOutputPort.searchAdmins(organizationIdentity.getId(),
                 organizationEmployeeIdentity);
@@ -76,15 +85,30 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
         OrganizationIdentity organizationIdentity
                 = organizationIdentityOutputPort.findByUserId(organizationEmployeeIdentity.getMeedlUser().getId())
                     .orElseThrow(()-> new MeedlException("User does not exist in an organization"));
+        boolean actorHasViewPermission = isActorHavingViewPermission(organizationEmployeeIdentity, foundActor);
+        if (!actorHasViewPermission){
+            return Page.empty(PageRequest.of(
+                    organizationEmployeeIdentity.getPageNumber(),
+                    organizationEmployeeIdentity.getPageSize()
+            ));
+        }
         setRolesToView(organizationEmployeeIdentity, foundActor);
         return organizationEmployeeOutputPort.findAllAdminInOrganization(organizationIdentity.getId(),
                 organizationEmployeeIdentity);
     }
 
-    private void setRolesToView(OrganizationEmployeeIdentity organizationEmployeeIdentity, UserIdentity foundActor) {
-        if (ActivationStatus.PENDING_APPROVAL.equals(organizationEmployeeIdentity.getActivationStatus())){
-
+    private boolean isActorHavingViewPermission(OrganizationEmployeeIdentity organizationEmployeeIdentity, UserIdentity foundActor) {
+        boolean userHavePermission = validateUserPermissionOnEmployeeRolesToView(organizationEmployeeIdentity.getIdentityRoles(), foundActor);
+        if (!userHavePermission){
+            return userHavePermission;
         }
+        if (ActivationStatus.PENDING_APPROVAL.equals(organizationEmployeeIdentity.getActivationStatus())){
+            return validateUserPermissionToViewPendingInvitesToApprove(organizationEmployeeIdentity.getIdentityRoles(), foundActor);
+        }
+        return userHavePermission;
+    }
+
+    private void setRolesToView(OrganizationEmployeeIdentity organizationEmployeeIdentity, UserIdentity foundActor) {
         if (organizationEmployeeIdentity.getIdentityRoles() == null ||
                 MeedlValidator.isEmpty(organizationEmployeeIdentity.getIdentityRoles())) {
             log.info("No roles were provided for the organization employee... user role is {}", foundActor.getRole());
@@ -95,6 +119,65 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
                 organizationEmployeeIdentity.setIdentityRoles(IdentityRole.getOrganizationRoles());
             }
         }
+    }
+    private boolean validateUserPermissionToViewPendingInvitesToApprove(Set<IdentityRole> employeeRoles, UserIdentity foundActor) {
+        IdentityRole actorRole = foundActor.getRole();
+        log.error("Actor role while verifying view permission {}", actorRole);
+        switch (actorRole) {
+            case ORGANIZATION_ASSOCIATE, MEEDL_ASSOCIATE -> {
+                log.error("You are not permitted to view pending invites.");
+                return Boolean.FALSE;
+            }
+            case PORTFOLIO_MANAGER -> {
+                boolean allowed = employeeRoles.stream().allMatch(
+                        role -> role == IdentityRole.PORTFOLIO_MANAGER || role == IdentityRole.MEEDL_ASSOCIATE
+                );
+                if (!allowed) {
+                    log.error("Portfolio Managers can only view Portfolio Managers or Meedl Associates.");
+                    return Boolean.FALSE;
+                }
+            }
+
+            case MEEDL_SUPER_ADMIN, MEEDL_ADMIN -> {
+                boolean allowed = employeeRoles.stream().allMatch(IdentityRole::isMeedlStaff);
+                if (!allowed) {
+                    log.error("You are only permitted to view Meedl staff invites.");
+                    return Boolean.FALSE;
+                }
+            }
+
+            case ORGANIZATION_ADMIN, ORGANIZATION_SUPER_ADMIN -> {
+                boolean allowed = employeeRoles.stream().allMatch(IdentityRole::isOrganizationStaff);
+                if (!allowed) {
+                    log.error("You are only permitted to view Organization staff invites.");
+                    return Boolean.FALSE;
+                }
+            }
+            default -> {
+                log.error("You are not permitted to view pending invites user with role {}", actorRole);
+                return Boolean.FALSE;
+            }
+        }
+        log.info("Actor is permitted to view staffs. Role {}", actorRole);
+        return Boolean.TRUE;
+    }
+
+
+    public boolean validateUserPermissionOnEmployeeRolesToView(Set<IdentityRole> employeeRoles, UserIdentity foundActor) {
+        boolean userIsMeedlStaff = IdentityRole.isMeedlStaff(foundActor.getRole());
+        boolean employeeHasMeedlRole = employeeRoles.stream().anyMatch(IdentityRole::isMeedlStaff);
+        boolean employeeHasOrganizationRole = employeeRoles.stream().anyMatch(IdentityRole::isOrganizationStaff);
+
+        if (!userIsMeedlStaff && employeeHasMeedlRole) {
+            log.error("A none meedl staff {} is attempting to view staffs that are meedl staffs. \n ---------------------------------------------------------------------> Roles atempted to view {}", foundActor, employeeRoles);
+            return Boolean.FALSE;
+        }
+
+        if (userIsMeedlStaff && employeeHasOrganizationRole) {
+            log.error("A meedl staff {} is attempting to view staffs that are in another organization not meedl. \n ---------------------------------------------------------------------> Roles atempted to view {}", foundActor, employeeRoles);
+            return Boolean.FALSE;
+        }
+        return Boolean.TRUE;
     }
 
     @Override

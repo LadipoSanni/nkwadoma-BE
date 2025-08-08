@@ -7,7 +7,7 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface OrganizationEmployeeIdentityMapper {
-    @Mapping(source = "status", target = "activationStatus")
+    @Mapping(target = "status", source = "activationStatus")
     OrganizationEmployeeEntity toOrganizationEmployeeEntity(OrganizationEmployeeIdentity organizationEmployeeIdentity);
 
     @InheritInverseConfiguration
