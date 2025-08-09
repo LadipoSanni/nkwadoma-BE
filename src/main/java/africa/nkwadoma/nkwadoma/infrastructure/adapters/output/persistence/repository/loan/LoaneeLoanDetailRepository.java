@@ -94,6 +94,8 @@ public interface LoaneeLoanDetailRepository extends JpaRepository<LoaneeLoanDeta
     JOIN OrganizationEntity  o ON o.id = p.organizationIdentity.id
     JOIN OrganizationLoanDetailEntity old ON old.organization.id = o.id
     WHERE o.id = :organizationId
+    
+    group by old.amountReceived, old.amountRepaid,old.outstandingAmount
 """)
     LoanSummaryProjection getOrganizationLoanSummary(@Param("organizationId") String organizationId);
 }

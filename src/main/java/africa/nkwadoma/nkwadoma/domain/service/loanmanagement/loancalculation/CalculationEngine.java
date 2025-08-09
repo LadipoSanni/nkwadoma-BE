@@ -697,6 +697,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
         LoaneeLoanAggregate loaneeLoanAggregate =
                 loaneeLoanAggregateOutputPort.findByLoaneeLoanAgrregateByLoaneeLoanDetailId(loaneeLoanDetail.getId());
         loaneeLoanAggregate.setTotalAmountOutstanding(loaneeLoanAggregate.getTotalAmountOutstanding().add(monthlyInterest.getInterest()));
+        loaneeLoanAggregateOutputPort.save(loaneeLoanAggregate);
     }
 
     private BigDecimal sumAccumulatedInterestForTheMonth(LoaneeLoanDetail loaneeLoanDetail) throws MeedlException {
