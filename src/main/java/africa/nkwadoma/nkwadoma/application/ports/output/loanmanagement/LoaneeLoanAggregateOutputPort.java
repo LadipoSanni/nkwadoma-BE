@@ -18,4 +18,6 @@ public interface LoaneeLoanAggregateOutputPort {
     Page<LoaneeLoanAggregate> searchLoanAggregate(String name, int pageSize, int pageNumber);
 
     LoanDetailSummary getLoanAggregationSummary();
+
+    LoaneeLoanAggregate findByLoaneeLoanAgrregateByLoaneeLoanDetailId(String id) throws MeedlException;
 }

@@ -68,4 +68,11 @@ public class LoaneeLoanAggregateAdapter implements LoaneeLoanAggregateOutputPort
         return loaneeLoanAggregateMapper.mapLoanSummaryProjectionToLoanDetailSummary(loanSummaryProjection);
     }
 
+    @Override
+    public LoaneeLoanAggregate findByLoaneeLoanAgrregateByLoaneeLoanDetailId(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id,"Loanee loan detail cannot be empty");
+        LoaneeLoanAggregateEntity loaneeLoanAggregateEntity = loaneeLoanAggregateRepository.findByLoaneeLoandetailId(id);
+        return loaneeLoanAggregateMapper.toLoaneeLoanAggregate(loaneeLoanAggregateEntity);
+    }
+
 }

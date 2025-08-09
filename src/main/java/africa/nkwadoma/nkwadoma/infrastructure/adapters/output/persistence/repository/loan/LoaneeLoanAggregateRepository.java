@@ -54,4 +54,14 @@ public interface LoaneeLoanAggregateRepository extends JpaRepository<LoaneeLoanA
     FROM LoaneeLoanAggregateEntity l
     """)
     LoanSummaryProjection getLoanSummary();
+
+    @Query("""
+    select l from  LoaneeLoanAggregateEntity l
+        join LoaneeEntity loanee on loanee.id = l.loanee.id
+        join CohortLoaneeEntity cohortLoanee on cohortLoanee.loanee.id = loanee.id
+        join LoaneeLoanDetailEntity loaneeLoanDetail on loaneeLoanDetail.id = cohortLoanee.loaneeLoanDetail.id
+        
+        where loaneeLoanDetail.id = :id       
+    """)
+    LoaneeLoanAggregateEntity findByLoaneeLoandetailId(@Param("id") String id);
 }
