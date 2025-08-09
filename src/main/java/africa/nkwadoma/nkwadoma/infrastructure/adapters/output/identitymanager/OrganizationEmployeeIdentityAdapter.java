@@ -7,7 +7,6 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEmployeeEntity;
@@ -148,7 +147,7 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
                 employeeAdminEntityRepository.findAdminsByNameFilters(organizationId,
                                 organizationEmployeeIdentity.getName(),
                                 organizationEmployeeIdentity.getIdentityRoles(),
-                                organizationEmployeeIdentity.getStatus(), null, pageRequest);
+                                organizationEmployeeIdentity.getActivationStatus(), null, pageRequest);
         return organizationEmployeeEntities.map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity);
     }
 
@@ -166,7 +165,7 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
                 employeeAdminEntityRepository
                         .findAllByOrgIdRoleInAndOptionalFilters(organizationId,
                                 organizationEmployeeIdentity.getIdentityRoles(),
-                                organizationEmployeeIdentity.getStatus(), null, pageRequest);
+                                organizationEmployeeIdentity.getActivationStatus(), null, pageRequest);
         return organizationEmployeeEntities.map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity);
     }
 

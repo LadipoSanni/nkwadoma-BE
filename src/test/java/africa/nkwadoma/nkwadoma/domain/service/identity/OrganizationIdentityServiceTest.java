@@ -141,7 +141,7 @@ class OrganizationIdentityServiceTest {
             assertNotNull(invitedOrganisation);
             assertNotNull(invitedOrganisation.getServiceOfferings());
             assertEquals(roseCouture.getName(), invitedOrganisation.getName());
-            assertEquals(ActivationStatus.INVITED, employeeSarah.getStatus());
+            assertEquals(ActivationStatus.INVITED, employeeSarah.getActivationStatus());
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
@@ -301,7 +301,7 @@ class OrganizationIdentityServiceTest {
             OrganizationIdentity deactivatedOrganization =
                     organizationIdentityService.reactivateOrganization(roseCouture.getId(), "test 2 reason");
             assertTrue(deactivatedOrganization.isEnabled());
-            assertEquals(ActivationStatus.ACTIVE, employeeSarah.getStatus());
+            assertEquals(ActivationStatus.ACTIVE, employeeSarah.getActivationStatus());
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
@@ -330,7 +330,7 @@ class OrganizationIdentityServiceTest {
                     organizationIdentityService.deactivateOrganization(roseCouture.getId(), "test 2 reason");
             assertFalse(deactivatedOrganization.isEnabled());
             assertEquals(ActivationStatus.DEACTIVATED, deactivatedOrganization.getStatus());
-            assertEquals(ActivationStatus.DEACTIVATED, employeeSarah.getStatus());
+            assertEquals(ActivationStatus.DEACTIVATED, employeeSarah.getActivationStatus());
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
@@ -468,7 +468,7 @@ class OrganizationIdentityServiceTest {
             OrganizationEmployeeIdentity savedEmployee = new OrganizationEmployeeIdentity();
             savedEmployee.setMeedlUser(sarah);
             savedEmployee.setOrganization(employeeSarah.getOrganization());
-            savedEmployee.setStatus(ActivationStatus.PENDING_APPROVAL);
+            savedEmployee.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
 
             when(organizationEmployeeIdentityOutputPort.save(any())).thenReturn(savedEmployee);
 

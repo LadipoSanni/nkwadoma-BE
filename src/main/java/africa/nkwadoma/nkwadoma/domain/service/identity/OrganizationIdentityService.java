@@ -221,9 +221,9 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     private void reactivateOrganizationEmployee(OrganizationEmployeeIdentity organizationEmployeeIdentity, String reason) throws MeedlException {
         log.info("Reactivating user {}", organizationEmployeeIdentity.getMeedlUser());
         organizationEmployeeIdentity.getMeedlUser().setReactivationReason(reason);
-        organizationEmployeeIdentity.setStatus(ActivationStatus.ACTIVE);
+        organizationEmployeeIdentity.setActivationStatus(ActivationStatus.ACTIVE);
         organizationEmployeeIdentity = organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
-        log.info("Updated Organization employee status: {}", organizationEmployeeIdentity.getStatus());
+        log.info("Updated Organization employee status: {}", organizationEmployeeIdentity.getActivationStatus());
         identityManagerOutPutPort.enableUserAccount(organizationEmployeeIdentity.getMeedlUser());
     }
 
@@ -232,9 +232,9 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         log.info("Deactivating user {} , while deactivating organization.", organizationEmployeeIdentity.getMeedlUser());
         userIdentity.setDeactivationReason(reason);
         log.info("Reason on deactivating user before deactivating organization is {}", organizationEmployeeIdentity.getMeedlUser().getDeactivationReason());
-        organizationEmployeeIdentity.setStatus(ActivationStatus.DEACTIVATED);
+        organizationEmployeeIdentity.setActivationStatus(ActivationStatus.DEACTIVATED);
         organizationEmployeeIdentity = organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
-        log.info("Updated organization status: {}", organizationEmployeeIdentity.getStatus());
+        log.info("Updated organization status: {}", organizationEmployeeIdentity.getActivationStatus());
         identityManagerOutPutPort.disableUserAccount(userIdentity);
     }
 
@@ -267,9 +267,9 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         organizationIdentityOutputPort.save(organizationIdentity);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
         if (identityRole.equals(IdentityRole.MEEDL_SUPER_ADMIN)) {
-            organizationEmployeeIdentity.setStatus(ActivationStatus.INVITED);
+            organizationEmployeeIdentity.setActivationStatus(ActivationStatus.INVITED);
         }else {
-            organizationEmployeeIdentity.setStatus(ActivationStatus.PENDING_APPROVAL);
+            organizationEmployeeIdentity.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
         }
         organizationEmployeeIdentity.getMeedlUser().setCreatedAt(LocalDateTime.now());
         userIdentityOutputPort.save(organizationEmployeeIdentity.getMeedlUser());
@@ -401,7 +401,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         OrganizationEmployeeIdentity employeeIdentity = new OrganizationEmployeeIdentity();
         employeeIdentity.setOrganization(inviter.getOrganization());
         employeeIdentity.setMeedlUser(colleague);
-        employeeIdentity.setStatus(isSuperAdmin(inviter.getMeedlUser().getRole())
+        employeeIdentity.setActivationStatus(isSuperAdmin(inviter.getMeedlUser().getRole())
                 ? ActivationStatus.INVITED
                 : ActivationStatus.PENDING_APPROVAL);
         return employeeIdentity;
@@ -431,7 +431,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
 
         for(OrganizationEmployeeIdentity organizationEmployeeIdentity : organizationIdentity.getOrganizationEmployees()){
-            organizationEmployeeIdentity.setStatus(ActivationStatus.INVITED);
+            organizationEmployeeIdentity.setActivationStatus(ActivationStatus.INVITED);
             organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
             asynchronousMailingOutputPort.sendEmailToInvitedOrganization(organizationEmployeeIdentity.getMeedlUser());
         }
@@ -476,9 +476,9 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         employeeIdentity = employeesUseCase.viewEmployeeDetails(employeeIdentity);
         log.info("Found Employee identity to update status: {}", employeeIdentity);
 
-        employeeIdentity.setStatus(ActivationStatus.ACTIVE);
+        employeeIdentity.setActivationStatus(ActivationStatus.ACTIVE);
         employeeIdentity = organizationEmployeeIdentityOutputPort.save(employeeIdentity);
-        log.info("Updated Organization Employee Status: {}", employeeIdentity.getStatus());
+        log.info("Updated Organization Employee Status: {}", employeeIdentity.getActivationStatus());
         return employeeIdentity;
     }
 

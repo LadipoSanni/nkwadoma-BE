@@ -14,7 +14,7 @@ import java.util.Set;
 @NoArgsConstructor
 public class ViewOrganizationAdminRequest {
     private String name;
-    private ActivationStatus status;
+    private ActivationStatus activationStatus;
     private Set <IdentityRole> identityRoles;
     private int pageSize=10;
     private int pageNumber=0;
