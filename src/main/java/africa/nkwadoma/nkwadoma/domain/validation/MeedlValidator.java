@@ -109,6 +109,17 @@ public class MeedlValidator {
             throw new MeedlException(message);
         }
     }
+    public static boolean isEmptyCollection(Object collection) {
+        if (collection == null || isEmpty(collection)) {
+            log.warn("It is an empty collection");
+            return Boolean.TRUE;
+        }
+        log.info("It is not an empty collection ");
+        return Boolean.FALSE;
+    }
+    public static boolean isNotEmptyCollection(Object collection) {
+        return !isEmptyCollection(collection);
+    }
 
     public static boolean isEmpty(Object obj) {
         if (obj instanceof Collection<?>) {

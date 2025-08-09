@@ -205,7 +205,7 @@ class OrganizationEmployeeServiceTest {
         request.setMeedlUser(user);
         request.setPageSize(10);
         request.setPageNumber(0);
-        request.setIdentityRoles(Set.of(IdentityRole.PORTFOLIO_MANAGER));
+        request.setIdentityRoles(Set.of(IdentityRole.ORGANIZATION_ADMIN));
 
         OrganizationIdentity organization = new OrganizationIdentity();
         organization.setId("org-789");
@@ -229,7 +229,7 @@ class OrganizationEmployeeServiceTest {
     void searchOrganizationAdminWithValidRequestAndNoExplicitRoles() throws MeedlException {
 
         Page<OrganizationEmployeeIdentity> mockPage = new PageImpl<>(List.of(new OrganizationEmployeeIdentity()));
-
+        organizationEmployeeIdentity.setIdentityRoles(IdentityRole.getMeedlRoles());
         when(userIdentityOutputPort.findById(userIdentity.getId())).thenReturn(userIdentity);
         when(organizationIdentityOutputPort.findByUserId(userIdentity.getId())).thenReturn(Optional.of(organization));
         when(organizationEmployeeOutputPort.searchAdmins(eq(organization.getId()), any())).thenReturn(mockPage);

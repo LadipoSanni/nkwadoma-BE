@@ -98,7 +98,7 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
     }
 
     private boolean isActorHavingViewPermission(OrganizationEmployeeIdentity organizationEmployeeIdentity, UserIdentity foundActor) {
-        boolean userHavePermission = validateUserPermissionOnEmployeeRolesToView(organizationEmployeeIdentity.getIdentityRoles(), foundActor);
+        boolean userHavePermission = validateUserPermissionOnEmployeeRolesToView(organizationEmployeeIdentity, foundActor);
         if (!userHavePermission){
             return userHavePermission;
         }
@@ -109,8 +109,7 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
     }
 
     private void setRolesToView(OrganizationEmployeeIdentity organizationEmployeeIdentity, UserIdentity foundActor) {
-        if (organizationEmployeeIdentity.getIdentityRoles() == null ||
-                MeedlValidator.isEmpty(organizationEmployeeIdentity.getIdentityRoles())) {
+        if (MeedlValidator.isNotEmptyCollection(organizationEmployeeIdentity.getIdentityRoles())) {
             log.info("No roles were provided for the organization employee... user role is {}", foundActor.getRole());
             if (IdentityRole.isMeedlStaff(foundActor.getRole())){
                 organizationEmployeeIdentity.setIdentityRoles(IdentityRole.getMeedlRoles());
@@ -163,10 +162,13 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
     }
 
 
-    public boolean validateUserPermissionOnEmployeeRolesToView(Set<IdentityRole> employeeRoles, UserIdentity foundActor) {
+    public boolean validateUserPermissionOnEmployeeRolesToView(OrganizationEmployeeIdentity organizationEmployeeIdentity, UserIdentity foundActor) {
+        if (MeedlValidator.isEmptyCollection(organizationEmployeeIdentity.getIdentityRoles())){
+
+        }
         boolean userIsMeedlStaff = IdentityRole.isMeedlStaff(foundActor.getRole());
-        boolean employeeHasMeedlRole = employeeRoles.stream().anyMatch(IdentityRole::isMeedlStaff);
-        boolean employeeHasOrganizationRole = employeeRoles.stream().anyMatch(IdentityRole::isOrganizationStaff);
+        boolean employeeHasMeedlRole = organizationEmployeeIdentity.getIdentityRoles().stream().anyMatch(IdentityRole::isMeedlStaff);
+        boolean employeeHasOrganizationRole = organizationEmployeeIdentity.getIdentityRoles().stream().anyMatch(IdentityRole::isOrganizationStaff);
 
         if (!userIsMeedlStaff && employeeHasMeedlRole) {
             log.error("A none meedl staff {} is attempting to view staffs that are meedl staffs. \n ---------------------------------------------------------------------> Roles atempted to view {}", foundActor, employeeRoles);
