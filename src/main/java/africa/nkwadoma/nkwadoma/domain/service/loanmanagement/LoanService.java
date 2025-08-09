@@ -13,6 +13,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -24,7 +25,6 @@ import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanOfferMapper;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanException;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanSummaryProjection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -339,7 +339,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }else {
             OrganizationEmployeeIdentity organizationEmployeeIdentity =
                     organizationEmployeeIdentityOutputPort.findByMeedlUserId(actorId)
-                            .orElseThrow();
+                            .orElseThrow(() -> new IdentityException("User is not an employee of this organization"));
             loanDetailSummary = loaneeLoanDetailsOutputPort.getOrganizationLoanSummary(organizationEmployeeIdentity.getOrganization());
             log.info("Found organization loan summary {}", loanDetailSummary);
         }
