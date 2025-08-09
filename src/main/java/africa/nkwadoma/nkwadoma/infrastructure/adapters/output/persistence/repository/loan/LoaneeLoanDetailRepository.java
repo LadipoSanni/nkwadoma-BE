@@ -77,4 +77,25 @@ public interface LoaneeLoanDetailRepository extends JpaRepository<LoaneeLoanDeta
     List<LoaneeLoanDetailEntity> findAllWithDailyInterestByMonthAndYear(
             @Param("month") int month,
             @Param("year") int year);
+
+
+    @Query("""
+    SELECT
+        old.amountReceived AS totalAmountReceived,
+        old.amountRepaid AS totalAmountRepaid,
+        old.outstandingAmount AS totalAmountOutstanding,
+        COUNT(DISTINCT l.id) AS numberOfLoanee
+    FROM LoaneeLoanDetailEntity lld
+    JOIN CohortLoaneeEntity cle ON cle.loaneeLoanDetail.id = lld.id
+    JOIN LoaneeEntity l ON l.id = cle.loanee.id
+    JOIN UserEntity u ON u.id = l.userIdentity.id
+    JOIN CohortEntity  c ON c.id = cle.cohort.id
+    JOIN ProgramEntity  p ON p.id = c.programId
+    JOIN OrganizationEntity  o ON o.id = p.organizationIdentity.id
+    JOIN OrganizationLoanDetailEntity old ON old.organization.id = o.id
+    WHERE o.id = :organizationId
+    
+    group by old.amountReceived, old.amountRepaid,old.outstandingAmount
+""")
+    LoanSummaryProjection getOrganizationLoanSummary(@Param("organizationId") String organizationId);
 }
