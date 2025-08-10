@@ -276,13 +276,15 @@ public class LoanController {
     }
 
     @GetMapping("/view-all-disbursal")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('LOANEE')")
+    @PreAuthorize("hasRole('LOANEE') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewAllDisbursedLoan(@RequestParam(required = false) String organizationId,
+                                                               @RequestParam(required = false) String loaneeId,
                                                                @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                                                @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
                                                                @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
 
-        Loan loan = Loan.builder().actorId(meedlUser.getClaimAsString("sub")).organizationId(organizationId)
+        log.info("page number == {} pageSize == {} ", pageNumber, pageSize);
+        Loan loan = Loan.builder().actorId(meedlUser.getClaimAsString("sub")).organizationId(organizationId).loaneeId(loaneeId)
                 .pageNumber(pageNumber).pageSize(pageSize).build();
         Page<Loan> loans = loanUseCase.viewAllLoans(loan);
         log.info("Mapped Loan responses: {}", loans.getContent().toArray());
