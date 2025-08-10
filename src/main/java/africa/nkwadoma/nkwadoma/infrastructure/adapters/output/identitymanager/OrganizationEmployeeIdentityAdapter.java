@@ -139,6 +139,7 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
         MeedlValidator.validateCollection(organizationEmployeeIdentity.getIdentityRoles(), IdentityMessages.INVALID_ROLE.getMessage());
         MeedlValidator.validatePageNumber(organizationEmployeeIdentity.getPageNumber());
         MeedlValidator.validatePageSize(organizationEmployeeIdentity.getPageSize());
+        MeedlValidator.validateDataElement(organizationEmployeeIdentity.getName(), "Please input a valid name to search.");
 
         Pageable pageRequest = PageRequest
                 .of(organizationEmployeeIdentity.getPageNumber(),

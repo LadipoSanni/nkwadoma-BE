@@ -51,29 +51,6 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
         MeedlValidator.validateUUID(organizationEmployeeIdentity.getId(), "Valid organization employee id is required");
         return organizationEmployeeOutputPort.findByEmployeeId(organizationEmployeeIdentity.getId());
     }
-
-    @Override
-    public Page<OrganizationEmployeeIdentity> searchOrganizationAdmin(OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
-        MeedlValidator.validateObjectInstance(organizationEmployeeIdentity, "Provide an organization employee data.");
-        MeedlValidator.validateObjectInstance(organizationEmployeeIdentity.getMeedlUser(), "Provide a user entity.");
-        MeedlValidator.validateUUID(organizationEmployeeIdentity.getMeedlUser().getId(), UserMessages.INVALID_USER_ID.getMessage());
-
-        UserIdentity foundActor = userIdentityOutputPort.findById(organizationEmployeeIdentity.getMeedlUser().getId());
-
-        OrganizationIdentity organizationIdentity
-                = organizationIdentityOutputPort.findByUserId(organizationEmployeeIdentity.getMeedlUser().getId())
-                .orElseThrow(()-> new MeedlException("User does not exist in an organization"));
-        setRolesToView(organizationEmployeeIdentity, foundActor);
-        boolean actorHasViewPermission = isActorHavingViewPermission(organizationEmployeeIdentity, foundActor);
-        if (!actorHasViewPermission){
-            return Page.empty(PageRequest.of(
-                    organizationEmployeeIdentity.getPageNumber(),
-                    organizationEmployeeIdentity.getPageSize()
-            ));
-        }
-        return organizationEmployeeOutputPort.searchAdmins(organizationIdentity.getId(),
-                organizationEmployeeIdentity);
-    }
     @Override
     public Page<OrganizationEmployeeIdentity> viewAllAdminInOrganization(OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(organizationEmployeeIdentity, "Provide an organization employee data.");
@@ -92,6 +69,10 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
                     organizationEmployeeIdentity.getPageNumber(),
                     organizationEmployeeIdentity.getPageSize()
             ));
+        }
+        if (MeedlValidator.isNotEmptyString(organizationEmployeeIdentity.getName())){
+            return organizationEmployeeOutputPort.searchAdmins(organizationIdentity.getId(),
+                    organizationEmployeeIdentity);
         }
         return organizationEmployeeOutputPort.findAllAdminInOrganization(organizationIdentity.getId(),
                 organizationEmployeeIdentity);

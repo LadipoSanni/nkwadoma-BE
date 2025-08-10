@@ -55,42 +55,6 @@ public class OrganizationEmployeeController {
                 HttpStatus.OK.toString()));
     }
 
-    @GetMapping("search/admin")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
-            "or hasRole('MEEDL_ADMIN')" +
-            "or hasRole('MEEDL_ASSOCIATE')" +
-            "or hasRole('PORTFOLIO_MANAGER')" +
-            "or hasRole('ORGANIZATION_SUPER_ADMIN')" +
-            "or hasRole('ORGANIZATION_ADMIN')" +
-            "or hasRole('ORGANIZATION_ASSOCIATE')")
-    public ResponseEntity<?> searchOrganizationEmployees(@AuthenticationPrincipal Jwt meedlUser,
-                                                         @RequestBody ViewOrganizationAdminRequest viewOrganizationAdminRequest) throws MeedlException {
-
-        OrganizationEmployeeIdentity  organizationEmployeeIdentity = organizationEmployeeRestMapper.toOrganizationEmployeeIdentity(meedlUser.getClaimAsString("sub"), viewOrganizationAdminRequest);
-
-        Page<OrganizationEmployeeIdentity> organizationEmployeeIdentities =
-                viewOrganizationEmployeesUseCase.searchOrganizationAdmin(organizationEmployeeIdentity);
-        List<OrganizationEmployeeResponse> organizationEmployeeResponses =
-                organizationEmployeeIdentities.stream().map(organizationEmployeeRestMapper::toOrganizationEmployeeResponse).toList();
-
-        PaginatedResponse<OrganizationEmployeeResponse> paginatedResponse =new PaginatedResponse<>(
-                organizationEmployeeResponses,
-                organizationEmployeeIdentities.hasNext(),
-                organizationEmployeeIdentities.getTotalPages(),
-                organizationEmployeeIdentities.getTotalElements() ,
-                organizationEmployeeIdentity.getPageNumber(),
-                organizationEmployeeIdentity.getPageSize()
-        );
-
-        ApiResponse<PaginatedResponse<OrganizationEmployeeResponse>> apiResponse = ApiResponse.<PaginatedResponse<OrganizationEmployeeResponse>>builder()
-                .data(paginatedResponse)
-                .message(SuccessMessages.SUCCESSFUL_RESPONSE)
-                .statusCode(HttpStatus.OK.toString())
-                .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-    }
-
-
     @GetMapping("view-all/admin")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
             "or hasRole('MEEDL_ADMIN')" +
