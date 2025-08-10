@@ -89,7 +89,8 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
 
         List<Map<String, String>> data = readFile(loanBook);
         loanBookValidator.validateUserDataUploadFile(loanBook, data, requiredHeaders);
-//        log.info("Loan book read is {}", data);
+        log.info("Loan book read is {}", data);
+
         Cohort savedCohort = findCohort(loanBook.getCohort());
         List<CohortLoanee> convertedCohortLoanees = convertToLoanees(data, savedCohort, loanBook.getActorId());
         convertedCohortLoanees = addUploadedLoaneeToCohort(convertedCohortLoanees);
@@ -97,7 +98,6 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         log.info("Converted loanees size {}", convertedCohortLoanees.size());
         loanBook.setCohortLoanees(convertedCohortLoanees);
         referCohort(loanBook);
-        log.info("loanee loan details from 1st converted loanee {}", convertedCohortLoanees.get(0).getLoaneeLoanDetail());
         completeLoanProcessing(loanBook);
         updateLoaneeCount(savedCohort, convertedCohortLoanees);
 
