@@ -2,10 +2,12 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanAggregateOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetailSummary;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanAggregate;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoaneeLoanAggregateEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoaneeLoanAggregateMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanSummaryProjection;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeLoanAggregateProjection;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeLoanAggregateRepository;
 import lombok.RequiredArgsConstructor;
@@ -58,6 +60,19 @@ public class LoaneeLoanAggregateAdapter implements LoaneeLoanAggregateOutputPort
         Page<LoaneeLoanAggregateProjection> loaneeLoanAggregateProjections =
                 loaneeLoanAggregateRepository.searchLoaneeLoanAggregate(name,pageRequest);
         return loaneeLoanAggregateProjections.map(loaneeLoanAggregateMapper::mapProjectionToLoaneeLoanAggregate);
+    }
+
+    @Override
+    public LoanDetailSummary getLoanAggregationSummary() {
+        LoanSummaryProjection loanSummaryProjection = loaneeLoanAggregateRepository.getLoanSummary();
+        return loaneeLoanAggregateMapper.mapLoanSummaryProjectionToLoanDetailSummary(loanSummaryProjection);
+    }
+
+    @Override
+    public LoaneeLoanAggregate findByLoaneeLoanAgrregateByLoaneeLoanDetailId(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id,"Loanee loan detail cannot be empty");
+        LoaneeLoanAggregateEntity loaneeLoanAggregateEntity = loaneeLoanAggregateRepository.findByLoaneeLoandetailId(id);
+        return loaneeLoanAggregateMapper.toLoaneeLoanAggregate(loaneeLoanAggregateEntity);
     }
 
 }

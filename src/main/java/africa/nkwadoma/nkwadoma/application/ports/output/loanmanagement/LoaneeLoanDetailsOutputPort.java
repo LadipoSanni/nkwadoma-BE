@@ -14,7 +14,7 @@ public interface LoaneeLoanDetailsOutputPort {
 
     LoaneeLoanDetail findByCohortLoaneeId(String cohortLoaneeId) throws MeedlException;
 
-    LoanSummaryProjection getLoanSummary(String userId) throws MeedlException;
+    LoanDetailSummary getLoaneeLoanSummary(String userId) throws MeedlException;
 
     LoaneeLoanDetail findByCohortAndLoaneeId(String cohortId, String loaneeId) throws MeedlException;
 
@@ -23,4 +23,6 @@ public interface LoaneeLoanDetailsOutputPort {
     List<LoaneeLoanDetail> findAllByNotNullAmountOutStanding();
 
     List<LoaneeLoanDetail> findAllWithDailyInterestByMonthAndYear(Month month, int year);
+
+    LoanDetailSummary getOrganizationLoanSummary(String organization) throws MeedlException;
 }

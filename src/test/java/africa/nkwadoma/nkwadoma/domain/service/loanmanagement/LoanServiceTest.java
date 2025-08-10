@@ -98,6 +98,10 @@ class LoanServiceTest {
     @Mock
     private LoaneeLoanAggregateOutputPort loaneeLoanAggregateOutputPort;
     private LoaneeLoanAggregate loaneeLoanAggregate;
+    @Mock
+    private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
+    private OrganizationEmployeeIdentity organizationEmployeeIdentity;
+
 
     @BeforeEach
     void setUp() {
@@ -159,6 +163,7 @@ class LoanServiceTest {
                 .build();
 
         loaneeLoanAggregate = TestData.buildLoaneeLoanAggregate(loanee);
+        organizationEmployeeIdentity = TestData.createOrganizationEmployeeIdentityTestData(userIdentity);
     }
 
     @Test
@@ -506,17 +511,43 @@ class LoanServiceTest {
     }
 
     @Test
-    void viewLoaneeDetailsTotal(){
-        LoanSummaryProjection loanSummaryProjection = mock(LoanSummaryProjection.class);
+    void viewLoaneeDetailsTotalByLoanee(){
         try {
-        when(loaneeLoanDetailsOutputPort.getLoanSummary(testId)).thenReturn(loanSummaryProjection);
-        when(loanMapper.toLoanDetailSummary(loanSummaryProjection)).thenReturn(loanDetailSummary);
+        when(userIdentityOutputPort.findById(testId)).thenReturn(userIdentity);
+        when(loaneeLoanDetailsOutputPort.getLoaneeLoanSummary(testId)).thenReturn(loanDetailSummary);
         loanDetailSummary = loanService.viewLoanTotal(testId);
     }catch (MeedlException exception){
         log.error(exception.getMessage(), exception);
     }
         assertNotNull(loanDetailSummary);
-}
+    }
+
+    @Test
+    void viewLoaneeDetailsTotalByByMeedlStaff(){
+        try {
+            userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
+        when(userIdentityOutputPort.findById(testId)).thenReturn(userIdentity);
+        when(loaneeLoanAggregateOutputPort.getLoanAggregationSummary()).thenReturn(loanDetailSummary);
+        loanDetailSummary = loanService.viewLoanTotal(testId);
+    }catch (MeedlException exception){
+        log.error(exception.getMessage(), exception);
+    }
+        assertNotNull(loanDetailSummary);
+    }
+
+    @Test
+    void viewLoaneeDetailsTotalByByOrganizationStaff(){
+        try {
+            userIdentity.setRole(IdentityRole.ORGANIZATION_SUPER_ADMIN);
+        when(userIdentityOutputPort.findById(testId)).thenReturn(userIdentity);
+        when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(anyString())).thenReturn(Optional.ofNullable(organizationEmployeeIdentity));
+        when(loaneeLoanDetailsOutputPort.getOrganizationLoanSummary(organizationEmployeeIdentity.getOrganization())).thenReturn(loanDetailSummary);
+        loanDetailSummary = loanService.viewLoanTotal(testId);
+    }catch (MeedlException exception){
+        log.error(exception.getMessage(), exception);
+    }
+        assertNotNull(loanDetailSummary);
+    }
 
 
     @Test

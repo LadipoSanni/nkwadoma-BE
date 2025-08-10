@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 @Getter
 public class LoanDetailSummaryResponse {
 
+    private int numberOfLoanee;
     private BigDecimal totalAmountReceived;
     private BigDecimal totalAmountRepaid;
     private BigDecimal totalAmountOutstanding;

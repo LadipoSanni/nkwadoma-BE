@@ -306,7 +306,8 @@ public class LoanController {
     }
 
     @GetMapping("/total")
-    @PreAuthorize("hasRole('LOANEE')")
+    @PreAuthorize("hasRole('LOANEE') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') " +
+                  "or hasRole('PORTFOLIO_MANAGER') or hasRole('ORGANIZATION_ADMIN')")
     public ResponseEntity<ApiResponse<?>> viewTotalAmount(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
 
         LoanDetailSummary loanDetailSummary = loanUseCase.viewLoanTotal(meedlUser.getClaimAsString("sub"));

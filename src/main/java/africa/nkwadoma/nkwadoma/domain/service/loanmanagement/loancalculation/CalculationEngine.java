@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoanDet
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramLoanDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationLoanDetailOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanAggregateOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.DailyInterestOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.MonthlyInterestOutputPort;
@@ -16,6 +17,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.education.ProgramLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanAggregate;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.*;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +50,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
     private final DailyInterestOutputPort dailyInterestOutputPort;
     private final MonthlyInterestOutputPort monthlyInterestOutputPort;
     private final JobScheduler jobScheduler;
+    private final LoaneeLoanAggregateOutputPort loaneeLoanAggregateOutputPort;
 
 
     @Override
@@ -679,6 +682,8 @@ public class CalculationEngine implements CalculationEngineUseCase {
 
             updateInterestIncurredOnLoaneeLoanDetail(loaneeLoanDetail, accumulatedInterestForTheMonth, monthlyInterest);
 
+            updateLoaneeLoanAggregation(loaneeLoanDetail, monthlyInterest);
+
             CohortLoanDetail cohortLoanDetail = updateInterestIncurredOnCohortLoanDetail(loaneeLoanDetail, monthlyInterest);
 
             ProgramLoanDetail programLoanDetail = updateInterestIncurredOnProgramLoanDetail(cohortLoanDetail, monthlyInterest);
@@ -686,6 +691,13 @@ public class CalculationEngine implements CalculationEngineUseCase {
             updateInterestIncurredOnOrganizationLoanDetail(programLoanDetail, monthlyInterest);
         }
 
+    }
+
+    private void updateLoaneeLoanAggregation(LoaneeLoanDetail loaneeLoanDetail, MonthlyInterest monthlyInterest) throws MeedlException {
+        LoaneeLoanAggregate loaneeLoanAggregate =
+                loaneeLoanAggregateOutputPort.findByLoaneeLoanAgrregateByLoaneeLoanDetailId(loaneeLoanDetail.getId());
+        loaneeLoanAggregate.setTotalAmountOutstanding(loaneeLoanAggregate.getTotalAmountOutstanding().add(monthlyInterest.getInterest()));
+        loaneeLoanAggregateOutputPort.save(loaneeLoanAggregate);
     }
 
     private BigDecimal sumAccumulatedInterestForTheMonth(LoaneeLoanDetail loaneeLoanDetail) throws MeedlException {

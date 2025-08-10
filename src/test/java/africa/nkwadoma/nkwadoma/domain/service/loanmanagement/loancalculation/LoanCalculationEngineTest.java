@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoanDet
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramLoanDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationLoanDetailOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanAggregateOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.DailyInterestOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.MonthlyInterestOutputPort;
@@ -16,6 +17,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.education.ProgramLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanAggregate;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.*;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
@@ -71,6 +73,9 @@ public class LoanCalculationEngineTest {
     private DailyInterestOutputPort dailyInterestOutputPort;
     @Mock
     private MonthlyInterestOutputPort monthlyInterestOutputPort;
+    @Mock
+    private LoaneeLoanAggregateOutputPort loaneeLoanAggregateOutputPort;
+    private LoaneeLoanAggregate loaneeLoanAggregate;
 
 
     @BeforeEach
@@ -80,6 +85,7 @@ public class LoanCalculationEngineTest {
         cohortLoanDetail = TestData.buildCohortLoanDetail(TestData.createCohortData("cohort mock", cohortId, cohortId, null, loaneeId));
         programLoanDetail = TestData.buildProgramLoanDetail(TestData.createProgramTestData("Mock test program"));
         organizationLoanDetail = TestData.buildOrganizationLoanDetail(TestData.createOrganizationTestData("Mock org test name", "random", null));
+        loaneeLoanAggregate = TestData.buildLoaneeLoanAggregate(Loanee.builder().build());
     }
 
     private RepaymentHistory createRepayment(LocalDateTime time, BigDecimal amount) {
@@ -997,6 +1003,10 @@ public class LoanCalculationEngineTest {
                         DailyInterest.builder().interest(new BigDecimal("50.00")).build(),
                         DailyInterest.builder().interest(new BigDecimal("50.00")).build()));
 
+
+        when(loaneeLoanAggregateOutputPort.findByLoaneeLoanAgrregateByLoaneeLoanDetailId(loanDetail.getId()))
+                .thenReturn(loaneeLoanAggregate);
+        when(loaneeLoanAggregateOutputPort.save(loaneeLoanAggregate)).thenReturn(loaneeLoanAggregate);
 
 
         MonthlyInterest monthlyInterest = TestData.buildMonthlyInterest(loanDetail);

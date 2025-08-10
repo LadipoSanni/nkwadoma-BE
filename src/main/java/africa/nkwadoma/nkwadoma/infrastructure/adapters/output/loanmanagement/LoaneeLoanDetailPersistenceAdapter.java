@@ -2,9 +2,12 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetailSummary;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.LoanDetailEntity;
@@ -51,9 +54,10 @@ public class LoaneeLoanDetailPersistenceAdapter implements LoaneeLoanDetailsOutp
     }
 
     @Override
-    public LoanSummaryProjection getLoanSummary(String userId) throws MeedlException {
+    public LoanDetailSummary getLoaneeLoanSummary(String userId) throws MeedlException {
         MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
-        return loaneeLoanDetailRepository.getLoanSummary(userId);
+        LoanSummaryProjection loanSummaryProjection = loaneeLoanDetailRepository.getLoanSummary(userId);
+        return loaneeLoanDetailMapper.mapLoanSummaryProjectionToLOanSummary(loanSummaryProjection);
     }
 
     @Override
@@ -83,5 +87,12 @@ public class LoaneeLoanDetailPersistenceAdapter implements LoaneeLoanDetailsOutp
         List<LoaneeLoanDetailEntity> loaneeLoanDetailEntities =
                 loaneeLoanDetailRepository.findAllWithDailyInterestByMonthAndYear(month.getValue(),year);
         return loaneeLoanDetailEntities.stream().map(loaneeLoanDetailMapper::toLoaneeLoanDetails).toList();
+    }
+
+    @Override
+    public LoanDetailSummary getOrganizationLoanSummary(String organizationId) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+        LoanSummaryProjection loanSummaryProjection = loaneeLoanDetailRepository.getOrganizationLoanSummary(organizationId);
+        return loaneeLoanDetailMapper.mapLoanSummaryProjectionToLOanSummary(loanSummaryProjection);
     }
 }

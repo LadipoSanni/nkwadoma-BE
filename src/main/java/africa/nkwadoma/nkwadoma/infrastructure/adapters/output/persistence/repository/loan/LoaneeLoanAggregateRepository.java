@@ -32,11 +32,11 @@ public interface LoaneeLoanAggregateRepository extends JpaRepository<LoaneeLoanA
     @Query("""
         select loaneeLoanAggregate.historicalDebt as historicalDebt,
                loaneeLoanAggregate.totalAmountOutstanding as totalAmountOutstanding,
-               loaneeLoanAggregate.numberOfLoans as numberOfLoans,  
+               loaneeLoanAggregate.numberOfLoans as numberOfLoans,
                loanee.userIdentity.firstName as firstName,
                loanee.userIdentity.lastName as lastName,
                loanee.userIdentity.email as email  ,
-               loanee.id as loaneeId                   
+               loanee.id as loaneeId
               
         from LoaneeLoanAggregateEntity loaneeLoanAggregate
         join LoaneeEntity loanee on loanee.id = loaneeLoanAggregate.loanee.id
@@ -45,4 +45,23 @@ public interface LoaneeLoanAggregateRepository extends JpaRepository<LoaneeLoanA
         order by loaneeLoanAggregate.numberOfLoans desc 
 """)
     Page<LoaneeLoanAggregateProjection> searchLoaneeLoanAggregate(@Param("nameFragment") String nameFragment, Pageable pageRequest);
+
+    @Query("""
+    SELECT
+        SUM(l.historicalDebt) AS totalAmountReceived,
+        SUM(l.totalAmountOutstanding) AS totalAmountOutstanding,
+        COUNT(l) AS numberOfLoanee
+    FROM LoaneeLoanAggregateEntity l
+    """)
+    LoanSummaryProjection getLoanSummary();
+
+    @Query("""
+    select l from  LoaneeLoanAggregateEntity l
+        join LoaneeEntity loanee on loanee.id = l.loanee.id
+        join CohortLoaneeEntity cohortLoanee on cohortLoanee.loanee.id = loanee.id
+        join LoaneeLoanDetailEntity loaneeLoanDetail on loaneeLoanDetail.id = cohortLoanee.loaneeLoanDetail.id
+        
+        where loaneeLoanDetail.id = :id       
+    """)
+    LoaneeLoanAggregateEntity findByLoaneeLoandetailId(@Param("id") String id);
 }

@@ -6,4 +6,5 @@ public interface LoanSummaryProjection {
     BigDecimal getTotalAmountReceived();
     BigDecimal getTotalAmountRepaid();
     BigDecimal getTotalAmountOutstanding();
+    Integer getNumberOfLoanee();
 }
