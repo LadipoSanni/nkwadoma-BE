@@ -140,6 +140,7 @@ public class LoanBookValidator {
     private void validateLoaneeDoesNotExistInTheSameCohort(String email, Cohort cohort, int rowCount) {
         Loanee loaneeFound = null;
         try {
+            log.info("Search for loanee in cohort by email {} to ensure loanee doesn't exist i n the same cohort ",email);
             loaneeFound = loaneeOutputPort.findByLoaneeEmail(email);
         } catch (MeedlException e) {
             log.info("Loanee with email {} does not exist on the platform. Proceed to upload user data ", email, e);
@@ -152,12 +153,15 @@ public class LoanBookValidator {
     private void checkIfLoaneeExistInTheSameCohort(Cohort cohort, Loanee loanee, int rowCount) {
         CohortLoanee cohortLoanee = null;
         try {
+            log.info("Searching for cohort loanee to validate on upload ....");
             cohortLoanee = cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(loanee.getId(), cohort.getId());
+            log.info("Cohort loanee for in upload validation {}", cohortLoanee);
         } catch (MeedlException e) {
             log.info("Uploaded loanee {} does not exist in this cohort {}", loanee.getId(), cohort.getId());
         }
 
         if (ObjectUtils.isNotEmpty(cohortLoanee)) {
+            log.warn("loanee exists in the same cohort with email {} on upload validation ", loanee.getUserIdentity().getEmail());
             validationErrorMessage
                     .append("Error in row : ")
                     .append(rowCount)
@@ -261,7 +265,7 @@ public class LoanBookValidator {
             validationErrorMessage.append(errorMessage)
                     .append(" \n");
         }
-        log.info("Eleven digit number successfully validated and encrypted ");
+        log.info("Eleven digit number successfully validated ");
 
     }
 
@@ -304,7 +308,7 @@ public class LoanBookValidator {
         boolean isCohortValid = Boolean.TRUE;
         try {
             Cohort foundCohort = findCohort(cohort);
-            log.info("Cohort was found successfully in upload repayment history validation {}", foundCohort);
+            log.info("Cohort was found successfully in upload validation {}", foundCohort);
             isCohortValid = checkIfCohortTuitionDetailsHaveBeenUpdated(foundCohort);
         } catch (MeedlException e) {
             log.error("Cohort in upload repayment validation not found. error : {}", e.getMessage());

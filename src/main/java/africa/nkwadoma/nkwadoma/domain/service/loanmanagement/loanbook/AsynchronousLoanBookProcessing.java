@@ -89,8 +89,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
 
         List<Map<String, String>> data = readFile(loanBook);
         loanBookValidator.validateUserDataUploadFile(loanBook, data, requiredHeaders);
-        log.info("Loan book read is {}", data);
-
+//        log.info("Loan book read is {}", data);
         Cohort savedCohort = findCohort(loanBook.getCohort());
         List<CohortLoanee> convertedCohortLoanees = convertToLoanees(data, savedCohort, loanBook.getActorId());
         convertedCohortLoanees = addUploadedLoaneeToCohort(convertedCohortLoanees);
@@ -98,8 +97,11 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         log.info("Converted loanees size {}", convertedCohortLoanees.size());
         loanBook.setCohortLoanees(convertedCohortLoanees);
         referCohort(loanBook);
+        log.info("loanee loan details from 1st converted loanee {}", convertedCohortLoanees.get(0).getLoaneeLoanDetail());
         completeLoanProcessing(loanBook);
         updateLoaneeCount(savedCohort, convertedCohortLoanees);
+
+
         sendUserDataUploadSuccessNotification(loanBook);
         log.info("Upload of user data done!");
     }
@@ -225,10 +227,10 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
                         LoanReferral loanReferral = acceptLoanReferral(cohortLoanee);
                         log.info("loan referral is {}", loanReferral);
                         LoanRequest loanRequest = acceptLoanRequest(cohortLoanee, loanReferral, loanBook);
-                        log.info("loan request is {}", loanRequest);
+                        log.info("user data upload processing loan request is {}", loanRequest);
                         loanRequest.setLoanee(cohortLoanee.getLoanee());
                         acceptLoanOffer(loanRequest);
-                        startLoan(loanRequest,cohortLoanee.getUpdatedAt() );
+                        startLoan(loanRequest, cohortLoanee.getLoaneeLoanDetail().getLoanStartDate());
                     } catch (MeedlException e) {
                         log.error("Error accepting loan referral.",e);
                     }
@@ -414,6 +416,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         for (Map<String, String> row : data) {
             log.info("Bvn {} and nin {} for each loanee", row.get("bvn"), row.get("nin"));
             LocalDateTime loanStartDate = parseFlexibleDateTime(row.get("loanstartdate"), row.get("email"));
+            log.info("The loan start date from file : {}", loanStartDate);
             UserIdentity userIdentity = UserIdentity.builder()
                     .firstName(row.get("firstname"))
                     .lastName(row.get("lastname"))
