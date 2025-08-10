@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loan;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -137,6 +138,32 @@ public class LoanAdapter implements LoanOutputPort {
         Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
         Page<LoanProjection> loanProjection =
                 loanRepository.findAllLoanDisburestToLoanee(id,pageRequest);
+        return loanProjection.map(loanMapper::mapProjectionToLoan);
+    }
+
+    @Override
+    public Page<Loan> searchLoanByOrganizationNameAndLoaneeId(Loan loan) throws MeedlException {
+        MeedlValidator.validatePageSize(loan.getPageSize());
+        MeedlValidator.validatePageNumber(loan.getPageNumber());
+        MeedlValidator.validateUUID(loan.getLoaneeId(), LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+        Pageable pageRequest = PageRequest.of(loan.getPageNumber(),loan.getPageSize());
+
+        Page<LoanProjection> loanProjection =
+                loanRepository.findAllLoanDisbursedByOrganizationNameAndLoaneeId
+                        (loan.getOrganizationName(),loan.getLoaneeId(),pageRequest);
+        return loanProjection.map(loanMapper::mapProjectionToLoan);
+    }
+
+    @Override
+    public Page<Loan> searchLoanByOrganizationNameAndUserId(Loan loan, String id) throws MeedlException {
+        MeedlValidator.validatePageSize(loan.getPageSize());
+        MeedlValidator.validatePageNumber(loan.getPageNumber());
+        MeedlValidator.validateUUID(id, UserMessages.INVALID_USER_ID.getMessage());
+        Pageable pageRequest = PageRequest.of(loan.getPageNumber(),loan.getPageSize());
+
+        Page<LoanProjection> loanProjection =
+                loanRepository.findAllLoanDisbursedByOrganizationNameAndUserId
+                        (loan.getOrganizationName(),loan.getLoaneeId(),pageRequest);
         return loanProjection.map(loanMapper::mapProjectionToLoan);
     }
 }

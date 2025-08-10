@@ -346,6 +346,19 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         return loanDetailSummary;
     }
 
+    @Override
+    public Page<Loan> searchDisbursedLoan(Loan loan) throws MeedlException {
+        MeedlValidator.validatePageSize(loan.getPageSize());
+        MeedlValidator.validatePageNumber(loan.getPageNumber());
+        UserIdentity userIdentity = userIdentityOutputPort.findById(loan.getActorId());
+        if (userIdentity.getRole().isMeedlRole()) {
+            MeedlValidator.validateUUID(loan.getLoaneeId(),LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+            return loanOutputPort.searchLoanByOrganizationNameAndLoaneeId(loan);
+        }else {
+            return loanOutputPort.searchLoanByOrganizationNameAndUserId(loan,userIdentity.getId());
+        }
+    }
+
     private String getLoanAccountId(Loanee foundLoanee) throws MeedlException {
         LoaneeLoanAccount loaneeLoanAccount = loaneeLoanAccountOutputPort.findByLoaneeId(foundLoanee.getId());
         log.info("Found loanee account: {}", loaneeLoanAccount);
