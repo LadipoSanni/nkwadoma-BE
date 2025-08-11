@@ -524,7 +524,8 @@ public class LoanBookService implements LoanBookUseCase {
                 .loanee(createdLoanee)
                 .historicalDebt(BigDecimal.ZERO)
                 .numberOfLoans(0)
-                .totalAmountOutstanding(BigDecimal.ZERO).build();
+                .totalAmountOutstanding(BigDecimal.ZERO)
+                .totalAmountRepaid(BigDecimal.ZERO).build();
         loaneeLoanAggregateOutputPort.save(loaneeLoanAggregate);
     }
 

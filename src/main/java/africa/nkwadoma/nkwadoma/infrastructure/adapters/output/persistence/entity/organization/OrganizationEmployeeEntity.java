@@ -21,6 +21,6 @@ public class OrganizationEmployeeEntity {
     @ManyToOne
     private UserEntity meedlUser;
     @Enumerated(EnumType.STRING)
-    private ActivationStatus status;
+    private ActivationStatus activationStatus;
     private String organization;
 }
