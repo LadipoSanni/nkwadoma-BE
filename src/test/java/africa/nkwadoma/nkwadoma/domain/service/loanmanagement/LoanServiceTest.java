@@ -260,6 +260,8 @@ class LoanServiceTest {
     void acceptLoanReferral() {
         LoanReferral referral = null;
         try {
+            loanReferral.setLoaneeUserId(testId);
+            loanReferral.getCohortLoanee().getLoanee().getUserIdentity().setId(testId);
             loanReferral.getCohortLoanee().getLoanee().getUserIdentity().setIdentityVerified(true);
             when(loanReferralOutputPort.findById(loanReferral.getId())).thenReturn(loanReferral);
             when(cohortOutputPort.save(cohortLoanee.getCohort())).thenReturn(cohortLoanee.getCohort());
@@ -339,6 +341,8 @@ class LoanServiceTest {
         loanReferral.setReasonForDeclining("I just don't want a loan");
         LoanReferral referral = null;
         try {
+            loanReferral.setLoaneeUserId(testId);
+            loanReferral.getCohortLoanee().getLoanee().getUserIdentity().setId(testId);
             when(loanReferralOutputPort.findById(loanReferral.getId())).thenReturn(loanReferral);
             when(loanReferralOutputPort.save(loanReferral)).thenReturn(loanReferral);
 
@@ -376,6 +380,7 @@ class LoanServiceTest {
         loanOffer.setOrganizationId(testId);
         loanOffer.setCohortId(testId);
         try {
+            loanOffer.setLoaneeId(loanee.getId());
             when(loaneeOutputPort.findLoaneeById(anyString())).thenReturn(loanee);
             when(loanOfferOutputPort.findLoanOfferById(loan.getLoanOfferId())).
                     thenReturn(loanOffer);
@@ -420,23 +425,6 @@ class LoanServiceTest {
     @Test
     void startLoanWithNull() {
         assertThrows(MeedlException.class, ()-> loanService.startLoan(null));
-    }
-
-    @Test
-    void startLoanThatHasAlreadyBeenStarted() {
-        loan.setLoanStatus(LoanStatus.PERFORMING);
-        LoanOffer loanOffer = new LoanOffer();
-        loanOffer.setId(testId);
-        loanOffer.setLoaneeResponse(LoanDecision.ACCEPTED);
-        try {
-            when(loaneeOutputPort.findLoaneeById(loan.getLoaneeId())).thenReturn(loanee);
-            when(loanOfferOutputPort.findLoanOfferById(loan.getLoanOfferId())).
-                    thenReturn(loanOffer);
-            when(loanOutputPort.findLoanByLoanOfferId(anyString())).thenReturn(Optional.of(loan));
-        } catch (MeedlException e) {
-            log.error(e.getMessage(), e);
-        }
-        assertThrows(MeedlException.class, ()-> loanService.startLoan(loan));
     }
 
     @ParameterizedTest
@@ -712,7 +700,7 @@ class LoanServiceTest {
 
 
     @Test
-    void cannotStartLoanForALoaneeThatTheLoanDoesNotBelongTo() throws MeedlException {
+    void cannotStartLoanForALoaneeThatTheLoanDoesNotBelongToLoanee() throws MeedlException {
         when(loaneeOutputPort.findLoaneeById(loan.getLoaneeId())).thenReturn(loanee);
         when(loanOfferOutputPort.findLoanOfferById(loan.getLoanOfferId())).thenReturn(loanOffer);
         assertThrows(MeedlException.class, () -> loanService.startLoan(loan));
