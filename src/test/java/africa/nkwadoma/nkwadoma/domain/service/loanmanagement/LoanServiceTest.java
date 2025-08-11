@@ -104,6 +104,7 @@ class LoanServiceTest {
     private OrganizationEmployeeIdentity organizationEmployeeIdentity;
     @Mock
     private LoaneeLoanAggregateMapper loaneeLoanAggregateMapper;
+    private LoanOffer loanOffer;
 
 
     @BeforeEach
@@ -167,6 +168,7 @@ class LoanServiceTest {
 
         loaneeLoanAggregate = TestData.buildLoaneeLoanAggregate(loanee);
         organizationEmployeeIdentity = TestData.createOrganizationEmployeeIdentityTestData(userIdentity);
+        loanOffer = TestData.buildLoanOffer(loanRequest);
     }
 
     @Test
@@ -707,5 +709,14 @@ class LoanServiceTest {
         }
         assertNull(loans);
     }
+
+
+    @Test
+    void cannotStartLoanForALoaneeThatTheLoanDoesNotBelongTo() throws MeedlException {
+        when(loaneeOutputPort.findLoaneeById(loan.getLoaneeId())).thenReturn(loanee);
+        when(loanOfferOutputPort.findLoanOfferById(loan.getLoanOfferId())).thenReturn(loanOffer);
+        assertThrows(MeedlException.class, () -> loanService.startLoan(loan));
+    }
+
 
 }

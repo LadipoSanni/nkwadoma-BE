@@ -68,7 +68,11 @@ public enum LoanMessages {
     LOAN_REQUEST_CANNOT_BE_APPROVED("Loanee identity not verified, loanee request cannot be approved "),
     LOANEE_LOAN_NOT_FOUND("Loanee loan not found"),
     LOAN_REFERRAL_NOT_ASSIGNED_TO_LOANEE("Loan referral not assigned to loanee"),
-    LOAN_DECISION("Loan offer decision hasn't been made yet "),;
+    LOAN_DECISION("Loan offer decision hasn't been made yet "),
+    LOAN_REFERRAL_DECISION_CANNOT_BE_MADE_ON_ANOTHER_LOANEE_REFERRAL(
+            "Loanee cannot make a decision on this loan referral, it doesn't belong to this loanee"
+    ),
+    LOAN_DOES_NOT_BELONG_TO_LOANEE("This loan does not belong to this loanee");
     private final String message;
 
     LoanMessages(String message) {
