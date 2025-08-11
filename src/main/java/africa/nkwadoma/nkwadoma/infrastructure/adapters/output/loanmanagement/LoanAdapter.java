@@ -152,4 +152,30 @@ public class LoanAdapter implements LoanOutputPort {
                 loanRepository.findAllLoanDisbursedToLoaneeByLoaneeId(loaneeId,pageRequest);
         return loanProjection.map(loanMapper::mapProjectionToLoan);
     }
+
+    @Override
+    public Page<Loan> searchLoanByOrganizationNameAndLoaneeId(Loan loan) throws MeedlException {
+        MeedlValidator.validatePageSize(loan.getPageSize());
+        MeedlValidator.validatePageNumber(loan.getPageNumber());
+        MeedlValidator.validateUUID(loan.getLoaneeId(), LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+        Pageable pageRequest = PageRequest.of(loan.getPageNumber(),loan.getPageSize());
+
+        Page<LoanProjection> loanProjection =
+                loanRepository.findAllLoanDisbursedByOrganizationNameAndLoaneeId
+                        (loan.getOrganizationName(),loan.getLoaneeId(),pageRequest);
+        return loanProjection.map(loanMapper::mapProjectionToLoan);
+    }
+
+    @Override
+    public Page<Loan> searchLoanByOrganizationNameAndUserId(Loan loan, String id) throws MeedlException {
+        MeedlValidator.validatePageSize(loan.getPageSize());
+        MeedlValidator.validatePageNumber(loan.getPageNumber());
+        MeedlValidator.validateUUID(id, UserMessages.INVALID_USER_ID.getMessage());
+        Pageable pageRequest = PageRequest.of(loan.getPageNumber(),loan.getPageSize());
+
+        Page<LoanProjection> loanProjection =
+                loanRepository.findAllLoanDisbursedByOrganizationNameAndUserId
+                        (loan.getOrganizationName(),loan.getLoaneeId(),pageRequest);
+        return loanProjection.map(loanMapper::mapProjectionToLoan);
+    }
 }
