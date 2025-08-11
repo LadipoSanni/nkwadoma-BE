@@ -14,6 +14,7 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoaneeLoanAggregateMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanSummaryProjection;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.*;
@@ -101,6 +102,8 @@ class LoanServiceTest {
     @Mock
     private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     private OrganizationEmployeeIdentity organizationEmployeeIdentity;
+    @Mock
+    private LoaneeLoanAggregateMapper loaneeLoanAggregateMapper;
 
 
     @BeforeEach
@@ -537,7 +540,7 @@ class LoanServiceTest {
         try {
         when(userIdentityOutputPort.findById(testId)).thenReturn(userIdentity);
         when(loaneeLoanDetailsOutputPort.getLoaneeLoanSummary(testId)).thenReturn(loanDetailSummary);
-        loanDetailSummary = loanService.viewLoanTotal(testId);
+        loanDetailSummary = loanService.viewLoanTotal(testId,null);
     }catch (MeedlException exception){
         log.error(exception.getMessage(), exception);
     }
@@ -545,12 +548,25 @@ class LoanServiceTest {
     }
 
     @Test
-    void viewLoaneeDetailsTotalByByMeedlStaff(){
+    void viewLoaneeDetailsTotalByMeedlStaff(){
         try {
             userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
         when(userIdentityOutputPort.findById(testId)).thenReturn(userIdentity);
         when(loaneeLoanAggregateOutputPort.getLoanAggregationSummary()).thenReturn(loanDetailSummary);
-        loanDetailSummary = loanService.viewLoanTotal(testId);
+        loanDetailSummary = loanService.viewLoanTotal(testId,null);
+    }catch (MeedlException exception){
+        log.error(exception.getMessage(), exception);
+    }
+        assertNotNull(loanDetailSummary);
+    }
+    @Test
+    void viewLoaneeDetailsTotalByMeedlStaffAndLoaneeId(){
+        try {
+            userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
+        when(userIdentityOutputPort.findById(testId)).thenReturn(userIdentity);
+        when(loaneeLoanAggregateOutputPort.findByLoaneeId(testId)).thenReturn(loaneeLoanAggregate);
+        when(loaneeLoanAggregateMapper.mapLoaneeLoanAggregateTOLoanDetailSummary(loaneeLoanAggregate)).thenReturn(loanDetailSummary);
+        loanDetailSummary = loanService.viewLoanTotal(testId,testId);
     }catch (MeedlException exception){
         log.error(exception.getMessage(), exception);
     }
@@ -564,7 +580,7 @@ class LoanServiceTest {
         when(userIdentityOutputPort.findById(testId)).thenReturn(userIdentity);
         when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(anyString())).thenReturn(Optional.ofNullable(organizationEmployeeIdentity));
         when(loaneeLoanDetailsOutputPort.getOrganizationLoanSummary(organizationEmployeeIdentity.getOrganization())).thenReturn(loanDetailSummary);
-        loanDetailSummary = loanService.viewLoanTotal(testId);
+        loanDetailSummary = loanService.viewLoanTotal(testId,null);
     }catch (MeedlException exception){
         log.error(exception.getMessage(), exception);
     }

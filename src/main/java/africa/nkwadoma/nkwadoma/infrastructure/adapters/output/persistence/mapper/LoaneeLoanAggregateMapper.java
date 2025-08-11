@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanSummaryProjection;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeLoanAggregateProjection;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = "spring",nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
@@ -18,4 +19,8 @@ public interface LoaneeLoanAggregateMapper {
     LoaneeLoanAggregate mapProjectionToLoaneeLoanAggregate(LoaneeLoanAggregateProjection loaneeLoanAggregateProjection);
 
     LoanDetailSummary mapLoanSummaryProjectionToLoanDetailSummary(LoanSummaryProjection loanSummaryProjection);
+
+    @Mapping(target = "totalAmountReceived", source = "historicalDebt")
+    @Mapping(target = "totalAmountOutstanding", source = "totalAmountOutstanding")
+    LoanDetailSummary mapLoaneeLoanAggregateTOLoanDetailSummary(LoaneeLoanAggregate loaneeLoanAggregate);
 }
