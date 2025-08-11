@@ -29,7 +29,7 @@ public interface EmployeeAdminEntityRepository extends JpaRepository<Organizatio
     @Query("SELECT o FROM OrganizationEmployeeEntity o " +
             "WHERE o.organization = :organizationId " +
             "AND (:roles IS NULL OR o.meedlUser.role IN :roles) " +
-            "AND (:activationStatus IS NULL OR o.activationStatus IN :activationStatuses) " +
+            "AND (:activationStatuses IS NULL OR o.activationStatus IN :activationStatuses) " +
             "AND (:enabled IS NULL OR o.meedlUser.enabled = :enabled)" +
             "AND (" +
             "   upper(concat(o.meedlUser.firstName, ' ', o.meedlUser.lastName)) LIKE upper(concat('%', :nameFragment, '%')) " +
@@ -53,7 +53,7 @@ public interface EmployeeAdminEntityRepository extends JpaRepository<Organizatio
     SELECT e FROM OrganizationEmployeeEntity e
     WHERE e.organization = :organizationId
       AND e.meedlUser.role IN :roles
-      AND (:statuses IS NULL OR e.activationStatus IN :activationStatuses)
+      AND (:activationStatuses IS NULL OR e.activationStatus IN :activationStatuses)
       AND (:enabled IS NULL OR e.meedlUser.enabled = :enabled)
       ORDER BY e.meedlUser.createdAt DESC
 """)

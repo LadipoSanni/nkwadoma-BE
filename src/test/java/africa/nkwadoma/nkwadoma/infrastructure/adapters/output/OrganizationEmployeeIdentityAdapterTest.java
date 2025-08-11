@@ -80,6 +80,7 @@ class OrganizationEmployeeIdentityAdapterTest {
              organizationEmployeeIdentity = new OrganizationEmployeeIdentity();
             organizationEmployeeIdentity.setOrganization(organizationId);
             organizationEmployeeIdentity.setMeedlUser(joel);
+            organizationEmployeeIdentity.setActivationStatus(ActivationStatus.ACTIVE);
              organizationEmployeeIdentity = organizationEmployeeIdentityOutputPort.
                     save(organizationEmployeeIdentity);
 
@@ -219,35 +220,36 @@ class OrganizationEmployeeIdentityAdapterTest {
     }
 
 
-//    @Test
-//    @Order(1)
-//    void searchAdminsByValidName() throws MeedlException {
-//        organizationEmployeeIdentity.setName(joel.getFirstName());
-//        organizationEmployeeIdentity.setIdentityRoles(Set.of(joel.getRole()));
-//        Page<OrganizationEmployeeIdentity> result = organizationEmployeeIdentityOutputPort.searchOrFindAllAdminInOrganization(
-//                organizationId, organizationEmployeeIdentity);
-//
-//        assertThat(result.getTotalElements()).isEqualTo(1);
-//    }
-//    @Test
-//    @Order(2)
-//    void searchAdminsByValidEmail() throws MeedlException {
-//        organizationEmployeeIdentity.setName(joel.getEmail());
-//        Page<OrganizationEmployeeIdentity> result = organizationEmployeeIdentityOutputPort.searchOrFindAllAdminInOrganization(
-//                organizationId, organizationEmployeeIdentity);
-//
-//        assertThat(result.getTotalElements()).isEqualTo(1);
-//    }
-//
-//
-//    @Test
-//    @Order(3)
-//    void searchNameWithNoMatch() throws MeedlException {
-//        organizationEmployeeIdentity.setName("no match");
-//        Page<OrganizationEmployeeIdentity> result = organizationEmployeeIdentityOutputPort.searchOrFindAllAdminInOrganization(
-//                organizationId, organizationEmployeeIdentity);
-//        assertThat(result.getTotalElements()).isZero();
-//    }
+    @Test
+    @Order(1)
+    void searchAdminsByValidName() throws MeedlException {
+        organizationEmployeeIdentity.setName(joel.getFirstName());
+        organizationEmployeeIdentity.setIdentityRoles(Set.of(joel.getRole()));
+        Page<OrganizationEmployeeIdentity> result = organizationEmployeeIdentityOutputPort.searchOrFindAllAdminInOrganization(
+                organizationId, organizationEmployeeIdentity);
+
+        assertThat(result.getTotalElements()).isEqualTo(1);
+    }
+    @Test
+    @Order(2)
+    void searchAdminsByValidEmail() throws MeedlException {
+        organizationEmployeeIdentity.setName(joel.getFirstName());
+
+        Page<OrganizationEmployeeIdentity> result = organizationEmployeeIdentityOutputPort.searchOrFindAllAdminInOrganization(
+                organizationId, organizationEmployeeIdentity);
+
+        assertThat(result.getTotalElements()).isEqualTo(1);
+    }
+
+
+    @Test
+    @Order(3)
+    void searchNameWithNoMatch() throws MeedlException {
+        organizationEmployeeIdentity.setName("no match");
+        Page<OrganizationEmployeeIdentity> result = organizationEmployeeIdentityOutputPort.searchOrFindAllAdminInOrganization(
+                organizationId, organizationEmployeeIdentity);
+        assertThat(result.getTotalElements()).isZero();
+    }
 
     @Test
     @Order(4)
