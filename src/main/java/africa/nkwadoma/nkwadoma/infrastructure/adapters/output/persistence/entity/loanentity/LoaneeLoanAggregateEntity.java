@@ -21,6 +21,7 @@ public class LoaneeLoanAggregateEntity {
     private String id;
     private BigDecimal historicalDebt;
     private BigDecimal totalAmountOutstanding;
+    private BigDecimal totalAmountRepaid;
     private int numberOfLoans;
     @OneToOne
     private LoaneeEntity loanee;
