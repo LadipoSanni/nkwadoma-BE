@@ -65,15 +65,18 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
         setRolesToView(organizationEmployeeIdentity, foundActor);
         boolean actorHasViewPermission = isActorHavingViewPermission(organizationEmployeeIdentity, foundActor);
         if (!actorHasViewPermission){
+            log.warn("Actor viewing empty employee list because permission denied");
             return Page.empty(PageRequest.of(
                     organizationEmployeeIdentity.getPageNumber(),
                     organizationEmployeeIdentity.getPageSize()
             ));
         }
         if (MeedlValidator.isNotEmptyString(organizationEmployeeIdentity.getName())){
+            log.info("Search employee with name {}", organizationEmployeeIdentity.getName());
             return organizationEmployeeOutputPort.searchAdmins(organizationIdentity.getId(),
                     organizationEmployeeIdentity);
         }
+        log.info("View employees in organization. before out put port call.");
         return organizationEmployeeOutputPort.findAllAdminInOrganization(organizationIdentity.getId(),
                 organizationEmployeeIdentity);
     }
@@ -101,7 +104,6 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
         }
     }
 
-    /* ------------------- Helper Methods ------------------- */
 
     private boolean isPendingApprovalWithoutRoles(OrganizationEmployeeIdentity orgEmployee) {
         return MeedlValidator.isEmptyCollection(orgEmployee.getIdentityRoles()) &&
@@ -197,6 +199,7 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
             log.error("A meedl staff {} is attempting to view staffs that are in another organization not meedl. \n ---------------------------------------------------------------------> Roles atempted to view {}", foundActor, organizationEmployeeIdentity.getIdentityRoles());
             return Boolean.FALSE;
         }
+        log.info("Actor has the permissions to view");
         return Boolean.TRUE;
     }
 

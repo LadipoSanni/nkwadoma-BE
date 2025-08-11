@@ -144,6 +144,7 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
         Pageable pageRequest = PageRequest
                 .of(organizationEmployeeIdentity.getPageNumber(),
                         organizationEmployeeIdentity.getPageSize());
+        log.info("Before repository search called --- page request : {}", pageRequest);
         Page<OrganizationEmployeeEntity> organizationEmployeeEntities =
                 employeeAdminEntityRepository.findAdminsByNameFilters(organizationId,
                                 organizationEmployeeIdentity.getName(),

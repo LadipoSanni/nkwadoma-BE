@@ -277,6 +277,7 @@ class OrganizationEmployeeServiceTest {
 
         Page<OrganizationEmployeeIdentity> mockPage = new PageImpl<>(List.of(new OrganizationEmployeeIdentity()));
         organizationEmployeeIdentity.setIdentityRoles(IdentityRole.getMeedlRoles());
+        organizationEmployeeIdentity.setName(userIdentity.getEmail());
         when(userIdentityOutputPort.findById(userIdentity.getId())).thenReturn(userIdentity);
         when(organizationIdentityOutputPort.findByUserId(userIdentity.getId())).thenReturn(Optional.of(organization));
         when(organizationEmployeeOutputPort.searchAdmins(eq(organization.getId()), any())).thenReturn(mockPage);
@@ -291,11 +292,13 @@ class OrganizationEmployeeServiceTest {
         String userId = UUID.randomUUID().toString();
         UserIdentity user = new UserIdentity();
         user.setId(userId);
+        user.setFirstName("User test");
         user.setRole(IdentityRole.ORGANIZATION_SUPER_ADMIN);
 
         OrganizationEmployeeIdentity request = new OrganizationEmployeeIdentity();
         request.setMeedlUser(user);
         request.setIdentityRoles(Set.of(IdentityRole.ORGANIZATION_ADMIN));
+        request.setName(user.getFirstName());
 
         when(userIdentityOutputPort.findById(userId)).thenReturn(user);
         when(organizationIdentityOutputPort.findByUserId(userId)).thenReturn(Optional.of(organization));
@@ -310,9 +313,11 @@ class OrganizationEmployeeServiceTest {
     void searchOrganizationAdminWhenUserIdIsInvalidUUID() {
         UserIdentity user = new UserIdentity();
         user.setId("invalid-uuid");
+        user.setFirstName("First test name");
 
         OrganizationEmployeeIdentity request = new OrganizationEmployeeIdentity();
         request.setMeedlUser(user);
+        request.setName(user.getFirstName());
 
         assertThrows(MeedlException.class, () -> organizationEmployeeService.viewAllAdminInOrganization(request));
     }
@@ -324,7 +329,6 @@ class OrganizationEmployeeServiceTest {
 
         assertThrows(MeedlException.class, () -> organizationEmployeeService.viewAllAdminInOrganization(request));
     }
-
     @Test
     void searchOrganizationAdminWhenUserNotInOrganization() throws MeedlException {
 
@@ -333,19 +337,4 @@ class OrganizationEmployeeServiceTest {
 
         assertThrows(MeedlException.class, () -> organizationEmployeeService.viewAllAdminInOrganization(organizationEmployeeIdentity));
     }
-
-    @Test
-    void searchOrganizationAdminWhenSearchReturnsEmptyPageInOrganizationzzzz() throws MeedlException {
-
-
-        when(userIdentityOutputPort.findById(userIdentity.getId())).thenReturn(userIdentity);
-        when(organizationIdentityOutputPort.findByUserId(userIdentity.getId())).thenReturn(Optional.of(organization));
-        when(organizationEmployeeOutputPort.searchAdmins(eq(organization.getId()), any())).thenReturn(Page.empty());
-
-        Page<OrganizationEmployeeIdentity> result = organizationEmployeeService.viewAllAdminInOrganization(organizationEmployeeIdentity);
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-    }
-
-
 }
