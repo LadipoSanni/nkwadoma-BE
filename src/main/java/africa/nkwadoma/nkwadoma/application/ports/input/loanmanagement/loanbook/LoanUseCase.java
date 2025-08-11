@@ -15,7 +15,7 @@ public interface LoanUseCase {
 
     Page<Loan> viewAllLoans(Loan loan) throws MeedlException;
 
-    LoanDetailSummary viewLoanTotal(String actorId) throws MeedlException;
+    LoanDetailSummary viewLoanTotal(String actorId,String loaneeId) throws MeedlException;
 
     Page<Loan> searchDisbursedLoan(Loan loan) throws MeedlException;
 }

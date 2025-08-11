@@ -25,6 +25,7 @@ import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanOfferMapper;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanException;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoaneeLoanAggregateMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -79,6 +80,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
     private final LoanMapper loanMapper;
     private final LoaneeLoanAggregateOutputPort loaneeLoanAggregateOutputPort;
+    private final LoaneeLoanAggregateMapper loaneeLoanAggregateMapper;
 
     @Override
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
@@ -330,7 +332,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     @Override
-    public LoanDetailSummary viewLoanTotal(String actorId) throws MeedlException {
+    public LoanDetailSummary viewLoanTotal(String actorId,String loaneeId) throws MeedlException {
         MeedlValidator.validateUUID(actorId,UserMessages.INVALID_USER_ID.getMessage());
         LoanDetailSummary loanDetailSummary = null;
         IdentityRole identityRole = userIdentityOutputPort.findById(actorId).getRole();
@@ -339,8 +341,14 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             log.info("Found loanee  loan summary {}", loanDetailSummary);
             return loanDetailSummary;
         }if (identityRole.isMeedlRole()){
-            loanDetailSummary = loaneeLoanAggregateOutputPort.getLoanAggregationSummary();
-            log.info("Found meedl  loan summary {}", loanDetailSummary);
+            if (ObjectUtils.isNotEmpty(loaneeId)){
+                MeedlValidator.validateUUID(loaneeId,LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+                LoaneeLoanAggregate loaneeLoanAggregate  = loaneeLoanAggregateOutputPort.findByLoaneeId(loaneeId);
+                loanDetailSummary = loaneeLoanAggregateMapper.mapLoaneeLoanAggregateTOLoanDetailSummary(loaneeLoanAggregate);
+            }else {
+                loanDetailSummary = loaneeLoanAggregateOutputPort.getLoanAggregationSummary();
+                log.info("Found meedl  loan summary {}", loanDetailSummary);
+            }
         }else {
             OrganizationEmployeeIdentity organizationEmployeeIdentity =
                     organizationEmployeeIdentityOutputPort.findByMeedlUserId(actorId)

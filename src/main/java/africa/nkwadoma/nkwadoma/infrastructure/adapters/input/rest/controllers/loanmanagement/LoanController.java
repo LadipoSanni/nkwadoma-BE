@@ -310,9 +310,10 @@ public class LoanController {
     @GetMapping("/total")
     @PreAuthorize("hasRole('LOANEE') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') " +
                   "or hasRole('PORTFOLIO_MANAGER') or hasRole('ORGANIZATION_ADMIN')")
-    public ResponseEntity<ApiResponse<?>> viewTotalAmount(@AuthenticationPrincipal Jwt  meedlUser) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> viewTotalAmount(@AuthenticationPrincipal Jwt  meedlUser,
+                                                          @RequestParam(required = false, name = "loaneeId") String loaneeId) throws MeedlException {
 
-        LoanDetailSummary loanDetailSummary = loanUseCase.viewLoanTotal(meedlUser.getClaimAsString("sub"));
+        LoanDetailSummary loanDetailSummary = loanUseCase.viewLoanTotal(meedlUser.getClaimAsString("sub"),loaneeId);
         LoanDetailSummaryResponse loanDetailSummaryResponse = loanRestMapper.toLoanSummaryDetail(loanDetailSummary);
         ApiResponse<LoanDetailSummaryResponse> apiResponse = ApiResponse.<LoanDetailSummaryResponse>builder()
                 .data(loanDetailSummaryResponse)
