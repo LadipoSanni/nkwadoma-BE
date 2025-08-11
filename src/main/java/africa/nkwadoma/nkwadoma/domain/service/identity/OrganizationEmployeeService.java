@@ -2,6 +2,8 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
@@ -24,6 +26,7 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeOutputPort;
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
+    private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
 
     @Override
     public Page<OrganizationEmployeeIdentity> viewOrganizationEmployees
@@ -211,5 +214,23 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
             throw new ResourceNotFoundException(IdentityMessages.ORGANIZATION_NOT_FOUND.getMessage());
         }
         return organizationEmployeeOutputPort.findAllEmployeesInOrganization(organizationId,name,pageSize,pageNumber);
+    }
+
+    @Override
+    public String respondToColleagueInvitation(String organizationEmployeeId) throws MeedlException {
+        MeedlValidator.validateUUID(organizationEmployeeId,IdentityMessages.INVALID_ORGANIZATION_EMPLOYEE.getMessage());
+
+        OrganizationEmployeeIdentity organizationEmployeeIdentity = organizationEmployeeOutputPort.findById(organizationEmployeeId);
+        if (organizationEmployeeIdentity.getActivationStatus().equals(ActivationStatus.ACTIVE)) {
+            throw new IdentityException(OrganizationMessages.ORGANIZATION_EMPLOYEE_IS_ACTIVE.getMessage());
+        }
+
+        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
+
+        asynchronousMailingOutputPort.sendColleagueEmail(organizationIdentity.getName(),organizationEmployeeIdentity.getMeedlUser());
+        organizationEmployeeIdentity.setActivationStatus(ActivationStatus.INVITED);
+        organizationEmployeeOutputPort.save(organizationEmployeeIdentity);
+        return "Colleague invitation approved for "+organizationEmployeeIdentity.getMeedlUser().getFirstName()+" "
+                +organizationEmployeeIdentity.getMeedlUser().getLastName();
     }
 }
