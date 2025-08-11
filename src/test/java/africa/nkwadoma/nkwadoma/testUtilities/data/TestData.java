@@ -759,6 +759,7 @@ public class TestData {
                 .totalAmountOutstanding(BigDecimal.valueOf(5000.00))
                 .numberOfLoans(2)
                 .loanee(loanee)
+                .totalAmountRepaid(BigDecimal.valueOf(500.00))
                 .build();
     }
 }
