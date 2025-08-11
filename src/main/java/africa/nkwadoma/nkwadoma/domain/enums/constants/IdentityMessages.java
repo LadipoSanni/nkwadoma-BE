@@ -45,7 +45,8 @@ public enum IdentityMessages {
     USER_HAS_NEXT_OF_KIN("Next of kin details exist for this user."),
     ORGANIZATION_HAS_ALREADY_BEEN_INVITED("Organization has already been invited."),
     ORGANIZATION_IS_ACTIVE("Organization is active."),
-    RESPONSE_FOR_INVITATION_CAN_EITHER_APPROVED_OR_DECLINED("Response for invitation must either be approved or declined.");
+    RESPONSE_FOR_INVITATION_CAN_EITHER_APPROVED_OR_DECLINED("Response for invitation must either be approved or declined."),
+    INVALID_ORGANIZATION_EMPLOYEE("Invalid organization employee id"),;
 
     public String format(Object... args) {
         return String.format(message, args);

@@ -15,7 +15,8 @@ public enum OrganizationMessages {
     LOAN_METRICS_NOT_FOUND("No loan metrics found"),
     ORGANIZATION_NAME_IS_REQUIRED("Organization name is required"),
     ORGANIZATION_NOT_FOUND("Organization not found"),
-    ORGANIZATION_ID_IS_REQUIRED("Organization ID is required");
+    ORGANIZATION_ID_IS_REQUIRED("Organization ID is required"),
+    ORGANIZATION_EMPLOYEE_IS_ACTIVE("Organization employee is active, Employee can't be Invited"),;
 
     private final String message;
     OrganizationMessages(String message) {
