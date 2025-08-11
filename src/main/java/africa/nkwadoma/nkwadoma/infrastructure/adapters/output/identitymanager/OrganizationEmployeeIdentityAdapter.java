@@ -117,8 +117,6 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
         employeeAdminEntityRepository.deleteByMeedlUserId(id);
     }
 
-
-
     @Override
     public List<OrganizationEmployeeIdentity> findAllByOrganization(String organizationId) throws MeedlException {
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
