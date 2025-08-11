@@ -477,9 +477,31 @@ class LoanServiceTest {
         try{
             log.info("org id  {}",loan.getOrganizationId());
             loan.setOrganizationId(null);
+            loan.setLoaneeId(null);
             userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
             when(userIdentityOutputPort.findById(loan.getActorId())).thenReturn(userIdentity);
             when(loanOutputPort.findAllLoan(pageSize,pageNumber))
+                    .thenReturn(new PageImpl<>(List.of(loan)));
+            loans = loanService.viewAllLoans(loan);
+        }catch (MeedlException e){
+            log.error("Error viewing all loans: {}", e.getMessage());
+        }
+        assertNotNull(loans);
+        assertNotNull(loans.getContent());
+        assertEquals(1, loans.getTotalElements());
+    }
+
+    @Test
+    void viewAllLoanByLOaneeId(){
+        Page<Loan> loans = Page.empty();
+        loan.setPageNumber(pageNumber);
+        loan.setPageSize(pageSize);
+        try{
+            loan.setOrganizationId(null);
+            loan.setLoaneeId(loanee.getId());
+            userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
+            when(userIdentityOutputPort.findById(loan.getActorId())).thenReturn(userIdentity);
+            when(loanOutputPort.findAllLoanDisburedToLoaneeByLoaneeId(loan.getLoaneeId(),loan.getPageSize(),pageNumber))
                     .thenReturn(new PageImpl<>(List.of(loan)));
             loans = loanService.viewAllLoans(loan);
         }catch (MeedlException e){
@@ -609,6 +631,65 @@ class LoanServiceTest {
         verify(loanReferralOutputPort, times(1)).findAllLoanReferralsForLoanee(loanee.getId(), pageNumber, pageSize);
         verify(loaneeLoanBreakDownOutputPort, times(1)).findAllLoaneeLoanBreakDownByCohortLoaneeId(cohortLoanee.getId());
         verifyNoMoreInteractions(loaneeOutputPort, loanReferralOutputPort, loaneeLoanBreakDownOutputPort);
+    }
+
+    @Test
+    void searchDisbursedLoanByOrganizationNameAndLoaneeId(){
+        Page<Loan> loans = Page.empty();
+        loan.setPageNumber(pageNumber);
+        loan.setPageSize(pageSize);
+        try{
+            loan.setOrganizationName("Brown");
+            loan.setLoaneeId(loanee.getId());
+            userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
+            when(userIdentityOutputPort.findById(loan.getActorId())).thenReturn(userIdentity);
+            when(loanOutputPort.searchLoanByOrganizationNameAndLoaneeId(loan))
+                    .thenReturn(new PageImpl<>(List.of(loan)));
+            loans = loanService.searchDisbursedLoan(loan);
+        }catch (MeedlException e){
+            log.error("Error viewing all loans: {}", e.getMessage());
+        }
+        assertNotNull(loans);
+        assertNotNull(loans.getContent());
+        assertEquals(1, loans.getTotalElements());
+    }
+
+    @Test
+    void searchDisbursedLoanByOrganizationNameAndUserId(){
+        Page<Loan> loans = Page.empty();
+        loan.setPageNumber(pageNumber);
+        loan.setPageSize(pageSize);
+        try{
+            loan.setOrganizationName("H");
+            userIdentity.setRole(IdentityRole.LOANEE);
+            when(userIdentityOutputPort.findById(loan.getActorId())).thenReturn(userIdentity);
+            when(loanOutputPort.searchLoanByOrganizationNameAndUserId(loan,userIdentity.getId()))
+                    .thenReturn(new PageImpl<>(List.of(loan)));
+            loans = loanService.searchDisbursedLoan(loan);
+        }catch (MeedlException e){
+            log.error("Error viewing all loans: {}", e.getMessage());
+        }
+        assertNotNull(loans);
+        assertNotNull(loans.getContent());
+        assertEquals(1, loans.getTotalElements());
+    }
+
+    @Test
+    void searchDisbursedLoanByNotExistingOrganizationNameAndUserId(){
+        Page<Loan> loans = Page.empty();
+        loan.setPageNumber(pageNumber);
+        loan.setPageSize(pageSize);
+        try{
+            loan.setOrganizationName("z");
+            userIdentity.setRole(IdentityRole.LOANEE);
+            when(userIdentityOutputPort.findById(loan.getActorId())).thenReturn(userIdentity);
+            when(loanOutputPort.searchLoanByOrganizationNameAndUserId(loan,userIdentity.getId()))
+                    .thenReturn(null);
+            loans = loanService.searchDisbursedLoan(loan);
+        }catch (MeedlException e){
+            log.error("Error viewing all loans: {}", e.getMessage());
+        }
+        assertNull(loans);
     }
 
 }
