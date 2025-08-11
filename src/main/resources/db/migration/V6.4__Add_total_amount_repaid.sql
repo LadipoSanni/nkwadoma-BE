@@ -14,3 +14,7 @@ SET total_amount_repaid = sub_query.total_amount_repaid
 ) sub_query
 WHERE llae.loanee_id = sub_query.loanee_id;
 
+
+
+ALTER TABLE organization_employee
+    RENAME COLUMN status TO activation_status;
