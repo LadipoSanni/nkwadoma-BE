@@ -130,7 +130,12 @@ public class OrganizationEmployeeController {
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> respondToColleagueInvite(@RequestParam(name = "organizationEmployeeId") String organizationEmployeeId) throws MeedlException {
         String response = viewOrganizationEmployeesUseCase.respondToColleagueInvitation(organizationEmployeeId);
-        return null;
+        ApiResponse<String> apiResponse = ApiResponse.<String>builder()
+                .data(response)
+                .message(response)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
 
 }
