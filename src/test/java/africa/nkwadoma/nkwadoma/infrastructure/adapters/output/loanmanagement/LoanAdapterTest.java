@@ -283,6 +283,20 @@ class LoanAdapterTest {
         assertNotNull(loans.getContent());
     }
 
+    @Test
+    @Order(8)
+    void findAllLoanDisbursedToALoaneeByLoaneeId(){
+
+        Page<Loan> loans = Page.empty();
+        try{
+            loans = loanOutputPort.findAllLoanDisburedToLoaneeByLoaneeId(loanee.getId(), pageSize,pageNumber);
+        }catch (MeedlException e){
+            log.error("Error finding loans : {}", e.getMessage());
+        }
+        assertNotNull(loans);
+        assertNotNull(loans.getContent());
+    }
+
     @AfterAll
     void cleanUp() throws MeedlException {
         VendorEntity foundGemsVendorEntity = vendorEntityRepository.findByVendorName(loanProduct.getVendors().get(0).getVendorName());

@@ -229,7 +229,7 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           where u.id = :id
           order by le.startDate desc
     """)
-    Page<LoanProjection> findAllLoanDisburestToLoanee(@Param("id") String id, Pageable pageRequest);
+    Page<LoanProjection> findAllLoanDisbursedToLoanee(@Param("id") String id, Pageable pageRequest);
 
     @Query("""
     SELECT SUM(lr.loanAmountApproved)
@@ -244,4 +244,38 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
 """)
     BigDecimal getTotalLoanAmountApproved(@Param("id") String id);
 
+    @Query("""
+          select
+          le.id as id,
+          le.startDate as startDate,
+          l.userIdentity.firstName as firstName,
+          l.userIdentity.lastName as lastName,
+          cle.loaneeLoanDetail.initialDeposit as initialDeposit,
+          lr.createdDate as createdDate, lr.loanAmountRequested as loanAmountRequested,
+          c.name as cohortName, c.startDate as cohortStartDate, loe.dateTimeOffered as offerDate,
+          p.name as programName,
+          lr.loanAmountApproved as loanAmountApproved,
+          c.tuitionAmount as tuitionAmount,
+          o.name as referredBy,
+          lld.amountOutstanding as amountOutstanding,
+          lld.amountRepaid as amountRepaid,
+              lp.interestRate as interestRate
+          
+              
+            from LoanEntity le
+          join LoanOfferEntity loe on loe.id = le.loanOfferId
+           join LoanProductEntity lp on lp.id = loe.loanProduct.id
+          join LoanRequestEntity lr on lr.id = loe.id
+          join LoanReferralEntity lfe on lfe.id = lr.id
+          join CohortLoaneeEntity cle on cle.id = lfe.cohortLoanee.id
+          join LoaneeLoanDetailEntity lld on lld.id = cle.loaneeLoanDetail.id    
+          join LoaneeEntity l on l.id = cle.loanee.id
+          join UserEntity u on u.id = l.userIdentity.id 
+          join CohortEntity c on c.id = cle.cohort.id
+          join ProgramEntity p on p.id = c.programId
+          join OrganizationEntity o on o.id = p.organizationIdentity.id
+          where l.id = :loaneeId
+          order by le.startDate desc
+    """)
+    Page<LoanProjection> findAllLoanDisbursedToLoaneeByLoaneeId(@Param("loaneeId") String loaneeId, Pageable pageRequest);
 }
