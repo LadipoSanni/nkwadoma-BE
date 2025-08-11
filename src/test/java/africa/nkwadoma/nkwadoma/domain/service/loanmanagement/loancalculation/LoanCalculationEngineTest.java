@@ -842,6 +842,8 @@ public class LoanCalculationEngineTest {
 
         when(cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(loaneeId, cohortId)).thenReturn(cohortLoanee);
 
+        when(loaneeLoanAggregateOutputPort.findByLoaneeLoanAgrregateByLoaneeLoanDetailId(anyString())).thenReturn(loaneeLoanAggregate);
+        when(loaneeLoanAggregateOutputPort.save(any())).thenReturn(loaneeLoanAggregate);
         when(cohortLoanDetailOutputPort.findByCohortId(anyString())).thenReturn(cohortLoanDetail);
         when(programLoanDetailOutputPort.findByProgramId(anyString())).thenReturn(programLoanDetail);
         when(organizationLoanDetailOutputPort.findByOrganizationId(anyString())).thenReturn(organizationLoanDetail);

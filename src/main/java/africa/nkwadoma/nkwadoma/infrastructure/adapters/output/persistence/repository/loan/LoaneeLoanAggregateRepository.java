@@ -50,6 +50,7 @@ public interface LoaneeLoanAggregateRepository extends JpaRepository<LoaneeLoanA
     SELECT
         SUM(l.historicalDebt) AS totalAmountReceived,
         SUM(l.totalAmountOutstanding) AS totalAmountOutstanding,
+        SUM(l.totalAmountRepaid) AS totalAmountRepaid,
         COUNT(l) AS numberOfLoanee
     FROM LoaneeLoanAggregateEntity l
     """)
