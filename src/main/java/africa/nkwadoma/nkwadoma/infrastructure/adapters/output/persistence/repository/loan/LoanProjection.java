@@ -8,6 +8,7 @@ import java.time.*;
 public interface LoanProjection {
     String getId();
     String getLoaneeId();
+    String getCohortId();
     String getFirstName();
     String getEmail();
     String getPhoneNumber();

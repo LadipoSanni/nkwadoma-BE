@@ -27,6 +27,7 @@ public class Loan {
     private String lastName;
     private String phoneNumber;
     private String loaneeId;
+    private String cohortId;
     private String loanOfferId;
     private String loanAccountId;
     private LoanRequestStatus status;
