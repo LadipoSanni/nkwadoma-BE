@@ -20,6 +20,7 @@ public interface LoanMapper {
 
     @Mapping(target = "loanAmountRequested", source = "loanAmountRequested")
     @Mapping(target = "loaneeId", source = "loaneeId")
+    @Mapping(target = "cohortId", source = "cohortId")
     @Mapping(target = "nextOfKin.id", source = "nextOfKinId")
     @Mapping(target = "nextOfKin.firstName", source = "nextOfKinFirstName")
     @Mapping(target = "nextOfKin.lastName", source = "nextOfKinLastName")

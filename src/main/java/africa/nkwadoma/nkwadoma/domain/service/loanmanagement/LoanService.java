@@ -158,6 +158,9 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         MeedlValidator.validateUUID(loan.getLoaneeId(), LoaneeMessages.PLEASE_PROVIDE_A_VALID_LOANEE_IDENTIFICATION.getMessage());
         Loanee foundLoanee = loaneeOutputPort.findLoaneeById(loan.getLoaneeId());
         LoanOffer loanOffer = loanOfferOutputPort.findLoanOfferById(loan.getLoanOfferId());
+        if (! foundLoanee.getId().equals(loanOffer.getLoaneeId())) {
+            throw new LoanException(LoanMessages.LOAN_DOES_NOT_BELONG_TO_LOANEE.getMessage());
+        }
         log.info("-----> Loan offer ----> {}", loanOffer);
         log.info("-----> offer response ----> {}", loanOffer.getLoaneeResponse());
         if (loanOffer.getLoaneeResponse() == null) {
@@ -449,6 +452,9 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }
         log.info("loanee verification state === {}", foundLoanReferral.getCohortLoanee().getLoanee().getUserIdentity().isIdentityVerified());
 
+        if (!loanReferral.getLoaneeUserId().equals(foundLoanReferral.getCohortLoanee().getLoanee().getUserIdentity().getId())) {
+            throw new LoanException(LoanMessages.LOAN_REFERRAL_DECISION_CANNOT_BE_MADE_ON_ANOTHER_LOANEE_REFERRAL.getMessage());
+        }
         checkLoanReferralHasBeenAcceptedOrDeclined(foundLoanReferral);
         loanReferral.validateLoanReferralStatus();
 

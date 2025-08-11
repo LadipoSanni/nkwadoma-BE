@@ -21,6 +21,8 @@ public class LoanQueryResponse {
     private String organizationName;
     private String cohortName;
     private String programName;
+    private String loaneeId;
+    private String cohortId;
     private BigDecimal amountRequested;
     private LocalDateTime offerDate;
     private LocalDateTime startDate;

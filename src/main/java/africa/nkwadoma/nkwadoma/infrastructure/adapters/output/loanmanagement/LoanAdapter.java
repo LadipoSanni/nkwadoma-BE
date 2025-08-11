@@ -137,13 +137,13 @@ public class LoanAdapter implements LoanOutputPort {
         MeedlValidator.validatePageNumber(pageNumber);
         Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
         Page<LoanProjection> loanProjection =
-                loanRepository.findAllLoanDisbursedToLoanee(id,pageRequest);
+                 loanRepository.findAllLoanDisbursedToLoanee(id,pageRequest);
         return loanProjection.map(loanMapper::mapProjectionToLoan);
     }
 
     @Override
     public Page<Loan> findAllLoanDisburedToLoaneeByLoaneeId(String loaneeId, int pageSize, int pageNumber) throws MeedlException {
-        log.info("request got here loaneeID = {} pageNumber == {}  pageSize == {}", loaneeId, pageNumber, pageSize);
+        log.info("request  got here loaneeID = {} pageNumber == {}  pageSize == {}", loaneeId, pageNumber, pageSize);
         MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validatePageNumber(pageNumber);

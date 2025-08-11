@@ -22,7 +22,7 @@ public interface LoanOutputPort {
 
     Page<Loan> filterLoanByProgram(String programId, String organizationId, int pageSize, int pageNumber) throws MeedlException;
 
-    String findLoanReferal(String id) throws MeedlException;
+    String findLoanReferal(String id) throws  MeedlException;
 
     Page<Loan> findAllLoanDisburedToLoanee(String id, int pageNumber, int pageSize) throws MeedlException;
 
