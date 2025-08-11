@@ -25,10 +25,18 @@ public interface OrganizationEmployeeRestMapper {
     }
 
     @Mapping(target = "meedlUser.id", source = "userId")
-    @Mapping(target = "identityRoles", source = "viewOrganizationAdminRequest.identityRoles")
-    @Mapping(target = "activationStatus", source = "viewOrganizationAdminRequest.activationStatus")
-    @Mapping(target = "pageNumber", source = "viewOrganizationAdminRequest.pageNumber")
-    @Mapping(target = "pageSize", source = "viewOrganizationAdminRequest.pageSize")
-    OrganizationEmployeeIdentity toOrganizationEmployeeIdentity(String userId, ViewOrganizationAdminRequest viewOrganizationAdminRequest);
+    OrganizationEmployeeIdentity toOrganizationEmployeeIdentity(String userId,
+                                                                String name,
+                                                                Set<IdentityRole> identityRoles,
+                                                                Set<ActivationStatus> activationStatuses,
+                                                                int pageNumber,
+                                                                int pageSize);
+
+//    @Mapping(target = "meedlUser.id", source = "userId")
+//    @Mapping(target = "identityRoles", source = "viewOrganizationAdminRequest.identityRoles")
+//    @Mapping(target = "activationStatus", source = "viewOrganizationAdminRequest.activationStatus")
+//    @Mapping(target = "pageNumber", source = "viewOrganizationAdminRequest.pageNumber")
+//    @Mapping(target = "pageSize", source = "viewOrganizationAdminRequest.pageSize")
+//    OrganizationEmployeeIdentity toOrganizationEmployeeIdentity(String userId, ViewOrganizationAdminRequest viewOrganizationAdminRequest);
 
 }

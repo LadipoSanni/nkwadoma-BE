@@ -66,8 +66,18 @@ public class OrganizationEmployeeController {
             "or hasRole('ORGANIZATION_ADMIN')" +
             "or hasRole('ORGANIZATION_ASSOCIATE')")
     public ResponseEntity<?> viewAllAdminInOrganization(@AuthenticationPrincipal Jwt meedlUser,
-                                                        @RequestParam Map<String, String> requestParams) throws MeedlException {
-        OrganizationEmployeeIdentity  organizationEmployeeIdentity = mapParamsToOrganizationEmployeeIdentity(meedlUser.getClaimAsString("sub"), requestParams);
+                                                        @RequestParam(required = false) String name,
+                                                        @RequestParam(required = false) Set<IdentityRole> identityRoles,
+                                                        @RequestParam(required = false) Set<ActivationStatus> activationStatuses,
+                                                        @RequestParam(required = false, defaultValue = "0") int pageNumber,
+                                                        @RequestParam(required = false, defaultValue = "10") int pageSize
+    ) throws MeedlException {
+        OrganizationEmployeeIdentity organizationEmployeeIdentity = organizationEmployeeRestMapper
+                .toOrganizationEmployeeIdentity(meedlUser.getClaimAsString("sub"),
+                name, identityRoles,
+                activationStatuses,
+                pageNumber, pageSize);
+        organizationEmployeeIdentity.setActivationStatus(organizationEmployeeIdentity.getActivationStatuses().stream().toList().get(0));
 
         Page<OrganizationEmployeeIdentity> organizationEmployeeIdentities =
                 viewOrganizationEmployeesUseCase.viewAllAdminInOrganization(organizationEmployeeIdentity);
@@ -115,57 +125,4 @@ public class OrganizationEmployeeController {
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
-
-    private OrganizationEmployeeIdentity mapParamsToOrganizationEmployeeIdentity(
-            String meedlUserId,
-            Map<String, String> params) {
-
-        OrganizationEmployeeIdentity organizationEmployeeIdentity = new OrganizationEmployeeIdentity();
-
-        UserIdentity userIdentity = new UserIdentity();
-        userIdentity.setId(meedlUserId);
-        organizationEmployeeIdentity.setMeedlUser(userIdentity);
-
-        if (params.containsKey("name")) {
-            organizationEmployeeIdentity.setName(params.get("name"));
-        }
-
-        if (params.containsKey("activationStatus")) {
-            Set<ActivationStatus> statuses = Arrays.stream(params.get("activationStatuses").split(","))
-                    .map(String::trim)
-                    .map(String::toUpperCase)
-                    .map(ActivationStatus::valueOf)
-                    .collect(Collectors.toSet());
-            organizationEmployeeIdentity.setActivationStatuses(statuses);
-            organizationEmployeeIdentity.setActivationStatus(statuses.stream().toList().get(0));
-        }
-
-        if (params.containsKey("identityRoles")) {
-            Set<IdentityRole> roles = Arrays.stream(params.get("identityRoles").split(","))
-                    .map(String::trim)
-                    .map(String::toUpperCase)
-                    .map(IdentityRole::valueOf)
-                    .collect(Collectors.toSet());
-            organizationEmployeeIdentity.setIdentityRoles(roles);
-        }
-
-        if (params.containsKey("organizationId")) {
-            organizationEmployeeIdentity.setOrganization(params.get("organizationId"));
-        }
-
-        if (params.containsKey("pageSize")) {
-            organizationEmployeeIdentity.setPageSize(Integer.parseInt(params.get("pageSize")));
-        } else {
-            organizationEmployeeIdentity.setPageSize(10);
-        }
-
-        if (params.containsKey("pageNumber")) {
-            organizationEmployeeIdentity.setPageNumber(Integer.parseInt(params.get("pageNumber")));
-        } else {
-            organizationEmployeeIdentity.setPageNumber(0);
-        }
-
-        return organizationEmployeeIdentity;
-    }
-
 }
