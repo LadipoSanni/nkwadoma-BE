@@ -319,7 +319,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }
         if (StringUtils.isNotEmpty(loan.getOrganizationId())) {
             return loanOutputPort.findAllByOrganizationId(loan.getOrganizationId(), loan.getPageSize(), loan.getPageNumber());
-        } else {
+        }if (StringUtils.isNotEmpty(loan.getLoaneeId())){
+            MeedlValidator.validateUUID(loan.getLoaneeId(),LoaneeMessages.LOANEES_ID_CANNOT_BE_EMPTY.getMessage());
+            return loanOutputPort.findAllLoanDisburedToLoaneeByLoaneeId(loan.getLoaneeId(),loan.getPageSize(), loan.getPageNumber());
+        }else {
             return loanOutputPort.findAllLoan(loan.getPageSize(), loan.getPageNumber());
         }
     }
