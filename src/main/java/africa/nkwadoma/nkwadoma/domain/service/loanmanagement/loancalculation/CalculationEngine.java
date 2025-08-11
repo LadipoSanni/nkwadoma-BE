@@ -130,9 +130,38 @@ public class CalculationEngine implements CalculationEngineUseCase {
     }
 
     private void updateLoanDetails(CalculationContext calculationContext) throws MeedlException {
+
+        calculateLoaneeLoanAgregate(calculationContext);
         calculateCohortLoanDetail(calculationContext);
         calculateProgramLoanDetail(calculationContext);
         calculateOrganizationLoanDetail(calculationContext);
+    }
+
+    private void calculateLoaneeLoanAgregate(CalculationContext calculationContext) throws MeedlException {
+        log.info("loanee loan detail before finding Aggregation == {}", calculationContext.getLoaneeLoanDetail());
+
+        BigDecimal currentAmountRepaid = calculationContext.getLoaneeLoanDetail().getAmountRepaid()
+                .subtract(calculationContext.getPreviousTotalAmountPaid());
+
+        log.info("current amount repaid == {} total amount repaid == {} previous amount repaid == {}",
+                currentAmountRepaid,calculationContext.getPreviousTotalAmountPaid(),
+                calculationContext.getLoaneeLoanDetail().getAmountRepaid());
+
+        log.info("previous interest incured ==  {}",calculationContext.getPreviousTotalInterestIncurred());
+
+        log.info("total interest incurred == {}",calculationContext.getLoaneeLoanDetail().getInterestIncurred());
+
+        BigDecimal currentInterest = calculationContext.getLoaneeLoanDetail().getInterestIncurred().subtract(calculationContext.getPreviousTotalInterestIncurred());
+        log.info("current interest {}",currentInterest);
+
+        LoaneeLoanAggregate loaneeLoanAggregate =
+                loaneeLoanAggregateOutputPort.findByLoaneeLoanAgrregateByLoaneeLoanDetailId(calculationContext.getLoaneeLoanDetail().getId());
+        log.info("found loanee loan aggregate {}", loaneeLoanAggregate);
+        loaneeLoanAggregate.setTotalAmountRepaid(loaneeLoanAggregate.getTotalAmountRepaid().add(currentAmountRepaid));
+        loaneeLoanAggregate.setTotalAmountOutstanding(loaneeLoanAggregate.getTotalAmountOutstanding()
+                .subtract(currentAmountRepaid).add(currentInterest));
+        loaneeLoanAggregateOutputPort.save(loaneeLoanAggregate);
+        log.info("loanee loan aggregate after saving {}", loaneeLoanAggregate);
     }
 
     private void calculateProgramLoanDetail(CalculationContext calculationContext) throws MeedlException {
@@ -305,7 +334,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
             log.info("Outstanding per payment {}", previousOutstandingAmount);
         }
 
-        calculateTotalInterestIncurred(calculationContext.getLoaneeLoanDetail(), totalInterestIncurred, lastDate,runningTotal);
+        calculateTotalInterestIncurred(calculationContext.getLoaneeLoanDetail(), totalInterestIncurred, lastDate);
     }
 
     private BigDecimal calculateInterestIncurredFromLastPaymentTillDate(LoaneeLoanDetail loaneeLoanDetail, LocalDateTime lastDate) {
@@ -339,7 +368,8 @@ public class CalculationEngine implements CalculationEngineUseCase {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private void calculateTotalInterestIncurred(LoaneeLoanDetail loaneeLoanDetail, BigDecimal totalInterestIncurred, LocalDateTime lastDate,BigDecimal amountRepaid) throws MeedlException {
+    private void calculateTotalInterestIncurred(LoaneeLoanDetail loaneeLoanDetail, BigDecimal totalInterestIncurred,
+                                                LocalDateTime lastDate) {
 
         BigDecimal interestIncurredFromLastPaymentTillDate = calculateInterestIncurredFromLastPaymentTillDate(loaneeLoanDetail, lastDate);
         loaneeLoanDetail.setAmountOutstanding(loaneeLoanDetail.getAmountOutstanding().add(interestIncurredFromLastPaymentTillDate));
@@ -348,17 +378,6 @@ public class CalculationEngine implements CalculationEngineUseCase {
         totalInterestIncurred = totalInterestIncurred.add(interestIncurredFromLastPaymentTillDate);
         loaneeLoanDetail.setInterestIncurred(decimalPlaceRoundUp(totalInterestIncurred));
         log.info("Total interest incurred in loanee loan details after all calculations are done ===> {}", loaneeLoanDetail.getInterestIncurred());
-
-        log.info("loanee loan detail before finding Aggregation == {}", loaneeLoanDetail);
-
-        LoaneeLoanAggregate loaneeLoanAggregate =
-                loaneeLoanAggregateOutputPort.findByLoaneeLoanAgrregateByLoaneeLoanDetailId(loaneeLoanDetail.getId());
-        log.info("found loanee loan aggregate {}", loaneeLoanAggregate);
-        loaneeLoanAggregate.setTotalAmountRepaid(loaneeLoanAggregate.getTotalAmountRepaid().add(amountRepaid));
-        loaneeLoanAggregate.setTotalAmountOutstanding(loaneeLoanAggregate.getTotalAmountOutstanding()
-                .subtract(amountRepaid).add(totalInterestIncurred));
-        loaneeLoanAggregateOutputPort.save(loaneeLoanAggregate);
-        log.info("loanee loan aggregate after saving {}", loaneeLoanAggregate);
     }
 
     BigDecimal getPreviousAmountOutstanding(BigDecimal previousOutstanding, LoaneeLoanDetail loaneeLoanDetail) {

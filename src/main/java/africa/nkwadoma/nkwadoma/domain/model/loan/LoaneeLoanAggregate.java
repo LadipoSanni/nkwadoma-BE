@@ -6,12 +6,14 @@ import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 
 @Setter
 @Getter
 @Builder
+@ToString
 public class LoaneeLoanAggregate {
 
     private String id;
