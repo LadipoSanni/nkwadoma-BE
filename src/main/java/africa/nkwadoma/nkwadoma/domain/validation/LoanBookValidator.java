@@ -80,6 +80,21 @@ public class LoanBookValidator {
         }
     }
 
+    public BigDecimal parseNumericStringToBigDecimal(String numericString) throws MeedlException {
+        if (MeedlValidator.isEmptyString(numericString)) {
+            log.error("Empty monetary value provided");
+            throw new MeedlException("Money value cannot be empty");
+        }
+        String cleanNumber = numericString.replace(",", "")
+//                .replace("\"", "")
+//                .replace("'", "")
+                .trim();
+        if (!cleanNumber.matches("\\d+(\\.\\d+)?")) {
+            log.error("Invalid monetary value provided {}", cleanNumber);
+            throw new MeedlException("Invalid monetary value provided: " + numericString);
+        }
+        return new BigDecimal(cleanNumber);
+    }
 
     private static boolean isNotValidUUID(String id) {
         if (id == null || id.isEmpty()) {
