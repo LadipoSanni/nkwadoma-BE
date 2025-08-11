@@ -22,5 +22,6 @@ public interface LoaneeLoanAggregateMapper {
 
     @Mapping(target = "totalAmountReceived", source = "historicalDebt")
     @Mapping(target = "totalAmountOutstanding", source = "totalAmountOutstanding")
+//    @Mapping(target = "totalAmountRepaid", source = "totalAmountRepaid")
     LoanDetailSummary mapLoaneeLoanAggregateTOLoanDetailSummary(LoaneeLoanAggregate loaneeLoanAggregate);
 }
