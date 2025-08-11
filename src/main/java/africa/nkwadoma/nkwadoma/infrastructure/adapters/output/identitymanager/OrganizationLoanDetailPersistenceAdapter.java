@@ -39,13 +39,14 @@ public class OrganizationLoanDetailPersistenceAdapter  implements OrganizationLo
         log.info("Finding organization loan detail at adapter level with id {}", id);
         OrganizationLoanDetailEntity organizationLoanDetailEntity =
                 organizationLoanDetailRepository.findByOrganizationId(id);
+        OrganizationLoanDetail organizationLoanDetail = null;
         if (ObjectUtils.isNotEmpty(organizationLoanDetailEntity)) {
             log.info("Organization loan detail entity found at adapter level interest incurred {} ", organizationLoanDetailEntity.getInterestIncurred());
-        }else {
+            organizationLoanDetail = organizationLoanDetailMapper.toOrganizationLoanDetail(organizationLoanDetailEntity);
+            organizationLoanDetail.setInterestIncurred(organizationLoanDetailEntity.getInterestIncurred());
+        } else {
             log.warn("No organization loan detail entity was found");
         }
-        OrganizationLoanDetail organizationLoanDetail=  organizationLoanDetailMapper.toOrganizationLoanDetail(organizationLoanDetailEntity);
-        organizationLoanDetail.setInterestIncurred(organizationLoanDetailEntity.getInterestIncurred());
         return organizationLoanDetail;
     }
 

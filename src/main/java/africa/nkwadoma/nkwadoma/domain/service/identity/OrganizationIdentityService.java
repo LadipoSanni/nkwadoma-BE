@@ -366,6 +366,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         IdentityRole inviterRole = inviter.getMeedlUser().getRole();
 
         if (isSuperAdmin(inviterRole)) {
+            log.info("The user inviting is a super admin");
             OrganizationIdentity organization = organizationIdentityOutputPort.findById(inviter.getOrganization());
             asynchronousMailingOutputPort.sendColleagueEmail(organization.getName(), savedUserIdentity);
             return String.format("Colleague with role %s invited", savedUserIdentity.getRole().name());
