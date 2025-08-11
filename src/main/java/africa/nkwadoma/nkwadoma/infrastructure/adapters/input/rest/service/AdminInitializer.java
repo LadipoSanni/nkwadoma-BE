@@ -159,7 +159,7 @@ public class AdminInitializer {
                 userIdentity = saveUserToDB(userIdentity);
             }else {
                 userIdentity = foundUserIdentity;
-                log.info("First user already exists");
+                log.info("First user already exists in db {}", foundUserIdentity);
             }
         }
         return userIdentity;

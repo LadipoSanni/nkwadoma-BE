@@ -152,7 +152,7 @@ class OrganizationEmployeeIdentityAdapterTest {
             OrganizationIdentity organization = OrganizationIdentity.builder().name("A").id(amazingGrace.getId())
                     .pageNumber(pageNumber).pageSize(pageSize).build();
             organizationEmployeeIdentities =
-                    organizationEmployeeIdentityOutputPort.searchAdmins(organization.getId(), organizationEmployeeIdentity);
+                    organizationEmployeeIdentityOutputPort.searchOrFindAllAdminInOrganization(organization.getId(), organizationEmployeeIdentity);
         }catch (MeedlException exception){
             log.error("Error finding organization employees", exception);
         }
@@ -163,7 +163,7 @@ class OrganizationEmployeeIdentityAdapterTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY,StringUtils.SPACE,"hdhdh"})
     void findAllAdminInOrganizationWithInvalidId(String invalidOrganizationId){
-        assertThrows(MeedlException.class,()-> organizationEmployeeIdentityOutputPort.findAllAdminInOrganization(invalidOrganizationId,
+        assertThrows(MeedlException.class,()-> organizationEmployeeIdentityOutputPort.searchOrFindAllAdminInOrganization(invalidOrganizationId,
                 organizationEmployeeIdentity));
     }
 
@@ -175,7 +175,7 @@ class OrganizationEmployeeIdentityAdapterTest {
         Page<OrganizationEmployeeIdentity> organizationEmployeeIdentities = null;
         try{
             organizationEmployeeIdentities =
-                    organizationEmployeeIdentityOutputPort.findAllAdminInOrganization(amazingGrace.getId(),
+                    organizationEmployeeIdentityOutputPort.searchOrFindAllAdminInOrganization(amazingGrace.getId(),
                             organizationEmployeeIdentity);
         }catch (MeedlException exception){
             log.error("Error finding organization employees", exception);
@@ -221,7 +221,7 @@ class OrganizationEmployeeIdentityAdapterTest {
     void searchAdminsByValidName() throws MeedlException {
         organizationEmployeeIdentity.setName(joel.getFirstName());
         organizationEmployeeIdentity.setIdentityRoles(Set.of(joel.getRole()));
-        Page<OrganizationEmployeeIdentity> result = organizationEmployeeIdentityOutputPort.searchAdmins(
+        Page<OrganizationEmployeeIdentity> result = organizationEmployeeIdentityOutputPort.searchOrFindAllAdminInOrganization(
                 organizationId, organizationEmployeeIdentity);
 
         assertThat(result.getTotalElements()).isEqualTo(1);
@@ -230,7 +230,7 @@ class OrganizationEmployeeIdentityAdapterTest {
     @Order(2)
     void searchAdminsByValidEmail() throws MeedlException {
         organizationEmployeeIdentity.setName(joel.getEmail());
-        Page<OrganizationEmployeeIdentity> result = organizationEmployeeIdentityOutputPort.searchAdmins(
+        Page<OrganizationEmployeeIdentity> result = organizationEmployeeIdentityOutputPort.searchOrFindAllAdminInOrganization(
                 organizationId, organizationEmployeeIdentity);
 
         assertThat(result.getTotalElements()).isEqualTo(1);
@@ -241,7 +241,7 @@ class OrganizationEmployeeIdentityAdapterTest {
     @Order(3)
     void searchNameWithNoMatch() throws MeedlException {
         organizationEmployeeIdentity.setName("no match");
-        Page<OrganizationEmployeeIdentity> result = organizationEmployeeIdentityOutputPort.searchAdmins(
+        Page<OrganizationEmployeeIdentity> result = organizationEmployeeIdentityOutputPort.searchOrFindAllAdminInOrganization(
                 organizationId, organizationEmployeeIdentity);
         assertThat(result.getTotalElements()).isZero();
     }
@@ -250,7 +250,7 @@ class OrganizationEmployeeIdentityAdapterTest {
     @Order(4)
     void searchWithInvalidOrganizationId() {
         assertThrows(MeedlException.class, () -> {
-            organizationEmployeeIdentityOutputPort.searchAdmins(
+            organizationEmployeeIdentityOutputPort.searchOrFindAllAdminInOrganization(
                     "not-a-uuid", organizationEmployeeIdentity);
         });
     }

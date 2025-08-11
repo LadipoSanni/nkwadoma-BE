@@ -76,8 +76,6 @@ public class OrganizationEmployeeController {
 
         log.info("The organization employee at the controller {}",organizationEmployeeIdentity);
         log.info("Roles {}, activation statuses {}", identityRoles, activationStatuses);
-        organizationEmployeeIdentity.setActivationStatus(organizationEmployeeIdentity.getActivationStatuses().stream().toList().get(0));
-
         Page<OrganizationEmployeeIdentity> organizationEmployeeIdentities =
                 viewOrganizationEmployeesUseCase.viewAllAdminInOrganization(organizationEmployeeIdentity);
 
