@@ -4,10 +4,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.service;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loancalculation.CalculationEngineUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.LoanMetricsUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.Industry;
@@ -15,6 +12,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
@@ -31,6 +29,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -48,6 +47,7 @@ public class AdminInitializer {
     private final LoanMetricsUseCase loanMetricsUseCase;
     private final PortfolioOutputPort portfolioOutputPort;
     private final CalculationEngineUseCase calculationEngineUseCase;
+    private final OrganizationLoanDetailOutputPort organizationLoanDetailOutputPort;
 
     @Value("${superAdmin.email}")
     private String SUPER_ADMIN_EMAIL ;
@@ -107,6 +107,12 @@ public class AdminInitializer {
             log.warn("Failed to create organization identity on db for first organization {}", exception.getMessage());
             savedOrganizationIdentity = organizationIdentityOutputPort.findByEmail(organizationIdentity.getEmail());
         }
+        OrganizationLoanDetail organizationLoanDetail = organizationLoanDetailOutputPort.findByOrganizationId(organizationIdentity.getId());
+        if (ObjectUtils.isEmpty(organizationLoanDetail)){
+            log.info("No organization loan details was found for this first organization. \n------> Saving a new organization loan detail.");
+            organizationLoanDetail = buildOrganizationLoanDetail(organizationIdentity);
+            organizationLoanDetailOutputPort.save(organizationLoanDetail);
+        }
         OrganizationEmployeeIdentity employeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
         employeeIdentity.setOrganization(organizationIdentity.getId());
         employeeIdentity.setActivationStatus(ActivationStatus.ACTIVE);
@@ -135,6 +141,8 @@ public class AdminInitializer {
             if (foundOrganization.isEmpty()) {
                 log.info("Creating first organization identity");
                 organizationIdentity = identityManagerOutPutPort.createKeycloakClient(organizationIdentity);
+            }else {
+                organizationIdentity.setId(foundOrganization.get().getId());
             }
         } catch (MeedlException exception) {
             log.warn("Failed to create organization identity's client representation for first organization {}", exception.getMessage());
@@ -142,6 +150,13 @@ public class AdminInitializer {
             organizationIdentity.setId(foundClient.getId());
         }
         return organizationIdentity;
+    }
+    private OrganizationLoanDetail buildOrganizationLoanDetail(OrganizationIdentity organizationIdentity) {
+        return OrganizationLoanDetail.builder()
+                .organization(organizationIdentity).amountReceived(BigDecimal.valueOf(0))
+                .amountRequested(BigDecimal.valueOf(0)).amountRepaid(BigDecimal.valueOf(0))
+                .interestIncurred(BigDecimal.ZERO)
+                .outstandingAmount(BigDecimal.valueOf(0)).build();
     }
 
     public UserIdentity inviteFirstUser(UserIdentity userIdentity) throws MeedlException {
