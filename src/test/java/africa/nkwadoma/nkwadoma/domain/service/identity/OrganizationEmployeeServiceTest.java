@@ -159,7 +159,7 @@ class OrganizationEmployeeServiceTest {
 
         when(userIdentityOutputPort.findById(userIdentity.getId())).thenReturn(userIdentity);
         when(organizationIdentityOutputPort.findByUserId(userIdentity.getId())).thenReturn(Optional.of(organization));
-        when(organizationEmployeeOutputPort.findAllAdminInOrganization(eq("org-123"), any())).thenReturn(Page.empty());
+        when(organizationEmployeeOutputPort.searchOrFindAllAdminInOrganization(eq("org-123"), any())).thenReturn(Page.empty());
 
         Page<OrganizationEmployeeIdentity> result = organizationEmployeeService.viewAllAdminInOrganization(organizationEmployeeIdentity);
         assertNotNull(result);
@@ -280,7 +280,7 @@ class OrganizationEmployeeServiceTest {
         organizationEmployeeIdentity.setName(userIdentity.getEmail());
         when(userIdentityOutputPort.findById(userIdentity.getId())).thenReturn(userIdentity);
         when(organizationIdentityOutputPort.findByUserId(userIdentity.getId())).thenReturn(Optional.of(organization));
-        when(organizationEmployeeOutputPort.searchAdmins(eq(organization.getId()), any())).thenReturn(mockPage);
+        when(organizationEmployeeOutputPort.searchOrFindAllAdminInOrganization(eq(organization.getId()), any())).thenReturn(mockPage);
 
         Page<OrganizationEmployeeIdentity> result = organizationEmployeeService.viewAllAdminInOrganization(organizationEmployeeIdentity);
         assertNotNull(result);
@@ -302,7 +302,7 @@ class OrganizationEmployeeServiceTest {
 
         when(userIdentityOutputPort.findById(userId)).thenReturn(user);
         when(organizationIdentityOutputPort.findByUserId(userId)).thenReturn(Optional.of(organization));
-        when(organizationEmployeeOutputPort.searchAdmins(eq(organization.getId()), any())).thenReturn(Page.empty());
+        when(organizationEmployeeOutputPort.searchOrFindAllAdminInOrganization(eq(organization.getId()), any())).thenReturn(Page.empty());
 
         Page<OrganizationEmployeeIdentity> result = organizationEmployeeService.viewAllAdminInOrganization(request);
         assertNotNull(result);

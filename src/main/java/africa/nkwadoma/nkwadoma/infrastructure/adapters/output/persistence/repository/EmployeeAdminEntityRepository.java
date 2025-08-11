@@ -29,7 +29,7 @@ public interface EmployeeAdminEntityRepository extends JpaRepository<Organizatio
     @Query("SELECT o FROM OrganizationEmployeeEntity o " +
             "WHERE o.organization = :organizationId " +
             "AND (:roles IS NULL OR o.meedlUser.role IN :roles) " +
-            "AND (:activationStatus IS NULL OR o.activationStatus = :activationStatus) " +
+            "AND (:activationStatuses IS NULL OR o.activationStatus IN :activationStatuses) " +
             "AND (:enabled IS NULL OR o.meedlUser.enabled = :enabled)" +
             "AND (" +
             "   upper(concat(o.meedlUser.firstName, ' ', o.meedlUser.lastName)) LIKE upper(concat('%', :nameFragment, '%')) " +
@@ -43,7 +43,7 @@ public interface EmployeeAdminEntityRepository extends JpaRepository<Organizatio
             @Param("organizationId") String organizationId,
             @Param("nameFragment") String nameFragment,
             @Param("roles") Set<IdentityRole> roles,
-            @Param("activationStatus") ActivationStatus activationStatus,
+            @Param("activationStatuses") Set<ActivationStatus> activationStatuses,
             @Param("enabled") Boolean onlyEnabled,
             Pageable pageable
     );
@@ -53,14 +53,14 @@ public interface EmployeeAdminEntityRepository extends JpaRepository<Organizatio
     SELECT e FROM OrganizationEmployeeEntity e
     WHERE e.organization = :organizationId
       AND e.meedlUser.role IN :roles
-      AND (:status IS NULL OR e.activationStatus = :status)
+      AND (:activationStatuses IS NULL OR e.activationStatus IN :activationStatuses)
       AND (:enabled IS NULL OR e.meedlUser.enabled = :enabled)
       ORDER BY e.meedlUser.createdAt DESC
 """)
     Page<OrganizationEmployeeEntity> findAllByOrgIdRoleInAndOptionalFilters(
             @Param("organizationId") String organizationId,
             @Param("roles") Set<IdentityRole> roles,
-            @Param("status") ActivationStatus status,
+            @Param("activationStatuses") Set<ActivationStatus>  activationStatuses,
             @Param("enabled") Boolean enabled,
             Pageable pageable
     );

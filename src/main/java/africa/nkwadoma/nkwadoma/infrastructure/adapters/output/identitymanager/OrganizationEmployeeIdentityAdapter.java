@@ -134,27 +134,7 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
     }
 
     @Override
-    public Page<OrganizationEmployeeIdentity> searchAdmins(String organizationId, OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
-        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-        MeedlValidator.validateCollection(organizationEmployeeIdentity.getIdentityRoles(), IdentityMessages.INVALID_ROLE.getMessage());
-        MeedlValidator.validatePageNumber(organizationEmployeeIdentity.getPageNumber());
-        MeedlValidator.validatePageSize(organizationEmployeeIdentity.getPageSize());
-        MeedlValidator.validateDataElement(organizationEmployeeIdentity.getName(), "Please input a valid name to search.");
-
-        Pageable pageRequest = PageRequest
-                .of(organizationEmployeeIdentity.getPageNumber(),
-                        organizationEmployeeIdentity.getPageSize());
-        log.info("Before repository search called --- page request : {}", pageRequest);
-        Page<OrganizationEmployeeEntity> organizationEmployeeEntities =
-                employeeAdminEntityRepository.findAdminsByNameFilters(organizationId,
-                                organizationEmployeeIdentity.getName(),
-                                organizationEmployeeIdentity.getIdentityRoles(),
-                                organizationEmployeeIdentity.getActivationStatus(), null, pageRequest);
-        return organizationEmployeeEntities.map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity);
-    }
-
-    @Override
-    public Page<OrganizationEmployeeIdentity> findAllAdminInOrganization(String organizationId, OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
+    public Page<OrganizationEmployeeIdentity> searchOrFindAllAdminInOrganization(String organizationId, OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         MeedlValidator.validateCollection(organizationEmployeeIdentity.getIdentityRoles(), IdentityMessages.INVALID_ROLE.getMessage());
         MeedlValidator.validatePageNumber(organizationEmployeeIdentity.getPageNumber());
@@ -163,11 +143,21 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
         Pageable pageRequest = PageRequest
                 .of(organizationEmployeeIdentity.getPageNumber(),
                         organizationEmployeeIdentity.getPageSize());
-        Page<OrganizationEmployeeEntity> organizationEmployeeEntities =
-                employeeAdminEntityRepository
-                        .findAllByOrgIdRoleInAndOptionalFilters(organizationId,
-                                organizationEmployeeIdentity.getIdentityRoles(),
-                                organizationEmployeeIdentity.getActivationStatus(), null, pageRequest);
+        Page<OrganizationEmployeeEntity> organizationEmployeeEntities ;
+        if (MeedlValidator.isNotEmptyString(organizationEmployeeIdentity.getName())){
+            log.info("output port search for employee with name {}", organizationEmployeeIdentity.getName());
+            organizationEmployeeEntities =
+                    employeeAdminEntityRepository.findAdminsByNameFilters(organizationId,
+                            organizationEmployeeIdentity.getName(),
+                            organizationEmployeeIdentity.getIdentityRoles(),
+                            organizationEmployeeIdentity.getActivationStatuses(), null, pageRequest);
+        }else {
+            organizationEmployeeEntities =
+                    employeeAdminEntityRepository
+                            .findAllByOrgIdRoleInAndOptionalFilters(organizationId,
+                                    organizationEmployeeIdentity.getIdentityRoles(),
+                                    organizationEmployeeIdentity.getActivationStatuses(), null, pageRequest);
+        }
         return organizationEmployeeEntities.map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity);
     }
 

@@ -302,6 +302,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     public Optional<OrganizationIdentity> findByUserId(String userId) throws MeedlException {
         MeedlValidator.validateUUID(userId, IdentityMessages.INVALID_USER_ID.getMessage());
         Optional<OrganizationEntity> organizationEntity = organizationEntityRepository.findByUserId(userId);
+        log.info("The user id used in finding organization is {}", userId);
         if (organizationEntity.isEmpty()) return Optional.empty();
         log.info("Organization entity retrieved from DB by user id: {}", organizationEntity.get());
         OrganizationIdentity organizationIdentity = organizationIdentityMapper.toOrganizationIdentity(organizationEntity.get());

@@ -27,8 +27,7 @@ public interface OrganizationEmployeeIdentityOutputPort {
 
     List<OrganizationEmployeeIdentity> findAllOrganizationEmployees(String organizationId);
 
-    Page<OrganizationEmployeeIdentity> searchAdmins(String organizationId, OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException;
-    Page<OrganizationEmployeeIdentity> findAllAdminInOrganization(String organizationId, OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException;
+    Page<OrganizationEmployeeIdentity> searchOrFindAllAdminInOrganization(String organizationId, OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException;
 
     @Deprecated
     Page<OrganizationEmployeeIdentity> findAllEmployeesInOrganization(String organizationId,String name, int pageSize, int pageNumber) throws MeedlException;

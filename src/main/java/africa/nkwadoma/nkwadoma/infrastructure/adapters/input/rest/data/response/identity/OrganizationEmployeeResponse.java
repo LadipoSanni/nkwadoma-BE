@@ -3,6 +3,8 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.respons
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -15,6 +17,7 @@ public class OrganizationEmployeeResponse {
     private String firstName;
     private String lastName;
     private String email;
+    private LocalDateTime createdAt;
     private ActivationStatus activationStatus;
     private IdentityRole role;
 }
