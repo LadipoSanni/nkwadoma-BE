@@ -284,6 +284,20 @@ class LoanAdapterTest {
     }
 
     @Test
+    @Order(8)
+    void findAllLoanDisbursedToALoaneeByLoaneeId(){
+
+        Page<Loan> loans = Page.empty();
+        try{
+            loans = loanOutputPort.findAllLoanDisburedToLoaneeByLoaneeId(loanee.getId(), pageSize,pageNumber);
+        }catch (MeedlException e){
+            log.error("Error finding loans : {}", e.getMessage());
+        }
+        assertNotNull(loans);
+        assertNotNull(loans.getContent());
+    }
+
+    @Test
     @Order(9)
     void searchAllLoanDisbursalByOrganizationNameAndLoaneeId(){
         Page<Loan> loans = Page.empty();

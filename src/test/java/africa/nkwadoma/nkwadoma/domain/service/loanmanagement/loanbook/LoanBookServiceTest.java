@@ -1,6 +1,5 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanmanagement.loanbook;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.AsynchronousLoanBookProcessingUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.LoanBookUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
@@ -28,10 +27,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import africa.nkwadoma.nkwadoma.testUtilities.TestUtils;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -47,13 +43,11 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
 public class LoanBookServiceTest {
+
     @Autowired
     private LoanBookUseCase loanBookUseCase;
     @Autowired
-    private AsynchronousLoanBookProcessingUseCase asynchronousLoanBookProcessingUseCase;
-    @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
-    private OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
     @Autowired
     private IdentityManagerOutputPort identityManagerOutputPort;
     private final String absoluteCSVFilePath = "/Users/admin/nkwadoma-BE/src/test/java/africa/nkwadoma/nkwadoma/domain/service/loanManagement/loanBook/";
@@ -172,7 +166,7 @@ public class LoanBookServiceTest {
         RepaymentHistory match2 = createRepayment(UUID.randomUUID().toString(), email);
         RepaymentHistory nonMatch = createRepayment(UUID.randomUUID().toString(), "other@example.com");
 
-        List<RepaymentHistory> result = asynchronousLoanBookProcessingUseCase.getRepaymentsByEmail(
+        List<RepaymentHistory> result = loanBookUseCase.getRepaymentsByEmail(
                 List.of(match1, match2, nonMatch), email
         );
 
@@ -187,7 +181,7 @@ public class LoanBookServiceTest {
         RepaymentHistory nonMatch1 = createRepayment(UUID.randomUUID().toString(), "nope1@example.com");
         RepaymentHistory nonMatch2 = createRepayment(UUID.randomUUID().toString(), "nope2@example.com");
 
-        List<RepaymentHistory> result = asynchronousLoanBookProcessingUseCase.getRepaymentsByEmail(
+        List<RepaymentHistory> result = loanBookUseCase.getRepaymentsByEmail(
                 List.of(nonMatch1, nonMatch2), email
         );
 
@@ -201,7 +195,7 @@ public class LoanBookServiceTest {
                 .loanee(null)
                 .build();
 
-        List<RepaymentHistory> result = asynchronousLoanBookProcessingUseCase.getRepaymentsByEmail(
+        List<RepaymentHistory> result = loanBookUseCase.getRepaymentsByEmail(
                 List.of(rh), "any@example.com"
         );
 
@@ -216,7 +210,7 @@ public class LoanBookServiceTest {
                 .loanee(loanee)
                 .build();
 
-        List<RepaymentHistory> result = asynchronousLoanBookProcessingUseCase.getRepaymentsByEmail(
+        List<RepaymentHistory> result = loanBookUseCase.getRepaymentsByEmail(
                 List.of(rh), "any@example.com"
         );
 
@@ -232,7 +226,7 @@ public class LoanBookServiceTest {
                 .loanee(loanee)
                 .build();
 
-        List<RepaymentHistory> result = asynchronousLoanBookProcessingUseCase.getRepaymentsByEmail(
+        List<RepaymentHistory> result = loanBookUseCase.getRepaymentsByEmail(
                 List.of(rh), "any@example.com"
         );
 
@@ -241,7 +235,7 @@ public class LoanBookServiceTest {
 
     @Test
     void returnsEmptyListWhenRepaymentHistoriesIsEmpty() {
-        List<RepaymentHistory> result = asynchronousLoanBookProcessingUseCase.getRepaymentsByEmail(
+        List<RepaymentHistory> result = loanBookUseCase.getRepaymentsByEmail(
                 List.of(), "test@example.com"
         );
 
