@@ -18,6 +18,7 @@ public class LoaneeLoanAggregate {
     private String loaneeId;
     private BigDecimal historicalDebt;
     private BigDecimal totalAmountOutstanding;
+    private BigDecimal totalAmountRepaid;
     private int numberOfLoans;
     private String firstName;
     private String lastName;
