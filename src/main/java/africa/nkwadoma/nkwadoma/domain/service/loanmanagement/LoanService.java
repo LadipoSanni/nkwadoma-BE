@@ -172,8 +172,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             throw new LoanException(LoanMessages.LOAN_ALREADY_EXISTS_FOR_THIS_LOANEE.getMessage());
         }
         if (loan.getStartDate() != null){
+            log.info("Loan start date was provided as {}", loan.getStartDate());
             loan = loan.buildLoan(foundLoanee, getLoanAccountId(foundLoanee),loan.getLoanOfferId(), loan.getStartDate());
         }else {
+            log.info("Loan start date wasn't provided");
             loan = loan.buildLoan(foundLoanee, getLoanAccountId(foundLoanee), loan.getLoanOfferId());
         }
 
@@ -319,7 +321,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }
         if (StringUtils.isNotEmpty(loan.getOrganizationId())) {
             return loanOutputPort.findAllByOrganizationId(loan.getOrganizationId(), loan.getPageSize(), loan.getPageNumber());
-        } else {
+        }if (StringUtils.isNotEmpty(loan.getLoaneeId())){
+            MeedlValidator.validateUUID(loan.getLoaneeId(),LoaneeMessages.LOANEES_ID_CANNOT_BE_EMPTY.getMessage());
+            return loanOutputPort.findAllLoanDisburedToLoaneeByLoaneeId(loan.getLoaneeId(),loan.getPageSize(), loan.getPageNumber());
+        }else {
             return loanOutputPort.findAllLoan(loan.getPageSize(), loan.getPageNumber());
         }
     }
@@ -344,6 +349,19 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             log.info("Found organization loan summary {}", loanDetailSummary);
         }
         return loanDetailSummary;
+    }
+
+    @Override
+    public Page<Loan> searchDisbursedLoan(Loan loan) throws MeedlException {
+        MeedlValidator.validatePageSize(loan.getPageSize());
+        MeedlValidator.validatePageNumber(loan.getPageNumber());
+        UserIdentity userIdentity = userIdentityOutputPort.findById(loan.getActorId());
+        if (userIdentity.getRole().isMeedlRole()) {
+            MeedlValidator.validateUUID(loan.getLoaneeId(),LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+            return loanOutputPort.searchLoanByOrganizationNameAndLoaneeId(loan);
+        }else {
+            return loanOutputPort.searchLoanByOrganizationNameAndUserId(loan,userIdentity.getId());
+        }
     }
 
     private String getLoanAccountId(Loanee foundLoanee) throws MeedlException {

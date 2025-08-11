@@ -16,6 +16,7 @@ public class OrganizationEmployeeIdentity {
     private String name;
     private UserIdentity meedlUser;
     private Set<IdentityRole> identityRoles;
+    private Set<ActivationStatus> activationStatuses;
     private String organization;
     private ActivationStatus activationStatus;
     private int pageNumber;
