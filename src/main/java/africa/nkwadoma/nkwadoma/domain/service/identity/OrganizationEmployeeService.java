@@ -63,6 +63,7 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
                 = organizationIdentityOutputPort.findByUserId(organizationEmployeeIdentity.getMeedlUser().getId())
                     .orElseThrow(()-> new MeedlException("User does not exist in an organization"));
         setRolesToView(organizationEmployeeIdentity, foundActor);
+//        setActivationStatus()
         boolean actorHasViewPermission = isActorHavingViewPermission(organizationEmployeeIdentity, foundActor);
         if (!actorHasViewPermission){
             log.warn("Actor viewing empty employee list because permission denied");

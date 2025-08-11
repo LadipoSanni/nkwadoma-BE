@@ -19,6 +19,7 @@ public interface OrganizationEmployeeRestMapper {
     @Mapping(target = "firstName", source = "meedlUser.firstName")
     @Mapping(target = "lastName", source = "meedlUser.lastName")
     @Mapping(target = "email", source = "meedlUser.email")
+    @Mapping(target = "createdAt", source = "meedlUser.createdAt")
     @Mapping(target = "role", source = "meedlUser.role")
     OrganizationEmployeeResponse toOrganizationEmployeeResponse(OrganizationEmployeeIdentity organizationEmployeeIdentity);
 
