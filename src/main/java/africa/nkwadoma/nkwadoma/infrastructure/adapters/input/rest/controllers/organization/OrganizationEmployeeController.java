@@ -126,7 +126,7 @@ public class OrganizationEmployeeController {
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
 
-    @PostMapping("organization/approve/invite")
+    @PostMapping("approve/invite/colleague")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> respondToColleagueInvite(@RequestParam(name = "organizationEmployeeId") String organizationEmployeeId) throws MeedlException {
         String response = viewOrganizationEmployeesUseCase.respondToColleagueInvitation(organizationEmployeeId);
