@@ -1,9 +1,10 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.organization;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
+import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.ViewOrganizationAdminRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.education.*;
@@ -21,6 +22,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -55,42 +57,6 @@ public class OrganizationEmployeeController {
                 HttpStatus.OK.toString()));
     }
 
-    @GetMapping("search/admin")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
-            "or hasRole('MEEDL_ADMIN')" +
-            "or hasRole('MEEDL_ASSOCIATE')" +
-            "or hasRole('PORTFOLIO_MANAGER')" +
-            "or hasRole('ORGANIZATION_SUPER_ADMIN')" +
-            "or hasRole('ORGANIZATION_ADMIN')" +
-            "or hasRole('ORGANIZATION_ASSOCIATE')")
-    public ResponseEntity<?> searchOrganizationEmployees(@AuthenticationPrincipal Jwt meedlUser,
-                                                         @RequestBody ViewOrganizationAdminRequest viewOrganizationAdminRequest) throws MeedlException {
-
-        OrganizationEmployeeIdentity  organizationEmployeeIdentity = organizationEmployeeRestMapper.toOrganizationEmployeeIdentity(meedlUser.getClaimAsString("sub"), viewOrganizationAdminRequest);
-
-        Page<OrganizationEmployeeIdentity> organizationEmployeeIdentities =
-                viewOrganizationEmployeesUseCase.searchOrganizationAdmin(organizationEmployeeIdentity);
-        List<OrganizationEmployeeResponse> organizationEmployeeResponses =
-                organizationEmployeeIdentities.stream().map(organizationEmployeeRestMapper::toOrganizationEmployeeResponse).toList();
-
-        PaginatedResponse<OrganizationEmployeeResponse> paginatedResponse =new PaginatedResponse<>(
-                organizationEmployeeResponses,
-                organizationEmployeeIdentities.hasNext(),
-                organizationEmployeeIdentities.getTotalPages(),
-                organizationEmployeeIdentities.getTotalElements() ,
-                organizationEmployeeIdentity.getPageNumber(),
-                organizationEmployeeIdentity.getPageSize()
-        );
-
-        ApiResponse<PaginatedResponse<OrganizationEmployeeResponse>> apiResponse = ApiResponse.<PaginatedResponse<OrganizationEmployeeResponse>>builder()
-                .data(paginatedResponse)
-                .message(SuccessMessages.SUCCESSFUL_RESPONSE)
-                .statusCode(HttpStatus.OK.toString())
-                .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-    }
-
-
     @GetMapping("view-all/admin")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
             "or hasRole('MEEDL_ADMIN')" +
@@ -100,8 +66,18 @@ public class OrganizationEmployeeController {
             "or hasRole('ORGANIZATION_ADMIN')" +
             "or hasRole('ORGANIZATION_ASSOCIATE')")
     public ResponseEntity<?> viewAllAdminInOrganization(@AuthenticationPrincipal Jwt meedlUser,
-                                                        @RequestBody ViewOrganizationAdminRequest viewOrganizationAdminRequest) throws MeedlException {
-        OrganizationEmployeeIdentity  organizationEmployeeIdentity = organizationEmployeeRestMapper.toOrganizationEmployeeIdentity(meedlUser.getClaimAsString("sub"), viewOrganizationAdminRequest);
+                                                        @RequestParam(required = false) String name,
+                                                        @RequestParam(required = false) Set<IdentityRole> identityRoles,
+                                                        @RequestParam(required = false) Set<ActivationStatus> activationStatuses,
+                                                        @RequestParam(required = false, defaultValue = "0") int pageNumber,
+                                                        @RequestParam(required = false, defaultValue = "10") int pageSize
+    ) throws MeedlException {
+        OrganizationEmployeeIdentity organizationEmployeeIdentity = organizationEmployeeRestMapper
+                .toOrganizationEmployeeIdentity(meedlUser.getClaimAsString("sub"),
+                name, identityRoles,
+                activationStatuses,
+                pageNumber, pageSize);
+        organizationEmployeeIdentity.setActivationStatus(organizationEmployeeIdentity.getActivationStatuses().stream().toList().get(0));
 
         Page<OrganizationEmployeeIdentity> organizationEmployeeIdentities =
                 viewOrganizationEmployeesUseCase.viewAllAdminInOrganization(organizationEmployeeIdentity);
