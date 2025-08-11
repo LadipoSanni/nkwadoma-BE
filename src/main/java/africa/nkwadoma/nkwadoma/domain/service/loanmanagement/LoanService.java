@@ -172,8 +172,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             throw new LoanException(LoanMessages.LOAN_ALREADY_EXISTS_FOR_THIS_LOANEE.getMessage());
         }
         if (loan.getStartDate() != null){
+            log.info("Loan start date was provided as {}", loan.getStartDate());
             loan = loan.buildLoan(foundLoanee, getLoanAccountId(foundLoanee),loan.getLoanOfferId(), loan.getStartDate());
         }else {
+            log.info("Loan start date wasn't provided");
             loan = loan.buildLoan(foundLoanee, getLoanAccountId(foundLoanee), loan.getLoanOfferId());
         }
 
