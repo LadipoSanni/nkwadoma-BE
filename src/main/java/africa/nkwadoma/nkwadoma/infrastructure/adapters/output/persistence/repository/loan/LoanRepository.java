@@ -110,7 +110,9 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           lr.createdDate as createdDate,
           lr.loanAmountRequested as loanAmountRequested,
           c.name as cohortName, c.startDate as cohortStartDate, loe.dateTimeOffered as offerDate,
-          p.name as programName,lr.loanAmountApproved as loanAmountApproved,c.tuitionAmount as tuitionAmount
+          p.name as programName,lr.loanAmountApproved as loanAmountApproved,c.tuitionAmount as tuitionAmount,
+          l.id as loaneeId , c.id as cohortId
+
 
           from LoanEntity le
           join LoanOfferEntity loe on loe.id = le.loanOfferId
@@ -138,7 +140,9 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           p.name as programName,
           lr.loanAmountApproved as loanAmountApproved,
           c.tuitionAmount as tuitionAmount,
-          o.name as referredBy
+          o.name as referredBy,
+          l.id as loaneeId , c.id as cohortId
+
           from LoanEntity le
           join LoanOfferEntity loe on loe.id = le.loanOfferId
           join LoanRequestEntity lr on lr.id = loe.id
@@ -211,8 +215,9 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           o.name as referredBy,
           lld.amountOutstanding as amountOutstanding,
           lld.amountRepaid as amountRepaid,
-              lp.interestRate as interestRate
-          
+          lp.interestRate as interestRate,
+          l.id as loaneeId , c.id as cohortId
+   
               
             from LoanEntity le
           join LoanOfferEntity loe on loe.id = le.loanOfferId
@@ -259,9 +264,9 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           o.name as referredBy,
           lld.amountOutstanding as amountOutstanding,
           lld.amountRepaid as amountRepaid,
-              lp.interestRate as interestRate
-          
-              
+          lp.interestRate as interestRate,
+          l.id as loaneeId , c.id as cohortId
+        
             from LoanEntity le
           join LoanOfferEntity loe on loe.id = le.loanOfferId
            join LoanProductEntity lp on lp.id = loe.loanProduct.id
@@ -293,7 +298,9 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           o.name as referredBy,
           lld.amountOutstanding as amountOutstanding,
           lld.amountRepaid as amountRepaid,
-              lp.interestRate as interestRate
+          lp.interestRate as interestRate,
+          l.id as loaneeId , c.id as cohortId
+
           
               
             from LoanEntity le
@@ -330,7 +337,9 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           o.name as referredBy,
           lld.amountOutstanding as amountOutstanding,
           lld.amountRepaid as amountRepaid,
-              lp.interestRate as interestRate
+          lp.interestRate as interestRate,
+          l.id as loaneeId , c.id as cohortId
+                  
           
               
             from LoanEntity le
