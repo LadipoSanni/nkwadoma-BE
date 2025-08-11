@@ -1,9 +1,10 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.organization;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
+import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.ViewOrganizationAdminRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.education.*;
@@ -21,6 +22,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -64,8 +66,8 @@ public class OrganizationEmployeeController {
             "or hasRole('ORGANIZATION_ADMIN')" +
             "or hasRole('ORGANIZATION_ASSOCIATE')")
     public ResponseEntity<?> viewAllAdminInOrganization(@AuthenticationPrincipal Jwt meedlUser,
-                                                        @RequestBody ViewOrganizationAdminRequest viewOrganizationAdminRequest) throws MeedlException {
-        OrganizationEmployeeIdentity  organizationEmployeeIdentity = organizationEmployeeRestMapper.toOrganizationEmployeeIdentity(meedlUser.getClaimAsString("sub"), viewOrganizationAdminRequest);
+                                                        @RequestParam Map<String, String> requestParams) throws MeedlException {
+        OrganizationEmployeeIdentity  organizationEmployeeIdentity = mapParamsToOrganizationEmployeeIdentity(meedlUser.getClaimAsString("sub"), requestParams);
 
         Page<OrganizationEmployeeIdentity> organizationEmployeeIdentities =
                 viewOrganizationEmployeesUseCase.viewAllAdminInOrganization(organizationEmployeeIdentity);
@@ -113,4 +115,57 @@ public class OrganizationEmployeeController {
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
+
+    private OrganizationEmployeeIdentity mapParamsToOrganizationEmployeeIdentity(
+            String meedlUserId,
+            Map<String, String> params) {
+
+        OrganizationEmployeeIdentity organizationEmployeeIdentity = new OrganizationEmployeeIdentity();
+
+        UserIdentity userIdentity = new UserIdentity();
+        userIdentity.setId(meedlUserId);
+        organizationEmployeeIdentity.setMeedlUser(userIdentity);
+
+        if (params.containsKey("name")) {
+            organizationEmployeeIdentity.setName(params.get("name"));
+        }
+
+        if (params.containsKey("activationStatus")) {
+            Set<ActivationStatus> statuses = Arrays.stream(params.get("activationStatuses").split(","))
+                    .map(String::trim)
+                    .map(String::toUpperCase)
+                    .map(ActivationStatus::valueOf)
+                    .collect(Collectors.toSet());
+            organizationEmployeeIdentity.setActivationStatuses(statuses);
+            organizationEmployeeIdentity.setActivationStatus(statuses.stream().toList().get(0));
+        }
+
+        if (params.containsKey("identityRoles")) {
+            Set<IdentityRole> roles = Arrays.stream(params.get("identityRoles").split(","))
+                    .map(String::trim)
+                    .map(String::toUpperCase)
+                    .map(IdentityRole::valueOf)
+                    .collect(Collectors.toSet());
+            organizationEmployeeIdentity.setIdentityRoles(roles);
+        }
+
+        if (params.containsKey("organizationId")) {
+            organizationEmployeeIdentity.setOrganization(params.get("organizationId"));
+        }
+
+        if (params.containsKey("pageSize")) {
+            organizationEmployeeIdentity.setPageSize(Integer.parseInt(params.get("pageSize")));
+        } else {
+            organizationEmployeeIdentity.setPageSize(10);
+        }
+
+        if (params.containsKey("pageNumber")) {
+            organizationEmployeeIdentity.setPageNumber(Integer.parseInt(params.get("pageNumber")));
+        } else {
+            organizationEmployeeIdentity.setPageNumber(0);
+        }
+
+        return organizationEmployeeIdentity;
+    }
+
 }
