@@ -278,4 +278,77 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           order by le.startDate desc
     """)
     Page<LoanProjection> findAllLoanDisbursedToLoaneeByLoaneeId(@Param("loaneeId") String loaneeId, Pageable pageRequest);
+    @Query("""
+          select
+          le.id as id,
+          le.startDate as startDate,
+          l.userIdentity.firstName as firstName,
+          l.userIdentity.lastName as lastName,
+          cle.loaneeLoanDetail.initialDeposit as initialDeposit,
+          lr.createdDate as createdDate, lr.loanAmountRequested as loanAmountRequested,
+          c.name as cohortName, c.startDate as cohortStartDate, loe.dateTimeOffered as offerDate,
+          p.name as programName,
+          lr.loanAmountApproved as loanAmountApproved,
+          c.tuitionAmount as tuitionAmount,
+          o.name as referredBy,
+          lld.amountOutstanding as amountOutstanding,
+          lld.amountRepaid as amountRepaid,
+              lp.interestRate as interestRate
+          
+              
+            from LoanEntity le
+          join LoanOfferEntity loe on loe.id = le.loanOfferId
+           join LoanProductEntity lp on lp.id = loe.loanProduct.id
+          join LoanRequestEntity lr on lr.id = loe.id
+          join LoanReferralEntity lfe on lfe.id = lr.id
+          join CohortLoaneeEntity cle on cle.id = lfe.cohortLoanee.id
+          join LoaneeLoanDetailEntity lld on lld.id = cle.loaneeLoanDetail.id    
+          join LoaneeEntity l on l.id = cle.loanee.id
+          join UserEntity u on u.id = l.userIdentity.id 
+          join CohortEntity c on c.id = cle.cohort.id
+          join ProgramEntity p on p.id = c.programId
+          join OrganizationEntity o on o.id = p.organizationIdentity.id
+          where lower(o.name) like lower(concat('%', :organizationName, '%'))
+                                      and l.id = :loaneeId
+          order by le.startDate desc
+    """)
+    Page<LoanProjection> findAllLoanDisbursedByOrganizationNameAndLoaneeId(@Param("organizationName") String organizationName,
+                                                                           @Param("loaneeId") String loaneeId, Pageable pageRequest);
+
+    @Query("""
+          select
+          le.id as id,
+          le.startDate as startDate,
+          l.userIdentity.firstName as firstName,
+          l.userIdentity.lastName as lastName,
+          cle.loaneeLoanDetail.initialDeposit as initialDeposit,
+          lr.createdDate as createdDate, lr.loanAmountRequested as loanAmountRequested,
+          c.name as cohortName, c.startDate as cohortStartDate, loe.dateTimeOffered as offerDate,
+          p.name as programName,
+          lr.loanAmountApproved as loanAmountApproved,
+          c.tuitionAmount as tuitionAmount,
+          o.name as referredBy,
+          lld.amountOutstanding as amountOutstanding,
+          lld.amountRepaid as amountRepaid,
+              lp.interestRate as interestRate
+          
+              
+            from LoanEntity le
+          join LoanOfferEntity loe on loe.id = le.loanOfferId
+           join LoanProductEntity lp on lp.id = loe.loanProduct.id
+          join LoanRequestEntity lr on lr.id = loe.id
+          join LoanReferralEntity lfe on lfe.id = lr.id
+          join CohortLoaneeEntity cle on cle.id = lfe.cohortLoanee.id
+          join LoaneeLoanDetailEntity lld on lld.id = cle.loaneeLoanDetail.id    
+          join LoaneeEntity l on l.id = cle.loanee.id
+          join UserEntity u on u.id = l.userIdentity.id 
+          join CohortEntity c on c.id = cle.cohort.id
+          join ProgramEntity p on p.id = c.programId
+          join OrganizationEntity o on o.id = p.organizationIdentity.id
+          where lower(o.name) like lower(concat('%', :organizationName, '%'))
+                        and u.id = :userId
+          order by le.startDate desc
+    """)
+    Page<LoanProjection> findAllLoanDisbursedByOrganizationNameAndUserId(@Param("organizationName") String organizationName,
+                                                                         @Param("userId") String userId, Pageable pageRequest);
 }
