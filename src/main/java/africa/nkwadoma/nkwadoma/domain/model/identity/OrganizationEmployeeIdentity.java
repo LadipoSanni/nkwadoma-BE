@@ -9,16 +9,17 @@ import java.util.Set;
 @Setter
 @Getter
 @Builder
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrganizationEmployeeIdentity {
     private String id;
     private String name;
-    private UserIdentity meedlUser;
-    private Set<IdentityRole> identityRoles;
-    private Set<ActivationStatus> activationStatuses;
     private String organization;
     private ActivationStatus activationStatus;
+    private Set<IdentityRole> identityRoles;
+    private Set<ActivationStatus> activationStatuses;
+    private UserIdentity meedlUser;
     private int pageNumber;
     private int pageSize;
 

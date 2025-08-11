@@ -38,7 +38,7 @@ public interface EmployeeAdminEntityRepository extends JpaRepository<Organizatio
             "   OR upper(o.meedlUser.lastName) LIKE upper(concat('%', :nameFragment, '%')) " +
             "   OR upper(o.meedlUser.email) LIKE upper(concat('%', :nameFragment, '%'))" +
             ") " +
-            "ORDER BY o.meedlUser.createdAt ASC")
+            "ORDER BY o.meedlUser.createdAt DESC")
     Page<OrganizationEmployeeEntity> findAdminsByNameFilters(
             @Param("organizationId") String organizationId,
             @Param("nameFragment") String nameFragment,
@@ -55,6 +55,7 @@ public interface EmployeeAdminEntityRepository extends JpaRepository<Organizatio
       AND e.meedlUser.role IN :roles
       AND (:status IS NULL OR e.activationStatus = :status)
       AND (:enabled IS NULL OR e.meedlUser.enabled = :enabled)
+      ORDER BY e.meedlUser.createdAt DESC
 """)
     Page<OrganizationEmployeeEntity> findAllByOrgIdRoleInAndOptionalFilters(
             @Param("organizationId") String organizationId,

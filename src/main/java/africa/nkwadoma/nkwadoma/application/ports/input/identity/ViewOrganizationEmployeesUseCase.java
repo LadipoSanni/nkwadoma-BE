@@ -10,5 +10,6 @@ public interface ViewOrganizationEmployeesUseCase {
 
     Page<OrganizationEmployeeIdentity> viewAllAdminInOrganization(OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException;
 
+    @Deprecated
     Page<OrganizationEmployeeIdentity> searchAdminInOrganization(String organizationId,String name,int pageSize,int pageNumber) throws MeedlException;
 }

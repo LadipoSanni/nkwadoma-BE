@@ -72,11 +72,10 @@ public class OrganizationEmployeeController {
                                                         @RequestParam(required = false, defaultValue = "0") int pageNumber,
                                                         @RequestParam(required = false, defaultValue = "10") int pageSize
     ) throws MeedlException {
-        OrganizationEmployeeIdentity organizationEmployeeIdentity = organizationEmployeeRestMapper
-                .toOrganizationEmployeeIdentity(meedlUser.getClaimAsString("sub"),
-                name, identityRoles,
-                activationStatuses,
-                pageNumber, pageSize);
+        OrganizationEmployeeIdentity organizationEmployeeIdentity = organizationEmployeeRestMapper.toOrganizationEmployeeIdentity(meedlUser.getClaimAsString("sub"), name, identityRoles, activationStatuses, pageNumber, pageSize);
+
+        log.info("The organization employee at the controller {}",organizationEmployeeIdentity);
+        log.info("Roles {}, activation statuses {}", identityRoles, activationStatuses);
         organizationEmployeeIdentity.setActivationStatus(organizationEmployeeIdentity.getActivationStatuses().stream().toList().get(0));
 
         Page<OrganizationEmployeeIdentity> organizationEmployeeIdentities =
@@ -103,6 +102,7 @@ public class OrganizationEmployeeController {
     }
 
 
+    @Deprecated
     @GetMapping("search-admin")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<?> searchAllAdminInOrganization(@RequestParam @NotBlank(message = "Organization id is required") String organizationId,

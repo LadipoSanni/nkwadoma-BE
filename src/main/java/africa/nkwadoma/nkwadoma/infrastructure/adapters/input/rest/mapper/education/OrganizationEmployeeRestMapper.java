@@ -16,6 +16,8 @@ public interface OrganizationEmployeeRestMapper {
             "java(concatenateNames(organizationEmployeeIdentity.getMeedlUser().getFirstName()," +
                     " organizationEmployeeIdentity.getMeedlUser().getLastName()))"
     )
+    @Mapping(target = "firstName", source = "meedlUser.firstName")
+    @Mapping(target = "lastName", source = "meedlUser.lastName")
     @Mapping(target = "email", source = "meedlUser.email")
     @Mapping(target = "role", source = "meedlUser.role")
     OrganizationEmployeeResponse toOrganizationEmployeeResponse(OrganizationEmployeeIdentity organizationEmployeeIdentity);
@@ -31,12 +33,5 @@ public interface OrganizationEmployeeRestMapper {
                                                                 Set<ActivationStatus> activationStatuses,
                                                                 int pageNumber,
                                                                 int pageSize);
-
-//    @Mapping(target = "meedlUser.id", source = "userId")
-//    @Mapping(target = "identityRoles", source = "viewOrganizationAdminRequest.identityRoles")
-//    @Mapping(target = "activationStatus", source = "viewOrganizationAdminRequest.activationStatus")
-//    @Mapping(target = "pageNumber", source = "viewOrganizationAdminRequest.pageNumber")
-//    @Mapping(target = "pageSize", source = "viewOrganizationAdminRequest.pageSize")
-//    OrganizationEmployeeIdentity toOrganizationEmployeeIdentity(String userId, ViewOrganizationAdminRequest viewOrganizationAdminRequest);
 
 }
