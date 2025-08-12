@@ -37,7 +37,9 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
 
     @Override
     public OrganizationEmployeeIdentity save(OrganizationEmployeeIdentity organizationEmployeeIdentity) {
+        log.info("Organization employee identity before map {}", organizationEmployeeIdentity);
         OrganizationEmployeeEntity organizationEmployeeEntity = organizationEmployeeIdentityMapper.toOrganizationEmployeeEntity(organizationEmployeeIdentity);
+        log.info("Organization employee entity before saving in out put port {}", organizationEmployeeEntity);
         organizationEmployeeEntity = employeeAdminEntityRepository.save(organizationEmployeeEntity);
         return organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(organizationEmployeeEntity);
     }

@@ -57,7 +57,7 @@ public class MeedlValidator {
 
     public static void validateUUID(String dataElement, String message) throws MeedlException {
         log.info("validateUUID {}", dataElement);
-        validateDataElement(dataElement, message.concat(StringUtils.SPACE.concat(", ")).concat(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage()));
+        validateDataElement(dataElement, message);
         if (!isValidUUID(dataElement)) {
             log.info("{}. The invalid UUID : {}", dataElement, message);
             throw new MeedlException(message);
