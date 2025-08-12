@@ -21,6 +21,7 @@ public interface OrganizationEmployeeRestMapper {
     @Mapping(target = "email", source = "meedlUser.email")
     @Mapping(target = "createdAt", source = "meedlUser.createdAt")
     @Mapping(target = "role", source = "meedlUser.role")
+    @Mapping(target = "userId", source = "meedlUser.id")
     OrganizationEmployeeResponse toOrganizationEmployeeResponse(OrganizationEmployeeIdentity organizationEmployeeIdentity);
 
     default String concatenateNames(String firstName, String lastName) {
