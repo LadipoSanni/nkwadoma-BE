@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.respons
 
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.CohortType;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanBreakdownResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,6 +28,7 @@ public class CohortResponse {
     private String name;
     private ActivationStatus activationStatus;
     private CohortStatus cohortStatus;
+    private CohortType cohortType;
     private BigDecimal tuitionAmount = BigDecimal.ZERO;
     private BigDecimal totalCohortFee = BigDecimal.ZERO;
     private BigDecimal amountRequested;
