@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education;
 
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.CohortType;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,7 +24,9 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
         c.tuitionAmount AS tuitionAmount,
         cl.amountReceived AS amountReceived,
         cl.outstandingAmount AS amountOutstanding,
-        cl.amountRepaid AS amountRepaind
+        cl.amountRepaid AS amountRepaid,
+        c.cohortType as cohortType
+        
     FROM CohortEntity c
     LEFT JOIN CohortLoaneeEntity cle ON cle.cohort.id = c.id
     LEFT JOIN CohortLoanDetailEntity cl ON cl.cohort.id = c.id
@@ -35,14 +38,16 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
     WHERE c.organizationId = :organizationId 
         AND (:cohortStatus IS NULL OR c.cohortStatus = :cohortStatus)
         AND LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%'))
+        AND (:cohortType IS NULL OR c.cohortType = :cohortType)
     GROUP BY c.id, c.name, c.startDate,c.tuitionAmount, cl.amountReceived ,cl.outstandingAmount,
-        cl.amountRepaid,cl.amountRequested
+        cl.amountRepaid,cl.amountRequested, c.cohortType 
 
 """)
     Page<CohortProjection> findByNameContainingIgnoreCaseAndOrganizationId(
             @Param("name") String name,
             @Param("cohortStatus") CohortStatus cohortStatus,
             @Param("organizationId") String organizationId,
+            @Param("cohortType") CohortType cohortType,
             Pageable pageRequest);
 
 
@@ -98,6 +103,7 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
         pr.name as programName,
         c.activationStatus as activationStatus,
         c.cohortStatus as cohortStatus,
+        c.cohortType as cohortType,
         c.stillInTraining as stillInTraining,
         c.numberOfLoanRequest as numberOfLoanRequest,
         c.imageUrl as imageUrl,
@@ -119,15 +125,17 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
     LEFT JOIN LoanEntity le ON le.id = lo.id
     WHERE pr.organizationIdentity.id = :organizationId
         AND (:cohortStatus IS NULL OR c.cohortStatus = :cohortStatus)
+        AND (:cohortType IS NULL OR c.cohortType = :cohortType)
     GROUP BY c.id, c.name ,c.cohortDescription ,c.programId,
-        c.organizationId ,pr.name,c.activationStatus ,c.cohortStatus,c.stillInTraining,
+        c.organizationId ,pr.name,c.activationStatus ,c.cohortStatus,c.cohortType,c.stillInTraining,
         c.numberOfLoanRequest,c.imageUrl ,c.numberOfLoanees,c.startDate ,c.tuitionAmount,
         cl.amountReceived,cl.outstandingAmount,cl.amountRepaid, cl.amountRequested
 """)
     Page<CohortProjection> findAllByOrganizationIdAndCohortStatus(
             @Param("organizationId") String organizationId,
             Pageable pageRequest,
-            @Param("cohortStatus") CohortStatus cohortStatus);
+            @Param("cohortStatus") CohortStatus cohortStatus,
+            @Param("cohortType") CohortType cohortType);
 
     Page<CohortEntity> findByProgramIdAndNameContainingIgnoreCase(String programId, String name,Pageable pageRequest);
 
