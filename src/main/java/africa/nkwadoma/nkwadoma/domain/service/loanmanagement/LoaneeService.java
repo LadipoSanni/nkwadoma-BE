@@ -882,17 +882,35 @@ public class LoaneeService implements LoaneeUseCase {
     }
 
     @Override
-    public Page<LoaneeLoanAggregate> viewAllLoanee(int pageSize, int pageNumber) throws MeedlException {
+    public Page<LoaneeLoanAggregate> viewAllLoanee(String actorId,int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validatePageNumber(pageNumber);
-        return loaneeLoanAggregateOutputPort.findAllLoanAggregate(pageSize,pageNumber);
+        UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
+        if (userIdentity.getRole().isMeedlRole()) {
+            return loaneeLoanAggregateOutputPort.findAllLoanAggregate(pageSize, pageNumber);
+        }else {
+            OrganizationEmployeeIdentity organizationEmployeeIdentity =
+                    organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId())
+                            .orElseThrow(() -> new IdentityException("Organization Employee identity not found."));
+            return loaneeLoanAggregateOutputPort.findAllLoanAggregateByOrganizationId(organizationEmployeeIdentity.getOrganization(),
+                    pageSize, pageNumber);
+        }
     }
 
     @Override
-    public Page<LoaneeLoanAggregate> searchLoanAggregate(String name,int pageSize, int pageNumber) throws MeedlException  {
+    public Page<LoaneeLoanAggregate> searchLoanAggregate(Loanee loanee,int pageSize, int pageNumber) throws MeedlException  {
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validatePageNumber(pageNumber);
-        return loaneeLoanAggregateOutputPort.searchLoanAggregate(name,pageSize,pageNumber);
+        UserIdentity userIdentity = userIdentityOutputPort.findById(loanee.getId());
+        if(userIdentity.getRole().isMeedlRole()) {
+            return loaneeLoanAggregateOutputPort.searchLoanAggregate(loanee.getLoaneeName(), pageSize, pageNumber);
+        }else {
+            OrganizationEmployeeIdentity organizationEmployeeIdentity =
+                    organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId())
+                            .orElseThrow(() -> new IdentityException("Organization Employee identity not found."));
+            loanee.setOrganizationId(organizationEmployeeIdentity.getOrganization());
+            return loaneeLoanAggregateOutputPort.searchLoanAggregateByOrganizationId(loanee, pageSize, pageNumber);
+        }
     }
 
     private void sendPortfolioManagerDropOutNotification(Loanee loanee, UserIdentity userIdentity) throws MeedlException {
