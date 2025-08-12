@@ -145,6 +145,7 @@ public class TestData {
         elites.setTuitionAmount(BigDecimal.valueOf(1000000));
         elites.setOrganizationId(organizationId);
         elites.setCohortStatus(CohortStatus.GRADUATED);
+        elites.setCohortType(CohortType.NON_LOAN_BOOK);
         return elites;
     }
     public static Program createProgramTestData(String programName){
