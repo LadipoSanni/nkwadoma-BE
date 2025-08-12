@@ -331,7 +331,7 @@ public class LoaneeController {
 
 
     @GetMapping("all")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> viewAllLoanees( @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                                           @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException{
         Page<LoaneeLoanAggregate> loaneeLoanAggregate  = loaneeUseCase.viewAllLoanee(pageSize,pageNumber);
@@ -350,7 +350,7 @@ public class LoaneeController {
     }
 
     @GetMapping("all/search")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> searchAllLoanees( @RequestParam(name = "name") String name,
                                                           @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                                           @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException{
