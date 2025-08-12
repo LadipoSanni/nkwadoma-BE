@@ -13,11 +13,17 @@ import java.util.*;
 public interface EmployeeAdminEntityRepository extends JpaRepository<OrganizationEmployeeEntity,String> {
     @Query("""
           select
-          oe.id as id, oe.meedlUser.firstName as firstName, oe.meedlUser.lastName as lastName,
-          oe.meedlUser.email as email, o.status as status
-          from OrganizationEmployeeEntity oe
-          join OrganizationEntity o on oe.organization = o.id
-          where o.id = :organizationId
+             oe.id as id,
+             oe.meedlUser.id as userId,
+             oe.meedlUser.firstName as firstName,
+             oe.meedlUser.lastName as lastName,
+             oe.meedlUser.email as email,
+             oe.meedlUser.createdAt as createdAt,
+             oe.activationStatus as activationStatus,
+             oe.meedlUser.role as role
+             from OrganizationEmployeeEntity oe
+             join OrganizationEntity o on oe.organization = o.id
+             where o.id = :organizationId
     """)
     Page<OrganizationEmployeeProjection> findAllByOrganization(String organizationId, Pageable pageable);
     OrganizationEmployeeEntity findByMeedlUserId(String userId);

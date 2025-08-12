@@ -2,10 +2,15 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repo
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 
+import java.time.LocalDateTime;
+
 public interface OrganizationEmployeeProjection {
     String getId();
-    ActivationStatus getActivationStatus();
     String getFirstName();
     String getLastName();
     String getEmail();
+    ActivationStatus getActivationStatus();
+    String getUserId();
+    LocalDateTime getCreatedAt();
+    IdentityRole getRole();
 }
