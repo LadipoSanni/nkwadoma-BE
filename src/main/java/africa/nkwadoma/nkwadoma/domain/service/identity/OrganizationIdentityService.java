@@ -366,7 +366,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         IdentityRole inviterRole = inviter.getMeedlUser().getRole();
 
         if (isSuperAdmin(inviterRole)) {
-            log.info("The user inviting is a super admin");
+            log.info("The user inviting is a super admin with organization id {}", inviter.getOrganization());
             OrganizationIdentity organization = organizationIdentityOutputPort.findById(inviter.getOrganization());
             asynchronousMailingOutputPort.sendColleagueEmail(organization.getName(), savedUserIdentity);
             return String.format("Colleague with role %s invited", savedUserIdentity.getRole().name());
@@ -399,12 +399,14 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
 
     private OrganizationEmployeeIdentity buildOrganizationEmployeeIdentity(
             OrganizationEmployeeIdentity inviter, UserIdentity colleague) {
+        log.info("Building organization empty organization employee for the invited employee");
         OrganizationEmployeeIdentity employeeIdentity = new OrganizationEmployeeIdentity();
         employeeIdentity.setOrganization(inviter.getOrganization());
         employeeIdentity.setMeedlUser(colleague);
         employeeIdentity.setActivationStatus(isSuperAdmin(inviter.getMeedlUser().getRole())
                 ? ActivationStatus.INVITED
                 : ActivationStatus.PENDING_APPROVAL);
+        log.info("The built organization employee being invited is {}", employeeIdentity);
         return employeeIdentity;
     }
 

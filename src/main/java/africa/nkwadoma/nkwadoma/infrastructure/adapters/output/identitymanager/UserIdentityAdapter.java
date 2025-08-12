@@ -48,6 +48,7 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
     @Override
     public UserIdentity findById(String id) throws MeedlException {
         MeedlValidator.validateUUID(id, UserMessages.INVALID_USER_ID.getMessage());
+        log.info("Find user in the adapter with id {}", id);
         UserEntity userEntity = userEntityRepository.findById(id).orElseThrow(() -> new IdentityException(IdentityMessages.USER_NOT_FOUND.getMessage()));
         log.info("UserEntity found by id before mapping : {}", userEntity);
         UserIdentity userIdentity = userIdentityMapper.toUserIdentity(userEntity);

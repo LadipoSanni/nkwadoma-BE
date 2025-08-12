@@ -14,6 +14,7 @@ import java.util.Set;
 @NoArgsConstructor
 public class OrganizationEmployeeIdentity {
     private String id;
+    private String userId;
     private String name;
     private String organization;
     private ActivationStatus activationStatus;

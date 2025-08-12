@@ -18,9 +18,9 @@ public class OrganizationEmployeeEntity {
     @Id
     @UuidGenerator
     private String id;
-    @ManyToOne
-    private UserEntity meedlUser;
+    private String organization;
     @Enumerated(EnumType.STRING)
     private ActivationStatus activationStatus;
-    private String organization;
+    @ManyToOne
+    private UserEntity meedlUser;
 }
