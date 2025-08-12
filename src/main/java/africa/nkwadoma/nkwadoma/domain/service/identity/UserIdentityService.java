@@ -199,6 +199,7 @@ public class UserIdentityService implements CreateUserUseCase {
         MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
         MeedlValidator.validateUUID(userIdentity.getId(), UserMessages.INVALID_USER_ID.getMessage());
         MeedlValidator.validateDataElement(userIdentity.getDeactivationReason(), "Reason for deactivation required");
+        log.info("About to find deactivating actor by id {}", userIdentity.getId());
         UserIdentity foundUserToDeactivate = userIdentityOutputPort.findById(userIdentity.getId());
         checkIfUserAllowedToDeactivateAccount(foundUserToDeactivate, userIdentity);
         foundUserToDeactivate.setDeactivationReason("User deactivated by : "+ userIdentity.getCreatedBy() + ". Reason : "+userIdentity.getDeactivationReason());
