@@ -196,12 +196,12 @@ public class AdminInitializer {
         return foundPortfolio;
     }
 
-    @PostConstruct
-    public void init() throws MeedlException {
-        UserIdentity userIdentity = inviteFirstUser(getUserIdentity());
-        OrganizationIdentity organizationIdentity = createFirstOrganizationIdentity(getOrganizationIdentity(userIdentity));
-        loanMetricsUseCase.correctLoanRequestCount();
-        Portfolio portfolio = createMeedlPortfolio(getPortfolio());
-        log.info("Meedl portfolio process done-- {}", portfolio);
-    }
+//    @PostConstruct
+//    public void init() throws MeedlException {
+//        UserIdentity userIdentity = inviteFirstUser(getUserIdentity());
+//        OrganizationIdentity organizationIdentity = createFirstOrganizationIdentity(getOrganizationIdentity(userIdentity));
+//        loanMetricsUseCase.correctLoanRequestCount();
+//        Portfolio portfolio = createMeedlPortfolio(getPortfolio());
+//        log.info("Meedl portfolio process done-- {}", portfolio);
+//    }
 }
