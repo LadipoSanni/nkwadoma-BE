@@ -198,7 +198,7 @@ public class UserIdentityService implements CreateUserUseCase {
         performEmployeeActivation(userIdentity, ActivationStatus.ACTIVE);
         log.info("Employee reactivated successfully. User id: {}", userIdentity.getId());
 
-//        asynchronousMailingOutputPort.notifyDeactivatedUser(userIdentity);
+        asynchronousMailingOutputPort.notifyUserOnActivationActivityOnUserAccount(userIdentity, ActivationStatus.ACTIVE);
         return userIdentity;
     }
 
@@ -218,7 +218,7 @@ public class UserIdentityService implements CreateUserUseCase {
         performEmployeeActivation(userIdentity, ActivationStatus.DEACTIVATED);
         log.info("Employee deactivated successfully. User id: {}", userIdentity.getId());
 
-        asynchronousMailingOutputPort.notifyDeactivatedUser(userIdentity);
+        asynchronousMailingOutputPort.notifyUserOnActivationActivityOnUserAccount(userIdentity, ActivationStatus.DEACTIVATED);
         return userIdentity;
     }
 
