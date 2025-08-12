@@ -413,7 +413,7 @@ class UserIdentityServiceTest {
                 userIdentityService.checkIfUserAllowedForAccountActivationActivity(favour, favour, ActivationStatus.DEACTIVATED)
         );
 
-        assertEquals("You are not allowed to deactivate yourself.", exception.getMessage());
+        assertEquals("You are not allowed to "+ActivationStatus.DEACTIVATED+" yourself.", exception.getMessage());
     }
 
     @Test
@@ -431,7 +431,7 @@ class UserIdentityServiceTest {
                 userIdentityService.checkIfUserAllowedForAccountActivationActivity(favour, favour, ActivationStatus.DEACTIVATED)
         );
 
-        assertEquals("You cannot deactivate this user, please contact Meedl admin!", exception.getMessage());
+        assertEquals("You cannot "+ActivationStatus.DEACTIVATED+" this user, please contact Meedl admin!", exception.getMessage());
     }
 
     @Test
@@ -458,7 +458,7 @@ class UserIdentityServiceTest {
                 userIdentityService.checkIfUserAllowedForAccountActivationActivity(favour, favour, ActivationStatus.DEACTIVATED)
         );
 
-        assertEquals("You are not authorized to deactivate this user", exception.getMessage());
+        assertEquals("You are not authorized to "+ActivationStatus.DEACTIVATED+" this user", exception.getMessage());
     }
 
     @Test
