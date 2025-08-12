@@ -236,7 +236,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
         return MeedlNotification.builder()
                 .user(portfolioManager)
                 .timestamp(LocalDateTime.now())
-                .contentId(portfolioManager.getId())
+                .contentId(organization.getId())
                 .title("Organization has been " + status)
                 .callToAction(Boolean.TRUE)
                 .senderMail(portfolioManager.getEmail())
