@@ -47,7 +47,7 @@ public class LoaneeController {
     private final LoaneeUseCase loaneeUseCase;
 
     @PostMapping("/invite/{cohortId}")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> inviteLoanees(
                                                     @AuthenticationPrincipal Jwt meedlUser,
                                                     @PathVariable String cohortId,
@@ -85,7 +85,7 @@ public class LoaneeController {
     }
 
     @GetMapping("{loaneeId}")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')  or hasRole('PORTFOLIO_MANAGER')  or hasRole('LOANEE')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('ORGANIZATION_ADMIN')  or hasRole('PORTFOLIO_MANAGER')  or hasRole('LOANEE')")
     public ResponseEntity<ApiResponse<?>> viewLoaneeDetails(@PathVariable String loaneeId,
                                                             @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
         String userId = meedlUser.getClaimAsString("sub");
@@ -102,7 +102,7 @@ public class LoaneeController {
     }
 
     @GetMapping("cohorts/loanees")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewAllLoaneeInCohort(
             @RequestParam String cohortId,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
@@ -129,7 +129,7 @@ public class LoaneeController {
     }
 
     @GetMapping("cohorts/search/loanees")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> searchForLoaneeInCohort(@RequestParam("loaneeName")String loaneeName,
                                                                   @RequestParam("cohortId")String cohortId,
                                                                   @RequestParam(name = "status" , required = false ) LoaneeStatus status,
@@ -155,7 +155,7 @@ public class LoaneeController {
     }
 
     @GetMapping("cohorts/loanee")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewLoaneeInCohort(@RequestParam("cohortId")String cohortId,
                                                              @RequestParam("loaneeId") String loaneeId) throws MeedlException {
         log.info("request that came in cohortID == {} , loaneeId == {}", cohortId, loaneeId);
@@ -187,7 +187,7 @@ public class LoaneeController {
 
 
     @GetMapping("loanProduct/loanees/{loanProductId}")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewAllLoanBeneficiaryFromLoanProduct(
             @PathVariable String loanProductId,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
@@ -213,7 +213,7 @@ public class LoaneeController {
 
 
     @GetMapping("loan-product/search/loanees/{loanProductId}")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> searchLoanBeneficiaryFromLoanProduct(
             @PathVariable String loanProductId,
             @RequestParam(name = "name") String name,
@@ -317,7 +317,7 @@ public class LoaneeController {
     }
 
     @PostMapping("status")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> archiveOrUnArchiveLoanee(@RequestBody LoaneeStatusRequest loaneeStatusRequest) throws MeedlException{
         String response = loaneeUseCase.archiveOrUnArchiveByIds(loaneeStatusRequest.getCohortId(),
                 loaneeStatusRequest.getLoaneeIds(),loaneeStatusRequest.getLoaneeStatus());
