@@ -203,9 +203,22 @@ public class UserIdentityService implements CreateUserUseCase {
         checkIfUserAllowedToDeactivateAccount(foundUserToDeactivate, userIdentity);
         foundUserToDeactivate.setDeactivationReason("User deactivated by : "+ userIdentity.getCreatedBy() + ". Reason : "+userIdentity.getDeactivationReason());
         userIdentity = identityManagerOutPutPort.disableUserAccount(foundUserToDeactivate);
+        log.info("User on key cloak deactivated successfully.");
+        deactivateEmployee(userIdentity);
         log.info("User deactivated successfully {}", userIdentity.getId());
         asynchronousMailingOutputPort.notifyDeactivatedUser(userIdentity);
         return userIdentity;
+    }
+
+    private void deactivateEmployee(UserIdentity userIdentity) throws MeedlException {
+        Optional<OrganizationEmployeeIdentity> optionalOrganizationEmployeeIdentity = organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId());
+        if (optionalOrganizationEmployeeIdentity.isPresent()) {
+            log.info("User being deactivated is an employee. User id {}", userIdentity.getId());
+            OrganizationEmployeeIdentity organizationEmployeeIdentity = optionalOrganizationEmployeeIdentity.get();
+            organizationEmployeeIdentity.setActivationStatus(ActivationStatus.DEACTIVATED);
+            organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
+            log.info("Employee deactivated successfully! Employee id {} , organization id {}", organizationEmployeeIdentity.getId(), organizationEmployeeIdentity.getOrganization());
+        }
     }
 
     public void checkIfUserAllowedToDeactivateAccount(UserIdentity userToDeactivate, UserIdentity userIdentity) throws MeedlException {
