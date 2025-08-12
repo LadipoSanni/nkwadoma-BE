@@ -36,7 +36,8 @@ public class CohortController {
     private final CohortRestMapper cohortMapper;
 
     @PostMapping("cohort/create")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') " +
+            "or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> createCohort(@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid
             CreateCohortRequest createCohortRequest) throws MeedlException {
         Cohort cohort = cohortMapper.toCohort(createCohortRequest);
@@ -55,7 +56,8 @@ public class CohortController {
     }
 
     @GetMapping("cohort-details")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') " +
+            "or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> viewCohortDetails(
             @AuthenticationPrincipal Jwt meedlUser,
             @RequestParam @NotBlank(message = "Cohort ID is required") String cohortId) throws MeedlException {
@@ -73,7 +75,7 @@ public class CohortController {
 
 
     @PostMapping("cohort/edit")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') ")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') ")
     public ResponseEntity<ApiResponse<?>> editCohort(@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid
     EditCohortRequest editCohortRequest) throws MeedlException {
         Cohort cohort = cohortMapper.mapEditCohortRequestToCohort(editCohortRequest);
@@ -91,7 +93,7 @@ public class CohortController {
 
     @DeleteMapping("/delete/{id}")
     @Operation(summary = "Delete a cohort by it's ID")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') ")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') ")
     public ResponseEntity<ApiResponse<?>> deleteCohort(@PathVariable @Valid @NotBlank(message = "Cohort id is required") String id)
             throws MeedlException {
         cohortUseCase.deleteCohort(id);
@@ -103,7 +105,8 @@ public class CohortController {
     }
 
     @PostMapping("cohort/loanee/refer")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') " +
+            "or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> inviteCohort(
             @AuthenticationPrincipal Jwt meedl,
             @RequestBody ReferCohortRequest referCohortRequest) throws MeedlException {
@@ -119,7 +122,8 @@ public class CohortController {
 
 
     @GetMapping("searchCohort")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') " +
+            "or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> searchCohort(
             @AuthenticationPrincipal Jwt meedl,
             @RequestParam @NotBlank(message = "Cohort name is required") String cohortName,
@@ -144,7 +148,8 @@ public class CohortController {
     }
 
     @GetMapping("cohort/all")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') " +
+            "or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ASSOCIATE')")
     public ResponseEntity<ApiResponse<PaginatedResponse<CohortResponse>>> viewAllCohortsInAProgram(
             @RequestParam @NotBlank(message = "Program ID is required") String programId,
             @RequestParam(name = "cohortStatus",required = false) CohortStatus cohortStatus,
@@ -167,7 +172,8 @@ public class CohortController {
 
 
     @GetMapping("organization-cohort/all")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER') ")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') " +
+            "or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ASSOCIATE')")
     public ResponseEntity<ApiResponse<PaginatedResponse<CohortResponse>>> viewAllCohortsInOrganization(
             @AuthenticationPrincipal Jwt meedl,
             @RequestParam(name = "organizationId", required = false) String organizationId,
@@ -189,7 +195,7 @@ public class CohortController {
     }
 
     @GetMapping("cohort/loanbreakdown")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') ")
     public ResponseEntity<ApiResponse<?>> getLoanBreakDown(@RequestParam @NotBlank(message = "Cohort id is required") String cohortId) throws MeedlException {
         List<LoanBreakdown> loanBreakdowns = cohortUseCase.getCohortLoanBreakDown(cohortId);
         List<LoanBreakdownResponse> loanBreakdownResponses = cohortMapper.toLoanBreakdownResponses(loanBreakdowns);
