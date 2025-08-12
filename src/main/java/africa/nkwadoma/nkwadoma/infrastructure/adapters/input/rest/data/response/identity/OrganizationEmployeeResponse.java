@@ -17,6 +17,7 @@ public class OrganizationEmployeeResponse {
     private String firstName;
     private String lastName;
     private String email;
+    private String userId;
     private LocalDateTime createdAt;
     private ActivationStatus activationStatus;
     private IdentityRole role;
