@@ -40,7 +40,8 @@ public class RepaymentHistoryController {
     private final RepaymentHistoryRestMapper repaymentHistoryRestMapper;
 
     @GetMapping("all")
-    @PreAuthorize("hasRole('LOANEE') or hasRole('PORTFOLIO_MANAGER') ")
+    @PreAuthorize("hasRole('LOANEE') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')  " +
+            "or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ASSOCIATE') ")
     public ResponseEntity<ApiResponse<?>> viewAllRepaymentHistory(@AuthenticationPrincipal Jwt meedlUser,
                                                                   @RequestParam(name = "loaneeId", required = false) String loaneeId,
                                                                   @RequestParam(name = "month", required = false) Integer month,
@@ -71,7 +72,7 @@ public class RepaymentHistoryController {
     }
 
     @GetMapping("search")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') ")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')  or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> searchRepaymentHistory(@AuthenticationPrincipal Jwt meedlUser,
                                                                   @RequestParam(name = "name", required = false) String name,
                                                                   @RequestParam(name = "month", required = false) Integer month,
@@ -100,7 +101,7 @@ public class RepaymentHistoryController {
     }
 
     @GetMapping("years")
-    @PreAuthorize("hasRole('LOANEE') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('LOANEE') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> getFirstAndLastYear(
             @AuthenticationPrincipal Jwt meedlUser,
             @RequestParam(name = "loaneeId", required = false) String loaneeId) throws MeedlException {
