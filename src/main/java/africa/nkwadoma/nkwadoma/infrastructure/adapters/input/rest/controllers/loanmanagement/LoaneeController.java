@@ -47,7 +47,7 @@ public class LoaneeController {
     private final LoaneeUseCase loaneeUseCase;
 
     @PostMapping("/invite/{cohortId}")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN')")
     public ResponseEntity<ApiResponse<?>> inviteLoanees(
                                                     @AuthenticationPrincipal Jwt meedlUser,
                                                     @PathVariable String cohortId,
@@ -68,7 +68,7 @@ public class LoaneeController {
 
 
     @PostMapping("cohort")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> addLoaneeToCohort(@AuthenticationPrincipal Jwt meedlUser,
                                                             @RequestBody  @Valid LoaneeRequest loaneeRequest) throws MeedlException {
         Loanee loanee = loaneeRestMapper.toLoanee(loaneeRequest);
@@ -85,7 +85,8 @@ public class LoaneeController {
     }
 
     @GetMapping("{loaneeId}")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')  or hasRole('PORTFOLIO_MANAGER')  or hasRole('LOANEE')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')  or hasRole('PORTFOLIO_MANAGER')  or hasRole('LOANEE') or hasRole('ORGANIZATION_SUPER_ADMIN')" +
+            "or hasRole('MEEDL_SUPER_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('MEEDL_ADMIN')")
     public ResponseEntity<ApiResponse<?>> viewLoaneeDetails(@PathVariable String loaneeId,
                                                             @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
         String userId = meedlUser.getClaimAsString("sub");
@@ -102,7 +103,8 @@ public class LoaneeController {
     }
 
     @GetMapping("cohorts/loanees")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_SUPER_ADMIN') " +
+            "or hasRole('ORGANIZATION_SUPER_ADMIN')or hasRole('MEEDL_ADMIN') ")
     public ResponseEntity<ApiResponse<?>> viewAllLoaneeInCohort(
             @RequestParam String cohortId,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
@@ -129,7 +131,8 @@ public class LoaneeController {
     }
 
     @GetMapping("cohorts/search/loanees")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_SUPER_ADMIN') " +
+            "or hasRole('ORGANIZATION_SUPER_ADMIN')or hasRole('MEEDL_ADMIN') ")
     public ResponseEntity<ApiResponse<?>> searchForLoaneeInCohort(@RequestParam("loaneeName")String loaneeName,
                                                                   @RequestParam("cohortId")String cohortId,
                                                                   @RequestParam(name = "status" , required = false ) LoaneeStatus status,
@@ -155,7 +158,8 @@ public class LoaneeController {
     }
 
     @GetMapping("cohorts/loanee")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_SUPER_ADMIN') " +
+            "or hasRole('ORGANIZATION_SUPER_ADMIN')or hasRole('MEEDL_ADMIN') ")
     public ResponseEntity<ApiResponse<?>> viewLoaneeInCohort(@RequestParam("cohortId")String cohortId,
                                                              @RequestParam("loaneeId") String loaneeId) throws MeedlException {
         log.info("request that came in cohortID == {} , loaneeId == {}", cohortId, loaneeId);
@@ -187,7 +191,7 @@ public class LoaneeController {
 
 
     @GetMapping("loanProduct/loanees/{loanProductId}")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') ")
     public ResponseEntity<ApiResponse<?>> viewAllLoanBeneficiaryFromLoanProduct(
             @PathVariable String loanProductId,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
@@ -213,7 +217,7 @@ public class LoaneeController {
 
 
     @GetMapping("loan-product/search/loanees/{loanProductId}")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') ")
     public ResponseEntity<ApiResponse<?>> searchLoanBeneficiaryFromLoanProduct(
             @PathVariable String loanProductId,
             @RequestParam(name = "name") String name,
@@ -273,7 +277,7 @@ public class LoaneeController {
 
 
     @PostMapping("defer")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> indicateDeferLoanee(@AuthenticationPrincipal Jwt meedlUser,
                                                               @RequestBody LoaneeDeferRequest loaneeDeferRequest) throws MeedlException {
         String response = loaneeUseCase.indicateDeferredLoanee(meedlUser.getClaimAsString("sub"), loaneeDeferRequest.getLoaneeId());
@@ -286,7 +290,7 @@ public class LoaneeController {
     }
 
     @PostMapping("indicate/dropout")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> indicateDropOutLoanee(@AuthenticationPrincipal Jwt meedlUser,
                                                                 @RequestParam String loanId) throws MeedlException {
         String userId = meedlUser.getClaimAsString("sub");

@@ -155,7 +155,8 @@ public class UserIdentityService implements CreateUserUseCase {
     @Override
     public void changePassword(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity, USER_IDENTITY_CANNOT_BE_NULL.getMessage());
-        MeedlValidator.validatePassword(userIdentity.getNewPassword());
+        MeedlValidator.validatePassword(tokenUtils.decryptAES(userIdentity.getPassword(), "Invalid password for current password"));
+        MeedlValidator.validatePassword(tokenUtils.decryptAES(userIdentity.getNewPassword(), "Invalid new password provided"));
         login(userIdentity);
         if (userIdentity.getNewPassword().equals(userIdentity.getPassword())){
             log.warn("{}", UserMessages.NEW_PASSWORD_AND_CURRENT_PASSWORD_CANNOT_BE_SAME.getMessage());
@@ -167,6 +168,7 @@ public class UserIdentityService implements CreateUserUseCase {
         userIdentity.setEmailVerified(true);
         userIdentity.setEnabled(true);
         userIdentity.setCreatedAt(LocalDateTime.now());
+        userIdentity.setNewPassword(tokenUtils.decryptAES(userIdentity.getNewPassword(), "Provide valid password to update"));
         identityManagerOutPutPort.setPassword(userIdentity);
         log.info("Password changed successfully for user with id: {}",userIdentity.getId());
     }
