@@ -331,10 +331,12 @@ public class LoaneeController {
 
 
     @GetMapping("all")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ASSOCIATE')")
-    public ResponseEntity<ApiResponse<?>> viewAllLoanees( @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ASSOCIATE')" +
+                  "or hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('ORGANIZATION_ASSOCIATE')")
+    public ResponseEntity<ApiResponse<?>> viewAllLoanees( @AuthenticationPrincipal Jwt meedlUser,
+                                                          @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                                           @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException{
-        Page<LoaneeLoanAggregate> loaneeLoanAggregate  = loaneeUseCase.viewAllLoanee(pageSize,pageNumber);
+        Page<LoaneeLoanAggregate> loaneeLoanAggregate  = loaneeUseCase.viewAllLoanee(meedlUser.getClaimAsString("sub"),pageSize,pageNumber);
         List<LoaneeLoanAggregateResponse> loaneeLoanAggregateResponses =
                 loaneeLoanAggregate.map(loaneeRestMapper::toLoaneeLoanAggregateResponse).stream().toList();
 
@@ -350,11 +352,15 @@ public class LoaneeController {
     }
 
     @GetMapping("all/search")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ASSOCIATE')")
-    public ResponseEntity<ApiResponse<?>> searchAllLoanees( @RequestParam(name = "name") String name,
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ASSOCIATE')" +
+                  "or hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('ORGANIZATION_ASSOCIATE')")
+    public ResponseEntity<ApiResponse<?>> searchAllLoanees(@AuthenticationPrincipal Jwt meedlUser,
+                                                          @RequestParam(name = "name") String name,
                                                           @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                                           @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException{
-        Page<LoaneeLoanAggregate> loaneeLoanAggregate  = loaneeUseCase.searchLoanAggregate(name,pageSize,pageNumber);
+        Loanee loanee = Loanee.builder().loaneeName(name).id(meedlUser.getClaimAsString("sub")).build();
+
+        Page<LoaneeLoanAggregate> loaneeLoanAggregate  = loaneeUseCase.searchLoanAggregate(loanee,pageSize,pageNumber);
         List<LoaneeLoanAggregateResponse> loaneeLoanAggregateResponses =
                 loaneeLoanAggregate.map(loaneeRestMapper::toLoaneeLoanAggregateResponse).stream().toList();
 

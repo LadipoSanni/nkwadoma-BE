@@ -975,4 +975,70 @@ class LoaneeServiceTest {
     }
 
 
+    @Test
+    void searchLoanAggregateByPm(){
+        userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
+        Page<LoaneeLoanAggregate> loanAggregatePage = new PageImpl<>(List.of(loaneeLoanAggregate));
+        firstLoanee.setLoaneeName("q");
+        try {
+            when(userIdentityOutputPort.findById(any())).thenReturn(userIdentity);
+            when(loaneeLoanAggregateOutputPort.searchLoanAggregate(firstLoanee.getLoaneeName(),pageSize,pageNumber))
+                    .thenReturn(loanAggregatePage);
+            loanAggregatePage = loaneeService.searchLoanAggregate(firstLoanee,pageSize,pageNumber);
+        }catch (MeedlException exception){
+            log.error(exception.getMessage());
+        }
+        assertNotNull(loanAggregatePage);
+    }
+
+    @Test
+    void searchLoanAggregateByOrganizationAdmin(){
+        userIdentity.setRole(IdentityRole.ORGANIZATION_ADMIN);
+        firstLoanee.setOrganizationId(organizationEmployeeIdentity.getOrganization());
+        firstLoanee.setLoaneeName("q");
+        Page<LoaneeLoanAggregate> loanAggregatePage = new PageImpl<>(List.of(loaneeLoanAggregate));
+        try {
+            when(userIdentityOutputPort.findById(any())).thenReturn(userIdentity);
+            when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId())).thenReturn(Optional.ofNullable(organizationEmployeeIdentity));
+            when(loaneeLoanAggregateOutputPort.searchLoanAggregateByOrganizationId(firstLoanee,pageSize,pageNumber))
+                    .thenReturn(loanAggregatePage);
+            loanAggregatePage = loaneeService.searchLoanAggregate(firstLoanee,pageSize,pageNumber);
+        }catch (MeedlException exception){
+            log.error(exception.getMessage());
+        }
+        assertNotNull(loanAggregatePage);
+    }
+
+    @Test
+    void viewAllLoanAggregateByPm(){
+        userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
+        Page<LoaneeLoanAggregate> loanAggregatePage = new PageImpl<>(List.of(loaneeLoanAggregate));
+        try {
+            when(userIdentityOutputPort.findById(any())).thenReturn(userIdentity);
+            when(loaneeLoanAggregateOutputPort.findAllLoanAggregate(pageSize,pageNumber))
+                    .thenReturn(loanAggregatePage);
+            loanAggregatePage = loaneeService.viewAllLoanee(mockId,pageSize,pageNumber);
+        }catch (MeedlException exception){
+            log.error(exception.getMessage());
+        }
+        assertNotNull(loanAggregatePage);
+    }
+
+    @Test
+    void viewAllLoanAggregateByOrganizationAdmin(){
+        userIdentity.setRole(IdentityRole.ORGANIZATION_ADMIN);
+        firstLoanee.setOrganizationId(organizationEmployeeIdentity.getOrganization());
+        Page<LoaneeLoanAggregate> loanAggregatePage = new PageImpl<>(List.of(loaneeLoanAggregate));
+        try {
+            when(userIdentityOutputPort.findById(any())).thenReturn(userIdentity);
+            when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId())).thenReturn(Optional.ofNullable(organizationEmployeeIdentity));
+            when(loaneeLoanAggregateOutputPort.findAllLoanAggregateByOrganizationId(organizationEmployeeIdentity.getOrganization(),pageSize,pageNumber))
+                    .thenReturn(loanAggregatePage);
+            loanAggregatePage = loaneeService.viewAllLoanee(mockId,pageSize,pageNumber);
+        }catch (MeedlException exception){
+            log.error(exception.getMessage());
+        }
+        assertNotNull(loanAggregatePage);
+    }
+
 }
