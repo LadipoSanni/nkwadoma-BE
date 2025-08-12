@@ -155,7 +155,6 @@ public class UserIdentityService implements CreateUserUseCase {
     @Override
     public void changePassword(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity, USER_IDENTITY_CANNOT_BE_NULL.getMessage());
-        log.info("Password old {} and new {}", userIdentity.getPassword(), userIdentity.getNewPassword());
         MeedlValidator.validatePassword(tokenUtils.decryptAES(userIdentity.getPassword(), "Invalid password for current password"));
         MeedlValidator.validatePassword(tokenUtils.decryptAES(userIdentity.getNewPassword(), "Invalid new password provided"));
         login(userIdentity);
