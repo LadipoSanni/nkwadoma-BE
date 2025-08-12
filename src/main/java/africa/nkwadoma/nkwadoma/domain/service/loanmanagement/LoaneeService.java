@@ -891,7 +891,7 @@ public class LoaneeService implements LoaneeUseCase {
         }else {
             OrganizationEmployeeIdentity organizationEmployeeIdentity =
                     organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId())
-                            .orElseThrow(() -> new IdentityException("Organization Employee identity not found."));
+                            .orElseThrow(() -> new LoanException("Organization Employee identity not found."));
             return loaneeLoanAggregateOutputPort.findAllLoanAggregateByOrganizationId(organizationEmployeeIdentity.getOrganization(),
                     pageSize, pageNumber);
         }
@@ -907,7 +907,7 @@ public class LoaneeService implements LoaneeUseCase {
         }else {
             OrganizationEmployeeIdentity organizationEmployeeIdentity =
                     organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId())
-                            .orElseThrow(() -> new IdentityException("Organization Employee identity not found."));
+                            .orElseThrow(() -> new LoanException("Organization Employee identity not found."));
             loanee.setOrganizationId(organizationEmployeeIdentity.getOrganization());
             return loaneeLoanAggregateOutputPort.searchLoanAggregateByOrganizationId(loanee, pageSize, pageNumber);
         }

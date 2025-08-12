@@ -67,47 +67,54 @@ public interface LoaneeLoanAggregateRepository extends JpaRepository<LoaneeLoanA
     LoaneeLoanAggregateEntity findByLoaneeLoandetailId(@Param("id") String id);
 
     @Query("""
-        
-        select loaneeLoanAggregate.historicalDebt as historicalDebt ,
-                loaneeLoanAggregate.totalAmountOutstanding as totalAmountOutstanding ,
-                loaneeLoanAggregate.numberOfLoans as numberOfLoans ,  
-                loanee.userIdentity.firstName as firstName ,
-                loanee.userIdentity.lastName as lastName ,
-                loanee.userIdentity.email as email,
-                 loanee.id as loaneeId                   
-            from LoaneeLoanAggregateEntity loaneeLoanAggregate
-            join LoaneeEntity loanee on loanee.id = loaneeLoanAggregate.loanee.id
-            join CohortLoaneeEntity cohortLoanee on cohortLoanee.loanee.id = loanee.id
-            join CohortEntity  cohort on cohort.id = cohortLoanee.cohort.id
-            join ProgramEntity program on program.id = cohort.programId
-            join OrganizationEntity organization on organization.id = program.organizationIdentity.id
-             
-            where organization.id = :organizationId            
-              
-            order by loaneeLoanAggregate.numberOfLoans desc 
-
-    """)
-    Page<LoaneeLoanAggregateProjection> findAllByOrganizationId(@Param("organizationId") String organizationId,Pageable pageRequest);
+    SELECT SUM(loaneeLoanDetail.amountReceived) AS historicalDebt,
+           SUM(loaneeLoanDetail.amountOutstanding) AS totalAmountOutstanding,
+           COUNT(loaneeLoanDetail.id) AS numberOfLoans,
+           loanee.userIdentity.firstName AS firstName,
+           loanee.userIdentity.lastName AS lastName,
+           loanee.userIdentity.email AS email,
+           loanee.id AS loaneeId
+    FROM LoaneeEntity loanee
+    JOIN CohortLoaneeEntity cohortLoanee ON cohortLoanee.loanee.id = loanee.id
+    JOIN LoaneeLoanDetailEntity loaneeLoanDetail ON loaneeLoanDetail.id = cohortLoanee.loaneeLoanDetail.id
+    JOIN CohortEntity cohort ON cohort.id = cohortLoanee.cohort.id
+    JOIN ProgramEntity program ON program.id = cohort.programId
+    JOIN OrganizationEntity organization ON organization.id = program.organizationIdentity.id
+    WHERE organization.id = :organizationId
+    GROUP BY loanee.userIdentity.firstName, loanee.userIdentity.lastName, loanee.userIdentity.email, loanee.id
+    ORDER BY COUNT(loaneeLoanDetail.id) DESC, loanee.userIdentity.firstName DESC
+""")
+    Page<LoaneeLoanAggregateProjection> findAllByOrganizationId(@Param("organizationId") String organizationId, Pageable pageRequest);
 
     @Query("""
-        SELECT loaneeLoanAggregate.historicalDebt AS historicalDebt,
-               loaneeLoanAggregate.totalAmountOutstanding AS totalAmountOutstanding,
-               loaneeLoanAggregate.numberOfLoans AS numberOfLoans,
-               loanee.userIdentity.firstName AS firstName,
-               loanee.userIdentity.lastName AS lastName,
-               loanee.userIdentity.email AS email,
-               loanee.id AS loaneeId
-        FROM LoaneeLoanAggregateEntity loaneeLoanAggregate
-        JOIN LoaneeEntity loanee ON loanee.id = loaneeLoanAggregate.loanee.id
-        JOIN CohortLoaneeEntity cohortLoanee ON cohortLoanee.loanee.id = loanee.id
-        JOIN CohortEntity cohort ON cohort.id = cohortLoanee.cohort.id
-        JOIN ProgramEntity program ON program.id = cohort.programId
-        JOIN OrganizationEntity organization ON organization.id = program.organizationIdentity.id
-        WHERE (loanee.userIdentity.firstName LIKE :nameFragment
-           OR loanee.userIdentity.lastName LIKE :nameFragment)
-           AND organization.id = :organizationId
-        ORDER BY loaneeLoanAggregate.numberOfLoans DESC
-    """)
-    Page<LoaneeLoanAggregateProjection> searchLoaneeLoanAggregateByOrganizationId(@Param("nameFragment") String nameFragment,
-                                                                                  @Param("organizationId") String organizationId, Pageable pageRequest);
+    select 
+        SUM(loaneeLoanDetail.amountReceived) as historicalDebt,
+        SUM(loaneeLoanDetail.amountOutstanding) as totalAmountOutstanding,
+        COUNT(loaneeLoanDetail.id) as numberOfLoans,
+        loanee.userIdentity.firstName as firstName,
+        loanee.userIdentity.lastName as lastName,
+        loanee.userIdentity.email as email,
+        loanee.id as loaneeId
+
+    FROM LoaneeEntity loanee 
+    join CohortLoaneeEntity cohortLoanee on cohortLoanee.loanee.id = loanee.id
+    join LoaneeLoanDetailEntity loaneeLoanDetail on loaneeLoanDetail.id = cohortLoanee.loaneeLoanDetail.id
+    join CohortEntity cohort on cohort.id = cohortLoanee.cohort.id
+    join ProgramEntity program on program.id = cohort.programId
+    join OrganizationEntity organization on organization.id = program.organizationIdentity.id
+
+    where (
+        lower(loanee.userIdentity.firstName) like lower(concat('%', :nameFragment, '%'))
+        or lower(loanee.userIdentity.lastName) like lower(concat('%', :nameFragment, '%'))
+    )
+    and organization.id = :organizationId
+    GROUP BY loanee.userIdentity.firstName, loanee.userIdentity.lastName, loanee.userIdentity.email, loanee.id
+    ORDER BY COUNT(loaneeLoanDetail.id) DESC, loanee.userIdentity.firstName DESC
+""")
+    Page<LoaneeLoanAggregateProjection> searchLoaneeLoanAggregateByOrganizationId(
+            @Param("nameFragment") String nameFragment,
+            @Param("organizationId") String organizationId,
+            Pageable pageRequest
+    );
+
 }
