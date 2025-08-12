@@ -66,6 +66,7 @@ public class Loanee {
     private String institutionName;
     private String loanReferralId;
     private String cohortLoaneeId;
+    private String organizationId;
 
 
     public void validate() throws MeedlException {

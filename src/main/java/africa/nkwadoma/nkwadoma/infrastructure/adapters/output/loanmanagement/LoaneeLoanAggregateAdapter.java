@@ -1,8 +1,10 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanAggregateOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetailSummary;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanAggregate;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoaneeLoanAggregateEntity;
@@ -73,6 +75,26 @@ public class LoaneeLoanAggregateAdapter implements LoaneeLoanAggregateOutputPort
         MeedlValidator.validateUUID(id,"Loanee loan detail cannot be empty");
         LoaneeLoanAggregateEntity loaneeLoanAggregateEntity = loaneeLoanAggregateRepository.findByLoaneeLoandetailId(id);
         return loaneeLoanAggregateMapper.toLoaneeLoanAggregate(loaneeLoanAggregateEntity);
+    }
+
+    @Override
+    public Page<LoaneeLoanAggregate> findAllLoanAggregateByOrganizationId(String organizationId, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+
+        Page<LoaneeLoanAggregateProjection> loaneeLoanAggregateProjections =
+                loaneeLoanAggregateRepository.findAllByOrganizationId(organizationId,pageRequest);
+        return loaneeLoanAggregateProjections.map(loaneeLoanAggregateMapper::mapProjectionToLoaneeLoanAggregate);
+    }
+
+    @Override
+    public Page<LoaneeLoanAggregate> searchLoanAggregateByOrganizationId(Loanee loanee, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(loanee.getOrganizationId(), OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+        Page<LoaneeLoanAggregateProjection> loaneeLoanAggregateProjections =
+                loaneeLoanAggregateRepository.searchLoaneeLoanAggregateByOrganizationId(loanee.getLoaneeName(),
+                        loanee.getOrganizationId(),pageRequest);
+        return loaneeLoanAggregateProjections.map(loaneeLoanAggregateMapper::mapProjectionToLoaneeLoanAggregate);
     }
 
 }
