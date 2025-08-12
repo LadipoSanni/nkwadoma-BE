@@ -979,8 +979,9 @@ class LoaneeServiceTest {
     void searchLoanAggregateByPm(){
         userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
         Page<LoaneeLoanAggregate> loanAggregatePage = new PageImpl<>(List.of(loaneeLoanAggregate));
+        firstLoanee.setLoaneeName("q");
         try {
-            when(userIdentityOutputPort.findById(userId)).thenReturn(userIdentity);
+            when(userIdentityOutputPort.findById(any())).thenReturn(userIdentity);
             when(loaneeLoanAggregateOutputPort.searchLoanAggregate(firstLoanee.getLoaneeName(),pageSize,pageNumber))
                     .thenReturn(loanAggregatePage);
             loanAggregatePage = loaneeService.searchLoanAggregate(firstLoanee,pageSize,pageNumber);
@@ -994,11 +995,12 @@ class LoaneeServiceTest {
     void searchLoanAggregateByOrganizationAdmin(){
         userIdentity.setRole(IdentityRole.ORGANIZATION_ADMIN);
         firstLoanee.setOrganizationId(organizationEmployeeIdentity.getOrganization());
+        firstLoanee.setLoaneeName("q");
         Page<LoaneeLoanAggregate> loanAggregatePage = new PageImpl<>(List.of(loaneeLoanAggregate));
         try {
-            when(userIdentityOutputPort.findById(userId)).thenReturn(userIdentity);
+            when(userIdentityOutputPort.findById(any())).thenReturn(userIdentity);
             when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId())).thenReturn(Optional.ofNullable(organizationEmployeeIdentity));
-            when(loaneeLoanAggregateOutputPort.searchLoanAggregate(firstLoanee.getLoaneeName(),pageSize,pageNumber))
+            when(loaneeLoanAggregateOutputPort.searchLoanAggregateByOrganizationId(firstLoanee,pageSize,pageNumber))
                     .thenReturn(loanAggregatePage);
             loanAggregatePage = loaneeService.searchLoanAggregate(firstLoanee,pageSize,pageNumber);
         }catch (MeedlException exception){
@@ -1012,8 +1014,8 @@ class LoaneeServiceTest {
         userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
         Page<LoaneeLoanAggregate> loanAggregatePage = new PageImpl<>(List.of(loaneeLoanAggregate));
         try {
-            when(userIdentityOutputPort.findById(userId)).thenReturn(userIdentity);
-            when(loaneeLoanAggregateOutputPort.searchLoanAggregate(firstLoanee.getLoaneeName(),pageSize,pageNumber))
+            when(userIdentityOutputPort.findById(any())).thenReturn(userIdentity);
+            when(loaneeLoanAggregateOutputPort.findAllLoanAggregate(pageSize,pageNumber))
                     .thenReturn(loanAggregatePage);
             loanAggregatePage = loaneeService.viewAllLoanee(mockId,pageSize,pageNumber);
         }catch (MeedlException exception){
@@ -1028,9 +1030,9 @@ class LoaneeServiceTest {
         firstLoanee.setOrganizationId(organizationEmployeeIdentity.getOrganization());
         Page<LoaneeLoanAggregate> loanAggregatePage = new PageImpl<>(List.of(loaneeLoanAggregate));
         try {
-            when(userIdentityOutputPort.findById(userId)).thenReturn(userIdentity);
+            when(userIdentityOutputPort.findById(any())).thenReturn(userIdentity);
             when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId())).thenReturn(Optional.ofNullable(organizationEmployeeIdentity));
-            when(loaneeLoanAggregateOutputPort.searchLoanAggregate(firstLoanee.getLoaneeName(),pageSize,pageNumber))
+            when(loaneeLoanAggregateOutputPort.findAllLoanAggregateByOrganizationId(organizationEmployeeIdentity.getOrganization(),pageSize,pageNumber))
                     .thenReturn(loanAggregatePage);
             loanAggregatePage = loaneeService.viewAllLoanee(mockId,pageSize,pageNumber);
         }catch (MeedlException exception){
