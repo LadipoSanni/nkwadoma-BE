@@ -56,7 +56,7 @@ public class LoanController {
     private final LoanMetricsRestMapper loanMetricsRestMapper;
 
     @PostMapping("/loan-product/create")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = LOAN_PRODUCT_CREATION,description = LOAN_PRODUCT_CREATION_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> createLoanProduct (@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid LoanProductRequest request) throws MeedlException {
         log.info("Create loan product called.... ");
@@ -72,7 +72,7 @@ public class LoanController {
             return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
     }
     @PostMapping("/loan-product/update")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = LOAN_PRODUCT_UPDATE,description = LOAN_PRODUCT_UPDATE_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> updateLoanProduct (@RequestBody LoanProductRequest request) throws MeedlException {
         log.info("Update loan product called with id .... {}", request.getId());
@@ -88,7 +88,7 @@ public class LoanController {
     }
 
     @GetMapping("/loan-product/all")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = LOAN_PRODUCT_VIEW_ALL, description = LOAN_PRODUCT_VIEW_ALL_DESCRIPTION )
     public ResponseEntity<ApiResponse<?>> viewAllLoanProduct(@AuthenticationPrincipal Jwt meedl,
                                                              @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
@@ -110,7 +110,7 @@ public class LoanController {
         );
     }
     @GetMapping("/loan-product/search")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> searchLoanProduct(
             @RequestParam @NotBlank(message = "Loan product name is required") String loanProductName,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
@@ -132,7 +132,7 @@ public class LoanController {
 
 
     @GetMapping("/loan-product/view-details-by-id")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = VIEW_LOAN_PRODUCT_DETAILS,description = VIEW_LOAN_PRODUCT_DETAILS_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> viewLoanProductDetailsById (@RequestParam
                                                                           @NotBlank(message = "Provide a valid loan product identifier")
@@ -166,7 +166,7 @@ public class LoanController {
     }
 
     @PostMapping("start")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = START_LOAN, description = START_LOAN_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> startLoan(@RequestParam @NotBlank(message = "Loanee ID is required")
                                                     String loaneeId,
@@ -188,7 +188,7 @@ public class LoanController {
     }
 
     @PostMapping("/accept/loan-offer")
-    @PreAuthorize("hasRole('LOANEE')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> acceptLoanOffer(@AuthenticationPrincipal Jwt meedlUser,
                                                           @Valid @RequestBody LoanOfferAcceptRequest loanOfferRequest) throws MeedlException {
         log.info("process of accept loan offer request started: {}", loanOfferRequest);
@@ -208,7 +208,7 @@ public class LoanController {
 
 
     @GetMapping("/loanOffer/all")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('LOANEE')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('LOANEE') or hasRole('MEEDL_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> viewLoanOffers(@AuthenticationPrincipal Jwt meedlUser,
                                                          @RequestParam(required = false) String organizationId ,
                                                          @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
@@ -233,7 +233,7 @@ public class LoanController {
     }
 
     @GetMapping("/view-loan-offer/{loanOfferId}")
-    @PreAuthorize("hasRole('LOANEE') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('LOANEE') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> viewLoanOffer(@AuthenticationPrincipal Jwt meedlUser, @PathVariable @NotBlank(message = "LoanOffer ID is required")
                                                             String loanOfferId ) throws MeedlException {
         LoanOffer loanOffer = loanOfferUseCase.viewLoanOfferDetails((meedlUser.getClaimAsString("sub")),loanOfferId);
@@ -248,7 +248,7 @@ public class LoanController {
 
 
     @GetMapping("/search-loan")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> searchLoan(@RequestParam @NotBlank(message = "Program id is required") String programId,
                                                      @RequestParam @NotBlank(message = "Organization id is required") String organizationId,
                                                      @RequestParam LoanType status,
@@ -325,7 +325,7 @@ public class LoanController {
 
 
     @GetMapping("/filter-by-program")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> filterLoanByProgram(@RequestParam @NotBlank(message = "Program id is required") String programId,
                                                               @RequestParam @NotBlank(message = "Organization id is required") String organizationId,
                                                               @RequestParam LoanType type,
