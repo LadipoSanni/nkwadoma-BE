@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.notification.SendColleag
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
@@ -409,7 +410,7 @@ class UserIdentityServiceTest {
         when(userIdentityOutputPort.findById(favour.getCreatedBy())).thenReturn(favour);
 
         MeedlException exception = assertThrows(MeedlException.class, () ->
-                userIdentityService.checkIfUserAllowedToDeactivateAccount(favour, favour)
+                userIdentityService.checkIfUserAllowedForAccountActivationActivity(favour, favour, ActivationStatus.DEACTIVATED)
         );
 
         assertEquals("You are not allowed to deactivate yourself.", exception.getMessage());
@@ -427,7 +428,7 @@ class UserIdentityServiceTest {
         when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(favour.getId())).thenReturn(Optional.empty());
 
         MeedlException exception = assertThrows(MeedlException.class, () ->
-                userIdentityService.checkIfUserAllowedToDeactivateAccount(favour, favour)
+                userIdentityService.checkIfUserAllowedForAccountActivationActivity(favour, favour, ActivationStatus.DEACTIVATED)
         );
 
         assertEquals("You cannot deactivate this user, please contact Meedl admin!", exception.getMessage());
@@ -454,7 +455,7 @@ class UserIdentityServiceTest {
         when(organizationIdentityOutputPort.findByEmail("org-A")).thenReturn(org);
 
         MeedlException exception = assertThrows(MeedlException.class, () ->
-                userIdentityService.checkIfUserAllowedToDeactivateAccount(favour, favour)
+                userIdentityService.checkIfUserAllowedForAccountActivationActivity(favour, favour, ActivationStatus.DEACTIVATED)
         );
 
         assertEquals("You are not authorized to deactivate this user", exception.getMessage());
@@ -481,7 +482,7 @@ class UserIdentityServiceTest {
         when(organizationIdentityOutputPort.findByEmail("org-A")).thenReturn(org);
 
         assertDoesNotThrow(() ->
-                userIdentityService.checkIfUserAllowedToDeactivateAccount(favour, favour)
+                userIdentityService.checkIfUserAllowedForAccountActivationActivity(favour, favour, ActivationStatus.DEACTIVATED)
         );
 
     }
