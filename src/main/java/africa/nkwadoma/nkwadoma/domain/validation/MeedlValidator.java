@@ -146,6 +146,13 @@ public class MeedlValidator {
             throw new MeedlException(MeedlMessages.PAGE_SIZE_CANNOT_BE_LESS_THAN_ONE.getMessage());
         }
     }
+    public static String formatPhoneNumber(String input) {
+        if (input != null && input.matches("^\\d{10}$")) {
+            return "0" + input;
+        }
+        return input;
+    }
+
     public static void validateElevenDigits(String numbersToValidate, String errorMessage) throws MeedlException {
         MeedlValidator.validateDataElement(numbersToValidate, errorMessage);
         String regex = "^\\d{11}$";
