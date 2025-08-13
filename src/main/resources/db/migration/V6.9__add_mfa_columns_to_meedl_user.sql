@@ -1,6 +1,0 @@
-
-ALTER TABLE meedl_user
-    ADD COLUMN mfa_phone_number VARCHAR(255),
-    ADD COLUMN enable_phone_number_mfa BOOLEAN NOT NULL DEFAULT FALSE,
-    ADD COLUMN enable_email_mfa BOOLEAN NOT NULL DEFAULT FALSE,
-    ADD COLUMN mfa_enabled BOOLEAN NOT NULL DEFAULT FALSE;

@@ -51,9 +51,13 @@ public class UserEntity {
     private String bvn;
     private String nin;
     private String taxId;
+    @Column(name = "mfa_phone_number")
     private String  MFAPhoneNumber;
+    @Column(name = "enable_phone_number_mfa")
     private boolean enablePhoneNumberMFA;
+    @Column(name = "enable_email_mfa")
     private boolean enableEmailMFA;
+    @Column(name = "mfa_enabled")
     private boolean MFAEnabled;
     @OneToOne
     private BankDetailEntity bankDetailEntity;
