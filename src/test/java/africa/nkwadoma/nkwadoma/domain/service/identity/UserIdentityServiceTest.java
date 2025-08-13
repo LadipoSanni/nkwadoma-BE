@@ -491,4 +491,94 @@ class UserIdentityServiceTest {
 
 
 
+    @Test
+    @DisplayName("Should throw exception when MFA is enabled and disabled at same time")
+    void manageMFAWithConflictingFlags() {
+        favour.setEnablePhoneNumberMFA(true);
+        favour.setDisableMFA(true);
+
+        MeedlException exception = assertThrows(MeedlException.class,
+                () -> userIdentityService.manageMFA(favour));
+
+        assertEquals("MFA cannot be disabled and enabled at the same time", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should disable MFA when disableMFA flag is set")
+    void disableMFA() throws MeedlException {
+        favour.setDisableMFA(true);
+        when(userIdentityOutputPort.findById(favour.getId())).thenReturn(favour);
+
+        String result = userIdentityService.manageMFA(favour);
+
+        assertEquals("MFA disabled", result);
+        verify(userIdentityOutputPort).save(favour);
+        assertFalse(favour.isMFAEnabled());
+        assertFalse(favour.isEnableEmailMFA());
+        assertFalse(favour.isEnablePhoneNumberMFA());
+    }
+
+    @Test
+    @DisplayName("Should enable Email MFA when enableEmailMFA flag is set")
+    void enableEmailMFA() throws MeedlException {
+        favour.setEnableEmailMFA(true);
+        when(userIdentityOutputPort.findById(favour.getId())).thenReturn(favour);
+
+        String result = userIdentityService.manageMFA(favour);
+
+        assertEquals("Email MFA enabled successfully", result);
+        verify(userIdentityOutputPort).save(favour);
+        assertTrue(favour.isMFAEnabled());
+        assertTrue(favour.isEnableEmailMFA());
+        assertFalse(favour.isEnablePhoneNumberMFA());
+    }
+
+    @Test
+    @DisplayName("Should enable Phone Number MFA when flag is set and new number provided")
+    void enablePhoneNumberMFAWithNewNumber() throws MeedlException {
+        favour.setEnablePhoneNumberMFA(true);
+        favour.setDisableMFA(Boolean.FALSE);
+        favour.setMFAPhoneNumber("08012345678");
+        when(userIdentityOutputPort.findById(favour.getId())).thenReturn(favour);
+
+        String result = userIdentityService.manageMFA(favour);
+
+        assertEquals("Phone number MFA enabled successfully", result);
+        verify(userIdentityOutputPort).save(favour);
+        assertTrue(favour.isMFAEnabled());
+        assertFalse(favour.isEnableEmailMFA());
+        assertTrue(favour.isEnablePhoneNumberMFA());
+    }
+
+    @Test
+    @DisplayName("Should enable Phone Number MFA when flag is set and old number used")
+    void enablePhoneNumberMFAWithOldNumber() throws MeedlException {
+        UserIdentity foundUser = new UserIdentity();
+        foundUser.setId(favour.getId());
+        foundUser.setMFAPhoneNumber("08012345678");
+        favour.setEnablePhoneNumberMFA(true);
+
+        when(userIdentityOutputPort.findById(favour.getId())).thenReturn(foundUser);
+        favour.setMFAPhoneNumber("");
+
+        String result = userIdentityService.manageMFA(favour);
+
+        assertEquals("Phone number MFA enabled successfully", result);
+        verify(userIdentityOutputPort).save(foundUser);
+        assertTrue(foundUser.isMFAEnabled());
+        assertFalse(foundUser.isEnableEmailMFA());
+        assertTrue(foundUser.isEnablePhoneNumberMFA());
+    }
+
+    @Test
+    @DisplayName("Should return warning message when no MFA option is selected")
+    void manageMFAWithNoOptionSelected() throws MeedlException {
+        when(userIdentityOutputPort.findById(favour.getId())).thenReturn(favour);
+
+        String result = userIdentityService.manageMFA(favour);
+
+        assertEquals("Unable to determine MFA option selected", result);
+        verify(userIdentityOutputPort, never()).save(any());
+    }
+
 }

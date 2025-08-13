@@ -222,12 +222,6 @@ public class LoanBookValidator {
         return false;
     }
 
-    public String formatPhoneNumber(String input) {
-        if (input != null && input.matches("^\\d{10}$")) {
-            return "0" + input;
-        }
-        return input;
-    }
 
 
     private void validateName(int rowCount, String nameToValidate, String attributeName) {
@@ -270,7 +264,7 @@ public class LoanBookValidator {
     }
 
     private void validatePhoneNumber(String elevenDigitNumber, String errorMessage)  {
-        elevenDigitNumber = formatPhoneNumber(elevenDigitNumber);
+        elevenDigitNumber = MeedlValidator.formatPhoneNumber(elevenDigitNumber);
         validateElevenDigit(elevenDigitNumber, errorMessage);
     }
     private void validateElevenDigit(String elevenDigitNumber, String errorMessage)  {

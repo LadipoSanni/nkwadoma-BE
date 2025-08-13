@@ -4,7 +4,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import org.keycloak.representations.*;
 
-public interface CreateUserUseCase {
+public interface UserUseCase {
 
     UserIdentity createPassword(String token, String password) throws MeedlException;
 
@@ -27,4 +27,6 @@ public interface CreateUserUseCase {
     boolean checkNewPasswordMatchLastFive(UserIdentity userIdentity) throws MeedlException;
 
     UserIdentity viewUserDetail(UserIdentity userIdentity) throws MeedlException;
+
+    String manageMFA(UserIdentity userIdentity) throws MeedlException;
 }
