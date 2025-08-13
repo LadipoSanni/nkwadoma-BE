@@ -139,6 +139,7 @@ class CohortPersistenceAdapterTest {
         elites.setTuitionAmount(BigDecimal.valueOf(20000));
         elites.setOrganizationId(organizationId);
         elites.setCohortStatus(CohortStatus.GRADUATED);
+        elites.setCohortType(CohortType.NON_LOAN_BOOK);
 
         xplorers = new Cohort();
         xplorers.setName("xplorers");
@@ -149,6 +150,7 @@ class CohortPersistenceAdapterTest {
         xplorers.setTuitionAmount(BigDecimal.valueOf(20000));
         xplorers.setOrganizationId(organizationId);
         xplorers.setCohortStatus(CohortStatus.CURRENT);
+        xplorers.setCohortType(CohortType.NON_LOAN_BOOK);
 
         mavin = new Cohort();
         mavin.setStartDate(LocalDate.of(2024,10,18));
@@ -159,6 +161,7 @@ class CohortPersistenceAdapterTest {
         mavin.setTuitionAmount(BigDecimal.valueOf(20000));
         mavin.setOrganizationId(organizationId);
         mavin.setCohortStatus(CohortStatus.INCOMING);
+        mavin.setCohortType(CohortType.NON_LOAN_BOOK);
     }
 
 

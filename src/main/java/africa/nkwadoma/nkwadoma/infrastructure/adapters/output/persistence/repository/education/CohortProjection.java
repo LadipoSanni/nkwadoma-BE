@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repo
 
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.CohortType;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -16,6 +17,7 @@ public interface CohortProjection {
     String getProgramName();
     ActivationStatus getActivationStatus();
     CohortStatus getCohortStatus();
+    CohortType getCohortType();
     BigDecimal getTuitionAmount();
     BigDecimal getTotalCohortFee();
     BigDecimal getAmountRequested();

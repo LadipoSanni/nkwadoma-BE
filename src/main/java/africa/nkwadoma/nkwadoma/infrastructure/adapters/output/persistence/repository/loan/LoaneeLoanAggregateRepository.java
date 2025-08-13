@@ -40,8 +40,8 @@ public interface LoaneeLoanAggregateRepository extends JpaRepository<LoaneeLoanA
               
         from LoaneeLoanAggregateEntity loaneeLoanAggregate
         join LoaneeEntity loanee on loanee.id = loaneeLoanAggregate.loanee.id
-        where loanee.userIdentity.firstName like %:nameFragment% 
-           or loanee.userIdentity.lastName like %:nameFragment%
+        where (upper(concat(loanee.userIdentity.firstName, ' ', loanee.userIdentity.lastName)) LIKE upper(concat('%', :nameFragment, '%'))
+        OR upper(concat(loanee.userIdentity.lastName, ' ', loanee.userIdentity.firstName)) LIKE upper(concat('%', :nameFragment, '%')))
         order by loaneeLoanAggregate.numberOfLoans desc 
 """)
     Page<LoaneeLoanAggregateProjection> searchLoaneeLoanAggregate(@Param("nameFragment") String nameFragment, Pageable pageRequest);

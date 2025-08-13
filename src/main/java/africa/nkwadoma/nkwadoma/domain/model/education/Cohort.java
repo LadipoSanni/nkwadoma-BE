@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.model.education;
 
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.CohortType;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
@@ -31,6 +32,7 @@ public class Cohort {
     private String name;
     private ActivationStatus activationStatus;
     private CohortStatus cohortStatus;
+    private CohortType cohortType;
     private LocalDateTime createdAt;
     private BigDecimal tuitionAmount;
     private BigDecimal totalAmountRequested;
