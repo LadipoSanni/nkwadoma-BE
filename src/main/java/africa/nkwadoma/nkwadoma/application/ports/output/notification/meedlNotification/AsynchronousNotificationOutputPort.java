@@ -55,7 +55,7 @@ public interface AsynchronousNotificationOutputPort {
     void notifyAllBackOfficeAdminForReactivatedAccount(OrganizationIdentity organization) throws MeedlException;
 
     @Async
-    void notifySuperAdminOfDeactivationAttempt(UserIdentity foundActor) throws MeedlException;
+    void notifySuperAdminOfActivationActivityAttempt(UserIdentity foundActor) throws MeedlException;
 
     @Async
     void sendNotificationToSuperAdmin(OrganizationEmployeeIdentity organizationEmployeeIdentity, OrganizationEmployeeIdentity

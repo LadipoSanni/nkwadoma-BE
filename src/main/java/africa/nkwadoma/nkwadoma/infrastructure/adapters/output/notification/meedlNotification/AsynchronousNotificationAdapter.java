@@ -209,7 +209,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
     }
 
     @Override
-    public void notifySuperAdminOfDeactivationAttempt(UserIdentity foundActor) throws MeedlException {
+    public void notifySuperAdminOfActivationActivityAttempt(UserIdentity foundActor) throws MeedlException {
         List<UserIdentity> superAdmins = userIdentityOutputPort.findAllByRole(IdentityRole.MEEDL_SUPER_ADMIN);
         for (UserIdentity superAdmin : superAdmins) {
             MeedlNotification notification = MeedlNotification.builder()
