@@ -321,7 +321,7 @@ public class LoaneeController {
     }
 
     @PostMapping("status")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> archiveOrUnArchiveLoanee(@RequestBody LoaneeStatusRequest loaneeStatusRequest) throws MeedlException{
         String response = loaneeUseCase.archiveOrUnArchiveByIds(loaneeStatusRequest.getCohortId(),
                 loaneeStatusRequest.getLoaneeIds(),loaneeStatusRequest.getLoaneeStatus());
