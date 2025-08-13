@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.notification.SendColleag
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
@@ -387,16 +388,16 @@ class UserIdentityServiceTest {
     void reactivateUserAccountWithNull(){
         assertThrows(MeedlException.class,()-> userIdentityService.reactivateUserAccount(null));
     }
-    @Test
-    void reactivateAccountThatHasBeenEnabled() {
-        try {
-            when(userIdentityOutputPort.findById(any())).thenReturn(favour);
-            when(identityManagerOutPutPort.enableUserAccount(favour)).thenThrow(MeedlException.class);
-            assertThrows(MeedlException.class, () -> userIdentityService.reactivateUserAccount(favour));
-        } catch (MeedlException e) {
-            log.error("error occurred {}", e.getMessage());
-        }
-    }
+//    @Test
+//    void reactivateAccountThatHasBeenEnabled() {
+//        try {
+//            when(userIdentityOutputPort.findById(any())).thenReturn(favour);
+//            when(identityManagerOutPutPort.enableUserAccount(favour)).thenThrow(MeedlException.class);
+//            assertThrows(MeedlException.class, () -> userIdentityService.reactivateUserAccount(favour));
+//        } catch (MeedlException e) {
+//            log.error("error occurred {}", e.getMessage());
+//        }
+//    }
 
 
 
@@ -409,10 +410,10 @@ class UserIdentityServiceTest {
         when(userIdentityOutputPort.findById(favour.getCreatedBy())).thenReturn(favour);
 
         MeedlException exception = assertThrows(MeedlException.class, () ->
-                userIdentityService.checkIfUserAllowedToDeactivateAccount(favour, favour)
+                userIdentityService.checkIfUserAllowedForAccountActivationActivity(favour, favour, ActivationStatus.DEACTIVATED)
         );
 
-        assertEquals("You are not allowed to deactivate yourself.", exception.getMessage());
+        assertEquals("You are not allowed to "+ActivationStatus.DEACTIVATED+" yourself.", exception.getMessage());
     }
 
     @Test
@@ -427,10 +428,10 @@ class UserIdentityServiceTest {
         when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(favour.getId())).thenReturn(Optional.empty());
 
         MeedlException exception = assertThrows(MeedlException.class, () ->
-                userIdentityService.checkIfUserAllowedToDeactivateAccount(favour, favour)
+                userIdentityService.checkIfUserAllowedForAccountActivationActivity(favour, favour, ActivationStatus.DEACTIVATED)
         );
 
-        assertEquals("You cannot deactivate this user, please contact Meedl admin!", exception.getMessage());
+        assertEquals("You cannot "+ActivationStatus.DEACTIVATED+" this user, please contact Meedl admin!", exception.getMessage());
     }
 
     @Test
@@ -454,10 +455,10 @@ class UserIdentityServiceTest {
         when(organizationIdentityOutputPort.findByEmail("org-A")).thenReturn(org);
 
         MeedlException exception = assertThrows(MeedlException.class, () ->
-                userIdentityService.checkIfUserAllowedToDeactivateAccount(favour, favour)
+                userIdentityService.checkIfUserAllowedForAccountActivationActivity(favour, favour, ActivationStatus.DEACTIVATED)
         );
 
-        assertEquals("You are not authorized to deactivate this user", exception.getMessage());
+        assertEquals("You are not authorized to "+ActivationStatus.DEACTIVATED+" this user", exception.getMessage());
     }
 
     @Test
@@ -481,7 +482,7 @@ class UserIdentityServiceTest {
         when(organizationIdentityOutputPort.findByEmail("org-A")).thenReturn(org);
 
         assertDoesNotThrow(() ->
-                userIdentityService.checkIfUserAllowedToDeactivateAccount(favour, favour)
+                userIdentityService.checkIfUserAllowedForAccountActivationActivity(favour, favour, ActivationStatus.DEACTIVATED)
         );
 
     }

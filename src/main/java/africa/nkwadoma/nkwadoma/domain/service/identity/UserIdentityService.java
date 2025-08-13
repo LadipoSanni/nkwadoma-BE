@@ -190,9 +190,17 @@ public class UserIdentityService implements CreateUserUseCase {
         MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
         MeedlValidator.validateUUID(userIdentity.getId(), UserMessages.INVALID_USER_ID.getMessage());
         MeedlValidator.validateDataElement(userIdentity.getReactivationReason(), "Reason for reactivation is required.");
-        UserIdentity foundUserIdentity = userIdentityOutputPort.findById(userIdentity.getId());
-        userIdentity = identityManagerOutPutPort.enableUserAccount(foundUserIdentity);
-        log.info("User reactivated successfully {}", userIdentity.getId());
+        UserIdentity userToActivate = userIdentityOutputPort.findById(userIdentity.getId());
+
+        checkIfUserAllowedForAccountActivationActivity(userIdentity, userIdentity, ActivationStatus.ACTIVE);
+        userIdentity.setReactivationReason("User activated by : "+ userIdentity.getCreatedBy() + ". Reason : "+userIdentity.getDeactivationReason());
+
+        userIdentity = identityManagerOutPutPort.enableUserAccount(userToActivate);
+        log.info("User on key cloak reactivation successfully.");
+        performEmployeeActivation(userIdentity, ActivationStatus.ACTIVE);
+        log.info("Employee reactivated successfully. User id: {}", userIdentity.getId());
+
+        asynchronousMailingOutputPort.notifyUserOnActivationActivityOnUserAccount(userIdentity, ActivationStatus.ACTIVE);
         return userIdentity;
     }
 
@@ -203,47 +211,52 @@ public class UserIdentityService implements CreateUserUseCase {
         MeedlValidator.validateDataElement(userIdentity.getDeactivationReason(), "Reason for deactivation required");
         log.info("About to find user to deactivate by id {}", userIdentity.getId());
         UserIdentity foundUserToDeactivate = userIdentityOutputPort.findById(userIdentity.getId());
-        checkIfUserAllowedToDeactivateAccount(foundUserToDeactivate, userIdentity);
+
+        checkIfUserAllowedForAccountActivationActivity(foundUserToDeactivate, userIdentity, ActivationStatus.DEACTIVATED);
         foundUserToDeactivate.setDeactivationReason("User deactivated by : "+ userIdentity.getCreatedBy() + ". Reason : "+userIdentity.getDeactivationReason());
+
         userIdentity = identityManagerOutPutPort.disableUserAccount(foundUserToDeactivate);
         log.info("User on key cloak deactivated successfully.");
-        deactivateEmployee(userIdentity);
-        log.info("User deactivated successfully {}", userIdentity.getId());
-        asynchronousMailingOutputPort.notifyDeactivatedUser(userIdentity);
+        performEmployeeActivation(userIdentity, ActivationStatus.DEACTIVATED);
+        log.info("Employee deactivated successfully. User id: {}", userIdentity.getId());
+
+        asynchronousMailingOutputPort.notifyUserOnActivationActivityOnUserAccount(userIdentity, ActivationStatus.DEACTIVATED);
         return userIdentity;
     }
 
-    private void deactivateEmployee(UserIdentity userIdentity) throws MeedlException {
+    private void performEmployeeActivation(UserIdentity userIdentity, ActivationStatus activationStatus) throws MeedlException {
         Optional<OrganizationEmployeeIdentity> optionalOrganizationEmployeeIdentity = organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId());
         if (optionalOrganizationEmployeeIdentity.isPresent()) {
-            log.info("User being deactivated is an employee. User id {}", userIdentity.getId());
+            log.info("User being {} is an employee. User id {}", activationStatus, userIdentity.getId());
             OrganizationEmployeeIdentity organizationEmployeeIdentity = optionalOrganizationEmployeeIdentity.get();
-            organizationEmployeeIdentity.setActivationStatus(ActivationStatus.DEACTIVATED);
+            organizationEmployeeIdentity.setActivationStatus(activationStatus);
             organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
-            log.info("Employee deactivated successfully! Employee id {} , organization id {}", organizationEmployeeIdentity.getId(), organizationEmployeeIdentity.getOrganization());
+            log.info("Employee {} successfully! Employee id {} , organization id {}", activationStatus, organizationEmployeeIdentity.getId(), organizationEmployeeIdentity.getOrganization());
         }
     }
 
-    public void checkIfUserAllowedToDeactivateAccount(UserIdentity userToDeactivate, UserIdentity userIdentity) throws MeedlException {
+    public void checkIfUserAllowedForAccountActivationActivity(UserIdentity userActedUpon, UserIdentity userIdentity, ActivationStatus activationStatus) throws MeedlException {
         UserIdentity foundActor = userIdentityOutputPort.findById(userIdentity.getCreatedBy());
-        log.info("Is actor with email {} and role {} , allowed to deactivate user with email {} and role {}", foundActor.getEmail(), foundActor.getRole(), userToDeactivate.getEmail(), userToDeactivate.getRole());
-        if (foundActor.getId().equals(userToDeactivate.getId())){
-            log.error("User attempts to deactivate self found actor {}, user to deactivate {}", foundActor, userToDeactivate);
-            throw new MeedlException("You are not allowed to deactivate yourself.");
+        log.info("Is actor with email {} and role {} , allowed to {} user with email {} and role {}", foundActor.getEmail(), foundActor.getRole(), activationStatus, userActedUpon.getEmail(), userActedUpon.getRole());
+        if (foundActor.getId().equals(userActedUpon.getId())){
+            log.error("User attempts to {} self found actor {}, user is {}", activationStatus, foundActor, userActedUpon);
+            throw new MeedlException("You are not allowed to "+activationStatus+" yourself.");
         }
-        checkIfOrganizationAdminCanDeactivateAccount(userToDeactivate, foundActor);
-        checkIfPortfolioManagerCanDeactivateAccount(userToDeactivate, foundActor);
-        if (IdentityRole.MEEDL_SUPER_ADMIN.equals(userToDeactivate.getRole())){
-            log.info("An attempt was made to deactivate Meedl's supper admin {} \n ----------------------------> attempt to deactivate Meedls super admin was made by ------------------------->{}", userToDeactivate, foundActor);
-            asynchronousNotificationOutputPort.notifySuperAdminOfDeactivationAttempt(foundActor);
-            throw new MeedlException("You are not allowed to deactivate the super admin on Meedl");
+        checkIfOrganizationAdminCanPerformAccountActivationActivity(userActedUpon, foundActor, activationStatus);
+        checkIfPortfolioManagerCanPerformAccountActivationActivity(userActedUpon, foundActor, activationStatus);
+        if (IdentityRole.MEEDL_SUPER_ADMIN.equals(userActedUpon.getRole())){
+            log.info("An attempt was made to {} Meedl's supper admin {} \n ----------------------------> attempt on Meedls super admin was made by ------------------------->{}",activationStatus, userActedUpon, foundActor);
+            asynchronousNotificationOutputPort.notifySuperAdminOfActivationActivityAttempt(foundActor);
+            throw new MeedlException("You are not allowed to "+activationStatus+" the super admin on Meedl");
         }
-        log.info("Done with validation, actor is allowed to deactivate user.");
+        log.info("Done with validation, actor is allowed to {} user.", activationStatus);
     }
 
-    private void checkIfPortfolioManagerCanDeactivateAccount(UserIdentity userToDeactivate, UserIdentity foundActor) throws MeedlException {
+    private void checkIfPortfolioManagerCanPerformAccountActivationActivity(UserIdentity userToDeactivate, UserIdentity foundActor, ActivationStatus activationStatus) throws MeedlException {
         if (IdentityRole.PORTFOLIO_MANAGER.equals(foundActor.getRole())) {
+            log.info("Checking to see if portfolio manager can perform activation activity");
             checkDeactivationIsAuthorised(
+                    activationStatus,
                     foundActor,
                     userToDeactivate,
                     Set.of(IdentityRole.PORTFOLIO_MANAGER, IdentityRole.MEEDL_ASSOCIATE)
@@ -251,27 +264,29 @@ public class UserIdentityService implements CreateUserUseCase {
         }
     }
 
-    private void checkIfOrganizationAdminCanDeactivateAccount(UserIdentity userToDeactivate, UserIdentity foundActor) throws MeedlException {
+    private void checkIfOrganizationAdminCanPerformAccountActivationActivity(UserIdentity userToDeactivate, UserIdentity foundActor, ActivationStatus activationStatus) throws MeedlException {
         if (IdentityRole.ORGANIZATION_SUPER_ADMIN.equals(foundActor.getRole()) ||
                 IdentityRole.ORGANIZATION_ADMIN.equals(foundActor.getRole())) {
             Optional <OrganizationEmployeeIdentity> deactivatingEmployee = organizationEmployeeIdentityOutputPort.findByMeedlUserId(userToDeactivate.getId());
                     if (deactivatingEmployee.isEmpty()) {
-                        log.error("User can not perform deactivation as user is not an employee on the platform");
-                        throw new MeedlException("You cannot deactivate this user, please contact Meedl admin!");
+                        log.error("User can not perform {} as user is not an employee on the platform", activationStatus);
+                        throw new MeedlException("You cannot "+activationStatus+" this user, please contact Meedl admin!");
                     };
             Optional <OrganizationEmployeeIdentity> employeeToDeactivate = organizationEmployeeIdentityOutputPort.findByMeedlUserId(userToDeactivate.getId());
             if (employeeToDeactivate.isEmpty()) {
-                log.error("User to be deactivated is not an employee, there and organization cannot deactivate this user as user is meant to be an employee in the same organization as the actor.");
-                throw new MeedlException("You can only deactivate employees in your organizations");
+                log.error("User to be {} is not an employee, there and organization cannot {} this user as user is meant to be an employee in the same organization as the actor.", activationStatus, activationStatus);
+                throw new MeedlException("You can only "+activationStatus+" employees in your organizations");
             };
 
             OrganizationIdentity actorOrganization = organizationIdentityOutputPort.findByEmail(employeeToDeactivate.get().getOrganization());
             OrganizationIdentity userToDeactivateOrganization = organizationIdentityOutputPort.findByEmail(employeeToDeactivate.get().getOrganization());
             if (!actorOrganization.getId().equals(userToDeactivateOrganization.getId())){
-                log.error("Attempting to deactivate a user in {} \nWhere as actor is in {}", userToDeactivateOrganization, actorOrganization);
-                throw new MeedlException("You are not allowed to deactivate a user that is not in your organization");
+                log.error("Attempting to {} a user in {} \nWhere as actor is in {}", actorOrganization, userToDeactivateOrganization, actorOrganization);
+                throw new MeedlException("You are not allowed to "+activationStatus+" a user that is not in your organization");
             }
+            log.info("Checking if actor with role {} can perform activation activity {}", foundActor.getRole(), activationStatus);
             checkDeactivationIsAuthorised(
+                    activationStatus,
                     foundActor,
                     userToDeactivate,
                     Set.of(IdentityRole.ORGANIZATION_ADMIN, IdentityRole.ORGANIZATION_ASSOCIATE)
@@ -280,12 +295,13 @@ public class UserIdentityService implements CreateUserUseCase {
     }
 
 
-    private void checkDeactivationIsAuthorised(UserIdentity foundActor , UserIdentity userToDeactivate, Set<IdentityRole> allowedTargetRoles) throws MeedlException {
+    private void checkDeactivationIsAuthorised(ActivationStatus activationStatus, UserIdentity foundActor , UserIdentity userToDeactivate, Set<IdentityRole> allowedTargetRoles) throws MeedlException {
         if (!allowedTargetRoles.contains(userToDeactivate.getRole())) {
-            log.error("You are not authorized to deactivate user with role {} for user with email {}. The actor email is {} and the role of the actor is {}",
-                    userToDeactivate.getRole(), userToDeactivate.getEmail(), foundActor.getEmail(), foundActor.getRole());
-            throw new MeedlException("You are not authorized to deactivate this user");
+            log.error("You are not authorized to {} user with role {} for user with email {}. The actor email is {} and the role of the actor is {}",
+                    activationStatus, userToDeactivate.getRole(), userToDeactivate.getEmail(), foundActor.getEmail(), foundActor.getRole());
+            throw new MeedlException("You are not authorized to "+activationStatus+" this user");
         }
+        log.info("Actor has permission to perform activation activity");
     }
 
     @Override
