@@ -397,7 +397,7 @@ class UserIdentityServiceTest {
 //        } catch (MeedlException e) {
 //            log.error("error occurred {}", e.getMessage());
 //        }
-    }
+//    }
 
 
 
