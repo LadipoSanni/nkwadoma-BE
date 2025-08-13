@@ -76,7 +76,7 @@ public class AdminInitializer {
                 .tin("kwadoma2189")
                 .rcNumber("RC2892832")
                 .phoneNumber("0908965321")
-                .status(ActivationStatus.ACTIVE)
+                .activationStatus(ActivationStatus.ACTIVE)
                 .organizationEmployees(List.of(OrganizationEmployeeIdentity
                         .builder()
                         .meedlUser(userIdentity)
@@ -91,7 +91,7 @@ public class AdminInitializer {
     private OrganizationIdentity createFirstOrganizationIdentity(OrganizationIdentity organizationIdentity) throws MeedlException {
         organizationIdentity.setEnabled(Boolean.TRUE);
         organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
-        organizationIdentity.setStatus(ActivationStatus.ACTIVE);
+        organizationIdentity.setActivationStatus(ActivationStatus.ACTIVE);
         Optional<OrganizationEntity> foundOrganization = organizationIdentityOutputPort.findByRcNumber(organizationIdentity.getRcNumber());
         organizationIdentity = getKeycloakOrganizationIdentity(organizationIdentity, foundOrganization);
         OrganizationIdentity savedOrganizationIdentity;

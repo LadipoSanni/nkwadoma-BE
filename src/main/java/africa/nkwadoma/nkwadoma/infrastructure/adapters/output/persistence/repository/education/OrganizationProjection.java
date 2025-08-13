@@ -24,7 +24,7 @@ public interface OrganizationProjection {
     BigDecimal getTotalHistoricalDebt();
     BigDecimal getTotalAmountReceived ();
     BigDecimal getTotalAmountRequested ();
-    ActivationStatus getStatus();
+    ActivationStatus getActivationStatus();
     Double getDebtPercentage();
     Double getRepaymentRate();
 }

@@ -171,13 +171,13 @@ class OrganizationIdentityServiceTest {
     void viewAllOrganizationWithStatus() throws MeedlException {
 
         OrganizationIdentity roseCouture2 = TestData.createOrganizationTestData("rose couture6", "RC8789905",orgEmployee);
-        roseCouture2.setStatus(ActivationStatus.ACTIVE);
+        roseCouture2.setActivationStatus(ActivationStatus.ACTIVE);
 
         int pageNumber = 0;
         int pageSize = 10;
         roseCouture.setPageNumber(pageNumber);
         roseCouture.setPageSize(pageSize);
-        roseCouture.setStatus(ActivationStatus.ACTIVE);
+        roseCouture.setActivationStatus(ActivationStatus.ACTIVE);
 
         List<OrganizationIdentity> organizationIdentities = new ArrayList<>();
         organizationIdentities.add(roseCouture);
@@ -186,13 +186,13 @@ class OrganizationIdentityServiceTest {
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.ASC, "invitedDate"));
         Page<OrganizationIdentity> organizationIdentityPage = new PageImpl<>(organizationIdentities, pageRequest, organizationIdentities.size());
 
-        when(organizationIdentityOutputPort.viewAllOrganizationByStatus(roseCouture, ActivationStatus.ACTIVE)).thenReturn(organizationIdentityPage);
+        when(organizationIdentityOutputPort.viewAllOrganizationByStatus(roseCouture, Set.of(ActivationStatus.ACTIVE))).thenReturn(organizationIdentityPage);
         Page<OrganizationIdentity> result = organizationIdentityService.viewAllOrganizationByStatus(roseCouture, ActivationStatus.ACTIVE);
 
         assertNotNull(result);
         assertEquals(2, result.getContent().size());
-        assertEquals(ActivationStatus.ACTIVE, result.getContent().get(1).getStatus());
-        verify(organizationIdentityOutputPort, times(1)).viewAllOrganizationByStatus(roseCouture, ActivationStatus.ACTIVE);
+        assertEquals(ActivationStatus.ACTIVE, result.getContent().get(1).getActivationStatus());
+        verify(organizationIdentityOutputPort, times(1)).viewAllOrganizationByStatus(roseCouture, Set.of(ActivationStatus.ACTIVE));
     }
 
     @Test
@@ -329,7 +329,7 @@ class OrganizationIdentityServiceTest {
             OrganizationIdentity deactivatedOrganization =
                     organizationIdentityService.deactivateOrganization(roseCouture.getId(), "test 2 reason");
             assertFalse(deactivatedOrganization.isEnabled());
-            assertEquals(ActivationStatus.DEACTIVATED, deactivatedOrganization.getStatus());
+            assertEquals(ActivationStatus.DEACTIVATED, deactivatedOrganization.getActivationStatus());
             assertEquals(ActivationStatus.DEACTIVATED, employeeSarah.getActivationStatus());
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
@@ -437,7 +437,7 @@ class OrganizationIdentityServiceTest {
         when(userIdentityOutputPort.findById(anyString())).thenReturn(superAdmin);
         when(organizationIdentityOutputPort.findById(anyString())).thenReturn(roseCouture);
         when(userIdentityOutputPort.findById(roseCouture.getCreatedBy())).thenReturn(sarah);
-        roseCouture.setStatus(ActivationStatus.ACTIVE);
+        roseCouture.setActivationStatus(ActivationStatus.ACTIVE);
         assertThrows(MeedlException.class, () ->
                 organizationIdentityService.respondToOrganizationInvite(mockId,mockId,ActivationStatus.APPROVED));
     }
@@ -447,7 +447,7 @@ class OrganizationIdentityServiceTest {
         when(userIdentityOutputPort.findById(anyString())).thenReturn(superAdmin);
         when(organizationIdentityOutputPort.findById(anyString())).thenReturn(roseCouture);
         when(userIdentityOutputPort.findById(roseCouture.getCreatedBy())).thenReturn(sarah);
-        roseCouture.setStatus(ActivationStatus.PENDING_APPROVAL);
+        roseCouture.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
         when(organizationEmployeeIdentityOutputPort.save(employeeSarah)).thenReturn(employeeSarah);
         doNothing().when(asynchronousMailingOutputPort).sendEmailToInvitedOrganization(any(UserIdentity.class));
         when(meedlNotificationOutputPort.save(any(MeedlNotification.class))).thenReturn(any(MeedlNotification.class));

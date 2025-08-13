@@ -92,7 +92,7 @@ public class OrganizationController {
                                                                        @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                                                        @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber)
             throws MeedlException {
-        OrganizationIdentity organizationIdentity = OrganizationIdentity.builder().name(name).status(status).loanType(loanType)
+        OrganizationIdentity organizationIdentity = OrganizationIdentity.builder().name(name).activationStatus(status).loanType(loanType)
                 .pageNumber(pageNumber).pageSize(pageSize).build();
         Page<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase.search(organizationIdentity);
         List<OrganizationResponse> organizationResponses =

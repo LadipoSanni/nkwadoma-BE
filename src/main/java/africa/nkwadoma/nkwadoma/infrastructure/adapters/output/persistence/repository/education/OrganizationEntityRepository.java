@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
+import java.util.Set;
 
 public interface OrganizationEntityRepository extends JpaRepository<OrganizationEntity,String> {
     Optional<OrganizationEntity> findByEmail(String email);
@@ -71,9 +72,9 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
                    from OrganizationEntity o
                                
                    left join OrganizationLoanDetailEntity ld on ld.organization.id = o.id        
-                   WHERE UPPER(o.status) = UPPER(:status) 
+                   WHERE UPPER(o.activationStatus) = UPPER(:activationStatuses) 
                         """)
-    Page<OrganizationProjection> findAllByStatus(@Param("status") String status, Pageable pageable);
+    Page<OrganizationProjection> findAllByStatus(@Param("activationStatuses") Set<ActivationStatus> activationStatuses, Pageable pageable);
 
 
     @Query("""

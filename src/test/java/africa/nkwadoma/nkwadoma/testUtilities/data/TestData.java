@@ -78,7 +78,7 @@ public class TestData {
         organizationIdentity.setEmail("testorganizationdata@gmail.com");
         organizationIdentity.setTin("7682-5627");
         organizationIdentity.setRcNumber(rcNumber);
-        organizationIdentity.setStatus(ActivationStatus.INVITED);
+        organizationIdentity.setActivationStatus(ActivationStatus.INVITED);
         organizationIdentity.setServiceOfferings(List.of(new ServiceOffering()));
         organizationIdentity.getServiceOfferings().get(0).setIndustry(Industry.EDUCATION);
         organizationIdentity.getServiceOfferings().get(0).setTransactionLowerBound(new BigDecimal("0.00"));

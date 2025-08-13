@@ -55,7 +55,7 @@ public interface OrganizationIdentityMapper {
     void mapOrganizationLoanDetailsToOrganization(@MappingTarget OrganizationIdentity organizationIdentity, OrganizationLoanDetail organizationLoanDetail);
 
     @Mapping(target = "id", source = "organizationId")
-    @Mapping(target = "status", source = "status")
+    @Mapping(target = "activationStatus", source = "activationStatus")
     @Mapping(target = "numberOfLoanees", source = "numberOfLoanees")
     @Mapping(target = "numberOfCohort", source = "numberOfCohort")
     @Mapping(target = "numberOfPrograms", source = "numberOfPrograms")

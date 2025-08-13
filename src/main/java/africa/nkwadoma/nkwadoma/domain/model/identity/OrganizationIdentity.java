@@ -43,7 +43,7 @@ public class OrganizationIdentity {
     private LoanType loanType;
     private LocalDateTime timeUpdated;
     private List<ServiceOffering> serviceOfferings;
-    private ActivationStatus status;
+    private ActivationStatus activationStatus;
     private UserIdentity userIdentity;
     private List<OrganizationEmployeeIdentity> organizationEmployees;
     private int numberOfLoanees;
