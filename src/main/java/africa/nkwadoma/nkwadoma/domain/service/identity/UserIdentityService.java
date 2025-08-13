@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.OrganizationEmployeeEmailUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.UserUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
@@ -43,7 +43,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*
 @Slf4j
 @EnableAsync
 @RequiredArgsConstructor
-public class UserIdentityService implements CreateUserUseCase {
+public class UserIdentityService implements UserUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final IdentityManagerOutputPort identityManagerOutPutPort;
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
@@ -305,6 +305,68 @@ public class UserIdentityService implements CreateUserUseCase {
             log.info("Alternate email {}", foundUser.getAlternateEmail());
         }
         return foundUser;
+    }
+
+    @Override
+    public String manageMFA(UserIdentity userIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(userIdentity, UserMessages.USER_IDENTITY_CANNOT_BE_EMPTY.getMessage());
+        if ((userIdentity.isEnablePhoneNumberMFA() || userIdentity.isEnableEmailMFA())
+            && userIdentity.isDisableMFA()){
+            log.error("MFA cannot be disabled and enabled at the same time as one or more factors are selected for a disabled mfa {}", userIdentity);
+            throw new MeedlException("MFA cannot be disabled and enabled at the same time");
+        }
+        UserIdentity foundUser = userIdentityOutputPort.findById(userIdentity.getId());
+        if(userIdentity.isDisableMFA()){
+            return disableMFA(foundUser);
+        }
+        if (userIdentity.isEnableEmailMFA()){
+            return enableEmailMFA(foundUser);
+        }
+
+        if (userIdentity.isEnablePhoneNumberMFA()){
+            return enablePhoneNumberForMFA(userIdentity, foundUser);
+        }
+        log.warn("Unable to determine MFA option selected by user with email {}", foundUser.getEmail());
+        return "Unable to determine MFA option selected";
+    }
+
+    private String enableEmailMFA(UserIdentity foundUser) throws MeedlException {
+        log.info("Email mfa is selected. User Email {}", foundUser.getEmail());
+        applyMFASettings(foundUser, true, Boolean.TRUE, Boolean.FALSE);
+        return "Email MFA enabled successfully";
+    }
+
+    private String disableMFA(UserIdentity foundUser) throws MeedlException {
+        log.warn("MFA is being disabled for user with email {}", foundUser.getEmail());
+        applyMFASettings(foundUser, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE);
+        return "MFA disabled";
+    }
+
+    private String enablePhoneNumberForMFA(UserIdentity userIdentity, UserIdentity foundUser) throws MeedlException {
+        if (MeedlValidator.isNotEmptyString(userIdentity.getMFAPhoneNumber())){
+            log.info("A new phone number is given for mfa {}", userIdentity.getMFAPhoneNumber());
+            validatePhoneNumber(userIdentity);
+            foundUser.setMFAPhoneNumber(userIdentity.getMFAPhoneNumber());
+        }else if (MeedlValidator.isEmptyString(userIdentity.getMFAPhoneNumber())){
+            log.info("No new phone number was provided for mfa. The old number is {}", foundUser.getMFAPhoneNumber());
+            validatePhoneNumber(foundUser);
+        }
+
+        applyMFASettings(foundUser, Boolean.TRUE, Boolean.FALSE, Boolean.TRUE);
+        return "Phone number MFA enabled successfully";
+    }
+
+    private void applyMFASettings(UserIdentity foundUser, boolean mfaEnabled, boolean emailMFA, boolean phoneMFA) throws MeedlException {
+        foundUser.setMFAEnabled(mfaEnabled);
+        foundUser.setEnableEmailMFA(emailMFA);
+        foundUser.setEnablePhoneNumberMFA(phoneMFA);
+        log.info("Saving new mfa settings mfaEnabled {} , emailMFA {}, phoneMFA {}", mfaEnabled, emailMFA, phoneMFA);
+        userIdentityOutputPort.save(foundUser);
+    }
+
+    private static void validatePhoneNumber(UserIdentity foundUser) throws MeedlException {
+        String elevenDigitNumber = MeedlValidator.formatPhoneNumber(foundUser.getMFAPhoneNumber());
+        MeedlValidator.validateElevenDigits(elevenDigitNumber, "Please provide a valid phone number for MFA");
     }
 
 }

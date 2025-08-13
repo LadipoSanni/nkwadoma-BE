@@ -69,6 +69,12 @@ public class UserIdentity {
     private NextOfKin nextOfKin;
     private BankDetail bankDetail;
 
+    private String  MFAPhoneNumber;
+    private boolean enablePhoneNumberMFA;
+    private boolean enableEmailMFA;
+    private boolean MFAEnabled;
+    private boolean disableMFA;
+
     public void validate() throws MeedlException {
         log.info("Started validating for user identity in validation");
         if (ObjectUtils.isEmpty(this.role)|| StringUtils.isEmpty(this.role.name()))

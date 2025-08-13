@@ -51,6 +51,10 @@ public class UserEntity {
     private String bvn;
     private String nin;
     private String taxId;
+    private String  MFAPhoneNumber;
+    private boolean enablePhoneNumberMFA;
+    private boolean enableEmailMFA;
+    private boolean MFAEnabled;
     @OneToOne
     private BankDetailEntity bankDetailEntity;
     @OneToOne

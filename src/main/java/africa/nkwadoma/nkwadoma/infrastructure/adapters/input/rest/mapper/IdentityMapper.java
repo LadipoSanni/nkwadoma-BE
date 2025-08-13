@@ -21,4 +21,8 @@ public interface IdentityMapper {
     UserIdentity toLoginUserIdentity(LoginRequest loginRequest);
 
     UserIdentityResponse toUserIdentityResponse(UserIdentity userIdentityFound);
+
+    @Mapping(target = "id", source = "userId")
+    UserIdentity map(String userId, MFARequest mfaRequest);
+
 }
