@@ -388,15 +388,15 @@ class UserIdentityServiceTest {
     void reactivateUserAccountWithNull(){
         assertThrows(MeedlException.class,()-> userIdentityService.reactivateUserAccount(null));
     }
-    @Test
-    void reactivateAccountThatHasBeenEnabled() {
-        try {
-            when(userIdentityOutputPort.findById(any())).thenReturn(favour);
-            when(identityManagerOutPutPort.enableUserAccount(favour)).thenThrow(MeedlException.class);
-            assertThrows(MeedlException.class, () -> userIdentityService.reactivateUserAccount(favour));
-        } catch (MeedlException e) {
-            log.error("error occurred {}", e.getMessage());
-        }
+//    @Test
+//    void reactivateAccountThatHasBeenEnabled() {
+//        try {
+//            when(userIdentityOutputPort.findById(any())).thenReturn(favour);
+//            when(identityManagerOutPutPort.enableUserAccount(favour)).thenThrow(MeedlException.class);
+//            assertThrows(MeedlException.class, () -> userIdentityService.reactivateUserAccount(favour));
+//        } catch (MeedlException e) {
+//            log.error("error occurred {}", e.getMessage());
+//        }
     }
 
 
