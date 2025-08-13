@@ -10,6 +10,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOffe
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.CohortType;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
@@ -73,6 +74,9 @@ public class CohortService implements CohortUseCase {
         UserIdentity userIdentity = userIdentityOutputPort.findById(cohort.getCreatedBy());
         if (userIdentity.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)) {
             cohort.validateLoanBreakDowns();
+            cohort.setCohortType(CohortType.NON_LOAN_BOOK);
+        }else {
+            cohort.setCohortType(CohortType.LOAN_BOOK);
         }
         log.info("Creating cohort with name {} at service level", cohortName);
         Program program = checkifCohortNameExistInProgram(cohort, cohortName);

@@ -29,6 +29,8 @@ public class CohortEntity {
     private ActivationStatus activationStatus;
     @Enumerated(EnumType.STRING)
     private CohortStatus cohortStatus;
+    @Enumerated(EnumType.STRING)
+    private CohortType cohortType;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private BigDecimal tuitionAmount = BigDecimal.ZERO;

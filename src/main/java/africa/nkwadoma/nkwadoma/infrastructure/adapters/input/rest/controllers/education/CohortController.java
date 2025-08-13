@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.*;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.CohortType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.constants.ControllerConstant;
@@ -130,11 +131,12 @@ public class CohortController {
             @RequestParam(required = false) String organizationId,
             @RequestParam(required = false) String programId,
             @RequestParam(required = false)CohortStatus cohortStatus,
+            @RequestParam(name = "cohortType", required = false) CohortType cohortType,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
 
         Cohort cohort = Cohort.builder().programId(programId).organizationId(organizationId).name(cohortName)
-                .cohortStatus(cohortStatus).pageSize(pageSize).pageNumber(pageNumber).build();
+                .cohortStatus(cohortStatus).cohortType(cohortType).pageSize(pageSize).pageNumber(pageNumber).build();
         Page<Cohort> cohorts = cohortUseCase.searchForCohort(meedl.getClaimAsString("sub"),cohort);
         List<CohortResponse> cohortResponses =  cohorts.stream().map(cohortMapper::toCohortResponse).toList();
         PaginatedResponse<CohortResponse> paginatedResponse = new PaginatedResponse<>(
@@ -178,9 +180,10 @@ public class CohortController {
             @AuthenticationPrincipal Jwt meedl,
             @RequestParam(name = "organizationId", required = false) String organizationId,
             @RequestParam(name = "cohortStatus", required = false) CohortStatus cohortStatus,
+            @RequestParam(name = "cohortType", required = false) CohortType cohortType,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
-        Cohort cohort = Cohort.builder().organizationId(organizationId).cohortStatus(cohortStatus)
+        Cohort cohort = Cohort.builder().organizationId(organizationId).cohortStatus(cohortStatus).cohortType(cohortType)
                 .pageSize(pageSize).pageNumber(pageNumber).build();
         Page<Cohort> cohorts = cohortUseCase.viewAllCohortInOrganization(meedl.getClaimAsString("sub"),cohort);
         List<CohortResponse> cohortResponses = cohorts.stream().map(cohortMapper::toCohortResponse).toList();

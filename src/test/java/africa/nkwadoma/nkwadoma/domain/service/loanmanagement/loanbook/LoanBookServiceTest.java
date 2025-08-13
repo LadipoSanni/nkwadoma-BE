@@ -9,6 +9,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationId
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.CohortType;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
@@ -135,6 +136,7 @@ public class LoanBookServiceTest {
 
             cohort = TestData.createCohortData(TestUtils.generateName(5), program.getId(),
                     program.getOrganizationId(), List.of(TestData.createLoanBreakDown()), meedleUserId);
+            cohort.setCohortType(CohortType.LOAN_BOOK);
             cohort = cohortOutputPort.save(cohort);
 
         } catch (MeedlException e) {
