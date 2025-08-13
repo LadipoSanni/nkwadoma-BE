@@ -57,7 +57,7 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
                    ld.amountRequested as totalAmountRequested,
                    ld.amountRepaid as totalDebtRepaid,
                    ld.outstandingAmount as totalCurrentDebt,
-                    o.activationStatus as status,o.email as email,
+                    o.activationStatus as activationStatus,o.email as email,
                     o.numberOfLoanees as numberOfLoanees,
                     o.numberOfCohort as numberOfCohort,o.websiteAddress as websiteAddress,
                     o.numberOfPrograms as numberOfPrograms,

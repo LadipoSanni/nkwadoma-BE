@@ -156,6 +156,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         MeedlValidator.validatePageNumber(organizationIdentity.getPageNumber());
         Pageable pageRequest = PageRequest.of(organizationIdentity.getPageNumber(), organizationIdentity.getPageSize(), Sort.by(Sort.Direction.DESC, "invitedDate"));
 
+        log.info("List of statuses {}", activationStatuses);
         Page<OrganizationProjection> organizationEntities= organizationEntityRepository.findAllByStatus(activationStatuses,pageRequest);
         log.info("Organization entities {}", organizationEntities.stream().toList());
         return organizationEntities.map(organizationIdentityMapper::mapProjecttionToOrganizationIdentity);
