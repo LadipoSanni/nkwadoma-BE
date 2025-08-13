@@ -67,9 +67,12 @@ public interface LoaneeLoanAggregateRepository extends JpaRepository<LoaneeLoanA
     LoaneeLoanAggregateEntity findByLoaneeLoandetailId(@Param("id") String id);
 
     @Query("""
-    SELECT SUM(loaneeLoanDetail.amountReceived) AS historicalDebt,
-           SUM(loaneeLoanDetail.amountOutstanding) AS totalAmountOutstanding,
-           COUNT(loaneeLoanDetail.id) AS numberOfLoans,
+    SELECT COALESCE(SUM(CASE WHEN loaneeLoanDetail.amountReceived IS NOT NULL AND loaneeLoanDetail.amountReceived > 0 
+                             THEN loaneeLoanDetail.amountReceived ELSE 0 END), 0) AS historicalDebt,
+           COALESCE(SUM(CASE WHEN loaneeLoanDetail.amountReceived IS NOT NULL AND loaneeLoanDetail.amountReceived > 0 
+                             THEN loaneeLoanDetail.amountOutstanding ELSE 0 END), 0) AS totalAmountOutstanding,
+           COUNT(CASE WHEN loaneeLoanDetail.amountReceived IS NOT NULL AND loaneeLoanDetail.amountReceived > 0 
+                      THEN loaneeLoanDetail.id END) AS numberOfLoans,
            loanee.userIdentity.firstName AS firstName,
            loanee.userIdentity.lastName AS lastName,
            loanee.userIdentity.email AS email,
@@ -82,15 +85,19 @@ public interface LoaneeLoanAggregateRepository extends JpaRepository<LoaneeLoanA
     JOIN OrganizationEntity organization ON organization.id = program.organizationIdentity.id
     WHERE organization.id = :organizationId
     GROUP BY loanee.userIdentity.firstName, loanee.userIdentity.lastName, loanee.userIdentity.email, loanee.id
-    ORDER BY COUNT(loaneeLoanDetail.id) DESC, loanee.userIdentity.firstName DESC
+    ORDER BY COUNT(CASE WHEN loaneeLoanDetail.amountReceived IS NOT NULL AND loaneeLoanDetail.amountReceived > 0 
+                        THEN loaneeLoanDetail.id END) DESC, loanee.userIdentity.firstName DESC
 """)
     Page<LoaneeLoanAggregateProjection> findAllByOrganizationId(@Param("organizationId") String organizationId, Pageable pageRequest);
 
     @Query("""
     select 
-        SUM(loaneeLoanDetail.amountReceived) as historicalDebt,
-        SUM(loaneeLoanDetail.amountOutstanding) as totalAmountOutstanding,
-        COUNT(loaneeLoanDetail.id) as numberOfLoans,
+        COALESCE(SUM(CASE WHEN loaneeLoanDetail.amountReceived IS NOT NULL AND loaneeLoanDetail.amountReceived > 0 
+                             THEN loaneeLoanDetail.amountReceived ELSE 0 END), 0) AS historicalDebt,
+        COALESCE(SUM(CASE WHEN loaneeLoanDetail.amountReceived IS NOT NULL AND loaneeLoanDetail.amountReceived > 0 
+                             THEN loaneeLoanDetail.amountOutstanding ELSE 0 END), 0) AS totalAmountOutstanding,
+        COUNT(CASE WHEN loaneeLoanDetail.amountReceived IS NOT NULL AND loaneeLoanDetail.amountReceived > 0 
+                      THEN loaneeLoanDetail.id END) AS numberOfLoans,
         loanee.userIdentity.firstName as firstName,
         loanee.userIdentity.lastName as lastName,
         loanee.userIdentity.email as email,
@@ -109,8 +116,8 @@ public interface LoaneeLoanAggregateRepository extends JpaRepository<LoaneeLoanA
     )
     and organization.id = :organizationId
     GROUP BY loanee.userIdentity.firstName, loanee.userIdentity.lastName, loanee.userIdentity.email, loanee.id
-    ORDER BY COUNT(loaneeLoanDetail.id) DESC, loanee.userIdentity.firstName DESC
-""")
+    ORDER BY COUNT(CASE WHEN loaneeLoanDetail.amountReceived IS NOT NULL AND loaneeLoanDetail.amountReceived > 0 
+                        THEN loaneeLoanDetail.id END) DESC, loanee.userIdentity.firstName DESC""")
     Page<LoaneeLoanAggregateProjection> searchLoaneeLoanAggregateByOrganizationId(
             @Param("nameFragment") String nameFragment,
             @Param("organizationId") String organizationId,
