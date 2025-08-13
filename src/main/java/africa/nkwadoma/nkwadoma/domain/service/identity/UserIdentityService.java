@@ -235,17 +235,17 @@ public class UserIdentityService implements CreateUserUseCase {
         }
     }
 
-    public void checkIfUserAllowedForAccountActivationActivity(UserIdentity useActedUpon, UserIdentity userIdentity, ActivationStatus activationStatus) throws MeedlException {
+    public void checkIfUserAllowedForAccountActivationActivity(UserIdentity userActedUpon, UserIdentity userIdentity, ActivationStatus activationStatus) throws MeedlException {
         UserIdentity foundActor = userIdentityOutputPort.findById(userIdentity.getCreatedBy());
-        log.info("Is actor with email {} and role {} , allowed to {} user with email {} and role {}", foundActor.getEmail(), foundActor.getRole(), activationStatus, useActedUpon.getEmail(), useActedUpon.getRole());
-        if (foundActor.getId().equals(useActedUpon.getId())){
-            log.error("User attempts to {} self found actor {}, user is {}", activationStatus, foundActor, useActedUpon);
+        log.info("Is actor with email {} and role {} , allowed to {} user with email {} and role {}", foundActor.getEmail(), foundActor.getRole(), activationStatus, userActedUpon.getEmail(), userActedUpon.getRole());
+        if (foundActor.getId().equals(userActedUpon.getId())){
+            log.error("User attempts to {} self found actor {}, user is {}", activationStatus, foundActor, userActedUpon);
             throw new MeedlException("You are not allowed to "+activationStatus+" yourself.");
         }
-        checkIfOrganizationAdminCanPerformAccountActivationActivity(useActedUpon, foundActor, activationStatus);
-        checkIfPortfolioManagerCanPerformAccountActivationActivity(useActedUpon, foundActor, activationStatus);
-        if (IdentityRole.MEEDL_SUPER_ADMIN.equals(useActedUpon.getRole())){
-            log.info("An attempt was made to {} Meedl's supper admin {} \n ----------------------------> attempt on Meedls super admin was made by ------------------------->{}",activationStatus, useActedUpon, foundActor);
+        checkIfOrganizationAdminCanPerformAccountActivationActivity(userActedUpon, foundActor, activationStatus);
+        checkIfPortfolioManagerCanPerformAccountActivationActivity(userActedUpon, foundActor, activationStatus);
+        if (IdentityRole.MEEDL_SUPER_ADMIN.equals(userActedUpon.getRole())){
+            log.info("An attempt was made to {} Meedl's supper admin {} \n ----------------------------> attempt on Meedls super admin was made by ------------------------->{}",activationStatus, userActedUpon, foundActor);
             asynchronousNotificationOutputPort.notifySuperAdminOfActivationActivityAttempt(foundActor);
             throw new MeedlException("You are not allowed to "+activationStatus+" the super admin on Meedl");
         }
