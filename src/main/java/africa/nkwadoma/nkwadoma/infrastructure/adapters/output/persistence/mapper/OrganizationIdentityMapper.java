@@ -63,5 +63,6 @@ public interface OrganizationIdentityMapper {
     @Mapping(target = "websiteAddress", source = "websiteAddress")
     @Mapping(target = "debtPercentage", source = "debtPercentage")
     @Mapping(target = "repaymentRate", source = "repaymentRate")
+    @Mapping(target = "requestedBy", source = "inviterFullName")
     OrganizationIdentity mapProjecttionToOrganizationIdentity(OrganizationProjection organizationProjection);
 }

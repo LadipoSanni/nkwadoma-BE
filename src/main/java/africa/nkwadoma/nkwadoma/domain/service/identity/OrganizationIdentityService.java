@@ -503,9 +503,9 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     public Page<OrganizationIdentity> viewAllOrganizationByStatus(OrganizationIdentity organizationIdentity, ActivationStatus activationStatus) throws MeedlException {
         MeedlValidator.validateObjectInstance(organizationIdentity, OrganizationMessages.ORGANIZATION_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validateObjectInstance(activationStatus, OrganizationMessages.ORGANIZATION_STATUS_MUST_NOT_BE_EMPTY.getMessage());
-        Set <ActivationStatus> activationStatuses = Set.of(activationStatus);
+        List <String> activationStatuses = List.of(String.valueOf(activationStatus));
         if (ActivationStatus.INVITED.equals(activationStatus)){
-            activationStatuses = Set.of(ActivationStatus.INVITED, ActivationStatus.PENDING_APPROVAL);
+            activationStatuses = List.of(ActivationStatus.INVITED.name(), ActivationStatus.PENDING_APPROVAL.name());
         }
         return organizationIdentityOutputPort.viewAllOrganizationByStatus(organizationIdentity, activationStatuses);
     }

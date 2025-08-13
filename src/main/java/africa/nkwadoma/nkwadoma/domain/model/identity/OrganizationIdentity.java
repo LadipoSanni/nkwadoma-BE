@@ -34,6 +34,7 @@ public class OrganizationIdentity {
     private String phoneNumber;
     private int numberOfPrograms;
     private boolean isEnabled;
+    private String requestedBy;
     private String createdBy;
     private String updatedBy;
     private int loanRequestCount;

@@ -186,13 +186,13 @@ class OrganizationIdentityServiceTest {
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.ASC, "invitedDate"));
         Page<OrganizationIdentity> organizationIdentityPage = new PageImpl<>(organizationIdentities, pageRequest, organizationIdentities.size());
 
-        when(organizationIdentityOutputPort.viewAllOrganizationByStatus(roseCouture, Set.of(ActivationStatus.ACTIVE))).thenReturn(organizationIdentityPage);
+        when(organizationIdentityOutputPort.viewAllOrganizationByStatus(roseCouture, List.of(ActivationStatus.ACTIVE.name()))).thenReturn(organizationIdentityPage);
         Page<OrganizationIdentity> result = organizationIdentityService.viewAllOrganizationByStatus(roseCouture, ActivationStatus.ACTIVE);
 
         assertNotNull(result);
         assertEquals(2, result.getContent().size());
         assertEquals(ActivationStatus.ACTIVE, result.getContent().get(1).getActivationStatus());
-        verify(organizationIdentityOutputPort, times(1)).viewAllOrganizationByStatus(roseCouture, Set.of(ActivationStatus.ACTIVE));
+        verify(organizationIdentityOutputPort, times(1)).viewAllOrganizationByStatus(roseCouture, List.of(ActivationStatus.ACTIVE.name()));
     }
 
     @Test

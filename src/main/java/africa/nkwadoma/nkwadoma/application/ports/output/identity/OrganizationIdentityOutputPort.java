@@ -20,7 +20,7 @@ public interface OrganizationIdentityOutputPort {
     OrganizationIdentity findById(String id) throws MeedlException;
     List<ServiceOffering> getServiceOfferings(String organizationId) throws MeedlException;
     Page<OrganizationIdentity> viewAllOrganization(OrganizationIdentity organizationIdentity) throws MeedlException;
-    Page<OrganizationIdentity> viewAllOrganizationByStatus(OrganizationIdentity organizationIdentity, Set<ActivationStatus> status) throws MeedlException;
+    Page<OrganizationIdentity> viewAllOrganizationByStatus(OrganizationIdentity organizationIdentity, List<String> activationStatuses) throws MeedlException;
     List<ServiceOffering> findServiceOfferingById(String id) throws MeedlException;
     Optional<OrganizationIdentity> findByOrganizationId(String organizationId) throws MeedlException;
     List<OrganizationServiceOffering> findOrganizationServiceOfferingsByOrganizationId(String organizationId) throws MeedlException;

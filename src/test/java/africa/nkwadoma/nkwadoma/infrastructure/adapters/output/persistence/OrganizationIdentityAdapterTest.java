@@ -318,7 +318,7 @@ class OrganizationIdentityAdapterTest {
             log.info("found organization {}",organizationOutputPort.findByOrganizationId(amazingGrace.getId()));
             amazingGrace.setPageSize(1);
             amazingGrace.setPageNumber(0);
-            foundOrganizationIdentities = organizationOutputPort.viewAllOrganizationByStatus(amazingGrace, Set.of(ActivationStatus.ACTIVE));
+            foundOrganizationIdentities = organizationOutputPort.viewAllOrganizationByStatus(amazingGrace, List.of(ActivationStatus.ACTIVE.name()));
             assertNotNull(foundOrganizationIdentities);
             List<OrganizationIdentity> organizationIdentityList = foundOrganizationIdentities.toList();
             int listSize = organizationIdentityList.size();

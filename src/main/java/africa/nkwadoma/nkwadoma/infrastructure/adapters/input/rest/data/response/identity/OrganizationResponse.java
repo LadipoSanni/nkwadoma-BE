@@ -26,7 +26,8 @@ public class OrganizationResponse {
     private String tin;
     private String phoneNumber;
     private int numberOfPrograms;
-    private ActivationStatus status;
+    private ActivationStatus activationStatus;
+    private String requestedBy;
     private String createdBy;
     private int numberOfLoanees;
     private int stillInTraining;

@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -16,7 +17,7 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
     Optional<OrganizationEntity> findByRcNumber(String rcNumber);
 
     @Query("SELECT o FROM OrganizationEntity o WHERE LOWER(o.name) LIKE LOWER(CONCAT('%', :name, '%')) " +
-            "AND (:status IS NULL OR o.status = :status)")
+            "AND (:status IS NULL OR o.activationStatus = :status)")
     Page<OrganizationEntity> findByNameContainingIgnoreCaseAndStatus(@Param("name") String name,
                                                                      @Param("status") ActivationStatus status,
                                                                      Pageable pageable);
@@ -56,7 +57,7 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
                    ld.amountRequested as totalAmountRequested,
                    ld.amountRepaid as totalDebtRepaid,
                    ld.outstandingAmount as totalCurrentDebt,
-                    o.status as status,o.email as email,
+                    o.activationStatus as status,o.email as email,
                     o.numberOfLoanees as numberOfLoanees,
                     o.numberOfCohort as numberOfCohort,o.websiteAddress as websiteAddress,
                     o.numberOfPrograms as numberOfPrograms,
@@ -67,14 +68,16 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
         CASE 
             WHEN COALESCE(ld.amountReceived, 0) = 0 THEN 0.0 
             ELSE (ld.amountRepaid / ld.amountReceived * 100.0) 
-        END as repaymentRate
-                                
+        END as repaymentRate,
+             
+                   CONCAT(u.firstName, ' ', u.lastName) as inviterFullName
                    from OrganizationEntity o
                                
-                   left join OrganizationLoanDetailEntity ld on ld.organization.id = o.id        
-                   WHERE UPPER(o.activationStatus) = UPPER(:activationStatuses) 
+                   left join OrganizationLoanDetailEntity ld on ld.organization.id = o.id  
+                    LEFT JOIN UserEntity u ON u.id = o.createdBy      
+                   WHERE UPPER(o.activationStatus) IN :activationStatuses
                         """)
-    Page<OrganizationProjection> findAllByStatus(@Param("activationStatuses") Set<ActivationStatus> activationStatuses, Pageable pageable);
+    Page<OrganizationProjection> findAllByStatus(@Param("activationStatuses") List<String> activationStatuses, Pageable pageable);
 
 
     @Query("""
@@ -91,7 +94,7 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
         from OrganizationEntity o
         join LoanMetricsEntity lm on lm.organizationId = o.id
         where lower(o.name) like lower(concat('%', :name, '%'))
-        and o.status = 'ACTIVE'
+        and o.activationStatus = 'ACTIVE'
         order by 
             case :loanType
                 when 'LOAN_OFFER' then coalesce(lm.loanOfferCount, 0)
@@ -123,7 +126,7 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
         ld.amountRequested as totalAmountRequested,
         ld.amountRepaid as totalDebtRepaid,
         ld.outstandingAmount as totalCurrentDebt,
-        o.status as status,
+        o.activationStatus as status,
         o.email as email,
         o.numberOfLoanees as numberOfLoanees,
         o.websiteAddress as websiteAddress,

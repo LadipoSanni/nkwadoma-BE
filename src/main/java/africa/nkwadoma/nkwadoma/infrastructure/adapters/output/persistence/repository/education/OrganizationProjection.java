@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public interface OrganizationProjection {
     String getOrganizationId();
@@ -25,6 +26,7 @@ public interface OrganizationProjection {
     BigDecimal getTotalAmountReceived ();
     BigDecimal getTotalAmountRequested ();
     ActivationStatus getActivationStatus();
+    String getInviterFullName();
     Double getDebtPercentage();
     Double getRepaymentRate();
 }
