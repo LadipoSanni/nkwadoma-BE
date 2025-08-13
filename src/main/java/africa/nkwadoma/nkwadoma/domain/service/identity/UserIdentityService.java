@@ -376,7 +376,7 @@ public class UserIdentityService implements UserUseCase {
         foundUser.setMFAEnabled(mfaEnabled);
         foundUser.setEnableEmailMFA(emailMFA);
         foundUser.setEnablePhoneNumberMFA(phoneMFA);
-        log.info("Saving new mfa settings mfaEnabled {} , emailMFA {}, phoneMFA {}", mfaEnabled, emailMFA, phoneMFA);
+        log.info("Saving new mfa settings mfaEnabled {} , emailMFA {}, phoneMFA {}, found user {}", mfaEnabled, emailMFA, phoneMFA, foundUser);
         userIdentityOutputPort.save(foundUser);
     }
 
