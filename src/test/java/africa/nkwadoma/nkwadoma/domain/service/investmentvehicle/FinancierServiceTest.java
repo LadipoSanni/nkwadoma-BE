@@ -175,6 +175,7 @@ public class FinancierServiceTest {
         try {
             assertThrows(MeedlException.class, ()-> userIdentityOutputPort.findByEmail(individualUserIdentity.getEmail()));
             response = financierUseCase.inviteFinancier(individualFinancierList, privateInvestmentVehicleId);
+            log.info("the email in invite to platform test {}", individualUserIdentity.getEmail());
             individualUserIdentity = userIdentityOutputPort.findByEmail(individualUserIdentity.getEmail());
             individualUserIdentityId = individualUserIdentity.getId();
             foundFinancier = financierOutputPort.findFinancierByUserId(individualUserIdentityId);
@@ -258,6 +259,7 @@ public class FinancierServiceTest {
         Financier financier;
         try {
             investmentVehicle = investmentVehicleOutputPort.findById(privateInvestmentVehicleId);
+            log.info("Financier id in invest in vehicle {}", individualFinancierId);
             financier = financierOutputPort.findFinancierByFinancierId(individualFinancierId);
             assertNotNull(investmentVehicle.getTotalAvailableAmount());
             assertNotNull(financier);

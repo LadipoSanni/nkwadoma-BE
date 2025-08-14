@@ -126,7 +126,7 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
     }
 
     private UserEntity getUserEntityByEmail(String email) throws IdentityException {
-        return userEntityRepository.findByEmail(email).orElseThrow(()-> new IdentityException(EMAIL_NOT_FOUND.getMessage()));
+        return userEntityRepository.findByEmailIgnoreCase(email).orElseThrow(()-> new IdentityException(EMAIL_NOT_FOUND.getMessage()));
     }
 
 }
