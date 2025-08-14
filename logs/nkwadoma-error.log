@@ -1,0 +1,2 @@
+2025-08-14 08:42:51 [restartedMain] ERROR a.n.n.i.a.o.i.KeycloakAdapter - Conflict - User with this identity already exists --- Error occurred on attempting to create user on keycloak
+2025-08-14 08:42:51 [restartedMain] ERROR a.n.n.i.a.o.i.KeycloakAdapter - Conflict - Client already exists.

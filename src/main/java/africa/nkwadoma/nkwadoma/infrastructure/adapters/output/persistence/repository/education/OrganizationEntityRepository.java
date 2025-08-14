@@ -73,8 +73,8 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
                    CONCAT(u.firstName, ' ', u.lastName) as inviterFullName
                    from OrganizationEntity o
                                
-                   left join OrganizationLoanDetailEntity ld on ld.organization.id = o.id  
-                    LEFT JOIN UserEntity u ON u.id = o.createdBy      
+                   join OrganizationLoanDetailEntity ld on ld.organization.id = o.id  
+                   JOIN UserEntity u ON u.id = o.createdBy      
                    WHERE UPPER(o.activationStatus) IN :activationStatuses
                         """)
     Page<OrganizationProjection> findAllByStatus(@Param("activationStatuses") List<String> activationStatuses, Pageable pageable);

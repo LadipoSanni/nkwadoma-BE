@@ -273,6 +273,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         }
         organizationEmployeeIdentity.getMeedlUser().setCreatedAt(LocalDateTime.now());
         userIdentityOutputPort.save(organizationEmployeeIdentity.getMeedlUser());
+        organizationEmployeeIdentity.setCreatedBy(organizationEmployeeIdentity.getMeedlUser().getCreatedBy());
         organizationEmployeeIdentity = organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
         organizationIdentity.getOrganizationEmployees().get(0).setId(organizationEmployeeIdentity.getId());
         return organizationEmployeeIdentity;
@@ -353,6 +354,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
 
         log.info("about to set up new colleague representation in organization {}", newColleague);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = buildOrganizationEmployeeIdentity(inviter, newColleague);
+        organizationEmployeeIdentity.setCreatedBy(newColleague.getCreatedBy());
         OrganizationEmployeeIdentity savedEmployee = organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
         log.info("Saved new colleague employee identity in organization: {}", savedEmployee);
 

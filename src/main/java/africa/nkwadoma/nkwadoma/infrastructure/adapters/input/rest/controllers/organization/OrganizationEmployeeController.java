@@ -80,7 +80,8 @@ public class OrganizationEmployeeController {
                 viewOrganizationEmployeesUseCase.viewAllAdminInOrganization(organizationEmployeeIdentity);
 
         List<OrganizationEmployeeResponse> organizationEmployeeResponses =
-                organizationEmployeeIdentities.stream().map(organizationEmployeeRestMapper::toOrganizationEmployeeResponse).toList();
+                organizationEmployeeIdentities.stream()
+                        .map(organizationEmployeeRestMapper::toOrganizationEmployeeResponse).toList();
 
         PaginatedResponse<OrganizationEmployeeResponse> paginatedResponse =new PaginatedResponse<>(
                 organizationEmployeeResponses,

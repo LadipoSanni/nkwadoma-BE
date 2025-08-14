@@ -19,6 +19,7 @@ public class OrganizationEmployeeResponse {
     private String email;
     private String userId;
     private String requestedBy;
+    private String createdBy;
     private LocalDateTime createdAt;
     private ActivationStatus activationStatus;
     private IdentityRole role;

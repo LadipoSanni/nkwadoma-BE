@@ -143,7 +143,7 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
         Pageable pageRequest = PageRequest
                 .of(organizationEmployeeIdentity.getPageNumber(),
                         organizationEmployeeIdentity.getPageSize());
-        Page<OrganizationEmployeeEntity> organizationEmployeeEntities ;
+        Page<OrganizationEmployeeEntityProjection> organizationEmployeeEntities ;
         if (MeedlValidator.isNotEmptyString(organizationEmployeeIdentity.getName())){
             log.info("output port search for employee with name {}", organizationEmployeeIdentity.getName());
             organizationEmployeeEntities =
