@@ -35,7 +35,7 @@ public class CooperateFinancierAdapterTest {
         userIdentity = TestData.createTestUserIdentity("financier@grr.la");
         financier = TestData.buildFinancierIndividual(userIdentity);
         cooperate = TestData.buildCooperation("Nepo BABY!!!!");
-        cooperateFinancier = TestData.buildCoperateFinancier(financier,cooperate);
+        cooperateFinancier = TestData.buildCooperateFinancier(financier,cooperate);
     }
 
     @Test
@@ -61,5 +61,5 @@ public class CooperateFinancierAdapterTest {
         assertThrows(MeedlException.class, ()-> cooperateFinancierOutputPort.save(cooperateFinancier));
     }
 
-    
+
 }

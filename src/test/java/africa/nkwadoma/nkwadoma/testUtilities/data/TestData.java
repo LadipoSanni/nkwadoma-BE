@@ -764,7 +764,7 @@ public class TestData {
                 .build();
     }
 
-    public static CooperateFinancier buildCoperateFinancier(Financier financier,Cooperation cooperation) {
+    public static CooperateFinancier buildCooperateFinancier(Financier financier, Cooperation cooperation) {
         return CooperateFinancier.builder()
                 .id(testId)
                 .activationStatus(ActivationStatus.ACTIVE)
