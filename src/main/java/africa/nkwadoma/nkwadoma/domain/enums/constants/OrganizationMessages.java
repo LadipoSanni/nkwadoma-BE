@@ -16,7 +16,8 @@ public enum OrganizationMessages {
     ORGANIZATION_NAME_IS_REQUIRED("Organization name is required"),
     ORGANIZATION_NOT_FOUND("Organization not found"),
     ORGANIZATION_ID_IS_REQUIRED("Organization ID is required"),
-    ORGANIZATION_EMPLOYEE_IS_ACTIVE("Organization employee is active, Employee can't be Invited"),;
+    ORGANIZATION_EMPLOYEE_IS_ACTIVE("Organization employee is active, Employee can't be Invited"),
+    DECISION_CAN_EITHER_BE_APPROVED_OR_DECLINED("Decision can be approved or declined"),;
 
     private final String message;
     OrganizationMessages(String message) {

@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
@@ -44,6 +45,8 @@ class OrganizationEmployeeServiceTest {
     private OrganizationIdentity organization ;
     @Mock
     private AsynchronousMailingOutputPort asynchronousMailingOutputPort;
+    @Mock
+    private AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
 
 
     @BeforeEach
@@ -346,19 +349,38 @@ class OrganizationEmployeeServiceTest {
 
 
     @Test
-    void respondToColleagueInvitation(){
+    void approveColleagueInvitation(){
         String response = "";
         try {
             organizationEmployeeIdentity.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
             when(organizationEmployeeOutputPort.findById(any())).thenReturn(organizationEmployeeIdentity);
             when(organizationIdentityOutputPort.findById(any())).thenReturn(organization);
             when(organizationEmployeeOutputPort.save(organizationEmployeeIdentity)).thenReturn(organizationEmployeeIdentity);
-            response = organizationEmployeeService.respondToColleagueInvitation(mockId);
+            response = organizationEmployeeService.respondToColleagueInvitation(mockId,mockId,ActivationStatus.APPROVED);
         }catch (MeedlException meedlException){
             log.error(meedlException.getMessage());
         }
         assertNotNull(response);
-        assertEquals(response,"Colleague invitation approved for "+organizationEmployeeIdentity.getMeedlUser().getFirstName()+" "
+        assertEquals(response,"Colleague invitation APPROVED for "+organizationEmployeeIdentity.getMeedlUser().getFirstName()+" "
+                +organizationEmployeeIdentity.getMeedlUser().getLastName());
+    }
+
+    @Test
+    void declineColleagueInvitation(){
+        String response = "";
+        try {
+            organizationEmployeeIdentity.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
+            when(organizationEmployeeOutputPort.findById(any())).thenReturn(organizationEmployeeIdentity);
+            when(organizationIdentityOutputPort.findById(any())).thenReturn(organization);
+            when(organizationEmployeeOutputPort.save(organizationEmployeeIdentity)).thenReturn(organizationEmployeeIdentity);
+            when(userIdentityOutputPort.findById(any())).thenReturn(userIdentity);
+
+            response = organizationEmployeeService.respondToColleagueInvitation(mockId,mockId,ActivationStatus.DECLINED);
+        }catch (MeedlException meedlException){
+            log.error(meedlException.getMessage());
+        }
+        assertNotNull(response);
+        assertEquals(response,"Colleague invitation DECLINED for "+organizationEmployeeIdentity.getMeedlUser().getFirstName()+" "
                 +organizationEmployeeIdentity.getMeedlUser().getLastName());
     }
 
@@ -367,11 +389,11 @@ class OrganizationEmployeeServiceTest {
     void cannotRespondToActiveColleagueInvitation() throws MeedlException {
         organizationEmployeeIdentity.setActivationStatus(ActivationStatus.ACTIVE);
         when(organizationEmployeeOutputPort.findById(any())).thenReturn(organizationEmployeeIdentity);
-        assertThrows(MeedlException.class , () ->organizationEmployeeService.respondToColleagueInvitation(mockId));
+        assertThrows(MeedlException.class , () ->organizationEmployeeService.respondToColleagueInvitation(mockId,mockId,ActivationStatus.APPROVED));
     }
 
     @Test
     void respondToColleagueInvitationWithNullOrganizationEmployeeId() throws MeedlException {
-            assertThrows(MeedlException.class , () ->organizationEmployeeService.respondToColleagueInvitation(null));
+            assertThrows(MeedlException.class , () ->organizationEmployeeService.respondToColleagueInvitation(mockId,null,ActivationStatus.APPROVED));
     }
 }

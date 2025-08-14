@@ -409,4 +409,24 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
         meedlNotificationUsecase.sendNotification(meedlNotification);
         log.info("notification sent ====---=-=---=-");
     }
+
+    @Override
+    public void sendDeclineColleagueNotification(OrganizationEmployeeIdentity organizationEmployeeIdentity,
+                                                 UserIdentity userIdentity,UserIdentity createdBy) throws MeedlException {
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .title("Decline colleague invitation")
+                .contentDetail("Decline invitation for "+organizationEmployeeIdentity.getMeedlUser().getFirstName()+
+                        " "+organizationEmployeeIdentity.getMeedlUser().getLastName())
+                .senderFullName(userIdentity.getFirstName()+" "+userIdentity.getLastName())
+                .senderMail(userIdentity.getEmail())
+                .notificationFlag(NotificationFlag.DECLINE_COLLEAGUE_INVITE)
+                .timestamp(LocalDateTime.now())
+                .contentId(organizationEmployeeIdentity.getId())
+                .callToAction(true)
+                .user(createdBy)
+                .build();
+        log.info("done building notification for decline colleague invitation{}", meedlNotification);
+        meedlNotificationUsecase.sendNotification(meedlNotification);
+        log.info("notification sent ====---=-==---=-");
+    }
 }

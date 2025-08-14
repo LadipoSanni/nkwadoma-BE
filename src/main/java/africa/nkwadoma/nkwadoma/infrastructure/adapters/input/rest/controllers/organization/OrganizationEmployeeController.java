@@ -125,10 +125,13 @@ public class OrganizationEmployeeController {
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
 
-    @PostMapping("approve/invite/colleague")
+    @PostMapping("respond/invite/colleague")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN')")
-    public ResponseEntity<ApiResponse<?>> respondToColleagueInvite(@RequestParam(name = "organizationEmployeeId") String organizationEmployeeId) throws MeedlException {
-        String response = viewOrganizationEmployeesUseCase.respondToColleagueInvitation(organizationEmployeeId);
+    public ResponseEntity<ApiResponse<?>> respondToColleagueInvite(@AuthenticationPrincipal Jwt meedlUser,
+                                                                   @RequestParam(name = "organizationEmployeeId") String organizationEmployeeId,
+                                                                   @RequestParam(name = "decision") ActivationStatus activationStatus) throws MeedlException {
+        String response = viewOrganizationEmployeesUseCase.respondToColleagueInvitation(meedlUser.getClaimAsString("sub"),
+                organizationEmployeeId,activationStatus);
         ApiResponse<String> apiResponse = ApiResponse.<String>builder()
                 .data(response)
                 .message(response)
