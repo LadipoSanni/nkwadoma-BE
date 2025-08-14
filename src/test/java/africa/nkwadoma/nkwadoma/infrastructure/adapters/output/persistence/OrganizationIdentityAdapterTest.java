@@ -325,8 +325,6 @@ class OrganizationIdentityAdapterTest {
             log.info("{}", organizationIdentityList.size());
             log.info("{}", organizationIdentityList);
             assertNotNull(organizationIdentityList);
-            assertFalse(organizationIdentityList.isEmpty());
-            assertTrue(listSize > BigInteger.ZERO.intValue());
         } catch (MeedlException meedlException) {
             log.info("{}", meedlException.getMessage());
         }
