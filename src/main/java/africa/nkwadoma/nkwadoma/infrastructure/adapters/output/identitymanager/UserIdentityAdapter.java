@@ -34,7 +34,7 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
         MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
         userIdentity.validate();
         if (ObjectUtils.isEmpty(userIdentity.getId()) &&
-                userEntityRepository.existsByEmail(userIdentity.getEmail())) {
+                userEntityRepository.existsByEmailIgnoreCase(userIdentity.getEmail())) {
             throw new MeedlException("Email already exists");
         }
         log.info("User in adapter before being mapped to save: {}", userIdentity);

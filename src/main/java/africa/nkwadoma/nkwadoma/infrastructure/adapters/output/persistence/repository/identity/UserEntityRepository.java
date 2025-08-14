@@ -15,7 +15,7 @@ public interface UserEntityRepository extends JpaRepository<UserEntity, String> 
 
     List<UserEntity> findAllByRole(IdentityRole identityRole);
 
-    boolean existsByEmail(String email);
+    boolean existsByEmailIgnoreCase(String email);
 
     @Query("SELECT u FROM UserEntity u WHERE u.role IN (:adminRoles)")
     List<UserEntity> findAllByRoles(List<IdentityRole> adminRoles);
