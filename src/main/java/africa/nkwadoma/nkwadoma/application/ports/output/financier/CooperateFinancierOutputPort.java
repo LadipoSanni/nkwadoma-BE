@@ -5,4 +5,6 @@ import africa.nkwadoma.nkwadoma.domain.model.financier.CooperateFinancier;
 
 public interface CooperateFinancierOutputPort {
     CooperateFinancier save(CooperateFinancier cooperateFinancier) throws MeedlException;
+
+    void delete(String id) throws MeedlException;
 }

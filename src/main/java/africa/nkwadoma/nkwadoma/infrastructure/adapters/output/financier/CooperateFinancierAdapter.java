@@ -32,4 +32,10 @@ public class CooperateFinancierAdapter implements CooperateFinancierOutputPort {
 
         return cooperateFinancierMapper.toCooperateFinancier(cooperateFinancierEntity);
     }
+
+    @Override
+    public void delete(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id,"Cooperate financier id cannot br empty");
+        cooperateFinancierRepository.deleteById(id);
+    }
 }
