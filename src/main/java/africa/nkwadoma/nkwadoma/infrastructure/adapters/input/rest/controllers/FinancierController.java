@@ -307,4 +307,7 @@ public class FinancierController {
         );
     }
 
+    @GetMapping("invite/colleuage/financier")
+    @PreAuthorize("hasRole('COOPERATE_FINANCIER_SUPER_ADMIN') or hasRole('COOPERATE_FINANCIER_ADMIN')")
+
 }
