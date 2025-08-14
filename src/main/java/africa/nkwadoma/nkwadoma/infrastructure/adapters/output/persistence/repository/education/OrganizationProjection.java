@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 public interface OrganizationProjection {
     String getOrganizationId();
     String getName();
+    String getRcNumber();
     Integer getLoanRequestCount();
     Integer getLoanDisbursalCount();
     Integer getLoanReferralCount();
@@ -16,7 +17,7 @@ public interface OrganizationProjection {
     String getLogoImage();
     String getEmail();
     String getWebsiteAddress();
-    String getInvitedDate();
+    LocalDateTime getInvitedDate();
     Integer getNumberOfLoanees();
     Integer getNumberOfCohort();
     Integer getNumberOfPrograms();

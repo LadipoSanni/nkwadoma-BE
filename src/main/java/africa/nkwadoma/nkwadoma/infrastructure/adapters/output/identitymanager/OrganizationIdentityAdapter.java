@@ -158,7 +158,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
 
         log.info("List of statuses {}", activationStatuses);
         Page<OrganizationProjection> organizationEntities= organizationEntityRepository.findAllByStatus(activationStatuses,pageRequest);
-        log.info("Organization entities {}", organizationEntities.stream().toList());
+        log.info("Organization entities {}", organizationEntities.stream().peek(or -> log.info("Each org invited date {}", or.getInvitedDate())).toList());
         return organizationEntities.map(organizationIdentityMapper::mapProjecttionToOrganizationIdentity);
     }
 

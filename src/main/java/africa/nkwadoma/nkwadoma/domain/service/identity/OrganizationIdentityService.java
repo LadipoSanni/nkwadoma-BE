@@ -49,10 +49,8 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     private final OrganizationIdentityMapper organizationIdentityMapper;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
-    private final OrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
     private final ViewOrganizationEmployeesUseCase employeesUseCase;
     private final LoanMetricsUseCase  loanMetricsUseCase;
-    private final MeedlNotificationUsecase meedlNotificationUsecase;
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
     private final OrganizationLoanDetailOutputPort organizationLoanDetailOutputPort;

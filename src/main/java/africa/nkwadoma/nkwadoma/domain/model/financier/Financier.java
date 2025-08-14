@@ -72,6 +72,7 @@ public class Financier {
     //Declaration
     private boolean declarationAndAgreement;
     private boolean politicallyExposed;
+    private boolean privacyPolicyAccepted;
     private List<PoliticallyExposedPerson> politicallyExposedPeople;
 
     private void validateUserIdentity() throws InvestmentException, MeedlException {
