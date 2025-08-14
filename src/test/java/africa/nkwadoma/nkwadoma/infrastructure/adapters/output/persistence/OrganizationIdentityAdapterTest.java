@@ -318,7 +318,7 @@ class OrganizationIdentityAdapterTest {
             log.info("found organization {}",organizationOutputPort.findByOrganizationId(amazingGrace.getId()));
             amazingGrace.setPageSize(1);
             amazingGrace.setPageNumber(0);
-            foundOrganizationIdentities = organizationOutputPort.viewAllOrganizationByStatus(amazingGrace, List.of(ActivationStatus.ACTIVE.name()));
+            foundOrganizationIdentities = organizationOutputPort.viewAllOrganizationByStatus(amazingGrace, List.of(ActivationStatus.INVITED.name()));
             assertNotNull(foundOrganizationIdentities);
             List<OrganizationIdentity> organizationIdentityList = foundOrganizationIdentities.toList();
             int listSize = organizationIdentityList.size();
@@ -330,7 +330,7 @@ class OrganizationIdentityAdapterTest {
         } catch (MeedlException meedlException) {
             log.info("{}", meedlException.getMessage());
         }
-        assertEquals(ActivationStatus.ACTIVE, foundOrganizationIdentities.get().toList().get(0).getActivationStatus());
+        assertEquals(ActivationStatus.INVITED, foundOrganizationIdentities.get().toList().get(0).getActivationStatus());
     }
 
     @Test
