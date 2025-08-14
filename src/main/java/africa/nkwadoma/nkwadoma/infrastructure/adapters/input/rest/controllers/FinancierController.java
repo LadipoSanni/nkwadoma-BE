@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentvehicle.FinancierUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType;
@@ -21,10 +20,8 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentvehicle.FinancierRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentvehicle.InvestmentVehicleRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.swagger.SwaggerDocumentation;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentvehicle.InvestmentVehicleFinancierRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.swaggerannotationdoc.FinancierDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.swaggerannotationdoc.FinancierInvestmentDetailDocs;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentvehicle.InvestmentVehicleFinancierMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.constants.ControllerConstant;
 import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,9 +44,6 @@ import java.util.List;
 public class FinancierController {
     private final FinancierUseCase financierUseCase;
     private final FinancierRestMapper financierRestMapper;
-    private final InvestmentVehicleFinancierMapper investmentVehicleFinancierMapper;
-    private final InvestmentVehicleFinancierRestMapper investmentVehicleFinancierRestMapper;
-    private final FinancierOutputPort financierOutputPort;
     private final InvestmentVehicleRestMapper investmentVehicleRestMapper;
 
     @PostMapping("financier/invite")
@@ -147,6 +141,19 @@ public class FinancierController {
         ApiResponse<FinancierInvestmentDetailResponse> apiResponse = ApiResponse.<FinancierInvestmentDetailResponse>builder()
                 .data(financierInvestmentDetailResponse)
                 .message(ControllerConstant.VIEW_EMPLOYEE_DETAILS_SUCCESSFULLY.getMessage())
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+    @GetMapping("financier/privacy-policy-decision")
+    @PreAuthorize("hasRole('FINANCIER')")
+    @FinancierInvestmentDetailDocs
+    public ResponseEntity<ApiResponse<?>> makePrivacyPolicyDecision(@AuthenticationPrincipal Jwt meedlUser, @PathVariable boolean privacyPolicyDecision) throws MeedlException {
+        Financier financier = financierRestMapper.map(meedlUser.getClaimAsString("sub"), privacyPolicyDecision);
+        String response = financierUseCase.makePrivacyPolicyDecision(financier);
+
+        ApiResponse<FinancierInvestmentDetailResponse> apiResponse = ApiResponse.<FinancierInvestmentDetailResponse>builder()
+                .message(response)
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);

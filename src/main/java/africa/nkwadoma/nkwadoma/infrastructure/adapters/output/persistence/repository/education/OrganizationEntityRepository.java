@@ -59,6 +59,8 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
                    ld.outstandingAmount as totalCurrentDebt,
                     o.activationStatus as activationStatus,o.email as email,
                     o.numberOfLoanees as numberOfLoanees,
+                    o.invitedDate as invitedDate,
+                    o.rcNumber as rcNumber,
                     o.numberOfCohort as numberOfCohort,o.websiteAddress as websiteAddress,
                     o.numberOfPrograms as numberOfPrograms,
                       CASE
@@ -86,6 +88,7 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
                o.logoImage as logoImage,
                o.numberOfLoanees as numberOfLoanees,
                o.numberOfCohort as numberOfCohort,
+               o.rcNumber as rcNumber,
                o.numberOfPrograms as numberOfPrograms,
                lm.loanRequestCount as loanRequestCount,
                lm.loanDisbursalCount as loanDisbursalCount,

@@ -22,7 +22,6 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicleVisibility;
-import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.InvestmentException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.*;
@@ -95,6 +94,19 @@ public class FinancierService implements FinancierUseCase {
         asynchronousNotificationOutputPort.notifyPortfolioManagerOfNewFinancier(financiersToMail, investmentVehicle, actor);
         updateNumberOfFinancierOnPortfolio(financiers);
         return response;
+    }
+    @Override
+    public String makePrivacyPolicyDecision(Financier financier) throws MeedlException {
+        MeedlValidator.validateObjectInstance(financier, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
+        MeedlValidator.validateUUID(financier.getUserIdentity().getId(), UserMessages.INVALID_USER_ID.getMessage());
+
+        Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getUserIdentity().getId());
+        foundFinancier.setPrivacyPolicyAccepted(financier.isPrivacyPolicyAccepted());
+        financierOutputPort.save(foundFinancier);
+        if (financier.isPrivacyPolicyAccepted()){
+            return "Privacy policy accepted";
+        }
+        return "Privacy policy declined";
     }
 
     private void updateNumberOfFinancierOnPortfolio(List<Financier> financiers) throws MeedlException {

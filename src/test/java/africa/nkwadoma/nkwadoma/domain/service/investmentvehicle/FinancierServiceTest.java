@@ -175,6 +175,7 @@ public class FinancierServiceTest {
         try {
             assertThrows(MeedlException.class, ()-> userIdentityOutputPort.findByEmail(individualUserIdentity.getEmail()));
             response = financierUseCase.inviteFinancier(individualFinancierList, privateInvestmentVehicleId);
+            log.info("the email in invite to platform test {}", individualUserIdentity.getEmail());
             individualUserIdentity = userIdentityOutputPort.findByEmail(individualUserIdentity.getEmail());
             individualUserIdentityId = individualUserIdentity.getId();
             foundFinancier = financierOutputPort.findFinancierByUserId(individualUserIdentityId);
@@ -199,10 +200,6 @@ public class FinancierServiceTest {
         assertFalse(financiers.isEmpty());
         assertEquals(individualFinancierId, financiers.getContent().get(0).getId());
         assertNotNull(individualFinancierId);
-    }
-    @Test
-    public void inviteFinancierOnPlatformToAnotherInvestmentVehicle() {
-
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
@@ -262,6 +259,7 @@ public class FinancierServiceTest {
         Financier financier;
         try {
             investmentVehicle = investmentVehicleOutputPort.findById(privateInvestmentVehicleId);
+            log.info("Financier id in invest in vehicle {}", individualFinancierId);
             financier = financierOutputPort.findFinancierByFinancierId(individualFinancierId);
             assertNotNull(investmentVehicle.getTotalAvailableAmount());
             assertNotNull(financier);
@@ -1222,7 +1220,30 @@ public class FinancierServiceTest {
         log.info("------->Exception message------------>"+exception.getMessage());
     }
 
+    @Test
+    @Order(28)
+    public void acceptPrivacyPolicy() throws MeedlException {
+        individualFinancier.setPrivacyPolicyAccepted(Boolean.TRUE);
+        String message = financierUseCase.makePrivacyPolicyDecision(individualFinancier);
+        assertNotNull(message);
+        Financier foundFinancier = financierOutputPort.findFinancierByFinancierId(individualFinancierId);
+        assertNotNull(foundFinancier);
+        assertTrue(foundFinancier.isPrivacyPolicyAccepted());
 
+    }
+    @Test
+    @Order(29)
+    public void declinePrivacyPolicy() throws MeedlException {
+        individualFinancier.setPrivacyPolicyAccepted(Boolean.FALSE);
+        individualUserIdentity.setId(individualUserIdentityId);
+        individualFinancier.setUserIdentity(individualUserIdentity);
+        String message = financierUseCase.makePrivacyPolicyDecision(individualFinancier);
+        assertNotNull(message);
+        Financier foundFinancier = financierOutputPort.findFinancierByFinancierId(individualFinancierId);
+        assertNotNull(foundFinancier);
+        assertFalse(foundFinancier.isPrivacyPolicyAccepted());
+
+    }
     @AfterAll
     void tearDown() throws MeedlException {
 
