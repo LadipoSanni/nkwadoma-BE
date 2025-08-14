@@ -60,4 +60,8 @@ public interface AsynchronousNotificationOutputPort {
     @Async
     void sendNotificationToSuperAdmin(OrganizationEmployeeIdentity organizationEmployeeIdentity, OrganizationEmployeeIdentity
             savedEmployee, OrganizationEmployeeIdentity organizationSuperAdmin) throws MeedlException ;
+
+    @Async
+    void sendDeclineColleagueNotification(OrganizationEmployeeIdentity organizationEmployeeIdentity,
+                                          UserIdentity userIdentity,UserIdentity createdBy) throws MeedlException;
 }
