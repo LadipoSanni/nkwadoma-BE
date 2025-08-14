@@ -34,6 +34,7 @@ public class OrganizationIdentity {
     private String phoneNumber;
     private int numberOfPrograms;
     private boolean isEnabled;
+    private String requestedBy;
     private String createdBy;
     private String updatedBy;
     private int loanRequestCount;
@@ -43,7 +44,7 @@ public class OrganizationIdentity {
     private LoanType loanType;
     private LocalDateTime timeUpdated;
     private List<ServiceOffering> serviceOfferings;
-    private ActivationStatus status;
+    private ActivationStatus activationStatus;
     private UserIdentity userIdentity;
     private List<OrganizationEmployeeIdentity> organizationEmployees;
     private int numberOfLoanees;

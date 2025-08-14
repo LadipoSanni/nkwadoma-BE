@@ -149,14 +149,15 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     }
 
     @Override
-    public Page<OrganizationIdentity> viewAllOrganizationByStatus(OrganizationIdentity organizationIdentity, ActivationStatus status) throws MeedlException {
+    public Page<OrganizationIdentity> viewAllOrganizationByStatus(OrganizationIdentity organizationIdentity, List<String> activationStatuses) throws MeedlException {
         MeedlValidator.validateObjectInstance(organizationIdentity, OrganizationMessages.ORGANIZATION_TYPE_MUST_NOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateObjectInstance(status, OrganizationMessages.ORGANIZATION_STATUS_MUST_NOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectInstance(activationStatuses, OrganizationMessages.ORGANIZATION_STATUS_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validatePageSize(organizationIdentity.getPageSize());
         MeedlValidator.validatePageNumber(organizationIdentity.getPageNumber());
         Pageable pageRequest = PageRequest.of(organizationIdentity.getPageNumber(), organizationIdentity.getPageSize(), Sort.by(Sort.Direction.DESC, "invitedDate"));
 
-        Page<OrganizationProjection> organizationEntities= organizationEntityRepository.findAllByStatus(String.valueOf(status),pageRequest);
+        log.info("List of statuses {}", activationStatuses);
+        Page<OrganizationProjection> organizationEntities= organizationEntityRepository.findAllByStatus(activationStatuses,pageRequest);
         log.info("Organization entities {}", organizationEntities.stream().toList());
         return organizationEntities.map(organizationIdentityMapper::mapProjecttionToOrganizationIdentity);
     }
