@@ -750,6 +750,13 @@ public class FinancierService implements FinancierUseCase {
     }
 
     @Override
+    public String inviteColleagueFinancier(String actorID) throws MeedlException {
+        MeedlValidator.validateUUID(actorID,UserMessages.INVALID_USER_ID.getMessage());
+
+        return "";
+    }
+
+    @Override
     public Page<Financier> viewAllFinancierInvestment(String actorId, String finanacierId, int pageSize, int pageNumber) throws MeedlException {
         UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
         if (userIdentity.getRole().equals(IdentityRole.FINANCIER)){

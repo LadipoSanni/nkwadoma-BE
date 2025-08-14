@@ -763,4 +763,13 @@ public class TestData {
                 .totalAmountRepaid(BigDecimal.valueOf(500.00))
                 .build();
     }
+
+    public static CooperateFinancier buildCooperateFinancier(Financier financier, Cooperation cooperation) {
+        return CooperateFinancier.builder()
+                .id(testId)
+                .activationStatus(ActivationStatus.ACTIVE)
+                .financier(financier)
+                .cooperate(cooperation)
+                .build();
+    }
 }
