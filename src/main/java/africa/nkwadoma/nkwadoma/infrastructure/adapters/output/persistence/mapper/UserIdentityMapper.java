@@ -12,13 +12,17 @@ public interface UserIdentityMapper {
     @Mapping(source = "firstName", target = "firstName")
     @Mapping(source = "nextOfKin", target = "nextOfKinEntity")
     @Mapping(source = "bankDetail", target = "bankDetailEntity")
-    @Mapping(target = "email", expression = "java(userIdentity.getEmail() != null ? userIdentity.getEmail().toLowerCase() : null)")
+    @Mapping(source = "email", qualifiedByName = "toLowerCase",target = "email")
     UserEntity toUserEntity(UserIdentity userIdentity);
 
     @Mapping(source = "identityVerified", target = "isIdentityVerified")
     @Mapping(source = "firstName", target = "firstName")
     @Mapping(source = "nextOfKinEntity", target = "nextOfKin")
     @Mapping(source = "bankDetailEntity", target = "bankDetail")
-    @Mapping(target = "email", expression = "java(userIdentity.getEmail() != null ? userIdentity.getEmail().toLowerCase() : null)")
+    @Mapping(source = "email", qualifiedByName = "toLowerCase", target = "email")
     UserIdentity toUserIdentity(UserEntity userEntity);
+    @Named("toLowerCase")
+    default String toLowerCase(String value) {
+        return value == null ? null : value.toLowerCase();
+    }
 }
