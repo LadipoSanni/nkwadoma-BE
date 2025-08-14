@@ -76,10 +76,11 @@ public class AdminInitializer {
                 .tin("kwadoma2189")
                 .rcNumber("RC2892832")
                 .phoneNumber("0908965321")
-                .status(ActivationStatus.ACTIVE)
+                .activationStatus(ActivationStatus.ACTIVE)
                 .organizationEmployees(List.of(OrganizationEmployeeIdentity
                         .builder()
                         .meedlUser(userIdentity)
+                        .createdBy(userIdentity.getId())
                         .build()))
                 .serviceOfferings(List.of(ServiceOffering
                         .builder()
@@ -91,7 +92,7 @@ public class AdminInitializer {
     private OrganizationIdentity createFirstOrganizationIdentity(OrganizationIdentity organizationIdentity) throws MeedlException {
         organizationIdentity.setEnabled(Boolean.TRUE);
         organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
-        organizationIdentity.setStatus(ActivationStatus.ACTIVE);
+        organizationIdentity.setActivationStatus(ActivationStatus.ACTIVE);
         Optional<OrganizationEntity> foundOrganization = organizationIdentityOutputPort.findByRcNumber(organizationIdentity.getRcNumber());
         organizationIdentity = getKeycloakOrganizationIdentity(organizationIdentity, foundOrganization);
         OrganizationIdentity savedOrganizationIdentity;
@@ -162,10 +163,12 @@ public class AdminInitializer {
     public UserIdentity inviteFirstUser(UserIdentity userIdentity) throws MeedlException {
         userIdentity.setCreatedAt(LocalDateTime.now());
         userIdentity = saveUserToKeycloak(userIdentity);
+        userIdentity.setCreatedBy(userIdentity.getId());
         UserIdentity foundUserIdentity = null;
         log.info("First user, after saving on keycloak: {}", userIdentity);
         try {
             foundUserIdentity = userIdentityOutputPort.findByEmail(userIdentity.getEmail());
+            foundUserIdentity.setCreatedBy(foundUserIdentity.getId());
         } catch (MeedlException e) {
             log.warn("First user not found, creating first user: {}", e.getMessage());
         } finally {

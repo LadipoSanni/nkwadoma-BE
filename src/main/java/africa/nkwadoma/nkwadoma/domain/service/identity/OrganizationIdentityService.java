@@ -161,7 +161,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         reactivateOrganizationEmployees(reason, organizationEmployees);
         updateOrganizationActivationStatus(foundOrganization,ActivationStatus.ACTIVE);
         asynchronousMailingOutputPort.sendReactivatedEmployeesEmailNotification(organizationEmployees, foundOrganization);
-        log.info("Updated Organization entity status: {}", foundOrganization.getStatus());
+        log.info("Updated Organization entity status: {}", foundOrganization.getActivationStatus());
         return foundOrganization;
     }
 
@@ -207,11 +207,11 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         if (activationStatus == ActivationStatus.ACTIVE) {
             identityManagerOutPutPort.enableClient(organization);
             organization.setEnabled(Boolean.TRUE);
-            organization.setStatus(ActivationStatus.ACTIVE);
+            organization.setActivationStatus(ActivationStatus.ACTIVE);
         } else {
             identityManagerOutPutPort.disableClient(organization);
             organization.setEnabled(Boolean.FALSE);
-            organization.setStatus(ActivationStatus.DEACTIVATED);
+            organization.setActivationStatus(ActivationStatus.DEACTIVATED);
         }
 
         organization.setTimeUpdated(LocalDateTime.now());
@@ -259,10 +259,10 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     private OrganizationEmployeeIdentity saveOrganisationIdentityToDatabase(OrganizationIdentity organizationIdentity,IdentityRole identityRole) throws MeedlException {
         organizationIdentity.setEnabled(Boolean.TRUE);
         if (identityRole.equals(IdentityRole.MEEDL_SUPER_ADMIN)) {
-            organizationIdentity.setStatus(ActivationStatus.INVITED);
+            organizationIdentity.setActivationStatus(ActivationStatus.INVITED);
             organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
         }else {
-            organizationIdentity.setStatus(ActivationStatus.PENDING_APPROVAL);
+            organizationIdentity.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
         }
         organizationIdentityOutputPort.save(organizationIdentity);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
@@ -273,6 +273,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         }
         organizationEmployeeIdentity.getMeedlUser().setCreatedAt(LocalDateTime.now());
         userIdentityOutputPort.save(organizationEmployeeIdentity.getMeedlUser());
+        organizationEmployeeIdentity.setCreatedBy(organizationEmployeeIdentity.getMeedlUser().getCreatedBy());
         organizationEmployeeIdentity = organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
         organizationIdentity.getOrganizationEmployees().get(0).setId(organizationEmployeeIdentity.getId());
         return organizationEmployeeIdentity;
@@ -353,6 +354,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
 
         log.info("about to set up new colleague representation in organization {}", newColleague);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = buildOrganizationEmployeeIdentity(inviter, newColleague);
+        organizationEmployeeIdentity.setCreatedBy(newColleague.getCreatedBy());
         OrganizationEmployeeIdentity savedEmployee = organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
         log.info("Saved new colleague employee identity in organization: {}", savedEmployee);
 
@@ -417,8 +419,8 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
 
 
     private static void checkCurrentStatusOfOrganization(OrganizationIdentity organizationIdentity) throws IdentityException {
-        if (!organizationIdentity.getStatus().equals(ActivationStatus.PENDING_APPROVAL) &&
-                ! organizationIdentity.getStatus().equals( ActivationStatus.DECLINED)) {
+        if (!organizationIdentity.getActivationStatus().equals(ActivationStatus.PENDING_APPROVAL) &&
+                ! organizationIdentity.getActivationStatus().equals( ActivationStatus.DECLINED)) {
             throw new IdentityException("This organization cannot be activated because its status is neither pending approval nor declined.");
         }
     }
@@ -426,11 +428,11 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     private void declineInvitation(ActivationStatus activationStatus, UserIdentity organizationCreator, OrganizationIdentity organizationIdentity, UserIdentity actor) throws MeedlException {
         sendNotificationToOrganizationCreator(activationStatus, organizationCreator, organizationIdentity,
                 actor,NotificationFlag.ORGANIZATION_INVITATION_DECLINED);
-        organizationIdentity.setStatus(ActivationStatus.DECLINED);
+        organizationIdentity.setActivationStatus(ActivationStatus.DECLINED);
     }
 
     private void approveInvitation(ActivationStatus activationStatus, OrganizationIdentity organizationIdentity, UserIdentity organizationCreator, UserIdentity actor) throws MeedlException {
-        organizationIdentity.setStatus(ActivationStatus.INVITED);
+        organizationIdentity.setActivationStatus(ActivationStatus.INVITED);
         organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
 
         for(OrganizationEmployeeIdentity organizationEmployeeIdentity : organizationIdentity.getOrganizationEmployees()){
@@ -463,13 +465,13 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         OrganizationIdentity foundOrganizationIdentity =
                 viewOrganizationDetails(employeeIdentity.getOrganization(), organizationIdentity.getUserIdentity().getId());
         log.info("Found organization: {}", foundOrganizationIdentity);
-        if (foundOrganizationIdentity.getStatus() != ActivationStatus.ACTIVE) {
-            log.info("Organization found is not activated with id {} and status {}", foundOrganizationIdentity.getId(), foundOrganizationIdentity.getStatus());
-            foundOrganizationIdentity.setStatus(ActivationStatus.ACTIVE);
+        if (foundOrganizationIdentity.getActivationStatus() != ActivationStatus.ACTIVE) {
+            log.info("Organization found is not activated with id {} and status {}", foundOrganizationIdentity.getId(), foundOrganizationIdentity.getActivationStatus());
+            foundOrganizationIdentity.setActivationStatus(ActivationStatus.ACTIVE);
             foundOrganizationIdentity.setUpdatedBy(organizationIdentity.getUserIdentity().getId());
             foundOrganizationIdentity.setTimeUpdated(LocalDateTime.now());
             OrganizationIdentity savedOrganization = organizationIdentityOutputPort.save(foundOrganizationIdentity);
-            log.info("Updated Organization Entity Status: {}", savedOrganization.getStatus());
+            log.info("Updated Organization Entity Status: {}", savedOrganization.getActivationStatus());
         }
     }
 
@@ -503,7 +505,11 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     public Page<OrganizationIdentity> viewAllOrganizationByStatus(OrganizationIdentity organizationIdentity, ActivationStatus activationStatus) throws MeedlException {
         MeedlValidator.validateObjectInstance(organizationIdentity, OrganizationMessages.ORGANIZATION_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validateObjectInstance(activationStatus, OrganizationMessages.ORGANIZATION_STATUS_MUST_NOT_BE_EMPTY.getMessage());
-        return organizationIdentityOutputPort.viewAllOrganizationByStatus(organizationIdentity, activationStatus);
+        List <String> activationStatuses = List.of(String.valueOf(activationStatus));
+        if (ActivationStatus.INVITED.equals(activationStatus)){
+            activationStatuses = List.of(ActivationStatus.INVITED.name(), ActivationStatus.PENDING_APPROVAL.name());
+        }
+        return organizationIdentityOutputPort.viewAllOrganizationByStatus(organizationIdentity, activationStatuses);
     }
 
     @Override
@@ -512,7 +518,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
             return organizationIdentityOutputPort.findByNameSortingByLoanType(organizationIdentity.getName()
                     ,organizationIdentity.getLoanType(),organizationIdentity.getPageSize(),organizationIdentity.getPageNumber());
         }
-        return organizationIdentityOutputPort.findByName(organizationIdentity.getName(),organizationIdentity.getStatus()
+        return organizationIdentityOutputPort.findByName(organizationIdentity.getName(),organizationIdentity.getActivationStatus()
                 ,organizationIdentity.getPageSize(),organizationIdentity.getPageNumber());
     }
 

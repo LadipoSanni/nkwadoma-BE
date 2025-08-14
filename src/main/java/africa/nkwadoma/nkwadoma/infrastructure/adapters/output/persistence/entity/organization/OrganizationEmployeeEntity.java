@@ -5,6 +5,12 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.Set;
 
 @Setter
 @Getter
@@ -23,4 +29,5 @@ public class OrganizationEmployeeEntity {
     private ActivationStatus activationStatus;
     @ManyToOne
     private UserEntity meedlUser;
+    private String createdBy;
 }

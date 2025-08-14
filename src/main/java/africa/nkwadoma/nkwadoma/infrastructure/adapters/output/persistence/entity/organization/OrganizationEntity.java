@@ -27,7 +27,7 @@ public class OrganizationEntity {
     private String taxIdentity;
     private String phoneNumber;
     @Enumerated(EnumType.STRING)
-    private ActivationStatus status;
+    private ActivationStatus activationStatus;
     @Column(unique = true)
     private String rcNumber;
     private String createdBy;
