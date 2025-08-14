@@ -27,6 +27,7 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
+    private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
 
     @Override
     public Page<OrganizationEmployeeIdentity> viewOrganizationEmployees
@@ -219,9 +220,11 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
     }
 
     @Override
-    public String respondToColleagueInvitation(String organizationEmployeeId) throws MeedlException {
+    public String respondToColleagueInvitation(String actorId,String organizationEmployeeId,ActivationStatus activationStatus) throws MeedlException {
         MeedlValidator.validateUUID(organizationEmployeeId,IdentityMessages.INVALID_ORGANIZATION_EMPLOYEE.getMessage());
-
+        MeedlValidator.validateObjectInstance(activationStatus,"Activation status cannot be null");
+        decisionMustEitherBeApprovedOrDeclined(activationStatus);
+        UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = organizationEmployeeOutputPort.findById(organizationEmployeeId);
         if (organizationEmployeeIdentity.getActivationStatus().equals(ActivationStatus.ACTIVE)) {
             throw new IdentityException(OrganizationMessages.ORGANIZATION_EMPLOYEE_IS_ACTIVE.getMessage());
@@ -229,10 +232,25 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
 
         OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
 
-        asynchronousMailingOutputPort.sendColleagueEmail(organizationIdentity.getName(),organizationEmployeeIdentity.getMeedlUser());
-        organizationEmployeeIdentity.setActivationStatus(ActivationStatus.INVITED);
-        organizationEmployeeOutputPort.save(organizationEmployeeIdentity);
-        return "Colleague invitation approved for "+organizationEmployeeIdentity.getMeedlUser().getFirstName()+" "
-                +organizationEmployeeIdentity.getMeedlUser().getLastName();
+        if (activationStatus.equals(ActivationStatus.APPROVED)) {
+            asynchronousMailingOutputPort.sendColleagueEmail(organizationIdentity.getName(), organizationEmployeeIdentity.getMeedlUser());
+            organizationEmployeeIdentity.setActivationStatus(ActivationStatus.INVITED);
+            organizationEmployeeOutputPort.save(organizationEmployeeIdentity);
+            return "Colleague invitation APPROVED for " + organizationEmployeeIdentity.getMeedlUser().getFirstName() + " "
+                    + organizationEmployeeIdentity.getMeedlUser().getLastName();
+        }else {
+            organizationEmployeeIdentity.setActivationStatus(ActivationStatus.DECLINED);
+            organizationEmployeeOutputPort.save(organizationEmployeeIdentity);
+            UserIdentity createdBy = userIdentityOutputPort.findById(organizationEmployeeIdentity.getCreatedBy());
+            asynchronousNotificationOutputPort.sendDeclineColleagueNotification(organizationEmployeeIdentity,userIdentity,createdBy);
+            return "Colleague invitation DECLINED for " + organizationEmployeeIdentity.getMeedlUser().getFirstName() +" "
+                    + organizationEmployeeIdentity.getMeedlUser().getLastName();
+        }
+    }
+
+    private void decisionMustEitherBeApprovedOrDeclined(ActivationStatus activationStatus) throws IdentityException {
+        if (! activationStatus.equals(ActivationStatus.APPROVED) && !activationStatus.equals(ActivationStatus.DECLINED)) {
+            throw new IdentityException(OrganizationMessages.DECISION_CAN_EITHER_BE_APPROVED_OR_DECLINED.getMessage());
+        }
     }
 }

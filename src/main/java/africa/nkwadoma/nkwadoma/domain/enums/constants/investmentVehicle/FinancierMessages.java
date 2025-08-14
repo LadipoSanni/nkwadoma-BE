@@ -11,7 +11,8 @@ public enum FinancierMessages {
    FINANCIER_INVITE_TO_PLATFORM("financier-to-platform-invite"),
    FINANCIER_INVITE_TO_PLATFORM_TITLE("Financier invited to Meedl platform"),
    INVALID_FINANCIER_TYPE("Please specify if financier is individual or cooperate."),
-    AMOUNT_TO_INVEST_REQUIRED("Amount to invest is require.");
+    AMOUNT_TO_INVEST_REQUIRED("Amount to invest is require."),
+    COOPERATE_FINANCIER_CANNOT_BE_EMPTY("Cooperate financier cannot be empty."),;
 
     private final String message;
 
