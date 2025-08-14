@@ -307,7 +307,12 @@ public class FinancierController {
         );
     }
 
-    @GetMapping("invite/colleuage/financier")
+    @GetMapping("invite/colleague/financier")
     @PreAuthorize("hasRole('COOPERATE_FINANCIER_SUPER_ADMIN') or hasRole('COOPERATE_FINANCIER_ADMIN')")
+    public ResponseEntity<ApiResponse<?>> inviteColleagueFinancier(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
+
+        String response = financierUseCase.inviteColleagueFinancier(meedlUser.getClaimAsString("sub"));
+        return null;
+    }
 
 }
