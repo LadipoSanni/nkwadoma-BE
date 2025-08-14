@@ -18,7 +18,7 @@ public class CooperateFinancierEntity {
     @Id
     private String id;
     @ManyToOne
-    private CooperationEntity cooperation;
+    private CooperationEntity cooperate;
     @ManyToOne
     private FinancierEntity financier;
 }
