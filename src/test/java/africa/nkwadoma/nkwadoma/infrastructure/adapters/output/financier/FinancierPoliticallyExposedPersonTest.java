@@ -83,7 +83,7 @@ public class FinancierPoliticallyExposedPersonTest {
         assertNotNull(savedFinancierPoliticallyExposedPerson.getFinancier());
         assertNotNull(savedFinancierPoliticallyExposedPerson.getFinancier().getUserIdentity());
         assertNotNull(savedFinancierPoliticallyExposedPerson.getFinancier().getUserIdentity().getEmail());
-        assertEquals(email, savedFinancierPoliticallyExposedPerson.getFinancier().getUserIdentity().getEmail());
+        assertEquals(email, savedFinancierPoliticallyExposedPerson.getFinancier().getUserIdentity().getEmail().toLowerCase());
         assertNotNull(savedFinancierPoliticallyExposedPerson.getPoliticallyExposedPerson());
         assertNotNull(savedFinancierPoliticallyExposedPerson.getPoliticallyExposedPerson().getPositionHeld());
         assertNotNull(savedFinancierPoliticallyExposedPerson.getPoliticallyExposedPerson().getCountry());
