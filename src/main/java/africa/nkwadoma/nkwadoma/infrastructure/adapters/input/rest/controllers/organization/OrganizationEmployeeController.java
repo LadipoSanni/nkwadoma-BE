@@ -57,6 +57,33 @@ public class OrganizationEmployeeController {
                 HttpStatus.OK.toString()));
     }
 
+    @GetMapping("view/employee/details")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
+            "or hasRole('MEEDL_ADMIN')" +
+            "or hasRole('MEEDL_ASSOCIATE')" +
+            "or hasRole('PORTFOLIO_MANAGER')" +
+            "or hasRole('ORGANIZATION_SUPER_ADMIN')" +
+            "or hasRole('ORGANIZATION_ADMIN')" +
+            "or hasRole('ORGANIZATION_ASSOCIATE')")
+    public ResponseEntity<?> viewAllAdminInOrganization(@AuthenticationPrincipal Jwt meedlUser,
+                                                        @RequestParam(required = false) String employeeId) throws MeedlException {
+        OrganizationEmployeeIdentity organizationEmployeeIdentity =
+                OrganizationEmployeeIdentity.builder().id(employeeId).meedlUser(UserIdentity.builder().id(meedlUser.getClaimAsString("sub")).build()).build();
+        log.info("The organization employee detail with id at the controller {}",employeeId);
+        OrganizationEmployeeIdentity foundOrganizationEmployeeIdentity =
+                viewOrganizationEmployeesUseCase.viewEmployeeDetail(organizationEmployeeIdentity);
+
+        OrganizationEmployeeResponse organizationEmployeeResponse = organizationEmployeeRestMapper
+                .toOrganizationEmployeeResponse(foundOrganizationEmployeeIdentity);
+
+        ApiResponse<OrganizationEmployeeResponse> apiResponse = ApiResponse.
+                        <OrganizationEmployeeResponse>builder()
+                .data(organizationEmployeeResponse)
+                .message(ControllerConstant.RETURNED_SUCCESSFULLY.getMessage())
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
     @GetMapping("view-all/admin")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
             "or hasRole('MEEDL_ADMIN')" +

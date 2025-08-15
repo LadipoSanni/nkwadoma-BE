@@ -392,7 +392,46 @@ class OrganizationEmployeeServiceTest {
     }
 
     @Test
-    void respondToColleagueInvitationWithNullOrganizationEmployeeId() throws MeedlException {
+    void respondToColleagueInvitationWithNullOrganizationEmployeeId(){
             assertThrows(MeedlException.class , () ->organizationEmployeeService.respondToColleagueInvitation(mockId,null,ActivationStatus.APPROVED));
     }
+
+
+
+    @Test
+    void viewEmployeeDetailWithValidId() throws MeedlException {
+        organizationEmployeeIdentity.setId(mockId);
+        OrganizationEmployeeIdentity expectedEmployee = new OrganizationEmployeeIdentity();
+        expectedEmployee.setId(mockId);
+
+        when(organizationEmployeeOutputPort.findById(mockId))
+                .thenReturn(expectedEmployee);
+
+        OrganizationEmployeeIdentity result =
+                organizationEmployeeService.viewEmployeeDetail(organizationEmployeeIdentity);
+
+        assertNotNull(result);
+        assertEquals(mockId, result.getId());
+        Mockito.verify(organizationEmployeeOutputPort, Mockito.times(1))
+                .findById(mockId);
+    }
+
+    @Test
+    void viewEmployeeDetailWithInvalidUUID() {
+        organizationEmployeeIdentity.setId("not-a-uuid");
+
+        assertThrows(MeedlException.class,
+                () -> organizationEmployeeService.viewEmployeeDetail(organizationEmployeeIdentity));
+
+        Mockito.verifyNoInteractions(organizationEmployeeOutputPort);
+    }
+
+    @Test
+    void viewEmployeeDetailWithNullOrganizationEmployeeIdentity() {
+        assertThrows(MeedlException.class,
+                () -> organizationEmployeeService.viewEmployeeDetail(null));
+
+        Mockito.verifyNoInteractions(organizationEmployeeOutputPort);
+    }
+
 }
