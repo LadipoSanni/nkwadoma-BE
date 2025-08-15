@@ -24,7 +24,6 @@ ALTER TABLE meedl_user
                         'COOPERATE_FINANCIER_SUPER_ADMIN'
             ));
 
--- V8__add_activation_status_to_bank_detail.sql
 
 -- 1. Add the new column as varchar (EnumType.STRING in JPA stores as text)
 ALTER TABLE bank_detail_entity
