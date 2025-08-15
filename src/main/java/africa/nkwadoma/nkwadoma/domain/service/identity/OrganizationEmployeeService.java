@@ -133,7 +133,7 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
         }
         else if (IdentityRole.PORTFOLIO_MANAGER.equals(foundActor.getRole())) {
             log.info("The found actor to view employees pending approval is a meedl staff {}", foundActor.getRole());
-            orgEmployee.setIdentityRoles(Set.of(IdentityRole.PORTFOLIO_MANAGER, IdentityRole.PORTFOLIO_ASSOCIATE));
+            orgEmployee.setIdentityRoles(Set.of(IdentityRole.PORTFOLIO_MANAGER, IdentityRole.PORTFOLIO_MANAGER_ASSOCIATE));
         }
         else if (IdentityRole.isOrganizationAdminOrSuperAdmin(foundActor)) {
             log.info("The found actor viewing employees with pending approval is an organization staff with role {}", foundActor.getRole());
@@ -159,13 +159,13 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
         IdentityRole actorRole = foundActor.getRole();
         log.error("Actor role while verifying view permission {}", actorRole);
         switch (actorRole) {
-            case ORGANIZATION_ASSOCIATE, PORTFOLIO_ASSOCIATE -> {
+            case ORGANIZATION_ASSOCIATE, PORTFOLIO_MANAGER_ASSOCIATE -> {
                 log.error("You are not permitted to view pending invites.");
                 return Boolean.FALSE;
             }
             case PORTFOLIO_MANAGER -> {
                 boolean allowed = employeeRoles.stream().allMatch(
-                        role -> role == IdentityRole.PORTFOLIO_MANAGER || role == IdentityRole.PORTFOLIO_ASSOCIATE
+                        role -> role == IdentityRole.PORTFOLIO_MANAGER || role == IdentityRole.PORTFOLIO_MANAGER_ASSOCIATE
                 );
                 if (!allowed) {
                     log.error("Portfolio Managers can only view Portfolio Managers or Meedl Associates.");

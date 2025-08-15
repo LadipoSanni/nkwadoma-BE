@@ -385,9 +385,9 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
 
     private void validateRolePermissions(IdentityRole inviterRole, IdentityRole colleagueRole) throws IdentityException {
         Map<IdentityRole, Set<IdentityRole>> allowedRoles = Map.of(
-                IdentityRole.MEEDL_SUPER_ADMIN, Set.of(PORTFOLIO_MANAGER, MEEDL_ADMIN, IdentityRole.PORTFOLIO_ASSOCIATE),
-                MEEDL_ADMIN, Set.of(PORTFOLIO_MANAGER, IdentityRole.PORTFOLIO_ASSOCIATE,MEEDL_ADMIN),
-                PORTFOLIO_MANAGER, Set.of(IdentityRole.PORTFOLIO_ASSOCIATE,PORTFOLIO_MANAGER),
+                IdentityRole.MEEDL_SUPER_ADMIN, Set.of(PORTFOLIO_MANAGER, MEEDL_ADMIN, IdentityRole.PORTFOLIO_MANAGER_ASSOCIATE),
+                MEEDL_ADMIN, Set.of(PORTFOLIO_MANAGER, IdentityRole.PORTFOLIO_MANAGER_ASSOCIATE,MEEDL_ADMIN),
+                PORTFOLIO_MANAGER, Set.of(IdentityRole.PORTFOLIO_MANAGER_ASSOCIATE,PORTFOLIO_MANAGER),
                 IdentityRole.ORGANIZATION_SUPER_ADMIN, Set.of(ORGANIZATION_ADMIN, IdentityRole.ORGANIZATION_ASSOCIATE),
                 ORGANIZATION_ADMIN, Set.of(IdentityRole.ORGANIZATION_ASSOCIATE,ORGANIZATION_ADMIN)
         );

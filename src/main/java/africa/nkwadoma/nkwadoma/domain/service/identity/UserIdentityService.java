@@ -259,7 +259,7 @@ public class UserIdentityService implements UserUseCase {
                     activationStatus,
                     foundActor,
                     userToDeactivate,
-                    Set.of(IdentityRole.PORTFOLIO_MANAGER, IdentityRole.PORTFOLIO_ASSOCIATE)
+                    Set.of(IdentityRole.PORTFOLIO_MANAGER, IdentityRole.PORTFOLIO_MANAGER_ASSOCIATE)
             );
         }
     }

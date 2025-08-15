@@ -221,7 +221,7 @@ class OrganizationEmployeeServiceTest {
 
         organizationEmployeeService.setRolesToView(organizationEmployeeIdentity, userIdentity);
 
-        assertEquals(Set.of(IdentityRole.PORTFOLIO_MANAGER, IdentityRole.PORTFOLIO_ASSOCIATE),
+        assertEquals(Set.of(IdentityRole.PORTFOLIO_MANAGER, IdentityRole.PORTFOLIO_MANAGER_ASSOCIATE),
                 organizationEmployeeIdentity.getIdentityRoles());
     }
 
@@ -237,7 +237,7 @@ class OrganizationEmployeeServiceTest {
 
     @Test
     void setsMeedlRolesForNonPendingApprovalByMeedlStaff() {
-        userIdentity.setRole(IdentityRole.PORTFOLIO_ASSOCIATE);
+        userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER_ASSOCIATE);
         organizationEmployeeIdentity.setActivationStatus(ActivationStatus.ACTIVE);
 
         organizationEmployeeService.setRolesToView(organizationEmployeeIdentity, userIdentity);
@@ -269,7 +269,7 @@ class OrganizationEmployeeServiceTest {
 
     @Test
     void nonPendingApprovalWithRolesProvidedDoesNotOverride() {
-        userIdentity.setRole(IdentityRole.PORTFOLIO_ASSOCIATE);
+        userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER_ASSOCIATE);
         organizationEmployeeIdentity.setActivationStatus(ActivationStatus.ACTIVE);
         organizationEmployeeIdentity.setIdentityRoles(Set.of(IdentityRole.MEEDL_ADMIN));
 

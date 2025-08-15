@@ -8,7 +8,7 @@ import java.util.Set;
 
 @Getter
 public enum IdentityRole {
-    PORTFOLIO_ASSOCIATE("Portfolio manager associate"),
+    PORTFOLIO_MANAGER_ASSOCIATE("Portfolio manager associate"),
     MEEDL_SUPER_ADMIN("Meedl super admin"),
     MEEDL_ADMIN("Meedl admin"),
     PORTFOLIO_MANAGER("Portfolio manager"),
@@ -27,7 +27,7 @@ public enum IdentityRole {
     }
 
     public static Set<IdentityRole> getMeedlRoles(){
-        return Set.of(MEEDL_SUPER_ADMIN, MEEDL_ADMIN, PORTFOLIO_ASSOCIATE, PORTFOLIO_MANAGER);
+        return Set.of(MEEDL_SUPER_ADMIN, MEEDL_ADMIN, PORTFOLIO_MANAGER_ASSOCIATE, PORTFOLIO_MANAGER);
     }
     public static Set<IdentityRole> getOrganizationRoles(){
         return Set.of(ORGANIZATION_ADMIN, ORGANIZATION_ASSOCIATE, ORGANIZATION_SUPER_ADMIN);
@@ -65,7 +65,7 @@ public enum IdentityRole {
     public boolean isMeedlRole() {
         return this == MEEDL_SUPER_ADMIN ||
                 this == MEEDL_ADMIN ||
-                this == PORTFOLIO_ASSOCIATE ||
+                this == PORTFOLIO_MANAGER_ASSOCIATE ||
                 this == PORTFOLIO_MANAGER;
     }
 
