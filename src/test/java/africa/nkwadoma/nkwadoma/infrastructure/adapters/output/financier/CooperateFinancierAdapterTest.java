@@ -45,7 +45,7 @@ public class CooperateFinancierAdapterTest {
     void setUp() throws MeedlException {
         userIdentity = TestData.createTestUserIdentity("financier@grr.la");
         userIdentity.setRole(IdentityRole.COOPERATE_FINANCIER_SUPER_ADMIN);
-        userIdentity = userIdentityOutputPort.save(userIdentity);
+        userIdentity =  userIdentityOutputPort.save(userIdentity);
         financier = TestData.buildFinancierIndividual(userIdentity);
         financier = financierOutputPort.save(financier);
         cooperate = TestData.buildCooperation("NepoBABY");

@@ -66,5 +66,5 @@ public interface AsynchronousNotificationOutputPort {
     void sendDeclineColleagueNotification(OrganizationEmployeeIdentity organizationEmployeeIdentity,
                                           UserIdentity userIdentity,UserIdentity createdBy) throws MeedlException;
     @Async
-    void sendNotificationToCooperateSuperAdmin(CooperateFinancier inviter, CooperateFinancier newCooperateFinancier, CooperateFinancier superAdminFinancier);
+    void sendNotificationToCooperateSuperAdmin(CooperateFinancier inviter, CooperateFinancier newCooperateFinancier, CooperateFinancier superAdminFinancier) throws MeedlException;
 }

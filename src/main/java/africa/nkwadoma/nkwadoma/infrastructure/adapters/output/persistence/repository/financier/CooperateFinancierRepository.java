@@ -27,7 +27,7 @@ public interface CooperateFinancierRepository extends JpaRepository<CooperateFin
         JOIN CooperationEntity c on c.id = cf.cooperate.id
         JOIN UserEntity u on u.id = f.userIdentity.id
             
-               WHERE u.role = 'COOPERATE_FINANCIER_SUPER_ADMIN' and c.name = :name
+        WHERE u.role = 'COOPERATE_FINANCIER_SUPER_ADMIN' and c.name = :name
                   
     """)
     CooperateFinancierEntity findByCooperateFinancierSuperAdminByCooperateName(@Param("name") String name);
