@@ -9,6 +9,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.financier.CooperateFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -428,5 +429,24 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
         log.info("done building notification for decline colleague invitation{}", meedlNotification);
         meedlNotificationUsecase.sendNotification(meedlNotification);
         log.info("notification sent ====---=-==---=-");
+    }
+
+    @Override
+    public void sendNotificationToCooperateSuperAdmin(CooperateFinancier inviter, CooperateFinancier newCooperateFinancier, CooperateFinancier superAdminFinancier) throws MeedlException {
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .title("Pending colleague invitation")
+                .contentDetail("Need Approval for colleague invitation")
+                .senderFullName(inviter.getFinancier().getUserIdentity().getFirstName()+" "+ inviter.getFinancier().getUserIdentity().getLastName())
+                .senderMail(inviter.getFinancier().getUserIdentity().getEmail())
+                .notificationFlag(NotificationFlag.INVITE_COLLEAGUE)
+                .timestamp(LocalDateTime.now())
+                .contentId(newCooperateFinancier.getId())
+                .callToAction(true)
+                .user(superAdminFinancier.getFinancier().getUserIdentity())
+                .build();
+        log.info("done building notification for super admin to approve colleague invitation{}", meedlNotification);
+        meedlNotificationUsecase.sendNotification(meedlNotification);
+        log.info("notification sent ====---=-=---=-");
+
     }
 }

@@ -52,6 +52,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType.COOPERATE;
 
@@ -77,6 +79,7 @@ public class FinancierService implements FinancierUseCase {
     private final InvestmentVehicleMapper investmentVehicleMapper;
     private final FinancierMapper financierMapper;
     private final PortfolioOutputPort portfolioOutputPort;
+    private final CooperateFinancierOutputPort cooperateFinancierOutputPort;
 
     @Override
     public String inviteFinancier(List<Financier> financiers, String investmentVehicleId) throws MeedlException {
@@ -750,10 +753,65 @@ public class FinancierService implements FinancierUseCase {
     }
 
     @Override
-    public String inviteColleagueFinancier(String actorID) throws MeedlException {
-        MeedlValidator.validateUUID(actorID,UserMessages.INVALID_USER_ID.getMessage());
+    public String inviteColleagueFinancier(String actorID,Financier financier) throws MeedlException {
+        MeedlValidator.validateObjectInstance(financier.getUserIdentity(), IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
+        UserIdentity newColleagueUserIdentity = financier.getUserIdentity();
+        newColleagueUserIdentity.setCreatedBy(actorID);
+        newColleagueUserIdentity.validate();
 
-        return "";
+        UserIdentity inviter = userIdentityOutputPort.findById(actorID);
+        validateRolePermissions(inviter.getRole(), newColleagueUserIdentity.getRole());
+        CooperateFinancier inviterCooperateFinancier =
+                cooperateFinancierOutputPort.findCooperateFinancierByUserId(inviter.getId());
+
+
+        newColleagueUserIdentity.setCreatedAt(LocalDateTime.now());
+        newColleagueUserIdentity = identityManagerOutputPort.createUser(newColleagueUserIdentity);
+        newColleagueUserIdentity = userIdentityOutputPort.save(newColleagueUserIdentity);
+
+        Financier newColleague = Financier.builder().userIdentity(newColleagueUserIdentity).financierType(COOPERATE).build();
+        newColleague = financierOutputPort.save(newColleague);
+
+        CooperateFinancier cooperateFinancier = buildCooperateFinancierIdentity(inviterCooperateFinancier,newColleague);
+
+        cooperateFinancier = cooperateFinancierOutputPort.save(cooperateFinancier);
+
+        return handleNotificationsAndResponse(inviterCooperateFinancier,cooperateFinancier,newColleagueUserIdentity);
+    }
+
+    private CooperateFinancier buildCooperateFinancierIdentity(CooperateFinancier inviter, Financier newColleague) {
+       CooperateFinancier newCooperateFinancier = CooperateFinancier.builder().cooperate(inviter.getCooperate())
+                .financier(newColleague).build();
+       newCooperateFinancier.setActivationStatus(
+               inviter.getFinancier().getUserIdentity().getRole().isSuperAdmin()
+                       ? ActivationStatus.INVITED
+                       : ActivationStatus.PENDING_APPROVAL
+       );
+       return newCooperateFinancier;
+    }
+
+    private String handleNotificationsAndResponse(CooperateFinancier inviter, CooperateFinancier cooperateFinancier, UserIdentity newColleagueUserIdentity) throws MeedlException {
+
+        if (inviter.getFinancier().getUserIdentity().getRole().isSuperAdmin()) {
+            asynchronousMailingOutputPort.sendColleagueEmail(inviter.getCooperate().getName(),newColleagueUserIdentity);
+            return String.format("Colleague with role %s invited", newColleagueUserIdentity.getRole().name());
+        }
+
+        CooperateFinancier superAdminFinancier =
+                cooperateFinancierOutputPort.findCooperateFinancierSuperAdminByCooperateName
+                        (cooperateFinancier.getCooperate().getName());
+        asynchronousNotificationOutputPort.sendNotificationToCooperateSuperAdmin(inviter,cooperateFinancier,superAdminFinancier);
+        return "Invitation needs approval, pending.";
+    }
+
+    private void validateRolePermissions(IdentityRole inviterRole, IdentityRole colleagueRole) throws IdentityException {
+        Map<IdentityRole, Set<IdentityRole>> allowedRoles = Map.of(
+                IdentityRole.COOPERATE_FINANCIER_SUPER_ADMIN,Set.of(IdentityRole.COOPERATE_FINANCIER_ADMIN),
+                IdentityRole.COOPERATE_FINANCIER_ADMIN,Set.of(IdentityRole.COOPERATE_FINANCIER_ADMIN)
+        );
+        if (!allowedRoles.getOrDefault(inviterRole, Set.of()).contains(colleagueRole)) {
+            throw new IdentityException(String.format("Role %s cannot invite colleague with role %s", inviterRole, colleagueRole));
+        }
     }
 
     @Override

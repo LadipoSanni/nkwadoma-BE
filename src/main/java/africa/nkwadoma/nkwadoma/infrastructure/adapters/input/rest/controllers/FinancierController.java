@@ -12,6 +12,7 @@ import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentSummary;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.InviteColleagueRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.InviteFinancierRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.KycRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.FinancierRequest;
@@ -53,7 +54,7 @@ public class FinancierController {
     private final InvestmentVehicleRestMapper investmentVehicleRestMapper;
 
     @PostMapping("financier/invite")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN') or hasRole('MEEDL_SUPER_ADMIN')  ")
     public  ResponseEntity<ApiResponse<?>> inviteFinancierToVehicle(@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid
     InviteFinancierRequest inviteFinancierRequest) throws MeedlException {
         log.info("Inviting a financier with request {}", inviteFinancierRequest);
@@ -309,10 +310,17 @@ public class FinancierController {
 
     @GetMapping("invite/colleague/financier")
     @PreAuthorize("hasRole('COOPERATE_FINANCIER_SUPER_ADMIN') or hasRole('COOPERATE_FINANCIER_ADMIN')")
-    public ResponseEntity<ApiResponse<?>> inviteColleagueFinancier(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> inviteColleagueFinancier(@AuthenticationPrincipal Jwt meedlUser,
+                                                                   @RequestBody InviteColleagueRequest inviteColleagueRequest) throws MeedlException {
+        Financier financier  =  financierRestMapper.mapInviteColleagueRequestToFinancier(inviteColleagueRequest);
 
-        String response = financierUseCase.inviteColleagueFinancier(meedlUser.getClaimAsString("sub"));
-        return null;
+        String response = financierUseCase.inviteColleagueFinancier(meedlUser.getClaimAsString("sub"),financier);
+        ApiResponse<Object> apiResponse = ApiResponse.builder()
+                .statusCode(HttpStatus.OK.toString())
+                .message(response)
+                .data(response)
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
 }

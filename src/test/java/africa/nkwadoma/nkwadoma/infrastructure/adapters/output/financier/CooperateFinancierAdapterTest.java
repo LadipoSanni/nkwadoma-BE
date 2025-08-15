@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.financier.CooperateFina
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.CooperationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.CooperateFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
@@ -43,6 +44,7 @@ public class CooperateFinancierAdapterTest {
     @BeforeAll
     void setUp() throws MeedlException {
         userIdentity = TestData.createTestUserIdentity("financier@grr.la");
+        userIdentity.setRole(IdentityRole.COOPERATE_FINANCIER_SUPER_ADMIN);
         userIdentity = userIdentityOutputPort.save(userIdentity);
         financier = TestData.buildFinancierIndividual(userIdentity);
         financier = financierOutputPort.save(financier);
@@ -90,6 +92,31 @@ public class CooperateFinancierAdapterTest {
     }
 
 
+    @Order(2)
+    @Test
+    void findCooperateFinancierByUserId() {
+        CooperateFinancier foundCooperateFinancier = null;
+        try{
+            foundCooperateFinancier = cooperateFinancierOutputPort.findCooperateFinancierByUserId(userIdentity.getId());
+        }catch (MeedlException e){
+            log.error(e.getMessage());
+        }
+        assertNotNull(foundCooperateFinancier);
+        assertEquals(foundCooperateFinancier.getId(),cooperateFinancierID);
+    }
+
+    @Order(3)
+    @Test
+    void findCooperateFinancierSuperAdminByCooperateName() {
+        CooperateFinancier foundCooperateFinancier = null;
+        try{
+            foundCooperateFinancier = cooperateFinancierOutputPort.findCooperateFinancierSuperAdminByCooperateName("NepoBABY");
+        }catch (MeedlException e){
+            log.error(e.getMessage());
+        }
+        assertNotNull(foundCooperateFinancier);
+        assertEquals(foundCooperateFinancier.getId(),cooperateFinancierID);
+    }
 
     @AfterAll
     void tearDown() throws MeedlException {
