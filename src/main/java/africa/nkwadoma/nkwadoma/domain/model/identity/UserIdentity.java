@@ -2,7 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.model.identity;
 
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
@@ -15,7 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.INVALID_ROLE;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages.INVALID_ROLE;
 
 @Slf4j
 @Setter

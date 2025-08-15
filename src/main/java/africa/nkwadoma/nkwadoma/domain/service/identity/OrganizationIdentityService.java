@@ -1,9 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.notification.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.LoanMetricsUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.meedlnotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
@@ -11,6 +9,8 @@ import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotif
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -35,7 +35,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.*;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages.*;
 
 
 @RequiredArgsConstructor
@@ -385,9 +385,9 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
 
     private void validateRolePermissions(IdentityRole inviterRole, IdentityRole colleagueRole) throws IdentityException {
         Map<IdentityRole, Set<IdentityRole>> allowedRoles = Map.of(
-                IdentityRole.MEEDL_SUPER_ADMIN, Set.of(PORTFOLIO_MANAGER, MEEDL_ADMIN, IdentityRole.MEEDL_ASSOCIATE),
-                MEEDL_ADMIN, Set.of(PORTFOLIO_MANAGER, IdentityRole.MEEDL_ASSOCIATE,MEEDL_ADMIN),
-                PORTFOLIO_MANAGER, Set.of(IdentityRole.MEEDL_ASSOCIATE,PORTFOLIO_MANAGER),
+                IdentityRole.MEEDL_SUPER_ADMIN, Set.of(PORTFOLIO_MANAGER, MEEDL_ADMIN, IdentityRole.PORTFOLIO_ASSOCIATE),
+                MEEDL_ADMIN, Set.of(PORTFOLIO_MANAGER, IdentityRole.PORTFOLIO_ASSOCIATE,MEEDL_ADMIN),
+                PORTFOLIO_MANAGER, Set.of(IdentityRole.PORTFOLIO_ASSOCIATE,PORTFOLIO_MANAGER),
                 IdentityRole.ORGANIZATION_SUPER_ADMIN, Set.of(ORGANIZATION_ADMIN, IdentityRole.ORGANIZATION_ASSOCIATE),
                 ORGANIZATION_ADMIN, Set.of(IdentityRole.ORGANIZATION_ASSOCIATE,ORGANIZATION_ADMIN)
         );

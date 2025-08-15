@@ -8,7 +8,8 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.constants.ControllerConstant;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanBreakdownResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.education.*;
@@ -26,7 +27,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort.SuccessMessages.*;
 
 @Slf4j

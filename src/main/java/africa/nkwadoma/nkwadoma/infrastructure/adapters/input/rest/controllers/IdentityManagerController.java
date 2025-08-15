@@ -10,7 +10,7 @@ import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.constants.ControllerConstant;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.UserIdentityResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.*;
 import jakarta.servlet.http.HttpServletRequest;

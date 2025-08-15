@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.investment;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentvehicle.FinancierUseCase;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
@@ -14,8 +14,8 @@ import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.InviteFinancierRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.KycRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.FinancierRequest;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentvehicle.FinancierRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentvehicle.InvestmentVehicleRestMapper;

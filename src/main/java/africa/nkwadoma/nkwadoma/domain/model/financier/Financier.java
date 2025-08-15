@@ -2,12 +2,11 @@ package africa.nkwadoma.nkwadoma.domain.model.financier;
 
 import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicleDesignation;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicleType;
-import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.InvestmentException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;

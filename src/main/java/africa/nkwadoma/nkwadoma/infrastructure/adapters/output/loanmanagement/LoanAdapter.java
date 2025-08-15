@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -132,7 +133,7 @@ public class LoanAdapter implements LoanOutputPort {
 
     @Override
     public Page<Loan> findAllLoanDisburedToLoanee(String id, int pageNumber, int pageSize) throws MeedlException {
-        MeedlValidator.validateUUID(id,UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateUUID(id, UserMessages.INVALID_USER_ID.getMessage());
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validatePageNumber(pageNumber);
         Pageable pageRequest = PageRequest.of(pageNumber,pageSize);

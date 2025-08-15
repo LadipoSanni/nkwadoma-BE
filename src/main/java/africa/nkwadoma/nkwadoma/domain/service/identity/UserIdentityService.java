@@ -12,8 +12,8 @@ import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.Emai
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages.*;
 
 @Slf4j
 @EnableAsync
@@ -259,7 +259,7 @@ public class UserIdentityService implements UserUseCase {
                     activationStatus,
                     foundActor,
                     userToDeactivate,
-                    Set.of(IdentityRole.PORTFOLIO_MANAGER, IdentityRole.MEEDL_ASSOCIATE)
+                    Set.of(IdentityRole.PORTFOLIO_MANAGER, IdentityRole.PORTFOLIO_ASSOCIATE)
             );
         }
     }

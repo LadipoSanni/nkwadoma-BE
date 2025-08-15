@@ -5,7 +5,8 @@ import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
@@ -22,7 +23,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @RestController

@@ -14,6 +14,7 @@ public class BankDetail {
     private String id;
     private String bankName;
     private String bankNumber;
+    private String response;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateDataElement(this.bankName, "Bank account name is required.");
