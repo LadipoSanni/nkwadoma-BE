@@ -47,12 +47,20 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
         }
         return organizationEmployees;
     }
+    @Override
+    public OrganizationEmployeeIdentity viewEmployeeDetail
+            (OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(organizationEmployeeIdentity, OrganizationMessages.ORGANIZATION_MUST_NOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateUUID(organizationEmployeeIdentity.getId(), OrganizationMessages.INVALID_ORGANIZATION_EMPLOYEE_ID.getMessage());
 
+        return organizationEmployeeOutputPort.
+                findById(organizationEmployeeIdentity.getId());
+    }
 
     @Override
     public OrganizationEmployeeIdentity viewEmployeeDetails(OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(organizationEmployeeIdentity, OrganizationMessages.ORGANIZATION_MUST_NOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateUUID(organizationEmployeeIdentity.getId(), "Valid organization employee id is required");
+        MeedlValidator.validateUUID(organizationEmployeeIdentity.getId(), OrganizationMessages.INVALID_ORGANIZATION_EMPLOYEE_ID.getMessage());
         return organizationEmployeeOutputPort.findByEmployeeId(organizationEmployeeIdentity.getId());
     }
     @Override

@@ -72,6 +72,10 @@ public interface FinancierRestMapper {
     @Mapping(target = "investmentVehicleType", source = "investmentVehicleType")
     FinancierInvestmentResponse mapToFinancierInvestment(Financier financier);
 
+    @Mapping(target = "userIdentity.id", source = "userId")
+    @Mapping(target = "privacyPolicyAccepted", source = "privacyPolicyDecision")
+    Financier map(String userId, boolean privacyPolicyDecision);
+
     @Mapping(target = "userIdentity.firstName", source = "firstName")
     @Mapping(target = "userIdentity.lastName", source = "lastName")
     @Mapping(target = "userIdentity.email", source = "email")

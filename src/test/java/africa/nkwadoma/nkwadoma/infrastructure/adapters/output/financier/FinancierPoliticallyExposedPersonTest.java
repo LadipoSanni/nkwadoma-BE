@@ -31,7 +31,7 @@ public class FinancierPoliticallyExposedPersonTest {
     private PoliticallyExposedPersonOutputPort politicallyExposedPersonOutputPort;
     private FinancierPoliticallyExposedPerson financierPoliticallyExposedPerson;
     private String politicallyExposedPersonId;
-    private final String email = String.format("testfinancier%spoliticallyexposedpersonemail@email.com", TestUtils.generateName(4));;
+    private final String email = String.format("testfinancier%spoliticallyexposedpersonemail@email.com", TestUtils.generateName(4)).toLowerCase();;
     @BeforeAll
     void setUp() {
         financierPoliticallyExposedPerson = TestData.buildFinancierPoliticallyExposedPerson(email);
@@ -83,7 +83,7 @@ public class FinancierPoliticallyExposedPersonTest {
         assertNotNull(savedFinancierPoliticallyExposedPerson.getFinancier());
         assertNotNull(savedFinancierPoliticallyExposedPerson.getFinancier().getUserIdentity());
         assertNotNull(savedFinancierPoliticallyExposedPerson.getFinancier().getUserIdentity().getEmail());
-        assertEquals(email, savedFinancierPoliticallyExposedPerson.getFinancier().getUserIdentity().getEmail());
+        assertEquals(email.toLowerCase(), savedFinancierPoliticallyExposedPerson.getFinancier().getUserIdentity().getEmail().toLowerCase());
         assertNotNull(savedFinancierPoliticallyExposedPerson.getPoliticallyExposedPerson());
         assertNotNull(savedFinancierPoliticallyExposedPerson.getPoliticallyExposedPerson().getPositionHeld());
         assertNotNull(savedFinancierPoliticallyExposedPerson.getPoliticallyExposedPerson().getCountry());

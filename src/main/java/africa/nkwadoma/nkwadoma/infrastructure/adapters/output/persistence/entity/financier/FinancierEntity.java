@@ -44,4 +44,5 @@ public class FinancierEntity {
     private CooperationEntity cooperation;
     private BigDecimal totalAmountInvested;
     private LocalDateTime createdAt;
+    private boolean privacyPolicyAccepted;
 }

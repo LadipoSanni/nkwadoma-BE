@@ -11,6 +11,8 @@ import java.util.List;
 public interface FinancierUseCase {
     String inviteFinancier(List<Financier> financier, String investmentVehicleId) throws MeedlException;
 
+    String makePrivacyPolicyDecision(Financier financier) throws MeedlException;
+
     Financier viewFinancierDetail(String userId, String financierId) throws MeedlException;
 
     Page<Financier> viewAllFinancier(Financier financier) throws MeedlException;
