@@ -25,17 +25,17 @@ public class BankDetailService implements BankDetailUseCase {
     public BankDetail addBankDetails(BankDetail bankDetail) throws MeedlException {
         MeedlValidator.validateObjectInstance(bankDetail, BankDetailMessages.INVALID_BANK_DETAIL.getMessage());
         bankDetail.validate();
-        UserIdentity userIdentity = userIdentityOutputPort.findById(bankDetail.getUserId());
-        if ((!IdentityRole.MEEDL_SUPER_ADMIN.equals(userIdentity.getRole())) &&
-                (!IdentityRole.ORGANIZATION_SUPER_ADMIN.equals(userIdentity.getRole()))){
-            bankDetail.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
-            if (IdentityRole.isMeedlStaff(userIdentity.getRole())){
-//                notifyMeedlSuperAdminOfBankDetailAddition();
-            }
-//            if (IdentityRole.isOrganizationStaff())
-        }else {
-            bankDetail.setActivationStatus(ActivationStatus.APPROVED);
-        }
+//        UserIdentity userIdentity = userIdentityOutputPort.findById(bankDetail.getUserId());
+//        if ((!IdentityRole.MEEDL_SUPER_ADMIN.equals(userIdentity.getRole())) &&
+//                (!IdentityRole.ORGANIZATION_SUPER_ADMIN.equals(userIdentity.getRole()))){
+//            bankDetail.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
+//            if (IdentityRole.isMeedlStaff(userIdentity.getRole())){
+////                notifyMeedlSuperAdminOfBankDetailAddition();
+//            }
+////            if (IdentityRole.isOrganizationStaff())
+//        }else {
+//            bankDetail.setActivationStatus(ActivationStatus.APPROVED);
+//        }
         bankDetail = bankDetailOutputPort.save(bankDetail);
         bankDetail.setResponse("Added bank details successfully");
         return bankDetail;
