@@ -173,7 +173,7 @@ public class UserIdentityService implements UserUseCase {
         userIdentity.setEmailVerified(true);
         userIdentity.setEnabled(true);
         userIdentity.setCreatedAt(LocalDateTime.now());
-        userIdentity.setPassword(tokenUtils.decryptAES(userIdentity.getNewPassword(), "Provide valid password to update"));
+        userIdentity.setNewPassword(tokenUtils.decryptAES(userIdentity.getNewPassword(), "Provide valid password to update"));
         identityManagerOutPutPort.setPassword(userIdentity);
         log.info("Password changed successfully for user with id: {}",userIdentity.getId());
     }
