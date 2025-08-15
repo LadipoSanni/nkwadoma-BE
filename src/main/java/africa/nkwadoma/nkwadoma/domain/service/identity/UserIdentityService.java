@@ -157,7 +157,12 @@ public class UserIdentityService implements UserUseCase {
         MeedlValidator.validateObjectInstance(userIdentity, USER_IDENTITY_CANNOT_BE_NULL.getMessage());
         MeedlValidator.validatePassword(tokenUtils.decryptAES(userIdentity.getPassword(), "Invalid password for current password"));
         MeedlValidator.validatePassword(tokenUtils.decryptAES(userIdentity.getNewPassword(), "Invalid new password provided"));
-        login(userIdentity);
+        try {
+            login(userIdentity);
+        }catch (MeedlException e){
+            log.info("Password invalid on change password {} user email {}", e.getMessage(), userIdentity.getEmail());
+            throw new MeedlException("Password incorrect");
+        }
         if (userIdentity.getNewPassword().equals(userIdentity.getPassword())){
             log.warn("{}", UserMessages.NEW_PASSWORD_AND_CURRENT_PASSWORD_CANNOT_BE_SAME.getMessage());
             throw new IdentityException(UserMessages.NEW_PASSWORD_AND_CURRENT_PASSWORD_CANNOT_BE_SAME.getMessage());
