@@ -32,7 +32,7 @@ public enum IdentityRole {
     public static Set<IdentityRole> getOrganizationRoles(){
         return Set.of(ORGANIZATION_ADMIN, ORGANIZATION_ASSOCIATE, ORGANIZATION_SUPER_ADMIN);
     }
-    public static boolean isMeedlAdminOrSuperAdmin(UserIdentity actor) {
+    public static boolean isMeedlAdminOrMeedlSuperAdmin(UserIdentity actor) {
         return IdentityRole.MEEDL_SUPER_ADMIN.equals(actor.getRole()) ||
                 IdentityRole.MEEDL_ADMIN.equals(actor.getRole());
     }
