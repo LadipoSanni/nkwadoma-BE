@@ -129,7 +129,7 @@ public class OrganizationEmployeeController {
 
     @Deprecated
     @GetMapping("search-admin")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<?> searchAllAdminInOrganization(@RequestParam @NotBlank(message = "Organization id is required") String organizationId,
                                                           @RequestParam @NotBlank(message = "name") String name,
                                                           @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,

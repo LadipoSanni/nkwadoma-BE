@@ -200,7 +200,7 @@ public class InvestmentVehicleController {
     }
 
     @DeleteMapping("delete-investment-vehicle/{investmentVehicleId}")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> deleteInvestmentVehicle(@PathVariable String investmentVehicleId) throws MeedlException {
 
         String response =

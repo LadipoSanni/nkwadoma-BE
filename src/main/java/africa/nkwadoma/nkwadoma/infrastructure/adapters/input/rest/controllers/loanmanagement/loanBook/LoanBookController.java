@@ -41,7 +41,7 @@ public class LoanBookController {
     private LoanBookUseCase loanBookUseCase;
 
     @PostMapping(value = "/upload/{cohortId}/file/loanee/data", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = LOAN_BOOK_USER_DATA_CREATION_VIA_FILE_UPLOAD,description = LOAN_BOOK_USER_DATA_CREATION_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> uploadLoanBookUserData(@AuthenticationPrincipal Jwt meedlUser,
                                                          @RequestPart("file") MultipartFile file,
@@ -60,7 +60,7 @@ public class LoanBookController {
     }
 
     @PostMapping(value = "/upload/{cohortId}/file/loanee/repayment/record", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = LOAN_BOOK_REPAYMENT_RECORD_CREATION_VIA_FILE_UPLOAD,description = LOAN_BOOK_REPAYMENT_RECORD_CREATION_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> uploadLoanBookRepaymentRecord(@AuthenticationPrincipal Jwt meedlUser,
                                                          @RequestPart("file") MultipartFile file,
