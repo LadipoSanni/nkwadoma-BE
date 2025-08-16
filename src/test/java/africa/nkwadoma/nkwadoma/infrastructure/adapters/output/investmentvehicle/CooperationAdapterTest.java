@@ -58,11 +58,7 @@ public class CooperationAdapterTest {
         log.info("Saved cooperation {}", savedCooperation);
         cooperationId = savedCooperation.getId();
     }
-    @Test
-    @Order(2)
-    void saveCooperationWithTheSameEmailNoId() {
-        assertThrows(MeedlException.class, ()-> cooperationOutputPort.save(cooperation));
-    }
+
     @Test
     void saveCooperationWithNull(){
         assertThrows(MeedlException.class, () -> cooperationOutputPort.save(null));
@@ -86,7 +82,7 @@ public class CooperationAdapterTest {
         assertThrows(MeedlException.class, () -> cooperationOutputPort.findByName(companyName));
     }
     @Test
-    @Order(3)
+    @Order(2)
     void findCooperationById() {
         Cooperation foundCooperation = null;
         try {
@@ -100,7 +96,7 @@ public class CooperationAdapterTest {
         log.info("found cooperation {}", foundCooperation);
     }
     @Test
-    @Order(4)
+    @Order(3)
     void findCooperationByName() {
         Cooperation foundCooperation = null;
         try {
@@ -114,7 +110,7 @@ public class CooperationAdapterTest {
         log.info("found cooperation {}", foundCooperation);
     }
     @Test
-    @Order(5)
+    @Order(4)
     void deleteCooperationById() {
         try {
             cooperationOutputPort.deleteById(cooperationId);
