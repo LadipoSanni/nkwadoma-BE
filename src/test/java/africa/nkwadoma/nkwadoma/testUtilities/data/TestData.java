@@ -325,9 +325,10 @@ public class TestData {
                 .file(new File(absolutePath))
                 .build();
     }
-    public static Cooperation buildCooperation(String name){
+    public static Cooperation buildCooperation(String name,String emial){
         return Cooperation.builder()
                 .name(name)
+                .email(emial)
                 .build();
     }
 

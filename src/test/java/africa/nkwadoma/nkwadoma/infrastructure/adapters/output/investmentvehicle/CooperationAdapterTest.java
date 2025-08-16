@@ -30,7 +30,7 @@ public class CooperationAdapterTest {
     private final String email = "testemail@email.com";
     @BeforeAll
     void setUp() {
-        cooperation = TestData.buildCooperation("cooperation adapter test");
+        cooperation = TestData.buildCooperation("cooperation adapter test","cooperation@grr.la");
 
     }
     private UserIdentity saveTestUser(String email){
@@ -67,10 +67,16 @@ public class CooperationAdapterTest {
     void saveCooperationWithNull(){
         assertThrows(MeedlException.class, () -> cooperationOutputPort.save(null));
     }
+
+    @Test
+    void saveCooperationWithNullEmail(){
+        cooperation.setEmail(null);
+        assertThrows(MeedlException.class, () -> cooperationOutputPort.save(cooperation));
+    }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY})
     void saveCooperationWithInvalidName(String name){
-        Cooperation cooperation = TestData.buildCooperation(name);
+        Cooperation cooperation = TestData.buildCooperation(name,"cooperation@grr.la");
         assertThrows(MeedlException.class, () -> cooperationOutputPort.save(cooperation));
     }
 

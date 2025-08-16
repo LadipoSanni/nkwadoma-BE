@@ -38,4 +38,12 @@ public class CooperateFinancierAdapter implements CooperateFinancierOutputPort {
         MeedlValidator.validateUUID(id,"Cooperate financier id cannot br empty");
         cooperateFinancierRepository.deleteById(id);
     }
+
+    @Override
+    public CooperateFinancier findByFinancierId(String cooperateFinancierId) {
+
+        CooperateFinancierEntity cooperateFinancierEntity =
+                cooperateFinancierRepository.findByFinancierId(cooperateFinancierId);
+        return cooperateFinancierMapper.toCooperateFinancier(cooperateFinancierEntity);
+    }
 }

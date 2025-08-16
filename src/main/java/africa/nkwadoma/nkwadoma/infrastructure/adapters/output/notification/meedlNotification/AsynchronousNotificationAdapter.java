@@ -451,7 +451,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
             }else {
                 meedlNotification.setContentDetail("Request for an individual financier invitation ");
             }
-            log.info("done building notification for decline colleague invitation{}", meedlNotification);
+            log.info("done building notification for financier invitation colleague invitation{}", meedlNotification);
             try {
                 meedlNotificationUsecase.sendNotification(meedlNotification);
             } catch (MeedlException e) {

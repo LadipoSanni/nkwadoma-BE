@@ -86,7 +86,7 @@ class FinancierAdapterTest {
 
     private Cooperation saveCooperation(UserIdentity userIdentity) {
         log.info("Saved user identity for cooperation {}", userIdentity);
-        Cooperation cooperation = TestData.buildCooperation(TestUtils.generateName("FaradeTestCooperationAdapter", 5));
+        Cooperation cooperation = TestData.buildCooperation(TestUtils.generateName("FaradeTestCooperationAdapter", 5),"mail@grr.la");
 
         try {
             cooperation = cooperationOutputPort.save(cooperation);
