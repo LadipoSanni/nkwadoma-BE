@@ -7,4 +7,6 @@ public interface CooperationRepository extends JpaRepository<CooperationEntity, 
     CooperationEntity findByName(String email);
 
     boolean existsByName(String name);
+
+    CooperationEntity findByEmail(String email);
 }

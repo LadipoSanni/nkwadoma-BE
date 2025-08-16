@@ -47,7 +47,7 @@ public class FinancierController {
     private final InvestmentVehicleRestMapper investmentVehicleRestMapper;
 
     @PostMapping("financier/invite")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_SUPER_ADMIN')")
     public  ResponseEntity<ApiResponse<?>> inviteFinancierToVehicle(@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid
     InviteFinancierRequest inviteFinancierRequest) throws MeedlException {
         log.info("Inviting a financier with request {}", inviteFinancierRequest);
@@ -67,31 +67,16 @@ public class FinancierController {
         return financierRequests.stream().map(financierRequest ->{
             Financier financier = financierRestMapper.map(financierRequest);
             if (financierRequest.getFinancierType() == FinancierType.COOPERATE){
-                mapCooperateValues(financierRequest, financier);
+                financier = financierRestMapper.mapToCooperateFinancier(financierRequest);
             } else if (financierRequest.getFinancierType() == FinancierType.INDIVIDUAL) {
                 financier.setUserIdentity(financierRequest.getUserIdentity());
             }
-            if (financier.getUserIdentity() == null){
-                log.info("user identity is {}", financierRequest.getUserIdentity());
-                financier.setUserIdentity(UserIdentity.builder().build());
-            }
-
             financier.getUserIdentity().setCreatedBy(meedlUserId);
             financier.getUserIdentity().setCreatedAt(LocalDateTime.now());
             return financier;
         }).toList();
     }
 
-    private static void mapCooperateValues(FinancierRequest financierRequest, Financier financier) {
-        financier.setUserIdentity(UserIdentity.builder()
-                .email(financierRequest.getOrganizationEmail())
-                .createdAt(LocalDateTime.now())
-                .role(IdentityRole.FINANCIER)
-                .build());
-        financier.setCooperation(Cooperation.builder()
-                .name(financierRequest.getOrganizationName())
-                .build());
-    }
 
     @PostMapping("financier/complete-kyc")
     @PreAuthorize("hasRole('FINANCIER')")

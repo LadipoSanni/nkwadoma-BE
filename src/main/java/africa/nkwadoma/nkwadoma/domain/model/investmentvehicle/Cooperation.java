@@ -16,9 +16,11 @@ import lombok.extern.slf4j.Slf4j;
 public class Cooperation {
     private String id;
     private String name;
+    private String email;
 
     public void validate() throws MeedlException {
         log.info("Validating cooperation details...");
-        MeedlValidator.validateObjectName(this.name,"name cannot be empty","Cooperation");
+        MeedlValidator.validateObjectName(this.name,"name cannot be empty","Cooperation name");
+        MeedlValidator.validateObjectName(this.email,"email cannot be empty","Cooperation email");
     }
 }

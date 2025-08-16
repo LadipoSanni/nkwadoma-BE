@@ -60,4 +60,12 @@ public class CooperationAdapter implements CooperationOutputPort {
         CooperationEntity cooperationEntity = cooperationRepository.findByName(name);
         return cooperationMapper.toCooperation(cooperationEntity);
     }
+
+    @Override
+    public Cooperation findByEmail(String email) throws MeedlException {
+        MeedlValidator.validateEmail(email);
+        CooperationEntity cooperationEntity = cooperationRepository.findByEmail(email);
+
+        return cooperationMapper.toCooperation(cooperationEntity);
+    }
 }

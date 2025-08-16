@@ -74,4 +74,9 @@ public interface FinancierRestMapper {
     @Mapping(target = "userIdentity.id", source = "userId")
     @Mapping(target = "privacyPolicyAccepted", source = "privacyPolicyDecision")
     Financier map(String userId, boolean privacyPolicyDecision);
+
+
+    @Mapping(target = "cooperation.name", source = "organizationName")
+    @Mapping(target = "cooperation.email", source = "organizationEmail")
+    Financier mapToCooperateFinancier(FinancierRequest financierRequest);
 }
