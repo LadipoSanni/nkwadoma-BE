@@ -777,6 +777,22 @@ public class FinancierService implements FinancierUseCase {
     }
 
     @Override
+    public Cooperation updateCooperateProfile(String actorId, Cooperation cooperation) throws MeedlException {
+        UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
+        MeedlValidator.validateObjectInstance(cooperation,"Cooperation cannot be empty");
+        if (ObjectUtils.isNotEmpty(cooperationOutputPort.findByName(cooperation.getName()))){
+            throw new InvestmentException("Cooperation with name already exists");
+        }
+        //FIND by Mail
+        CooperateFinancier cooperateFinancier = cooperateFinancierOutputPort.findByUserId(userIdentity.getId());
+        financierMapper.updateCooperation(cooperateFinancier.getCooperate(),cooperation);
+        cooperationOutputPort.save(cooperation);
+        return cooperation;
+    }
+
+
+
+    @Override
     public Page<Financier> viewAllFinancierInvestment(String actorId, String finanacierId, int pageSize, int pageNumber) throws MeedlException {
         UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
         if (userIdentity.getRole().equals(IdentityRole.FINANCIER)){

@@ -37,5 +37,7 @@ public interface FinancierUseCase {
 
     String inviteColleagueFinancier(String actorID) throws MeedlException;
 
-    Cooperation viewCooperateFinancierDetail(String sub) throws MeedlException;
+    Cooperation viewCooperateFinancierDetail(String actorId) throws MeedlException;
+
+    Cooperation updateCooperateProfile(String actorId,Cooperation cooperation) throws MeedlException;
 }

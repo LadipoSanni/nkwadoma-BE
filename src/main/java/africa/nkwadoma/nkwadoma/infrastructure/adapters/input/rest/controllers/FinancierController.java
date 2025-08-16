@@ -11,6 +11,7 @@ import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentSummary;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.CooperationRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.InviteFinancierRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.KycRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.FinancierRequest;
@@ -337,4 +338,24 @@ public class FinancierController {
                 .build(),HttpStatus.OK);
 
     }
+
+
+    @GetMapping("update/cooperate/profile")
+    @PreAuthorize("hasRole('COOPERATE_FINANCIER_SUPER_ADMIN') or hasRole('COOPERATE_FINANCIER_ADMIN')")
+    public ResponseEntity<ApiResponse<?>> updateCooperationProfile(@AuthenticationPrincipal Jwt meedlUser ,
+                                                                   @RequestBody CooperationRequest cooperationRequest) throws MeedlException {
+
+        Cooperation cooperation = financierRestMapper.mapCooperationRequestToCooperation(cooperationRequest);
+        cooperation = financierUseCase.updateCooperateProfile(meedlUser.getClaimAsString("sub"),cooperation);
+        CooperationResponse cooperationResponse = financierRestMapper.mapToCooperationResponse(cooperation);
+
+        return new ResponseEntity<>(ApiResponse.builder()
+                .statusCode(HttpStatus.OK.toString())
+                .data(cooperationResponse)
+                .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage())
+                .build(),HttpStatus.OK);
+
+    }
+
+
 }
