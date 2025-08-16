@@ -90,6 +90,18 @@ public class CooperateFinancierAdapterTest {
     }
 
 
+    @Order(2)
+    @Test
+    void findCooperateFinancierByUserIdentityId() {
+        CooperateFinancier foundCooperateFinancier = null;
+        try {
+            foundCooperateFinancier = cooperateFinancierOutputPort.findByUserId(userIdentity.getId());
+        }catch (MeedlException e){
+            log.error(e.getMessage());
+        }
+        assertNotNull(foundCooperateFinancier);
+        assertEquals(foundCooperateFinancier.getId(), cooperateFinancierID);
+    }
 
     @AfterAll
     void tearDown() throws MeedlException {

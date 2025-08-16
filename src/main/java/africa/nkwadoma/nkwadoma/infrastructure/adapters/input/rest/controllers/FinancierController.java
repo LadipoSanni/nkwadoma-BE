@@ -322,4 +322,19 @@ public class FinancierController {
         return null;
     }
 
+
+    @GetMapping("view/cooperate/detail")
+    @PreAuthorize("hasRole('COOPERATE_FINANCIER_SUPER_ADMIN') or hasRole('COOPERATE_FINANCIER_ADMIN')")
+    public ResponseEntity<ApiResponse<?>> viewCooperationDetail(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
+
+        Cooperation cooperation = financierUseCase.viewCooperateFinancierDetail(meedlUser.getClaimAsString("sub"));
+        CooperationResponse cooperationResponse = financierRestMapper.mapToCooperationResponse(cooperation);
+
+        return new ResponseEntity<>(ApiResponse.builder()
+                .statusCode(HttpStatus.OK.toString())
+                .data(cooperationResponse)
+                .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage())
+                .build(),HttpStatus.OK);
+
+    }
 }

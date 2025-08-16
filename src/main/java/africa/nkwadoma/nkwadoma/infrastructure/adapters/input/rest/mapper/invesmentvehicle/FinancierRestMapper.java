@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.inves
 
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
+import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.Cooperation;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.KycRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.FinancierRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.*;
@@ -74,4 +75,6 @@ public interface FinancierRestMapper {
     @Mapping(target = "userIdentity.id", source = "userId")
     @Mapping(target = "privacyPolicyAccepted", source = "privacyPolicyDecision")
     Financier map(String userId, boolean privacyPolicyDecision);
+
+    CooperationResponse mapToCooperationResponse(Cooperation cooperation);
 }

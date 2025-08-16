@@ -76,6 +76,7 @@ public class FinancierService implements FinancierUseCase {
     private final InvestmentVehicleMapper investmentVehicleMapper;
     private final FinancierMapper financierMapper;
     private final PortfolioOutputPort portfolioOutputPort;
+    private final CooperateFinancierOutputPort cooperateFinancierOutputPort;
 
     @Override
     public String inviteFinancier(List<Financier> financiers, String investmentVehicleId) throws MeedlException {
@@ -766,6 +767,13 @@ public class FinancierService implements FinancierUseCase {
         MeedlValidator.validateUUID(actorID,UserMessages.INVALID_USER_ID.getMessage());
 
         return "";
+    }
+
+    @Override
+    public Cooperation viewCooperateFinancierDetail(String actorID) throws MeedlException {
+        UserIdentity userIdentity = userIdentityOutputPort.findById(actorID);
+        CooperateFinancier cooperateFinancier = cooperateFinancierOutputPort.findByUserId(userIdentity.getId());
+        return cooperateFinancier.getCooperate();
     }
 
     @Override
