@@ -21,6 +21,6 @@ public class Cooperation {
     public void validate() throws MeedlException {
         log.info("Validating cooperation details...");
         MeedlValidator.validateObjectName(this.name,"name cannot be empty","Cooperation name");
-        MeedlValidator.validateObjectName(this.email,"email cannot be empty","Cooperation email");
+        MeedlValidator.validateEmail(this.email);
     }
 }

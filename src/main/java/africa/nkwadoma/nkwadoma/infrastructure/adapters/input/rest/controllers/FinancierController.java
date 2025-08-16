@@ -47,7 +47,7 @@ public class FinancierController {
     private final InvestmentVehicleRestMapper investmentVehicleRestMapper;
 
     @PostMapping("financier/invite")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') ")
     public  ResponseEntity<ApiResponse<?>> inviteFinancierToVehicle(@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid
     InviteFinancierRequest inviteFinancierRequest) throws MeedlException {
         log.info("Inviting a financier with request {}", inviteFinancierRequest);

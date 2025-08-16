@@ -429,4 +429,11 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
         meedlNotificationUsecase.sendNotification(meedlNotification);
         log.info("notification sent ====---=-==---=-");
     }
+
+    @Override
+    public void sendFinancierInvitationNotificationToSuperAdmin(List<Financier> financiersToMail, InvestmentVehicle investmentVehicle, UserIdentity actor) {
+        financiersToMail.forEach(financier -> {
+
+        })
+    }
 }

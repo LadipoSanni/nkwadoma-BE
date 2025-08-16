@@ -40,8 +40,6 @@ public class FinancierEntity {
     private boolean declarationAndAgreement;
     private boolean politicallyExposed;
 
-    @OneToOne
-    private CooperationEntity cooperation;
     private BigDecimal totalAmountInvested;
     private LocalDateTime createdAt;
     private boolean privacyPolicyAccepted;

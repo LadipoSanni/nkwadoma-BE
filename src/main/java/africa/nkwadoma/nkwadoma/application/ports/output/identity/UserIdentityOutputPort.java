@@ -20,4 +20,6 @@ public interface UserIdentityOutputPort {
     List<UserIdentity> findAllByRole(IdentityRole identityRole) throws MeedlException;
 
     List<UserIdentity> findAllByRoles(List<IdentityRole> roles) throws MeedlException;
+
+    boolean checkIfUserExistByEmail(String email) throws MeedlException;
 }

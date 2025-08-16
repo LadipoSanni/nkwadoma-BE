@@ -113,6 +113,12 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
         return userEntities.stream().map(userIdentityMapper::toUserIdentity).toList();
     }
 
+    @Override
+    public boolean checkIfUserExistByEmail(String email) throws MeedlException {
+        validateEmail(email);
+        return userEntityRepository.existsByEmailIgnoreCase(email);
+    }
+
     private void validateRoles(List<IdentityRole> roles) throws MeedlException {
         MeedlValidator.validateCollection(roles, "Please provide a list of roles for search for.");
         roles.forEach(identityRole -> {

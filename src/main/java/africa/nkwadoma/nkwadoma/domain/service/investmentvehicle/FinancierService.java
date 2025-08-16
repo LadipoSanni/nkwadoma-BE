@@ -91,9 +91,13 @@ public class FinancierService implements FinancierUseCase {
         }else {
             response = inviteMultipleFinancier(financiers, investmentVehicle);
         }
-        asynchronousMailingOutputPort.sendFinancierEmail(financiersToMail, investmentVehicle);
-        asynchronousNotificationOutputPort.notifyPortfolioManagerOfNewFinancier(financiersToMail, investmentVehicle, actor);
-        updateNumberOfFinancierOnPortfolio(financiers);
+        if (actor.getRole().isMeedlSuperAdmin()) {
+            asynchronousMailingOutputPort.sendFinancierEmail(financiersToMail, investmentVehicle);
+            asynchronousNotificationOutputPort.notifyPortfolioManagerOfNewFinancier(financiersToMail, investmentVehicle, actor);
+            updateNumberOfFinancierOnPortfolio(financiers);
+        }else {
+            asynchronousNotificationOutputPort.sendFinancierInvitationNotificationToSuperAdmin(financiersToMail,investmentVehicle,actor);
+        }
         return response;
     }
     @Override
@@ -226,17 +230,19 @@ public class FinancierService implements FinancierUseCase {
         validateInput(financier);
 
         Cooperation cooperation = financier.getCooperation();
-        validateCooperationDoesNotExist(cooperation);
+        validateCooperationDoesNotExist(cooperation,financier.getUserIdentity().getEmail());
 
 
         Cooperation savedCooperation = saveCooperation(cooperation);
         UserIdentity savedUserIdentity = saveUserIdentity(financier.getUserIdentity());
 
-        Financier buildFinancier = buildFinancier(financier,savedUserIdentity);
+        UserIdentity actor = userIdentityOutputPort.findById(savedUserIdentity.getCreatedBy());
+
+        Financier buildFinancier = buildFinancier(financier,savedUserIdentity,actor);
 
         Financier savedFinancier = financierOutputPort.save(buildFinancier);
 
-        saveCooperateFinancier(savedCooperation, savedFinancier);
+        saveCooperateFinancier(savedCooperation, savedFinancier,actor);
 
         financiersToMail.add(savedFinancier);
         log.info("Financier with email {} added for email sending.", savedFinancier.getUserIdentity().getEmail());
@@ -244,27 +250,33 @@ public class FinancierService implements FinancierUseCase {
     }
 
 
-    private void saveCooperateFinancier(Cooperation cooperation, Financier financier) throws MeedlException {
+    private void saveCooperateFinancier(Cooperation cooperation, Financier financier,UserIdentity actor) throws MeedlException {
         CooperateFinancier cooperateFinancier = CooperateFinancier.builder()
                 .cooperate(cooperation)
                 .financier(financier)
-                .activationStatus(ActivationStatus.INVITED)
+                .activationStatus(actor.getRole().isMeedlSuperAdmin()
+                        ? ActivationStatus.INVITED
+                        : ActivationStatus.PENDING_APPROVAL)
                 .build();
 
         log.info("Saving cooperate financier representation: {}", cooperateFinancier);
         cooperateFinancierOutputPort.save(cooperateFinancier);
     }
 
-    private Financier buildFinancier(Financier financier, UserIdentity savedUserIdentity) {
+    private Financier buildFinancier(Financier financier, UserIdentity savedUserIdentity,UserIdentity actor) {
         financier.setUserIdentity(savedUserIdentity);
         financier.setCreatedAt(LocalDateTime.now());
         financier.setAccreditationStatus(AccreditationStatus.UNVERIFIED);
+        financier.setActivationStatus(actor.getRole().isMeedlSuperAdmin()
+                ? ActivationStatus.INVITED
+                : ActivationStatus.PENDING_APPROVAL);
         return financier;
     }
 
     private UserIdentity saveUserIdentity(UserIdentity userIdentity) throws MeedlException {
         log.info("Saving user identity for email: {}", userIdentity.getEmail());
         userIdentity.setRole(IdentityRole.COOPERATE_FINANCIER_SUPER_ADMIN);
+        userIdentity = identityManagerOutputPort.createUser(userIdentity);
         return userIdentityOutputPort.save(userIdentity);
     }
 
@@ -273,14 +285,14 @@ public class FinancierService implements FinancierUseCase {
         return cooperationOutputPort.save(cooperation);
     }
 
-    private void validateCooperationDoesNotExist(Cooperation cooperation) throws MeedlException {
+    private void validateCooperationDoesNotExist(Cooperation cooperation,String email) throws MeedlException {
         if (ObjectUtils.isNotEmpty(cooperationOutputPort.findByEmail(cooperation.getEmail()))) {
             throw new InvestmentException("Cooperation with email already exists");
         }
         if (ObjectUtils.isNotEmpty(cooperationOutputPort.findByName(cooperation.getName()))) {
             throw new InvestmentException("Cooperation with name already exists");
         }
-        if (ObjectUtils.isNotEmpty(userIdentityOutputPort.findById(cooperation.getEmail()))) {
+        if (userIdentityOutputPort.checkIfUserExistByEmail(email)) {
             throw new InvestmentException("User with email already exists");
         }
     }
