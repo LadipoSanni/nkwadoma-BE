@@ -33,6 +33,7 @@ import java.util.Set;
 @Builder
 public class Financier {
     private String id;
+    private String bankDetailId;
     private List<BeneficialOwner> beneficialOwners;
 
     private FinancierType financierType;

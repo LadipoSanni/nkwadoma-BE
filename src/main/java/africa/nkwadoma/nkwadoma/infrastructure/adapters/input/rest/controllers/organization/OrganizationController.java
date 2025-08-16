@@ -83,7 +83,7 @@ public class OrganizationController {
     @Operation(summary = "Search for organization(s) by similar or precise name")
      @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
              "or hasRole('MEEDL_ADMIN')" +
-             "or hasRole('MEEDL_ASSOCIATE')" +
+             "or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')" +
              "or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> searchOrganizationByName(
                                                                        @RequestParam(name = "name") String name,
@@ -141,7 +141,7 @@ public class OrganizationController {
     @GetMapping("organization/details")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
             "or hasRole('MEEDL_ADMIN')" +
-            "or hasRole('MEEDL_ASSOCIATE')" +
+            "or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')" +
             "or hasRole('ORGANIZATION_SUPER_ADMIN')" +
             "or hasRole('ORGANIZATION_ASSOCIATE')" +
             "or hasRole('ORGANIZATION_ADMIN')" +
@@ -211,7 +211,7 @@ public class OrganizationController {
     @Operation(summary = "View all Organizations", description = "Fetch all organizations ")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
             "or hasRole('MEEDL_ADMIN')" +
-            "or hasRole('MEEDL_ASSOCIATE')" +
+            "or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')" +
             "or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewAllOrganization(@RequestParam int pageNumber, @RequestParam int pageSize)
             throws MeedlException {
@@ -228,7 +228,7 @@ public class OrganizationController {
     @Operation(summary = "View all Organizations with status", description = "Fetch all organizations with status")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
             "or hasRole('MEEDL_ADMIN')" +
-            "or hasRole('MEEDL_ASSOCIATE')" +
+            "or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')" +
             "or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewAllOrganizationByStatus(@RequestParam int pageNumber, @RequestParam int pageSize, @RequestParam ActivationStatus status)
             throws MeedlException {

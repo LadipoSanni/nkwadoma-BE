@@ -335,7 +335,7 @@ public class LoaneeController {
 
 
     @GetMapping("all")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ASSOCIATE')" +
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')" +
                   "or hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('ORGANIZATION_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> viewAllLoanees( @AuthenticationPrincipal Jwt meedlUser,
                                                           @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
@@ -356,7 +356,7 @@ public class LoaneeController {
     }
 
     @GetMapping("all/search")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ASSOCIATE')" +
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')" +
                   "or hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('ORGANIZATION_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> searchAllLoanees(@AuthenticationPrincipal Jwt meedlUser,
                                                           @RequestParam(name = "name") String name,

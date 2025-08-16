@@ -60,7 +60,7 @@ public class OrganizationEmployeeController {
     @GetMapping("view/employee/details")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
             "or hasRole('MEEDL_ADMIN')" +
-            "or hasRole('MEEDL_ASSOCIATE')" +
+            "or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')" +
             "or hasRole('PORTFOLIO_MANAGER')" +
             "or hasRole('ORGANIZATION_SUPER_ADMIN')" +
             "or hasRole('ORGANIZATION_ADMIN')" +
@@ -87,7 +87,7 @@ public class OrganizationEmployeeController {
     @GetMapping("view-all/admin")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
             "or hasRole('MEEDL_ADMIN')" +
-            "or hasRole('MEEDL_ASSOCIATE')" +
+            "or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')" +
             "or hasRole('PORTFOLIO_MANAGER')" +
             "or hasRole('ORGANIZATION_SUPER_ADMIN')" +
             "or hasRole('ORGANIZATION_ADMIN')" +

@@ -42,7 +42,7 @@ public class WalletManagementController {
     @PreAuthorize(""" 
             hasRole('MEEDL_SUPER_ADMIN')
             or hasRole('MEEDL_ADMIN')
-            or hasRole('MEEDL_ASSOCIATE')
+            or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')
             or hasRole('PORTFOLIO_MANAGER')
             or hasRole('ORGANIZATION_SUPER_ADMIN')
             or hasRole('ORGANIZATION_ADMIN')

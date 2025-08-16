@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Slf4j
 @RequiredArgsConstructor
 @Component
@@ -37,5 +39,10 @@ public class CooperateFinancierAdapter implements CooperateFinancierOutputPort {
     public void delete(String id) throws MeedlException {
         MeedlValidator.validateUUID(id,"Cooperate financier id cannot br empty");
         cooperateFinancierRepository.deleteById(id);
+    }
+
+    @Override
+    public Optional<CooperateFinancier> findByUserId(String userId) {
+        return Optional.empty();
     }
 }
