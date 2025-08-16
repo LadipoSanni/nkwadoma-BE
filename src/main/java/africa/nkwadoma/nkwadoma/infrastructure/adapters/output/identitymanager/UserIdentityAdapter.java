@@ -119,6 +119,12 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
         return userEntityRepository.existsByEmailIgnoreCase(email);
     }
 
+    @Override
+    public UserIdentity findMeedlSuperAdmin() {
+        UserEntity userEntity = userEntityRepository.findByRole_MeedlSuperAdmin();
+        return userIdentityMapper.toUserIdentity(userEntity);
+    }
+
     private void validateRoles(List<IdentityRole> roles) throws MeedlException {
         MeedlValidator.validateCollection(roles, "Please provide a list of roles for search for.");
         roles.forEach(identityRole -> {

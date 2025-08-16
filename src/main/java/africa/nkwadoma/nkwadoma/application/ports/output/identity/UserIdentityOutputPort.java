@@ -22,4 +22,6 @@ public interface UserIdentityOutputPort {
     List<UserIdentity> findAllByRoles(List<IdentityRole> roles) throws MeedlException;
 
     boolean checkIfUserExistByEmail(String email) throws MeedlException;
+
+    UserIdentity findMeedlSuperAdmin();
 }

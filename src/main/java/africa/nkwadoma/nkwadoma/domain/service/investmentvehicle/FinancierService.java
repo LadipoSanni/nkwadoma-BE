@@ -96,7 +96,8 @@ public class FinancierService implements FinancierUseCase {
             asynchronousNotificationOutputPort.notifyPortfolioManagerOfNewFinancier(financiersToMail, investmentVehicle, actor);
             updateNumberOfFinancierOnPortfolio(financiers);
         }else {
-            asynchronousNotificationOutputPort.sendFinancierInvitationNotificationToSuperAdmin(financiersToMail,investmentVehicle,actor);
+            UserIdentity meedlSuperAdmin = userIdentityOutputPort.findMeedlSuperAdmin();
+            asynchronousNotificationOutputPort.sendFinancierInvitationNotificationToSuperAdmin(financiersToMail,actor,meedlSuperAdmin);
         }
         return response;
     }

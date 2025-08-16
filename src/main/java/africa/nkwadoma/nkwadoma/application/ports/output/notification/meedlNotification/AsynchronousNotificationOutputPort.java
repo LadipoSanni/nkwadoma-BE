@@ -66,5 +66,5 @@ public interface AsynchronousNotificationOutputPort {
                                           UserIdentity userIdentity,UserIdentity createdBy) throws MeedlException;
 
     @Async
-    void sendFinancierInvitationNotificationToSuperAdmin(List<Financier> financiersToMail, InvestmentVehicle investmentVehicle, UserIdentity actor);
+    void sendFinancierInvitationNotificationToSuperAdmin(List<Financier> financiersToMail, UserIdentity actor,UserIdentity meedlSuperAdmin) throws MeedlException;
 }

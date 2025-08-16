@@ -20,4 +20,6 @@ public interface UserEntityRepository extends JpaRepository<UserEntity, String> 
     @Query("SELECT u FROM UserEntity u WHERE u.role IN (:adminRoles)")
     List<UserEntity> findAllByRoles(List<IdentityRole> adminRoles);
 
+    @Query("select user from UserEntity  user where user.role = 'MEEDL_SUPER_ADMIN' ")
+    UserEntity findByRole_MeedlSuperAdmin();
 }

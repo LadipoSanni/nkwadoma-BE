@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
@@ -431,9 +432,31 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
     }
 
     @Override
-    public void sendFinancierInvitationNotificationToSuperAdmin(List<Financier> financiersToMail, InvestmentVehicle investmentVehicle, UserIdentity actor) {
-        financiersToMail.forEach(financier -> {
+    public void sendFinancierInvitationNotificationToSuperAdmin(List<Financier> financiersToMail, UserIdentity actor, UserIdentity meedlSuperAdmin) {
 
-        })
+        financiersToMail.forEach(financier -> {
+            MeedlNotification meedlNotification = MeedlNotification.builder()
+                    .title("Financier invitation")
+                    .contentId(financier.getId())
+                    .senderMail(actor.getEmail())
+                    .senderFullName(actor.getFirstName() +" "+ actor.getLastName())
+                    .notificationFlag(NotificationFlag.REQUESTING_APPROVAL_FINANCIER_INVITATION)
+                    .timestamp(LocalDateTime.now())
+                    .callToAction(true)
+                    .user(meedlSuperAdmin)
+                    .build();
+
+            if (financier.getFinancierType().equals(FinancierType.COOPERATE)){
+                meedlNotification.setContentDetail("Request for cooperation financier invitation ");
+            }else {
+                meedlNotification.setContentDetail("Request for an individual financier invitation ");
+            }
+            log.info("done building notification for decline colleague invitation{}", meedlNotification);
+            try {
+                meedlNotificationUsecase.sendNotification(meedlNotification);
+            } catch (MeedlException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 }
