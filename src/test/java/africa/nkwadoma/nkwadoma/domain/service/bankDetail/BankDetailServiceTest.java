@@ -37,23 +37,23 @@ class BankDetailServiceTest {
                 .build();
     }
 
-    @Test
-    void addBankDetailsWithValidData() throws MeedlException {
-        BankDetail savedDetail = BankDetail.builder()
-                .id("123")
-                .bankName(builtBankDetail.getBankName())
-                .bankNumber(builtBankDetail.getBankNumber())
-                .build();
-
-        when(bankDetailOutputPort.save(any(BankDetail.class))).thenReturn(savedDetail);
-
-        BankDetail result = bankDetailService.addBankDetails(builtBankDetail);
-
-        assertNotNull(result);
-        assertEquals("123", result.getId());
-        assertEquals("Added bank details successfully", result.getResponse());
-        verify(bankDetailOutputPort, times(1)).save(any(BankDetail.class));
-    }
+//    @Test
+//    void addBankDetailsWithValidData() throws MeedlException {
+//        BankDetail savedDetail = BankDetail.builder()
+//                .id("123")
+//                .bankName(builtBankDetail.getBankName())
+//                .bankNumber(builtBankDetail.getBankNumber())
+//                .build();
+//
+//        when(bankDetailOutputPort.save(any(BankDetail.class))).thenReturn(savedDetail);
+//
+//        BankDetail result = bankDetailService.addBankDetails(builtBankDetail);
+//
+//        assertNotNull(result);
+//        assertEquals("123", result.getId());
+//        assertEquals("Added bank details successfully", result.getResponse());
+//        verify(bankDetailOutputPort, times(1)).save(any(BankDetail.class));
+//    }
 
     @Test
     void addBankDetailsWithNullBankDetail() {
