@@ -3,13 +3,23 @@ BEGIN;
 ALTER TABLE cooperation_entity
     ADD COLUMN IF NOT EXISTS email VARCHAR(36);
 
+UPDATE cooperation_entity ce
+SET email = (SELECT mu.email
+             FROM financier_entity fe
+                      JOIN meedl_user mu ON mu.id = fe.user_identity_id
+             WHERE fe.cooperation_id = ce.id
+               AND fe.cooperation_id IS NOT NULL
+               AND mu.email IS NOT NULL
+             ORDER BY mu.email
+);
+
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 INSERT INTO cooperate_financier_entity (
      id,
-     cooperate,
-     financier,
+     cooperate_id,
+     financier_id,
      activation_status
 )
 SELECT
@@ -26,12 +36,12 @@ WHERE
 
 
 ALTER TABLE financier_entity
-    DROP COLUMN IF EXISTS cooperation_id
+    DROP COLUMN IF EXISTS cooperation_id;
 
 
 ALTER TABLE cooperate_financier_entity
-    ADD CONSTRAINT fk_cooperate FOREIGN KEY (cooperate) REFERENCES cooperation_entity(id),
-    ADD CONSTRAINT fk_financier FOREIGN KEY (financier) REFERENCES financier_entity(id);
+    ADD CONSTRAINT fk_cooperate FOREIGN KEY (cooperate_id) REFERENCES cooperation_entity(id),
+    ADD CONSTRAINT fk_financier FOREIGN KEY (financier_id) REFERENCES financier_entity(id);
 
 
  COMMIT;
