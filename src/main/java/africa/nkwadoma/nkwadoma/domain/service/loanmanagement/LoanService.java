@@ -336,7 +336,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     @Override
     public LoanDetailSummary viewLoanTotal(String actorId,String loaneeId) throws MeedlException {
-        MeedlValidator.validateUUID(actorId,UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
+        MeedlValidator.validateUUID(actorId,UserMessages.INVALID_USER_ID.getMessage());
         LoanDetailSummary loanDetailSummary = null;
         IdentityRole identityRole = userIdentityOutputPort.findById(actorId).getRole();
         if (identityRole.equals(IdentityRole.LOANEE)) {
@@ -393,7 +393,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     @Override
     public LoanReferral viewLoanReferral(String actorId, String loanReferralId) throws MeedlException {
-        MeedlValidator.validateUUID(actorId,UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
+        MeedlValidator.validateUUID(actorId,UserMessages.INVALID_USER_ID.getMessage());
         MeedlValidator.validateUUID(loanReferralId, LoanMessages.LOAN_REFERRAL_ID_MUST_NOT_BE_EMPTY.getMessage());
         UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
         LoanReferral loanReferral = loanReferralOutputPort.findLoanReferralById(loanReferralId)
@@ -415,7 +415,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     @Override
     public Page<LoanReferral> viewLoanReferralsForLoanee(String userId, int pageNumber, int pageSize) throws MeedlException {
-        MeedlValidator.validateUUID(userId, UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
+        MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
         Optional<Loanee> loanee = loaneeOutputPort.findByUserId(userId);
         String loaneeId = null;
         if (loanee.isPresent()) {

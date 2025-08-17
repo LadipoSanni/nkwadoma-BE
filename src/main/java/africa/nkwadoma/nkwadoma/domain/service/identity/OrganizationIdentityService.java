@@ -520,7 +520,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
 
     @Override
     public OrganizationIdentity viewOrganizationDetails(String organizationId, String userId) throws MeedlException {
-        MeedlValidator.validateUUID(userId, UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
+        MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
         log.info("Viewing organization detail for user with role {}", userIdentity.getRole());
         if(userIdentity.getRole().equals(ORGANIZATION_ADMIN)){

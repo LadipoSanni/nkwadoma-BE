@@ -117,7 +117,7 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
 
     @Override
     public Page<LoanOffer> findAllLoanOfferAssignedToLoanee(String id, int pageSize, int pageNumber) throws MeedlException {
-        MeedlValidator.validateUUID(id, UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
+        MeedlValidator.validateUUID(id, UserMessages.INVALID_USER_ID.getMessage());
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.asc("dateTimeOffered")));
 
         Page<LoanOfferProjection> loanOfferProjections =

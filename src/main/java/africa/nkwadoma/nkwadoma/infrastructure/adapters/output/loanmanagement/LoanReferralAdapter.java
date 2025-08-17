@@ -72,7 +72,7 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
 
     @Override
     public List<LoanReferral> findLoanReferralByUserId(String userId) throws MeedlException {
-        MeedlValidator.validateUUID(userId, UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
+        MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
         List<LoanReferralEntity> loanReferralEntities = loanReferralRepository.findAllByCohortLoanee_Loanee_UserIdentity_id(userId);
         return loanReferralMapper.toLoanReferrals(loanReferralEntities);
     }
@@ -114,7 +114,7 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
 
     @Override
     public Page<LoanReferral> findAllLoanReferralsForLoanee(String loaneeId, int pageNumber, int pageSize) throws MeedlException {
-        MeedlValidator.validateUUID(loaneeId, UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
+        MeedlValidator.validateUUID(loaneeId, UserMessages.INVALID_USER_ID.getMessage());
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
         Page<LoanReferralProjection> loanReferralEntities = loanReferralRepository.findAllLoanReferralsForLoanee(loaneeId, pageRequest);
         return loanReferralEntities.map(loanReferralMapper::mapProjectionToLoanReferralEntity);
@@ -122,7 +122,7 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
 
     @Override
     public List<LoanReferral> findAllLoanReferralsByUserIdAndStatus(String id, LoanReferralStatus loanReferralStatus) throws MeedlException {
-        MeedlValidator.validateUUID(id,UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
+        MeedlValidator.validateUUID(id,UserMessages.INVALID_USER_ID.getMessage());
         List<LoanReferralEntity> loanReferralEntities =
                 loanReferralRepository.findAllByCohortLoanee_Loanee_UserIdentity_idAndLoanReferralStatus(id,loanReferralStatus);
         return loanReferralEntities.stream().map(loanReferralMapper::toLoanReferral).collect(Collectors.toList());

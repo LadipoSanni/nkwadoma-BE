@@ -52,7 +52,7 @@ public class LoaneeLoanDetailPersistenceAdapter implements LoaneeLoanDetailsOutp
 
     @Override
     public LoanDetailSummary getLoaneeLoanSummary(String userId) throws MeedlException {
-        MeedlValidator.validateUUID(userId, UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
+        MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
         LoanSummaryProjection loanSummaryProjection = loaneeLoanDetailRepository.getLoanSummary(userId);
         return loaneeLoanDetailMapper.mapLoanSummaryProjectionToLOanSummary(loanSummaryProjection);
     }

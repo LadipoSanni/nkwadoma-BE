@@ -110,7 +110,7 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
 
     @Override
     public Page<InvestmentVehicleFinancier> findAllInvestmentVehicleFinancierInvestedIntoByUserId(String userId, int pageSize, int pageNumber) throws MeedlException {
-        MeedlValidator.validateUUID(userId, UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
+        MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
 
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("dateInvested").descending());
         Page<InvestmentVehicleFinancierEntity> investmentVehicleFinancierEntities =
@@ -120,7 +120,7 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
 
     @Override
     public Page<InvestmentVehicleFinancier> findAllInvestmentVehicleFinancierInvestedIntoByFinancierId(String finanacierId, int pageSize, int pageNumber) throws MeedlException {
-        MeedlValidator.validateUUID(finanacierId, UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
+        MeedlValidator.validateUUID(finanacierId, UserMessages.INVALID_USER_ID.getMessage());
 
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("dateInvested").descending());
         Page<InvestmentVehicleFinancierEntity> investmentVehicleFinancierEntities =
@@ -130,7 +130,7 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
 
     @Override
     public Page<InvestmentVehicleFinancier> searchFinancierInvestmentByInvestmentVehicleNameAndUserId(String investmentVehicleName, String userId, int pageSize, int pageNumber) throws MeedlException {
-        MeedlValidator.validateUUID(userId, UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
+        MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
 
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("dateInvested").descending());
         Page<InvestmentVehicleFinancierEntity> investmentVehicleFinancierEntities =
@@ -140,7 +140,7 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
 
     @Override
     public Page<InvestmentVehicleFinancier> searchFinancierInvestmentByInvestmentVehicleNameAndFinancierId(String investmentVehicleName, String financierId, int pageSize, int pageNumber) throws MeedlException {
-        MeedlValidator.validateUUID(financierId, UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
+        MeedlValidator.validateUUID(financierId, UserMessages.INVALID_USER_ID.getMessage());
 
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("dateInvested").descending());
         Page<InvestmentVehicleFinancierEntity> investmentVehicleFinancierEntities =

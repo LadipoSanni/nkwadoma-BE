@@ -106,7 +106,7 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
 
     @Override
     public Optional<Loanee> findByUserId(String userId) throws MeedlException {
-        MeedlValidator.validateUUID(userId, UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
+        MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
         Optional<LoaneeEntity> loaneeEntity = loaneeRepository.findLoaneeByUserIdentityId(userId);
         if (loaneeEntity.isEmpty()) {
             return Optional.empty();

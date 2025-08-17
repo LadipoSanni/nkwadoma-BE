@@ -103,7 +103,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     public  OrganizationIdentity findCreatorOrganization(String meedlUserId) throws MeedlException {
         MeedlValidator.validateUUID(meedlUserId, MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
         log.info("Validating the created by: {}",meedlUserId);
-        MeedlValidator.validateUUID(meedlUserId, UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
+        MeedlValidator.validateUUID(meedlUserId, UserMessages.INVALID_USER_ID.getMessage());
         OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.findByCreatedBy(meedlUserId);
         if (ObjectUtils.isEmpty(employeeIdentity)) {
             log.error("Unable to find employee performing this action on the data base. {}", MeedlMessages.INVALID_CREATED_BY_ID.getMessage());

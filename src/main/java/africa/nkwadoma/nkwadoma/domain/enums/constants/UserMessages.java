@@ -7,8 +7,8 @@ public enum UserMessages {
 
     INVALID_EMAIL("Email is invalid"),
     NULL_ACTOR_USER_IDENTITY("User performing this action is unknown."),
-    INVALID_USER_ID("Please provide a valid user identification."),
-    INVALID_ROLE_ASSIGNER_ID("Invalid id for user assigning role"),
+    INVALID_ROLE_ASSIGNER_ID("Please provide a valid user identification."),
+    INVALID_USER_ID("Invalid id for user assigning role"),
     INVALID_ROLE_ASSIGNEE_ID("Invalid id for user being assigned a new role"),
     INVALID_FIRST_NAME("User first name is required."),
     INVALID_LAST_NAME("User last name is required."),

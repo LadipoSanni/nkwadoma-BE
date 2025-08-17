@@ -132,7 +132,7 @@ public class LoanAdapter implements LoanOutputPort {
 
     @Override
     public Page<Loan> findAllLoanDisburedToLoanee(String id, int pageNumber, int pageSize) throws MeedlException {
-        MeedlValidator.validateUUID(id,UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
+        MeedlValidator.validateUUID(id,UserMessages.INVALID_USER_ID.getMessage());
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validatePageNumber(pageNumber);
         Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
@@ -170,7 +170,7 @@ public class LoanAdapter implements LoanOutputPort {
     public Page<Loan> searchLoanByOrganizationNameAndUserId(Loan loan, String id) throws MeedlException {
         MeedlValidator.validatePageSize(loan.getPageSize());
         MeedlValidator.validatePageNumber(loan.getPageNumber());
-        MeedlValidator.validateUUID(id, UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
+        MeedlValidator.validateUUID(id, UserMessages.INVALID_USER_ID.getMessage());
         Pageable pageRequest = PageRequest.of(loan.getPageNumber(),loan.getPageSize());
 
         Page<LoanProjection> loanProjection =

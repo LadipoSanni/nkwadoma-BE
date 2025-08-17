@@ -193,7 +193,7 @@ public class UserIdentityService implements UserUseCase {
     @Override
     public UserIdentity reactivateUserAccount(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
-        MeedlValidator.validateUUID(userIdentity.getId(), UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
+        MeedlValidator.validateUUID(userIdentity.getId(), UserMessages.INVALID_USER_ID.getMessage());
         MeedlValidator.validateDataElement(userIdentity.getReactivationReason(), "Reason for reactivation is required.");
         UserIdentity userToActivate = userIdentityOutputPort.findById(userIdentity.getId());
 
@@ -212,7 +212,7 @@ public class UserIdentityService implements UserUseCase {
     @Override
     public UserIdentity deactivateUserAccount(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
-        MeedlValidator.validateUUID(userIdentity.getId(), UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
+        MeedlValidator.validateUUID(userIdentity.getId(), UserMessages.INVALID_USER_ID.getMessage());
         MeedlValidator.validateDataElement(userIdentity.getDeactivationReason(), "Reason for deactivation required");
         log.info("About to find user to deactivate by id {}", userIdentity.getId());
         UserIdentity foundUserToDeactivate = userIdentityOutputPort.findById(userIdentity.getId());
@@ -317,7 +317,7 @@ public class UserIdentityService implements UserUseCase {
 
     @Override
     public UserIdentity viewUserDetail(UserIdentity userIdentity) throws MeedlException {
-        MeedlValidator.validateUUID(userIdentity.getId(), UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
+        MeedlValidator.validateUUID(userIdentity.getId(), UserMessages.INVALID_USER_ID.getMessage());
         log.info("Viewing user details");
         UserIdentity foundUser = userIdentityOutputPort.findById(userIdentity.getId());
         if (foundUser != null && StringUtils.isNotEmpty(foundUser.getAlternateEmail())){
