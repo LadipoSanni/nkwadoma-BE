@@ -197,7 +197,7 @@ public class CohortService implements CohortUseCase {
 
     @Override
     public Cohort viewCohortDetails(String userId,  String cohortId) throws MeedlException {
-        MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateUUID(userId, UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
         MeedlValidator.validateUUID(cohortId, CohortMessages.INVALID_COHORT_ID.getMessage());
         Cohort cohort = cohortOutputPort.findCohortById(cohortId);
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
@@ -287,7 +287,7 @@ public class CohortService implements CohortUseCase {
 
     @Override
     public Page<Cohort> searchForCohort(String userId, Cohort cohort) throws MeedlException {
-        MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateUUID(userId, UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
         if (userIdentity.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)){
             if (ObjectUtils.isEmpty(cohort.getProgramId())) {

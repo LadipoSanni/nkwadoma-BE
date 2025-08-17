@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.notification.SendColleagueEmailUseCase;
+import  africa.nkwadoma.nkwadoma.application.ports.input.notification.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
@@ -27,6 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -579,6 +580,105 @@ class UserIdentityServiceTest {
 
         assertEquals("Unable to determine MFA option selected", result);
         verify(userIdentityOutputPort, never()).save(any());
+    }
+
+
+
+
+
+    @Test
+    void superAdminAssignsValidMeedlRole() throws MeedlException {
+        UserIdentity superAdmin = new UserIdentity();
+        superAdmin.setId(UUID.randomUUID().toString());
+        superAdmin.setRole(IdentityRole.MEEDL_SUPER_ADMIN);
+
+        UserIdentity userToAssign = new UserIdentity();
+        userToAssign.setId(UUID.randomUUID().toString());
+        userToAssign.setRole(IdentityRole.MEEDL_ADMIN);
+        userToAssign.setCreatedBy(superAdmin.getId());
+
+        when(userIdentityOutputPort.findById(superAdmin.getId())).thenReturn(superAdmin);
+        when(userIdentityOutputPort.findById(userToAssign.getId())).thenReturn(userToAssign);
+        when(userIdentityOutputPort.save(any(UserIdentity.class))).thenReturn(userToAssign);
+
+        UserIdentity result = userIdentityService.assignRole(userToAssign);
+
+        assertNotNull(result);
+        assertEquals(IdentityRole.MEEDL_ADMIN, result.getRole());
+        verify(userIdentityOutputPort).save(userToAssign);
+    }
+
+    @Test
+    void superAdminAssignsInvalidMeedlRole() throws MeedlException {
+        UserIdentity superAdmin = new UserIdentity();
+        superAdmin.setId(UUID.randomUUID().toString());
+        superAdmin.setRole(IdentityRole.MEEDL_SUPER_ADMIN);
+
+        UserIdentity userToAssign = new UserIdentity();
+        userToAssign.setId(UUID.randomUUID().toString());
+        userToAssign.setRole(IdentityRole.ORGANIZATION_ADMIN);
+        userToAssign.setCreatedBy(superAdmin.getId());
+
+        when(userIdentityOutputPort.findById(superAdmin.getId())).thenReturn(superAdmin);
+        when(userIdentityOutputPort.findById(userToAssign.getId())).thenReturn(userToAssign);
+
+        assertThrows(MeedlException.class, () -> userIdentityService.assignRole(userToAssign));
+    }
+
+    @Test
+    void orgSuperAdminAssignsValidOrgRole() throws MeedlException {
+        UserIdentity orgSuperAdmin = new UserIdentity();
+        orgSuperAdmin.setId(UUID.randomUUID().toString());
+        orgSuperAdmin.setRole(IdentityRole.ORGANIZATION_SUPER_ADMIN);
+
+        UserIdentity userToAssign = new UserIdentity();
+        userToAssign.setId(UUID.randomUUID().toString());
+        userToAssign.setRole(IdentityRole.ORGANIZATION_ASSOCIATE);
+        userToAssign.setCreatedBy(orgSuperAdmin.getId());
+
+        when(userIdentityOutputPort.findById(orgSuperAdmin.getId())).thenReturn(orgSuperAdmin);
+        when(userIdentityOutputPort.findById(userToAssign.getId())).thenReturn(userToAssign);
+        when(userIdentityOutputPort.save(any(UserIdentity.class))).thenReturn(userToAssign);
+
+        UserIdentity result = userIdentityService.assignRole(userToAssign);
+
+        assertNotNull(result);
+        assertEquals(IdentityRole.ORGANIZATION_ASSOCIATE, result.getRole());
+        verify(userIdentityOutputPort).save(userToAssign);
+    }
+
+    @Test
+    void orgSuperAdminAssignsInvalidOrgRole() throws MeedlException {
+        UserIdentity orgSuperAdmin = new UserIdentity();
+        orgSuperAdmin.setId(UUID.randomUUID().toString());
+        orgSuperAdmin.setRole(IdentityRole.ORGANIZATION_SUPER_ADMIN);
+
+        UserIdentity userToAssign = new UserIdentity();
+        userToAssign.setId(UUID.randomUUID().toString());
+        userToAssign.setRole(IdentityRole.MEEDL_ADMIN);
+        userToAssign.setCreatedBy(orgSuperAdmin.getId());
+
+        when(userIdentityOutputPort.findById(orgSuperAdmin.getId())).thenReturn(orgSuperAdmin);
+        when(userIdentityOutputPort.findById(userToAssign.getId())).thenReturn(userToAssign);
+
+        assertThrows(MeedlException.class, () -> userIdentityService.assignRole(userToAssign));
+    }
+
+    @Test
+    void nonSuperAdminTriesAssignRole() throws MeedlException {
+        UserIdentity normalUser = new UserIdentity();
+        normalUser.setId(UUID.randomUUID().toString());
+        normalUser.setRole(IdentityRole.ORGANIZATION_ASSOCIATE);
+
+        UserIdentity userToAssign = new UserIdentity();
+        userToAssign.setId(UUID.randomUUID().toString());
+        userToAssign.setRole(IdentityRole.ORGANIZATION_ADMIN);
+        userToAssign.setCreatedBy(normalUser.getId());
+
+        when(userIdentityOutputPort.findById(normalUser.getId())).thenReturn(normalUser);
+        when(userIdentityOutputPort.findById(userToAssign.getId())).thenReturn(userToAssign);
+
+        assertThrows(MeedlException.class, () -> userIdentityService.assignRole(userToAssign));
     }
 
 }

@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages.INVALID_USER_ID;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages.INVALID_ROLE_ASSIGNER_ID;
 
 
 @RequiredArgsConstructor
@@ -88,7 +88,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
     @Override
     public UserIdentity updateUserData(UserIdentity userIdentity) throws MeedlException {
         validateUserIdentityDetails(userIdentity);
-        MeedlValidator.validateUUID(userIdentity.getId(), INVALID_USER_ID.getMessage());
+        MeedlValidator.validateUUID(userIdentity.getId(), INVALID_ROLE_ASSIGNER_ID.getMessage());
         log.info("Done validating user identity details in keycloak adapter for update : {}",userIdentity);
         UserRepresentation userRepresentation = mapper.map(userIdentity);
         UserIdentity foundUserIdentity = getUserById(userIdentity.getId());
@@ -374,13 +374,13 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
     }
     @Override
     public UserIdentity getUserById(String userId) throws MeedlException {
-        MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateUUID(userId, UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
         return mapper.mapUserRepresentationToUserIdentity(getUserRepresentationById(userId));
     }
 
 
     private UserRepresentation getUserRepresentationById(String userId) throws MeedlException {
-        MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateUUID(userId, UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
         UserResource userResource = keycloak
                 .realm(KEYCLOAK_REALM)
                 .users()
@@ -457,7 +457,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
     }
     public UserResource getUserResource(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
-        MeedlValidator.validateUUID(userIdentity.getId(), INVALID_USER_ID.getMessage());
+        MeedlValidator.validateUUID(userIdentity.getId(), INVALID_ROLE_ASSIGNER_ID.getMessage());
         return keycloak
                 .realm(KEYCLOAK_REALM)
                 .users()

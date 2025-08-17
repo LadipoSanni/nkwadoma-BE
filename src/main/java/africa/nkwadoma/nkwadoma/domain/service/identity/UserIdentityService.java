@@ -193,7 +193,7 @@ public class UserIdentityService implements UserUseCase {
     @Override
     public UserIdentity reactivateUserAccount(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
-        MeedlValidator.validateUUID(userIdentity.getId(), UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateUUID(userIdentity.getId(), UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
         MeedlValidator.validateDataElement(userIdentity.getReactivationReason(), "Reason for reactivation is required.");
         UserIdentity userToActivate = userIdentityOutputPort.findById(userIdentity.getId());
 
@@ -212,7 +212,7 @@ public class UserIdentityService implements UserUseCase {
     @Override
     public UserIdentity deactivateUserAccount(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
-        MeedlValidator.validateUUID(userIdentity.getId(), UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateUUID(userIdentity.getId(), UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
         MeedlValidator.validateDataElement(userIdentity.getDeactivationReason(), "Reason for deactivation required");
         log.info("About to find user to deactivate by id {}", userIdentity.getId());
         UserIdentity foundUserToDeactivate = userIdentityOutputPort.findById(userIdentity.getId());
@@ -317,7 +317,7 @@ public class UserIdentityService implements UserUseCase {
 
     @Override
     public UserIdentity viewUserDetail(UserIdentity userIdentity) throws MeedlException {
-        MeedlValidator.validateUUID(userIdentity.getId(), UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateUUID(userIdentity.getId(), UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
         log.info("Viewing user details");
         UserIdentity foundUser = userIdentityOutputPort.findById(userIdentity.getId());
         if (foundUser != null && StringUtils.isNotEmpty(foundUser.getAlternateEmail())){
@@ -349,6 +349,33 @@ public class UserIdentityService implements UserUseCase {
         }
         log.warn("Unable to determine MFA option selected by user with email {}", foundUser.getEmail());
         return "Unable to determine MFA option selected";
+    }
+
+    @Override
+    public UserIdentity assignRole(UserIdentity userIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(userIdentity, UserMessages.USER_IDENTITY_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateUUID(userIdentity.getCreatedBy(), UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
+        MeedlValidator.validateUUID(userIdentity.getId(), UserMessages.INVALID_ROLE_ASSIGNEE_ID.getMessage());
+
+        UserIdentity superAdmin = userIdentityOutputPort.findById(userIdentity.getCreatedBy());
+        UserIdentity foundUserToAssign = userIdentityOutputPort.findById(userIdentity.getId());
+
+        if (IdentityRole.MEEDL_SUPER_ADMIN.equals(superAdmin.getRole())){
+            if (!IdentityRole.isAssignableMeedlRole(userIdentity.getRole())){
+                log.error("User with id {} and role {} attempts to assign a non meedl role {} to user with id {}", superAdmin.getId(), superAdmin.getRole(), userIdentity.getRole(), userIdentity.getId());
+                throw new MeedlException("You are not allowed to assign a non Meedl role an employee");
+            }
+        }else if (IdentityRole.ORGANIZATION_SUPER_ADMIN.equals(superAdmin.getRole())){
+            if (!IdentityRole.isAssignableOrganizationRole(userIdentity.getRole())){
+                log.error("User with id {} and role {} attempts to assign a non organizational role {} to user with id {}", superAdmin.getId(), superAdmin.getRole(), userIdentity.getRole(), userIdentity.getId());
+                throw new MeedlException("You are not allowed to assign a non Orgainzation role an employee");
+            }
+        }else {
+            log.error("User with id {} and role {} attempts to assign role {} to user with id {}", superAdmin.getId(), superAdmin.getRole(), userIdentity.getRole(), userIdentity.getId());
+            throw new MeedlException("You are not authorized to assign a role");
+        }
+        foundUserToAssign.setRole(userIdentity.getRole());
+        return userIdentityOutputPort.save(userIdentity);
     }
 
     private String enableEmailMFA(UserIdentity foundUser) throws MeedlException {

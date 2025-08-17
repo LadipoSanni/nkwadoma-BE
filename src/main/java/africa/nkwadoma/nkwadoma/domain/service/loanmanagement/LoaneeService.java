@@ -666,7 +666,7 @@ public class LoaneeService implements LoaneeUseCase {
 
     @Override
     public String indicateDeferredLoanee(String actorId, String loaneeId) throws MeedlException {
-        MeedlValidator.validateUUID(actorId,UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateUUID(actorId,UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
         MeedlValidator.validateUUID(loaneeId,LoaneeMessages.INVALID_LOANEE_ID.getMessage());
 
         UserIdentity userIdentity = identityOutputPort.findById(actorId);
@@ -748,7 +748,7 @@ public class LoaneeService implements LoaneeUseCase {
 
     @Override
     public String indicateDropOutLoanee(String userId, String loanId) throws MeedlException {
-        MeedlValidator.validateUUID(userId,UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateUUID(userId,UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
         MeedlValidator.validateUUID(loanId, LoanMessages.INVALID_LOAN_ID.getMessage());
 
         UserIdentity userIdentity = identityOutputPort.findById(userId);
@@ -849,7 +849,7 @@ public class LoaneeService implements LoaneeUseCase {
             throw new MeedlException(LoaneeMessages.LOANEES_ID_CANNOT_BE_EMPTY.getMessage());
         }
         for (String loaneeId : loaneeIds) {
-            MeedlValidator.validateUUID(loaneeId,UserMessages.INVALID_USER_ID.getMessage());
+            MeedlValidator.validateUUID(loaneeId,UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
         }
         cohortLoaneeOutputPort.archiveOrUnArchiveByIds(cohortId,loaneeIds,loaneeStatus);
         if (loaneeIds.size() == 1) {

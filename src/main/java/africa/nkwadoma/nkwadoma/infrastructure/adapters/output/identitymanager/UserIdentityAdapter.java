@@ -47,7 +47,7 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
 
     @Override
     public UserIdentity findById(String id) throws MeedlException {
-        MeedlValidator.validateUUID(id, UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateUUID(id, UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
         log.info("Find user in the adapter with id {}", id);
         UserEntity userEntity = userEntityRepository.findById(id).orElseThrow(() -> new IdentityException(IdentityMessages.USER_NOT_FOUND.getMessage()));
         log.info("UserEntity found by id before mapping : {}", userEntity);
@@ -58,7 +58,7 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
 
     @Override
     public void deleteUserById(String id) throws MeedlException {
-        MeedlValidator.validateUUID(id, UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateUUID(id, UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
         log.info("Deleting user {}", id);
         employeeIdentityOutputPort.deleteEmployee(id);
         UserEntity userEntity = null;

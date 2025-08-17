@@ -61,7 +61,7 @@ public class LoanOffer {
     }
 
     public void validateForAcceptOffer() throws MeedlException {
-        MeedlValidator.validateUUID(userId,  UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateUUID(userId,  UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
         MeedlValidator.validateUUID(id,"Loan offer id is invalid.");
     }
 }

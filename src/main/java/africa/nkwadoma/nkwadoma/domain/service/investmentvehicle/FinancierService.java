@@ -98,7 +98,7 @@ public class FinancierService implements FinancierUseCase {
     @Override
     public String makePrivacyPolicyDecision(Financier financier) throws MeedlException {
         MeedlValidator.validateObjectInstance(financier, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
-        MeedlValidator.validateUUID(financier.getUserIdentity().getId(), UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateUUID(financier.getUserIdentity().getId(), UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
 
         Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getUserIdentity().getId());
         foundFinancier.setPrivacyPolicyAccepted(financier.isPrivacyPolicyAccepted());
@@ -763,7 +763,7 @@ public class FinancierService implements FinancierUseCase {
 
     @Override
     public String inviteColleagueFinancier(String actorID) throws MeedlException {
-        MeedlValidator.validateUUID(actorID,UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateUUID(actorID,UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
 
         return "";
     }
