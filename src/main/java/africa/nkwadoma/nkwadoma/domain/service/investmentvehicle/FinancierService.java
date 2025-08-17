@@ -15,13 +15,11 @@ import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicleVisibility;
+import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.InvestmentException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.*;
@@ -72,6 +70,7 @@ public class FinancierService implements FinancierUseCase {
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
     private final PoliticallyExposedPersonOutputPort politicallyExposedPersonOutputPort;
     private final FinancierPoliticallyExposedPersonOutputPort financierPoliticallyExposedPersonOutputPort;
+    private final CooperateFinancierOutputPort cooperateFinancierOutputPort;
     private List<Financier> financiersToMail;
     private final InvestmentVehicleMapper investmentVehicleMapper;
     private final FinancierMapper financierMapper;
@@ -766,6 +765,40 @@ public class FinancierService implements FinancierUseCase {
         MeedlValidator.validateUUID(actorID,UserMessages.INVALID_USER_ID.getMessage());
 
         return "";
+    }
+
+    @Override
+    public String respondToColleageInvitation(String actorId, String cooperateFinancierId, ActivationStatus activationStatus) throws MeedlException {
+        MeedlValidator.validateUUID(cooperateFinancierId,"Financier id cannot be empty ");
+        MeedlValidator.validateObjectInstance(activationStatus,"Activation status cannot be null");
+        decisionMustEitherBeApprovedOrDeclined(activationStatus);
+
+        UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
+        CooperateFinancier cooperateFinancier = cooperateFinancierOutputPort.findById(cooperateFinancierId);
+        UserIdentity financierCreator = userIdentityOutputPort.findById(cooperateFinancier.getFinancier().getUserIdentity().getCreatedBy());
+        if (cooperateFinancier.getActivationStatus().equals(ActivationStatus.ACTIVE)){
+            throw new InvestmentException("Cannot respond to active colleague invitation");
+        }
+
+        if (activationStatus.equals(ActivationStatus.APPROVED)){
+            cooperateFinancier.setActivationStatus(ActivationStatus.INVITED);
+            asynchronousMailingOutputPort.sendColleagueEmail(cooperateFinancier.getCooperate().getName(),
+                    cooperateFinancier.getFinancier().getUserIdentity());
+            asynchronousNotificationOutputPort.notifyInviterForColleagueInvitationApproval(userIdentity,financierCreator,cooperateFinancier);
+            cooperateFinancierOutputPort.save(cooperateFinancier);
+            return "colleague invitation successful after approval";
+        }else {
+            cooperateFinancier.setActivationStatus(ActivationStatus.DECLINED);
+            asynchronousNotificationOutputPort.notifyInviterForColleagueInvitationDeclined(userIdentity,financierCreator,cooperateFinancier);
+            cooperateFinancierOutputPort.save(cooperateFinancier);
+            return "colleague invitation un-successful after request being decline";
+        }
+    }
+
+    private void decisionMustEitherBeApprovedOrDeclined(ActivationStatus activationStatus) throws africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException {
+        if (! activationStatus.equals(ActivationStatus.APPROVED) && !activationStatus.equals(ActivationStatus.DECLINED)) {
+            throw new IdentityException(OrganizationMessages.DECISION_CAN_EITHER_BE_APPROVED_OR_DECLINED.getMessage());
+        }
     }
 
     @Override

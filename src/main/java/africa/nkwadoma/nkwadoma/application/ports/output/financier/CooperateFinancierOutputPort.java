@@ -7,4 +7,6 @@ public interface CooperateFinancierOutputPort {
     CooperateFinancier save(CooperateFinancier cooperateFinancier) throws MeedlException;
 
     void delete(String id) throws MeedlException;
+
+    CooperateFinancier findById(String cooperateFinancierId) throws MeedlException;
 }
