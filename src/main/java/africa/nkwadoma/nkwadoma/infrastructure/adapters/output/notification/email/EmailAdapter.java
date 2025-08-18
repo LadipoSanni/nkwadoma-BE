@@ -19,7 +19,7 @@ import org.thymeleaf.context.Context;
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages.*;
 
 
 @RequiredArgsConstructor

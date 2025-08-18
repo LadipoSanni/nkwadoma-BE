@@ -12,8 +12,8 @@ import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.Emai
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages.*;
 
 @Slf4j
 @EnableAsync
@@ -264,7 +264,7 @@ public class UserIdentityService implements UserUseCase {
                     activationStatus,
                     foundActor,
                     userToDeactivate,
-                    Set.of(IdentityRole.PORTFOLIO_MANAGER, IdentityRole.MEEDL_ASSOCIATE)
+                    Set.of(IdentityRole.PORTFOLIO_MANAGER, IdentityRole.PORTFOLIO_MANAGER_ASSOCIATE)
             );
         }
     }
@@ -349,6 +349,33 @@ public class UserIdentityService implements UserUseCase {
         }
         log.warn("Unable to determine MFA option selected by user with email {}", foundUser.getEmail());
         return "Unable to determine MFA option selected";
+    }
+
+    @Override
+    public UserIdentity assignRole(UserIdentity userIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(userIdentity, UserMessages.USER_IDENTITY_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateUUID(userIdentity.getCreatedBy(), UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());
+        MeedlValidator.validateUUID(userIdentity.getId(), UserMessages.INVALID_ROLE_ASSIGNEE_ID.getMessage());
+
+        UserIdentity superAdmin = userIdentityOutputPort.findById(userIdentity.getCreatedBy());
+        UserIdentity foundUserToAssign = userIdentityOutputPort.findById(userIdentity.getId());
+
+        if (IdentityRole.MEEDL_SUPER_ADMIN.equals(superAdmin.getRole())){
+            if (!IdentityRole.isAssignableMeedlRole(userIdentity.getRole())){
+                log.error("User with id {} and role {} attempts to assign a non meedl role {} to user with id {}", superAdmin.getId(), superAdmin.getRole(), userIdentity.getRole(), userIdentity.getId());
+                throw new MeedlException("You are not allowed to assign a non Meedl role an employee");
+            }
+        }else if (IdentityRole.ORGANIZATION_SUPER_ADMIN.equals(superAdmin.getRole())){
+            if (!IdentityRole.isAssignableOrganizationRole(userIdentity.getRole())){
+                log.error("User with id {} and role {} attempts to assign a non organizational role {} to user with id {}", superAdmin.getId(), superAdmin.getRole(), userIdentity.getRole(), userIdentity.getId());
+                throw new MeedlException("You are not allowed to assign a non Orgainzation role an employee");
+            }
+        }else {
+            log.error("User with id {} and role {} attempts to assign role {} to user with id {}", superAdmin.getId(), superAdmin.getRole(), userIdentity.getRole(), userIdentity.getId());
+            throw new MeedlException("You are not authorized to assign a role");
+        }
+        foundUserToAssign.setRole(userIdentity.getRole());
+        return userIdentityOutputPort.save(userIdentity);
     }
 
     private String enableEmailMFA(UserIdentity foundUser) throws MeedlException {

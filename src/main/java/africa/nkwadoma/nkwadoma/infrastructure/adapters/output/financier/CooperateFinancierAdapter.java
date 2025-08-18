@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.financier;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.CooperateFinancierOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.CooperateFinancier;
@@ -37,6 +38,15 @@ public class CooperateFinancierAdapter implements CooperateFinancierOutputPort {
     public void delete(String id) throws MeedlException {
         MeedlValidator.validateUUID(id,"Cooperate financier id cannot br empty");
         cooperateFinancierRepository.deleteById(id);
+    }
+
+    public CooperateFinancier findByUserId(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id, UserMessages.INVALID_USER_ID.getMessage());
+
+        CooperateFinancierEntity cooperateFinancierEntity =
+                cooperateFinancierRepository.findByFinancier_UserIdentityId(id);
+
+        return cooperateFinancierMapper.toCooperateFinancier(cooperateFinancierEntity);
     }
 
     @Override

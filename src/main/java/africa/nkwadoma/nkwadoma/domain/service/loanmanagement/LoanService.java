@@ -10,6 +10,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.*;
@@ -336,7 +337,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     @Override
     public LoanDetailSummary viewLoanTotal(String actorId,String loaneeId) throws MeedlException {
-        MeedlValidator.validateUUID(actorId,UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateUUID(actorId, UserMessages.INVALID_USER_ID.getMessage());
         LoanDetailSummary loanDetailSummary = null;
         IdentityRole identityRole = userIdentityOutputPort.findById(actorId).getRole();
         if (identityRole.equals(IdentityRole.LOANEE)) {
