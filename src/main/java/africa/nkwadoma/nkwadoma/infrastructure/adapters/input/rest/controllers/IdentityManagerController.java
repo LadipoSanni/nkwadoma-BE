@@ -167,6 +167,7 @@ public class IdentityManagerController {
                 data(createdUserIdentity).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
     }
+
     @PostMapping("auth/user/deactivate")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
             "or hasRole('MEEDL_ADMIN')" +
@@ -185,6 +186,23 @@ public class IdentityManagerController {
         return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
                 data(createdUserIdentity).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
+    }
+    @PostMapping("auth/user/assign/role")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " + "or hasRole('ORGANIZATION_SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<?>> assignRole(@AuthenticationPrincipal Jwt meedlUser,
+                                                         @RequestParam String userId,
+                                                         @RequestParam IdentityRole identityRole) throws MeedlException {
+        UserIdentity userIdentity = UserIdentity.builder()
+                .id(userId)
+                .role(identityRole)
+                .createdBy(meedlUser.getClaimAsString("sub"))
+                .build();
+        log.info("The user id {} of user assigning role to user with id : {}",meedlUser.getClaimAsString("sub"), userId);
+        UserIdentity createdUserIdentity = userUseCase.assignRole(userIdentity);
+        return ResponseEntity.ok(ApiResponse.<UserIdentity>builder()
+                .data(createdUserIdentity)
+                .message(ControllerConstant.ROLE_ASSIGNED_SUCCESSFULLY.getMessage())
+                .statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("auth/password/change")
     public ResponseEntity<ApiResponse<?>> changePassword(@AuthenticationPrincipal Jwt meedlUser,

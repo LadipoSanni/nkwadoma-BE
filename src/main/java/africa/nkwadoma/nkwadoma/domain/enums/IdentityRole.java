@@ -66,6 +66,13 @@ public enum IdentityRole {
     public static boolean isCooperateFinancier(IdentityRole role) {
         return getCooperateFinancierRoles().contains(role);
     }
+    public static boolean isAssignableMeedlRole(IdentityRole role) {
+        return Set.of(MEEDL_ADMIN, PORTFOLIO_MANAGER_ASSOCIATE, PORTFOLIO_MANAGER).contains(role);
+    }
+
+    public static boolean isAssignableOrganizationRole(IdentityRole role) {
+        return Set.of(ORGANIZATION_ADMIN, ORGANIZATION_ASSOCIATE).contains(role);
+    }
 
 
     public boolean isMeedlRole() {
