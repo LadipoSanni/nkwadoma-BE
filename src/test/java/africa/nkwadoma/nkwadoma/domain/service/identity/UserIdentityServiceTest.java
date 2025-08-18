@@ -4,6 +4,7 @@ import  africa.nkwadoma.nkwadoma.application.ports.input.notification.SendCollea
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.MFAType;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -491,54 +492,34 @@ class UserIdentityServiceTest {
 
 
 
-
-    @Test
-    @DisplayName("Should throw exception when MFA is enabled and disabled at same time")
-    void manageMFAWithConflictingFlags() {
-        favour.setEnablePhoneNumberMFA(true);
-        favour.setDisableMFA(true);
-
-        MeedlException exception = assertThrows(MeedlException.class,
-                () -> userIdentityService.manageMFA(favour));
-
-        assertEquals("MFA cannot be disabled and enabled at the same time", exception.getMessage());
-    }
-
     @Test
     @DisplayName("Should disable MFA when disableMFA flag is set")
     void disableMFA() throws MeedlException {
-        favour.setDisableMFA(true);
+        favour.setMfaType(MFAType.MFA_DISABLED);
         when(userIdentityOutputPort.findById(favour.getId())).thenReturn(favour);
 
         String result = userIdentityService.manageMFA(favour);
 
         assertEquals("MFA disabled", result);
         verify(userIdentityOutputPort).save(favour);
-        assertFalse(favour.isMFAEnabled());
-        assertFalse(favour.isEnableEmailMFA());
-        assertFalse(favour.isEnablePhoneNumberMFA());
     }
 
     @Test
     @DisplayName("Should enable Email MFA when enableEmailMFA flag is set")
     void enableEmailMFA() throws MeedlException {
-        favour.setEnableEmailMFA(true);
+        favour.setMfaType(MFAType.EMAIL_MFA);
         when(userIdentityOutputPort.findById(favour.getId())).thenReturn(favour);
 
         String result = userIdentityService.manageMFA(favour);
 
         assertEquals("Email MFA enabled successfully", result);
         verify(userIdentityOutputPort).save(favour);
-        assertTrue(favour.isMFAEnabled());
-        assertTrue(favour.isEnableEmailMFA());
-        assertFalse(favour.isEnablePhoneNumberMFA());
     }
 
     @Test
     @DisplayName("Should enable Phone Number MFA when flag is set and new number provided")
     void enablePhoneNumberMFAWithNewNumber() throws MeedlException {
-        favour.setEnablePhoneNumberMFA(true);
-        favour.setDisableMFA(Boolean.FALSE);
+        favour.setMfaType(MFAType.PHONE_NUMBER_MFA);
         favour.setMFAPhoneNumber("08012345678");
         when(userIdentityOutputPort.findById(favour.getId())).thenReturn(favour);
 
@@ -546,9 +527,6 @@ class UserIdentityServiceTest {
 
         assertEquals("Phone number MFA enabled successfully", result);
         verify(userIdentityOutputPort).save(favour);
-        assertTrue(favour.isMFAEnabled());
-        assertFalse(favour.isEnableEmailMFA());
-        assertTrue(favour.isEnablePhoneNumberMFA());
     }
 
     @Test
@@ -557,7 +535,7 @@ class UserIdentityServiceTest {
         UserIdentity foundUser = new UserIdentity();
         foundUser.setId(favour.getId());
         foundUser.setMFAPhoneNumber("08012345678");
-        favour.setEnablePhoneNumberMFA(true);
+        favour.setMfaType(MFAType.PHONE_NUMBER_MFA);
 
         when(userIdentityOutputPort.findById(favour.getId())).thenReturn(foundUser);
         favour.setMFAPhoneNumber("");
@@ -566,9 +544,6 @@ class UserIdentityServiceTest {
 
         assertEquals("Phone number MFA enabled successfully", result);
         verify(userIdentityOutputPort).save(foundUser);
-        assertTrue(foundUser.isMFAEnabled());
-        assertFalse(foundUser.isEnableEmailMFA());
-        assertTrue(foundUser.isEnablePhoneNumberMFA());
     }
 
     @Test

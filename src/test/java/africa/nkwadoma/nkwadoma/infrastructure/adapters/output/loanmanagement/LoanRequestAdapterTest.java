@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
-class LoanRequestAdapterTest {
+public class LoanRequestAdapterTest {
 
     // Todo Coming back to right test
 

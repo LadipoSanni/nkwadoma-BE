@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity;
 
+import africa.nkwadoma.nkwadoma.domain.enums.identity.MFAType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -8,8 +9,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class MFARequest {
-    private String MFAPhoneNumber;
-    private boolean enablePhoneNumberMFA;
-    private boolean enableEmailMFA;
-    private boolean disableMFA;
+    private String mfaPhoneNumber;
+    private MFAType mfaType;
 }
