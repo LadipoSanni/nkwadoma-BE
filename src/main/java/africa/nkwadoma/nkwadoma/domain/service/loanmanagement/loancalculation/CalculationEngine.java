@@ -612,7 +612,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
 
     private void validateInterestRate(int interestRate, String name) throws MeedlException {
         if (interestRate < 0) {
-            log.error("{} must not be negative. In validate interest rate.", name);
+            log.error("{} must not be negative.  In validate interest rate.", name);
             throw new MeedlException(name + " must not be negative.");
         }
         if (interestRate > 100) {

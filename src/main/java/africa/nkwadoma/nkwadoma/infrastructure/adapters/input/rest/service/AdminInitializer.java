@@ -204,7 +204,7 @@ public class AdminInitializer {
         OrganizationIdentity organizationIdentity = createFirstOrganizationIdentity(getOrganizationIdentity(userIdentity));
         loanMetricsUseCase.correctLoanRequestCount();
         Portfolio portfolio = createMeedlPortfolio(getPortfolio());
-        log.info("Meedl portfolio process done-- {}", portfolio);
+        log.info("Meedl portfolio process done -- {} ", portfolio);
         calculationEngineUseCase.scheduleDailyInterestCalculation();
         calculationEngineUseCase.scheduleMonthlyInterestCalculation();
     }

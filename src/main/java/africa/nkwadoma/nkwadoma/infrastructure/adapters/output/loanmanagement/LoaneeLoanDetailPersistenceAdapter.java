@@ -46,7 +46,7 @@ public class LoaneeLoanDetailPersistenceAdapter implements LoaneeLoanDetailsOutp
     public LoaneeLoanDetail findByCohortLoaneeId(String cohortLoaneeId) throws MeedlException {
         MeedlValidator.validateUUID(cohortLoaneeId, CohortMessages.COHORT_LOANEE_ID_CANNOT_BE_EMPTY.getMessage());
         LoaneeLoanDetailEntity loaneeLoanDetailEntity = loaneeLoanDetailRepository.findByCohortLoaneeId(cohortLoaneeId);
-        log.info("Found loaneeLoanDetailEntity: {}", loaneeLoanDetailEntity);
+        log.info("Found loanee Loan Detail Entity: {}", loaneeLoanDetailEntity);
         return loaneeLoanDetailMapper.toLoaneeLoanDetails(loaneeLoanDetailEntity);
     }
 
