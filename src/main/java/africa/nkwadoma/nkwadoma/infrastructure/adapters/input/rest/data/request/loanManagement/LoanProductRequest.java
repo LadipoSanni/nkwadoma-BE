@@ -1,6 +1,5 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement;
 
-import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlPatterns;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ErrorMessages;
