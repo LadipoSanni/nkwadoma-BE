@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -26,4 +27,6 @@ public class CalculationContext {
     private List<RepaymentHistory> repaymentHistories;
     private BigDecimal previousTotalAmountPaid = BigDecimal.ZERO;
     private BigDecimal previousTotalInterestIncurred = BigDecimal.ZERO;
+    private RepaymentHistory repaymentHistory;
+    private LocalDateTime lastDate;
 }
