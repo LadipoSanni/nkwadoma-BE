@@ -13,13 +13,13 @@ SET email = (SELECT mu.email
              ORDER BY mu.email
 );
 
+
 UPDATE meedl_user mu
 SET role = 'COOPERATE_FINANCIER_SUPER_ADMIN'
-            FROM financier_entity fe
-                     JOIN meedl_user mu ON mu.id = fe.user_identity_id
-            WHERE fe.cooperation_id = ce.id
-              AND fe.cooperation_id IS NOT NULL
-              AND mu.email IS NOT NULL;
+    FROM financier_entity fe
+    JOIN cooperation_entity ce ON fe.cooperation_id = ce.id
+WHERE fe.user_identity_id = mu.id
+  AND mu.email IS NOT NULL;
 
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
