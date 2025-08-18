@@ -228,7 +228,7 @@ public class IdentityManagerController {
             "or hasRole('ORGANIZATION_ASSOCIATE')" +
             "or hasRole('ORGANIZATION_ADMIN')")
     public ResponseEntity<ApiResponse<?>> uploadImage(@AuthenticationPrincipal Jwt meedlUser,
-                                                         @RequestParam String imageUrl) throws MeedlException {
+                                                         @RequestBody String imageUrl) throws MeedlException {
         UserIdentity userIdentity = UserIdentity.builder().id(meedlUser.getClaimAsString("sub")).image(imageUrl).build();
         log.info("The user updating image: {} ",meedlUser.getClaimAsString("sub"));
         userUseCase.uploadImage(userIdentity);
