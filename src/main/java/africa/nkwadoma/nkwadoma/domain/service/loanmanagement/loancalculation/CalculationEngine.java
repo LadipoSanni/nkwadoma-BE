@@ -39,7 +39,6 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.loan.FinancialCons
 @Component
 public class CalculationEngine implements CalculationEngineUseCase {
     private final RepaymentHistoryOutputPort repaymentHistoryOutputPort;
-    private final int DAYS_IN_MONTH = 30;
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
     private final LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
     private final CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
