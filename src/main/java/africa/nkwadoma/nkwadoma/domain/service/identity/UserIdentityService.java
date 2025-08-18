@@ -359,10 +359,9 @@ public class UserIdentityService implements UserUseCase {
 
         UserIdentity foundUser = userIdentityOutputPort.findById(userIdentity.getId());
         if ((!IdentityRole.isMeedlStaff(foundUser.getRole())) &&
-                (!IdentityRole.isOrganizationStaff(foundUser.getRole()))
-//                        ||
-//                        (!IdentityRole.i)))
-        ) {
+                (!IdentityRole.isOrganizationStaff(foundUser.getRole())) &&
+                (!IdentityRole.FINANCIER.equals(foundUser.getRole())) &&
+                        (!IdentityRole.isCooperateFinancier(foundUser.getRole()))) {
             log.error("You are not authorized to update image. User with id {} and role {}", userIdentity.getId(), foundUser.getRole());
             throw new MeedlException("You are not authorized to update image");
         }

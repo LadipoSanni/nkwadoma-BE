@@ -217,6 +217,16 @@ public class IdentityManagerController {
                 statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("user/upload/image")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
+            "or hasRole('MEEDL_ADMIN')" +
+            "or hasRole('PORTFOLIO_MANAGER')" +
+            "or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')" +
+            "or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')" +
+            "or hasRole('COOPERATE_FINANCIER_ADMIN')" +
+            "or hasRole('FINANCIER')" +
+            "or hasRole('ORGANIZATION_SUPER_ADMIN')" +
+            "or hasRole('ORGANIZATION_ASSOCIATE')" +
+            "or hasRole('ORGANIZATION_ADMIN')")
     public ResponseEntity<ApiResponse<?>> uploadImage(@AuthenticationPrincipal Jwt meedlUser,
                                                          @RequestParam String imageUrl) throws MeedlException {
         UserIdentity userIdentity = UserIdentity.builder().id(meedlUser.getClaimAsString("sub")).image(imageUrl).build();
