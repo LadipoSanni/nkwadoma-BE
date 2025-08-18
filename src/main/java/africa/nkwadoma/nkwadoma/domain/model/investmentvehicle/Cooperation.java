@@ -17,6 +17,7 @@ public class Cooperation {
     private String id;
     private String bankDetailId;
     private String name;
+    private String email;
 
     public void validate() throws MeedlException {
         log.info("Validating cooperation details...");

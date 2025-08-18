@@ -19,6 +19,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -59,12 +60,11 @@ public class BankDetailService implements BankDetailUseCase {
             return bankDetail;
         }
         if (IdentityRole.isCooperateFinancier(userIdentity.getRole())){
-            Optional<CooperateFinancier> optionalCooperateFinancier =  cooperateFinancierOutputPort.findByUserId(userIdentity.getId());
-            if (optionalCooperateFinancier.isEmpty()){
+            CooperateFinancier cooperateFinancier =  cooperateFinancierOutputPort.findByUserId(userIdentity.getId());
+            if (ObjectUtils.isEmpty(cooperateFinancier)){
                 log.error("Unable to determine your details as a cooperate financier. User id {}", userIdentity.getId());
                 throw new MeedlException("Unable to determine your details as a cooperate financier");
             }
-            CooperateFinancier cooperateFinancier = optionalCooperateFinancier.get();
             log.info("Add bank detail by {} with user id {}", userIdentity.getRole(), userIdentity.getId());
             if (IdentityRole.COOPERATE_FINANCIER_SUPER_ADMIN.equals(userIdentity.getRole())){
                 return addCooperateFinancierBankDetail(bankDetail, cooperateFinancier, ActivationStatus.APPROVED);

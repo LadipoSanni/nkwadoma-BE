@@ -76,6 +76,7 @@ public class FinancierService implements FinancierUseCase {
     private final InvestmentVehicleMapper investmentVehicleMapper;
     private final FinancierMapper financierMapper;
     private final PortfolioOutputPort portfolioOutputPort;
+    private final CooperateFinancierOutputPort cooperateFinancierOutputPort;
 
     @Override
     public String inviteFinancier(List<Financier> financiers, String investmentVehicleId) throws MeedlException {
@@ -767,6 +768,29 @@ public class FinancierService implements FinancierUseCase {
 
         return "";
     }
+
+    @Override
+    public Cooperation viewCooperateFinancierDetail(String actorID) throws MeedlException {
+        UserIdentity userIdentity = userIdentityOutputPort.findById(actorID);
+        CooperateFinancier cooperateFinancier = cooperateFinancierOutputPort.findByUserId(userIdentity.getId());
+        return cooperateFinancier.getCooperate();
+    }
+
+    @Override
+    public Cooperation updateCooperateProfile(String actorId, Cooperation cooperation) throws MeedlException {
+        UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
+        MeedlValidator.validateObjectInstance(cooperation,"Cooperation cannot be empty");
+        if (ObjectUtils.isNotEmpty(cooperationOutputPort.findByName(cooperation.getName()))){
+            throw new InvestmentException("Cooperation with name already exists");
+        }
+        //FIND by Mail
+        CooperateFinancier cooperateFinancier = cooperateFinancierOutputPort.findByUserId(userIdentity.getId());
+        financierMapper.updateCooperation(cooperateFinancier.getCooperate(),cooperation);
+        cooperationOutputPort.save(cooperation);
+        return cooperation;
+    }
+
+
 
     @Override
     public Page<Financier> viewAllFinancierInvestment(String actorId, String finanacierId, int pageSize, int pageNumber) throws MeedlException {
