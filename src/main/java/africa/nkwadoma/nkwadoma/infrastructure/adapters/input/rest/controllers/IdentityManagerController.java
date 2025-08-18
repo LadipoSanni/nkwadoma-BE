@@ -130,7 +130,7 @@ public class IdentityManagerController {
                 statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("auth/manageMFA")
-    public ResponseEntity<ApiResponse<?>> manageMFA(@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid MFARequest mfaRequest) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> manageMFA(@AuthenticationPrincipal Jwt meedlUser, @RequestBody MFARequest mfaRequest) throws MeedlException {
         UserIdentity userIdentity = identityMapper.map(meedlUser.getClaimAsString("sub"), mfaRequest);
         String response = userUseCase.manageMFA(userIdentity);
         return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().

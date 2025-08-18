@@ -23,6 +23,7 @@ public interface IdentityMapper {
     UserIdentityResponse toUserIdentityResponse(UserIdentity userIdentityFound);
 
     @Mapping(target = "id", source = "userId")
+    @Mapping(target = "MFAPhoneNumber", source = "mfaRequest.mfaPhoneNumber")
     UserIdentity map(String userId, MFARequest mfaRequest);
 
 }

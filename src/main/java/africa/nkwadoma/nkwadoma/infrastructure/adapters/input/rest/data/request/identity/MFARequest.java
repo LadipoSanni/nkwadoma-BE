@@ -9,6 +9,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class MFARequest {
-    private String MFAPhoneNumber;
+    private String mfaPhoneNumber;
     private MFAType mfaType;
 }
