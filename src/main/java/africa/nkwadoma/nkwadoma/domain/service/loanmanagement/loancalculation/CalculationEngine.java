@@ -80,6 +80,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
     @Override
     public void calculateLoaneeLoanRepaymentHistory(CalculationContext calculationContext) throws MeedlException {
         if (isSkipableCalculation(calculationContext.getRepaymentHistories(), calculationContext.getLoanee())) return;
+        calculationContext.setDefaultValues();
         List<RepaymentHistory> previousRepaymentHistory = repaymentHistoryOutputPort.findAllRepaymentHistoryForLoan(calculationContext.getLoanee().getId(), calculationContext.getCohort().getId());
         List<RepaymentHistory> allRepayments = combineAndSortRepaymentHistories(calculationContext.getRepaymentHistories(), previousRepaymentHistory);
         LoaneeLoanDetail loaneeLoanDetail = getLoaneeLoanDetail(calculationContext);
@@ -277,10 +278,9 @@ public class CalculationEngine implements CalculationEngineUseCase {
 
         BigDecimal runningTotal = BigDecimal.ZERO;
         BigDecimal totalInterestIncurred = BigDecimal.ZERO;
-        calculationContext.setTotalInterestIncurred(BigDecimal.ZERO);
+        calculationContext.setDefaultValues();
         LocalDateTime startDate = calculationContext.getLoaneeLoanDetail().getLoanStartDate();
         BigDecimal previousOutstandingAmount = null;
-        calculationContext.setTotalInterestIncurredInAMonth(BigDecimal.ZERO);
 
         log.info("Total interest incurred before repayment history calculations begin {}", totalInterestIncurred);
         for (RepaymentHistory repayment : calculationContext.getRepaymentHistories()) {
@@ -765,8 +765,8 @@ public class CalculationEngine implements CalculationEngineUseCase {
         months.forEach(month -> {
             loopDaysUpToDate(month, calculationContext);
         });
-
     }
+
     public void loopDaysUpToDate(LocalDate month, CalculationContext calculationContext) throws MeedlException {
         int limit = month.getDayOfMonth();
         int lastDayOfMonth = month.lengthOfMonth();
