@@ -11,8 +11,10 @@ SET email = (SELECT mu.email
                AND fe.cooperation_id IS NOT NULL
                AND mu.email IS NOT NULL
              ORDER BY mu.email
-),
-    role = 'COOPERATE_FINANCIER_SUPER_ADMIN'
+);
+
+UPDATE meedl_user mu
+SET role = 'COOPERATE_FINANCIER_SUPER_ADMIN'
             FROM financier_entity fe
                      JOIN meedl_user mu ON mu.id = fe.user_identity_id
             WHERE fe.cooperation_id = ce.id
