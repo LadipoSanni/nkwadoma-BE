@@ -2,8 +2,8 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
-import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -208,7 +208,7 @@ class OrganizationEmployeeIdentityAdapterTest {
         OrganizationEmployeeIdentity organizationEmployeeIdentity= null;
         try{
             organizationEmployeeIdentity =
-                    organizationEmployeeIdentityOutputPort.findByRoleAndOrganizationId(organizationId,IdentityRole.ORGANIZATION_ADMIN);
+                    organizationEmployeeIdentityOutputPort.findByRoleAndOrganizationId(organizationId, IdentityRole.ORGANIZATION_ADMIN);
         }catch (MeedlException exception){
             log.error("Error finding organization employees", exception);
         }
