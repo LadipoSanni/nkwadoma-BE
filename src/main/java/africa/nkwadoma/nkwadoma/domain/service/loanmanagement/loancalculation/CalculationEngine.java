@@ -286,6 +286,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
             previousOutstandingAmount = getPreviousAmountOutstanding(previousOutstandingAmount, calculationContext.getLoaneeLoanDetail());
             log.info("Outstanding before processing this repayment {} ", previousOutstandingAmount);
 
+            compoundingInterest(lastDate, repayment.getPaymentDateTime());
             runningTotal = calculateTotalAmountRepaidPerRepayment(repayment, runningTotal);
 
             BigDecimal interestIncurred = calculateIncurredInterestPerRepayment(repayment, previousOutstandingAmount, lastDate, calculationContext.getLoaneeLoanDetail());
@@ -303,6 +304,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
 
         calculateTotalInterestIncurred(calculationContext.getLoaneeLoanDetail(), totalInterestIncurred, lastDate);
     }
+
 
     private BigDecimal calculateInterestIncurredFromLastPaymentTillDate(LoaneeLoanDetail loaneeLoanDetail, LocalDateTime lastDate) {
         long daysBetween = calculateDaysBetween(lastDate, LocalDateTime.now());
@@ -759,7 +761,21 @@ public class CalculationEngine implements CalculationEngineUseCase {
         log.info("Amount outstanding after adding this month incurred == {}", loaneeLoanDetail.getAmountOutstanding());
         loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
     }
+    private void compoundingInterest(LocalDateTime startDate, LocalDateTime endDate) {
+        List<LocalDate> months = MonthEndCalculator.getMonthEnds(startDate, endDate.toLocalDate());
 
+        BigDecimal dailyInterestIncurred =
+                calculateInterest(loaneeLoanDetail.getInterestRate(), loaneeLoanDetail.getAmountOutstanding(), 1);
+        log.info("daily interest {}", dailyInterestIncurred);
+        DailyInterest dailyInterest = DailyInterest.builder()
+                .interest(dailyInterestIncurred)
+                .createdAt(LocalDateTime.now())
+                .loaneeLoanDetail(loaneeLoanDetail)
+                .build();
+        log.info("daily interest before saving === : {}", dailyInterest);
+        dailyInterest = dailyInterestOutputPort.save(dailyInterest);
+        log.info("saved daily interest === : {}", dailyInterest);
+    }
 
     public void calculateDailyInterest() throws MeedlException {
         List<LoaneeLoanDetail> loaneeLoanDetails = loaneeLoanDetailsOutputPort.findAllByNotNullAmountOutStanding();
