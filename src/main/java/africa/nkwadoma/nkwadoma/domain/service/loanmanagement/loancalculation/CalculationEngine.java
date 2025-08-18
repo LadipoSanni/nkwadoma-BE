@@ -32,14 +32,14 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.loan.FinancialConstants.*;
+
 @Slf4j
 @RequiredArgsConstructor
 @Component
 public class CalculationEngine implements CalculationEngineUseCase {
     private final RepaymentHistoryOutputPort repaymentHistoryOutputPort;
-    private final int NUMBER_OF_DECIMAL_PLACE = 8;
     private final int DAYS_IN_MONTH = 30;
-    private final int DAYS_IN_YEAR = 365;
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
     private final LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
     private final CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
@@ -374,9 +374,9 @@ public class CalculationEngine implements CalculationEngineUseCase {
     public BigDecimal calculateIncurredInterestPerRepayment(RepaymentHistory repayment, BigDecimal previousOutstandingAmount, LocalDateTime lastDate, LoaneeLoanDetail loaneeLoanDetail) {
         long daysBetween = calculateDaysBetween(lastDate, repayment.getPaymentDateTime());
         log.info("How many days a between the last payment {} \n -------------- >>>>>>>> interest rate {}", daysBetween, loaneeLoanDetail.getInterestRate());
-        if (daysBetween < 0) {
+        if (daysBetween < MINIMUM_VALID_NUMBER) {
             log.warn("Days between payment is negative {} therefore days between is now 0", daysBetween);
-            daysBetween = 0;
+            daysBetween = MINIMUM_VALID_NUMBER;
         }
         BigDecimal incurredInterest = calculateInterest(loaneeLoanDetail.getInterestRate(), previousOutstandingAmount, daysBetween);
         log.info("Previous out standing amount after calculating interest incurred {} outstanding is {}", incurredInterest, previousOutstandingAmount);
@@ -392,8 +392,8 @@ public class CalculationEngine implements CalculationEngineUseCase {
     public BigDecimal calculateInterest(double interestRate, BigDecimal outstanding, long daysBetween) {
 
         BigDecimal interestRateInPercent = BigDecimal.valueOf(interestRate)
-                .divide(BigDecimal.valueOf(100), NUMBER_OF_DECIMAL_PLACE + 4, RoundingMode.HALF_UP);
-        BigDecimal dailyRate = interestRateInPercent.divide(BigDecimal.valueOf(DAYS_IN_YEAR), NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
+                .divide(PERCENTAGE_BASE, NUMBER_OF_DECIMAL_PLACES + ADDITIONAL_PRECISION_SCALE, RoundingMode.HALF_UP);
+        BigDecimal dailyRate = interestRateInPercent.divide(BigDecimal.valueOf(DAYS_IN_YEAR), NUMBER_OF_DECIMAL_PLACES, RoundingMode.HALF_UP);
 
         log.info("Calculated daily rate ==== {} for annual interest rate {}, interest rate in percent {}", dailyRate, interestRate, interestRateInPercent);
 
@@ -437,7 +437,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
             log.warn("Payment amount cannot be null");
             throw new MeedlException("Payment amount must be provided.");
         }
-        if (repayment.getAmountPaid().compareTo(BigDecimal.ZERO) < 0) {
+        if (repayment.getAmountPaid().compareTo(BigDecimal.ZERO) < MINIMUM_VALID_NUMBER) {
             log.warn("Amount paid on {} can not be negative: {}", repayment.getPaymentDateTime(), repayment.getAmountPaid());
             throw new MeedlException("Amount paid can not be negative : " + repayment.getAmountPaid());
         }
@@ -487,14 +487,14 @@ public class CalculationEngine implements CalculationEngineUseCase {
         }
 
         BigDecimal rateFraction = BigDecimal.valueOf(interestRate)
-                .divide(BigDecimal.valueOf(365), NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
+                .divide(BigDecimal.valueOf(DAYS_IN_YEAR), NUMBER_OF_DECIMAL_PLACES, RoundingMode.HALF_UP);
         return rateFraction.multiply(sumProduct);
     }
 
     //    @Override
     public int calculateMonthlyInterestRate(int interestRate) throws MeedlException {
         validateInterestRate(interestRate, "Interest rate");
-        return interestRate / 12;
+        return interestRate / MONTHS_PER_YEAR;
     }
 
     //    @Override
@@ -513,10 +513,10 @@ public class CalculationEngine implements CalculationEngineUseCase {
         validateLoanTenure(loanTenureMonths);
 
         BigDecimal percentage = BigDecimal.valueOf(creditLifePercentage)
-                .divide(BigDecimal.valueOf(100), NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
+                .divide(PERCENTAGE_BASE, NUMBER_OF_DECIMAL_PLACES, RoundingMode.HALF_UP);
 
-        double tenureYears = loanTenureMonths / 12.0;
-        int multiplier = Math.max(1, (int) Math.ceil(tenureYears));
+        double tenureYears = loanTenureMonths / MONTHS_PER_YEAR_DOUBLE;
+        int multiplier = Math.max(MINIMUM_MULTIPLIER, (int) Math.ceil(tenureYears));
 
         return decimalPlaceRoundUp(
                 loanAmountRequested
@@ -581,11 +581,11 @@ public class CalculationEngine implements CalculationEngineUseCase {
     }
 
     private BigDecimal decimalPlaceRoundUp(BigDecimal bigDecimal) {
-        return bigDecimal.setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
+        return bigDecimal.setScale(NUMBER_OF_DECIMAL_PLACES, RoundingMode.HALF_UP);
     }
 
     private void validateLoanTenure(int tenure) throws MeedlException {
-        if (tenure < 0) {
+        if (tenure < MINIMUM_VALID_NUMBER) {
             log.error("Loan Tenure must not be negative. Validation in loan calculation service.");
             throw new MeedlException("Loan Tenure must not be negative.");
         }
@@ -600,18 +600,18 @@ public class CalculationEngine implements CalculationEngineUseCase {
             log.error("Loan Amount Outstanding must not be null.");
             throw new MeedlException("Loan Amount Outstanding must not be null.");
         }
-        if (record.getLoanAmountOutstanding().compareTo(BigDecimal.ZERO) < 0) {
+        if (record.getLoanAmountOutstanding().compareTo(BigDecimal.ZERO) < MINIMUM_VALID_NUMBER) {
             log.error("In validateLoanPeriodRecord Method. Loan Amount Outstanding must not be negative.");
             throw new MeedlException("Loan Amount Outstanding must not be negative.");
         }
-        if (record.getDaysHeld() < 0) {
+        if (record.getDaysHeld() < MINIMUM_VALID_NUMBER) {
             log.error("Days Held must not be negative.");
             throw new MeedlException("Days Held must not be negative.");
         }
     }
 
     private void validateInterestRate(int interestRate, String name) throws MeedlException {
-        if (interestRate < 0) {
+        if (interestRate < MINIMUM_VALID_NUMBER) {
             log.error("{} must not be negative.  In validate interest rate.", name);
             throw new MeedlException(name + " must not be negative.");
         }
@@ -622,7 +622,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
     }
 
     private void validateInterestRate(double interestRate, String name) throws MeedlException {
-        if (interestRate < 0) {
+        if (interestRate < MINIMUM_VALID_NUMBER) {
             log.error("{} must not be negative. In validate interest rate as double", name);
             throw new MeedlException(name + " must not be negative.");
         }
@@ -637,7 +637,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
             log.error("{} must not be null. In validate amount", name);
             throw new MeedlException(name + " must not be null.");
         }
-        if (amount.compareTo(BigDecimal.ZERO) < 0) {
+        if (amount.compareTo(BigDecimal.ZERO) < MINIMUM_VALID_NUMBER) {
             log.error("{} must not be negative. In validate amount", name);
             throw new MeedlException(name + " must not be negative.");
         }
