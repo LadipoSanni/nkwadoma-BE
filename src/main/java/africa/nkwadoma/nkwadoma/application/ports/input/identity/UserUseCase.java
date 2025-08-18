@@ -30,5 +30,6 @@ public interface UserUseCase {
 
     String manageMFA(UserIdentity userIdentity) throws MeedlException;
 
+    void uploadImage(UserIdentity userIdentity) throws MeedlException;
     UserIdentity assignRole(UserIdentity userIdentity) throws MeedlException;
 }

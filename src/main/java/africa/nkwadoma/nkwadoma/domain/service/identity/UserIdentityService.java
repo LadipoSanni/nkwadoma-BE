@@ -352,6 +352,25 @@ public class UserIdentityService implements UserUseCase {
     }
 
     @Override
+    public void uploadImage(UserIdentity userIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(userIdentity, UserMessages.USER_IDENTITY_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateUUID(userIdentity.getId(), UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateDataElement(userIdentity.getImage(), "Image not provided");
+
+        UserIdentity foundUser = userIdentityOutputPort.findById(userIdentity.getId());
+        if ((!IdentityRole.isMeedlStaff(foundUser.getRole())) &&
+                (!IdentityRole.isOrganizationStaff(foundUser.getRole()))
+//                        ||
+//                        (!IdentityRole.i)))
+        ) {
+            log.error("You are not authorized to update image. User with id {} and role {}", userIdentity.getId(), foundUser.getRole());
+            throw new MeedlException("You are not authorized to update image");
+        }
+        foundUser.setImage(userIdentity.getImage());
+        userIdentityOutputPort.save(foundUser);
+        log.info("Image uploaded success.");
+    }
+    @Override
     public UserIdentity assignRole(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity, UserMessages.USER_IDENTITY_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(userIdentity.getCreatedBy(), UserMessages.INVALID_ROLE_ASSIGNER_ID.getMessage());

@@ -216,4 +216,14 @@ public class IdentityManagerController {
                 data("Password changed successfully.").message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
     }
+    @PostMapping("user/upload/image")
+    public ResponseEntity<ApiResponse<?>> uploadImage(@AuthenticationPrincipal Jwt meedlUser,
+                                                         @RequestParam String imageUrl) throws MeedlException {
+        UserIdentity userIdentity = UserIdentity.builder().id(meedlUser.getClaimAsString("sub")).image(imageUrl).build();
+        log.info("The user updating image: {} ",meedlUser.getClaimAsString("sub"));
+        userUseCase.uploadImage(userIdentity);
+        return ResponseEntity.ok(ApiResponse.<String>builder()
+                .message("Image uploaded successfully.")
+                .statusCode(HttpStatus.OK.name()).build());
+    }
 }
