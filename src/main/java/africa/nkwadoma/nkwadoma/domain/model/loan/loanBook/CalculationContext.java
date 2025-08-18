@@ -28,5 +28,6 @@ public class CalculationContext {
     private BigDecimal previousTotalAmountPaid = BigDecimal.ZERO;
     private BigDecimal previousTotalInterestIncurred = BigDecimal.ZERO;
     private RepaymentHistory repaymentHistory;
-    private LocalDateTime lastDate;
+    private LocalDateTime startDate;
+    private BigDecimal totalInterestIncurredInAMonth;
 }
