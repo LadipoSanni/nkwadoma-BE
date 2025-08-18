@@ -23,7 +23,6 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @Slf4j
@@ -222,7 +221,7 @@ class OrganizationEmployeeServiceTest {
 
         organizationEmployeeService.setRolesToView(organizationEmployeeIdentity, userIdentity);
 
-        assertEquals(Set.of(IdentityRole.PORTFOLIO_MANAGER, IdentityRole.MEEDL_ASSOCIATE),
+        assertEquals(Set.of(IdentityRole.PORTFOLIO_MANAGER, IdentityRole.PORTFOLIO_MANAGER_ASSOCIATE),
                 organizationEmployeeIdentity.getIdentityRoles());
     }
 
@@ -238,7 +237,7 @@ class OrganizationEmployeeServiceTest {
 
     @Test
     void setsMeedlRolesForNonPendingApprovalByMeedlStaff() {
-        userIdentity.setRole(IdentityRole.MEEDL_ASSOCIATE);
+        userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER_ASSOCIATE);
         organizationEmployeeIdentity.setActivationStatus(ActivationStatus.ACTIVE);
 
         organizationEmployeeService.setRolesToView(organizationEmployeeIdentity, userIdentity);
@@ -270,7 +269,7 @@ class OrganizationEmployeeServiceTest {
 
     @Test
     void nonPendingApprovalWithRolesProvidedDoesNotOverride() {
-        userIdentity.setRole(IdentityRole.MEEDL_ASSOCIATE);
+        userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER_ASSOCIATE);
         organizationEmployeeIdentity.setActivationStatus(ActivationStatus.ACTIVE);
         organizationEmployeeIdentity.setIdentityRoles(Set.of(IdentityRole.MEEDL_ADMIN));
 

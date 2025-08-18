@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse;
 
 import lombok.*;
 

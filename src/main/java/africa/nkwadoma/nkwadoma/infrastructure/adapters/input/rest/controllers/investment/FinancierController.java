@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.investment;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentvehicle.FinancierUseCase;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
@@ -11,11 +11,12 @@ import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentSummary;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.CooperationRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.InviteFinancierRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.KycRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.FinancierRequest;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentvehicle.FinancierRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentvehicle.InvestmentVehicleRestMapper;
@@ -321,5 +322,40 @@ public class FinancierController {
         String response = financierUseCase.inviteColleagueFinancier(meedlUser.getClaimAsString("sub"));
         return null;
     }
+
+
+    @GetMapping("view/cooperate/detail")
+    @PreAuthorize("hasRole('COOPERATE_FINANCIER_SUPER_ADMIN') or hasRole('COOPERATE_FINANCIER_ADMIN')")
+    public ResponseEntity<ApiResponse<?>> viewCooperationDetail(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
+
+        Cooperation cooperation = financierUseCase.viewCooperateFinancierDetail(meedlUser.getClaimAsString("sub"));
+        CooperationResponse cooperationResponse = financierRestMapper.mapToCooperationResponse(cooperation);
+
+        return new ResponseEntity<>(ApiResponse.builder()
+                .statusCode(HttpStatus.OK.toString())
+                .data(cooperationResponse)
+                .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage())
+                .build(),HttpStatus.OK);
+
+    }
+
+
+    @GetMapping("update/cooperate/profile")
+    @PreAuthorize("hasRole('COOPERATE_FINANCIER_SUPER_ADMIN') or hasRole('COOPERATE_FINANCIER_ADMIN')")
+    public ResponseEntity<ApiResponse<?>> updateCooperationProfile(@AuthenticationPrincipal Jwt meedlUser ,
+                                                                   @RequestBody CooperationRequest cooperationRequest) throws MeedlException {
+
+        Cooperation cooperation = financierRestMapper.mapCooperationRequestToCooperation(cooperationRequest);
+        cooperation = financierUseCase.updateCooperateProfile(meedlUser.getClaimAsString("sub"),cooperation);
+        CooperationResponse cooperationResponse = financierRestMapper.mapToCooperationResponse(cooperation);
+
+        return new ResponseEntity<>(ApiResponse.builder()
+                .statusCode(HttpStatus.OK.toString())
+                .data(cooperationResponse)
+                .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage())
+                .build(),HttpStatus.OK);
+
+    }
+
 
 }
