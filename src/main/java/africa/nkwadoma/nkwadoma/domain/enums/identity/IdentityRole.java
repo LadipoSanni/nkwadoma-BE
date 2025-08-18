@@ -40,9 +40,9 @@ public enum IdentityRole {
                 IdentityRole.MEEDL_ADMIN.equals(actor.getRole());
     }
 
-    public static boolean isOrganizationAdminOrSuperAdmin(UserIdentity actor) {
-        return IdentityRole.ORGANIZATION_SUPER_ADMIN.equals(actor.getRole()) ||
-                IdentityRole.ORGANIZATION_ADMIN.equals(actor.getRole());
+    public static boolean isOrganizationAdminOrSuperAdmin(IdentityRole role) {
+        return IdentityRole.ORGANIZATION_SUPER_ADMIN.equals(role) ||
+                IdentityRole.ORGANIZATION_ADMIN.equals(role);
     }
 
     @JsonCreator
