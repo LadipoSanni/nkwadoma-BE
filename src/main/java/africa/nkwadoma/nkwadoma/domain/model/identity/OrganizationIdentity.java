@@ -25,6 +25,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.INVA
 @ToString
 public class OrganizationIdentity {
     private String id;
+    private String bankDetailId;
     private String name;
     private String email;
     private String websiteAddress;

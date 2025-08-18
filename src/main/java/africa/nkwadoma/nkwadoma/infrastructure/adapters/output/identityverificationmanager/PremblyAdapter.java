@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityverificationmanager;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
