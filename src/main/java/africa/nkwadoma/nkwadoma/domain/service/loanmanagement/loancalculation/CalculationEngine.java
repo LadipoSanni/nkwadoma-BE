@@ -277,6 +277,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
 
         BigDecimal runningTotal = BigDecimal.ZERO;
         BigDecimal totalInterestIncurred = BigDecimal.ZERO;
+        calculationContext.setTotalInterestIncurred(BigDecimal.ZERO);
         LocalDateTime startDate = calculationContext.getLoaneeLoanDetail().getLoanStartDate();
         BigDecimal previousOutstandingAmount = null;
         calculationContext.setTotalInterestIncurredInAMonth(BigDecimal.ZERO);
@@ -793,7 +794,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
         log.info("Updated start date to next month: {}", nextMonthStart);
     }
 
-    private void calculateAndSaveMonthlyInterest(BigDecimal calculationContext, LoaneeLoanDetail loaneeLoanDetail) throws MeedlException {
+    private MonthlyInterest calculateAndSaveMonthlyInterest(BigDecimal calculationContext, LoaneeLoanDetail loaneeLoanDetail) throws MeedlException {
         MonthlyInterest monthlyInterest = MonthlyInterest.builder()
                 .interest(calculationContext)
                 .createdAt(LocalDateTime.now())

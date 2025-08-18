@@ -25,9 +25,17 @@ public class CalculationContext {
     private ProgramLoanDetail programLoanDetail;
     private OrganizationLoanDetail organizationLoanDetail;
     private List<RepaymentHistory> repaymentHistories;
-    private BigDecimal previousTotalAmountPaid = BigDecimal.ZERO;
-    private BigDecimal previousTotalInterestIncurred = BigDecimal.ZERO;
+    private BigDecimal previousTotalAmountPaid ;
+    private BigDecimal previousTotalInterestIncurred ;
     private RepaymentHistory repaymentHistory;
     private LocalDateTime startDate;
     private BigDecimal totalInterestIncurredInAMonth;
+    private BigDecimal totalInterestIncurred;
+
+    public void setDefaultValues(){
+        this.previousTotalAmountPaid = BigDecimal.ZERO;
+        this.previousTotalInterestIncurred = BigDecimal.ZERO;
+        this.totalInterestIncurred = BigDecimal.ZERO;
+        this.totalInterestIncurredInAMonth =BigDecimal.ZERO;
+    }
 }
