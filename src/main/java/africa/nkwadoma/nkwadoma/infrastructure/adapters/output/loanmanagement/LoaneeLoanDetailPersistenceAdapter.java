@@ -15,6 +15,8 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.math.BigDecimal;
+import java.time.Month;
 import java.util.*;
 
 @Slf4j
@@ -44,7 +46,7 @@ public class LoaneeLoanDetailPersistenceAdapter implements LoaneeLoanDetailsOutp
     public LoaneeLoanDetail findByCohortLoaneeId(String cohortLoaneeId) throws MeedlException {
         MeedlValidator.validateUUID(cohortLoaneeId, CohortMessages.COHORT_LOANEE_ID_CANNOT_BE_EMPTY.getMessage());
         LoaneeLoanDetailEntity loaneeLoanDetailEntity = loaneeLoanDetailRepository.findByCohortLoaneeId(cohortLoaneeId);
-        log.info("Found loaneeLoanDetailEntity: {}", loaneeLoanDetailEntity);
+        log.info("Found loanee Loan Detail Entity: {}", loaneeLoanDetailEntity);
         return loaneeLoanDetailMapper.toLoaneeLoanDetails(loaneeLoanDetailEntity);
     }
 
@@ -70,9 +72,16 @@ public class LoaneeLoanDetailPersistenceAdapter implements LoaneeLoanDetailsOutp
     }
 
     @Override
-    public List<LoaneeLoanDetail> findAllLoaneeLoanDetail() {
+    public List<LoaneeLoanDetail> findAllByNotNullAmountOutStanding() {
         List<LoaneeLoanDetailEntity> loaneeLoanDetailEntities =
-                loaneeLoanDetailRepository.findAllLoaneeLoanDetailByAmountOutstandingNotNullOrNonNegative();
+                loaneeLoanDetailRepository.findAllByAmountOutstandingGreaterThanZero();
+        return loaneeLoanDetailEntities.stream().map(loaneeLoanDetailMapper::toLoaneeLoanDetails).toList();
+    }
+
+    @Override
+    public List<LoaneeLoanDetail> findAllWithDailyInterestByMonthAndYear(Month month, int year) {
+        List<LoaneeLoanDetailEntity> loaneeLoanDetailEntities =
+                loaneeLoanDetailRepository.findAllWithDailyInterestByMonthAndYear(month.getValue(),year);
         return loaneeLoanDetailEntities.stream().map(loaneeLoanDetailMapper::toLoaneeLoanDetails).toList();
     }
 }

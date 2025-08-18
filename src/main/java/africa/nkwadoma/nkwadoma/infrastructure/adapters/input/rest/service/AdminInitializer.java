@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.service;
 
 
+import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loancalculation.CalculationEngineUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.LoanMetricsUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
@@ -43,6 +44,7 @@ public class AdminInitializer {
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     private final LoanMetricsUseCase loanMetricsUseCase;
     private final PortfolioOutputPort portfolioOutputPort;
+    private final CalculationEngineUseCase calculationEngineUseCase;
 
     @Value("${superAdmin.email}")
     private String SUPER_ADMIN_EMAIL ;
@@ -202,6 +204,8 @@ public class AdminInitializer {
         OrganizationIdentity organizationIdentity = createFirstOrganizationIdentity(getOrganizationIdentity(userIdentity));
         loanMetricsUseCase.correctLoanRequestCount();
         Portfolio portfolio = createMeedlPortfolio(getPortfolio());
-        log.info("Meedl portfolio process done-- {}", portfolio);
+        log.info("Meedl portfolio process done -- {} ", portfolio);
+        calculationEngineUseCase.scheduleDailyInterestCalculation();
+        calculationEngineUseCase.scheduleMonthlyInterestCalculation();
     }
 }
