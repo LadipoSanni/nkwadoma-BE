@@ -580,5 +580,38 @@ class UserIdentityServiceTest {
         assertEquals("Unable to determine MFA option selected", result);
         verify(userIdentityOutputPort, never()).save(any());
     }
+    @Test
+    void uploadImageForOrganizationAdmin() throws MeedlException {
+        favour.setImage("profile-pic.png");
+        favour.setRole(IdentityRole.ORGANIZATION_ADMIN);
+
+        when(userIdentityOutputPort.findById(favour.getId())).thenReturn(favour);
+        when(userIdentityOutputPort.save(any(UserIdentity.class))).thenReturn(favour);
+
+        userIdentityService.uploadImage(favour);
+
+        verify(userIdentityOutputPort).save(favour);
+        assertEquals("profile-pic.png", favour.getImage());
+    }
+
+    @Test
+    void uploadImageUnauthorizedRole() throws MeedlException {
+        favour.setImage("profile-pic.png");
+        favour.setRole(IdentityRole.LOANEE);
+
+        when(userIdentityOutputPort.findById(favour.getId())).thenReturn(favour);
+
+        assertThrows(MeedlException.class, () -> userIdentityService.uploadImage(favour));
+        verify(userIdentityOutputPort, never()).save(any());
+    }
+
+    @Test
+    void uploadImageWithNoImageProvided() throws MeedlException {
+        favour.setImage(null);
+        favour.setRole(IdentityRole.ORGANIZATION_ADMIN);
+
+        assertThrows(MeedlException.class, () -> userIdentityService.uploadImage(favour));
+        verify(userIdentityOutputPort, never()).save(any());
+    }
 
 }

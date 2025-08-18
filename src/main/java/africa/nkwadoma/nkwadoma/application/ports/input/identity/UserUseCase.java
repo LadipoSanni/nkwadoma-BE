@@ -29,4 +29,6 @@ public interface UserUseCase {
     UserIdentity viewUserDetail(UserIdentity userIdentity) throws MeedlException;
 
     String manageMFA(UserIdentity userIdentity) throws MeedlException;
+
+    void uploadImage(UserIdentity userIdentity) throws MeedlException;
 }
