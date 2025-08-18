@@ -6,7 +6,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.notification.SendColleag
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.LoanMetricsUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.Industry;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
@@ -33,7 +33,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole.MEEDL_SUPER_ADMIN;
+import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.MEEDL_SUPER_ADMIN;
 
 @Component
 @RequiredArgsConstructor

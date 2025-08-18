@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.domain.enums.identity;
+package africa.nkwadoma.nkwadoma.domain.enums;
 
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import com.fasterxml.jackson.annotation.JsonCreator;

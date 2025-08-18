@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository;
 
-import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEmployeeEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.identity.*;
 import org.springframework.data.domain.*;

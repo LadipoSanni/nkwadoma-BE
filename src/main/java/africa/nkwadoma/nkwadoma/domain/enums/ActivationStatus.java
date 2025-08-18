@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.domain.enums.identity;
+package africa.nkwadoma.nkwadoma.domain.enums;
 
 import lombok.Getter;
 
