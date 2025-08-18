@@ -54,6 +54,13 @@ public enum IdentityRole {
         return getOrganizationRoles().contains(role);
     }
 
+    public static boolean isAssignableMeedlRole(IdentityRole role) {
+        return Set.of(MEEDL_ADMIN, MEEDL_ASSOCIATE, PORTFOLIO_MANAGER).contains(role);
+    }
+
+    public static boolean isAssignableOrganizationRole(IdentityRole role) {
+        return Set.of(ORGANIZATION_ADMIN, ORGANIZATION_ASSOCIATE).contains(role);
+    }
 
 
     public boolean isMeedlRole() {
