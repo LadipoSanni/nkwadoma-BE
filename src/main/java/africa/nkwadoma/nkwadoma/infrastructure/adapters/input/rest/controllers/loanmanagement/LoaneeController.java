@@ -104,7 +104,7 @@ public class LoaneeController {
 
     @GetMapping("cohorts/loanees")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_SUPER_ADMIN') " +
-            "or hasRole('ORGANIZATION_SUPER_ADMIN')or hasRole('MEEDL_ADMIN') ")
+            "or hasRole('ORGANIZATION_SUPER_ADMIN')or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> viewAllLoaneeInCohort(
             @RequestParam String cohortId,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
@@ -132,7 +132,7 @@ public class LoaneeController {
 
     @GetMapping("cohorts/search/loanees")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_SUPER_ADMIN') " +
-            "or hasRole('ORGANIZATION_SUPER_ADMIN')or hasRole('MEEDL_ADMIN') ")
+            "or hasRole('ORGANIZATION_SUPER_ADMIN')or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE') ")
     public ResponseEntity<ApiResponse<?>> searchForLoaneeInCohort(@RequestParam("loaneeName")String loaneeName,
                                                                   @RequestParam("cohortId")String cohortId,
                                                                   @RequestParam(name = "status" , required = false ) LoaneeStatus status,
@@ -159,7 +159,7 @@ public class LoaneeController {
 
     @GetMapping("cohorts/loanee")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_SUPER_ADMIN') " +
-            "or hasRole('ORGANIZATION_SUPER_ADMIN')or hasRole('MEEDL_ADMIN') ")
+            "or hasRole('ORGANIZATION_SUPER_ADMIN')or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> viewLoaneeInCohort(@RequestParam("cohortId")String cohortId,
                                                              @RequestParam("loaneeId") String loaneeId) throws MeedlException {
         log.info("request that came in cohortID == {} , loaneeId == {}", cohortId, loaneeId);
@@ -191,7 +191,7 @@ public class LoaneeController {
 
 
     @GetMapping("loanProduct/loanees/{loanProductId}")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') ")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANGER_ASSOCIATE') ")
     public ResponseEntity<ApiResponse<?>> viewAllLoanBeneficiaryFromLoanProduct(
             @PathVariable String loanProductId,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
@@ -217,7 +217,7 @@ public class LoaneeController {
 
 
     @GetMapping("loan-product/search/loanees/{loanProductId}")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') ")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE') ")
     public ResponseEntity<ApiResponse<?>> searchLoanBeneficiaryFromLoanProduct(
             @PathVariable String loanProductId,
             @RequestParam(name = "name") String name,
