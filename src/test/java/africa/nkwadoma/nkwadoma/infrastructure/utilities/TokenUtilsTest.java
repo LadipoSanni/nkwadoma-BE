@@ -63,7 +63,7 @@ class TokenUtilsTest {
     @Test
     void testEncryptData() {
         try {
-            String encryptedAES = tokenUtils.encryptAES(DECRYPTED_DATA);
+            String encryptedAES = tokenUtils.encryptAES("Password123$");
             assertNotNull(encryptedAES);
             assertEquals(ENCRYPTED_DATA, encryptedAES);
         } catch (MeedlException e) {

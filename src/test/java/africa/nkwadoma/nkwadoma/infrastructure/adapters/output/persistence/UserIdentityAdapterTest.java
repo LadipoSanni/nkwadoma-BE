@@ -14,7 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.ArrayList;
 import java.util.List;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.LOANEE;
+import static africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole.LOANEE;
 import static org.junit.jupiter.api.Assertions.*;
 
 

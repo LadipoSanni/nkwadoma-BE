@@ -1,8 +1,9 @@
 package africa.nkwadoma.nkwadoma.domain.model.identity;
 
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.MFAType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
@@ -70,10 +71,7 @@ public class UserIdentity {
     private BankDetail bankDetail;
 
     private String  MFAPhoneNumber;
-    private boolean enablePhoneNumberMFA;
-    private boolean enableEmailMFA;
-    private boolean MFAEnabled;
-    private boolean disableMFA;
+    private MFAType mfaType;
 
     public void validate() throws MeedlException {
         log.info("Started validating for user identity in validation");

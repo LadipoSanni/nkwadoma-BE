@@ -1,34 +1,20 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.education.*;
-import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
-import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
-import africa.nkwadoma.nkwadoma.domain.model.education.LoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.*;
-import africa.nkwadoma.nkwadoma.testUtilities.TestUtils;
 import africa.nkwadoma.nkwadoma.testUtilities.data.*;
 import lombok.extern.slf4j.*;
-import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.params.*;
-import org.junit.jupiter.params.provider.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.boot.test.context.*;
-import org.springframework.data.domain.*;
 
-import java.math.*;
-import java.time.*;
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.ServiceOfferingType.TRAINING;
