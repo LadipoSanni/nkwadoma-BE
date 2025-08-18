@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.financier;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.CooperateFinancierOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.CooperateFinancier;
@@ -12,6 +12,8 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -40,7 +42,6 @@ public class CooperateFinancierAdapter implements CooperateFinancierOutputPort {
         cooperateFinancierRepository.deleteById(id);
     }
 
-    @Override
     public CooperateFinancier findByUserId(String id) throws MeedlException {
         MeedlValidator.validateUUID(id, UserMessages.INVALID_USER_ID.getMessage());
 

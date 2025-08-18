@@ -2,31 +2,40 @@ package africa.nkwadoma.nkwadoma.domain.enums;
 
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import lombok.Getter;
 
 import java.util.Set;
 
+@Getter
 public enum IdentityRole {
-    MEEDL_ASSOCIATE,
-    MEEDL_SUPER_ADMIN,
-    MEEDL_ADMIN,
-    PORTFOLIO_MANAGER,
-    ORGANIZATION_ADMIN,
-    ORGANIZATION_ASSOCIATE,
-    ORGANIZATION_SUPER_ADMIN,
-    LOANEE,
-    FINANCIER,
-    COOPERATE_FINANCIER_SUPER_ADMIN,
-    COOPERATE_FINANCIER_ADMIN,;
+    PORTFOLIO_MANAGER_ASSOCIATE("Portfolio manager associate"),
+    MEEDL_SUPER_ADMIN("Meedl super admin"),
+    MEEDL_ADMIN("Meedl admin"),
+    PORTFOLIO_MANAGER("Portfolio manager"),
+    ORGANIZATION_ADMIN("Organization admin"),
+    ORGANIZATION_ASSOCIATE("Organization associate"),
+    ORGANIZATION_SUPER_ADMIN("Organization super admin"),
+    LOANEE("Loanee"),
+    FINANCIER("Financier"),
+    COOPERATE_FINANCIER_SUPER_ADMIN("Cooperate financier super admin "),
+    COOPERATE_FINANCIER_ADMIN("Cooperate financier admin"),;
 
+    private final String roleName;
 
+    IdentityRole(String roleName) {
+        this.roleName = roleName;
+    }
 
     public static Set<IdentityRole> getMeedlRoles(){
-        return Set.of(MEEDL_SUPER_ADMIN, MEEDL_ADMIN, MEEDL_ASSOCIATE, PORTFOLIO_MANAGER);
+        return Set.of(MEEDL_SUPER_ADMIN, MEEDL_ADMIN, PORTFOLIO_MANAGER_ASSOCIATE, PORTFOLIO_MANAGER);
     }
     public static Set<IdentityRole> getOrganizationRoles(){
         return Set.of(ORGANIZATION_ADMIN, ORGANIZATION_ASSOCIATE, ORGANIZATION_SUPER_ADMIN);
     }
-    public static boolean isMeedlAdminOrSuperAdmin(UserIdentity actor) {
+    public static Set<IdentityRole> getCooperateFinancierRoles(){
+        return Set.of(COOPERATE_FINANCIER_ADMIN, COOPERATE_FINANCIER_SUPER_ADMIN);
+    }
+    public static boolean isMeedlAdminOrMeedlSuperAdmin(UserIdentity actor) {
         return IdentityRole.MEEDL_SUPER_ADMIN.equals(actor.getRole()) ||
                 IdentityRole.MEEDL_ADMIN.equals(actor.getRole());
     }
@@ -54,8 +63,11 @@ public enum IdentityRole {
         return getOrganizationRoles().contains(role);
     }
 
+    public static boolean isCooperateFinancier(IdentityRole role) {
+        return getCooperateFinancierRoles().contains(role);
+    }
     public static boolean isAssignableMeedlRole(IdentityRole role) {
-        return Set.of(MEEDL_ADMIN, MEEDL_ASSOCIATE, PORTFOLIO_MANAGER).contains(role);
+        return Set.of(MEEDL_ADMIN, PORTFOLIO_MANAGER_ASSOCIATE, PORTFOLIO_MANAGER).contains(role);
     }
 
     public static boolean isAssignableOrganizationRole(IdentityRole role) {
@@ -66,7 +78,7 @@ public enum IdentityRole {
     public boolean isMeedlRole() {
         return this == MEEDL_SUPER_ADMIN ||
                 this == MEEDL_ADMIN ||
-                this == MEEDL_ASSOCIATE ||
+                this == PORTFOLIO_MANAGER_ASSOCIATE ||
                 this == PORTFOLIO_MANAGER;
     }
 

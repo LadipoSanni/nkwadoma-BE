@@ -6,6 +6,8 @@ import lombok.Getter;
 public class ControllerConstant {
    public static final String  INVITE_ORGANIZATION_TITLE = "Invite Organization";
    public static final String  INVITE_ORGANIZATION_DESCRIPTION = "To invite an organization, kindly provide the industry name,organization name, email address, website address,rc number,tin and phone number ";
+    public static final String  BANK_DETAIL = "Bank detail";
+    public static final String  BANK_DETAIL_DESCRIPTION = "To add bank details and update ";
    public static final String  REFERENCE_DATA_TITLE = "Organization's Reference data";
    public static final String  REFERENCE_DATA_DESCRIPTION = "Organization's Reference data including service offering and industry type";
    public static final String  DEACTIVATE_ORGANIZATION_TITLE = "Deactivate Organization";
