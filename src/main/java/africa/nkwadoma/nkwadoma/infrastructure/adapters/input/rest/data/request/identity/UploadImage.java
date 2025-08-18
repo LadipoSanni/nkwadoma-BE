@@ -1,14 +1,16 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity;
 
-import africa.nkwadoma.nkwadoma.domain.enums.identity.MFAType;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@AllArgsConstructor
 @NoArgsConstructor
-public class MFARequest {
-    private String mfaPhoneNumber;
-    private MFAType mfaType;
+public class UploadImage {
+    @NotBlank(message = "image cannot be empty")
+    private String imageUrl;
 }

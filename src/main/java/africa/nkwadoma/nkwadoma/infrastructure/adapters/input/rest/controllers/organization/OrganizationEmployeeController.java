@@ -1,8 +1,8 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.organization;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
-import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
@@ -130,7 +130,7 @@ public class OrganizationEmployeeController {
 
     @Deprecated
     @GetMapping("search-admin")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<?> searchAllAdminInOrganization(@RequestParam @NotBlank(message = "Organization id is required") String organizationId,
                                                           @RequestParam @NotBlank(message = "name") String name,
                                                           @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
