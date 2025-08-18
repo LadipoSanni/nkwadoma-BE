@@ -332,11 +332,6 @@ public class UserIdentityService implements UserUseCase {
     @Override
     public String manageMFA(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity, UserMessages.USER_IDENTITY_CANNOT_BE_EMPTY.getMessage());
-//        if ((userIdentity.isEnablePhoneNumberMFA() || userIdentity.isEnableEmailMFA())
-//            && userIdentity.isDisableMFA()){
-//            log.error("MFA cannot be disabled and enabled at the same time as one or more factors are selected for a disabled mfa {}", userIdentity);
-//            throw new MeedlException("MFA cannot be disabled and enabled at the same time");
-//        }
         UserIdentity foundUser = userIdentityOutputPort.findById(userIdentity.getId());
         if(MFAType.MFA_DISABLED.equals(userIdentity.getMfaType())){
             foundUser.setMfaType(userIdentity.getMfaType());
