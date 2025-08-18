@@ -22,7 +22,7 @@ public class FinancialConstants {
 
     public static final double MONTHS_PER_YEAR_DOUBLE = 12.0;
 
-    private final int DAYS_IN_MONTH = 30;
+    private static final int DAYS_IN_MONTH = 30;
 
 
 }
