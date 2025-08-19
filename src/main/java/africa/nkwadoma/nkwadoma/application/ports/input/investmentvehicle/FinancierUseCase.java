@@ -1,5 +1,7 @@
 package africa.nkwadoma.nkwadoma.application.ports.input.investmentvehicle;
 
+
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
@@ -40,4 +42,6 @@ public interface FinancierUseCase {
     Cooperation viewCooperateFinancierDetail(String actorId) throws MeedlException;
 
     Cooperation updateCooperateProfile(String actorId,Cooperation cooperation) throws MeedlException;
+
+    String respondToColleageInvitation(String sub, String financierId, ActivationStatus activationStatus) throws MeedlException;
 }
