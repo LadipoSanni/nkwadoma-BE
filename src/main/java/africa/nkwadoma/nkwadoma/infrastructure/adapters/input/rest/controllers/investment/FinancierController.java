@@ -299,7 +299,7 @@ public class FinancierController {
         );
     }
 
-    @GetMapping("invite/colleague/financier")
+    @PostMapping("invite/colleague/financier")
     @PreAuthorize("hasRole('COOPERATE_FINANCIER_SUPER_ADMIN') or hasRole('COOPERATE_FINANCIER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> inviteColleagueFinancier(@AuthenticationPrincipal Jwt meedlUser,
                                                                    @RequestBody InviteColleagueRequest inviteColleagueRequest) throws MeedlException {
@@ -331,7 +331,7 @@ public class FinancierController {
     }
 
 
-    @GetMapping("update/cooperate/profile")
+    @PatchMapping("update/cooperate/profile")
     @PreAuthorize("hasRole('COOPERATE_FINANCIER_SUPER_ADMIN') or hasRole('COOPERATE_FINANCIER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> updateCooperationProfile(@AuthenticationPrincipal Jwt meedlUser ,
                                                                    @RequestBody CooperationRequest cooperationRequest) throws MeedlException {
@@ -352,11 +352,11 @@ public class FinancierController {
 
     @PostMapping("financier/respond/colleague/invitation")
     @PreAuthorize("hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')")
-    private ResponseEntity<ApiResponse<?>> respondToColleagueInvitation(@AuthenticationPrincipal Jwt meedlUser,
+    public ResponseEntity<ApiResponse<?>> respondToColleagueInvitation(@AuthenticationPrincipal Jwt meedlUser,
                                                                         @RequestParam(name = "cooperateFinancierId") String cooperateFinancierId,
-                                                                        @RequestParam(name = "decision") ActivationStatus activationStatus) throws MeedlException {
-        String response = financierUseCase.respondToColleageInvitation(meedlUser.getClaimAsString("sub"),
-                cooperateFinancierId,activationStatus);
+                                                                        @RequestParam(name = "decision") ActivationStatus decision) throws MeedlException {
+        String response = financierUseCase.respondToColleagueInvitation(meedlUser.getClaimAsString("sub"),
+                cooperateFinancierId,decision);
         return new ResponseEntity<>(ApiResponse.builder().
                 statusCode(HttpStatus.OK.toString()).
                 data(response).

@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.model.investmentvehicle;
 
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.Builder;
@@ -18,6 +19,7 @@ public class Cooperation {
     private String bankDetailId;
     private String name;
     private String email;
+    private ActivationStatus activationStatus;
 
     public void validate() throws MeedlException {
         log.info("Validating cooperation details...");

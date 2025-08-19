@@ -3,10 +3,12 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.UserUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.financier.CooperateFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.CooperationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.EmailTokenOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
@@ -17,9 +19,11 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.MFAType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.financier.CooperateFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.Cooperation;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identitymanager.BlackListedTokenAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.BlackListedToken;
@@ -30,6 +34,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.keycloak.representations.*;
 import org.keycloak.representations.idm.*;
 import org.springframework.scheduling.annotation.*;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
 import java.time.LocalDateTime;
@@ -44,6 +50,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityM
 @Slf4j
 @EnableAsync
 @RequiredArgsConstructor
+@Component
 public class UserIdentityService implements UserUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final IdentityManagerOutputPort identityManagerOutPutPort;
@@ -55,6 +62,8 @@ public class UserIdentityService implements UserUseCase {
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
+    private final CooperateFinancierOutputPort cooperateFinancierOutputPort;
+    private final CooperationOutputPort cooperationOutputPort;
 
     @Override
     public AccessTokenResponse login(UserIdentity userIdentity)throws MeedlException {
@@ -122,11 +131,32 @@ public class UserIdentityService implements UserUseCase {
                 UserIdentity.builder().email(foundUser.getEmail()).password(password).build());
         userIdentity.setRole(foundUser.getRole());
         log.info("User Identity after password has been created: {}", foundUser);
+
+        activateCooperateFinancier(userIdentity);
+
 //        blackListedTokenAdapter.blackListToken(createBlackList(token));
 //        log.info("done getting user identity frm token {}",userIdentity);
 //        userIdentity = identityManagerOutPutPort.createPassword(UserIdentity.builder().email(userIdentity.getEmail()).password(password).build());
 //        blackListedTokenAdapter.blackListToken(createBlackList(token));
         return userIdentity;
+    }
+
+    private void activateCooperateFinancier(UserIdentity userIdentity) throws MeedlException {
+        if (userIdentity.getRole().isCooperationStaff()){
+            CooperateFinancier cooperateFinancier =
+                    cooperateFinancierOutputPort.findCooperateFinancierByUserId(userIdentity.getId());
+            cooperateFinancier.setActivationStatus(ActivationStatus.ACTIVE);
+            cooperateFinancierOutputPort.save(cooperateFinancier);
+            activateCooperation(userIdentity, cooperateFinancier);
+        }
+    }
+
+    private void activateCooperation(UserIdentity userIdentity, CooperateFinancier cooperateFinancier) throws MeedlException {
+        if (userIdentity.getRole().equals(IdentityRole.COOPERATE_FINANCIER_SUPER_ADMIN)){
+            Cooperation cooperation = cooperateFinancier.getCooperate();
+            cooperation.setActivationStatus(ActivationStatus.ACTIVE);
+            cooperationOutputPort.save(cooperation);
+        }
     }
 
     @Override

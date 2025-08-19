@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.notification.SendColleag
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.financier.CooperateFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
@@ -66,11 +67,13 @@ public class BeanConfiguration {
                                                    BlackListedTokenAdapter blackListedTokenAdapter,
                                                    OrganizationIdentityOutputPort organizationIdentityOutputPort,
                                                    AsynchronousMailingOutputPort asynchronousMailingOutputPort,
-                                                   AsynchronousNotificationOutputPort asynchronousNotificationOutputPort
+                                                   AsynchronousNotificationOutputPort asynchronousNotificationOutputPort,
+                                                   CooperateFinancierOutputPort cooperateFinancierOutputPort,
+                                                   CooperationOutputPort cooperationOutputPort
                                                    ){
         return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,sendOrganizationEmployeeEmailUseCase,
                 tokenUtils, emailTokenOutputPort, blackListedTokenAdapter,
-                organizationIdentityOutputPort, asynchronousMailingOutputPort, asynchronousNotificationOutputPort
+                organizationIdentityOutputPort, asynchronousMailingOutputPort, asynchronousNotificationOutputPort,cooperateFinancierOutputPort,cooperationOutputPort
         );
     }
 
