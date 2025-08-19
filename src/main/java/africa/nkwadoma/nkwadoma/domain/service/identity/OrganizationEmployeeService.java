@@ -135,7 +135,7 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
             log.info("The found actor to view employees pending approval is a meedl staff {}", foundActor.getRole());
             orgEmployee.setIdentityRoles(Set.of(IdentityRole.PORTFOLIO_MANAGER, IdentityRole.PORTFOLIO_MANAGER_ASSOCIATE));
         }
-        else if (IdentityRole.isOrganizationAdminOrSuperAdmin(foundActor)) {
+        else if (IdentityRole.isOrganizationAdminOrSuperAdmin(foundActor.getRole())) {
             log.info("The found actor viewing employees with pending approval is an organization staff with role {}", foundActor.getRole());
             orgEmployee.setIdentityRoles(IdentityRole.getOrganizationRoles());
         }

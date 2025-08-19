@@ -72,7 +72,7 @@ public class CohortService implements CohortUseCase {
         cohort.validate();
         String cohortName = cohort.getName();
         UserIdentity userIdentity = userIdentityOutputPort.findById(cohort.getCreatedBy());
-        if (userIdentity.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)) {
+        if (IdentityRole.isOrganizationAdminOrSuperAdmin(userIdentity.getRole())) {
             cohort.validateLoanBreakDowns();
             cohort.setCohortType(CohortType.NON_LOAN_BOOK);
         }else {
@@ -289,7 +289,7 @@ public class CohortService implements CohortUseCase {
     public Page<Cohort> searchForCohort(String userId, Cohort cohort) throws MeedlException {
         MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
-        if (userIdentity.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)){
+        if (IdentityRole.isOrganizationStaff(userIdentity.getRole() )){
             if (ObjectUtils.isEmpty(cohort.getProgramId())) {
                 OrganizationIdentity organizationIdentity = programOutputPort.findCreatorOrganization(userId);
                 return cohortOutputPort.searchCohortInOrganization(organizationIdentity.getId(),cohort.getName(),

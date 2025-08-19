@@ -527,7 +527,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
         log.info("Viewing organization detail for user with role {}", userIdentity.getRole());
-        if(userIdentity.getRole().equals(ORGANIZATION_ADMIN)){
+        if(IdentityRole.isOrganizationStaff(userIdentity.getRole())){
             OrganizationEmployeeIdentity organizationEmployeeIdentity =
                     organizationEmployeeIdentityOutputPort.findByCreatedBy(userIdentity.getId());
             organizationId = organizationEmployeeIdentity.getOrganization();
@@ -544,7 +544,18 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
             int pendingLoanOffer = loanOfferOutputPort.countNumberOfPendingLoanOfferForOrganization(organizationIdentity.getId());
             log.info("Number of pending loan offer in organization with id {} -------> is {}",organizationId, pendingLoanOffer);
             organizationIdentity.setPendingLoanOfferCount(pendingLoanOffer);
+            updateOrganizationRequestedBy(organizationIdentity);
         return organizationIdentity;
+    }
+
+    private void updateOrganizationRequestedBy(OrganizationIdentity organizationIdentity) {
+        UserIdentity userIdentity = null;
+        try {
+            userIdentity = userIdentityOutputPort.findById(organizationIdentity.getCreatedBy());
+            organizationIdentity.setRequestedBy(userIdentity.getFirstName() + " " + userIdentity.getLastName());
+        } catch (MeedlException e) {
+            log.info("Unable to find created by {} for organization with id {} while viewing organization detail ",organizationIdentity.getCreatedBy(), organizationIdentity.getId());
+        }
     }
 
     private static void getLoanPercentage(OrganizationIdentity organizationIdentity, OrganizationLoanDetail organizationLoanDetail) {

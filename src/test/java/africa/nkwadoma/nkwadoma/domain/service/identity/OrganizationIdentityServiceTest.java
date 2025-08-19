@@ -351,7 +351,7 @@ class OrganizationIdentityServiceTest {
     }
 
     @Test
-    void shouldReturnOrganizationDetails_WhenUserIsOrganizationAdmin() throws MeedlException {
+    void viewOrganizationDetailByAdmin() throws MeedlException {
 
         OrganizationLoanDetail loanDetail = OrganizationLoanDetail.builder()
                 .amountRepaid(BigDecimal.valueOf(5000))
@@ -360,6 +360,7 @@ class OrganizationIdentityServiceTest {
                 .build();
 
         when(userIdentityOutputPort.findById(mockId)).thenReturn(sarah);
+        when(userIdentityOutputPort.findById(roseCouture.getCreatedBy())).thenReturn(sarah);
         sarah.setRole(IdentityRole.ORGANIZATION_ADMIN);
         employeeSarah.setOrganization(roseCouture.getId());
         when(organizationEmployeeIdentityOutputPort.findByCreatedBy(mockId)).thenReturn(employeeSarah);
@@ -381,7 +382,7 @@ class OrganizationIdentityServiceTest {
     }
 
     @Test
-    void shouldReturnOrganizationDetails_WhenUserIsPortfolioManager() throws MeedlException {
+    void viewOrganizationDetailByPortfolioManager() throws MeedlException {
         sarah.setRole(IdentityRole.PORTFOLIO_MANAGER);
 
         OrganizationLoanDetail loanDetail = OrganizationLoanDetail.builder()
@@ -390,6 +391,7 @@ class OrganizationIdentityServiceTest {
                 .outstandingAmount(BigDecimal.valueOf(10000))
                 .build();
         when(userIdentityOutputPort.findById(mockId)).thenReturn(sarah);
+        when(userIdentityOutputPort.findById(roseCouture.getCreatedBy())).thenReturn(sarah);
         when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
         when(organizationIdentityOutputPort.getServiceOfferings(roseCouture.getId())).thenReturn(roseCouture.getServiceOfferings());
         when(organizationLoanDetailOutputPort.findByOrganizationId(roseCouture.getId())).thenReturn(loanDetail);
