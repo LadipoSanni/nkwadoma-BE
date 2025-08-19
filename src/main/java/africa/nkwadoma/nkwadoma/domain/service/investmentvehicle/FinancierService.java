@@ -93,9 +93,14 @@ public class FinancierService implements FinancierUseCase {
         }else {
             response = inviteMultipleFinancier(financiers, investmentVehicle);
         }
-        asynchronousMailingOutputPort.sendFinancierEmail(financiersToMail, investmentVehicle);
-        asynchronousNotificationOutputPort.notifyPortfolioManagerOfNewFinancier(financiersToMail, investmentVehicle, actor);
-        updateNumberOfFinancierOnPortfolio(financiers);
+        if (actor.getRole().isMeedlSuperAdmin()) {
+            asynchronousMailingOutputPort.sendFinancierEmail(financiersToMail, investmentVehicle);
+            asynchronousNotificationOutputPort.notifyPortfolioManagerOfNewFinancier(financiersToMail, investmentVehicle, actor);
+            updateNumberOfFinancierOnPortfolio(financiers);
+        }else {
+            UserIdentity meedlSuperAdmin = userIdentityOutputPort.findMeedlSuperAdmin();
+            asynchronousNotificationOutputPort.sendFinancierInvitationNotificationToSuperAdmin(financiersToMail,actor,meedlSuperAdmin);
+        }
         return response;
     }
     @Override
@@ -224,55 +229,84 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private Financier inviteCooperateFinancierToPlatform(Financier financier) throws MeedlException {
-        log.info("Financier invited into the platform before getCooperateFinancierByUserIdentity is called.");
-        try {
-            financier = getCooperateFinancierByUserIdentity(financier);
-            log.info("cooperate financier found on the platform ");
-        } catch (MeedlException e) {
-            log.warn("Failed to find user on application. Financier not yet onboarded.");
-            log.info("Inviting a new financier to the platform {} ",e.getMessage());
-            financier = saveNonExistingCooperateFinancier(financier);
-            financiersToMail.add(financier);
-            log.info("Financier with email {} added for email sending.", financier.getUserIdentity().getEmail());
-        }
+        log.info("Cooperate Financier invitation about to start ");
+        validateInput(financier);
+
+        Cooperation cooperation = financier.getCooperation();
+        validateCooperationDoesNotExist(cooperation,financier.getUserIdentity().getEmail());
+
+
+        Cooperation savedCooperation = saveCooperation(cooperation);
+        UserIdentity savedUserIdentity = saveUserIdentity(financier.getUserIdentity());
+
+        UserIdentity actor = userIdentityOutputPort.findById(savedUserIdentity.getCreatedBy());
+
+        Financier buildFinancier = buildFinancier(financier,savedUserIdentity,actor);
+
+        Financier savedFinancier = financierOutputPort.save(buildFinancier);
+
+        saveCooperateFinancier(savedCooperation, savedFinancier,actor);
+
+        financiersToMail.add(savedFinancier);
+        log.info("Financier with email {} added for email sending.", savedFinancier.getUserIdentity().getEmail());
         return financier;
     }
 
-    private Financier saveNonExistingCooperateFinancier(Financier financier) throws MeedlException {
-        log.info("Saving cooperate financier user identity to platform {} ",financier);
-        financier.getUserIdentity().setFirstName(financier.getCooperation().getName());
-        financier.getUserIdentity().setLastName(financier.getCooperation().getName());
-        UserIdentity userIdentity = identityManagerOutputPort.createUser(financier.getUserIdentity());
-        userIdentity = userIdentityOutputPort.save(userIdentity);
-        financier.setUserIdentity(userIdentity);
-        Cooperation cooperation = cooperationOutputPort.save(financier.getCooperation());
-        financier.setCooperation(cooperation);
+
+    private void saveCooperateFinancier(Cooperation cooperation, Financier financier,UserIdentity actor) throws MeedlException {
+        CooperateFinancier cooperateFinancier = CooperateFinancier.builder()
+                .cooperate(cooperation)
+                .financier(financier)
+                .activationStatus(actor.getRole().isMeedlSuperAdmin()
+                        ? ActivationStatus.INVITED
+                        : ActivationStatus.PENDING_APPROVAL)
+                .build();
+
+        log.info("Saving cooperate financier representation: {}", cooperateFinancier);
+        cooperateFinancierOutputPort.save(cooperateFinancier);
+    }
+
+    private Financier buildFinancier(Financier financier, UserIdentity savedUserIdentity,UserIdentity actor) {
+        financier.setUserIdentity(savedUserIdentity);
         financier.setCreatedAt(LocalDateTime.now());
-        financier.setActivationStatus(ActivationStatus.INVITED);
         financier.setAccreditationStatus(AccreditationStatus.UNVERIFIED);
-        financier = financierOutputPort.save(financier);
+        financier.setActivationStatus(actor.getRole().isMeedlSuperAdmin()
+                ? ActivationStatus.INVITED
+                : ActivationStatus.PENDING_APPROVAL);
         return financier;
     }
 
-    private Financier getCooperateFinancierByUserIdentity(Financier financier) throws MeedlException {
-        UserIdentity userIdentity = findFinancierUserIdentityByEmail(financier.getUserIdentity().getEmail());
-        try {
-            Financier existingFinancier = financierOutputPort.findFinancierByUserId(userIdentity.getId());
-            log.info("Financier found on the platform you the user id: {} email is {}", existingFinancier.getId(), existingFinancier.getUserIdentity().getEmail());
-        }catch (MeedlException e){
-            log.warn("User is not previously a financier but exists on the platform");
-            log.info("Creating a new cooperation financier for user with this email : {}", userIdentity.getEmail());
-            Cooperation cooperation = cooperationOutputPort.save(financier.getCooperation());
-            financier.setCooperation(cooperation);
-            financier.setUserIdentity(userIdentity);
-            financier.setCreatedAt(LocalDateTime.now());
-            Financier savedFinancier = financierOutputPort.save(financier);
-            log.info("Cooperate financier saved successfully");
-            log.info("User previously existing has now been made a financier");
-            notifyExistingFinancier(financier, NotificationFlag.INVITE_FINANCIER);
-        }
-        return financier;
+    private UserIdentity saveUserIdentity(UserIdentity userIdentity) throws MeedlException {
+        log.info("Saving user identity for email: {}", userIdentity.getEmail());
+        userIdentity.setRole(IdentityRole.COOPERATE_FINANCIER_SUPER_ADMIN);
+        userIdentity = identityManagerOutputPort.createUser(userIdentity);
+        return userIdentityOutputPort.save(userIdentity);
     }
+
+    private Cooperation saveCooperation(Cooperation cooperation) throws MeedlException {
+        log.info("Saving new cooperation: {}", cooperation.getName());
+        return cooperationOutputPort.save(cooperation);
+    }
+
+    private void validateCooperationDoesNotExist(Cooperation cooperation,String email) throws MeedlException {
+        if (ObjectUtils.isNotEmpty(cooperationOutputPort.findByEmail(cooperation.getEmail()))) {
+            throw new InvestmentException("Cooperation with email already exists");
+        }
+        if (ObjectUtils.isNotEmpty(cooperationOutputPort.findByName(cooperation.getName()))) {
+            throw new InvestmentException("Cooperation with name already exists");
+        }
+        if (userIdentityOutputPort.checkIfUserExistByEmail(email)) {
+            throw new InvestmentException("User with email already exists");
+        }
+    }
+
+    private static void validateInput(Financier financier) throws MeedlException {
+        MeedlValidator.validateObjectInstance(financier,"Financier cannot be empty ");
+        MeedlValidator.validateObjectInstance(financier.getCooperation(),"Cooperation cannot be empty ");
+        MeedlValidator.validateObjectInstance(financier.getUserIdentity(),"UserIdentity cannot be empty ");
+        financier.getCooperation().validate();
+    }
+
 
     private void inviteIndividualFinancierToPlatform(Financier financier) throws InvestmentException {
         try {

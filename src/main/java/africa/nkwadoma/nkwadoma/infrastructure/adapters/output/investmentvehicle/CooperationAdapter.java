@@ -23,7 +23,6 @@ public class CooperationAdapter implements CooperationOutputPort {
     public Cooperation save(Cooperation cooperation) throws MeedlException {
         MeedlValidator.validateObjectInstance(cooperation, "Cooperation can not be empty");
         cooperation.validate();
-        confirmCooperationDoesNotPreviouslyExist(cooperation);
         log.info("Cooperation to save in cooperation adapter : {}", cooperation);
         CooperationEntity cooperationEntityToSave = cooperationMapper.toCooperationEntity(cooperation);
         log.info("Cooperation to save mapped : {}",cooperationEntityToSave);
@@ -32,13 +31,6 @@ public class CooperationAdapter implements CooperationOutputPort {
         return cooperationMapper.toCooperation(cooperationEntity);
     }
 
-    private void confirmCooperationDoesNotPreviouslyExist(Cooperation cooperation) throws MeedlException {
-        boolean cooperationExistByName = cooperationRepository.existsByName(cooperation.getName());
-        if (cooperationExistByName) {
-            log.error("Cooperation already exists with name {} ", cooperation.getName());
-            throw new InvestmentException("Cooperation with the same name already exists");
-        }
-    }
 
     @Override
     public Cooperation findById(String cooperationId) throws MeedlException {
@@ -58,6 +50,14 @@ public class CooperationAdapter implements CooperationOutputPort {
     public Cooperation findByName(String name) throws MeedlException {
         MeedlValidator.validateDataElement(name, "Cooperation name can not be empty");
         CooperationEntity cooperationEntity = cooperationRepository.findByName(name);
+        return cooperationMapper.toCooperation(cooperationEntity);
+    }
+
+    @Override
+    public Cooperation findByEmail(String email) throws MeedlException {
+        MeedlValidator.validateEmail(email);
+        CooperationEntity cooperationEntity = cooperationRepository.findByEmail(email);
+
         return cooperationMapper.toCooperation(cooperationEntity);
     }
 }

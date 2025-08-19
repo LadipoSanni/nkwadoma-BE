@@ -14,8 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 @Slf4j
 @RequiredArgsConstructor
 @Component
@@ -61,6 +59,14 @@ public class CooperateFinancierAdapter implements CooperateFinancierOutputPort {
                         orElseThrow(()-> new ResourceNotFoundException("Cooperate financier not found"));
 
 
+        return cooperateFinancierMapper.toCooperateFinancier(cooperateFinancierEntity);
+    }
+
+    @Override
+    public CooperateFinancier findByFinancierId(String cooperateFinancierId) {
+
+        CooperateFinancierEntity cooperateFinancierEntity =
+                cooperateFinancierRepository.findByFinancierId(cooperateFinancierId);
         return cooperateFinancierMapper.toCooperateFinancier(cooperateFinancierEntity);
     }
 }

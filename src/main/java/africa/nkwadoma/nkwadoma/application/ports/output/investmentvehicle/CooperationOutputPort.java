@@ -12,4 +12,6 @@ public interface CooperationOutputPort {
     void deleteById(String cooperationId) throws MeedlException;
 
     Cooperation findByName(String name) throws MeedlException;
+
+    Cooperation findByEmail(String email) throws MeedlException;
 }
