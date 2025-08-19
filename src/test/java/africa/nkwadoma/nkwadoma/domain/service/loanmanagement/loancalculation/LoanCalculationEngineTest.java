@@ -1015,8 +1015,83 @@ public class LoanCalculationEngineTest {
 
         calculationEngine.calculateMonthlyInterest();
 
-        // Verify interactions
         verify(loaneeLoanDetailsOutputPort, times(1))
                 .findAllWithDailyInterestByMonthAndYear(Month.AUGUST, 2025);
     }
+
+    @Test
+    void compoundInterestWhenEndDateIsNotMonthEndItShouldAccumulateDailyInterestOnly() throws MeedlException {
+        LocalDateTime startDate = LocalDateTime.of(2025, 8, 1, 0, 0);
+        LocalDateTime repaymentDate = LocalDateTime.of(2025, 8, 15, 0, 0);
+
+        RepaymentHistory repaymentHistory = createRepayment(repaymentDate, new BigDecimal("1000.00"));
+
+        LoaneeLoanDetail loaneeLoanDetail = LoaneeLoanDetail.builder()
+                .interestRate(5)
+                .amountOutstanding(new BigDecimal("10000.00"))
+                .build();
+
+        CalculationContext context = CalculationContext.builder()
+                .startDate(startDate)
+                .repaymentHistory(repaymentHistory)
+                .loaneeLoanDetail(loaneeLoanDetail)
+                .totalInterestIncurredInAMonth(BigDecimal.ZERO)
+                .build();
+
+        DailyInterest mockDailyInterest = DailyInterest.builder()
+                .interest(new BigDecimal("10.00"))
+                .build();
+
+        when(dailyInterestOutputPort.save(any(DailyInterest.class)))
+                .thenReturn(mockDailyInterest);
+
+        calculationEngine.compoundingInterest(context);
+
+        verify(dailyInterestOutputPort, atLeast(1)).save(any(DailyInterest.class));
+        verify(monthlyInterestOutputPort, never()).save(any(MonthlyInterest.class));
+
+        assertTrue(context.getTotalInterestIncurredInAMonth().compareTo(BigDecimal.ZERO) > 0);
+    }
+
+
+    @Test
+    void compoundingInterestWhenEndDateIsMonthEndItShouldAccumulateAndSaveMonthlyInterest() throws MeedlException {
+        LocalDateTime startDate = LocalDateTime.of(2025, 8, 1, 0, 0); // Aug 1st
+        LocalDateTime repaymentDate = LocalDateTime.of(2025, 8, 31, 0, 0); // Aug 31st (month end)
+
+        RepaymentHistory repaymentHistory = createRepayment(repaymentDate, new BigDecimal("1000.00"));
+
+        LoaneeLoanDetail loaneeLoanDetail = LoaneeLoanDetail.builder()
+                .interestRate(5)
+                .amountOutstanding(new BigDecimal("10000.00"))
+                .build();
+
+        CalculationContext context = CalculationContext.builder()
+                .startDate(startDate)
+                .repaymentHistory(repaymentHistory)
+                .loaneeLoanDetail(loaneeLoanDetail)
+                .totalInterestIncurredInAMonth(BigDecimal.ZERO)
+                .build();
+
+        DailyInterest mockDailyInterest = DailyInterest.builder()
+                .interest(new BigDecimal("10.00"))
+                .build();
+
+        MonthlyInterest mockMonthlyInterest = MonthlyInterest.builder()
+                .interest(new BigDecimal("300.00"))
+                .build();
+
+        when(dailyInterestOutputPort.save(any(DailyInterest.class)))
+                .thenReturn(mockDailyInterest);
+        when(monthlyInterestOutputPort.save(any(MonthlyInterest.class)))
+                .thenReturn(mockMonthlyInterest);
+
+        calculationEngine.compoundingInterest(context);
+
+        verify(dailyInterestOutputPort, atLeast(1)).save(any(DailyInterest.class));
+        verify(monthlyInterestOutputPort, times(1)).save(any(MonthlyInterest.class));
+
+        assertEquals(BigDecimal.ZERO, context.getTotalInterestIncurredInAMonth()); // reset after month-end calc
+    }
+
 }
