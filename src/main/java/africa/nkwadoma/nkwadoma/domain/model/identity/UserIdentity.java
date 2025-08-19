@@ -50,7 +50,7 @@ public class UserIdentity {
     private String lgaOfResidence;
     private String nameOnCard;
     //
-    private IdentityRole role;
+    private IdentityRole  role;
     private String createdBy;
     private String alternateEmail;
     private String alternatePhoneNumber;
