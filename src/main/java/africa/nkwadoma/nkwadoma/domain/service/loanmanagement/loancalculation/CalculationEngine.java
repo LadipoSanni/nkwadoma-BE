@@ -271,14 +271,20 @@ public class CalculationEngine implements CalculationEngineUseCase {
     private boolean isSkipableCalculation(List<RepaymentHistory> repaymentHistories, Loanee loanee) {
         return ObjectUtils.isEmpty(repaymentHistories) || repaymentHistories.isEmpty() || ObjectUtils.isEmpty(loanee);
     }
+    private void processRepaymentHistoryCalculation(
+            CalculationContext calculationContext
+    ) throws MeedlException {
+        calculationContext.setStartDate(calculationContext.getLoaneeLoanDetail().getLoanStartDate());
 
-    private void processRepaymentHistoryCalculations(
+/
+    }
+
+        private void processRepaymentHistoryCalculations(
             CalculationContext calculationContext
     ) throws MeedlException {
 
         BigDecimal runningTotal = BigDecimal.ZERO;
         BigDecimal totalInterestIncurred = BigDecimal.ZERO;
-        calculationContext.setDefaultValues();
         LocalDateTime startDate = calculationContext.getLoaneeLoanDetail().getLoanStartDate();
         BigDecimal previousOutstandingAmount = null;
 
@@ -756,27 +762,33 @@ public class CalculationEngine implements CalculationEngineUseCase {
         log.info("Amount outstanding after adding this month incurred == {}", loaneeLoanDetail.getAmountOutstanding());
         loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
     }
-    private void compoundingInterest(CalculationContext calculationContext){
+    private void compoundingInterest(CalculationContext calculationContext) throws MeedlException {
             LocalDateTime startDate = calculationContext.getStartDate();
         RepaymentHistory repaymentHistory = calculationContext.getRepaymentHistory();
         LocalDate endDate = repaymentHistory.getPaymentDateTime().toLocalDate();
         List<LocalDate> months = MonthEndCalculator.getMonthEnds(startDate, endDate);
+        for (LocalDate month: months){
+            calculateInterestUpToDate(month, calculationContext);
+        }
+        if(!isUpToLastDayOfTheMonth(endDate.getDayOfMonth(), endDate.lengthOfMonth())){
+            for (int dayCount = 1; dayCount <= endDate.getDayOfMonth(); dayCount++ ){
+                log.info("Something {}", dayCount);
+            }
+        }
 
-        months.forEach(month -> {
-            loopDaysUpToDate(month, calculationContext);
-        });
+
     }
 
-    public void loopDaysUpToDate(LocalDate month, CalculationContext calculationContext) throws MeedlException {
-        int limit = month.getDayOfMonth();
+    public void calculateInterestUpToDate(LocalDate month, CalculationContext calculationContext) throws MeedlException {
+        int numberOfDaysTillDateMeasured = month.getDayOfMonth();
         int lastDayOfMonth = month.lengthOfMonth();
 
         LoaneeLoanDetail loaneeLoanDetail = calculationContext.getLoaneeLoanDetail();
-        for (int day = 1; day <= limit; day++) {
+        for (int day = 1; day <= numberOfDaysTillDateMeasured; day++) {
             DailyInterest dailyInterest = calculateAndSaveDailyInterest(loaneeLoanDetail);
             calculationContext.setTotalInterestIncurredInAMonth(calculationContext.getTotalInterestIncurredInAMonth().add(dailyInterest.getInterest()));
         }
-        if (isUpToLastDayOfTheMonth(limit, lastDayOfMonth)) {
+        if (isUpToLastDayOfTheMonth(numberOfDaysTillDateMeasured, lastDayOfMonth)) {
             calculateAndSaveMonthlyInterest(calculationContext.getTotalInterestIncurredInAMonth(), loaneeLoanDetail);
             setStartDateToNextFirstOfNextMonth(calculationContext);
 
@@ -804,6 +816,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
         log.info("Monthly interest before saving == {}", monthlyInterest);
         monthlyInterest = monthlyInterestOutputPort.save(monthlyInterest);
         log.info("Monthly interest after saving == {}", monthlyInterest);
+        return monthlyInterest;
     }
 
     private boolean isUpToLastDayOfTheMonth(int countInDays, int lastDayOfMonth) {
@@ -832,5 +845,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
         log.info("saved daily interest === : {}", dailyInterest);
         return dailyInterest;
     }
+
+
 }
 
