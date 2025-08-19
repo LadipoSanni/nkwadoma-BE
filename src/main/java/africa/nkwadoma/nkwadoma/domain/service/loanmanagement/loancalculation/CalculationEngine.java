@@ -288,8 +288,8 @@ public class CalculationEngine implements CalculationEngineUseCase {
             compoundingInterest(calculationContext);
             runningTotal = calculateTotalAmountRepaidPerRepayment(repayment, runningTotal);
 
-            BigDecimal interestIncurred = calculateIncurredInterestPerRepayment(repayment, calculationContext.getPreviousOutstandingAmount(), calculationContext.getStartDate(), calculationContext.getLoaneeLoanDetail());
-            calculationContext.setTotalInterestIncurred(calculationContext.getTotalInterestIncurred().add(interestIncurred));
+//            BigDecimal interestIncurred = calculateIncurredInterestPerRepayment(repayment, calculationContext.getPreviousOutstandingAmount(), calculationContext.getStartDate(), calculationContext.getLoaneeLoanDetail());
+//            calculationContext.setTotalInterestIncurred(calculationContext.getTotalInterestIncurred().add(interestIncurred));
 
             calculateOutstandingPerRepayment(calculationContext);
 
@@ -299,18 +299,16 @@ public class CalculationEngine implements CalculationEngineUseCase {
             updateLoaneeLoanDetailWithRunningTotals(calculationContext.getLoaneeLoanDetail(), calculationContext.getPreviousOutstandingAmount(), runningTotal);
             log.info("Outstanding per payment {}", calculationContext.getPreviousOutstandingAmount());
         }
+            calculateTotalInterestIncurredAfterRepayment(calculationContext);
 
-        calculateTotalInterestIncurredAfterRepayment(calculationContext);
     }
     private void calculateTotalInterestIncurredAfterRepayment(CalculationContext calculationContext) throws MeedlException {
 
-        BigDecimal interestIncurredFromLastPaymentTillDate = calculateInterestIncurredFromLastPaymentTillDate(calculationContext);
+        calculateInterestIncurredFromLastRepaymentTillUploadDay(calculationContext);
         calculationContext
                 .getLoaneeLoanDetail()
                 .setAmountOutstanding(calculationContext
-                        .getLoaneeLoanDetail()
-                        .getAmountOutstanding()
-                        .add(interestIncurredFromLastPaymentTillDate));
+                        .getPreviousOutstandingAmount());
         log.info("Outstanding loan amount after adding interest incurred from last payment till date is {}", calculationContext.getLoaneeLoanDetail().getAmountOutstanding());
 
         calculationContext
@@ -318,17 +316,17 @@ public class CalculationEngine implements CalculationEngineUseCase {
                 .setInterestIncurred(
                 decimalPlaceRoundUp(
                 calculationContext
-                        .getTotalInterestIncurred()
-                        .add(interestIncurredFromLastPaymentTillDate)));
+                        .getTotalInterestIncurred()));
         log.info("Total interest incurred in loanee loan details after all calculations are done ===> {}", calculationContext.getLoaneeLoanDetail().getInterestIncurred());
     }
 
-    private BigDecimal calculateInterestIncurredFromLastPaymentTillDate(CalculationContext calculationContext) throws MeedlException {
+    private void calculateInterestIncurredFromLastRepaymentTillUploadDay(CalculationContext calculationContext) throws MeedlException {
         LocalDateTime startDate = calculationContext.getStartDate();
         LocalDate endDate = LocalDate.now();
+        log.info("Calculating interest incurred from last repayment date {}, till day of upload {}", startDate, endDate);
+
         calculateInterestForDaysBeforeAndMonthsBetweenAndDaysAfter(calculationContext, startDate, endDate);
 
-//        return incurredInterest;
     }
 
     private void calculateInterestForDaysBeforeAndMonthsBetweenAndDaysAfter(CalculationContext calculationContext, LocalDateTime startDate, LocalDate endDate) throws MeedlException {
@@ -806,6 +804,11 @@ public class CalculationEngine implements CalculationEngineUseCase {
                         .getPreviousOutstandingAmount()
                         .add(calculationContext
                                 .getTotalInterestIncurredInAMonth()));
+        calculationContext
+                .setTotalInterestIncurred(
+                        calculationContext
+                                .getTotalInterestIncurred()
+                                .add(calculationContext.getTotalInterestIncurredInAMonth()));
         calculationContext.setTotalInterestIncurredInAMonth(BigDecimal.ZERO);
     }
 

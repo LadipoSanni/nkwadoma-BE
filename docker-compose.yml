@@ -33,18 +33,18 @@ services:
     depends_on:
       - postgres
 
-  nkwadoma-app:
-    image: ${DOCKER_USERNAME}/nkwadoma:alpha
-    restart: unless-stopped
-    ports:
-      - "8768:8768"
-    env_file:
-      - /home/cloud-group/nkwadoma-systest.env
-    networks:
-      - meedl-network
-    depends_on:
-      - postgres
-      - keycloak
+#  nkwadoma-app:
+#    image: ${DOCKER_USERNAME}/nkwadoma:alpha
+#    restart: unless-stopped
+#    ports:
+#      - "8768:8768"
+#    env_file:
+#      - /home/cloud-group/nkwadoma-systest.env
+#    networks:
+#      - meedl-network
+#    depends_on:
+#      - postgres
+#      - keycloak
 
 volumes:
   pg_data:

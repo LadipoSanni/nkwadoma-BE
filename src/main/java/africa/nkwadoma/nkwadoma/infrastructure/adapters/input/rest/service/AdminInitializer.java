@@ -54,8 +54,6 @@ public class AdminInitializer {
 
     @Value("${superAdmin.lastName}")
     private String SUPER_ADMIN_LAST_NAME ;
-    @Value("${superAdmin.createdBy}")
-    private String CREATED_BY;
 
     private UserIdentity getUserIdentity() {
         return UserIdentity.builder()
@@ -63,7 +61,7 @@ public class AdminInitializer {
                 .firstName(SUPER_ADMIN_FIRST_NAME)
                 .lastName(SUPER_ADMIN_LAST_NAME)
                 .role(PORTFOLIO_MANAGER)
-                .createdBy(CREATED_BY)
+                .createdBy(UUID.randomUUID().toString())
                 .build();
     }
     private OrganizationIdentity getOrganizationIdentity(UserIdentity userIdentity) {
@@ -143,6 +141,7 @@ public class AdminInitializer {
     public UserIdentity inviteFirstUser(UserIdentity userIdentity) throws MeedlException {
         userIdentity.setCreatedAt(LocalDateTime.now());
         userIdentity = saveUserToKeycloak(userIdentity);
+        userIdentity.setCreatedBy(userIdentity.getId());
         UserIdentity foundUserIdentity = null;
         log.info("First user, after saving on keycloak: {}", userIdentity);
         try {
