@@ -17,6 +17,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FundRaisingStatus
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicleVisibility;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.*;
+
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -63,7 +64,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
 
 
     @Override
-    public InvestmentVehicle setUpInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MeedlException {
+    public InvestmentVehicle setUpInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MeedlException, MeedlException {
         MeedlValidator.validateObjectInstance(investmentVehicle,"Investment Vehicle Object Cannot Be Null");
             investmentVehicle.validateDraft();
             investmentVehicle.setLastUpdatedDate(LocalDateTime.now());
