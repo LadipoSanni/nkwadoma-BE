@@ -153,7 +153,7 @@ public class OrganizationEmployeeController {
     }
 
     @PostMapping("respond/invite/colleague")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN')  or hasRole('ORGANIZATION_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> respondToColleagueInvite(@AuthenticationPrincipal Jwt meedlUser,
                                                                    @RequestParam(name = "organizationEmployeeId") String organizationEmployeeId,
                                                                    @RequestParam(name = "decision") ActivationStatus activationStatus) throws MeedlException {

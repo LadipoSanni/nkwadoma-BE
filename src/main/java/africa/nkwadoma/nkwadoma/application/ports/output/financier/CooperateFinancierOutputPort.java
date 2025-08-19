@@ -11,4 +11,6 @@ public interface CooperateFinancierOutputPort {
     void delete(String id) throws MeedlException;
 
     CooperateFinancier findByUserId(String id) throws MeedlException;
+
+    CooperateFinancier findById(String cooperateFinancierId) throws MeedlException;
 }

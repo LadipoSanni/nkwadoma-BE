@@ -358,4 +358,20 @@ public class FinancierController {
     }
 
 
+
+    @PostMapping("financier/respond/colleague/invitation")
+    @PreAuthorize("hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')")
+    private ResponseEntity<ApiResponse<?>> respondToColleagueInvitation(@AuthenticationPrincipal Jwt meedlUser,
+                                                                        @RequestParam(name = "cooperateFinancierId") String cooperateFinancierId,
+                                                                        @RequestParam(name = "decision") ActivationStatus activationStatus) throws MeedlException {
+        String response = financierUseCase.respondToColleageInvitation(meedlUser.getClaimAsString("sub"),
+                cooperateFinancierId,activationStatus);
+        return new ResponseEntity<>(ApiResponse.builder().
+                statusCode(HttpStatus.OK.toString()).
+                data(response).
+                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
+                build(), HttpStatus.OK
+        );
+    }
+
 }

@@ -9,6 +9,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.financier.CooperateFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -428,5 +429,37 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
         log.info("done building notification for decline colleague invitation{}", meedlNotification);
         meedlNotificationUsecase.sendNotification(meedlNotification);
         log.info("notification sent ====---=-==---=-");
+    }
+
+    @Override
+    public void notifyInviterForColleagueInvitationApproval(UserIdentity userIdentity, UserIdentity financierCreator, CooperateFinancier cooperateFinancier) throws MeedlException {
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .title("Colleague invitation approval")
+                .user(financierCreator)
+                .callToAction(true)
+                .timestamp(LocalDateTime.now())
+                .contentId(cooperateFinancier.getId())
+                .notificationFlag(NotificationFlag.INVITE_COOPERATE_COLLEAGUE_APPROVAL)
+                .senderFullName(userIdentity.getFirstName() + " "+ userIdentity.getLastName())
+                .senderMail(userIdentity.getEmail())
+                .contentDetail("Colleague invitation approved for "+cooperateFinancier.getFinancier().getUserIdentity().getFirstName())
+                .build();
+        meedlNotificationUsecase.sendNotification(meedlNotification);
+    }
+
+    @Override
+    public void notifyInviterForColleagueInvitationDeclined(UserIdentity userIdentity, UserIdentity financierCreator, CooperateFinancier cooperateFinancier) throws MeedlException {
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .title("Colleague invitation declined")
+                .user(financierCreator)
+                .callToAction(true)
+                .timestamp(LocalDateTime.now())
+                .contentId(cooperateFinancier.getId())
+                .notificationFlag(NotificationFlag.INVITE_COOPERATE_COLLEAGUE_DECLINED)
+                .senderFullName(userIdentity.getFirstName() + " "+ userIdentity.getLastName())
+                .senderMail(userIdentity.getEmail())
+                .contentDetail("Colleague invitation declined for "+cooperateFinancier.getFinancier().getUserIdentity().getFirstName())
+                .build();
+        meedlNotificationUsecase.sendNotification(meedlNotification);
     }
 }
