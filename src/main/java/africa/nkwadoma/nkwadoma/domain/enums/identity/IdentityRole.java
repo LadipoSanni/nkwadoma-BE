@@ -82,6 +82,9 @@ public enum IdentityRole {
                 this == PORTFOLIO_MANAGER;
     }
 
+    public boolean isMeedlSuperAdmin() {
+        return this == MEEDL_SUPER_ADMIN;
+    }
     public boolean isSuperAdmin() {
         return this == MEEDL_SUPER_ADMIN ||
                 this == COOPERATE_FINANCIER_SUPER_ADMIN ||

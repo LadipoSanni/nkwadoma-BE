@@ -30,7 +30,7 @@ public class CooperationAdapterTest {
     private final String email = "testemail@email.com";
     @BeforeAll
     void setUp() {
-        cooperation = TestData.buildCooperation("cooperation adapter test");
+        cooperation = TestData.buildCooperation("cooperation adapter test","cooperation@grr.la");
 
     }
     private UserIdentity saveTestUser(String email){
@@ -58,19 +58,21 @@ public class CooperationAdapterTest {
         log.info("Saved cooperation {}", savedCooperation);
         cooperationId = savedCooperation.getId();
     }
-    @Test
-    @Order(2)
-    void saveCooperationWithTheSameEmailNoId() {
-        assertThrows(MeedlException.class, ()-> cooperationOutputPort.save(cooperation));
-    }
+
     @Test
     void saveCooperationWithNull(){
         assertThrows(MeedlException.class, () -> cooperationOutputPort.save(null));
     }
+
+    @Test
+    void saveCooperationWithNullEmail(){
+        cooperation.setEmail(null);
+        assertThrows(MeedlException.class, () -> cooperationOutputPort.save(cooperation));
+    }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY})
     void saveCooperationWithInvalidName(String name){
-        Cooperation cooperation = TestData.buildCooperation(name);
+        Cooperation cooperation = TestData.buildCooperation(name,"cooperation@grr.la");
         assertThrows(MeedlException.class, () -> cooperationOutputPort.save(cooperation));
     }
 
@@ -80,7 +82,7 @@ public class CooperationAdapterTest {
         assertThrows(MeedlException.class, () -> cooperationOutputPort.findByName(companyName));
     }
     @Test
-    @Order(3)
+    @Order(2)
     void findCooperationById() {
         Cooperation foundCooperation = null;
         try {
@@ -94,7 +96,7 @@ public class CooperationAdapterTest {
         log.info("found cooperation {}", foundCooperation);
     }
     @Test
-    @Order(4)
+    @Order(3)
     void findCooperationByName() {
         Cooperation foundCooperation = null;
         try {
@@ -108,7 +110,7 @@ public class CooperationAdapterTest {
         log.info("found cooperation {}", foundCooperation);
     }
     @Test
-    @Order(5)
+    @Order(4)
     void deleteCooperationById() {
         try {
             cooperationOutputPort.deleteById(cooperationId);

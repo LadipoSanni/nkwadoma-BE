@@ -2,10 +2,8 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentvehicle.FinancierUseCase;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.Cooperation;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
@@ -69,31 +67,16 @@ public class FinancierController {
         return financierRequests.stream().map(financierRequest ->{
             Financier financier = financierRestMapper.map(financierRequest);
             if (financierRequest.getFinancierType() == FinancierType.COOPERATE){
-                mapCooperateValues(financierRequest, financier);
+                financier = financierRestMapper.mapToCooperateFinancier(financierRequest);
             } else if (financierRequest.getFinancierType() == FinancierType.INDIVIDUAL) {
                 financier.setUserIdentity(financierRequest.getUserIdentity());
             }
-            if (financier.getUserIdentity() == null){
-                log.info("user identity is {}", financierRequest.getUserIdentity());
-                financier.setUserIdentity(UserIdentity.builder().build());
-            }
-
             financier.getUserIdentity().setCreatedBy(meedlUserId);
             financier.getUserIdentity().setCreatedAt(LocalDateTime.now());
             return financier;
         }).toList();
     }
 
-    private static void mapCooperateValues(FinancierRequest financierRequest, Financier financier) {
-        financier.setUserIdentity(UserIdentity.builder()
-                .email(financierRequest.getOrganizationEmail())
-                .createdAt(LocalDateTime.now())
-                .role(IdentityRole.FINANCIER)
-                .build());
-        financier.setCooperation(Cooperation.builder()
-                .name(financierRequest.getOrganizationName())
-                .build());
-    }
 
     @PostMapping("financier/complete-kyc")
     @PreAuthorize("hasRole('FINANCIER')")

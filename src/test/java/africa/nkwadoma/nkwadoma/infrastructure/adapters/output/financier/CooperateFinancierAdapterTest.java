@@ -48,7 +48,7 @@ public class CooperateFinancierAdapterTest {
         userIdentity =  userIdentityOutputPort.save(userIdentity);
         financier = TestData.buildFinancierIndividual(userIdentity);
         financier = financierOutputPort.save(financier);
-        cooperate = TestData.buildCooperation("NepoBABY");
+        cooperate = TestData.buildCooperation("NepoBABY","nepobaby@grr.la");
         cooperate = cooperationOutputPort.save(cooperate);
         cooperateFinancier = TestData.buildCooperateFinancier(financier,cooperate);
     }
