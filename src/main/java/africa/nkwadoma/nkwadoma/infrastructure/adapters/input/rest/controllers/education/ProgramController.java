@@ -5,7 +5,8 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.constants.ControllerConstant;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.*;
 import io.swagger.v3.oas.annotations.*;
@@ -34,7 +35,7 @@ public class ProgramController {
 
     @PostMapping("")
     @Operation(summary = "Add a program to an Institute")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
+    @PreAuthorize("hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('ORGANIZATION_ADMIN')")
     public ResponseEntity<ApiResponse<?>> createProgram(@RequestBody @Valid ProgramCreateRequest programCreateRequest,
                                                         @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
         log.info("Creating program is Meedl User with ID: {}", meedlUser.getClaimAsString("sub"));
@@ -50,7 +51,7 @@ public class ProgramController {
     }
 
     @GetMapping("/programs/all")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = "View all Programs in an Institute", description = "Fetch all programs in the given organization.")
     public ResponseEntity<ApiResponse<?>> viewAllPrograms(@AuthenticationPrincipal Jwt meedlUser,
                                                           @RequestParam(name = "organizationId", required = false) String organizationId,
@@ -84,7 +85,7 @@ public class ProgramController {
 
     @GetMapping("/search")
     @Operation(summary = "Search a program by name")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> searchProgramByName
             (@Valid @RequestParam(name = "name") @NotBlank(message = "Program name is required") String name,
              @AuthenticationPrincipal Jwt meedlUser,
@@ -111,7 +112,7 @@ public class ProgramController {
 
     @GetMapping("/{id}")
     @Operation(summary = "View a program by ID")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> viewProgramByID(@PathVariable @Valid @NotBlank(message = "Program ID is required") String id)
             throws MeedlException {
         Program program = new Program();
@@ -127,7 +128,7 @@ public class ProgramController {
 
     @PatchMapping("/edit")
     @Operation(summary = "Update an existing program")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> updateProgram(@RequestBody @Valid ProgramUpdateRequest programUpdateRequest,
                                                         @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
         Program program = programRestMapper.toUpdatedProgram(programUpdateRequest);
@@ -144,7 +145,7 @@ public class ProgramController {
 
     @DeleteMapping("/delete/{id}")
     @Operation(summary = "Delete a program by it's ID")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> deleteProgram(@PathVariable @Valid @NotBlank(message = "Program id is required") String id)
             throws MeedlException {
         Program program = new Program();

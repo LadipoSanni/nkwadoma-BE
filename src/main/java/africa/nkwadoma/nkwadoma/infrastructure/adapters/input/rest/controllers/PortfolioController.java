@@ -3,7 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlportfolio.PortfolioUseCase;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.meedlPortfolio.PortfolioResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.meedlportfolio.PortfolioRestMapper;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ public class PortfolioController {
 
 
     @GetMapping("meedl-portfolio/view")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewMeedlPortfolio() throws MeedlException {
         Portfolio portfolio =
                 portfolioUseCase.viewPortfolio();

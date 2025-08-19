@@ -1,8 +1,8 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.investment;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentvehicle.FinancierUseCase;
-import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -11,11 +11,12 @@ import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentSummary;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.CooperationRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.InviteFinancierRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.KycRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.FinancierRequest;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentvehicle.FinancierRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentvehicle.InvestmentVehicleRestMapper;
@@ -47,7 +48,7 @@ public class FinancierController {
     private final InvestmentVehicleRestMapper investmentVehicleRestMapper;
 
     @PostMapping("financier/invite")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_SUPER_ADMIN')")
     public  ResponseEntity<ApiResponse<?>> inviteFinancierToVehicle(@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid
     InviteFinancierRequest inviteFinancierRequest) throws MeedlException {
         log.info("Inviting a financier with request {}", inviteFinancierRequest);
@@ -131,7 +132,7 @@ public class FinancierController {
     }
 
     @GetMapping("financier/view/investment-detail/{financierId}")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
     @FinancierInvestmentDetailDocs
     public ResponseEntity<ApiResponse<?>> viewInvestmentDetailOfFinancier(@PathVariable(required = false) String financierId, @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
         String userId = meedlUser.getClaimAsString("sub");
@@ -160,7 +161,7 @@ public class FinancierController {
     }
 
     @GetMapping("financier/view")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
     @FinancierDetail
     public ResponseEntity<ApiResponse<?>> viewFinancierDetail(@AuthenticationPrincipal Jwt meedlUser,@RequestParam(required = false) String financierId) throws MeedlException {
         String userId = meedlUser.getClaimAsString("sub");
@@ -176,7 +177,7 @@ public class FinancierController {
     }
 
     @GetMapping("financier/all/view")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public  ResponseEntity<ApiResponse<?>> viewAllFinancier(@AuthenticationPrincipal Jwt meedlUser,
                                                             @RequestParam int pageNumber,
                                                             @RequestParam int pageSize,
@@ -199,7 +200,7 @@ public class FinancierController {
         );
     }
     @GetMapping("financier/search")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public  ResponseEntity<ApiResponse<?>> search(@AuthenticationPrincipal Jwt meedlUser,
                                                   @RequestParam String name,
                                                   @RequestParam int pageNumber,
@@ -227,7 +228,7 @@ public class FinancierController {
 
 
     @GetMapping("financier/investment-detail")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
     @FinancierInvestmentDetailDocs
     public ResponseEntity<ApiResponse<?>> viewFinancierInvestmentDetail(@RequestParam(required = false) String financierId,
                                                                         @RequestParam String investmentVehicleFinancierId,
@@ -245,7 +246,7 @@ public class FinancierController {
     }
 
     @GetMapping("financier/investment-vehicle/all/view")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public  ResponseEntity<ApiResponse<?>> viewAllFinancierInInvestmentVehicle(@AuthenticationPrincipal Jwt meedlUser,
                                                             @RequestParam int pageNumber,
                                                             @RequestParam int pageSize,
@@ -268,7 +269,7 @@ public class FinancierController {
     }
 
     @GetMapping("financier/all-investment")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
     public ResponseEntity<ApiResponse<?>> viewAllFinancierInvestment(@AuthenticationPrincipal Jwt meedlUser,
                                                                      @RequestParam(required = false) String financierId,
                                                                      @RequestParam int pageSize,
@@ -290,7 +291,7 @@ public class FinancierController {
     }
 
     @GetMapping("financier/search/all/investment/investment-vehicle")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
     public ResponseEntity<ApiResponse<?>> viewAllFinancierInvestment(@AuthenticationPrincipal Jwt meedlUser,
                                                                      @RequestParam String investmentVehicleName,
                                                                      @RequestParam(required = false) String financierId,
@@ -321,6 +322,41 @@ public class FinancierController {
         String response = financierUseCase.inviteColleagueFinancier(meedlUser.getClaimAsString("sub"));
         return null;
     }
+
+
+    @GetMapping("view/cooperate/detail")
+    @PreAuthorize("hasRole('COOPERATE_FINANCIER_SUPER_ADMIN') or hasRole('COOPERATE_FINANCIER_ADMIN')")
+    public ResponseEntity<ApiResponse<?>> viewCooperationDetail(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
+
+        Cooperation cooperation = financierUseCase.viewCooperateFinancierDetail(meedlUser.getClaimAsString("sub"));
+        CooperationResponse cooperationResponse = financierRestMapper.mapToCooperationResponse(cooperation);
+
+        return new ResponseEntity<>(ApiResponse.builder()
+                .statusCode(HttpStatus.OK.toString())
+                .data(cooperationResponse)
+                .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage())
+                .build(),HttpStatus.OK);
+
+    }
+
+
+    @GetMapping("update/cooperate/profile")
+    @PreAuthorize("hasRole('COOPERATE_FINANCIER_SUPER_ADMIN') or hasRole('COOPERATE_FINANCIER_ADMIN')")
+    public ResponseEntity<ApiResponse<?>> updateCooperationProfile(@AuthenticationPrincipal Jwt meedlUser ,
+                                                                   @RequestBody CooperationRequest cooperationRequest) throws MeedlException {
+
+        Cooperation cooperation = financierRestMapper.mapCooperationRequestToCooperation(cooperationRequest);
+        cooperation = financierUseCase.updateCooperateProfile(meedlUser.getClaimAsString("sub"),cooperation);
+        CooperationResponse cooperationResponse = financierRestMapper.mapToCooperationResponse(cooperation);
+
+        return new ResponseEntity<>(ApiResponse.builder()
+                .statusCode(HttpStatus.OK.toString())
+                .data(cooperationResponse)
+                .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage())
+                .build(),HttpStatus.OK);
+
+    }
+
 
 
     @PostMapping("financier/respond/colleague/invitation")

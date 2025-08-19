@@ -1,9 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.bankdetail;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -19,4 +17,6 @@ public class BankDetailEntity {
     private String id;
     private String bankName;
     private String bankNumber;
+    @Enumerated(EnumType.STRING)
+    private ActivationStatus activationStatus;
 }

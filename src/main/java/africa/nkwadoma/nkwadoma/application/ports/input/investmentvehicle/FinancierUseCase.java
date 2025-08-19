@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
+import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.Cooperation;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentSummary;
 import org.springframework.data.domain.Page;
 
@@ -36,6 +37,10 @@ public interface FinancierUseCase {
     InvestmentSummary viewInvestmentDetailOfFinancier(String financierId, String investmentVehicleFinancierId, String userId) throws MeedlException;
 
     String inviteColleagueFinancier(String actorID) throws MeedlException;
+
+    Cooperation viewCooperateFinancierDetail(String actorId) throws MeedlException;
+
+    Cooperation updateCooperateProfile(String actorId,Cooperation cooperation) throws MeedlException;
 
     String respondToColleageInvitation(String sub, String financierId, ActivationStatus activationStatus) throws MeedlException;
 }
