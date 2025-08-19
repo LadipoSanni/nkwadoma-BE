@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.model.identity;
 
 
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityVerificationEnum;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityVerificationEnum;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;

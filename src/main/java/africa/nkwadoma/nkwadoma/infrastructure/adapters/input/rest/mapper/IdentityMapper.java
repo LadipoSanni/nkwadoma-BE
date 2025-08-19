@@ -11,7 +11,6 @@ public interface IdentityMapper {
     @Mapping(source = "password", target = "password")
     UserIdentity toIdentity(UserIdentityRequest userIdentityRequest);
 
-//    @Mapping(source = "password", target = "newPassword")
     UserIdentity toUserIdentity(PasswordChangeRequest passwordChangeRequest);
 
     @Mapping(source = "token", target = "email")
@@ -23,6 +22,7 @@ public interface IdentityMapper {
     UserIdentityResponse toUserIdentityResponse(UserIdentity userIdentityFound);
 
     @Mapping(target = "id", source = "userId")
+    @Mapping(target = "MFAPhoneNumber", source = "mfaRequest.mfaPhoneNumber")
     UserIdentity map(String userId, MFARequest mfaRequest);
 
 }

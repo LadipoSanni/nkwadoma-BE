@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.application.ports.input.investmentvehicle;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
+import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.Cooperation;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentSummary;
 import org.springframework.data.domain.Page;
 
@@ -35,4 +36,8 @@ public interface FinancierUseCase {
     InvestmentSummary viewInvestmentDetailOfFinancier(String financierId, String investmentVehicleFinancierId, String userId) throws MeedlException;
 
     String inviteColleagueFinancier(String actorID,Financier financier) throws MeedlException;
+
+    Cooperation viewCooperateFinancierDetail(String actorId) throws MeedlException;
+
+    Cooperation updateCooperateProfile(String actorId,Cooperation cooperation) throws MeedlException;
 }

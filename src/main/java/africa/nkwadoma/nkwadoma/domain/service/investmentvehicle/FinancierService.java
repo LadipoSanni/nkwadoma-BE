@@ -13,13 +13,13 @@ import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.Portfoli
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicleVisibility;
@@ -826,6 +826,29 @@ public class FinancierService implements FinancierUseCase {
             throw new IdentityException(String.format("Role %s cannot invite colleague with role %s", inviterRole, colleagueRole));
         }
     }
+
+    @Override
+    public Cooperation viewCooperateFinancierDetail(String actorID) throws MeedlException {
+        UserIdentity userIdentity = userIdentityOutputPort.findById(actorID);
+        CooperateFinancier cooperateFinancier = cooperateFinancierOutputPort.findByUserId(userIdentity.getId());
+        return cooperateFinancier.getCooperate();
+    }
+
+    @Override
+    public Cooperation updateCooperateProfile(String actorId, Cooperation cooperation) throws MeedlException {
+        UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
+        MeedlValidator.validateObjectInstance(cooperation,"Cooperation cannot be empty");
+        if (ObjectUtils.isNotEmpty(cooperationOutputPort.findByName(cooperation.getName()))){
+            throw new InvestmentException("Cooperation with name already exists");
+        }
+        //FIND by Mail
+        CooperateFinancier cooperateFinancier = cooperateFinancierOutputPort.findByUserId(userIdentity.getId());
+        financierMapper.updateCooperation(cooperateFinancier.getCooperate(),cooperation);
+        cooperationOutputPort.save(cooperation);
+        return cooperation;
+    }
+
+
 
     @Override
     public Page<Financier> viewAllFinancierInvestment(String actorId, String finanacierId, int pageSize, int pageNumber) throws MeedlException {

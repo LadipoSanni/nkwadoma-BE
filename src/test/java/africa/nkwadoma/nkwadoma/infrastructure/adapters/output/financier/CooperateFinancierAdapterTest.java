@@ -94,6 +94,18 @@ public class CooperateFinancierAdapterTest {
 
     @Order(2)
     @Test
+    void findCooperateFinancierByUserIdentityId() {
+        CooperateFinancier foundCooperateFinancier = null;
+        try {
+            foundCooperateFinancier = cooperateFinancierOutputPort.findByUserId(userIdentity.getId());
+        }catch (MeedlException e){
+            log.error(e.getMessage());
+        }
+        assertNotNull(foundCooperateFinancier);
+        assertEquals(foundCooperateFinancier.getId(), cooperateFinancierID);
+    }
+    @Order(3)
+    @Test
     void findCooperateFinancierByUserId() {
         CooperateFinancier foundCooperateFinancier = null;
         try{
@@ -105,7 +117,7 @@ public class CooperateFinancierAdapterTest {
         assertEquals(foundCooperateFinancier.getId(),cooperateFinancierID);
     }
 
-    @Order(3)
+    @Order(4)
     @Test
     void findCooperateFinancierSuperAdminByCooperateName() {
         CooperateFinancier foundCooperateFinancier = null;

@@ -3,14 +3,14 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentvehicle.FinancierUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.LoaneeUseCase;
-import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.constants.ControllerConstant;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.UserIdentityResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -130,7 +130,7 @@ public class IdentityManagerController {
                 statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("auth/manageMFA")
-    public ResponseEntity<ApiResponse<?>> manageMFA(@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid MFARequest mfaRequest) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> manageMFA(@AuthenticationPrincipal Jwt meedlUser, @RequestBody MFARequest mfaRequest) throws MeedlException {
         UserIdentity userIdentity = identityMapper.map(meedlUser.getClaimAsString("sub"), mfaRequest);
         String response = userUseCase.manageMFA(userIdentity);
         return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
@@ -167,6 +167,7 @@ public class IdentityManagerController {
                 data(createdUserIdentity).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
     }
+
     @PostMapping("auth/user/deactivate")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
             "or hasRole('MEEDL_ADMIN')" +
@@ -186,6 +187,23 @@ public class IdentityManagerController {
                 data(createdUserIdentity).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
     }
+    @PostMapping("auth/user/assign/role")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " + "or hasRole('ORGANIZATION_SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<?>> assignRole(@AuthenticationPrincipal Jwt meedlUser,
+                                                         @RequestParam String userId,
+                                                         @RequestParam IdentityRole identityRole) throws MeedlException {
+        UserIdentity userIdentity = UserIdentity.builder()
+                .id(userId)
+                .role(identityRole)
+                .createdBy(meedlUser.getClaimAsString("sub"))
+                .build();
+        log.info("The user id {} of user assigning role to user with id : {}",meedlUser.getClaimAsString("sub"), userId);
+        UserIdentity createdUserIdentity = userUseCase.assignRole(userIdentity);
+        return ResponseEntity.ok(ApiResponse.<UserIdentity>builder()
+                .data(createdUserIdentity)
+                .message(ControllerConstant.ROLE_ASSIGNED_SUCCESSFULLY.getMessage())
+                .statusCode(HttpStatus.OK.name()).build());
+    }
     @PostMapping("auth/password/change")
     public ResponseEntity<ApiResponse<?>> changePassword(@AuthenticationPrincipal Jwt meedlUser,
                                                          @RequestBody PasswordChangeRequest passwordChangeRequest) throws MeedlException {
@@ -197,5 +215,25 @@ public class IdentityManagerController {
         return ResponseEntity.ok(ApiResponse.<String>builder().
                 data("Password changed successfully.").message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
+    }
+    @PostMapping("user/upload/image")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
+            "or hasRole('MEEDL_ADMIN')" +
+            "or hasRole('PORTFOLIO_MANAGER')" +
+            "or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')" +
+            "or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')" +
+            "or hasRole('COOPERATE_FINANCIER_ADMIN')" +
+            "or hasRole('FINANCIER')" +
+            "or hasRole('ORGANIZATION_SUPER_ADMIN')" +
+            "or hasRole('ORGANIZATION_ASSOCIATE')" +
+            "or hasRole('ORGANIZATION_ADMIN')")
+    public ResponseEntity<ApiResponse<?>> uploadImage(@AuthenticationPrincipal Jwt meedlUser,
+                                                         @RequestBody UploadImage uploadImage) throws MeedlException {
+        UserIdentity userIdentity = UserIdentity.builder().id(meedlUser.getClaimAsString("sub")).image(uploadImage.getImageUrl()).build();
+        log.info("The user updating image: {} ",meedlUser.getClaimAsString("sub"));
+        userUseCase.uploadImage(userIdentity);
+        return ResponseEntity.ok(ApiResponse.<String>builder()
+                .message("Image uploaded successfully.")
+                .statusCode(HttpStatus.OK.name()).build());
     }
 }
