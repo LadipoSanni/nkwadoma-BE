@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.domain.enums;
+package africa.nkwadoma.nkwadoma.domain.enums.identity;
 
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -40,9 +40,9 @@ public enum IdentityRole {
                 IdentityRole.MEEDL_ADMIN.equals(actor.getRole());
     }
 
-    public static boolean isOrganizationAdminOrSuperAdmin(UserIdentity actor) {
-        return IdentityRole.ORGANIZATION_SUPER_ADMIN.equals(actor.getRole()) ||
-                IdentityRole.ORGANIZATION_ADMIN.equals(actor.getRole());
+    public static boolean isOrganizationAdminOrSuperAdmin(IdentityRole role) {
+        return IdentityRole.ORGANIZATION_SUPER_ADMIN.equals(role) ||
+                IdentityRole.ORGANIZATION_ADMIN.equals(role);
     }
 
     @JsonCreator

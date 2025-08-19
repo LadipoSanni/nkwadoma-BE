@@ -2,7 +2,6 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentvehicle.FinancierUseCase;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -117,7 +116,7 @@ public class FinancierController {
     }
 
     @GetMapping("financier/view/investment-detail/{financierId}")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
     @FinancierInvestmentDetailDocs
     public ResponseEntity<ApiResponse<?>> viewInvestmentDetailOfFinancier(@PathVariable(required = false) String financierId, @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
         String userId = meedlUser.getClaimAsString("sub");
@@ -146,7 +145,7 @@ public class FinancierController {
     }
 
     @GetMapping("financier/view")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
     @FinancierDetail
     public ResponseEntity<ApiResponse<?>> viewFinancierDetail(@AuthenticationPrincipal Jwt meedlUser,@RequestParam(required = false) String financierId) throws MeedlException {
         String userId = meedlUser.getClaimAsString("sub");
@@ -162,7 +161,7 @@ public class FinancierController {
     }
 
     @GetMapping("financier/all/view")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public  ResponseEntity<ApiResponse<?>> viewAllFinancier(@AuthenticationPrincipal Jwt meedlUser,
                                                             @RequestParam int pageNumber,
                                                             @RequestParam int pageSize,
@@ -185,7 +184,7 @@ public class FinancierController {
         );
     }
     @GetMapping("financier/search")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public  ResponseEntity<ApiResponse<?>> search(@AuthenticationPrincipal Jwt meedlUser,
                                                   @RequestParam String name,
                                                   @RequestParam int pageNumber,
@@ -213,7 +212,7 @@ public class FinancierController {
 
 
     @GetMapping("financier/investment-detail")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
     @FinancierInvestmentDetailDocs
     public ResponseEntity<ApiResponse<?>> viewFinancierInvestmentDetail(@RequestParam(required = false) String financierId,
                                                                         @RequestParam String investmentVehicleFinancierId,
@@ -231,7 +230,7 @@ public class FinancierController {
     }
 
     @GetMapping("financier/investment-vehicle/all/view")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public  ResponseEntity<ApiResponse<?>> viewAllFinancierInInvestmentVehicle(@AuthenticationPrincipal Jwt meedlUser,
                                                             @RequestParam int pageNumber,
                                                             @RequestParam int pageSize,
@@ -254,7 +253,7 @@ public class FinancierController {
     }
 
     @GetMapping("financier/all-investment")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
     public ResponseEntity<ApiResponse<?>> viewAllFinancierInvestment(@AuthenticationPrincipal Jwt meedlUser,
                                                                      @RequestParam(required = false) String financierId,
                                                                      @RequestParam int pageSize,
@@ -276,7 +275,7 @@ public class FinancierController {
     }
 
     @GetMapping("financier/search/all/investment/investment-vehicle")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
     public ResponseEntity<ApiResponse<?>> viewAllFinancierInvestment(@AuthenticationPrincipal Jwt meedlUser,
                                                                      @RequestParam String investmentVehicleName,
                                                                      @RequestParam(required = false) String financierId,
@@ -342,5 +341,21 @@ public class FinancierController {
 
     }
 
+
+
+    @PostMapping("financier/respond/colleague/invitation")
+    @PreAuthorize("hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')")
+    private ResponseEntity<ApiResponse<?>> respondToColleagueInvitation(@AuthenticationPrincipal Jwt meedlUser,
+                                                                        @RequestParam(name = "cooperateFinancierId") String cooperateFinancierId,
+                                                                        @RequestParam(name = "decision") ActivationStatus activationStatus) throws MeedlException {
+        String response = financierUseCase.respondToColleageInvitation(meedlUser.getClaimAsString("sub"),
+                cooperateFinancierId,activationStatus);
+        return new ResponseEntity<>(ApiResponse.builder().
+                statusCode(HttpStatus.OK.toString()).
+                data(response).
+                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
+                build(), HttpStatus.OK
+        );
+    }
 
 }

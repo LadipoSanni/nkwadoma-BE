@@ -1,6 +1,6 @@
 -- 1. Drop the existing check constraint
 ALTER TABLE meedl_user
-DROP CONSTRAINT meedl_user_role_check;
+DROP CONSTRAINT IF EXISTS meedl_user_role_check;
 
 -- 2. Update all old roles to the new role
 UPDATE meedl_user

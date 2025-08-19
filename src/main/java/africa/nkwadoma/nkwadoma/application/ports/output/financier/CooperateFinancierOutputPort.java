@@ -10,5 +10,7 @@ public interface CooperateFinancierOutputPort {
 
     CooperateFinancier findByUserId(String id) throws MeedlException;
 
+    CooperateFinancier findById(String cooperateFinancierId) throws MeedlException;
+
     CooperateFinancier findByFinancierId(String cooperateFinancierId);
 }

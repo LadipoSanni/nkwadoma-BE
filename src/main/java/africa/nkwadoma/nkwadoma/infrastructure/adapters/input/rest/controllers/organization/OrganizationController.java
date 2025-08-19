@@ -2,7 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.OrganizationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.ViewOrganizationUseCase;
-import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
@@ -66,7 +66,7 @@ public class OrganizationController {
 
     @PatchMapping("organization/update")
     @Operation(summary = "Update an existing organization")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> updateOrganization(@RequestBody @Valid OrganizationUpdateRequest organizationUpdateRequest,
                                                              @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
         OrganizationIdentity organizationIdentity = organizationRestMapper.maptoOrganizationIdentity(organizationUpdateRequest);
@@ -311,7 +311,7 @@ public class OrganizationController {
 
     @PostMapping("organization/colleague/invite")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN')  " +
-                  " or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('ORGANIZATION_ADMIN') ")
+                  " or hasRole('ORGANIZATION_SUPER_ADMIN')  or hasRole('ORGANIZATION_ADMIN') ")
     public ResponseEntity<ApiResponse<?>> inviteColleague(@AuthenticationPrincipal Jwt meedlUser,
                                                           @RequestBody InviteColleagueRequest inviteColleagueRequest) throws MeedlException {
         OrganizationIdentity organizationIdentity =

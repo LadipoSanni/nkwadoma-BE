@@ -20,7 +20,7 @@ public class EmailResendController {
     private EmailResendUseCase emailResendUseCase;
 
     @PostMapping("loanee/refer/email/resend/{email}")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> resendEmail(@PathVariable @Valid String email) throws MeedlException {
         emailResendUseCase.resendReferralEmail(email);
         return ResponseEntity.ok(ApiResponse.<String>builder()

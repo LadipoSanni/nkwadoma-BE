@@ -24,7 +24,7 @@ public class PortfolioController {
 
 
     @GetMapping("meedl-portfolio/view")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewMeedlPortfolio() throws MeedlException {
         Portfolio portfolio =
                 portfolioUseCase.viewPortfolio();

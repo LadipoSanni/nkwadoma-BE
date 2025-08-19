@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.financier.CooperateFina
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.CooperateFinancier;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.financier.CooperateFinancierMapper;
@@ -45,6 +46,18 @@ public class CooperateFinancierAdapter implements CooperateFinancierOutputPort {
 
         CooperateFinancierEntity cooperateFinancierEntity =
                 cooperateFinancierRepository.findByFinancier_UserIdentityId(id);
+
+        return cooperateFinancierMapper.toCooperateFinancier(cooperateFinancierEntity);
+    }
+
+    @Override
+    public CooperateFinancier findById(String cooperateFinancierId) throws MeedlException {
+        MeedlValidator.validateUUID(cooperateFinancierId,"Cooperate financier id cannot br empty");
+
+        CooperateFinancierEntity cooperateFinancierEntity =
+                cooperateFinancierRepository.findById(cooperateFinancierId).
+                        orElseThrow(()-> new ResourceNotFoundException("Cooperate financier not found"));
+
 
         return cooperateFinancierMapper.toCooperateFinancier(cooperateFinancierEntity);
     }
