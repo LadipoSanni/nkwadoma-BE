@@ -12,7 +12,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -367,7 +367,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
 
         IdentityRole inviterRole = inviter.getMeedlUser().getRole();
 
-        if (isSuperAdmin(inviterRole)) {
+        if (inviterRole.isSuperAdmin()) {
             log.info("The user inviting is a super admin with organization id {}", inviter.getOrganization());
             OrganizationIdentity organization = organizationIdentityOutputPort.findById(inviter.getOrganization());
             asynchronousMailingOutputPort.sendColleagueEmail(organization.getName(), savedUserIdentity);
@@ -405,16 +405,13 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         OrganizationEmployeeIdentity employeeIdentity = new OrganizationEmployeeIdentity();
         employeeIdentity.setOrganization(inviter.getOrganization());
         employeeIdentity.setMeedlUser(colleague);
-        employeeIdentity.setActivationStatus(isSuperAdmin(inviter.getMeedlUser().getRole())
+        employeeIdentity.setActivationStatus(inviter.getMeedlUser().getRole().isSuperAdmin()
                 ? ActivationStatus.INVITED
                 : ActivationStatus.PENDING_APPROVAL);
         log.info("The built organization employee being invited is {}", employeeIdentity);
         return employeeIdentity;
     }
 
-    private boolean isSuperAdmin(IdentityRole role) {
-        return role == IdentityRole.MEEDL_SUPER_ADMIN || role == IdentityRole.ORGANIZATION_SUPER_ADMIN;
-    }
 
 
 

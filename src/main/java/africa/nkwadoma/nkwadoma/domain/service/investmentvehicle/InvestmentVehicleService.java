@@ -5,14 +5,19 @@ import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutp
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.BankPartner;
+import africa.nkwadoma.nkwadoma.domain.enums.Custodian;
+import africa.nkwadoma.nkwadoma.domain.enums.FundManager;
+import africa.nkwadoma.nkwadoma.domain.enums.Trustee;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
+
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicleVisibility;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.*;
+
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -59,7 +64,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
 
 
     @Override
-    public InvestmentVehicle setUpInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MeedlException {
+    public InvestmentVehicle setUpInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MeedlException, MeedlException {
         MeedlValidator.validateObjectInstance(investmentVehicle,"Investment Vehicle Object Cannot Be Null");
             investmentVehicle.validateDraft();
             investmentVehicle.setLastUpdatedDate(LocalDateTime.now());

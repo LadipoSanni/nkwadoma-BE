@@ -17,5 +17,5 @@ public interface CalculationEngineUseCase {
 
     void scheduleDailyInterestCalculation();
 
-    void scheduleMonthlyInterestCalculation();
+    void  scheduleMonthlyInterestCalculation();
 }

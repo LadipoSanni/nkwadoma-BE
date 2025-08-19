@@ -492,4 +492,23 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                 .build();
         meedlNotificationUsecase.sendNotification(meedlNotification);
     }
+
+    @Override
+    public void sendNotificationToCooperateSuperAdmin(CooperateFinancier inviter, CooperateFinancier newCooperateFinancier, CooperateFinancier superAdminFinancier) throws MeedlException {
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .title("Pending colleague invitation")
+                .contentDetail("Need Approval for colleague invitation")
+                .senderFullName(inviter.getFinancier().getUserIdentity().getFirstName()+" "+ inviter.getFinancier().getUserIdentity().getLastName())
+                .senderMail(inviter.getFinancier().getUserIdentity().getEmail())
+                .notificationFlag(NotificationFlag.INVITE_COLLEAGUE)
+                .timestamp(LocalDateTime.now())
+                .contentId(newCooperateFinancier.getId())
+                .callToAction(true)
+                .user(superAdminFinancier.getFinancier().getUserIdentity())
+                .build();
+        log.info("done building notification for super admin to approve colleague invitation{}", meedlNotification);
+        meedlNotificationUsecase.sendNotification(meedlNotification);
+        log.info("notification sent ====---=-=---=-");
+
+    }
 }

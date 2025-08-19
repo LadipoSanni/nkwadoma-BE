@@ -103,7 +103,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
         loaneeLoanDetail.setUpdatedAt(LocalDateTime.now());
         log.info("Loanee loan details in repayment calculation before being saved {}", loaneeLoanDetail);
         LoaneeLoanDetail updatedLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
-        log.info("Loanee loan details updated with repayment calculations. {}", updatedLoaneeLoanDetail);
+        log.info("Loanee loan details updated with  repayment calculations. {}", updatedLoaneeLoanDetail);
         updateLoaneeRepaymentHistory(currentRepayments, previousRepayments);
     }
 
@@ -680,7 +680,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
     public void scheduleDailyInterestCalculation() {
         jobScheduler.scheduleRecurrently(
                 "daily-interest-calculation-11-30-PM",
-                "0 30 23 * * *",  // every day at 11:30 PM
+                "0 30 23 * * *",  // every day at 11:30  PM
                 this::calculateDailyInterest
         );
     }

@@ -69,4 +69,23 @@ public class CooperateFinancierAdapter implements CooperateFinancierOutputPort {
                 cooperateFinancierRepository.findByFinancierId(cooperateFinancierId);
         return cooperateFinancierMapper.toCooperateFinancier(cooperateFinancierEntity);
     }
+
+    @Override
+    public CooperateFinancier findCooperateFinancierByUserId(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id, UserMessages.INVALID_USER_ID.getMessage());
+
+        CooperateFinancierEntity cooperateFinancierEntity =
+                cooperateFinancierRepository.findByUserId(id);
+
+        return cooperateFinancierMapper.toCooperateFinancier(cooperateFinancierEntity);
+    }
+
+    @Override
+    public CooperateFinancier findCooperateFinancierSuperAdminByCooperateName(String name) throws MeedlException {
+        MeedlValidator.validateObjectInstance(name,"Cooperate name cannot be empty");
+        CooperateFinancierEntity cooperateFinancierEntity =
+                cooperateFinancierRepository.findByCooperateFinancierSuperAdminByCooperateName(name);
+
+        return cooperateFinancierMapper.toCooperateFinancier(cooperateFinancierEntity);
+    }
 }
