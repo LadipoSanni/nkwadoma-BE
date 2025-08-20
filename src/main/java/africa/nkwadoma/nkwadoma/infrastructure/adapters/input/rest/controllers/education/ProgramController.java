@@ -51,7 +51,7 @@ public class ProgramController {
     }
 
     @GetMapping("/programs/all")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('ORGANIZATION_ASSOCIATE') or hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = "View all Programs in an Institute", description = "Fetch all programs in the given organization.")
     public ResponseEntity<ApiResponse<?>> viewAllPrograms(@AuthenticationPrincipal Jwt meedlUser,
                                                           @RequestParam(name = "organizationId", required = false) String organizationId,
@@ -85,7 +85,7 @@ public class ProgramController {
 
     @GetMapping("/search")
     @Operation(summary = "Search a program by name")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('ORGANIZATION_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> searchProgramByName
             (@Valid @RequestParam(name = "name") @NotBlank(message = "Program name is required") String name,
              @AuthenticationPrincipal Jwt meedlUser,
@@ -112,7 +112,7 @@ public class ProgramController {
 
     @GetMapping("/{id}")
     @Operation(summary = "View a program by ID")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('ORGANIZATION_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> viewProgramByID(@PathVariable @Valid @NotBlank(message = "Program ID is required") String id)
             throws MeedlException {
         Program program = new Program();

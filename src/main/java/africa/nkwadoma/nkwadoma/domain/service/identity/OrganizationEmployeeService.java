@@ -127,7 +127,7 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
     }
 
     private void assignRolesForPendingApproval(OrganizationEmployeeIdentity orgEmployee, UserIdentity foundActor) {
-        if (IdentityRole.isMeedlAdminOrMeedlSuperAdmin(foundActor)) {
+        if (IdentityRole.isMeedlAdminOrMeedlSuperAdmin(foundActor.getRole())) {
             log.info("The found actor to view pending approval is a meedl staff with role {}", foundActor.getRole());
             orgEmployee.setIdentityRoles(IdentityRole.getMeedlRoles());
         }

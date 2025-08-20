@@ -18,4 +18,6 @@ public interface OrganizationUseCase {
     String respondToOrganizationInvite(String actorId,String organizationId, ActivationStatus activationStatus) throws MeedlException;
 
     String inviteColleague(OrganizationIdentity organizationIdentity) throws MeedlException;
+
+    void uploadImage(OrganizationIdentity organizationIdentity) throws MeedlException;
 }

@@ -289,6 +289,24 @@ public class OrganizationController {
                 .build();
     }
 
+    @PostMapping("organization/upload/image")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
+            "or hasRole('MEEDL_ADMIN')" +
+            "or hasRole('PORTFOLIO_MANAGER')" +
+            "or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')" +
+            "or hasRole('COOPERATE_FINANCIER_ADMIN')" +
+            "or hasRole('ORGANIZATION_SUPER_ADMIN')" +
+            "or hasRole('ORGANIZATION_ADMIN')")
+    public ResponseEntity<ApiResponse<?>> uploadImage(@AuthenticationPrincipal Jwt meedlUser,
+                                                      @RequestBody UploadImage uploadImage) throws MeedlException {
+        OrganizationIdentity organizationIdentity = OrganizationIdentity.builder().actorId(meedlUser.getClaimAsString("sub")).bannerImage(uploadImage.getImageUrl()).build();
+        log.info("The organization updating image: {} ",meedlUser.getClaimAsString("sub"));
+        createOrganizationUseCase.uploadImage(organizationIdentity);
+        return ResponseEntity.ok(ApiResponse.<String>builder()
+                .message("Image uploaded successfully.")
+                .statusCode(HttpStatus.OK.name()).build());
+    }
+
 
     @PostMapping("organization/approve/invite")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN')")
