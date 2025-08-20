@@ -47,4 +47,6 @@ public interface FinancierUseCase {
     String respondToColleagueInvitation(String actorId, String financierId, ActivationStatus activationStatus) throws MeedlException;
 
     Page<CooperateFinancier> viewAllCooperationStaff(Financier financier) throws MeedlException;
+
+    Page<CooperateFinancier> searchCooperationStaff(Financier financier) throws MeedlException;
 }

@@ -62,6 +62,7 @@ public class Financier {
     private LocalDate dateInvested;
     private BigDecimal incomeEarned;
     private BigDecimal netAssertValue;
+    private String name;
 
     //source of fund
     private Set<String> sourceOfFunds;
