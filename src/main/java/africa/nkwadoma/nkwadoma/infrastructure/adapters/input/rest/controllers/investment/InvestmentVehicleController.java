@@ -36,7 +36,7 @@ public class InvestmentVehicleController {
     private final InvestmentVehicleUseCase investmentVehicleUseCase;
 
     @PostMapping("investment-vehicle")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')")
     public ResponseEntity<ApiResponse<?>> setUpInvestmentVehicle(@Valid @RequestBody SetUpInvestmentVehicleRequest
                                                                           investmentVehicleRequest) throws MeedlException {
         InvestmentVehicle investmentVehicle =
@@ -53,7 +53,7 @@ public class InvestmentVehicleController {
     }
 
     @GetMapping("investment-vehicle-details/{investmentVehicleId}")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN') or hasRole('FINANCIER') or hasRole('COOPERATE_FINANCIER_ADMIN') or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> viewInvestmentVehicleDetails(@AuthenticationPrincipal Jwt meedlUser, @PathVariable String investmentVehicleId) throws MeedlException {
         String userId = meedlUser.getClaimAsString("sub");
         InvestmentVehicle investmentVehicle =
@@ -85,7 +85,7 @@ public class InvestmentVehicleController {
     }
 
     @GetMapping("view-all-investment-vehicle")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER') or hasRole('COOPERATE_FINANCIER_ADMIN')  or  hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> viewAllInvestmentVehicleDetails(
             @AuthenticationPrincipal Jwt meedlUser,
             @RequestParam int pageSize,
@@ -107,7 +107,7 @@ public class InvestmentVehicleController {
 
 
     @GetMapping("investment-vehicle/all/view/by")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')  or hasRole('COOPERATE_FINANCIER_ADMIN') or  hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> viewAllInvestmentVehicleBy(
             @RequestParam int pageSize,
             @RequestParam int pageNumber,
@@ -140,7 +140,7 @@ public class InvestmentVehicleController {
     }
 
     @GetMapping("investmentvehicle/search/{investmentVehicleName}")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('COOPERATE_FINANCIER_ADMIN') or hasRole('FINANCIER') or  hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> searchInvestmentVehicle(@AuthenticationPrincipal Jwt meedlUser,
                                                                   @PathVariable String investmentVehicleName,
                                                                   @RequestParam(required = false) InvestmentVehicleType investmentVehicleType,
@@ -167,7 +167,7 @@ public class InvestmentVehicleController {
     }
 
     @PostMapping("investment-vehicle/visibility")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> setUpVisibility(@RequestBody InvestmentVehicleVisibilityRequest vehicleVisibilityRequest) throws MeedlException {
         InvestmentVehicle investmentVehicle = investmentVehicleUseCase.setInvestmentVehicleVisibility(vehicleVisibilityRequest.getInvestmentVehicleId(),
                 vehicleVisibilityRequest.getVisibility(),vehicleVisibilityRequest.getFinanciers());
@@ -182,7 +182,7 @@ public class InvestmentVehicleController {
     }
 
     @PostMapping("investment-vehicle/status")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> setUpInvestmentVehicleStatus(@RequestBody InvestmentVehicleOperationStatusRequest
                                                                                    vehicleOperationStatus) throws MeedlException{
         InvestmentVehicle investmentVehicle =
@@ -200,7 +200,7 @@ public class InvestmentVehicleController {
     }
 
     @DeleteMapping("delete-investment-vehicle/{investmentVehicleId}")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN')  or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER') ")
     public ResponseEntity<ApiResponse<?>> deleteInvestmentVehicle(@PathVariable String investmentVehicleId) throws MeedlException {
 
         String response =
@@ -214,7 +214,7 @@ public class InvestmentVehicleController {
     }
 
     @GetMapping("investmentVehicle/all/financier")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('FINANCIER') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('FINANCIER') or hasRole('PORTFOLIO_MANAGER') or hasRole('COOPERATE_FINANCIER_ADMIN') or  hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> viewAllInvestmentVehicleInvestedInOrAddedTo(@AuthenticationPrincipal Jwt meedlUser,
                                                              @RequestParam(required = false) String financierId,
                                                              @RequestParam(required = false) InvestmentVehicleType investmentVehicleType,
@@ -237,7 +237,8 @@ public class InvestmentVehicleController {
     }
 
     @GetMapping("investmentVehicle/search/financier/{investmentVehicleName}")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER') or" +
+            "  hasRole('COOPERATE_FINANCIER_SUPER_ADMIN') or hasRole('COOPERATE_FINANCIER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> searchMyInvestment(@AuthenticationPrincipal Jwt meedlUser,
                                                                   @PathVariable String investmentVehicleName,
                                                                   @RequestParam(required = false) InvestmentVehicleType investmentVehicleType,

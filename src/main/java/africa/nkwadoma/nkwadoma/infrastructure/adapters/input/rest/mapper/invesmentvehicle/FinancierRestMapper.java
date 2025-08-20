@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentvehicle;
 
+import africa.nkwadoma.nkwadoma.domain.model.financier.CooperateFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.InviteColleagueRequest;
@@ -92,4 +93,6 @@ public interface FinancierRestMapper {
     @Mapping(target = "cooperation.name", source = "organizationName")
     @Mapping(target = "cooperation.email", source = "organizationEmail")
     Financier mapToCooperateFinancier(FinancierRequest financierRequest);
+
+    CooperateFinancierResponse mapToCooperateFinancierResponse(CooperateFinancier cooperateFinancier);
 }

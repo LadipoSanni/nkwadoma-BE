@@ -914,6 +914,21 @@ public class FinancierService implements FinancierUseCase {
         }
     }
 
+    @Override
+    public Page<CooperateFinancier> viewAllCooperationStaff(Financier financier) throws MeedlException {
+        MeedlValidator.validateObjectInstance(financier,"Financier cannot be empty");
+        MeedlValidator.validatePageNumber(financier.getPageNumber());
+        MeedlValidator.validatePageSize(financier.getPageSize());
+
+        UserIdentity userIdentity = userIdentityOutputPort.findById(financier.getActorId());
+        CooperateFinancier cooperateFinancier = cooperateFinancierOutputPort.findByUserId(userIdentity.getId());
+        if (ObjectUtils.isEmpty(cooperateFinancier)){
+            throw new InvestmentException("Financier does not belong to any cooperation");
+        }
+        return cooperateFinancierOutputPort.findAllFinancierInCooperationByCooperationId(cooperateFinancier.getCooperate().getId(),
+                financier);
+    }
+
     private void decisionMustEitherBeApprovedOrDeclined(ActivationStatus activationStatus) throws africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException {
         if (! activationStatus.equals(ActivationStatus.APPROVED) && !activationStatus.equals(ActivationStatus.DECLINED)) {
             throw new IdentityException(OrganizationMessages.DECISION_CAN_EITHER_BE_APPROVED_OR_DECLINED.getMessage());

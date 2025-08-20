@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.investmentvehicle.Financ
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.financier.CooperateFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.Cooperation;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
@@ -37,6 +38,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.constants.ControllerConstant.RETURNED_SUCCESSFULLY;
 
 @Slf4j
 @RestController
@@ -79,7 +82,7 @@ public class FinancierController {
 
 
     @PostMapping("financier/complete-kyc")
-    @PreAuthorize("hasRole('FINANCIER')")
+    @PreAuthorize("hasRole('FINANCIER') or  hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> completeKyc(@AuthenticationPrincipal Jwt meedlUser,
                                                       @RequestBody KycRequest kycRequest) throws MeedlException {
         log.info("Kyc request controller {} , {}",LocalDateTime.now(), kycRequest);
@@ -153,7 +156,7 @@ public class FinancierController {
         FinancierDashboardResponse financierDashboardResponse = financierRestMapper.mapToDashboardResponse(financier);
 
         ApiResponse<FinancierDashboardResponse> apiResponse = ApiResponse.<FinancierDashboardResponse>builder()
-                .message(ControllerConstant.RETURNED_SUCCESSFULLY.getMessage())
+                .message(RETURNED_SUCCESSFULLY.getMessage())
                 .data(financierDashboardResponse)
                 .statusCode(HttpStatus.OK.toString())
                 .build();
@@ -253,7 +256,7 @@ public class FinancierController {
     }
 
     @GetMapping("financier/all-investment")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER') or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> viewAllFinancierInvestment(@AuthenticationPrincipal Jwt meedlUser,
                                                                      @RequestParam(required = false) String financierId,
                                                                      @RequestParam int pageSize,
@@ -275,7 +278,7 @@ public class FinancierController {
     }
 
     @GetMapping("financier/search/all/investment/investment-vehicle")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER') or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> viewAllFinancierInvestment(@AuthenticationPrincipal Jwt meedlUser,
                                                                      @RequestParam String investmentVehicleName,
                                                                      @RequestParam(required = false) String financierId,
@@ -363,6 +366,36 @@ public class FinancierController {
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 build(), HttpStatus.OK
         );
+    }
+
+
+    @GetMapping("cooperate/view/all/staff")
+    @PreAuthorize("hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<?>> viewAllCooperationStaff(@AuthenticationPrincipal Jwt meedlUser,
+                                                                  @RequestParam(required = false, name = "activationStatus") ActivationStatus activationStatus,
+                                                                  @RequestParam(defaultValue = "10") int pageSize,
+                                                                  @RequestParam(defaultValue = "0") int pageNumber) throws MeedlException {
+
+
+        Financier financier = Financier.builder().actorId(meedlUser.getClaimAsString("sub")).activationStatus(activationStatus)
+                .pageNumber(pageNumber).pageSize(pageSize).build();
+
+        Page<CooperateFinancier> cooperateFinanciers = financierUseCase.viewAllCooperationStaff(financier);
+
+        List<CooperateFinancierResponse> cooperateFinancierResponse =
+                cooperateFinanciers.map(financierRestMapper::mapToCooperateFinancierResponse).stream().toList();
+
+        PaginatedResponse<CooperateFinancierResponse> cooperateFinancierResponsePaginatedResponse =
+                new PaginatedResponse<>(cooperateFinancierResponse,cooperateFinanciers.hasNext(),
+                        cooperateFinanciers.getTotalPages(),cooperateFinanciers.getTotalElements(),pageNumber,pageSize);
+
+        ApiResponse<PaginatedResponse<CooperateFinancierResponse>> apiResponse = ApiResponse.<PaginatedResponse<CooperateFinancierResponse>>builder()
+                .data(cooperateFinancierResponsePaginatedResponse)
+                .message(String.valueOf(RETURNED_SUCCESSFULLY))
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+
     }
 
 }
