@@ -8,5 +8,5 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface MonthlyInterestRepository extends JpaRepository<MonthlyInterestEntity, String> {
-    Optional<MonthlyInterest> findByCreatedAt(LocalDateTime localDateTime);
+    Optional<MonthlyInterestEntity> findByCreatedAt(LocalDateTime localDateTime);
 }

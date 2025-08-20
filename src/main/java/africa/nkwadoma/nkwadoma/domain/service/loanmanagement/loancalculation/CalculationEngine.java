@@ -291,7 +291,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
             BigDecimal interestIncurred = calculateIncurredInterestPerRepayment(repayment, calculationContext.getPreviousOutstandingAmount(), calculationContext.getStartDate(), calculationContext.getLoaneeLoanDetail());
             calculationContext.getRepaymentHistory().setInterestIncurred(interestIncurred);
 
-            calculateOutstandingPerRepayment(calculationContext);
+//            calculateOutstandingPerRepayment(calculationContext);
 
             updateRepaymentMeta(repayment, calculationContext);
             calculationContext.setStartDate(repayment.getPaymentDateTime());
@@ -337,6 +337,9 @@ public class CalculationEngine implements CalculationEngineUseCase {
         }
         for (LocalDate month: months){
             calculateInterestForEachMonthWithNoRepayment(month, calculationContext);
+        }
+        if (endDate.isEqual(calculationContext.getRepaymentHistory().getPaymentDateTime().toLocalDate())){
+            calculateOutstandingPerRepayment(calculationContext);
         }
         if(!isLastDayOfTheMonth(endDate.getDayOfMonth(), endDate.lengthOfMonth())){
             calculateInterestForDaysBetween(calculationContext.getStartDate(), endDate.getDayOfMonth(), calculationContext, endDate);
@@ -794,6 +797,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
         int lastDayOfMonth = month.lengthOfMonth();
 
         LoaneeLoanDetail loaneeLoanDetail = calculationContext.getLoaneeLoanDetail();
+        log.info("calculate Interest For Each Month With No Repayment Loanee loan details id {} ", loaneeLoanDetail.getId());
         for (int day = startDay; day <= numberOfDaysTillDateMeasured; day++) {
             DailyInterest dailyInterest = calculateAndSaveDailyInterest(loaneeLoanDetail, calculationContext.getPreviousOutstandingAmount(),  month.withDayOfMonth(day).atStartOfDay());
             calculationContext.setTotalInterestIncurredInAMonth(calculationContext.getTotalInterestIncurredInAMonth().add(dailyInterest.getInterest()));

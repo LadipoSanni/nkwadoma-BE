@@ -44,6 +44,8 @@ public class MonthlyInterestAdapter implements MonthlyInterestOutputPort {
     @Override
     public Optional<MonthlyInterest> findByDateCreated(LocalDateTime localDateTime) throws MeedlException {
         MeedlValidator.validateObjectInstance(localDateTime,"Please provide monthly interest date to find");
-        return monthlyInterestRepository.findByCreatedAt(localDateTime);
+        log.info("finding monthly interest by date created {}", localDateTime);
+        Optional<MonthlyInterestEntity> optionalMonthlyInterestEntity =  monthlyInterestRepository.findByCreatedAt(localDateTime);
+        return optionalMonthlyInterestEntity.map(monthlyInterestMapper::toMonthlyInterest);
     }
 }
