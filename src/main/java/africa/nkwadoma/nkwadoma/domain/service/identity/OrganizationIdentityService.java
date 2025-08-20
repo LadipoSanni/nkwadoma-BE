@@ -549,6 +549,13 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
         log.info("Viewing organization detail for user with role {}", userIdentity.getRole());
         if(IdentityRole.isOrganizationStaff(userIdentity.getRole())){
+            log.info("Organization staff viewing organization detail");
+            OrganizationEmployeeIdentity organizationEmployeeIdentity =
+                    organizationEmployeeIdentityOutputPort.findByCreatedBy(userIdentity.getId());
+            organizationId = organizationEmployeeIdentity.getOrganization();
+        }
+        if (MeedlValidator.isEmptyString(organizationId) && IdentityRole.isMeedlStaff(userIdentity.getRole())){
+            log.info("No organization id was provided by Meedl staff to view organization details");
             OrganizationEmployeeIdentity organizationEmployeeIdentity =
                     organizationEmployeeIdentityOutputPort.findByCreatedBy(userIdentity.getId());
             organizationId = organizationEmployeeIdentity.getOrganization();
