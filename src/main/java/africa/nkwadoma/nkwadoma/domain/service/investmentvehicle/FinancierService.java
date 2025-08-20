@@ -818,7 +818,12 @@ public class FinancierService implements FinancierUseCase {
         newColleagueUserIdentity = identityManagerOutputPort.createUser(newColleagueUserIdentity);
         newColleagueUserIdentity = userIdentityOutputPort.save(newColleagueUserIdentity);
 
-        Financier newColleague = Financier.builder().userIdentity(newColleagueUserIdentity).financierType(COOPERATE).build();
+        Financier newColleague = Financier.builder()
+                .userIdentity(newColleagueUserIdentity)
+                .financierType(COOPERATE)
+                .createdAt(LocalDateTime.now())
+                .accreditationStatus(AccreditationStatus.UNVERIFIED).build();
+
         newColleague = financierOutputPort.save(newColleague);
 
         CooperateFinancier cooperateFinancier = buildCooperateFinancierIdentity(inviterCooperateFinancier,newColleague);

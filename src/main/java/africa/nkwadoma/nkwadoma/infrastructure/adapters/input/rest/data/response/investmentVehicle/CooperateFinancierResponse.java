@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle;
 
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,4 +18,5 @@ public class CooperateFinancierResponse {
     private String inviteeName;
     private IdentityRole role;
     private LocalDateTime createdAt;
+    private ActivationStatus activationStatus;
 }

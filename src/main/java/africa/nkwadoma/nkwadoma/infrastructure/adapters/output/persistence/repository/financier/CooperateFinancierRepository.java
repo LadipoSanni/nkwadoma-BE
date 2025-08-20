@@ -40,15 +40,17 @@ public interface CooperateFinancierRepository extends JpaRepository<CooperateFin
     @Query("""
     SELECT cooperateFinancier.id as id,user.firstName as firstName, user.lastName as lastName,
            user.email as email, user.role as role, cooperateFinancier.activationStatus as status,
-           user.createdAt as createdAt, concat(invitee.firstName,' ',invitee.lastName) as inviteeName
+           user.createdAt as createdAt,
+           COALESCE(concat(invitee.firstName, ' ', invitee.lastName), 'N/A') as inviteeName
 
             FROM CooperateFinancierEntity cooperateFinancier
-            join FinancierEntity financier on financier.id = cooperateFinancier.financier.id
-            join CooperationEntity cooperation on cooperation.id = cooperateFinancier.cooperate.id
-            join UserEntity user on user.id = financier.userIdentity.id
-            join UserEntity invitee on user.id = user.createdBy
+             join FinancierEntity financier on financier.id = cooperateFinancier.financier.id
+             join CooperationEntity cooperation on cooperation.id = cooperateFinancier.cooperate.id
+             join UserEntity user on user.id = financier.userIdentity.id
+             join UserEntity invitee on invitee.id = user.createdBy
     where cooperation.id = :cooperationId and (:activationStatus IS NULL OR cooperateFinancier.activationStatus  = :activationStatus)
-    order by createdAt desc
+        and user.role != 'COOPERATE_FINANCIER_SUPER_ADMIN'
+    order by user.createdAt desc
     """)
     Page<CooperateFinancierProjection> findAllCooperateFinancierByCooperationIdAndActivationStatus(
             @Param("cooperationId") String cooperationId,
