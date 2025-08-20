@@ -679,16 +679,19 @@ public class CalculationEngine implements CalculationEngineUseCase {
                 loaneeLoanDetailsOutputPort.findAllWithDailyInterestByMonthAndYear(LocalDate.now().getMonth(), LocalDate.now().getYear());
         for (LoaneeLoanDetail loaneeLoanDetail : loaneeLoanDetails) {
             BigDecimal accumulatedInterestForTheMonth = sumAccumulatedInterestForTheMonth(loaneeLoanDetail);
+            MonthlyInterest foundMonthlyInterest = monthlyInterestOutputPort.findByDateCreated(LocalDateTime.now(),loaneeLoanDetail.getId());
+            if (ObjectUtils.isEmpty(foundMonthlyInterest)) {
 
-            MonthlyInterest monthlyInterest = saveMonthlyInterest(accumulatedInterestForTheMonth, loaneeLoanDetail, LocalDateTime.now());
+                MonthlyInterest monthlyInterest = saveMonthlyInterest(accumulatedInterestForTheMonth, loaneeLoanDetail, LocalDateTime.now());
 
-            updateInterestIncurredOnLoaneeLoanDetail(loaneeLoanDetail, accumulatedInterestForTheMonth, monthlyInterest);
+                updateInterestIncurredOnLoaneeLoanDetail(loaneeLoanDetail, accumulatedInterestForTheMonth, monthlyInterest);
 
-            CohortLoanDetail cohortLoanDetail = updateInterestIncurredOnCohortLoanDetail(loaneeLoanDetail, monthlyInterest);
+                CohortLoanDetail cohortLoanDetail = updateInterestIncurredOnCohortLoanDetail(loaneeLoanDetail, monthlyInterest);
 
-            ProgramLoanDetail programLoanDetail = updateInterestIncurredOnProgramLoanDetail(cohortLoanDetail, monthlyInterest);
+                ProgramLoanDetail programLoanDetail = updateInterestIncurredOnProgramLoanDetail(cohortLoanDetail, monthlyInterest);
 
-            updateInterestIncurredOnOrganizationLoanDetail(programLoanDetail, monthlyInterest);
+                updateInterestIncurredOnOrganizationLoanDetail(programLoanDetail, monthlyInterest);
+            }
         }
 
     }
@@ -827,15 +830,19 @@ public class CalculationEngine implements CalculationEngineUseCase {
     }
 
     private MonthlyInterest saveMonthlyInterest(BigDecimal interestIncurredInMonth, LoaneeLoanDetail loaneeLoanDetail, LocalDateTime dateCreated) throws MeedlException {
-        MonthlyInterest monthlyInterest = MonthlyInterest.builder()
-                .interest(decimalPlaceRoundUp(interestIncurredInMonth))
-                .createdAt(dateCreated)
-                .loaneeLoanDetail(loaneeLoanDetail)
-                .build();
+        MonthlyInterest monthlyInterest = monthlyInterestOutputPort.findByDateCreated(dateCreated,loaneeLoanDetail.getId());
+        if (Objects.isNull(monthlyInterest)) {
+            MonthlyInterest buildMonthlyInterest = MonthlyInterest.builder()
+                    .interest(decimalPlaceRoundUp(interestIncurredInMonth))
+                    .createdAt(dateCreated)
+                    .loaneeLoanDetail(loaneeLoanDetail)
+                    .build();
 
-        log.info("Monthly interest before saving == {}", monthlyInterest);
-        monthlyInterest = monthlyInterestOutputPort.save(monthlyInterest);
-        log.info("Monthly interest after saving == {}", monthlyInterest);
+            log.info("Monthly interest before saving == {}", buildMonthlyInterest);
+            buildMonthlyInterest = monthlyInterestOutputPort.save(buildMonthlyInterest);
+            log.info("Monthly interest after saving == {}", buildMonthlyInterest);
+            return buildMonthlyInterest;
+        }
         return monthlyInterest;
     }
 
@@ -852,17 +859,21 @@ public class CalculationEngine implements CalculationEngineUseCase {
     }
 
     private DailyInterest calculateAndSaveDailyInterest(LoaneeLoanDetail loaneeLoanDetail, BigDecimal amountOutstanding, LocalDateTime dateCreated) throws MeedlException {
-        BigDecimal dailyInterestIncurred =
-                calculateInterest(loaneeLoanDetail.getInterestRate(), amountOutstanding, 1);
-        log.info("daily interest  {}", dailyInterestIncurred);
-        DailyInterest dailyInterest = DailyInterest.builder()
-                .interest(decimalPlaceRoundUp(dailyInterestIncurred))
-                .createdAt(dateCreated)
-                .loaneeLoanDetail(loaneeLoanDetail)
-                .build();
-        log.info("daily interest before saving === : {}", dailyInterest);
-        dailyInterest = dailyInterestOutputPort.save(dailyInterest);
-        log.info("saved daily interest === : {}", dailyInterest);
+        DailyInterest dailyInterest = dailyInterestOutputPort.findDailyInterestForDate(dateCreated,loaneeLoanDetail.getId());
+        if (ObjectUtils.isEmpty(dailyInterest)) {
+            BigDecimal dailyInterestIncurred =
+                    calculateInterest(loaneeLoanDetail.getInterestRate(), amountOutstanding, 1);
+            log.info("daily interest  {}", dailyInterestIncurred);
+            DailyInterest buildDailyInterest = DailyInterest.builder()
+                    .interest(decimalPlaceRoundUp(dailyInterestIncurred))
+                    .createdAt(dateCreated)
+                    .loaneeLoanDetail(loaneeLoanDetail)
+                    .build();
+            log.info("daily interest before saving === : {}", buildDailyInterest);
+            buildDailyInterest = dailyInterestOutputPort.save(buildDailyInterest);
+            log.info("saved daily interest === : {}", buildDailyInterest);
+            return buildDailyInterest;
+        }
         return dailyInterest;
     }
 

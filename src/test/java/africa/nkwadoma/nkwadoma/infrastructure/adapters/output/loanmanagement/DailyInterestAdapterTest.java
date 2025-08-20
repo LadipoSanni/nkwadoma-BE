@@ -80,6 +80,17 @@ public class DailyInterestAdapterTest {
         assertEquals(savedDailyInterest.getInterest(),BigDecimal.valueOf(5000.00));
     }
 
+    @Order(2)
+    @Test
+    void findDailyInterestByDateCreated() {
+        DailyInterest foundDailyInterest = DailyInterest.builder().build();
+        try{
+            foundDailyInterest = dailyInterestOutputPort.findDailyInterestForDate(dailyInterest.getCreatedAt(),loaneeLoanDetail.getId());
+        }catch (MeedlException meedlException) {
+            log.error(meedlException.getMessage());
+        }
+        assertEquals(dailyInterestId,foundDailyInterest.getId());
+    }
 
     @AfterAll
     void tearDown() throws MeedlException {
