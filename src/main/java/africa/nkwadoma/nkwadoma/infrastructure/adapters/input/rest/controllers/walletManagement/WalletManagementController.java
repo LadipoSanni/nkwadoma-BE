@@ -29,7 +29,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("program")
+@RequestMapping("wallet")
 @Tag(name = "Program Controller", description = "Manage Programs in an institute")
 public class WalletManagementController {
     @Autowired
