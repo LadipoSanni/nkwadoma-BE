@@ -42,10 +42,19 @@ public class MonthlyInterestAdapter implements MonthlyInterestOutputPort {
     }
 
     @Override
-    public Optional<MonthlyInterest> findByDateCreated(LocalDateTime localDateTime) throws MeedlException {
-        MeedlValidator.validateObjectInstance(localDateTime,"Please provide monthly interest date to find");
+    public Optional<MonthlyInterest> findOptionalByCreatedAt(LocalDateTime localDateTime, String loaneeLoanDetailId) throws MeedlException {
+        MeedlValidator.validateObjectInstance(localDateTime, "Please provide monthly interest date to find");
         log.info("finding monthly interest by date created {}", localDateTime);
-        Optional<MonthlyInterestEntity> optionalMonthlyInterestEntity =  monthlyInterestRepository.findByCreatedAt(localDateTime);
+        Optional<MonthlyInterestEntity> optionalMonthlyInterestEntity = monthlyInterestRepository.findByCreatedAtAndLoaneeLoanDetail_Id(localDateTime, loaneeLoanDetailId);
         return optionalMonthlyInterestEntity.map(monthlyInterestMapper::toMonthlyInterest);
+    }
+    public MonthlyInterest findByDateCreated(LocalDateTime dateCreated, String id) throws MeedlException {
+        MeedlValidator.validateUUID(id,"Loanee loan detail id cannot be empty");
+        MeedlValidator.validateObjectInstance(dateCreated,"Date created cannot be empty");
+        MonthlyInterestEntity monthlyInterestEntity =
+                monthlyInterestRepository.findByLoaneeLoanDetailIdAndCreatedAtMonthAndCreatedAtYear(id,dateCreated.getMonth().getValue()
+                        ,dateCreated.getYear());
+
+        return monthlyInterestMapper.toMonthlyInterest(monthlyInterestEntity);
     }
 }

@@ -13,5 +13,6 @@ public interface MonthlyInterestOutputPort {
 
     void deleteById(String monthlyInterestId) throws MeedlException;
 
-    Optional<MonthlyInterest> findByDateCreated(LocalDateTime localDateTime) throws MeedlException;
+    Optional<MonthlyInterest> findOptionalByCreatedAt(LocalDateTime localDateTime, String loaneeLoanDetailId) throws MeedlException;
+    MonthlyInterest findByDateCreated(LocalDateTime dateCreated, String id) throws MeedlException;
 }
