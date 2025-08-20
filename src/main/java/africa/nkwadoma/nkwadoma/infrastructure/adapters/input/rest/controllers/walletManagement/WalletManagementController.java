@@ -30,7 +30,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("wallet")
-@Tag(name = "Program Controller", description = "Manage Programs in an institute")
+@Tag(name = "Wallet management  Controller", description = "Manage wallet of different entities")
 public class WalletManagementController {
     @Autowired
     private BankDetailUseCase bankDetailUseCase;

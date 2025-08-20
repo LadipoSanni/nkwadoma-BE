@@ -12,6 +12,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.BankDetailMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
+import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.financier.CooperateFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -22,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -41,13 +43,13 @@ public class BankDetailService implements BankDetailUseCase {
         bankDetail.validate();
         UserIdentity userIdentity = userIdentityOutputPort.findById(bankDetail.getUserId());
         bankDetail.setUserIdentity(userIdentity);
-        bankDetail = addBankDetailsForFinancier(bankDetail, userIdentity);
+        bankDetail = addBankDetails(bankDetail, userIdentity);
 
         bankDetail.setResponse("Added bank details successfully");
         return bankDetail;
     }
 
-    private BankDetail addBankDetailsForFinancier(BankDetail bankDetail, UserIdentity userIdentity) throws MeedlException {
+    private BankDetail addBankDetails(BankDetail bankDetail, UserIdentity userIdentity) throws MeedlException {
         log.info("About to add bank detail by {} with user id {}", userIdentity.getRole(), userIdentity.getId());
 
         if (IdentityRole.FINANCIER.equals(userIdentity.getRole())){
@@ -104,6 +106,8 @@ public class BankDetailService implements BankDetailUseCase {
             bankDetail.setActivationStatus(activationStatus);
             bankDetail = bankDetailOutputPort.save(bankDetail);
             organizationIdentity.setBankDetailId(bankDetail.getId());
+            List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity.getId());
+            organizationIdentity.setServiceOfferings(serviceOfferings);
             organizationIdentityOutputPort.save(organizationIdentity);
             log.info("{} successfully added bank details", userIdentity.getRole().getRoleName());
         }else {
