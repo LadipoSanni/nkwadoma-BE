@@ -423,7 +423,7 @@ public class UserIdentityService implements UserUseCase {
             throw new MeedlException("You are not authorized to assign a role");
         }
         foundUserToAssign.setRole(userIdentity.getRole());
-        return userIdentityOutputPort.save(userIdentity);
+        return userIdentityOutputPort.save(foundUserToAssign);
     }
 
     private String enablePhoneNumberForMFA(UserIdentity userIdentity, UserIdentity foundUser) throws MeedlException {
