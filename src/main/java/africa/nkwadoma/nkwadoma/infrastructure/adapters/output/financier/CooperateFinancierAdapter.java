@@ -6,12 +6,17 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.Financi
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.CooperateFinancier;
+import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.financier.CooperateFinancierMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.financier.CooperateFinancierEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.financier.CooperateFinancierProjection;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.financier.CooperateFinancierRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -87,5 +92,22 @@ public class CooperateFinancierAdapter implements CooperateFinancierOutputPort {
                 cooperateFinancierRepository.findByCooperateFinancierSuperAdminByCooperateName(name);
 
         return cooperateFinancierMapper.toCooperateFinancier(cooperateFinancierEntity);
+    }
+
+    @Override
+    public Page<CooperateFinancier> findAllFinancierInCooperationByCooperationId(String cooperationId, Financier financier) throws MeedlException {
+        MeedlValidator.validateUUID(cooperationId,"Cooperation id cannot be empty");
+
+        MeedlValidator.validatePageNumber(financier.getPageNumber());
+        MeedlValidator.validatePageSize(financier.getPageSize());
+
+        Pageable pageRequest = PageRequest.of(financier.getPageNumber(), financier.getPageSize());
+
+
+        Page<CooperateFinancierProjection> cooperateFinancierProjection =
+                cooperateFinancierRepository.findAllCooperateFinancierByCooperationIdAndActivationStatus(
+                        cooperationId,financier.getActivationStatus(),pageRequest);
+
+        return cooperateFinancierProjection.map(cooperateFinancierMapper::mapCooperateFinancierProjectionToCooperateFinancier);
     }
 }

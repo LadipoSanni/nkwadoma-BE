@@ -15,6 +15,7 @@ import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.financier.CooperateFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -108,6 +109,7 @@ public class BankDetailService implements BankDetailUseCase {
             organizationIdentity.setBankDetailId(bankDetail.getId());
             List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity.getId());
             organizationIdentity.setServiceOfferings(serviceOfferings);
+            organizationIdentity.setOrganizationEmployees(List.of(OrganizationEmployeeIdentity.builder().meedlUser(userIdentity).build()));
             organizationIdentityOutputPort.save(organizationIdentity);
             log.info("{} successfully added bank details", userIdentity.getRole().getRoleName());
         }else {

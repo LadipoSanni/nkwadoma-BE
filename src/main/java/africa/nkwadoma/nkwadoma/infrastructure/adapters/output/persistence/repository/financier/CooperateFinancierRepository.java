@@ -1,6 +1,9 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.financier;
 
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.financier.CooperateFinancierEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -33,4 +36,23 @@ public interface CooperateFinancierRepository extends JpaRepository<CooperateFin
                   
     """)
     CooperateFinancierEntity findByCooperateFinancierSuperAdminByCooperateName(@Param("name") String name);
+
+    @Query("""
+    SELECT cooperateFinancier.id as id,user.firstName as firstName, user.lastName as lastName,
+           user.email as email, user.role as role, cooperateFinancier.activationStatus as status,
+           user.createdAt as createdAt,
+           COALESCE(concat(invitee.firstName, ' ', invitee.lastName), 'N/A') as inviteeName
+
+            FROM CooperateFinancierEntity cooperateFinancier
+             join FinancierEntity financier on financier.id = cooperateFinancier.financier.id
+             join CooperationEntity cooperation on cooperation.id = cooperateFinancier.cooperate.id
+             join UserEntity user on user.id = financier.userIdentity.id
+             join UserEntity invitee on invitee.id = user.createdBy
+    where cooperation.id = :cooperationId and (:activationStatus IS NULL OR cooperateFinancier.activationStatus  = :activationStatus)
+        and user.role != 'COOPERATE_FINANCIER_SUPER_ADMIN'
+    order by user.createdAt desc
+    """)
+    Page<CooperateFinancierProjection> findAllCooperateFinancierByCooperationIdAndActivationStatus(
+            @Param("cooperationId") String cooperationId,
+            @Param("activationStatus") ActivationStatus activationStatus, Pageable pageRequest);
 }

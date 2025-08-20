@@ -818,7 +818,12 @@ public class FinancierService implements FinancierUseCase {
         newColleagueUserIdentity = identityManagerOutputPort.createUser(newColleagueUserIdentity);
         newColleagueUserIdentity = userIdentityOutputPort.save(newColleagueUserIdentity);
 
-        Financier newColleague = Financier.builder().userIdentity(newColleagueUserIdentity).financierType(COOPERATE).build();
+        Financier newColleague = Financier.builder()
+                .userIdentity(newColleagueUserIdentity)
+                .financierType(COOPERATE)
+                .createdAt(LocalDateTime.now())
+                .accreditationStatus(AccreditationStatus.UNVERIFIED).build();
+
         newColleague = financierOutputPort.save(newColleague);
 
         CooperateFinancier cooperateFinancier = buildCooperateFinancierIdentity(inviterCooperateFinancier,newColleague);
@@ -912,6 +917,21 @@ public class FinancierService implements FinancierUseCase {
             cooperateFinancierOutputPort.save(cooperateFinancier);
             return "colleague invitation un-successful after request being decline";
         }
+    }
+
+    @Override
+    public Page<CooperateFinancier> viewAllCooperationStaff(Financier financier) throws MeedlException {
+        MeedlValidator.validateObjectInstance(financier,"Financier cannot be empty");
+        MeedlValidator.validatePageNumber(financier.getPageNumber());
+        MeedlValidator.validatePageSize(financier.getPageSize());
+
+        UserIdentity userIdentity = userIdentityOutputPort.findById(financier.getActorId());
+        CooperateFinancier cooperateFinancier = cooperateFinancierOutputPort.findByUserId(userIdentity.getId());
+        if (ObjectUtils.isEmpty(cooperateFinancier)){
+            throw new InvestmentException("Financier does not belong to any cooperation");
+        }
+        return cooperateFinancierOutputPort.findAllFinancierInCooperationByCooperationId(cooperateFinancier.getCooperate().getId(),
+                financier);
     }
 
     private void decisionMustEitherBeApprovedOrDeclined(ActivationStatus activationStatus) throws africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException {
