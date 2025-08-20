@@ -17,7 +17,6 @@ import lombok.ToString;
 public class CooperateFinancier {
 
     private String id;
-    private String image;
     private Cooperation cooperate;
     private Financier financier;
     private ActivationStatus activationStatus;

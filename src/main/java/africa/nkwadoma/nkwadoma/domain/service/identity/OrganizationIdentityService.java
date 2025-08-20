@@ -381,6 +381,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
             organizationIdentityOutputPort.save(foundOrganization);
             log.info("Image uploaded success.");
         }else {
+            log.error("Attempt to make image upload by user with id {} and role {}", foundUser.getId(), foundUser.getRole());
             throw new MeedlException("You are not allows to upload organization image");
         }
     }
