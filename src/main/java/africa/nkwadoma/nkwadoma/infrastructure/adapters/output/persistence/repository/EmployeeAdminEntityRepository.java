@@ -33,6 +33,20 @@ public interface EmployeeAdminEntityRepository extends JpaRepository<Organizatio
     List<OrganizationEmployeeEntity> findAllByOrganization(String organizationId);
 
     @Query("""
+       SELECT
+          o.id AS id,
+          o.meedlUser AS meedlUser,
+          o.organization AS organization,
+          o.createdBy AS createdBy,
+          o.activationStatus AS activationStatus,
+          CONCAT(u.firstName, ' ', u.lastName) AS requestedBy
+       FROM OrganizationEmployeeEntity o
+       JOIN UserEntity u ON u.id = o.createdBy
+       WHERE o.id = :id
+       """)
+    Optional<OrganizationEmployeeEntityProjection> findEmployeeById(@Param("id") String id);
+
+    @Query("""
 
           SELECT
           o.id AS id,

@@ -48,8 +48,8 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
     @Override
     public OrganizationEmployeeIdentity findById(String id)throws MeedlException {
         MeedlValidator.validateUUID(id, "Please provide a valid employee identification");
-        OrganizationEmployeeEntity organizationEmployeeIdentity = employeeAdminEntityRepository.findById(id).orElseThrow(()->new IdentityException(USER_NOT_FOUND.getMessage()));
-        return organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(organizationEmployeeIdentity);
+        OrganizationEmployeeEntityProjection organizationEmployeeEntityProjection = employeeAdminEntityRepository.findEmployeeById(id).orElseThrow(()->new IdentityException(USER_NOT_FOUND.getMessage()));
+        return organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(organizationEmployeeEntityProjection);
     }
 
     @Override

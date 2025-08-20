@@ -35,9 +35,9 @@ public enum IdentityRole {
     public static Set<IdentityRole> getCooperateFinancierRoles(){
         return Set.of(COOPERATE_FINANCIER_ADMIN, COOPERATE_FINANCIER_SUPER_ADMIN);
     }
-    public static boolean isMeedlAdminOrMeedlSuperAdmin(UserIdentity actor) {
-        return IdentityRole.MEEDL_SUPER_ADMIN.equals(actor.getRole()) ||
-                IdentityRole.MEEDL_ADMIN.equals(actor.getRole());
+    public static boolean isMeedlAdminOrMeedlSuperAdmin(IdentityRole identityRole) {
+        return IdentityRole.MEEDL_SUPER_ADMIN.equals(identityRole) ||
+                IdentityRole.MEEDL_ADMIN.equals(identityRole);
     }
 
     public static boolean isOrganizationAdminOrSuperAdmin(IdentityRole role) {

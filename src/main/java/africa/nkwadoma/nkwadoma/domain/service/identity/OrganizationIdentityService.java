@@ -362,6 +362,29 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         return handleNotificationsAndResponse(inviter, savedEmployee, savedUserIdentity);
     }
 
+    @Override
+    public void uploadImage(OrganizationIdentity organizationIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(organizationIdentity, UserMessages.USER_IDENTITY_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateUUID(organizationIdentity.getActorId(), UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateDataElement(organizationIdentity.getBannerImage(), "Image not provided");
+
+        UserIdentity foundUser = userIdentityOutputPort.findById(organizationIdentity.getActorId());
+        if (IdentityRole.isMeedlAdminOrMeedlSuperAdmin(foundUser.getRole()) ||
+                IdentityRole.isOrganizationAdminOrSuperAdmin(foundUser.getRole())){
+            Optional<OrganizationIdentity> optionalOrganization = organizationIdentityOutputPort.findByUserId(organizationIdentity.getActorId());
+            if (optionalOrganization.isEmpty()){
+                log.error("Unfortunately you don't belong to an organization to upload image to.\nContact admin. Error for user with id {} attempting to upload image but unable to determine user organization", organizationIdentity.getActorId());
+                throw new MeedlException("Unfortunately you don't belong to an organization to upload image to.\nContact admin");
+            }
+            OrganizationIdentity foundOrganization = optionalOrganization.get();
+            foundOrganization.setBannerImage(foundOrganization.getBannerImage());
+            organizationIdentityOutputPort.save(foundOrganization);
+            log.info("Image uploaded success.");
+        }else {
+            throw new MeedlException("You are not allows to upload organization image");
+        }
+    }
+
     private String handleNotificationsAndResponse(OrganizationEmployeeIdentity inviter, OrganizationEmployeeIdentity
             savedEmployee, UserIdentity savedUserIdentity) throws MeedlException {
 
