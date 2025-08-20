@@ -291,8 +291,6 @@ public class CalculationEngine implements CalculationEngineUseCase {
             BigDecimal interestIncurred = calculateIncurredInterestPerRepayment(repayment, calculationContext.getPreviousOutstandingAmount(), calculationContext.getStartDate(), calculationContext.getLoaneeLoanDetail());
             calculationContext.getRepaymentHistory().setInterestIncurred(interestIncurred);
 
-//            calculateOutstandingPerRepayment(calculationContext);
-
             updateRepaymentMeta(repayment, calculationContext);
             calculationContext.setStartDate(repayment.getPaymentDateTime());
 
@@ -378,10 +376,11 @@ public class CalculationEngine implements CalculationEngineUseCase {
     }
 
     private void calculateOutstandingPerRepayment(CalculationContext calculationContext) {
-        log.info("Calculating outstanding per repayment. previous outstanding amount is : {}", calculationContext.getPreviousOutstandingAmount());
+        log.info("Calculating outstanding per repayment. previous outstanding amount is : {} repayment date {}" , calculationContext.getPreviousOutstandingAmount(), calculationContext.getRepaymentHistory().getPaymentDateTime());
         BigDecimal newOutstandingAmount = calculationContext.getPreviousOutstandingAmount().subtract(calculationContext.getRepaymentHistory().getAmountPaid()).max(BigDecimal.ZERO);
         calculationContext.getRepaymentHistory().setAmountOutstanding(newOutstandingAmount);
         calculationContext.setPreviousOutstandingAmount(newOutstandingAmount);
+        log.info("New amount outstanding after making repayment is {} for repayment with date {}", newOutstandingAmount, calculationContext.getRepaymentHistory().getPaymentDateTime());
     }
 
     public BigDecimal calculateIncurredInterestPerRepayment(RepaymentHistory repayment, BigDecimal previousOutstandingAmount, LocalDateTime lastDate, LoaneeLoanDetail loaneeLoanDetail) {
@@ -785,11 +784,8 @@ public class CalculationEngine implements CalculationEngineUseCase {
             calculateAndSaveDailyInterest(calculationContext.getLoaneeLoanDetail(),calculationContext.getPreviousOutstandingAmount() ,startDate.withDayOfMonth(dayCount));
         }
         if(isLastDayOfTheMonth(endDay, endDate.lengthOfMonth())){
-            Optional<MonthlyInterest> optionalMonthlyInterest = monthlyInterestOutputPort.findOptionalByCreatedAt(startDate.withDayOfMonth(startDate.toLocalDate().lengthOfMonth()), calculationContext.getLoaneeLoanDetail().getId());
-            if (optionalMonthlyInterest.isEmpty()) {
-                log.info("No monthly interest found for {} saving new monthly interest",  startDate.withDayOfMonth(startDate.toLocalDate().lengthOfMonth()));
-                calculateAndSaveMonthlyInterest(calculationContext, calculationContext.getLoaneeLoanDetail(), startDate.withDayOfMonth(startDate.toLocalDate().lengthOfMonth()));
-            }
+            log.info("No monthly interest found for {} saving new monthly interest",  startDate.withDayOfMonth(startDate.toLocalDate().lengthOfMonth()));
+            calculateAndSaveMonthlyInterest(calculationContext, calculationContext.getLoaneeLoanDetail(), startDate.withDayOfMonth(startDate.toLocalDate().lengthOfMonth()));
         }
         calculationContext.setStartDate(endDate.atStartOfDay());
     }
@@ -806,12 +802,9 @@ public class CalculationEngine implements CalculationEngineUseCase {
             calculationContext.setTotalInterestIncurredInAMonth(calculationContext.getTotalInterestIncurredInAMonth().add(dailyInterest.getInterest()));
         }
         if (isLastDayOfTheMonth(numberOfDaysTillDateMeasured, lastDayOfMonth)) {
-            Optional<MonthlyInterest> optionalMonthlyInterest = monthlyInterestOutputPort.findOptionalByCreatedAt(month.atStartOfDay(), loaneeLoanDetail.getId());
-            if (optionalMonthlyInterest.isEmpty()) {
-                log.info("No monthly interest found for {} saving new monthly interest", month.atStartOfDay());
-                calculateAndSaveMonthlyInterest(calculationContext, loaneeLoanDetail, month.atStartOfDay());
-                setStartDateToNextFirstOfNextMonth(calculationContext);
-            }
+            log.info("No monthly interest found for {} saving new monthly interest", month.atStartOfDay());
+            calculateAndSaveMonthlyInterest(calculationContext, loaneeLoanDetail, month.atStartOfDay());
+            setStartDateToNextFirstOfNextMonth(calculationContext);
         }
     }
 
