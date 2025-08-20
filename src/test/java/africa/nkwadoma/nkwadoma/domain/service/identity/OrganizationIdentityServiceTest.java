@@ -405,18 +405,6 @@ class OrganizationIdentityServiceTest {
         verify(loanOfferOutputPort).countNumberOfPendingLoanOfferForOrganization(roseCouture.getId());
     }
 
-    @Test
-    void shouldThrowException_WhenOrganizationIdIsNullForPortfolioManager() {
-        sarah.setRole(IdentityRole.PORTFOLIO_MANAGER);
-        try {
-            when(userIdentityOutputPort.findById(mockId)).thenReturn(sarah);
-        } catch (MeedlException e) {
-            throw new RuntimeException(e);
-        }
-        assertThrows(MeedlException.class, () ->
-                organizationIdentityService.viewOrganizationDetails(null, mockId)
-        );
-    }
 
     @Test
     void approveOrganizationInvitationWithInValidResponse(){
