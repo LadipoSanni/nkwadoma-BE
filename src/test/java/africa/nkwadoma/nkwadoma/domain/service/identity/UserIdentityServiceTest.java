@@ -2,7 +2,9 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import  africa.nkwadoma.nkwadoma.application.ports.input.notification.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.OrganizationEmployeeEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.financier.CooperateFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.CooperationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.MFAType;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
@@ -62,6 +64,10 @@ class UserIdentityServiceTest {
     private UserIdentity favour;
     @Mock
     private EmailTokenManager emailTokenManager;
+    @Mock
+    private CooperationOutputPort cooperationOutputPort;
+    @Mock
+    private CooperateFinancierOutputPort cooperateFinancierOutputPort;
 
 //    private String password;
     private String newPassword;

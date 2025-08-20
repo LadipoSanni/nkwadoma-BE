@@ -887,7 +887,7 @@ public class FinancierService implements FinancierUseCase {
 
 
     @Override
-    public String respondToColleageInvitation(String actorId, String cooperateFinancierId, ActivationStatus activationStatus) throws MeedlException {
+    public String respondToColleagueInvitation(String actorId, String cooperateFinancierId, ActivationStatus activationStatus) throws MeedlException {
         MeedlValidator.validateUUID(cooperateFinancierId,"Financier id cannot be empty ");
         MeedlValidator.validateObjectInstance(activationStatus,"Activation status cannot be null");
         decisionMustEitherBeApprovedOrDeclined(activationStatus);

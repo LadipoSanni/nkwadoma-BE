@@ -103,11 +103,7 @@ public class Financier {
             MeedlValidator.validateObjectInstance(this.financierType, FinancierMessages.INVALID_FINANCIER_TYPE.getMessage());
             MeedlValidator.validateObjectInstance(this.getUserIdentity(), UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
             MeedlValidator.validateUUID(this.getUserIdentity().getCreatedBy(), "Valid user identification for user performing this action is required");
-            if (financierIsIndividual()) {
-                validateUserIdentity();
-            } else {
-                validateCooperation();
-            }
+            validateUserIdentity();
         }
     }
     private boolean financierIsIndividual(){
@@ -122,7 +118,7 @@ public class Financier {
     private void validateCooperation() throws MeedlException {
         log.info("Started cooperation validation in financier");
         MeedlValidator.validateObjectInstance(cooperation, UserMessages.COOPERATION_MUST_NOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateObjectName(this.cooperation.getName(), " name cannot be empty", "Cooperation");
+        MeedlValidator.validateObjectName(this.cooperation.getName(), "name cannot be empty", "Cooperation");
         MeedlValidator.validateObjectInstance(this.userIdentity, UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validateEmail(this.userIdentity.getEmail());
     }
