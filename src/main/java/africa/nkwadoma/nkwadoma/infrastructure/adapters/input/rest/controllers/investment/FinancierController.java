@@ -398,4 +398,34 @@ public class FinancierController {
 
     }
 
+    @GetMapping("cooperate/search/staff")
+    @PreAuthorize("hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<?>> searchCooperationStaff(@AuthenticationPrincipal Jwt meedlUser,
+                                                                  @RequestParam(name = "name") String name,
+                                                                  @RequestParam(required = false, name = "activationStatus") ActivationStatus activationStatus,
+                                                                  @RequestParam(defaultValue = "10") int pageSize,
+                                                                  @RequestParam(defaultValue = "0") int pageNumber) throws MeedlException {
+
+
+        Financier financier = Financier.builder().name(name).actorId(meedlUser.getClaimAsString("sub")).activationStatus(activationStatus)
+                .pageNumber(pageNumber).pageSize(pageSize).build();
+
+        Page<CooperateFinancier> cooperateFinanciers = financierUseCase.searchCooperationStaff(financier);
+
+        List<CooperateFinancierResponse> cooperateFinancierResponse =
+                cooperateFinanciers.map(financierRestMapper::mapToCooperateFinancierResponse).stream().toList();
+
+        PaginatedResponse<CooperateFinancierResponse> cooperateFinancierResponsePaginatedResponse =
+                new PaginatedResponse<>(cooperateFinancierResponse,cooperateFinanciers.hasNext(),
+                        cooperateFinanciers.getTotalPages(),cooperateFinanciers.getTotalElements(),pageNumber,pageSize);
+
+        ApiResponse<PaginatedResponse<CooperateFinancierResponse>> apiResponse = ApiResponse.<PaginatedResponse<CooperateFinancierResponse>>builder()
+                .data(cooperateFinancierResponsePaginatedResponse)
+                .message(String.valueOf(RETURNED_SUCCESSFULLY))
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+
+    }
+
 }

@@ -110,4 +110,21 @@ public class CooperateFinancierAdapter implements CooperateFinancierOutputPort {
 
         return cooperateFinancierProjection.map(cooperateFinancierMapper::mapCooperateFinancierProjectionToCooperateFinancier);
     }
+
+    @Override
+    public Page<CooperateFinancier> searchCooperationStaffByCooperationIdAndStaffName(String cooperationId, Financier financier) throws MeedlException {
+        MeedlValidator.validateUUID(cooperationId,"Cooperation id cannot be empty");
+
+
+        MeedlValidator.validatePageNumber(financier.getPageNumber());
+        MeedlValidator.validatePageSize(financier.getPageSize());
+
+        Pageable pageRequest = PageRequest.of(financier.getPageNumber(), financier.getPageSize());
+
+        Page<CooperateFinancierProjection> cooperateFinancierProjection =
+                cooperateFinancierRepository.findAllByStaffNameAndCooperationIdAndActivationStatus(
+                        cooperationId,financier.getActivationStatus(),financier.getName(),pageRequest);
+
+        return cooperateFinancierProjection.map(cooperateFinancierMapper::mapCooperateFinancierProjectionToCooperateFinancier);
+    }
 }

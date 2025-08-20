@@ -221,6 +221,60 @@ public class CooperateFinancierAdapterTest {
     }
 
 
+    @Order(9)
+    @Test
+    void searchCooperationStaffByCooperationIdAndNameNullActivationStatus(){
+        Page<CooperateFinancier> cooperateFinanciers = Page.empty();
+        financier.setPageNumber(0);
+        financier.setPageSize(10);
+        financier.setActivationStatus(null);
+        financier.setName("j");
+        try {
+            cooperateFinanciers = cooperateFinancierOutputPort.searchCooperationStaffByCooperationIdAndStaffName(cooperate.getId(),
+                    financier);
+        }catch (MeedlException e){
+            log.error(e.getMessage());
+        }
+        assertNotNull(cooperateFinanciers);
+        assertEquals(1, cooperateFinanciers.getContent().size());
+    }
+
+    @Order(10)
+    @Test
+    void searchCooperationStaffByCooperationIdAndActiveActivationStatus(){
+        Page<CooperateFinancier> cooperateFinanciers = Page.empty();
+        financier.setPageNumber(0);
+        financier.setPageSize(10);
+        financier.setActivationStatus(ActivationStatus.ACTIVE);
+        financier.setName("j");
+        try {
+            cooperateFinanciers = cooperateFinancierOutputPort.findAllFinancierInCooperationByCooperationId(cooperate.getId(),
+                    financier);
+        }catch (MeedlException e){
+            log.error(e.getMessage());
+        }
+        assertNotNull(cooperateFinanciers);
+        assertEquals(1, cooperateFinanciers.getContent().size());
+    }
+
+
+    @Order(11)
+    @Test
+    void searchCooperationStaffByCooperationIdPendingApprovalActiveActivationStatus(){
+        Page<CooperateFinancier> cooperateFinanciers = Page.empty();
+        financier.setPageNumber(0);
+        financier.setPageSize(10);
+        financier.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
+        try {
+            cooperateFinanciers = cooperateFinancierOutputPort.findAllFinancierInCooperationByCooperationId(cooperate.getId(),
+                    financier);
+        }catch (MeedlException e){
+            log.error(e.getMessage());
+        }
+        assertEquals(0,cooperateFinanciers.getContent().size());
+    }
+
+
     @AfterAll
     void tearDown() throws MeedlException {
         cooperateFinancierOutputPort.delete(superAdminCooperateFinancierID);
