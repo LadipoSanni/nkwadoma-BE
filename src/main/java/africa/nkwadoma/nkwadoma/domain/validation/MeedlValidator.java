@@ -217,18 +217,18 @@ public class MeedlValidator {
         String inviterEmailDomain = inviterEmail.substring(inviterEmail.indexOf(EMAIL_INDEX.getMessage()));
         return StringUtils.equals(inviterEmailDomain, inviteeEmailDomain);
     }
-    public static void validateOrganizationUserIdentities(List<OrganizationEmployeeIdentity> userIdentities) throws MeedlException {
-        log.info("Started validating for user identities (List) : {}", userIdentities);
-        log.info("validating to check for empty list : {}", CollectionUtils.isEmpty(userIdentities));
-        if (CollectionUtils.isEmpty(userIdentities)){
-            log.error("{} - {}", USER_IDENTITY_CANNOT_BE_NULL.getMessage(), userIdentities);
+    public static void validateOrganizationUserIdentities(List<OrganizationEmployeeIdentity> employees) throws MeedlException {
+        log.info("Started validating for user identities (List) : {}", employees);
+        log.info("validating to check for empty list : {}", CollectionUtils.isEmpty(employees));
+        if (CollectionUtils.isEmpty(employees)){
+            log.error("{} - {}", USER_IDENTITY_CANNOT_BE_NULL.getMessage(), employees);
             throw new MeedlException(USER_IDENTITY_CANNOT_BE_NULL.getMessage());
         }
-        for(OrganizationEmployeeIdentity userIdentity : userIdentities){
-            MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
-            userIdentity.getMeedlUser().validate();
+        for(OrganizationEmployeeIdentity employee : employees){
+            MeedlValidator.validateObjectInstance(employee, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
+            employee.getMeedlUser().validate();
         }
-        log.info("Users identity validation completed... for user {} ", userIdentities);
+        log.info("Users identity validation completed... for user {} ", employees);
     }
 
     public static void validateLoanRequest(LoanRequest foundLoanRequest) throws MeedlException {
