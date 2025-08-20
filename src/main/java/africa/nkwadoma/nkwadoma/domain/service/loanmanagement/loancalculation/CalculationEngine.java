@@ -340,6 +340,9 @@ public class CalculationEngine implements CalculationEngineUseCase {
         }
         if(!isLastDayOfTheMonth(endDate.getDayOfMonth(), endDate.lengthOfMonth())){
             calculateInterestForDaysBetween(calculationContext.getStartDate(), endDate.getDayOfMonth(), calculationContext, endDate);
+            if(isLastDayOfTheMonth(calculationContext.getStartDate().getDayOfMonth(), endDate.lengthOfMonth())){
+            calculateAndSaveMonthlyInterest(calculationContext, calculationContext.getLoaneeLoanDetail(), startDate.withDayOfMonth(startDate.toLocalDate().lengthOfMonth()));
+        }
         }
     }
 
@@ -773,11 +776,12 @@ public class CalculationEngine implements CalculationEngineUseCase {
         log.info("Calculating interest from start date {} to end date {}", startDate.getDayOfMonth(), endDay);
         int startDay = startDate.getDayOfMonth();
         for (int dayCount = startDay; dayCount <= endDay; dayCount++) {
-            calculateAndSaveDailyInterest(calculationContext.getLoaneeLoanDetail(), startDate.withDayOfMonth(dayCount));
+            log.info("dayCount --- {}", dayCount);
+            calculateAndSaveDailyInterest(calculationContext.getLoaneeLoanDetail(),calculationContext.getPreviousOutstandingAmount() ,startDate.withDayOfMonth(dayCount));
         }
-        if(isLastDayOfTheMonth(endDay, endDate.lengthOfMonth())){
-            calculateAndSaveMonthlyInterest(calculationContext, calculationContext.getLoaneeLoanDetail(), startDate.withDayOfMonth(startDate.toLocalDate().lengthOfMonth()));
-        }
+//        if(isLastDayOfTheMonth(endDay, endDate.lengthOfMonth())){
+//            calculateAndSaveMonthlyInterest(calculationContext, calculationContext.getLoaneeLoanDetail(), startDate.withDayOfMonth(startDate.toLocalDate().lengthOfMonth()));
+//        }
         calculationContext.setStartDate(endDate.atStartOfDay());
     }
 
@@ -788,7 +792,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
 
         LoaneeLoanDetail loaneeLoanDetail = calculationContext.getLoaneeLoanDetail();
         for (int day = startDay; day <= numberOfDaysTillDateMeasured; day++) {
-            DailyInterest dailyInterest = calculateAndSaveDailyInterest(loaneeLoanDetail, month.withDayOfMonth(startDay).atStartOfDay());
+            DailyInterest dailyInterest = calculateAndSaveDailyInterest(loaneeLoanDetail, calculationContext.getPreviousOutstandingAmount(),  month.withDayOfMonth(day).atStartOfDay());
             calculationContext.setTotalInterestIncurredInAMonth(calculationContext.getTotalInterestIncurredInAMonth().add(dailyInterest.getInterest()));
         }
         if (isLastDayOfTheMonth(numberOfDaysTillDateMeasured, lastDayOfMonth)) {
@@ -824,7 +828,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
 
     private MonthlyInterest saveMonthlyInterest(BigDecimal interestIncurredInMonth, LoaneeLoanDetail loaneeLoanDetail, LocalDateTime dateCreated) throws MeedlException {
         MonthlyInterest monthlyInterest = MonthlyInterest.builder()
-                .interest(interestIncurredInMonth)
+                .interest(decimalPlaceRoundUp(interestIncurredInMonth))
                 .createdAt(dateCreated)
                 .loaneeLoanDetail(loaneeLoanDetail)
                 .build();
@@ -843,16 +847,16 @@ public class CalculationEngine implements CalculationEngineUseCase {
         List<LoaneeLoanDetail> loaneeLoanDetails = loaneeLoanDetailsOutputPort.findAllByNotNullAmountOutStanding();
 
         for (LoaneeLoanDetail loaneeLoanDetail : loaneeLoanDetails) {
-            calculateAndSaveDailyInterest(loaneeLoanDetail, LocalDateTime.now());
+            calculateAndSaveDailyInterest(loaneeLoanDetail, loaneeLoanDetail.getAmountOutstanding(), LocalDateTime.now());
         }
     }
 
-    private DailyInterest calculateAndSaveDailyInterest(LoaneeLoanDetail loaneeLoanDetail, LocalDateTime dateCreated) throws MeedlException {
+    private DailyInterest calculateAndSaveDailyInterest(LoaneeLoanDetail loaneeLoanDetail, BigDecimal amountOutstanding, LocalDateTime dateCreated) throws MeedlException {
         BigDecimal dailyInterestIncurred =
-                calculateInterest(loaneeLoanDetail.getInterestRate(), loaneeLoanDetail.getAmountOutstanding(), 1);
+                calculateInterest(loaneeLoanDetail.getInterestRate(), amountOutstanding, 1);
         log.info("daily interest  {}", dailyInterestIncurred);
         DailyInterest dailyInterest = DailyInterest.builder()
-                .interest(dailyInterestIncurred)
+                .interest(decimalPlaceRoundUp(dailyInterestIncurred))
                 .createdAt(dateCreated)
                 .loaneeLoanDetail(loaneeLoanDetail)
                 .build();
