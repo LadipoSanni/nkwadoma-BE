@@ -32,18 +32,4 @@ public class MonthEndCalculator {
 
         return monthEnds;
     }
-    public static int getDaysInMonth(LocalDate date) {
-        YearMonth ym = YearMonth.from(date);
-        return date.getDayOfMonth();
-    }
-
-//    public static void main(String[] args) {
-//        LocalDateTime start = LocalDateTime.of(2025, 1, 15, 0, 0);
-//        LocalDate end = LocalDate.of(2025, 4, 10); // Try null or month-end too
-//
-//        List<LocalDate> result = getMonthEnds(start, end);
-////        result.forEach(date -> System.out.println(""+getDaysInMonth(date)));
-//        System.out.println(""+getDaysInMonth(LocalDate.of(2020, 4, 30)));
-////        result.forEach(System.out::println);
-//    }
 }

@@ -326,7 +326,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
         log.info("Calculating interest incurred from last repayment date {}, till day of upload {}", startDate, endDate);
 
         calculateInterestForDaysBeforeAndMonthsBetweenAndDaysAfter(calculationContext, startDate, endDate);
-
+        log.info("done with calculating interest for days before, and months between, lastly days after if not end of moth");
     }
 
     private void calculateInterestForDaysBeforeAndMonthsBetweenAndDaysAfter(CalculationContext calculationContext, LocalDateTime startDate, LocalDate endDate) throws MeedlException {
@@ -340,9 +340,6 @@ public class CalculationEngine implements CalculationEngineUseCase {
         }
         if(!isLastDayOfTheMonth(endDate.getDayOfMonth(), endDate.lengthOfMonth())){
             calculateInterestForDaysBetween(calculationContext.getStartDate(), endDate.getDayOfMonth(), calculationContext, endDate);
-            if(isLastDayOfTheMonth(calculationContext.getStartDate().getDayOfMonth(), endDate.lengthOfMonth())){
-            calculateAndSaveMonthlyInterest(calculationContext, calculationContext.getLoaneeLoanDetail(), startDate.withDayOfMonth(startDate.toLocalDate().lengthOfMonth()));
-        }
         }
     }
 
@@ -769,7 +766,9 @@ public class CalculationEngine implements CalculationEngineUseCase {
         LocalDateTime startDate = calculationContext.getStartDate();
         RepaymentHistory repaymentHistory = calculationContext.getRepaymentHistory();
         LocalDate endDate = repaymentHistory.getPaymentDateTime().toLocalDate();
+        log.info("Started compounding interest calculation for start date {} and end date {}",startDate, endDate);
         calculateInterestForDaysBeforeAndMonthsBetweenAndDaysAfter(calculationContext, startDate, endDate);
+        log.info("Done calculating interest for days before, also months between and lastly days after for compounding interest start date {} and end date {}", startDate, endDate);
     }
 
     private void calculateInterestForDaysBetween(LocalDateTime startDate, int endDay, CalculationContext calculationContext, LocalDate endDate) throws MeedlException {
@@ -779,9 +778,13 @@ public class CalculationEngine implements CalculationEngineUseCase {
             log.info("dayCount --- {}", dayCount);
             calculateAndSaveDailyInterest(calculationContext.getLoaneeLoanDetail(),calculationContext.getPreviousOutstandingAmount() ,startDate.withDayOfMonth(dayCount));
         }
-//        if(isLastDayOfTheMonth(endDay, endDate.lengthOfMonth())){
-//            calculateAndSaveMonthlyInterest(calculationContext, calculationContext.getLoaneeLoanDetail(), startDate.withDayOfMonth(startDate.toLocalDate().lengthOfMonth()));
-//        }
+        if(isLastDayOfTheMonth(endDay, endDate.lengthOfMonth())){
+            Optional<MonthlyInterest> optionalMonthlyInterest = monthlyInterestOutputPort.findByDateCreated(startDate.withDayOfMonth(startDate.toLocalDate().lengthOfMonth()));
+            if (optionalMonthlyInterest.isEmpty()) {
+                log.info("No monthly interest found for {} saving new monthly interest",  startDate.withDayOfMonth(startDate.toLocalDate().lengthOfMonth()));
+                calculateAndSaveMonthlyInterest(calculationContext, calculationContext.getLoaneeLoanDetail(), startDate.withDayOfMonth(startDate.toLocalDate().lengthOfMonth()));
+            }
+        }
         calculationContext.setStartDate(endDate.atStartOfDay());
     }
 
@@ -796,8 +799,12 @@ public class CalculationEngine implements CalculationEngineUseCase {
             calculationContext.setTotalInterestIncurredInAMonth(calculationContext.getTotalInterestIncurredInAMonth().add(dailyInterest.getInterest()));
         }
         if (isLastDayOfTheMonth(numberOfDaysTillDateMeasured, lastDayOfMonth)) {
-            calculateAndSaveMonthlyInterest(calculationContext, loaneeLoanDetail, month.atStartOfDay() );
-            setStartDateToNextFirstOfNextMonth(calculationContext);
+            Optional<MonthlyInterest> optionalMonthlyInterest = monthlyInterestOutputPort.findByDateCreated(month.atStartOfDay());
+            if (optionalMonthlyInterest.isEmpty()) {
+                log.info("No monthly interest found for {} saving new monthly interest", month.atStartOfDay());
+                calculateAndSaveMonthlyInterest(calculationContext, loaneeLoanDetail, month.atStartOfDay());
+                setStartDateToNextFirstOfNextMonth(calculationContext);
+            }
         }
     }
 
