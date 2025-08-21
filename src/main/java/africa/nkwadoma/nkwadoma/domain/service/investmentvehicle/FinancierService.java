@@ -677,7 +677,7 @@ public class FinancierService implements FinancierUseCase {
 
     private void saveFinancierPoliticallyExposedPeople(Financier financier) throws MeedlException {
         List<PoliticallyExposedPerson> politicallyExposedPeople = new ArrayList<>();
-        log.info("Started saving politically exposed person. is exposed {}", financier.isPoliticallyExposed());
+        log.info("Started saving politically exposed person.");
         for (PoliticallyExposedPerson politicallyExposedPerson : financier.getPoliticallyExposedPeople()) {
             PoliticallyExposedPerson savedPoliticallyExposedPerson = politicallyExposedPersonOutputPort.save(politicallyExposedPerson);
             politicallyExposedPeople.add(savedPoliticallyExposedPerson);

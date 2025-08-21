@@ -29,14 +29,16 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
     select o.id as organizationId,
            o.name as name,
            o.logoImage as logoImage,
-           o.numberOfLoanees as numberOfLoanees,
-           o.numberOfCohort as numberOfCohort,
-           o.numberOfPrograms as numberOfPrograms,
+           institute.numberOfLoanees as numberOfLoanees,
+           institute.numberOfCohort as numberOfCohort,
+           institute.numberOfPrograms as numberOfPrograms,
+           institute.stillInTraining as stillInTraining,
            lm.loanRequestCount as loanRequestCount,
            lm.loanDisbursalCount as loanDisbursalCount,
            lm.loanOfferCount as loanOfferCount,
            lm.loanReferralCount as loanReferralCount
     from OrganizationEntity o
+    left join InstituteMetricsEntity  institute on institute.organization.id = o.id
     join LoanMetricsEntity lm on lm.organizationId = o.id
     order by 
         case :loanType
@@ -57,11 +59,13 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
                    ld.amountRepaid as totalDebtRepaid,
                    ld.outstandingAmount as totalCurrentDebt,
                     o.activationStatus as activationStatus,o.email as email,
-                    o.numberOfLoanees as numberOfLoanees,
+                    institute.numberOfLoanees as numberOfLoanees,
                     o.invitedDate as invitedDate,
                     o.rcNumber as rcNumber,
-                    o.numberOfCohort as numberOfCohort,o.websiteAddress as websiteAddress,
-                    o.numberOfPrograms as numberOfPrograms,
+                    institute.numberOfCohort as numberOfCohort,o.websiteAddress as websiteAddress,
+                    institute.numberOfPrograms as numberOfPrograms,
+                    institute.stillInTraining as stillInTraining,
+        
                       CASE
             WHEN COALESCE(ld.amountReceived, 0) = 0 THEN 0.0 
             ELSE (ld.outstandingAmount / ld.amountReceived * 100.0) 
@@ -73,7 +77,7 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
              
                    CONCAT(u.firstName, ' ', u.lastName) as inviterFullName
                    from OrganizationEntity o
-                               
+                  left join InstituteMetricsEntity  institute on institute.organization.id = o.id                            
                    join OrganizationLoanDetailEntity ld on ld.organization.id = o.id  
                    JOIN UserEntity u ON u.id = o.createdBy      
                    WHERE UPPER(o.activationStatus) IN :activationStatuses
@@ -85,15 +89,18 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
         select o.id as organizationId,
                o.name as name,
                o.logoImage as logoImage,
-               o.numberOfLoanees as numberOfLoanees,
-               o.numberOfCohort as numberOfCohort,
+               institute.numberOfLoanees as numberOfLoanees,
+               institute.numberOfCohort as numberOfCohort,
+               institute.stillInTraining as stillInTraining,
                o.rcNumber as rcNumber,
-               o.numberOfPrograms as numberOfPrograms,
+               institute.numberOfPrograms as numberOfPrograms,
                lm.loanRequestCount as loanRequestCount,
                lm.loanDisbursalCount as loanDisbursalCount,
                lm.loanOfferCount as loanOfferCount,
                lm.loanReferralCount as loanReferralCount
         from OrganizationEntity o
+        left join InstituteMetricsEntity  institute on institute.organization.id = o.id
+
         join LoanMetricsEntity lm on lm.organizationId = o.id
         where lower(o.name) like lower(concat('%', :name, '%'))
         and o.activationStatus = 'ACTIVE'
@@ -130,10 +137,11 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
         ld.outstandingAmount as totalCurrentDebt,
         o.activationStatus as status,
         o.email as email,
-        o.numberOfLoanees as numberOfLoanees,
+        institute.numberOfLoanees as numberOfLoanees,
         o.websiteAddress as websiteAddress,
-        o.numberOfCohort as numberOfCohort,
-        o.numberOfPrograms as numberOfPrograms,
+        institute.numberOfCohort as numberOfCohort,
+        institute.numberOfPrograms as numberOfPrograms,
+        institute.stillInTraining as stillInTraining,
         CASE 
             WHEN COALESCE(ld.amountReceived, 0) = 0 THEN 0.0 
             ELSE (ld.outstandingAmount / ld.amountReceived * 100.0) 
@@ -143,6 +151,7 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
             ELSE (ld.amountRepaid / ld.amountReceived * 100.0) 
         END as repaymentRate
     FROM OrganizationEntity o
+    left join InstituteMetricsEntity  institute on institute.organization.id = o.id                            
     LEFT JOIN OrganizationLoanDetailEntity ld ON ld.organization.id = o.id
 """)
     Page<OrganizationProjection> findAllOrganization(Pageable pageRequest);
@@ -154,4 +163,32 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
     WHERE emp.meedlUser.id = :userId
 """)
     Optional<OrganizationEntity> findByUserId(String userId);
+
+
+    @Query("""
+        select o.id as organizationId,
+               o.name as name,
+               o.logoImage as logoImage,
+               institute.numberOfLoanees as numberOfLoanees,
+               institute.numberOfCohort as numberOfCohort,
+               institute.stillInTraining as stillInTraining,
+               o.rcNumber as rcNumber,
+               institute.numberOfPrograms as numberOfPrograms,
+               lm.loanRequestCount as loanRequestCount,
+               lm.loanDisbursalCount as loanDisbursalCount,
+               lm.loanOfferCount as loanOfferCount,
+               lm.loanReferralCount as loanReferralCount,
+               o.activationStatus as activationStatus , o.email as email, o.websiteAddress as websiteAddress,
+               o.invitedDate as invitedDate, loanDetail.amountReceived as totalAmountReceived,
+               loanDetail.amountRequested as totalAmountRequested, loanDetail.amountRepaid as totalDebtRepaid,
+               loanDetail.outstandingAmount as totalCurrentDebt, loanDetail.amountReceived as totalHistoricalDebt         
+               
+                               
+        from  OrganizationEntity  o
+                left join InstituteMetricsEntity institute on institute.organization.id = o.id
+                join LoanMetricsEntity lm on lm.organizationId = o.id  
+                join OrganizationLoanDetailEntity loanDetail on loanDetail.organization.id = o.id               
+                where o.id = :organizationId
+        """)
+    OrganizationProjection findByIdProjection(@Param("organizationId") String organizationId);
 }

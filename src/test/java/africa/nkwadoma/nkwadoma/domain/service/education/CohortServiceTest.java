@@ -75,6 +75,9 @@ class CohortServiceTest {
     private CohortLoanDetail cohortLoanDetail;
     @Mock
     private LoanOfferOutputPort loanOfferOutputPort;
+    @Mock
+    private InstituteMetricsOutputPort instituteMetricsOutputPort;
+    private InstituteMetrics instituteMetrics;
 
 
     @BeforeEach
@@ -119,7 +122,7 @@ class CohortServiceTest {
         loanBreakdown.setCurrency("usd");
 
         cohortLoanDetail = TestData.buildCohortLoanDetail(elites);
-
+        instituteMetrics = TestData.createInstituteMetrics(organizationIdentity);
     }
 
     @Test
@@ -129,7 +132,7 @@ class CohortServiceTest {
             when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
             when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             when(cohortOutputPort.save(elites)).thenReturn(elites);
-            when(organizationIdentityOutputPort.findById(program.getOrganizationId())).thenReturn(organizationIdentity);
+            when(instituteMetricsOutputPort.findByOrganizationId(program.getOrganizationId())).thenReturn(instituteMetrics);
             when(cohortLoanDetailOutputPort.save(any())).thenReturn(cohortLoanDetail);
             Cohort cohort = cohortService.createCohort(elites);
             assertEquals(cohort.getName(), elites.getName());
@@ -169,7 +172,7 @@ class CohortServiceTest {
             xplorers.setLoanBreakdowns(List.of(loanBreakdown));
             when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             when(cohortOutputPort.save(xplorers)).thenReturn(xplorers);
-            when(organizationIdentityOutputPort.findById(program.getOrganizationId())).thenReturn(organizationIdentity);
+            when(instituteMetricsOutputPort.findByOrganizationId(program.getOrganizationId())).thenReturn(instituteMetrics);
             when(cohortLoanDetailOutputPort.save(any())).thenReturn(cohortLoanDetail);
             Cohort cohort = cohortService.createCohort(xplorers);
             assertEquals(cohort.getName(), xplorers.getName());
