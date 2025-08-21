@@ -271,6 +271,12 @@ public class CalculationEngine implements CalculationEngineUseCase {
     private boolean isSkipableCalculation(List<RepaymentHistory> repaymentHistories, Loanee loanee) {
         return ObjectUtils.isEmpty(repaymentHistories) || repaymentHistories.isEmpty() || ObjectUtils.isEmpty(loanee);
     }
+    private void processRepaymentHistoryCalculations2(
+            CalculationContext calculationContext
+    ) throws MeedlException {
+        calculationContext.setStartDate(calculationContext.getLoaneeLoanDetail().getLoanStartDate());
+
+    }
 
         private void processRepaymentHistoryCalculations(
             CalculationContext calculationContext
@@ -331,15 +337,18 @@ public class CalculationEngine implements CalculationEngineUseCase {
         List<LocalDate> months = MonthEndCalculator.getMonthEnds(startDate, endDate);
         log.info("Number of months from last repayment till date or till today {}", months.size());
         if (!isLastDayOfTheMonth(startDate.getDayOfMonth(), startDate.toLocalDate().lengthOfMonth())){
+            log.info("Calculating interest for days between {} and {}", startDate.getDayOfMonth(), startDate.toLocalDate().lengthOfMonth());
             calculateInterestForDaysBetween(startDate, startDate.toLocalDate().lengthOfMonth(), calculationContext, endDate);
         }
         for (LocalDate month: months){
             calculateInterestForEachMonthWithNoRepayment(month, calculationContext);
         }
         if (endDate.isEqual(calculationContext.getRepaymentHistory().getPaymentDateTime().toLocalDate())){
+            log.info("Calculating for repayment made on {}", calculationContext.getRepaymentHistory().getPaymentDateTime().toLocalDate());
             calculateOutstandingPerRepayment(calculationContext);
         }
-        if(!isLastDayOfTheMonth(endDate.getDayOfMonth(), endDate.lengthOfMonth())){
+        if(!isLastDayOfTheMonth(calculationContext.getStartDate().getDayOfMonth(), endDate.lengthOfMonth())){
+            log.info("Carrying out calculation for the rest of the month {}",calculationContext.getStartDate().getDayOfMonth());
             calculateInterestForDaysBetween(calculationContext.getStartDate(), endDate.getDayOfMonth(), calculationContext, endDate);
         }
     }
@@ -780,7 +789,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
         log.info("Calculating interest from start date {} to end date {}", startDate.getDayOfMonth(), endDay);
         int startDay = startDate.getDayOfMonth();
         for (int dayCount = startDay; dayCount <= endDay; dayCount++) {
-            log.info("dayCount --- {}", dayCount);
+//            log.info("dayCount --- {}", dayCount);
             calculateAndSaveDailyInterest(calculationContext.getLoaneeLoanDetail(),calculationContext.getPreviousOutstandingAmount() ,startDate.withDayOfMonth(dayCount));
         }
         if(isLastDayOfTheMonth(endDay, endDate.lengthOfMonth())){

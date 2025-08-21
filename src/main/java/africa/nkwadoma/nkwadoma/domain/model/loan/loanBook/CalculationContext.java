@@ -31,6 +31,7 @@ public class CalculationContext {
     private ProgramLoanDetail programLoanDetail;
     private OrganizationLoanDetail organizationLoanDetail;
     private List<RepaymentHistory> repaymentHistories;
+    private BigDecimal runningTotal ;
     private BigDecimal previousTotalAmountPaid ;
     private BigDecimal previousTotalInterestIncurred ;
     private RepaymentHistory repaymentHistory;
@@ -44,6 +45,7 @@ public class CalculationContext {
         this.previousTotalInterestIncurred = BigDecimal.ZERO;
         this.totalInterestIncurred = BigDecimal.ZERO;
         this.totalInterestIncurredInAMonth =BigDecimal.ZERO;
+        this.runningTotal = BigDecimal.ZERO;
         this.previousOutstandingAmount = null;
     }
     public void setPreviousAmountOutstanding() {
