@@ -4,10 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.notification.LoaneeEmail
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.creditregistry.CreditRegistryOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
@@ -35,6 +32,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
+import africa.nkwadoma.nkwadoma.domain.model.education.InstituteMetrics;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -92,6 +90,7 @@ public class LoaneeService implements LoaneeUseCase {
     private final AesOutputPort aesOutputPort;
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
     private final LoaneeLoanAggregateOutputPort loaneeLoanAggregateOutputPort;
+    private final InstituteMetricsOutputPort instituteMetricsOutputPort;
 
 
     @Override
@@ -281,15 +280,16 @@ public class LoaneeService implements LoaneeUseCase {
 
     @Override
     public void increaseNumberOfLoaneesInOrganization(Cohort cohort, int size) throws MeedlException {
-        OrganizationIdentity organizationIdentity =
-                organizationIdentityOutputPort.findById(cohort.getOrganizationId());
-        organizationIdentity.setNumberOfLoanees(organizationIdentity.getNumberOfLoanees() + size);
-        organizationIdentity.setStillInTraining(organizationIdentity.getStillInTraining() + size);
-        organizationIdentity.setOrganizationEmployees(
-                organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId()));
-        organizationIdentityOutputPort.save(organizationIdentity);
-        log.info("Total number of loanees in an organization has been increased to : {}, in organization with id : {}", organizationIdentity.getNumberOfLoanees(), organizationIdentity.getId());
+        InstituteMetrics instituteMetrics =
+                instituteMetricsOutputPort.findByOrganizationId(cohort.getOrganizationId());
+
+        instituteMetrics.setNumberOfLoanees(instituteMetrics.getNumberOfLoanees() + size);
+        instituteMetrics.setStillInTraining(instituteMetrics.getStillInTraining() + size);
+        instituteMetricsOutputPort.save(instituteMetrics);
+        log.info("Total number of loanees in an institute has been increased to : {}, in institute with id : {}",
+                instituteMetrics.getNumberOfLoanees(), instituteMetrics.getId());
     }
+
     @Override
     public void increaseNumberOfLoaneesInProgram(Cohort cohort, int size) throws MeedlException {
         Program program = programOutputPort.findProgramById(cohort.getProgramId());

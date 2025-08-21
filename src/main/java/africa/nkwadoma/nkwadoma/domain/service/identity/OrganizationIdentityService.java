@@ -2,6 +2,9 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.LoanMetricsUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.InstituteMetricsOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.OrganizationServiceOfferingOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.ServiceOfferingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
@@ -22,6 +25,8 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationServiceOfferingEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.ServiceOfferingEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +38,7 @@ import org.springframework.stereotype.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -58,7 +64,9 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     private final OrganizationLoanDetailOutputPort organizationLoanDetailOutputPort;
     private final LoanOfferOutputPort loanOfferOutputPort;
     private final MeedlNotificationOutputPort meedlNotificationOutputPort;
-
+    private final ServiceOfferingOutputPort serviceOfferingOutputPort;
+    private final OrganizationServiceOfferingOutputPort organizationServiceOfferingOutputPort;
+    private final InstituteMetricsOutputPort instituteMetricsOutputPort;
 
 
     @Override
@@ -67,13 +75,15 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         validateUniqueValues(organizationIdentity);
         checkIfOrganizationAndAdminExist(organizationIdentity);
 
+        List<ServiceOffering> serviceOfferings = organizationIdentity.getServiceOfferings();
+
         UserIdentity userIdentity = userIdentityOutputPort.findById(organizationIdentity.getCreatedBy());
 
         log.info("After success full validation and check that user or organization doesn't exists");
         organizationIdentity = createOrganizationIdentityOnKeycloak(organizationIdentity);
         log.info("OrganizationIdentity created on keycloak {}", organizationIdentity);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = saveOrganisationIdentityToDatabase(organizationIdentity,userIdentity.getRole());
-        List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity.getId());
+
         organizationIdentity.setServiceOfferings(serviceOfferings);
         log.info("OrganizationEmployeeIdentity created on the db {}", organizationEmployeeIdentity);
 
@@ -82,11 +92,19 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
             log.info("sent email");
         }
 
+        List<ServiceOffering> serviceOfferingEntities = saveServiceOfferingEntities(serviceOfferings);
+        saveOrganizationServiceOfferings(serviceOfferingEntities, organizationIdentity);
+        log.info("Organization entity saved successfully {}", organizationIdentity);
+
         log.info("organization identity saved is : {}", organizationIdentity);
         log.info("about to create Loan Metrics for organization : {}", organizationIdentity);
         LoanMetrics loanMetrics = loanMetricsUseCase.createLoanMetrics(organizationIdentity.getId());
         log.info("loan metrics was created successfully for organiozation : {}", loanMetrics.getOrganizationId());
         OrganizationLoanDetail organizationLoanDetail = buildOrganizationLoanDetail(organizationIdentity);
+
+        InstituteMetrics instituteMetrics = buildInstituteMetrics(organizationIdentity);
+        instituteMetricsOutputPort.save(instituteMetrics);
+
         organizationLoanDetailOutputPort.save(organizationLoanDetail);
         if (! userIdentity.getRole().equals(IdentityRole.MEEDL_SUPER_ADMIN)) {
             asynchronousNotificationOutputPort.notifySuperAdminOfNewOrganization(
@@ -94,6 +112,36 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         }
         return organizationIdentity;
     }
+
+    private  InstituteMetrics buildInstituteMetrics(OrganizationIdentity organizationIdentity) {
+        return InstituteMetrics.builder()
+                .organization(organizationIdentity)
+                .stillInTraining(0)
+                .numberOfLoanees(0)
+                .numberOfCohort(0)
+                .numberOfPrograms(0)
+                .build();
+    }
+
+    private List<ServiceOffering> saveServiceOfferingEntities(List<ServiceOffering> serviceOfferings) {
+        List<ServiceOffering> savedServiceOfferings = new ArrayList<>();
+        for (ServiceOffering serviceOffering : serviceOfferings) {
+            serviceOfferingOutputPort.save(serviceOffering);
+            savedServiceOfferings.add(serviceOffering);
+        }
+        return savedServiceOfferings;
+    }
+
+
+    private void saveOrganizationServiceOfferings(List<ServiceOffering> serviceOfferings, OrganizationIdentity organizationIdentity) {
+        for (ServiceOffering serviceOffering : serviceOfferings) {
+            OrganizationServiceOffering organizationServiceOfferingEntity =
+                    OrganizationServiceOffering.builder().organizationId(organizationIdentity.getId()).
+                            serviceOffering(serviceOffering).build();
+            organizationServiceOfferingOutputPort.save(organizationServiceOfferingEntity);
+        }
+    }
+
 
     private OrganizationLoanDetail buildOrganizationLoanDetail(OrganizationIdentity organizationIdentity) {
         return OrganizationLoanDetail.builder()
@@ -561,7 +609,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
             organizationId = organizationEmployeeIdentity.getOrganization();
         }
             MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-            OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
+            OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findByIdProjection(organizationId);
             List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity.getId());
             organizationIdentity.setServiceOfferings(serviceOfferings);
             log.info("Service offering has been gotten during view organization detail {}", serviceOfferings);

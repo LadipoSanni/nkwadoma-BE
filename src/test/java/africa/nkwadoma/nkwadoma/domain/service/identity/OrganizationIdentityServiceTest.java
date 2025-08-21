@@ -2,6 +2,9 @@
 
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.LoanMetricsUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.InstituteMetricsOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.OrganizationServiceOfferingOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.ServiceOfferingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOfferOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
@@ -80,6 +83,12 @@ class OrganizationIdentityServiceTest {
     private LoanOfferOutputPort loanOfferOutputPort;
     @Mock
     private MeedlNotificationOutputPort meedlNotificationOutputPort;
+    @Mock
+    private InstituteMetricsOutputPort instituteMetricsOutputPort;
+    @Mock
+    private ServiceOfferingOutputPort serviceOfferingOutputPort;
+    @Mock
+    private OrganizationServiceOfferingOutputPort organizationServiceOfferingOutputPort;
 
     @BeforeEach
     void setUp() {
@@ -133,6 +142,7 @@ class OrganizationIdentityServiceTest {
             when(identityManagerOutPutPort.getClientRepresentationByName(roseCouture.getName())).thenReturn(new ClientRepresentation());
             when(identityManagerOutPutPort.getUserByEmail(roseCouture.getOrganizationEmployees().get(0).getMeedlUser().getEmail())).thenReturn(Optional.empty());
             doNothing().when(asynchronousMailingOutputPort).sendEmailToInvitedOrganization(any(UserIdentity.class));
+//            when()
 //            doNothing().when(asynchronousNotificationOutputPort).notifySuperAdminOfNewOrganization(any(UserIdentity.class),
 //                    any(OrganizationIdentity.class), any(NotificationFlag.class));
             when(loanMetricsUseCase.createLoanMetrics(anyString())).thenReturn(new LoanMetrics());
@@ -364,9 +374,9 @@ class OrganizationIdentityServiceTest {
         sarah.setRole(IdentityRole.ORGANIZATION_ADMIN);
         employeeSarah.setOrganization(roseCouture.getId());
         when(organizationEmployeeIdentityOutputPort.findByCreatedBy(mockId)).thenReturn(employeeSarah);
-        when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
 
-        when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
+
+        when(organizationIdentityOutputPort.findByIdProjection(roseCouture.getId())).thenReturn(roseCouture);
         when(organizationIdentityOutputPort.getServiceOfferings(roseCouture.getId())).thenReturn(roseCouture.getServiceOfferings());
         when(organizationLoanDetailOutputPort.findByOrganizationId(roseCouture.getId())).thenReturn(loanDetail);
         when(loanOfferOutputPort.countNumberOfPendingLoanOfferForOrganization(roseCouture.getId())).thenReturn(3);
@@ -378,7 +388,7 @@ class OrganizationIdentityServiceTest {
         assertEquals(1, result.getOrganizationEmployees().size());
         assertEquals(1, result.getServiceOfferings().size());
         verify(userIdentityOutputPort).findById(mockId);
-        verify(organizationIdentityOutputPort).findById(roseCouture.getId());
+        verify(organizationIdentityOutputPort).findByIdProjection(roseCouture.getId());
     }
 
     @Test
@@ -392,7 +402,7 @@ class OrganizationIdentityServiceTest {
                 .build();
         when(userIdentityOutputPort.findById(mockId)).thenReturn(sarah);
         when(userIdentityOutputPort.findById(roseCouture.getCreatedBy())).thenReturn(sarah);
-        when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
+        when(organizationIdentityOutputPort.findByIdProjection(roseCouture.getId())).thenReturn(roseCouture);
         when(organizationIdentityOutputPort.getServiceOfferings(roseCouture.getId())).thenReturn(roseCouture.getServiceOfferings());
         when(organizationLoanDetailOutputPort.findByOrganizationId(roseCouture.getId())).thenReturn(loanDetail);
         when(loanOfferOutputPort.countNumberOfPendingLoanOfferForOrganization(roseCouture.getId())).thenReturn(3);

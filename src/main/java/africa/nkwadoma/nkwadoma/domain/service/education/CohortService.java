@@ -65,6 +65,7 @@ public class CohortService implements CohortUseCase {
     private final CohortLoanDetailMapper cohortLoanDetailMapper;
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
     private final LoanOfferOutputPort loanOfferOutputPort;
+    private final InstituteMetricsOutputPort instituteMetricsOutputPort;
 
     @Override
     public Cohort createCohort(Cohort cohort) throws MeedlException {
@@ -93,7 +94,7 @@ public class CohortService implements CohortUseCase {
         savedCohort = cohortOutputPort.save(savedCohort);
         savedCohort.setLoanBreakdowns(savedLoanBreakdowns);
         savedCohort.setProgramName(program.getName());
-        updateNumberOfCohortInOrganization(program.getOrganizationId());
+        updateNumberOfCohortInInstituteMetrics(program.getOrganizationId());
 
         CohortLoanDetail cohortLoanDetail = buildCohortLoanDetail(savedCohort);
         cohortLoanDetailOutputPort.save(cohortLoanDetail);
@@ -111,10 +112,10 @@ public class CohortService implements CohortUseCase {
                 .build();
     }
 
-    public void updateNumberOfCohortInOrganization(String organizationId) throws MeedlException {
-        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
-        organizationIdentity.setNumberOfCohort(organizationIdentity.getNumberOfCohort() + 1);
-        organizationIdentityOutputPort.save(organizationIdentity);
+    public void updateNumberOfCohortInInstituteMetrics(String organizationId) throws MeedlException {
+        InstituteMetrics instituteMetrics = instituteMetricsOutputPort.findByOrganizationId(organizationId);
+        instituteMetrics.setNumberOfCohort(instituteMetrics.getNumberOfCohort() + 1);
+        instituteMetricsOutputPort.save(instituteMetrics);
     }
 
     private Program checkifCohortNameExistInProgram(Cohort cohort, String cohortName) throws MeedlException {
