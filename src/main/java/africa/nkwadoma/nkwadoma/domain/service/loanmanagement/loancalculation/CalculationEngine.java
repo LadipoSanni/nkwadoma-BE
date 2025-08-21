@@ -262,16 +262,6 @@ public class CalculationEngine implements CalculationEngineUseCase {
                 .subtract(context.getLoaneeLoanDetail().getAmountRepaid());
     }
 
-
-    private void updateLoaneeLoanDetailWithRunningTotals(
-            LoaneeLoanDetail loaneeLoanDetail,
-            BigDecimal outstanding,
-            BigDecimal repaid
-    ) {
-        loaneeLoanDetail.setAmountOutstanding(decimalPlaceRoundUp(outstanding));
-        loaneeLoanDetail.setAmountRepaid(decimalPlaceRoundUp(repaid));
-    }
-
     private void updateRepaymentMeta(RepaymentHistory repayment, CalculationContext calculationContext) {
         repayment.setCohort(calculationContext.getCohort());
         repayment.setLoanee(calculationContext.getLoanee());
@@ -309,6 +299,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
             while (repaymentIndex < repayments.size() &&
                     repayments.get(repaymentIndex).getPaymentDateTime().toLocalDate().isEqual(currentDate)) {
                 RepaymentHistory repaymentHistory = repayments.get(repaymentIndex);
+                validateAmountRepaid(repaymentHistory);
                 outstanding = outstanding.subtract(repaymentHistory.getAmountPaid());
                 totalAmountRepaid = totalAmountRepaid.add(repaymentHistory.getAmountPaid());
                 repaymentHistory.setAmountOutstanding(outstanding);
@@ -346,81 +337,6 @@ public class CalculationEngine implements CalculationEngineUseCase {
         return currentDate.getMonth() == endDate.getMonth() && currentDate.getYear() == endDate.getYear();
     }
 
-        private void processRepaymentHistoryCalculations2(
-            CalculationContext calculationContext
-    ) throws MeedlException {
-
-        BigDecimal runningTotal = BigDecimal.ZERO;
-        calculationContext.setStartDate(calculationContext.getLoaneeLoanDetail().getLoanStartDate());
-
-        log.info("Total interest incurred before repayment history calculations begin {}", calculationContext.getTotalInterestIncurred());
-        for (RepaymentHistory repayment : calculationContext.getRepaymentHistories()) {
-            validateAmountRepaid(repayment);
-            calculationContext.setPreviousAmountOutstanding();
-            log.info("Outstanding before processing this repayment {} ", calculationContext.getPreviousOutstandingAmount());
-            calculationContext.setRepaymentHistory(repayment);
-            compoundingInterest(calculationContext);
-            runningTotal = calculateTotalAmountRepaidPerRepayment(repayment, runningTotal);
-
-            BigDecimal interestIncurred = calculateIncurredInterestPerRepayment(repayment, calculationContext.getPreviousOutstandingAmount(), calculationContext.getStartDate(), calculationContext.getLoaneeLoanDetail());
-            calculationContext.getRepaymentHistory().setInterestIncurred(interestIncurred);
-
-            updateRepaymentMeta(repayment, calculationContext);
-            calculationContext.setStartDate(repayment.getPaymentDateTime());
-
-            updateLoaneeLoanDetailWithRunningTotals(calculationContext.getLoaneeLoanDetail(), calculationContext.getPreviousOutstandingAmount(), runningTotal);
-            log.info("Outstanding per payment {}", calculationContext.getPreviousOutstandingAmount());
-        }
-            calculateTotalInterestIncurredAfterRepayment(calculationContext);
-
-    }
-    private void calculateTotalInterestIncurredAfterRepayment(CalculationContext calculationContext) throws MeedlException {
-
-        calculateInterestIncurredFromLastRepaymentTillUploadDay(calculationContext);
-        calculationContext
-                .getLoaneeLoanDetail()
-                .setAmountOutstanding(calculationContext
-                        .getPreviousOutstandingAmount());
-        log.info("Outstanding loan amount after adding interest incurred from last payment till date is {}", calculationContext.getLoaneeLoanDetail().getAmountOutstanding());
-
-        calculationContext
-                .getLoaneeLoanDetail()
-                .setInterestIncurred(
-                decimalPlaceRoundUp(
-                calculationContext
-                        .getTotalInterestIncurred()));
-        log.info("Total interest incurred in loanee loan details after all calculations are done ===> {}", calculationContext.getLoaneeLoanDetail().getInterestIncurred());
-    }
-
-    private void calculateInterestIncurredFromLastRepaymentTillUploadDay(CalculationContext calculationContext) throws MeedlException {
-        LocalDateTime startDate = calculationContext.getStartDate();
-        LocalDate endDate = LocalDate.now();
-        log.info("Calculating interest incurred from last repayment date {}, till day of upload {}", startDate, endDate);
-
-        calculateInterestForDaysBeforeAndMonthsBetweenAndDaysAfter(calculationContext, startDate, endDate);
-        log.info("done with calculating interest for days before, and months between, lastly days after if not end of moth");
-    }
-
-    private void calculateInterestForDaysBeforeAndMonthsBetweenAndDaysAfter(CalculationContext calculationContext, LocalDateTime startDate, LocalDate endDate) throws MeedlException {
-        List<LocalDate> months = MonthEndCalculator.getMonthEnds(startDate, endDate);
-        log.info("Number of months from last repayment till date or till today {}", months.size());
-        if (!isLastDayOfTheMonth(startDate.getDayOfMonth(), startDate.toLocalDate().lengthOfMonth())){
-            log.info("Calculating interest for days between {} and {}", startDate.getDayOfMonth(), startDate.toLocalDate().lengthOfMonth());
-            calculateInterestForDaysBetween(startDate, startDate.toLocalDate().lengthOfMonth(), calculationContext, endDate);
-        }
-        for (LocalDate month: months){
-            calculateInterestForEachMonthWithNoRepayment(month, calculationContext);
-        }
-        if (endDate.isEqual(calculationContext.getRepaymentHistory().getPaymentDateTime().toLocalDate())){
-            log.info("Calculating for repayment made on {}", calculationContext.getRepaymentHistory().getPaymentDateTime().toLocalDate());
-            calculateOutstandingPerRepayment(calculationContext);
-        }
-        if(!isLastDayOfTheMonth(calculationContext.getStartDate().getDayOfMonth(), endDate.lengthOfMonth())){
-            log.info("Carrying out calculation for the rest of the month {}",calculationContext.getStartDate().getDayOfMonth());
-            calculateInterestForDaysBetween(calculationContext.getStartDate(), endDate.getDayOfMonth(), calculationContext, endDate);
-        }
-    }
-
     private List<RepaymentHistory> combineAndSortRepaymentHistories(List<RepaymentHistory> repaymentHistories, List<RepaymentHistory> previousRepaymentHistory) throws MeedlException {
         repaymentHistories = combinePreviousAndNewRepaymentHistory(previousRepaymentHistory, repaymentHistories);
         repaymentHistories = sortRepaymentsByDateTimeAscending(repaymentHistories);
@@ -452,31 +368,6 @@ public class CalculationEngine implements CalculationEngineUseCase {
         return loaneeLoanDetail;
     }
 
-    private void calculateOutstandingPerRepayment(CalculationContext calculationContext) {
-        log.info("Calculating outstanding per repayment. previous outstanding amount is : {} repayment date {}" , calculationContext.getPreviousOutstandingAmount(), calculationContext.getRepaymentHistory().getPaymentDateTime());
-        BigDecimal newOutstandingAmount = calculationContext.getPreviousOutstandingAmount().subtract(calculationContext.getRepaymentHistory().getAmountPaid()).max(BigDecimal.ZERO);
-        calculationContext.getRepaymentHistory().setAmountOutstanding(newOutstandingAmount);
-        calculationContext.setPreviousOutstandingAmount(newOutstandingAmount);
-        log.info("New amount outstanding after making repayment is {} for repayment with date {}", newOutstandingAmount, calculationContext.getRepaymentHistory().getPaymentDateTime());
-    }
-
-    public BigDecimal calculateIncurredInterestPerRepayment(RepaymentHistory repayment, BigDecimal previousOutstandingAmount, LocalDateTime lastDate, LoaneeLoanDetail loaneeLoanDetail) {
-        long daysBetween = calculateDaysBetween(lastDate, repayment.getPaymentDateTime());
-        log.info("How many days a between the last payment {} \n -------------- >>>>>>>> interest rate {}", daysBetween, loaneeLoanDetail.getInterestRate());
-        if (daysBetween < MINIMUM_VALID_NUMBER) {
-            log.warn("Days between payment is negative {} therefore days between is now 0", daysBetween);
-            daysBetween = MINIMUM_VALID_NUMBER;
-        }
-        BigDecimal incurredInterest = calculateInterest(loaneeLoanDetail.getInterestRate(), previousOutstandingAmount, daysBetween);
-        log.info("Previous out standing amount after calculating interest incurred {} outstanding is {}", incurredInterest, previousOutstandingAmount);
-        repayment.setInterestIncurred(incurredInterest);
-        return incurredInterest;
-    }
-
-    private long calculateDaysBetween(LocalDateTime lastDate, LocalDateTime currentDate) {
-        log.info("Last date {} current date {}", lastDate, currentDate);
-        return ChronoUnit.DAYS.between(lastDate, currentDate);
-    }
 
     public BigDecimal calculateInterest(double interestRate, BigDecimal outstanding, long daysBetween) {
 
@@ -487,12 +378,6 @@ public class CalculationEngine implements CalculationEngineUseCase {
         log.info("Calculated daily rate ==== {} for annual interest rate {}, interest rate in percent {}", dailyRate, interestRate, interestRateInPercent);
 
         return outstanding.multiply(dailyRate).multiply(BigDecimal.valueOf(daysBetween));
-    }
-
-    private BigDecimal calculateTotalAmountRepaidPerRepayment(RepaymentHistory repayment, BigDecimal previousTotalAmountRepaid) {
-        BigDecimal newTotalAmountRepaid = previousTotalAmountRepaid.add(repayment.getAmountPaid());
-        repayment.setTotalAmountRepaid(newTotalAmountRepaid);
-        return newTotalAmountRepaid;
     }
 
     private static void validateAmountRepaid(RepaymentHistory repayment) throws MeedlException {
@@ -843,28 +728,6 @@ public class CalculationEngine implements CalculationEngineUseCase {
         log.info("Interest incurred after adding this month incurred == {}", loaneeLoanDetail.getInterestIncurred());
         log.info("Amount outstanding after adding this month incurred == {}", loaneeLoanDetail.getAmountOutstanding());
         loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
-    }
-    public void compoundingInterest(CalculationContext calculationContext) throws MeedlException {
-        LocalDateTime startDate = calculationContext.getStartDate();
-        RepaymentHistory repaymentHistory = calculationContext.getRepaymentHistory();
-        LocalDate endDate = repaymentHistory.getPaymentDateTime().toLocalDate();
-        log.info("Started compounding interest calculation for start date {} and end date {}",startDate, endDate);
-        calculateInterestForDaysBeforeAndMonthsBetweenAndDaysAfter(calculationContext, startDate, endDate);
-        log.info("Done calculating interest for days before, also months between and lastly days after for compounding interest start date {} and end date {}", startDate, endDate);
-    }
-
-    private void calculateInterestForDaysBetween(LocalDateTime startDate, int endDay, CalculationContext calculationContext, LocalDate endDate) throws MeedlException {
-        log.info("Calculating interest from start date {} to end date {}", startDate.getDayOfMonth(), endDay);
-        int startDay = startDate.getDayOfMonth();
-        for (int dayCount = startDay; dayCount <= endDay; dayCount++) {
-//            log.info("dayCount --- {}", dayCount);
-            calculateAndSaveDailyInterest(calculationContext.getLoaneeLoanDetail(),calculationContext.getPreviousOutstandingAmount() ,startDate.withDayOfMonth(dayCount));
-        }
-        if(isLastDayOfTheMonth(endDay, endDate.lengthOfMonth())){
-            log.info("No monthly interest found for {} saving new monthly interest",  startDate.withDayOfMonth(startDate.toLocalDate().lengthOfMonth()));
-            calculateAndSaveMonthlyInterest(calculationContext, calculationContext.getLoaneeLoanDetail(), startDate.withDayOfMonth(startDate.toLocalDate().lengthOfMonth()));
-        }
-        calculationContext.setStartDate(endDate.atStartOfDay());
     }
 
     public void calculateInterestForEachMonthWithNoRepayment(LocalDate month, CalculationContext calculationContext) throws MeedlException {
