@@ -13,20 +13,51 @@ import java.util.Optional;
 
 public interface FinancierRepository extends JpaRepository<FinancierEntity,String> {
 
-    Optional<FinancierEntity> findByUserIdentity_Id(String id);
-    Optional<FinancierEntity> findByUserIdentity_Email(String email);
+    @Query("""
+    select financier 
+        from FinancierEntity financier
+        join UserEntity  user on user.id = financier.identity 
+         where user.id = :userId  
+        
+    """)
+    Optional<FinancierEntity> findByUserIdentity_Id(@Param("id") String id);
 
     @Query("""
-    SELECT f FROM FinancierEntity f
+    select financier 
+        from FinancierEntity financier
+        join UserEntity  user on user.id = financier.identity 
+         where user.email = :email  
+        
+    """)
+    Optional<FinancierEntity> findByUserIdentity_Email(@Param("email") String email);
+
+    @Query("""
+    SELECT f
+    FROM FinancierEntity f
+    JOIN UserEntity user 
+        ON f.financierType = 'INDIVIDUAL' AND user.id = f.identity
+    JOIN OrganizationEntity organization 
+        ON f.financierType = 'COOPERATE' AND organization.id = f.identity
     WHERE (
-        upper(concat(f.userIdentity.firstName, ' ', f.userIdentity.lastName)) LIKE upper(concat('%', :nameFragment, '%'))
-        OR upper(concat(f.userIdentity.lastName, ' ', f.userIdentity.firstName)) LIKE upper(concat('%', :nameFragment, '%'))
-        OR upper(f.userIdentity.email) LIKE upper(concat('%', :nameFragment, '%'))
+        :nameFragment IS NULL OR (
+            (f.financierType = 'INDIVIDUAL' AND (
+                upper(concat(user.firstName, ' ', user.lastName)) LIKE upper(concat('%', :nameFragment, '%'))
+                OR upper(concat(user.lastName, ' ', user.firstName)) LIKE upper(concat('%', :nameFragment, '%'))
+                OR upper(user.email) LIKE upper(concat('%', :nameFragment, '%'))
+            ))
+            OR
+            (f.financierType = 'COOPERATE' AND (
+                upper(organization.name) LIKE upper(concat('%', :nameFragment, '%'))
+                OR upper(organization.email) LIKE upper(concat('%', :nameFragment, '%'))
+            ))
+        )
     )
     AND (
         :investmentVehicleId IS NULL OR EXISTS (
-            SELECT ivf FROM InvestmentVehicleFinancierEntity ivf
-            WHERE ivf.financier = f AND ivf.investmentVehicle.id = :investmentVehicleId
+            SELECT 1 
+            FROM InvestmentVehicleFinancierEntity ivf
+            WHERE ivf.financier = f 
+              AND ivf.investmentVehicle.id = :investmentVehicleId
         )
     )
     AND (
@@ -46,21 +77,20 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
 
 
 
+
+
     @Query("SELECT f FROM FinancierEntity f " +
-            "LEFT JOIN FETCH f.userIdentity u " +
-            "LEFT JOIN FETCH u.nextOfKinEntity nk " +
             "WHERE f.id = :financierId")
     Optional<FinancierEntity> findByFinancierId(String financierId);
 
-    @Query("SELECT f FROM FinancierEntity f JOIN f.userIdentity u ORDER BY u.createdAt DESC")
-    Page<FinancierEntity> findAllOrderByUserCreatedAt(Pageable pageable);
 
     @Query("""
         SELECT f FROM FinancierEntity f 
-        JOIN f.userIdentity u 
+        LEFT JOIN UserEntity user on user.id = f.identity
+        LEFT JOIN OrganizationEntity organization on organization.id = f.identity    
         WHERE (:financierType IS NULL OR f.financierType = :financierType)
         AND (:activationStatus IS NULL OR f.activationStatus = :activationStatus)
-        ORDER BY u.createdAt DESC
+        ORDER BY user.createdAt DESC
     """)
     Page<FinancierEntity> findAllByFinancierTypeOrderByUserCreatedAt(
             @Param("financierType") FinancierType financierType,
