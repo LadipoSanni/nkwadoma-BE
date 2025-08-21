@@ -20,6 +20,7 @@ public interface OrganizationProjection {
     Integer getNumberOfLoanees();
     Integer getNumberOfCohort();
     Integer getNumberOfPrograms();
+    Integer getStillInTraining();
     BigDecimal getTotalDebtRepaid();
     BigDecimal getTotalCurrentDebt();
     BigDecimal getTotalHistoricalDebt();

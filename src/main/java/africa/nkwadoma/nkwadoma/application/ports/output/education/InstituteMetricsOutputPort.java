@@ -7,4 +7,6 @@ public interface InstituteMetricsOutputPort {
     InstituteMetrics save(InstituteMetrics saveInstituteMetrics) throws MeedlException;
 
     void delete(String id) throws MeedlException;
+
+    InstituteMetrics findByOrganizationId(String id) throws MeedlException;
 }

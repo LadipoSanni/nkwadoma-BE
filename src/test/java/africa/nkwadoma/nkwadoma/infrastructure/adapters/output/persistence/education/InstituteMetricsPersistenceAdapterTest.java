@@ -30,8 +30,9 @@ public class InstituteMetricsPersistenceAdapterTest {
 
     @BeforeAll
     void setUp() throws MeedlException {
-        organizationIdentity = TestData.createOrganizationTestData("Lapo","Rc432134",null);
+        organizationIdentity = TestData.createOrganizationTestData("Lapo","RC4321343",null);
         organizationIdentity = organizationIdentityOutputPort.save(organizationIdentity);
+        log.info("Organization identity: {}", organizationIdentity);
         instituteMetrics = TestData.createInstituteMetrics(organizationIdentity);
     }
 
@@ -52,7 +53,7 @@ public class InstituteMetricsPersistenceAdapterTest {
     void saveInstituteMetrics() {
         InstituteMetrics saveInstituteMetrics = InstituteMetrics.builder().build();
         try {
-            saveInstituteMetrics = instituteMetricsOutputPort.save(saveInstituteMetrics);
+            saveInstituteMetrics = instituteMetricsOutputPort.save(instituteMetrics);
         }catch (MeedlException e){
             log.error(e.getMessage());
         }
@@ -60,6 +61,18 @@ public class InstituteMetricsPersistenceAdapterTest {
         assertEquals(saveInstituteMetrics.getOrganization().getName(), organizationIdentity.getName());
     }
 
+    @Order(2)
+    @Test
+    void findInstituteMetricsByOrganizationIdentityId() {
+        InstituteMetrics foundInstituteMetrics = InstituteMetrics.builder().build();
+        try {
+            foundInstituteMetrics = instituteMetricsOutputPort.findByOrganizationId(organizationIdentity.getId());
+        }catch (MeedlException e){
+            log.error(e.getMessage());
+        }
+        assertNotNull(foundInstituteMetrics);
+        assertEquals(foundInstituteMetrics.getOrganization().getName(), organizationIdentity.getName());
+    }
 
     @AfterAll
     void tearDown() throws MeedlException {

@@ -159,37 +159,6 @@ class ProgramPersistenceAdapterTest {
     }
 
     @Test
-    void saveProgramWithNonTrainingServiceOffering() {
-        try {
-            OrganizationIdentity foundOrganizationIdentity = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
-            List<OrganizationServiceOffering> organizationServiceOfferings = organizationOutputPort.
-                    findOrganizationServiceOfferingsByOrganizationId(foundOrganizationIdentity
-                            .getId());
-            ServiceOffering serviceOffering = organizationServiceOfferings.get(0).getServiceOffering();
-            serviceOffering.setName("NON_TRAINING");
-            serviceOffering.setIndustry(Industry.BANKING);
-
-            foundOrganizationIdentity.setServiceOfferings(List.of(serviceOffering));
-            UserIdentity foundUserIdentity = userIdentityOutputPort.findByEmail(userIdentity.getEmail());
-            foundUserIdentity.setCreatedBy(foundOrganizationIdentity.getCreatedBy());
-            foundUserIdentity.setId(foundOrganizationIdentity.getCreatedBy());
-
-            foundOrganizationIdentity.setOrganizationEmployees(List.of(OrganizationEmployeeIdentity.builder().
-                    meedlUser(foundUserIdentity).build()));
-            OrganizationIdentity savedOrganization = organizationOutputPort.save(foundOrganizationIdentity);
-
-            userIdentityOutputPort.save(foundUserIdentity);
-            assertNotNull(savedOrganization);
-
-            dataScience.setCreatedBy(foundUserIdentity.getCreatedBy());
-            dataScience.setOrganizationIdentity(savedOrganization);
-            assertThrows(MeedlException.class, () -> programOutputPort.saveProgram(dataScience));
-        } catch (MeedlException e) {
-            log.error("Error while saving program", e);
-        }
-    }
-
-    @Test
     void createProgramWithNullName() {
         dataAnalytics.setName(null);
         assertThrows(MeedlException.class, () -> programOutputPort.saveProgram((dataAnalytics)));

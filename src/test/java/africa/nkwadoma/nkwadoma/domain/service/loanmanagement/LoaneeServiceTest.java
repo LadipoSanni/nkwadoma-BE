@@ -106,7 +106,9 @@ class LoaneeServiceTest {
     private LoanOfferOutputPort loanOfferOutputPort;
     @Mock
     private CohortLoaneeOutputPort cohortLoaneeOutputPort;
-
+    @Mock
+    private InstituteMetricsOutputPort instituteMetricsOutputPort;
+    private InstituteMetrics instituteMetrics;
     private int pageSize = 2;
     private int pageNumber = 1;
 
@@ -217,6 +219,8 @@ class LoaneeServiceTest {
 
         loaneeCohort = TestData.buildCohortLoanee(firstLoanee,elites,loaneeLoanDetails,mockId);
         loaneeLoanAggregate = TestData.buildLoaneeLoanAggregate(firstLoanee);
+
+        instituteMetrics = TestData.createInstituteMetrics(organizationIdentity);
     }
 
     @Test
@@ -238,10 +242,9 @@ class LoaneeServiceTest {
         when(cohortOutputPort.save(any())).thenReturn(elites);
         when(programOutputPort.findProgramById(any())).thenReturn(atlasProgram);
         when(programOutputPort.saveProgram(any())).thenReturn(atlasProgram);
-        when(organizationIdentityOutputPort.findById(any())).thenReturn(organizationIdentity);
-//
-        when(organizationIdentityOutputPort.save(organizationIdentity))
-                .thenReturn(organizationIdentity);
+        when(instituteMetricsOutputPort.findByOrganizationId(any())).thenReturn(instituteMetrics);
+        when(instituteMetricsOutputPort.save(instituteMetrics))
+                .thenReturn(instituteMetrics);
         Loanee loanee = loaneeService.addLoaneeToCohort(firstLoanee);
         assertEquals(firstLoanee.getUserIdentity().getFirstName(), loanee.getUserIdentity().getFirstName());
         verify(loaneeOutputPort, times(1)).save(firstLoanee);

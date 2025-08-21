@@ -50,22 +50,11 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         log.info("Organization identity before saving {}", organizationIdentity);
         MeedlValidator.validateObjectInstance(organizationIdentity, OrganizationMessages.ORGANIZATION_MUST_NOT_BE_EMPTY.getMessage());
         organizationIdentity.validate();
-        MeedlValidator.validateOrganizationUserIdentities(organizationIdentity.getOrganizationEmployees());
 
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
-        organizationEntity.setInvitedDate(LocalDateTime.now());
         organizationEntity = organizationEntityRepository.save(organizationEntity);
-
-        List<ServiceOfferingEntity> serviceOfferingEntities = saveServiceOfferingEntities(organizationIdentity);
-        saveOrganizationServiceOfferings(serviceOfferingEntities, organizationEntity);
-        log.info("Organization entity saved successfully {}", organizationEntity);
-        List<ServiceOffering> savedServiceOfferings = organizationIdentityMapper.
-                toServiceOfferingEntitiesServiceOfferings(serviceOfferingEntities);
         log.info("Organization entity saved successfully");
-
-        organizationIdentity = organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
-        organizationIdentity.setServiceOfferings(savedServiceOfferings);
-        return organizationIdentity;
+        return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
     }
 
     @Override
@@ -75,21 +64,6 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         return organizationEntityRepository.findByRcNumber(rcNumber);
     }
 
-    private List<ServiceOfferingEntity> saveServiceOfferingEntities(OrganizationIdentity organizationIdentity) {
-        List<ServiceOffering> serviceOfferings = organizationIdentity.getServiceOfferings();
-        List<ServiceOfferingEntity> serviceOfferingEntity = organizationIdentityMapper.toServiceOfferingEntity(serviceOfferings);
-        log.info("Saving all service offerings");
-        return serviceOfferEntityRepository.saveAll(serviceOfferingEntity);
-    }
-
-    private void saveOrganizationServiceOfferings(List<ServiceOfferingEntity> serviceOfferingEntities, OrganizationEntity organizationEntity) {
-        for (ServiceOfferingEntity foundServiceOffering : serviceOfferingEntities) {
-            OrganizationServiceOfferingEntity organizationServiceOfferingEntity =
-                    OrganizationServiceOfferingEntity.builder().organizationId(organizationEntity.getId()).
-                            serviceOfferingEntity(foundServiceOffering).build();
-            organizationServiceOfferingRepository.save(organizationServiceOfferingEntity);
-        }
-    }
 
     @Override
     public OrganizationIdentity findByEmail(String email) throws MeedlException {
@@ -310,5 +284,15 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         OrganizationIdentity organizationIdentity = organizationIdentityMapper.toOrganizationIdentity(organizationEntity.get());
         log.info("Mapped Organization identity, found with user id: {}", organizationEntity.get());
         return Optional.of(organizationIdentity);
+    }
+
+    @Override
+    public OrganizationIdentity findByIdProjection(String organizationId) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId, INVALID_ORGANIZATION_ID.getMessage());
+
+        OrganizationProjection organizationProjection =
+                organizationEntityRepository.findByIdProjection(organizationId);
+
+        return organizationIdentityMapper.mapProjecttionToOrganizationIdentity(organizationProjection);
     }
 }

@@ -38,4 +38,12 @@ public class InstituteMetricsPersistenceAdapter implements InstituteMetricsOutpu
         MeedlValidator.validateUUID(id,"Institute metrics id cannot be empty");
         instituteMetricsRepository.deleteById(id);
     }
+
+    @Override
+    public InstituteMetrics findByOrganizationId(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id,"Organization id cannot be empty");
+        InstituteMetricsEntity instituteMetricsEntity =
+                instituteMetricsRepository.findByOrganizationId(id);
+        return instituteMetricsMapper.toInstituteMetrics(instituteMetricsEntity);
+    }
 }
