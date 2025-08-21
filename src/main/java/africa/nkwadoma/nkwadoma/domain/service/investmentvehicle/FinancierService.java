@@ -926,6 +926,12 @@ public class FinancierService implements FinancierUseCase {
         MeedlValidator.validatePageSize(financier.getPageSize());
 
         UserIdentity userIdentity = userIdentityOutputPort.findById(financier.getActorId());
+        if (userIdentity.getRole().isMeedlRole()){
+            MeedlValidator.validateUUID(financier.getCooperateId(),"Cooperate id cannot be empty");
+            Cooperation cooperation = cooperationOutputPort.findById(financier.getCooperateId());
+            return cooperateFinancierOutputPort.findAllFinancierInCooperationByCooperationId(cooperation.getId(),
+                    financier);
+        }
         CooperateFinancier cooperateFinancier = cooperateFinancierOutputPort.findByUserId(userIdentity.getId());
         if (ObjectUtils.isEmpty(cooperateFinancier)){
             throw new InvestmentException("Financier does not belong to any cooperation");
@@ -941,6 +947,12 @@ public class FinancierService implements FinancierUseCase {
         MeedlValidator.validatePageSize(financier.getPageSize());
 
         UserIdentity userIdentity = userIdentityOutputPort.findById(financier.getActorId());
+        if (userIdentity.getRole().isMeedlRole()) {
+            MeedlValidator.validateUUID(financier.getCooperateId(), "Cooperate id cannot be empty");
+            Cooperation cooperation = cooperationOutputPort.findById(financier.getCooperateId());
+            return cooperateFinancierOutputPort.searchCooperationStaffByCooperationIdAndStaffName(cooperation.getId(),
+                    financier);
+        }
         CooperateFinancier cooperateFinancier = cooperateFinancierOutputPort.findByUserId(userIdentity.getId());
         if (ObjectUtils.isEmpty(cooperateFinancier)){
             throw new InvestmentException("Financier does not belong to any cooperation");

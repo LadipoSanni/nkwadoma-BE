@@ -50,7 +50,7 @@ public class FinancierController {
     private final InvestmentVehicleRestMapper investmentVehicleRestMapper;
 
     @PostMapping("financier/invite")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN') or hasRole('MEEDL_SUPER_ADMIN')  ")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     public  ResponseEntity<ApiResponse<?>> inviteFinancierToVehicle(@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid
     InviteFinancierRequest inviteFinancierRequest) throws MeedlException {
         log.info("Inviting a financier with request {}", inviteFinancierRequest);
@@ -370,8 +370,10 @@ public class FinancierController {
 
 
     @GetMapping("cooperate/view/all/staff")
-    @PreAuthorize("hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('COOPERATE_FINANCIER_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')" +
+            " or hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE') or hasRole('COOPERATE_FINANCIER_ADMIN') ")
     public ResponseEntity<ApiResponse<?>> viewAllCooperationStaff(@AuthenticationPrincipal Jwt meedlUser,
+                                                                  @RequestParam(required = false, name = "cooperateId") String cooperateId,
                                                                   @RequestParam(required = false, name = "activationStatus") ActivationStatus activationStatus,
                                                                   @RequestParam(defaultValue = "10") int pageSize,
                                                                   @RequestParam(defaultValue = "0") int pageNumber) throws MeedlException {
@@ -399,8 +401,10 @@ public class FinancierController {
     }
 
     @GetMapping("cooperate/search/staff")
-    @PreAuthorize("hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('COOPERATE_FINANCIER_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')" +
+            " or hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE') + hasRole('COOPERATE_FINANCIER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> searchCooperationStaff(@AuthenticationPrincipal Jwt meedlUser,
+                                                                  @RequestParam(required = false, name = "cooperateId") String cooperateId,
                                                                   @RequestParam(name = "name") String name,
                                                                   @RequestParam(required = false, name = "activationStatus") ActivationStatus activationStatus,
                                                                   @RequestParam(defaultValue = "10") int pageSize,
@@ -408,7 +412,7 @@ public class FinancierController {
 
 
         Financier financier = Financier.builder().name(name).actorId(meedlUser.getClaimAsString("sub")).activationStatus(activationStatus)
-                .pageNumber(pageNumber).pageSize(pageSize).build();
+                .pageNumber(pageNumber).pageSize(pageSize).cooperateId(cooperateId).build();
 
         Page<CooperateFinancier> cooperateFinanciers = financierUseCase.searchCooperationStaff(financier);
 

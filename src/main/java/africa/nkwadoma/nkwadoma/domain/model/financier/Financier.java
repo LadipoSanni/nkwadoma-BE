@@ -55,6 +55,7 @@ public class Financier {
     private String rcNumber;
     private LocalDateTime createdAt;
     private String actorId;
+    private String cooperateId;
     private InvestmentVehicleType investmentVehicleType;
     private String investmentId;
     private String investmentVehicleName;
