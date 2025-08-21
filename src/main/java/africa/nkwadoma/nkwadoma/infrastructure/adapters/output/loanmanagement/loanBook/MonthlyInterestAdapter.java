@@ -57,4 +57,10 @@ public class MonthlyInterestAdapter implements MonthlyInterestOutputPort {
 
         return monthlyInterestMapper.toMonthlyInterest(monthlyInterestEntity);
     }
+
+    @Override
+    public void deleteAllByLoaneeLoanDetailId(String loaneeLoanDetailId) throws MeedlException {
+        MeedlValidator.validateUUID(loaneeLoanDetailId, "Provide a valid loanee loan detail id");
+        monthlyInterestRepository.deleteAllByLoaneeLoanDetail_Id(loaneeLoanDetailId);
+    }
 }

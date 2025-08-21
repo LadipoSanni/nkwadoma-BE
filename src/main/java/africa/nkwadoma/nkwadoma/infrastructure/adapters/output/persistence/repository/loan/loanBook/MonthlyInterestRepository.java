@@ -26,4 +26,6 @@ public interface MonthlyInterestRepository extends JpaRepository<MonthlyInterest
             @Param("loaneeLoanDetailId")String loaneeLoanDetailId,
             @Param("createdAt_month") int createdAt_month,
             @Param("createdAt_year") int createdAt_year);
+
+    void deleteAllByLoaneeLoanDetail_Id(String loaneeLoanDetailId);
 }

@@ -82,15 +82,23 @@ public class CalculationEngine implements CalculationEngineUseCase {
         if (isSkipableCalculation(calculationContext.getRepaymentHistories(), calculationContext.getLoanee())) return;
         calculationContext.setDefaultValues();
         List<RepaymentHistory> previousRepaymentHistory = repaymentHistoryOutputPort.findAllRepaymentHistoryForLoan(calculationContext.getLoanee().getId(), calculationContext.getCohort().getId());
-        List<RepaymentHistory> allRepayments = combineAndSortRepaymentHistories(calculationContext.getRepaymentHistories(), previousRepaymentHistory);
         LoaneeLoanDetail loaneeLoanDetail = getLoaneeLoanDetail(calculationContext);
         calculationContext.setLoaneeLoanDetail(loaneeLoanDetail);
+        deletePreciousInterestHistory(calculationContext);
+        List<RepaymentHistory> allRepayments = combineAndSortRepaymentHistories(calculationContext.getRepaymentHistories(), previousRepaymentHistory);
         calculationContext.setRepaymentHistories(allRepayments);
         calculationContext.setAsOfDate(LocalDate.now());
 
         processRepaymentHistoryCalculations(calculationContext);
         finalizeRepaymentHistoryCalculation(allRepayments, previousRepaymentHistory, loaneeLoanDetail);
         updateLoanDetails(calculationContext);
+    }
+
+    private void deletePreciousInterestHistory(CalculationContext calculationContext) throws MeedlException {
+        log.info("Deleting previously existing monthly and daily interest for this particular loan if any exist. Loanee loan detail id is {}", calculationContext.getLoaneeLoanDetail().getId());
+        monthlyInterestOutputPort.deleteAllByLoaneeLoanDetailId(calculationContext.getLoaneeLoanDetail().getId());
+        dailyInterestOutputPort.deleteAllByLoaneeLoanDetailId(calculationContext.getLoaneeLoanDetail().getId());
+
     }
 
     private void finalizeRepaymentHistoryCalculation(
@@ -334,8 +342,8 @@ public class CalculationEngine implements CalculationEngineUseCase {
         return date.getDayOfMonth() == date.lengthOfMonth();
     }
 
-    private static boolean isSameMonth(LocalDate d1, LocalDate d2) {
-        return d1.getMonth() == d2.getMonth() && d1.getYear() == d2.getYear();
+    private static boolean isSameMonth(LocalDate currentDate, LocalDate endDate) {
+        return currentDate.getMonth() == endDate.getMonth() && currentDate.getYear() == endDate.getYear();
     }
 
         private void processRepaymentHistoryCalculations2(

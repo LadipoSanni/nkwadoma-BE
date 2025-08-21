@@ -58,4 +58,10 @@ public class DailyInterestAdapter implements DailyInterestOutputPort {
                         (dateCreated.getDayOfMonth(),dateCreated.getMonth().getValue(),dateCreated.getYear(),loaneeLoanDetailId);
         return dailyInterestMapper.toDailyInterest(dailyInterestEntity);
     }
+
+    @Override
+    public void deleteAllByLoaneeLoanDetailId(String loaneeLoanDetailId) throws MeedlException {
+        MeedlValidator.validateUUID(loaneeLoanDetailId, "Provide a valid loanee loan detail id");
+        dailyInterestRepository.deleteAllByLoaneeLoanDetail_Id(loaneeLoanDetailId);
+    }
 }

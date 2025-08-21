@@ -37,4 +37,6 @@ public interface DailyInterestRepository extends JpaRepository<DailyInterestEnti
             @Param("createdAt_month") int createdAt_month,
             @Param("createdAt_year") int createdAt_year,
             @Param("loaneeLoanDetailId")String loaneeLoanDetailId);
+
+    void deleteAllByLoaneeLoanDetail_Id(String loaneeLoanDetailId);
 }

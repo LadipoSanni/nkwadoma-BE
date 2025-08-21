@@ -16,4 +16,6 @@ public interface DailyInterestOutputPort {
     List<DailyInterest> findAllInterestForAMonth(Month month, int year, String id) throws MeedlException;
 
     DailyInterest findDailyInterestForDate(LocalDateTime dateCreated,String loaneeLoanDetailId) throws MeedlException;
+
+    void deleteAllByLoaneeLoanDetailId(String loaneeLoanDetailId) throws MeedlException;
 }
