@@ -153,7 +153,7 @@ public class IdentityManagerController {
             "or hasRole('MEEDL_ADMIN')" +
             "or hasRole('PORTFOLIO_MANAGER')" +
             "or hasRole('ORGANIZATION_SUPER_ADMIN')" +
-            "or hasRole('ORGANIZATION_ADMIN')")
+            "or hasRole('ORGANIZATION_ADMIN') or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> reactivateUser(@AuthenticationPrincipal Jwt meedlUser,
                                                          @RequestBody AccountActivationRequest accountActivationRequest) throws MeedlException {
         UserIdentity userIdentity = UserIdentity.builder()
@@ -173,7 +173,7 @@ public class IdentityManagerController {
             "or hasRole('MEEDL_ADMIN')" +
             "or hasRole('PORTFOLIO_MANAGER')" +
             "or hasRole('ORGANIZATION_SUPER_ADMIN')" +
-            "or hasRole('ORGANIZATION_ADMIN')")
+            "or hasRole('ORGANIZATION_ADMIN') or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> deactivateUser(@AuthenticationPrincipal Jwt meedlUser,
                                                          @RequestBody AccountActivationRequest accountActivationRequest) throws MeedlException {
         UserIdentity userIdentity = UserIdentity.builder()
