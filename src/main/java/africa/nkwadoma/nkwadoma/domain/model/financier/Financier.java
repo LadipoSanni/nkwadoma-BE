@@ -44,6 +44,7 @@ public class Financier {
     private BigDecimal totalAmountInvested;
     private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
     private Cooperation cooperation;
+    private String identity;
     private UserIdentity userIdentity;
     private int totalNumberOfInvestment;
     private int pageNumber;
@@ -64,6 +65,7 @@ public class Financier {
     private BigDecimal incomeEarned;
     private BigDecimal netAssertValue;
     private String name;
+    private String email;
 
     //source of fund
     private Set<String> sourceOfFunds;

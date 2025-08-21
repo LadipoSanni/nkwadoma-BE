@@ -29,8 +29,8 @@ public class FinancierEntity {
     private AccreditationStatus accreditationStatus;
     @Enumerated(EnumType.STRING)
     private FinancierType financierType;
-    @OneToOne
-    private UserEntity userIdentity;
+
+    private String identity;
 
     //source of fund
     @ElementCollection(fetch = FetchType.EAGER)

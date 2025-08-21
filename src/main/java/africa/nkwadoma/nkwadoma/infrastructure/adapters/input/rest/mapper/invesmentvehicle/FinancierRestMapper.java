@@ -90,8 +90,8 @@ public interface FinancierRestMapper {
     Cooperation mapCooperationRequestToCooperation(CooperationRequest cooperationRequest);
 
 
-    @Mapping(target = "cooperation.name", source = "organizationName")
-    @Mapping(target = "cooperation.email", source = "organizationEmail")
+    @Mapping(target = "name", source = "organizationName")
+    @Mapping(target = "email", source = "organizationEmail")
     Financier mapToCooperateFinancier(FinancierRequest financierRequest);
 
     @Mapping(target = "cooperateFinancierId", source = "id")
