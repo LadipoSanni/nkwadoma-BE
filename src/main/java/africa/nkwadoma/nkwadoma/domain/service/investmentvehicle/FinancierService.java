@@ -657,9 +657,12 @@ public class FinancierService implements FinancierUseCase {
             log.info("Financier details in service to use in completing kyc {}", financier);
             mapKycFinancierUpdatedValues(financier, foundFinancier);
             if (financier.getBeneficialOwners() != null){
+                log.info("Saving financier beneficial owners.");
                 saveFinancierBeneficialOwners(financier);
             }
-            saveFinancierPoliticallyExposedPeople(financier);
+            if (financier.isPoliticallyExposed()) {
+                saveFinancierPoliticallyExposedPeople(financier);
+            }
             userIdentityOutputPort.save(foundFinancier.getUserIdentity());
             identityManagerOutputPort.updateUserData(foundFinancier.getUserIdentity());
             log.info("updated user details for kyc");
@@ -674,7 +677,7 @@ public class FinancierService implements FinancierUseCase {
 
     private void saveFinancierPoliticallyExposedPeople(Financier financier) throws MeedlException {
         List<PoliticallyExposedPerson> politicallyExposedPeople = new ArrayList<>();
-        log.info("Started saving politically exposed person.");
+        log.info("Started saving politically exposed person. is exposed {}", financier.isPoliticallyExposed());
         for (PoliticallyExposedPerson politicallyExposedPerson : financier.getPoliticallyExposedPeople()) {
             PoliticallyExposedPerson savedPoliticallyExposedPerson = politicallyExposedPersonOutputPort.save(politicallyExposedPerson);
             politicallyExposedPeople.add(savedPoliticallyExposedPerson);
@@ -729,15 +732,14 @@ public class FinancierService implements FinancierUseCase {
 
     }
 
-    private static void mapKycFinancierUpdatedValues(Financier financier, Financier foundFinancier) throws MeedlException {
+    private void mapKycFinancierUpdatedValues(Financier financier, Financier foundFinancier) throws MeedlException {
         mapKycUserIdentityData(financier, foundFinancier);
         mapKycFinancierPreviousData(financier, foundFinancier);
     }
 
-    private static void mapKycFinancierPreviousData(Financier financier, Financier foundFinancier) {
+    private void mapKycFinancierPreviousData(Financier financier, Financier foundFinancier) {
         financier.setFinancierType(foundFinancier.getFinancierType());
         financier.setActivationStatus(foundFinancier.getActivationStatus());
-        financier.setFinancierType(foundFinancier.getFinancierType());
         financier.setAmountInvested(foundFinancier.getAmountInvested());
         financier.setTotalNumberOfInvestment(foundFinancier.getTotalNumberOfInvestment());
         financier.setTotalAmountInvested(foundFinancier.getTotalAmountInvested());
@@ -748,7 +750,7 @@ public class FinancierService implements FinancierUseCase {
         financier.setId(foundFinancier.getId());
     }
 
-    private static UserIdentity mapKycUserIdentityData(Financier financier, Financier foundFinancier) throws MeedlException {
+    private void mapKycUserIdentityData(Financier financier, Financier foundFinancier) throws MeedlException {
         UserIdentity userIdentity = foundFinancier.getUserIdentity();
         log.info("updating user details in kyc service : {}", userIdentity);
 
@@ -756,11 +758,15 @@ public class FinancierService implements FinancierUseCase {
         userIdentity.setTaxId(financier.getUserIdentity().getTaxId());
         userIdentity.setBvn(financier.getUserIdentity().getBvn());
         userIdentity.setPhoneNumber(financier.getUserIdentity().getPhoneNumber());
+        userIdentity.setEmailVerified(Boolean.TRUE);
+        userIdentity.setEnabled(Boolean.TRUE);
 
         if (foundFinancier.getFinancierType() == null){
+            log.error("Financier does not have type ");
             throw new MeedlException("Financier does not have type");
         } else{
             if (foundFinancier.getFinancierType() == COOPERATE){
+                log.info("Found financier user for cooperation first name {} ", foundFinancier.getCooperation().getName());
                 userIdentity.setFirstName(foundFinancier.getCooperation().getName());
                 userIdentity.setLastName(foundFinancier.getCooperation().getName());
             }
@@ -770,7 +776,6 @@ public class FinancierService implements FinancierUseCase {
         financier.setUserIdentity(userIdentity);
 
         log.info("Mapped user in financier {}", foundFinancier.getUserIdentity());
-        return userIdentity;
     }
 
     @Override
