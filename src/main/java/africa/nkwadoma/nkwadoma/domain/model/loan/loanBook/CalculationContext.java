@@ -14,6 +14,7 @@ import org.apache.commons.lang3.ObjectUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -39,6 +40,7 @@ public class CalculationContext {
     private BigDecimal totalInterestIncurredInAMonth;
     private BigDecimal totalInterestIncurred;
     private BigDecimal previousOutstandingAmount;
+    private LocalDate asOfDate = LocalDate.now();
 
     public void setDefaultValues(){
         this.previousTotalAmountPaid = BigDecimal.ZERO;
