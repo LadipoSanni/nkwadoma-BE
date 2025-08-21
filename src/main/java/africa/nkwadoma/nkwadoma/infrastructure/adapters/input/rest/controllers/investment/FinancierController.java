@@ -371,7 +371,7 @@ public class FinancierController {
 
     @GetMapping("cooperate/view/all/staff")
     @PreAuthorize("hasRole('COOPERATE_FINANCIER_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')" +
-            " or hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
+            " or hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE') or hasRole('COOPERATE_FINANCIER_ADMIN') ")
     public ResponseEntity<ApiResponse<?>> viewAllCooperationStaff(@AuthenticationPrincipal Jwt meedlUser,
                                                                   @RequestParam(required = false, name = "cooperateId") String cooperateId,
                                                                   @RequestParam(required = false, name = "activationStatus") ActivationStatus activationStatus,
@@ -402,7 +402,7 @@ public class FinancierController {
 
     @GetMapping("cooperate/search/staff")
     @PreAuthorize("hasRole('COOPERATE_FINANCIER_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')" +
-            " or hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
+            " or hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE') + hasRole('COOPERATE_FINANCIER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> searchCooperationStaff(@AuthenticationPrincipal Jwt meedlUser,
                                                                   @RequestParam(required = false, name = "cooperateId") String cooperateId,
                                                                   @RequestParam(name = "name") String name,
