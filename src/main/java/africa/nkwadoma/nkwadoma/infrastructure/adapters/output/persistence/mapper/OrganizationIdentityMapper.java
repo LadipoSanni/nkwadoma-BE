@@ -13,7 +13,6 @@ import java.util.*;
 public interface OrganizationIdentityMapper {
     @Mapping(source = "rcNumber", target = "registrationNumber")
     @Mapping(source = "tin", target = "taxIdentity")
-    @Mapping(source = "numberOfPrograms", target = "numberOfPrograms", defaultValue = "0")
     OrganizationEntity toOrganizationEntity(OrganizationIdentity organizationIdentity);
 
     @InheritInverseConfiguration

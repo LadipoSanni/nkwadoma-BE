@@ -775,4 +775,14 @@ public class TestData {
                 .cooperate(cooperation)
                 .build();
     }
+
+    public static InstituteMetrics createInstituteMetrics(OrganizationIdentity organizationIdentity) {
+        return InstituteMetrics.builder()
+                .id(testId)
+                .numberOfCohort(0)
+                .numberOfLoanees(0)
+                .stillInTraining(0)
+                .organization(organizationIdentity)
+                .build();
+    }
 }

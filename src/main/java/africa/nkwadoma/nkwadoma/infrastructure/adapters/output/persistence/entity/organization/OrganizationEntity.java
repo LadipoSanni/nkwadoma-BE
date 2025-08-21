@@ -33,12 +33,7 @@ public class OrganizationEntity {
     private String createdBy;
     private String updatedBy;
     private LocalDateTime timeUpdated;
-    private int numberOfLoanees;
-    private int stillInTraining;
-    private int numberOfCohort;
     private boolean isEnabled;
-    @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
-    private int numberOfPrograms;
     private String logoImage;
     private String bannerImage;
     private String address;
