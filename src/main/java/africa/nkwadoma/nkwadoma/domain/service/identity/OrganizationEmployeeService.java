@@ -138,6 +138,9 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
         else if (IdentityRole.isOrganizationAdminOrSuperAdmin(foundActor.getRole())) {
             log.info("The found actor viewing employees with pending approval is an organization staff with role {}", foundActor.getRole());
             orgEmployee.setIdentityRoles(IdentityRole.getOrganizationRoles());
+        }else if(IdentityRole.isCooperateSuperAdmin(foundActor.getRole())) {
+            log.info("The found actor viewing employees with pending approval is an cooperation staff with role {}", foundActor.getRole());
+            orgEmployee.setIdentityRoles(Set.of(IdentityRole.COOPERATE_FINANCIER_ADMIN));
         }
     }
 
@@ -146,9 +149,12 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
             log.info("The found actor is a meedl staff with role {}", foundActor.getRole());
             orgEmployee.setIdentityRoles(IdentityRole.getMeedlRoles());
         }
-        else if (IdentityRole.isOrganizationStaff(foundActor.getRole())) {
+        if (IdentityRole.isOrganizationStaff(foundActor.getRole())) {
             log.info("The found actor is an organization staff with role {}", foundActor.getRole());
             orgEmployee.setIdentityRoles(IdentityRole.getOrganizationRoles());
+        }if (IdentityRole.isCooperateSuperAdmin(foundActor.getRole())) {
+            log.info("The found actor is an cooperate staff with role {}", foundActor.getRole());
+            orgEmployee.setIdentityRoles(IdentityRole.getCooperateFinancierRoles());
         }
     }
 
@@ -159,7 +165,7 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
         IdentityRole actorRole = foundActor.getRole();
         log.error("Actor role while verifying view permission {}", actorRole);
         switch (actorRole) {
-            case ORGANIZATION_ASSOCIATE, PORTFOLIO_MANAGER_ASSOCIATE -> {
+            case ORGANIZATION_ASSOCIATE, PORTFOLIO_MANAGER_ASSOCIATE , COOPERATE_FINANCIER_ADMIN -> {
                 log.error("You are not permitted to view pending invites.");
                 return Boolean.FALSE;
             }
@@ -188,6 +194,13 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
                     return Boolean.FALSE;
                 }
             }
+            case COOPERATE_FINANCIER_SUPER_ADMIN -> {
+                boolean allowed = employeeRoles.stream().allMatch(IdentityRole::isCooperateSuperAdmin);
+                if (!allowed) {
+                    log.error("You are only permited to view Cooperate financier staff invites.");
+                    return Boolean.FALSE;
+                }
+            }
             default -> {
                 log.error("You are not permitted to view pending invites user with role {}", actorRole);
                 return Boolean.FALSE;
@@ -205,6 +218,8 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
         boolean userIsMeedlStaff = IdentityRole.isMeedlStaff(foundActor.getRole());
         boolean employeeHasMeedlRole = organizationEmployeeIdentity.getIdentityRoles().stream().anyMatch(IdentityRole::isMeedlStaff);
         boolean employeeHasOrganizationRole = organizationEmployeeIdentity.getIdentityRoles().stream().anyMatch(IdentityRole::isOrganizationStaff);
+        boolean userIsCorporateStaff = IdentityRole.isCooperateFinancier(foundActor.getRole());
+        boolean employeeIsCorporateStaff = organizationEmployeeIdentity.getIdentityRoles().stream().anyMatch(IdentityRole::isCooperateFinancier);
 
         if (!userIsMeedlStaff && employeeHasMeedlRole) {
             log.error("A none meedl staff {} is attempting to view staffs that are meedl staffs. \n ---------------------------------------------------------------------> Roles atempted to view {}", foundActor, organizationEmployeeIdentity.getIdentityRoles());
@@ -215,6 +230,12 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
             log.error("A meedl staff {} is attempting to view staffs that are in another organization not meedl. \n ---------------------------------------------------------------------> Roles atempted to view {}", foundActor, organizationEmployeeIdentity.getIdentityRoles());
             return Boolean.FALSE;
         }
+        if (employeeIsCorporateStaff && !userIsCorporateStaff) {
+            log.error("Unauthorized: non-corporate staff {} attempted to view corporate staff. \n ---> Roles attempted: {}",
+                    foundActor, organizationEmployeeIdentity.getIdentityRoles());
+            return Boolean.FALSE;
+        }
+
         log.info("Actor has the permissions to view");
         return Boolean.TRUE;
     }
