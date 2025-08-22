@@ -253,6 +253,7 @@ public class LoanBookService implements LoanBookUseCase {
 
         LoanReferral loanReferral = loanReferralOutputPort.findLoanReferralByCohortLoaneeId(cohortLoanee.getId());
         loanReferral.setLoanReferralStatus(LoanReferralStatus.ACCEPTED);
+        loanReferral.setLoaneeUserId(cohortLoanee.getLoanee().getUserIdentity().getId());
         respondToLoanReferralUseCase.respondToLoanReferral(loanReferral);
         return loanReferral;
     }

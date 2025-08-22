@@ -26,12 +26,12 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.math3.stat.StatUtils;
 import org.jobrunr.scheduling.JobScheduler;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.loan.FinancialConstants.*;
@@ -80,6 +80,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
         }
     }
 
+    @Transactional
     @Override
     public void calculateLoaneeLoanRepaymentHistory(CalculationContext calculationContext) throws MeedlException {
         if (isSkipableCalculation(calculationContext.getRepaymentHistories(), calculationContext.getLoanee())) return;
@@ -88,7 +89,12 @@ public class CalculationEngine implements CalculationEngineUseCase {
         LoaneeLoanDetail loaneeLoanDetail = getLoaneeLoanDetail(calculationContext);
         calculationContext.setLoaneeLoanDetail(loaneeLoanDetail);
         deletePreciousInterestHistory(calculationContext);
+        log.info("On repayment calculation, the cohort id is {} the loanee id is {}", calculationContext.getCohort().getId(), calculationContext.getLoanee().getId());
         List<RepaymentHistory> allRepayments = combineAndSortRepaymentHistories(calculationContext.getRepaymentHistories(), previousRepaymentHistory);
+        allRepayments.forEach(repaymentHistory -> {
+            repaymentHistory.setCohort(calculationContext.getCohort());
+            repaymentHistory.setLoanee(calculationContext.getLoanee());
+        });
         calculationContext.setRepaymentHistories(allRepayments);
         calculationContext.setAsOfDate(LocalDate.now());
 
@@ -148,6 +154,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
 
     private void calculateLoaneeLoanAgregate(CalculationContext calculationContext) throws MeedlException {
         log.info("loanee loan detail before finding Aggregation == {}", calculationContext.getLoaneeLoanDetail());
+        log.info("loanee id before calculating aggregate {}", calculationContext.getLoanee().getId());
 
         BigDecimal currentAmountRepaid = calculationContext.getLoaneeLoanDetail().getAmountRepaid()
                 .subtract(calculationContext.getPreviousTotalAmountPaid());
@@ -164,11 +171,12 @@ public class CalculationEngine implements CalculationEngineUseCase {
         log.info("current interest {}",currentInterest);
 
         LoaneeLoanAggregate loaneeLoanAggregate =
-                loaneeLoanAggregateOutputPort.findByLoaneeLoanAgrregateByLoaneeLoanDetailId(calculationContext.getLoaneeLoanDetail().getId());
+                loaneeLoanAggregateOutputPort.findByLoaneeLoanAggregateByLoaneeLoanDetailId(calculationContext.getLoaneeLoanDetail().getId());
         log.info("found loanee loan aggregate {}", loaneeLoanAggregate);
         loaneeLoanAggregate.setTotalAmountRepaid(loaneeLoanAggregate.getTotalAmountRepaid().add(currentAmountRepaid));
         loaneeLoanAggregate.setTotalAmountOutstanding(loaneeLoanAggregate.getTotalAmountOutstanding()
                 .subtract(currentAmountRepaid).add(currentInterest));
+        log.info("About to save aggregate on update made.");
         loaneeLoanAggregateOutputPort.save(loaneeLoanAggregate);
         log.info("loanee loan aggregate after saving {}", loaneeLoanAggregate);
     }
@@ -336,6 +344,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
                 totalAmountRepaid = decimalPlaceRoundUp(totalAmountRepaid.add(repaymentHistory.getAmountPaid()));
                 repaymentHistory.setAmountOutstanding(outstanding);
                 repaymentHistory.setInterestIncurred(interestAccruedBeforeRepayment);
+
                 log.info("Repayment made on {} amount paid {} amount outstanding {} current total amount repaid is {} interest incurred till today {}",
                         repaymentHistory.getPaymentDateTime(), repaymentHistory.getAmountPaid(), outstanding, totalAmountOutstanding, interestAccruedBeforeRepayment);
                 interestAccruedBeforeRepayment = BigDecimal.ZERO;
@@ -381,6 +390,8 @@ public class CalculationEngine implements CalculationEngineUseCase {
                 .map(RepaymentHistory::getId)
                 .toList();
         repaymentHistoryOutputPort.deleteMultipleRepaymentHistory(repaymentHistoryIds);
+        log.info("After deleting multiple repayments... ");
+        currentRepaymentHistories.forEach(repaymentHistory -> log.info("{}", repaymentHistory.getInterestIncurred()));
         currentRepaymentHistories = repaymentHistoryOutputPort.saveAllRepaymentHistory(currentRepaymentHistories);
         log.info("After saving multiple repayment history for a loanee {}", currentRepaymentHistories);
     }
@@ -702,7 +713,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
 
     private void updateLoaneeLoanAggregation(LoaneeLoanDetail loaneeLoanDetail, MonthlyInterest monthlyInterest) throws MeedlException {
         LoaneeLoanAggregate loaneeLoanAggregate =
-                loaneeLoanAggregateOutputPort.findByLoaneeLoanAgrregateByLoaneeLoanDetailId(loaneeLoanDetail.getId());
+                loaneeLoanAggregateOutputPort.findByLoaneeLoanAggregateByLoaneeLoanDetailId(loaneeLoanDetail.getId());
         loaneeLoanAggregate.setTotalAmountOutstanding(loaneeLoanAggregate.getTotalAmountOutstanding().add(monthlyInterest.getInterest()));
         loaneeLoanAggregateOutputPort.save(loaneeLoanAggregate);
     }

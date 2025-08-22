@@ -22,7 +22,6 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.*;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
-import org.jobrunr.jobs.lambdas.JobLambda;
 import org.jobrunr.scheduling.JobScheduler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +29,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -842,7 +840,7 @@ public class LoanCalculationEngineTest {
 
         when(cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(loaneeId, cohortId)).thenReturn(cohortLoanee);
 
-        when(loaneeLoanAggregateOutputPort.findByLoaneeLoanAgrregateByLoaneeLoanDetailId(anyString())).thenReturn(loaneeLoanAggregate);
+        when(loaneeLoanAggregateOutputPort.findByLoaneeLoanAggregateByLoaneeLoanDetailId(anyString())).thenReturn(loaneeLoanAggregate);
         when(loaneeLoanAggregateOutputPort.save(any())).thenReturn(loaneeLoanAggregate);
         when(cohortLoanDetailOutputPort.findByCohortId(anyString())).thenReturn(cohortLoanDetail);
         when(programLoanDetailOutputPort.findByProgramId(anyString())).thenReturn(programLoanDetail);
@@ -909,7 +907,7 @@ public class LoanCalculationEngineTest {
                         DailyInterest.builder().interest(new BigDecimal("50.00")).build()));
 
 
-        when(loaneeLoanAggregateOutputPort.findByLoaneeLoanAgrregateByLoaneeLoanDetailId(loanDetail.getId()))
+        when(loaneeLoanAggregateOutputPort.findByLoaneeLoanAggregateByLoaneeLoanDetailId(loanDetail.getId()))
                 .thenReturn(loaneeLoanAggregate);
         when(loaneeLoanAggregateOutputPort.save(loaneeLoanAggregate)).thenReturn(loaneeLoanAggregate);
 
