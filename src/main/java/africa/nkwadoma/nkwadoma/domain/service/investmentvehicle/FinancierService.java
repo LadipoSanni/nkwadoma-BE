@@ -43,6 +43,7 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.financier.FinancierMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentvehicle.InvestmentVehicleMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -60,6 +61,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType.COOPERATE;
+import static africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType.INDIVIDUAL;
 
 @AllArgsConstructor
 @Service
@@ -79,6 +81,7 @@ public class FinancierService implements FinancierUseCase {
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
     private final PoliticallyExposedPersonOutputPort politicallyExposedPersonOutputPort;
     private final FinancierPoliticallyExposedPersonOutputPort financierPoliticallyExposedPersonOutputPort;
+    private final OrganizationIdentityMapper organizationIdentityMapper;
     private List<Financier> financiersToMail;
     private final InvestmentVehicleMapper investmentVehicleMapper;
     private final FinancierMapper financierMapper;
@@ -92,6 +95,7 @@ public class FinancierService implements FinancierUseCase {
         financiersToMail = new ArrayList<>();
         MeedlValidator.validateCollection(financiers, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
         InvestmentVehicle investmentVehicle = fetchInvestmentVehicleIfProvided(investmentVehicleId);
+
         UserIdentity actor = getActorPerformingAction(financiers);
 
         String response = null;
@@ -143,6 +147,7 @@ public class FinancierService implements FinancierUseCase {
 
     private UserIdentity getActorPerformingAction(List<Financier> financiers) throws MeedlException {
         try {
+            log.info("created by == {}",financiers.get(0).getUserIdentity().getCreatedBy());
             return userIdentityOutputPort.findById(financiers.get(0).getUserIdentity().getCreatedBy());
         } catch (InvestmentException e) {
             if (e.getMessage().equals(IdentityMessages.USER_NOT_FOUND.getMessage())){
@@ -662,7 +667,13 @@ public class FinancierService implements FinancierUseCase {
         MeedlValidator.validateObjectInstance(financier.getUserIdentity(), UserMessages.NULL_ACTOR_USER_IDENTITY.getMessage());
         MeedlValidator.validateObjectInstance(financier.getUserIdentity().getId(), "Identification for user performing this action is unknown.");
 
-        Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getUserIdentity().getId());
+        Financier foundFinancier ;
+        UserIdentity userIdentity = userIdentityOutputPort.findById(financier.getUserIdentity().getId());
+        if (userIdentity.getRole().isCooperateStaff()){
+            foundFinancier = financierOutputPort.findFinancierByCooperateStaffUserId(userIdentity.getId());
+        }else {
+            foundFinancier = financierOutputPort.findFinancierByUserId(userIdentity.getId());
+        }
         if (foundFinancier.getAccreditationStatus() != null &&
                 foundFinancier.getAccreditationStatus().equals(AccreditationStatus.UNVERIFIED)){
             log.info("Validating for kyc financier service {}", financier);
@@ -673,9 +684,11 @@ public class FinancierService implements FinancierUseCase {
                 saveFinancierBeneficialOwners(financier);
             }
             saveFinancierPoliticallyExposedPeople(financier);
-            userIdentityOutputPort.save(foundFinancier.getUserIdentity());
-            identityManagerOutputPort.updateUserData(foundFinancier.getUserIdentity());
-            log.info("updated user details for kyc");
+            if (foundFinancier.getFinancierType().equals(INDIVIDUAL)) {
+                userIdentityOutputPort.save(foundFinancier.getUserIdentity());
+                identityManagerOutputPort.updateUserData(foundFinancier.getUserIdentity());
+                log.info("updated user details for kyc");
+            }
             Financier savedFinancier = financierOutputPort.completeKyc(financier);
             savedFinancier.setBeneficialOwners(financier.getBeneficialOwners());
             return savedFinancier;
@@ -742,9 +755,15 @@ public class FinancierService implements FinancierUseCase {
 
     }
 
-    private static void mapKycFinancierUpdatedValues(Financier financier, Financier foundFinancier) throws MeedlException {
-        mapKycUserIdentityData(financier, foundFinancier);
-        mapKycFinancierPreviousData(financier, foundFinancier);
+    private  void mapKycFinancierUpdatedValues(Financier financier, Financier foundFinancier) throws MeedlException {
+        if (foundFinancier.getFinancierType().equals(INDIVIDUAL)) {
+            mapKycUserIdentityData(financier, foundFinancier);
+            mapKycFinancierPreviousData(financier, foundFinancier);
+        }else {
+            OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(foundFinancier.getIdentity());
+            organizationIdentityMapper.mapCooperateDetailToOrganization(organizationIdentity,financier);
+            organizationIdentityOutputPort.save(organizationIdentity);
+        }
     }
 
     private static void mapKycFinancierPreviousData(Financier financier, Financier foundFinancier) {
@@ -756,34 +775,21 @@ public class FinancierService implements FinancierUseCase {
         financier.setTotalAmountInvested(foundFinancier.getTotalAmountInvested());
         financier.setTotalIncomeEarned(foundFinancier.getTotalIncomeEarned());
         financier.setCreatedAt(foundFinancier.getCreatedAt());
-        financier.setCooperation(foundFinancier.getCooperation());
-        financier.setCooperation(foundFinancier.getCooperation());
         financier.setId(foundFinancier.getId());
     }
 
-    private static UserIdentity mapKycUserIdentityData(Financier financier, Financier foundFinancier) throws MeedlException {
-        UserIdentity userIdentity = foundFinancier.getUserIdentity();
-        log.info("updating user details in kyc service : {}", userIdentity);
+    private  UserIdentity mapKycUserIdentityData(Financier financier, Financier foundFinancier) throws MeedlException {
+            UserIdentity userIdentity = userIdentityOutputPort.findById(foundFinancier.getIdentity());
+            userIdentity.setNin(financier.getUserIdentity().getNin());
+            userIdentity.setTaxId(financier.getUserIdentity().getTaxId());
+            userIdentity.setBvn(financier.getUserIdentity().getBvn());
+            userIdentity.setPhoneNumber(financier.getUserIdentity().getPhoneNumber());
 
-        userIdentity.setNin(financier.getUserIdentity().getNin());
-        userIdentity.setTaxId(financier.getUserIdentity().getTaxId());
-        userIdentity.setBvn(financier.getUserIdentity().getBvn());
-        userIdentity.setPhoneNumber(financier.getUserIdentity().getPhoneNumber());
+            foundFinancier.setUserIdentity(userIdentity);
+            financier.setUserIdentity(userIdentity);
 
-        if (foundFinancier.getFinancierType() == null){
-            throw new MeedlException("Financier does not have type");
-        } else{
-            if (foundFinancier.getFinancierType() == COOPERATE){
-                userIdentity.setFirstName(foundFinancier.getCooperation().getName());
-                userIdentity.setLastName(foundFinancier.getCooperation().getName());
-            }
-        }
-
-        foundFinancier.setUserIdentity(userIdentity);
-        financier.setUserIdentity(userIdentity);
-
-        log.info("Mapped user in financier {}", foundFinancier.getUserIdentity());
-        return userIdentity;
+            log.info("Mapped user in financier {}", foundFinancier.getUserIdentity());
+            return userIdentity;
     }
 
     @Override

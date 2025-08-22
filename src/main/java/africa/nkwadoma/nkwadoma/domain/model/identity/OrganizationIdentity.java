@@ -31,6 +31,7 @@ public class OrganizationIdentity {
     private String email;
     private String websiteAddress;
     private String invitedDate;
+    private String taxIdentity;
     private String rcNumber;
     private String tin;
     private String phoneNumber;

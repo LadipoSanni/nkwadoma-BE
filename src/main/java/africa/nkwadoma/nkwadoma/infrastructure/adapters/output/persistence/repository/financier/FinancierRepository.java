@@ -14,8 +14,9 @@ import java.util.Optional;
 public interface FinancierRepository extends JpaRepository<FinancierEntity,String> {
 
     @Query("""
-    select financier 
+    select financier
         from FinancierEntity financier
+            join UserEntity user on user.id = financier.identity
          where financier.identity  = :id
         
     """)
@@ -135,4 +136,13 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
     );
 
     FinancierEntity findByIdentity(String id);
+
+    @Query("""
+    SELECT f FROM FinancierEntity f
+        JOIN OrganizationEntity  organization on  organization.id = f.identity
+        JOIN OrganizationEmployeeEntity  organizationEmployee on organizationEmployee.organization = organization.id
+        JOIN UserEntity user on user.id = organizationEmployee.meedlUser.id
+         where user.id = :id    
+    """)
+    FinancierEntity findByCooperateStaffUserId(@Param("id") String id);
 }

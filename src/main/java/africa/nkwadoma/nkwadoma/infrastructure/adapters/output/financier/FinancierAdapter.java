@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.financier;
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -70,6 +71,13 @@ public class FinancierAdapter implements FinancierOutputPort {
         FinancierEntity financierEntity =
                 financierRepository.findByIdentity(id);
 
+        return financierMapper.map(financierEntity);
+    }
+
+    @Override
+    public Financier findFinancierByCooperateStaffUserId(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id, UserMessages.INVALID_USER_ID.getMessage());
+        FinancierEntity financierEntity = financierRepository.findByCooperateStaffUserId(id);
         return financierMapper.map(financierEntity);
     }
 
