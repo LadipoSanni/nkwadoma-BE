@@ -10,6 +10,7 @@ import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.financier.FinancierMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.financier.FinancierEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.financier.FinancierProjection;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.financier.FinancierRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -125,15 +126,11 @@ public class FinancierAdapter implements FinancierOutputPort {
         Pageable pageRequest = PageRequest.of(financier.getPageNumber(), financier.getPageSize(), Sort.by(Sort.Direction.DESC, MeedlMessages.CREATED_AT.getMessage()));
 
         log.info("Page number: {}, page size: {}, financier type : {}", financier.getPageNumber(), financier.getPageSize(), financier.getFinancierType());
-        Page<FinancierEntity> financierEntities = financierRepository
+        Page<FinancierProjection> financierEntities = financierRepository
                 .findAllByFinancierTypeOrderByUserCreatedAt(financier.getFinancierType(), financier.getActivationStatus(), pageRequest);
 
         log.info("Found financiers in db: {}", financierEntities);
-        return financierEntities.map(
-                financierEntity -> {
-                    Financier financierMapped = financierMapper.map(financierEntity);
-                    return cooperationUserIdentityView(financierMapped);
-                });
+        return financierEntities.map(financierMapper::mapProjectionToFinancier);
     }
 
 }

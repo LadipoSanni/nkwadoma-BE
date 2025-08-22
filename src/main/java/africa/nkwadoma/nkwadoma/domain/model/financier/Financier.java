@@ -66,6 +66,7 @@ public class Financier {
     private BigDecimal netAssertValue;
     private String name;
     private String email;
+    private String invitedBy;
 
     //source of fund
     private Set<String> sourceOfFunds;

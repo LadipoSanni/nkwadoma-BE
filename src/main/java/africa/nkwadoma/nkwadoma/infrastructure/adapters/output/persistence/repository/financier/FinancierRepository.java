@@ -85,17 +85,35 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
 
 
     @Query("""
-        SELECT f FROM FinancierEntity f 
-        LEFT JOIN UserEntity user on user.id = f.identity
-        LEFT JOIN OrganizationEntity organization on organization.id = f.identity    
-        WHERE (:financierType IS NULL OR f.financierType = :financierType)
-        AND (:activationStatus IS NULL OR f.activationStatus = :activationStatus)
-        ORDER BY user.createdAt DESC
-    """)
-    Page<FinancierEntity> findAllByFinancierTypeOrderByUserCreatedAt(
+    SELECT 
+        f.id AS id, 
+        CASE 
+            WHEN f.financierType = 'INDIVIDUAL' THEN CONCAT(user.firstName, ' ', user.lastName)
+            WHEN f.financierType = 'COOPERATE' THEN organization.name
+        END AS name,
+        f.financierType AS financierType,
+        f.activationStatus AS activationStatus,
+        f.totalAmountInvested AS amountInvested,
+        CASE 
+            WHEN f.financierType = 'INDIVIDUAL' THEN CONCAT(inviteeUser.firstName, ' ', inviteeUser.lastName)
+            WHEN f.financierType = 'COOPERATE' THEN CONCAT(inviteeOrg.firstName, ' ', inviteeOrg.lastName)
+        END AS invitedBy
+    FROM FinancierEntity f
+    LEFT JOIN UserEntity user 
+        ON f.financierType = 'INDIVIDUAL' AND user.id = f.identity
+    LEFT JOIN OrganizationEntity organization 
+        ON f.financierType = 'COOPERATE' AND organization.id = f.identity 
+    LEFT JOIN UserEntity inviteeUser 
+        ON f.financierType = 'INDIVIDUAL' AND inviteeUser.id = user.createdBy
+    LEFT JOIN UserEntity inviteeOrg 
+        ON f.financierType = 'COOPERATE' AND inviteeOrg.id = organization.createdBy
+    WHERE (:financierType IS NULL OR f.financierType = :financierType)
+    AND (:activationStatus IS NULL OR f.activationStatus = :activationStatus)
+    ORDER BY f.createdAt DESC
+""")
+    Page<FinancierProjection> findAllByFinancierTypeOrderByUserCreatedAt(
             @Param("financierType") FinancierType financierType,
             @Param("activationStatus") ActivationStatus activationStatus,
             Pageable pageable
     );
-
 }

@@ -329,7 +329,7 @@ public class FinancierService implements FinancierUseCase {
             financier = getFinancierByUserIdentity(financier);
         } catch (MeedlException e) {
             financier = saveNonExistingFinancier(financier, e.getMessage());
-            log.info("Financier with email {} added for email sending.", financier.getUserIdentity().getEmail());
+            log.info("Financier with email {} added for email sending.", financier.getIdentity());
         }
     }
     private void inviteFinancierToInvestmentVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
@@ -388,7 +388,7 @@ public class FinancierService implements FinancierUseCase {
         Financier savedFinancier;
         try {
             savedFinancier = saveFinancier(financier);
-            log.info("Saved non-existing financier with email : {}", savedFinancier.getUserIdentity().getEmail());
+            log.info("Saved non-existing financier with identity : {}", savedFinancier.getIdentity());
             financier = updateFinancierDetails(financier, savedFinancier);
         } catch (MeedlException ex) {
             log.error("",ex);
@@ -1048,6 +1048,7 @@ public class FinancierService implements FinancierUseCase {
             userIdentity = identityManagerOutputPort.createUser(userIdentity);
             userIdentity = userIdentityOutputPort.save(userIdentity);
             financier.setUserIdentity(userIdentity);
+            financier.setIdentity(userIdentity.getId());
             financier.setCreatedAt(LocalDateTime.now());
             return financierOutputPort.save(financier);
         }else {
