@@ -329,6 +329,14 @@ public class CalculationEngine implements CalculationEngineUseCase {
         BigDecimal totalInterestIncurred = BigDecimal.ZERO;
         log.info("Current date {}, as of date is {}", currentDate, asOfDate);
 
+        if (currentDate.isAfter(asOfDate)){
+            log.error("Payment made in future date");
+            throw new MeedlException("Cannot make  payment in future date");
+        }
+        if (currentDate.isEqual(asOfDate)){
+            log.info("The date is today");
+        }
+
         while (!currentDate.isAfter(asOfDate)) {
             // daily interest accrual
             BigDecimal dailyInterest = decimalPlaceRoundUp(calculateInterest(annualRate, outstanding, 1));
@@ -365,7 +373,9 @@ public class CalculationEngine implements CalculationEngineUseCase {
                 log.info("End of month calculations. New outstanding is {} interest incurred this month is {} date is {}", outstanding, monthlyInterestAccrued, currentDate);
                 monthlyInterestAccrued = BigDecimal.ZERO;
             }
-
+            if (currentDate.isEqual(asOfDate)){
+                log.info("The date is today in loop");
+            }
             currentDate = currentDate.plusDays(1);
         }
         calculationContext.getLoaneeLoanDetail().setAmountOutstanding(decimalPlaceRoundUp(totalAmountOutstanding));
