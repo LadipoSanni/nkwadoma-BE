@@ -9,7 +9,6 @@ import africa.nkwadoma.nkwadoma.application.ports.input.meedlnotification.MeedlN
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.CooperationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
@@ -27,7 +26,6 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicleVisibility;
-import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.InvestmentException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.*;
@@ -76,7 +74,6 @@ public class FinancierService implements FinancierUseCase {
     private final MeedlNotificationUsecase meedlNotificationUsecase;
     private final BeneficialOwnerOutputPort beneficialOwnerOutputPort;
     private final FinancierBeneficialOwnerOutputPort financierBeneficialOwnerOutputPort;
-    private final CooperationOutputPort cooperationOutputPort;
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
     private final PoliticallyExposedPersonOutputPort politicallyExposedPersonOutputPort;
@@ -86,7 +83,6 @@ public class FinancierService implements FinancierUseCase {
     private final InvestmentVehicleMapper investmentVehicleMapper;
     private final FinancierMapper financierMapper;
     private final PortfolioOutputPort portfolioOutputPort;
-    private final CooperateFinancierOutputPort cooperateFinancierOutputPort;
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
 
@@ -820,37 +816,6 @@ public class FinancierService implements FinancierUseCase {
         return investmentVehicleMapper.toInvestmentSummary(investmentVehicle);
     }
 
-    @Override
-    public String inviteColleagueFinancier(String actorID,Financier financier) throws MeedlException {
-        MeedlValidator.validateObjectInstance(financier.getUserIdentity(), IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
-        UserIdentity newColleagueUserIdentity = financier.getUserIdentity();
-        newColleagueUserIdentity.setCreatedBy(actorID);
-        newColleagueUserIdentity.validate();
-
-        UserIdentity inviter = userIdentityOutputPort.findById(actorID);
-        validateRolePermissions(inviter.getRole(), newColleagueUserIdentity.getRole());
-        CooperateFinancier inviterCooperateFinancier =
-                cooperateFinancierOutputPort.findCooperateFinancierByUserId(inviter.getId());
-
-
-        newColleagueUserIdentity.setCreatedAt(LocalDateTime.now());
-        newColleagueUserIdentity = identityManagerOutputPort.createUser(newColleagueUserIdentity);
-        newColleagueUserIdentity = userIdentityOutputPort.save(newColleagueUserIdentity);
-
-        Financier newColleague = Financier.builder()
-                .userIdentity(newColleagueUserIdentity)
-                .financierType(COOPERATE)
-                .createdAt(LocalDateTime.now())
-                .accreditationStatus(AccreditationStatus.UNVERIFIED).build();
-
-        newColleague = financierOutputPort.save(newColleague);
-
-        CooperateFinancier cooperateFinancier = buildCooperateFinancierIdentity(inviterCooperateFinancier,newColleague);
-
-        cooperateFinancier = cooperateFinancierOutputPort.save(cooperateFinancier);
-
-        return handleNotificationsAndResponse(inviterCooperateFinancier,cooperateFinancier,newColleagueUserIdentity);
-    }
 
     private CooperateFinancier buildCooperateFinancierIdentity(CooperateFinancier inviter, Financier newColleague) {
        CooperateFinancier newCooperateFinancier = CooperateFinancier.builder().cooperate(inviter.getCooperate())
@@ -863,19 +828,6 @@ public class FinancierService implements FinancierUseCase {
        return newCooperateFinancier;
     }
 
-    private String handleNotificationsAndResponse(CooperateFinancier inviter, CooperateFinancier cooperateFinancier, UserIdentity newColleagueUserIdentity) throws MeedlException {
-
-        if (inviter.getFinancier().getUserIdentity().getRole().isSuperAdmin()) {
-            asynchronousMailingOutputPort.sendColleagueEmail(inviter.getCooperate().getName(),newColleagueUserIdentity);
-            return String.format("Colleague with role %s invited", newColleagueUserIdentity.getRole().name());
-        }
-
-        CooperateFinancier superAdminFinancier =
-                cooperateFinancierOutputPort.findCooperateFinancierSuperAdminByCooperateName
-                        (cooperateFinancier.getCooperate().getName());
-        asynchronousNotificationOutputPort.sendNotificationToCooperateSuperAdmin(inviter,cooperateFinancier,superAdminFinancier);
-        return "Invitation needs approval, pending.";
-    }
 
     private void validateRolePermissions(IdentityRole inviterRole, IdentityRole colleagueRole) throws IdentityException {
         Map<IdentityRole, Set<IdentityRole>> allowedRoles = Map.of(
@@ -887,98 +839,8 @@ public class FinancierService implements FinancierUseCase {
         }
     }
 
-    @Override
-    public Cooperation viewCooperateFinancierDetail(String actorID) throws MeedlException {
-        UserIdentity userIdentity = userIdentityOutputPort.findById(actorID);
-        CooperateFinancier cooperateFinancier = cooperateFinancierOutputPort.findByUserId(userIdentity.getId());
-        return cooperateFinancier.getCooperate();
-    }
-
-    @Override
-    public Cooperation updateCooperateProfile(String actorId, Cooperation cooperation) throws MeedlException {
-        UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
-        MeedlValidator.validateObjectInstance(cooperation,"Cooperation cannot be empty");
-        if (ObjectUtils.isNotEmpty(cooperationOutputPort.findByName(cooperation.getName()))){
-            throw new InvestmentException("Cooperation with name already exists");
-        }
-        //FIND by Mail
-        CooperateFinancier cooperateFinancier = cooperateFinancierOutputPort.findByUserId(userIdentity.getId());
-        financierMapper.updateCooperation(cooperateFinancier.getCooperate(),cooperation);
-        cooperationOutputPort.save(cooperation);
-        return cooperation;
-    }
 
 
-
-    @Override
-    public String respondToColleagueInvitation(String actorId, String cooperateFinancierId, ActivationStatus activationStatus) throws MeedlException {
-        MeedlValidator.validateUUID(cooperateFinancierId,"Financier id cannot be empty ");
-        MeedlValidator.validateObjectInstance(activationStatus,"Activation status cannot be null");
-        decisionMustEitherBeApprovedOrDeclined(activationStatus);
-
-        UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
-        CooperateFinancier cooperateFinancier = cooperateFinancierOutputPort.findById(cooperateFinancierId);
-        UserIdentity financierCreator = userIdentityOutputPort.findById(cooperateFinancier.getFinancier().getUserIdentity().getCreatedBy());
-        if (cooperateFinancier.getActivationStatus().equals(ActivationStatus.ACTIVE)){
-            throw new InvestmentException("Cannot respond to active colleague invitation");
-        }
-
-        if (activationStatus.equals(ActivationStatus.APPROVED)){
-            cooperateFinancier.setActivationStatus(ActivationStatus.INVITED);
-            asynchronousMailingOutputPort.sendColleagueEmail(cooperateFinancier.getCooperate().getName(),
-                    cooperateFinancier.getFinancier().getUserIdentity());
-            asynchronousNotificationOutputPort.notifyInviterForColleagueInvitationApproval(userIdentity,financierCreator,cooperateFinancier);
-            cooperateFinancierOutputPort.save(cooperateFinancier);
-            return "colleague invitation successful after approval";
-        }else {
-            cooperateFinancier.setActivationStatus(ActivationStatus.DECLINED);
-            asynchronousNotificationOutputPort.notifyInviterForColleagueInvitationDeclined(userIdentity,financierCreator,cooperateFinancier);
-            cooperateFinancierOutputPort.save(cooperateFinancier);
-            return "colleague invitation un-successful after request being decline";
-        }
-    }
-
-    @Override
-    public Page<CooperateFinancier> viewAllCooperationStaff(Financier financier) throws MeedlException {
-        MeedlValidator.validateObjectInstance(financier,"Financier cannot be empty");
-        MeedlValidator.validatePageNumber(financier.getPageNumber());
-        MeedlValidator.validatePageSize(financier.getPageSize());
-
-        UserIdentity userIdentity = userIdentityOutputPort.findById(financier.getActorId());
-        if (userIdentity.getRole().isMeedlRole()){
-            MeedlValidator.validateUUID(financier.getCooperateId(),"Cooperate id cannot be empty");
-            Cooperation cooperation = cooperationOutputPort.findById(financier.getCooperateId());
-            return cooperateFinancierOutputPort.findAllFinancierInCooperationByCooperationId(cooperation.getId(),
-                    financier);
-        }
-        CooperateFinancier cooperateFinancier = cooperateFinancierOutputPort.findByUserId(userIdentity.getId());
-        if (ObjectUtils.isEmpty(cooperateFinancier)){
-            throw new InvestmentException("Financier does not belong to any cooperation");
-        }
-        return cooperateFinancierOutputPort.findAllFinancierInCooperationByCooperationId(cooperateFinancier.getCooperate().getId(),
-                financier);
-    }
-
-    @Override
-    public Page<CooperateFinancier> searchCooperationStaff(Financier financier) throws MeedlException {
-        MeedlValidator.validateObjectInstance(financier,"Financier cannot be empty");
-        MeedlValidator.validatePageNumber(financier.getPageNumber());
-        MeedlValidator.validatePageSize(financier.getPageSize());
-
-        UserIdentity userIdentity = userIdentityOutputPort.findById(financier.getActorId());
-        if (userIdentity.getRole().isMeedlRole()) {
-            MeedlValidator.validateUUID(financier.getCooperateId(), "Cooperate id cannot be empty");
-            Cooperation cooperation = cooperationOutputPort.findById(financier.getCooperateId());
-            return cooperateFinancierOutputPort.searchCooperationStaffByCooperationIdAndStaffName(cooperation.getId(),
-                    financier);
-        }
-        CooperateFinancier cooperateFinancier = cooperateFinancierOutputPort.findByUserId(userIdentity.getId());
-        if (ObjectUtils.isEmpty(cooperateFinancier)){
-            throw new InvestmentException("Financier does not belong to any cooperation");
-        }
-        return cooperateFinancierOutputPort.searchCooperationStaffByCooperationIdAndStaffName(cooperateFinancier.getCooperate().getId(),
-                financier);
-    }
 
     private void decisionMustEitherBeApprovedOrDeclined(ActivationStatus activationStatus) throws africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException {
         if (! activationStatus.equals(ActivationStatus.APPROVED) && !activationStatus.equals(ActivationStatus.DECLINED)) {
