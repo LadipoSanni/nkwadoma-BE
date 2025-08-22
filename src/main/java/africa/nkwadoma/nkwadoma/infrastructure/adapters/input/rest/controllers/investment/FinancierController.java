@@ -164,7 +164,8 @@ public class FinancierController {
     }
 
     @GetMapping("financier/all/view")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')  or hasRole('MEEDL_ADMIN') " +
+            "or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     public  ResponseEntity<ApiResponse<?>> viewAllFinancier(@AuthenticationPrincipal Jwt meedlUser,
                                                             @RequestParam int pageNumber,
                                                             @RequestParam int pageSize,
@@ -187,7 +188,8 @@ public class FinancierController {
         );
     }
     @GetMapping("financier/search")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')  or hasRole('MEEDL_ADMIN') " +
+            "or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     public  ResponseEntity<ApiResponse<?>> search(@AuthenticationPrincipal Jwt meedlUser,
                                                   @RequestParam String name,
                                                   @RequestParam int pageNumber,
@@ -233,7 +235,8 @@ public class FinancierController {
     }
 
     @GetMapping("financier/investment-vehicle/all/view")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')  or hasRole('MEEDL_ADMIN') " +
+            "or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     public  ResponseEntity<ApiResponse<?>> viewAllFinancierInInvestmentVehicle(@AuthenticationPrincipal Jwt meedlUser,
                                                             @RequestParam int pageNumber,
                                                             @RequestParam int pageSize,

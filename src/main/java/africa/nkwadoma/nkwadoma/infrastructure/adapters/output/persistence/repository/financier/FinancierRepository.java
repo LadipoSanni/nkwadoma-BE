@@ -32,23 +32,40 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
     Optional<FinancierEntity> findByUserIdentity_Email(@Param("email") String email);
 
     @Query("""
-    SELECT f
+    SELECT 
+        f.id AS id, 
+        CASE 
+            WHEN f.financierType = 'INDIVIDUAL' THEN CONCAT(user.firstName, ' ', user.lastName)
+            WHEN f.financierType = 'COOPERATE' THEN organization.name
+        END AS name,
+        f.financierType AS financierType,
+        f.activationStatus AS activationStatus,
+        f.totalAmountInvested AS amountInvested,
+       
+        CASE 
+            WHEN f.financierType = 'INDIVIDUAL' THEN CONCAT(inviteeUser.firstName, ' ', inviteeUser.lastName)
+            WHEN f.financierType = 'COOPERATE' THEN CONCAT(inviteeOrg.firstName, ' ', inviteeOrg.lastName)
+        END AS inviteeName
     FROM FinancierEntity f
-    JOIN UserEntity user 
+    LEFT JOIN UserEntity user 
         ON f.financierType = 'INDIVIDUAL' AND user.id = f.identity
-    JOIN OrganizationEntity organization 
+    LEFT JOIN OrganizationEntity organization 
         ON f.financierType = 'COOPERATE' AND organization.id = f.identity
+    LEFT JOIN UserEntity inviteeUser 
+        ON f.financierType = 'INDIVIDUAL' AND inviteeUser.id = user.createdBy
+    LEFT JOIN UserEntity inviteeOrg 
+        ON f.financierType = 'COOPERATE' AND inviteeOrg.id = organization.createdBy
     WHERE (
         :nameFragment IS NULL OR (
             (f.financierType = 'INDIVIDUAL' AND (
-                upper(concat(user.firstName, ' ', user.lastName)) LIKE upper(concat('%', :nameFragment, '%'))
-                OR upper(concat(user.lastName, ' ', user.firstName)) LIKE upper(concat('%', :nameFragment, '%'))
-                OR upper(user.email) LIKE upper(concat('%', :nameFragment, '%'))
+                UPPER(CONCAT(user.firstName, ' ', user.lastName)) LIKE UPPER(CONCAT('%', :nameFragment, '%'))
+                OR UPPER(CONCAT(user.lastName, ' ', user.firstName)) LIKE UPPER(CONCAT('%', :nameFragment, '%'))
+                OR UPPER(user.email) LIKE UPPER(CONCAT('%', :nameFragment, '%'))
             ))
             OR
             (f.financierType = 'COOPERATE' AND (
-                upper(organization.name) LIKE upper(concat('%', :nameFragment, '%'))
-                OR upper(organization.email) LIKE upper(concat('%', :nameFragment, '%'))
+                UPPER(organization.name) LIKE UPPER(CONCAT('%', :nameFragment, '%'))
+                OR UPPER(organization.email) LIKE UPPER(CONCAT('%', :nameFragment, '%'))
             ))
         )
     )
@@ -66,8 +83,9 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
     AND (
         :activationStatus IS NULL OR f.activationStatus = :activationStatus
     )
+    ORDER BY f.createdAt DESC
 """)
-    Page<FinancierEntity> findByFinancierByNameFragmentOptionalInvestmentVehicleIdFinancierTypeActivationStatus(
+    Page<FinancierProjection> findByFinancierByNameFragmentOptionalInvestmentVehicleIdFinancierTypeActivationStatus(
             @Param("nameFragment") String nameFragment,
             @Param("investmentVehicleId") String investmentVehicleId,
             @Param("financierType") FinancierType financierType,

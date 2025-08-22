@@ -81,14 +81,11 @@ public class FinancierAdapter implements FinancierOutputPort {
         log.info("Search financier parameters: name {}, page size {}, page number {}, financier type {}, activation status {}, investment vehicle id {}",
                 name, financier.getPageSize(), financier.getPageNumber(), financier.getFinancierType(), financier.getActivationStatus(), financier.getInvestmentVehicleId());
         Pageable pageRequest = PageRequest.of(financier.getPageNumber(), financier.getPageSize());
-        Page<FinancierEntity> financierEntities =
+        Page<FinancierProjection> financierEntities =
                 financierRepository.findByFinancierByNameFragmentOptionalInvestmentVehicleIdFinancierTypeActivationStatus(
                         name, financier.getInvestmentVehicleId(), financier.getFinancierType(), financier.getActivationStatus(), pageRequest);
         log.info("Financiers found on Entity search : {} {}", name, financierEntities );
-        return financierEntities.map(financierEntity -> {
-            Financier financierMapped = financierMapper.map(financierEntity);
-            return cooperationUserIdentityView(financierMapped);
-        });
+        return financierEntities.map(financierMapper::mapProjectionToFinancier);
     }
 
     private Financier cooperationUserIdentityView(Financier financierMapped) {
