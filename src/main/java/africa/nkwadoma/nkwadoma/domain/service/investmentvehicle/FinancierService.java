@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.investmentvehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.OrganizationType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentvehicle.FinancierUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlnotification.MeedlNotificationUsecase;
@@ -56,10 +57,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType.COOPERATE;
 
@@ -245,7 +243,7 @@ public class FinancierService implements FinancierUseCase {
         validateCooperationDoesNotExist(financier,financier.getUserIdentity().getEmail());
 
         OrganizationIdentity organizationIdentity = OrganizationIdentity.builder().name(financier.getName())
-                .email(financier.getEmail()).build();
+                .email(financier.getEmail()).createdBy(financier.getUserIdentity().getCreatedBy()).build();
 
         OrganizationIdentity savedCooperate = saveCooperation(organizationIdentity);
 
@@ -272,6 +270,7 @@ public class FinancierService implements FinancierUseCase {
         OrganizationEmployeeIdentity organizationEmployeeIdentity = OrganizationEmployeeIdentity.builder()
                 .meedlUser(employee)
                 .organization(organizationIdentity.getId())
+                .createdBy(organizationIdentity.getCreatedBy())
                 .activationStatus(actor.getRole().isMeedlSuperAdmin()
                         ? ActivationStatus.INVITED
                         : ActivationStatus.PENDING_APPROVAL)
@@ -299,12 +298,14 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private OrganizationIdentity saveCooperation(OrganizationIdentity organizationIdentity) throws MeedlException {
+        organizationIdentity.setOrganizationType(OrganizationType.COOPERATE);
+        organizationIdentity.setId(UUID.randomUUID().toString());
         log.info("Saving new cooperation: {}", organizationIdentity.getName());
         return organizationIdentityOutputPort.save(organizationIdentity);
     }
 
     private void validateCooperationDoesNotExist(Financier financier,String email) throws MeedlException {
-        if (ObjectUtils.isNotEmpty(organizationIdentityOutputPort.findByEmail(financier.getEmail()))) {
+        if (organizationIdentityOutputPort.existByEmail(financier.getEmail())) {
             throw new InvestmentException("Cooperation with email already exists");
         }
         if (ObjectUtils.isNotEmpty(organizationIdentityOutputPort.findOrganizationByName(financier.getName()))) {

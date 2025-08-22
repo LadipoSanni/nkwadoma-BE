@@ -50,7 +50,7 @@ public class CooperateFinancierAdapter implements CooperateFinancierOutputPort {
         MeedlValidator.validateUUID(id, UserMessages.INVALID_USER_ID.getMessage());
 
         CooperateFinancierEntity cooperateFinancierEntity =
-                cooperateFinancierRepository.findByFinancier_UserIdentityId(id);
+                cooperateFinancierRepository.findByFinancier_Identity(id);
 
         return cooperateFinancierMapper.toCooperateFinancier(cooperateFinancierEntity);
     }

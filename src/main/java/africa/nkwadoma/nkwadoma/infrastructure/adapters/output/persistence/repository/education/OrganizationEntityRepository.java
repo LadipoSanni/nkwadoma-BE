@@ -191,4 +191,13 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
                 where o.id = :organizationId
         """)
     OrganizationProjection findByIdProjection(@Param("organizationId") String organizationId);
+
+
+    @Query("""
+    SELECT COUNT(o) > 0
+    FROM OrganizationEntity o
+    WHERE lower(o.email) = lower(:email)
+""")
+    boolean existsByEmail(@Param("email") String email);
+
 }

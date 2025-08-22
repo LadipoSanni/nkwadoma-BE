@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface CooperateFinancierRepository extends JpaRepository<CooperateFinancierEntity, String> {
-    CooperateFinancierEntity findByFinancier_UserIdentityId(String id);
+    CooperateFinancierEntity findByFinancier_Identity(String id);
     CooperateFinancierEntity findByFinancierId(String cooperateFinancierId);
 
 
@@ -18,7 +18,7 @@ public interface CooperateFinancierRepository extends JpaRepository<CooperateFin
         FROM CooperateFinancierEntity cf
         JOIN FinancierEntity f on f.id = cf.financier.id
         JOIN CooperationEntity c on c.id = cf.cooperate.id
-        JOIN UserEntity u on u.id = f.userIdentity.id
+        JOIN UserEntity u on u.id = f.identity
             
                WHERE u.id = :id
     """)
@@ -30,7 +30,7 @@ public interface CooperateFinancierRepository extends JpaRepository<CooperateFin
         FROM CooperateFinancierEntity cf
         JOIN FinancierEntity f on f.id = cf.financier.id
         JOIN CooperationEntity c on c.id = cf.cooperate.id
-        JOIN UserEntity u on u.id = f.userIdentity.id
+        JOIN UserEntity u on u.id = f.identity
             
         WHERE u.role = 'COOPERATE_FINANCIER_SUPER_ADMIN' and c.name = :name
                   
@@ -46,7 +46,7 @@ public interface CooperateFinancierRepository extends JpaRepository<CooperateFin
             FROM CooperateFinancierEntity cooperateFinancier
              join FinancierEntity financier on financier.id = cooperateFinancier.financier.id
              join CooperationEntity cooperation on cooperation.id = cooperateFinancier.cooperate.id
-             join UserEntity user on user.id = financier.userIdentity.id
+             join UserEntity user on user.id = financier.identity
              join UserEntity invitee on invitee.id = user.createdBy
     where cooperation.id = :cooperationId and (:activationStatus IS NULL OR cooperateFinancier.activationStatus  = :activationStatus)
         and user.role != 'COOPERATE_FINANCIER_SUPER_ADMIN'
@@ -65,7 +65,7 @@ public interface CooperateFinancierRepository extends JpaRepository<CooperateFin
             FROM CooperateFinancierEntity cooperateFinancier
              join FinancierEntity financier on financier.id = cooperateFinancier.financier.id
              join CooperationEntity cooperation on cooperation.id = cooperateFinancier.cooperate.id
-             join UserEntity user on user.id = financier.userIdentity.id
+             join UserEntity user on user.id = financier.identity
              join UserEntity invitee on invitee.id = user.createdBy
     where (
         lower(user.firstName) like lower(concat('%', :name, '%'))

@@ -20,6 +20,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.*;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -49,7 +50,11 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     public OrganizationIdentity save(OrganizationIdentity organizationIdentity) throws MeedlException {
         log.info("Organization identity before saving {}", organizationIdentity);
         MeedlValidator.validateObjectInstance(organizationIdentity, OrganizationMessages.ORGANIZATION_MUST_NOT_BE_EMPTY.getMessage());
-        organizationIdentity.validate();
+        if (ObjectUtils.isNotEmpty(organizationIdentity.getOrganizationType())){
+            organizationIdentity.validateCooperateOrganization();
+        }else {
+            organizationIdentity.validate();
+        }
 
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
         organizationEntity = organizationEntityRepository.save(organizationEntity);
@@ -294,5 +299,12 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
                 organizationEntityRepository.findByIdProjection(organizationId);
 
         return organizationIdentityMapper.mapProjecttionToOrganizationIdentity(organizationProjection);
+    }
+
+
+    @Override
+    public boolean existByEmail(String email) throws MeedlException {
+        MeedlValidator.validateEmail(email);
+        return organizationEntityRepository.existsByEmail(email);
     }
 }
