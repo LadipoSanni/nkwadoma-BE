@@ -152,7 +152,7 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
         if (IdentityRole.isOrganizationStaff(foundActor.getRole())) {
             log.info("The found actor is an organization staff with role {}", foundActor.getRole());
             orgEmployee.setIdentityRoles(IdentityRole.getOrganizationRoles());
-        }else {
+        }if (IdentityRole.isCooperateSuperAdmin(foundActor.getRole())) {
             log.info("The found actor is an cooperate staff with role {}", foundActor.getRole());
             orgEmployee.setIdentityRoles(IdentityRole.getCooperateFinancierRoles());
         }
