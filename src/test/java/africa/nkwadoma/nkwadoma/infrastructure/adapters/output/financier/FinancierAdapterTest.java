@@ -51,8 +51,6 @@ class FinancierAdapterTest {
     @Autowired
     private InvestmentVehicleOutputPort investmentVehicleOutputPort;
     @Autowired
-    private CooperationOutputPort cooperationOutputPort;
-    @Autowired
     private NextOfKinOutputPort nextOfKinOutputPort;
     @Autowired
     private BankDetailOutputPort bankDetailOutputPort;
