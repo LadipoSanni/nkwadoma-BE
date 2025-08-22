@@ -289,7 +289,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
 
         while (!currentDate.isAfter(asOfDate)) {
             // daily interest accrual
-            BigDecimal dailyInterest = calculateInterest(annualRate, outstanding, 1);
+            BigDecimal dailyInterest = decimalPlaceRoundUp(calculateInterest(annualRate, outstanding, 1));
             calculateAndSaveDailyInterest(calculationContext.getLoaneeLoanDetail(), outstanding, currentDate.atStartOfDay());
             monthlyInterestAccrued = monthlyInterestAccrued.add(dailyInterest);
             interestAccruedBeforeRepayment = interestAccruedBeforeRepayment.add(dailyInterest);
@@ -300,8 +300,8 @@ public class CalculationEngine implements CalculationEngineUseCase {
                     repayments.get(repaymentIndex).getPaymentDateTime().toLocalDate().isEqual(currentDate)) {
                 RepaymentHistory repaymentHistory = repayments.get(repaymentIndex);
                 validateAmountRepaid(repaymentHistory);
-                outstanding = outstanding.subtract(repaymentHistory.getAmountPaid());
-                totalAmountRepaid = totalAmountRepaid.add(repaymentHistory.getAmountPaid());
+                outstanding = decimalPlaceRoundUp(outstanding.subtract(repaymentHistory.getAmountPaid()));
+                totalAmountRepaid = decimalPlaceRoundUp(totalAmountRepaid.add(repaymentHistory.getAmountPaid()));
                 repaymentHistory.setAmountOutstanding(outstanding);
                 repaymentHistory.setInterestIncurred(interestAccruedBeforeRepayment);
                 log.info("Repayment made on {} amount paid {} amount outstanding {} current total amount repaid is {} interest incurred till today {}",
@@ -313,9 +313,9 @@ public class CalculationEngine implements CalculationEngineUseCase {
 
             // if end of month and not the current month
             if (isEndOfMonth(currentDate) && !isSameMonth(currentDate, asOfDate)) {
-                outstanding = outstanding.add(monthlyInterestAccrued);
+                outstanding = decimalPlaceRoundUp(outstanding.add(monthlyInterestAccrued));
                 totalAmountOutstanding = outstanding;
-                totalInterestIncurred = totalInterestIncurred.add(monthlyInterestAccrued);
+                totalInterestIncurred = decimalPlaceRoundUp(totalInterestIncurred.add(monthlyInterestAccrued));
                 saveMonthlyInterest(monthlyInterestAccrued, calculationContext.getLoaneeLoanDetail(), currentDate.atStartOfDay());
                 log.info("End of month calculations. New outstanding is {} interest incurred this month is {} date is {}", outstanding, monthlyInterestAccrued, currentDate);
                 monthlyInterestAccrued = BigDecimal.ZERO;
