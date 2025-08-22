@@ -21,4 +21,7 @@ public interface FinancierOutputPort {
 
     Financier findFinancierByEmail(String email) throws MeedlException;
 
+    Financier findByIdentity(String id) throws MeedlException;
+
+    Financier findFinancierByCooperateStaffUserId(String id) throws MeedlException;
 }

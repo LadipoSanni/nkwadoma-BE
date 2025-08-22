@@ -56,7 +56,7 @@ public interface InvestmentVehicleEntityRepository extends JpaRepository<Investm
             "OR (i.investmentVehicleVisibility = 'PRIVATE' " +
             "AND EXISTS (SELECT ivf FROM InvestmentVehicleFinancierEntity ivf " +
             "WHERE ivf.investmentVehicle = i " +
-            "AND ivf.financier.userIdentity.id = :userId)))")
+            "AND ivf.financier.identity = :userId)))")
     Page<InvestmentVehicleEntity> findAllInvestmentVehicleExcludingPrivate(
             @Param("userId") String userId,Pageable pageRequest);
 
@@ -78,7 +78,7 @@ public interface InvestmentVehicleEntityRepository extends JpaRepository<Investm
             "  OR (i.investmentVehicleVisibility = 'PRIVATE' " +
             "      AND EXISTS (SELECT ivf FROM InvestmentVehicleFinancierEntity ivf " +
             "                  WHERE ivf.investmentVehicle.id = i.id " +
-            "                  AND ivf.financier.userIdentity.id = :userId))" +
+            "                  AND ivf.financier.identity = :userId))" +
             ") " +
             "AND (:investmentVehicleType IS NULL OR i.investmentVehicleType = :investmentVehicleType) " +
             "AND (:investmentVehicleStatus IS NULL OR i.investmentVehicleStatus = :investmentVehicleStatus) " +
@@ -95,7 +95,7 @@ public interface InvestmentVehicleEntityRepository extends JpaRepository<Investm
             "OR (i.investmentVehicleVisibility = 'PRIVATE' " +
             "AND EXISTS (SELECT ivf FROM InvestmentVehicleFinancierEntity ivf " +
             "WHERE ivf.investmentVehicle = i " +
-            "AND ivf.financier.userIdentity.id = :userId))) " +
+            "AND ivf.financier.identity = :userId))) " +
             "AND (:investmentVehicleType IS NULL OR i.investmentVehicleType = :investmentVehicleType) " +
             "AND i.investmentVehicleStatus = :investmentVehicleStatus " +
             "AND LOWER(i.name) LIKE LOWER(CONCAT('%', :name, '%'))")
@@ -138,7 +138,7 @@ public interface InvestmentVehicleEntityRepository extends JpaRepository<Investm
     LEFT JOIN InvestmentVehicleFinancierEntity ivf ON ivf.investmentVehicle = i
     LEFT JOIN i.operation vo
     LEFT JOIN i.closure vc
-    WHERE ivf.financier.userIdentity.id = :userId
+    WHERE ivf.financier.identity = :userId
     AND i.investmentVehicleStatus = 'PUBLISHED'
     AND (:investmentVehicleType IS NULL OR i.investmentVehicleType = :investmentVehicleType)
         GROUP BY
@@ -202,7 +202,7 @@ public interface InvestmentVehicleEntityRepository extends JpaRepository<Investm
     LEFT JOIN InvestmentVehicleFinancierEntity ivf ON ivf.investmentVehicle = i
     LEFT JOIN i.operation vo
     LEFT JOIN i.closure vc
-    WHERE ivf.financier.userIdentity.id = :userId
+    WHERE ivf.financier.identity = :userId
     AND (:name IS NULL OR LOWER(i.name) LIKE LOWER(CONCAT('%', :name, '%')))
     AND (:investmentVehicleType IS NULL OR i.investmentVehicleType = :investmentVehicleType)
         GROUP BY

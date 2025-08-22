@@ -446,9 +446,15 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
             return String.format("Colleague with role %s invited", savedUserIdentity.getRole().name());
         }
 
-        IdentityRole superAdminRole = inviterRole.isMeedlRole()
-                ? IdentityRole.MEEDL_SUPER_ADMIN
-                : IdentityRole.ORGANIZATION_SUPER_ADMIN;
+        IdentityRole superAdminRole;
+        if (inviterRole.isMeedlRole()) {
+            superAdminRole = IdentityRole.MEEDL_SUPER_ADMIN;
+        } else if (inviterRole.isCooperateStaff()) {
+            superAdminRole = IdentityRole.COOPERATE_FINANCIER_SUPER_ADMIN;
+        } else {
+            superAdminRole = IdentityRole.ORGANIZATION_SUPER_ADMIN;
+        }
+
         OrganizationEmployeeIdentity superAdmin = organizationEmployeeIdentityOutputPort
                 .findByRoleAndOrganizationId(inviter.getOrganization(), superAdminRole);
 
@@ -463,7 +469,9 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
                 MEEDL_ADMIN, Set.of(PORTFOLIO_MANAGER, IdentityRole.PORTFOLIO_MANAGER_ASSOCIATE,MEEDL_ADMIN),
                 PORTFOLIO_MANAGER, Set.of(IdentityRole.PORTFOLIO_MANAGER_ASSOCIATE,PORTFOLIO_MANAGER),
                 IdentityRole.ORGANIZATION_SUPER_ADMIN, Set.of(ORGANIZATION_ADMIN, IdentityRole.ORGANIZATION_ASSOCIATE),
-                ORGANIZATION_ADMIN, Set.of(IdentityRole.ORGANIZATION_ASSOCIATE,ORGANIZATION_ADMIN)
+                ORGANIZATION_ADMIN, Set.of(IdentityRole.ORGANIZATION_ASSOCIATE,ORGANIZATION_ADMIN),
+                COOPERATE_FINANCIER_SUPER_ADMIN, Set.of(COOPERATE_FINANCIER_ADMIN) ,
+                COOPERATE_FINANCIER_ADMIN , Set.of(COOPERATE_FINANCIER_ADMIN)
         );
 
         if (!allowedRoles.getOrDefault(inviterRole, Set.of()).contains(colleagueRole)) {

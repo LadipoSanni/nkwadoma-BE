@@ -3,12 +3,11 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.UserUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.financier.CooperateFinancierOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.CooperationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.EmailTokenOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
@@ -19,11 +18,10 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.MFAType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.financier.CooperateFinancier;
+import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.Cooperation;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identitymanager.BlackListedTokenAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.BlackListedToken;
@@ -35,7 +33,6 @@ import org.keycloak.representations.*;
 import org.keycloak.representations.idm.*;
 import org.springframework.scheduling.annotation.*;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
 import java.time.LocalDateTime;
@@ -62,8 +59,7 @@ public class UserIdentityService implements UserUseCase {
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
-    private final CooperateFinancierOutputPort cooperateFinancierOutputPort;
-    private final CooperationOutputPort cooperationOutputPort;
+    private final FinancierOutputPort financierOutputPort;
 
     @Override
     public AccessTokenResponse login(UserIdentity userIdentity)throws MeedlException {
@@ -142,20 +138,26 @@ public class UserIdentityService implements UserUseCase {
     }
 
     private void activateCooperateFinancier(UserIdentity userIdentity) throws MeedlException {
-        if (userIdentity.getRole().isCooperationStaff()){
-            CooperateFinancier cooperateFinancier =
-                    cooperateFinancierOutputPort.findCooperateFinancierByUserId(userIdentity.getId());
-            cooperateFinancier.setActivationStatus(ActivationStatus.ACTIVE);
-            cooperateFinancierOutputPort.save(cooperateFinancier);
-            activateCooperation(userIdentity, cooperateFinancier);
+        if (userIdentity.getRole().isCooperateStaff()){
+            OrganizationEmployeeIdentity organizationEmployeeIdentity =
+                    organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId())
+                            .orElseThrow(() -> new MeedlException("Organization employee identity not found"));
+            organizationEmployeeIdentity.setActivationStatus(ActivationStatus.ACTIVE);
+            organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
+            activateCooperation(userIdentity, organizationEmployeeIdentity);
         }
     }
 
-    private void activateCooperation(UserIdentity userIdentity, CooperateFinancier cooperateFinancier) throws MeedlException {
+    private void activateCooperation(UserIdentity userIdentity, OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
         if (userIdentity.getRole().equals(IdentityRole.COOPERATE_FINANCIER_SUPER_ADMIN)){
-            Cooperation cooperation = cooperateFinancier.getCooperate();
-            cooperation.setActivationStatus(ActivationStatus.ACTIVE);
-            cooperationOutputPort.save(cooperation);
+            OrganizationIdentity organizationIdentity =
+                    organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
+            organizationIdentity.setActivationStatus(ActivationStatus.ACTIVE);
+            organizationIdentityOutputPort.save(organizationIdentity);
+
+            Financier financier = financierOutputPort.findByIdentity(organizationIdentity.getId());
+            financier.setActivationStatus(ActivationStatus.ACTIVE);
+            financierOutputPort.save(financier);
         }
     }
 
