@@ -64,6 +64,8 @@ public class OrganizationEmployeeController {
             "or hasRole('PORTFOLIO_MANAGER')" +
             "or hasRole('ORGANIZATION_SUPER_ADMIN')" +
             "or hasRole('ORGANIZATION_ADMIN')" +
+            "or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')" +
+            "or hasRole('COOPERATE_FINANCIER_ADMIN')" +
             "or hasRole('ORGANIZATION_ASSOCIATE')")
     public ResponseEntity<?> viewAllAdminInOrganization(@AuthenticationPrincipal Jwt meedlUser,
                                                         @RequestParam(required = false) String employeeId) throws MeedlException {
