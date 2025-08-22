@@ -315,6 +315,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
     ) throws MeedlException {
         calculationContext.setStartDate(calculationContext.getLoaneeLoanDetail().getLoanStartDate());
 
+        log.info("Started processing repayment history calculations");
         BigDecimal outstanding = calculationContext.getLoaneeLoanDetail().getAmountReceived();
         BigDecimal monthlyInterestAccrued = BigDecimal.ZERO;
         BigDecimal interestAccruedBeforeRepayment = BigDecimal.ZERO;
@@ -326,6 +327,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
         BigDecimal totalAmountOutstanding = BigDecimal.ZERO;
         BigDecimal totalAmountRepaid = BigDecimal.ZERO;
         BigDecimal totalInterestIncurred = BigDecimal.ZERO;
+        log.info("Current date {}, as of date is {}", currentDate, asOfDate);
 
         while (!currentDate.isAfter(asOfDate)) {
             // daily interest accrual
@@ -343,6 +345,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
                 outstanding = decimalPlaceRoundUp(outstanding.subtract(repaymentHistory.getAmountPaid()));
                 totalAmountRepaid = decimalPlaceRoundUp(totalAmountRepaid.add(repaymentHistory.getAmountPaid()));
                 repaymentHistory.setAmountOutstanding(outstanding);
+                log.info("Interest accrued before repayment {}", interestAccruedBeforeRepayment);
                 repaymentHistory.setInterestIncurred(interestAccruedBeforeRepayment);
 
                 log.info("Repayment made on {} amount paid {} amount outstanding {} current total amount repaid is {} interest incurred till today {}",
@@ -354,6 +357,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
 
             // if end of month and not the current month
             if (isEndOfMonth(currentDate) && !isSameMonth(currentDate, asOfDate)) {
+                log.info("Its end of month but not this month {}", currentDate);
                 outstanding = decimalPlaceRoundUp(outstanding.add(monthlyInterestAccrued));
                 totalAmountOutstanding = outstanding;
                 totalInterestIncurred = decimalPlaceRoundUp(totalInterestIncurred.add(monthlyInterestAccrued));
