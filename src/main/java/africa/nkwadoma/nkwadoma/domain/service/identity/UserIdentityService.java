@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.notification.Organizatio
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.UserUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.CooperateFinancierOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
@@ -20,6 +21,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.identity.MFAType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.CooperateFinancier;
+import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -61,8 +63,7 @@ public class UserIdentityService implements UserUseCase {
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
-    private final CooperateFinancierOutputPort cooperateFinancierOutputPort;
-    private final CooperationOutputPort cooperationOutputPort;
+    private final FinancierOutputPort financierOutputPort;
 
     @Override
     public AccessTokenResponse login(UserIdentity userIdentity)throws MeedlException {
@@ -157,6 +158,10 @@ public class UserIdentityService implements UserUseCase {
                     organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
             organizationIdentity.setActivationStatus(ActivationStatus.ACTIVE);
             organizationIdentityOutputPort.save(organizationIdentity);
+
+            Financier financier = financierOutputPort.findByIdentity(organizationIdentity.getId());
+            financier.setActivationStatus(ActivationStatus.ACTIVE);
+            financierOutputPort.save(financier);
         }
     }
 

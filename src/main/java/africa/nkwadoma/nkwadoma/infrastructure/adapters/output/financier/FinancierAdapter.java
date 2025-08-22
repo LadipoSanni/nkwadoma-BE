@@ -64,6 +64,15 @@ public class FinancierAdapter implements FinancierOutputPort {
         return cooperationUserIdentityView(financier);
     }
 
+    @Override
+    public Financier findByIdentity(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id,"Identity id cannot be empty ");
+        FinancierEntity financierEntity =
+                financierRepository.findByIdentity(id);
+
+        return financierMapper.map(financierEntity);
+    }
+
 
     @Override
     public void delete(String financierId) throws MeedlException {

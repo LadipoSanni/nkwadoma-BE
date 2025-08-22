@@ -68,12 +68,11 @@ public class BeanConfiguration {
                                                    OrganizationIdentityOutputPort organizationIdentityOutputPort,
                                                    AsynchronousMailingOutputPort asynchronousMailingOutputPort,
                                                    AsynchronousNotificationOutputPort asynchronousNotificationOutputPort,
-                                                   CooperateFinancierOutputPort cooperateFinancierOutputPort,
-                                                   CooperationOutputPort cooperationOutputPort
+                                                   FinancierOutputPort financierOutputPort
                                                    ){
         return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,sendOrganizationEmployeeEmailUseCase,
                 tokenUtils, emailTokenOutputPort, blackListedTokenAdapter,
-                organizationIdentityOutputPort, asynchronousMailingOutputPort, asynchronousNotificationOutputPort,cooperateFinancierOutputPort,cooperationOutputPort
+                organizationIdentityOutputPort, asynchronousMailingOutputPort, asynchronousNotificationOutputPort,financierOutputPort
         );
     }
 

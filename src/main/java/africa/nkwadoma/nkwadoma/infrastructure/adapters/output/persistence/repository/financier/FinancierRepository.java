@@ -134,4 +134,6 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
             @Param("activationStatus") ActivationStatus activationStatus,
             Pageable pageable
     );
+
+    FinancierEntity findByIdentity(String id);
 }
