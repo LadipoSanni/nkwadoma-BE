@@ -43,6 +43,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -102,6 +103,7 @@ public class AsynchronousLoanBookProcessing implements AsynchronousLoanBookProce
         log.info("Upload of user data done!");
     }
 
+    @Transactional
     @Override
     public void uploadRepaymentHistory(LoanBook repaymentHistoryBook) throws MeedlException {
         loanBookValidator.validateLoanBookObjectValues(repaymentHistoryBook);

@@ -78,6 +78,17 @@ public class MonthlyInterestAdapterTest {
         assertEquals(savedMonthlyInterest.getInterest(), BigDecimal.valueOf(5000.00));
     }
 
+    @Order(2)
+    @Test
+    void findMonthlyInterestByCreatedDate() {
+        MonthlyInterest foundMonthlyInterest = MonthlyInterest.builder().build();
+        try{
+            foundMonthlyInterest = monthlyInterestOutputPort.findByDateCreated(monthlyInterest.getCreatedAt(),loaneeLoanDetail.getId());
+        }catch (MeedlException meedlException) {
+            log.error(meedlException.getMessage());
+        }
+        assertEquals(foundMonthlyInterest.getId(), monthlyInterestId);
+    }
 
     @AfterAll
     void tearDown() throws MeedlException {

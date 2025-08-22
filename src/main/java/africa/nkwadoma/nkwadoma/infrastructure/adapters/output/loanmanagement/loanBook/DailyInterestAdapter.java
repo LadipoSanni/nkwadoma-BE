@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,5 +48,20 @@ public class DailyInterestAdapter implements DailyInterestOutputPort {
                 dailyInterestRepository.findAllByLoaneeLoanDetailIdAndCreatedAtMonthAndCreatedAtYear(id,month.getValue(),year);
 
         return dailyInterestEntities.stream().map(dailyInterestMapper::toDailyInterest).collect(Collectors.toList());
+    }
+
+    @Override
+    public DailyInterest findDailyInterestForDate(LocalDateTime dateCreated, String loaneeLoanDetailId) throws MeedlException {
+        MeedlValidator.validateObjectInstance(dateCreated,"Date time cannot be empty");
+        DailyInterestEntity dailyInterestEntity =
+                dailyInterestRepository.findByCreatedAt_DayOfMonthAndCreatedAtMonthAndCreatedAtYear
+                        (dateCreated.getDayOfMonth(),dateCreated.getMonth().getValue(),dateCreated.getYear(),loaneeLoanDetailId);
+        return dailyInterestMapper.toDailyInterest(dailyInterestEntity);
+    }
+
+    @Override
+    public void deleteAllByLoaneeLoanDetailId(String loaneeLoanDetailId) throws MeedlException {
+        MeedlValidator.validateUUID(loaneeLoanDetailId, "Provide a valid loanee loan detail id");
+        dailyInterestRepository.deleteAllByLoaneeLoanDetail_Id(loaneeLoanDetailId);
     }
 }
