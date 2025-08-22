@@ -2,11 +2,9 @@ package africa.nkwadoma.nkwadoma.domain.service.bankDetail;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.walletManagement.BankDetailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.bankdetail.BankDetailOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.financier.CooperateFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.CooperationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.BankDetailMessages;
@@ -35,8 +33,7 @@ public class BankDetailService implements BankDetailUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final FinancierOutputPort financierOutputPort;
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
-    private final CooperateFinancierOutputPort cooperateFinancierOutputPort;
-    private final CooperationOutputPort cooperationOutputPort;
+
 
     @Override
     public BankDetail addBankDetails(BankDetail bankDetail) throws MeedlException {
@@ -63,16 +60,16 @@ public class BankDetailService implements BankDetailUseCase {
             return bankDetail;
         }
         if (IdentityRole.isCooperateFinancier(userIdentity.getRole())){
-            CooperateFinancier cooperateFinancier =  cooperateFinancierOutputPort.findByUserId(userIdentity.getId());
-            if (ObjectUtils.isEmpty(cooperateFinancier)){
+            Financier financier = financierOutputPort.findFinancierByCooperateStaffUserId(userIdentity.getId());
+            if (ObjectUtils.isEmpty(financier)){
                 log.error("Unable to determine your details as a cooperate financier. User id {}", userIdentity.getId());
                 throw new MeedlException("Unable to determine your details as a cooperate financier");
             }
             log.info("Add bank detail by {} with user id {}", userIdentity.getRole(), userIdentity.getId());
             if (IdentityRole.COOPERATE_FINANCIER_SUPER_ADMIN.equals(userIdentity.getRole())){
-                return addCooperateFinancierBankDetail(bankDetail, cooperateFinancier, ActivationStatus.APPROVED);
+                return addCooperateFinancierBankDetail(bankDetail, CooperateFinancier.builder().build(), ActivationStatus.APPROVED);
             }else {
-                bankDetail = addCooperateFinancierBankDetail(bankDetail, cooperateFinancier, ActivationStatus.PENDING_APPROVAL);
+                bankDetail = addCooperateFinancierBankDetail(bankDetail, CooperateFinancier.builder().build(), ActivationStatus.PENDING_APPROVAL);
 //                notifyCooperateSuperAdmin();
                 return bankDetail;
             }
@@ -93,8 +90,8 @@ public class BankDetailService implements BankDetailUseCase {
     private BankDetail addCooperateFinancierBankDetail(BankDetail bankDetail, CooperateFinancier cooperateFinancier, ActivationStatus activationStatus) throws MeedlException {
         bankDetail.setActivationStatus(activationStatus);
         bankDetail = bankDetailOutputPort.save(bankDetail);
-        cooperateFinancier.getCooperate().setBankDetailId(bankDetail.getId());
-        cooperationOutputPort.save(cooperateFinancier.getCooperate());
+//        cooperateFinancier.getCooperate().setBankDetailId(bankDetail.getId());
+//        cooperationOutputPort.save(cooperateFinancier.getCooperate());
         bankDetail.setResponse("Bank detail is "+activationStatus.getStatusName());
         log.info("Bank detail id {} for cooperate financier with id {}", bankDetail.getId(), cooperateFinancier.getId());
         return bankDetail;

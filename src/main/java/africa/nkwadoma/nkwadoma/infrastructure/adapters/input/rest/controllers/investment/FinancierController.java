@@ -4,14 +4,10 @@ import africa.nkwadoma.nkwadoma.application.ports.input.investmentvehicle.Financ
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.financier.CooperateFinancier;
-import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.Cooperation;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentSummary;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.CooperationRequest;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.InviteColleagueRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.InviteFinancierRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.KycRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.FinancierRequest;
@@ -150,7 +146,7 @@ public class FinancierController {
     @GetMapping("financier/view")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
     @FinancierDetail
-    public ResponseEntity<ApiResponse<?>> viewFinancierDetail(@AuthenticationPrincipal Jwt meedlUser,@RequestParam(required = false) String financierId) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>>viewFinancierDetail(@AuthenticationPrincipal Jwt meedlUser,@RequestParam(required = false) String financierId) throws MeedlException {
         String userId = meedlUser.getClaimAsString("sub");
         Financier financier = financierUseCase.viewFinancierDetail(userId, financierId);
         FinancierDashboardResponse financierDashboardResponse = financierRestMapper.mapToDashboardResponse(financier);
@@ -164,7 +160,8 @@ public class FinancierController {
     }
 
     @GetMapping("financier/all/view")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')  or hasRole('MEEDL_ADMIN') " +
+            "or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     public  ResponseEntity<ApiResponse<?>> viewAllFinancier(@AuthenticationPrincipal Jwt meedlUser,
                                                             @RequestParam int pageNumber,
                                                             @RequestParam int pageSize,
@@ -187,7 +184,8 @@ public class FinancierController {
         );
     }
     @GetMapping("financier/search")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')  or hasRole('MEEDL_ADMIN') " +
+            "or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     public  ResponseEntity<ApiResponse<?>> search(@AuthenticationPrincipal Jwt meedlUser,
                                                   @RequestParam String name,
                                                   @RequestParam int pageNumber,
@@ -233,7 +231,8 @@ public class FinancierController {
     }
 
     @GetMapping("financier/investment-vehicle/all/view")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')  or hasRole('MEEDL_ADMIN') " +
+            "or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     public  ResponseEntity<ApiResponse<?>> viewAllFinancierInInvestmentVehicle(@AuthenticationPrincipal Jwt meedlUser,
                                                             @RequestParam int pageNumber,
                                                             @RequestParam int pageSize,
@@ -300,136 +299,6 @@ public class FinancierController {
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 build(), HttpStatus.OK
         );
-    }
-
-    @PostMapping("invite/colleague/financier")
-    @PreAuthorize("hasRole('COOPERATE_FINANCIER_SUPER_ADMIN') or hasRole('COOPERATE_FINANCIER_ADMIN')")
-    public ResponseEntity<ApiResponse<?>> inviteColleagueFinancier(@AuthenticationPrincipal Jwt meedlUser,
-                                                                   @RequestBody InviteColleagueRequest inviteColleagueRequest) throws MeedlException {
-        Financier financier  =  financierRestMapper.mapInviteColleagueRequestToFinancier(inviteColleagueRequest);
-
-        String response = financierUseCase.inviteColleagueFinancier(meedlUser.getClaimAsString("sub"),financier);
-        ApiResponse<Object> apiResponse = ApiResponse.builder()
-                .statusCode(HttpStatus.OK.toString())
-                .message(response)
-                .data(response)
-                .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
-    }
-
-
-    @GetMapping("view/cooperate/detail")
-    @PreAuthorize("hasRole('COOPERATE_FINANCIER_SUPER_ADMIN') or hasRole('COOPERATE_FINANCIER_ADMIN')")
-    public ResponseEntity<ApiResponse<?>> viewCooperationDetail(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
-
-        Cooperation cooperation = financierUseCase.viewCooperateFinancierDetail(meedlUser.getClaimAsString("sub"));
-        CooperationResponse cooperationResponse = financierRestMapper.mapToCooperationResponse(cooperation);
-
-        return new ResponseEntity<>(ApiResponse.builder()
-                .statusCode(HttpStatus.OK.toString())
-                .data(cooperationResponse)
-                .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage())
-                .build(),HttpStatus.OK);
-
-    }
-
-
-    @PatchMapping("update/cooperate/profile")
-    @PreAuthorize("hasRole('COOPERATE_FINANCIER_SUPER_ADMIN') or hasRole('COOPERATE_FINANCIER_ADMIN')")
-    public ResponseEntity<ApiResponse<?>> updateCooperationProfile(@AuthenticationPrincipal Jwt meedlUser ,
-                                                                   @RequestBody CooperationRequest cooperationRequest) throws MeedlException {
-
-        Cooperation cooperation = financierRestMapper.mapCooperationRequestToCooperation(cooperationRequest);
-        cooperation = financierUseCase.updateCooperateProfile(meedlUser.getClaimAsString("sub"),cooperation);
-        CooperationResponse cooperationResponse = financierRestMapper.mapToCooperationResponse(cooperation);
-
-        return new ResponseEntity<>(ApiResponse.builder()
-                .statusCode(HttpStatus.OK.toString())
-                .data(cooperationResponse)
-                .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage())
-                .build(),HttpStatus.OK);
-
-    }
-
-
-
-    @PostMapping("financier/respond/colleague/invitation")
-    @PreAuthorize("hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')")
-    public ResponseEntity<ApiResponse<?>> respondToColleagueInvitation(@AuthenticationPrincipal Jwt meedlUser,
-                                                                        @RequestParam(name = "cooperateFinancierId") String cooperateFinancierId,
-                                                                        @RequestParam(name = "decision") ActivationStatus decision) throws MeedlException {
-        String response = financierUseCase.respondToColleagueInvitation(meedlUser.getClaimAsString("sub"),
-                cooperateFinancierId,decision);
-        return new ResponseEntity<>(ApiResponse.builder().
-                statusCode(HttpStatus.OK.toString()).
-                data(response).
-                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
-                build(), HttpStatus.OK
-        );
-    }
-
-
-    @GetMapping("cooperate/view/all/staff")
-    @PreAuthorize("hasRole('COOPERATE_FINANCIER_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')" +
-            " or hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE') or hasRole('COOPERATE_FINANCIER_ADMIN') ")
-    public ResponseEntity<ApiResponse<?>> viewAllCooperationStaff(@AuthenticationPrincipal Jwt meedlUser,
-                                                                  @RequestParam(required = false, name = "cooperateId") String cooperateId,
-                                                                  @RequestParam(required = false, name = "activationStatus") ActivationStatus activationStatus,
-                                                                  @RequestParam(defaultValue = "10") int pageSize,
-                                                                  @RequestParam(defaultValue = "0") int pageNumber) throws MeedlException {
-
-
-        Financier financier = Financier.builder().actorId(meedlUser.getClaimAsString("sub")).activationStatus(activationStatus)
-                .pageNumber(pageNumber).pageSize(pageSize).build();
-
-        Page<CooperateFinancier> cooperateFinanciers = financierUseCase.viewAllCooperationStaff(financier);
-
-        List<CooperateFinancierResponse> cooperateFinancierResponse =
-                cooperateFinanciers.map(financierRestMapper::mapToCooperateFinancierResponse).stream().toList();
-
-        PaginatedResponse<CooperateFinancierResponse> cooperateFinancierResponsePaginatedResponse =
-                new PaginatedResponse<>(cooperateFinancierResponse,cooperateFinanciers.hasNext(),
-                        cooperateFinanciers.getTotalPages(),cooperateFinanciers.getTotalElements(),pageNumber,pageSize);
-
-        ApiResponse<PaginatedResponse<CooperateFinancierResponse>> apiResponse = ApiResponse.<PaginatedResponse<CooperateFinancierResponse>>builder()
-                .data(cooperateFinancierResponsePaginatedResponse)
-                .message(String.valueOf(RETURNED_SUCCESSFULLY))
-                .statusCode(HttpStatus.OK.toString())
-                .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-
-    }
-
-    @GetMapping("cooperate/search/staff")
-    @PreAuthorize("hasRole('COOPERATE_FINANCIER_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')" +
-            " or hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE') + hasRole('COOPERATE_FINANCIER_ADMIN')")
-    public ResponseEntity<ApiResponse<?>> searchCooperationStaff(@AuthenticationPrincipal Jwt meedlUser,
-                                                                  @RequestParam(required = false, name = "cooperateId") String cooperateId,
-                                                                  @RequestParam(name = "name") String name,
-                                                                  @RequestParam(required = false, name = "activationStatus") ActivationStatus activationStatus,
-                                                                  @RequestParam(defaultValue = "10") int pageSize,
-                                                                  @RequestParam(defaultValue = "0") int pageNumber) throws MeedlException {
-
-
-        Financier financier = Financier.builder().name(name).actorId(meedlUser.getClaimAsString("sub")).activationStatus(activationStatus)
-                .pageNumber(pageNumber).pageSize(pageSize).cooperateId(cooperateId).build();
-
-        Page<CooperateFinancier> cooperateFinanciers = financierUseCase.searchCooperationStaff(financier);
-
-        List<CooperateFinancierResponse> cooperateFinancierResponse =
-                cooperateFinanciers.map(financierRestMapper::mapToCooperateFinancierResponse).stream().toList();
-
-        PaginatedResponse<CooperateFinancierResponse> cooperateFinancierResponsePaginatedResponse =
-                new PaginatedResponse<>(cooperateFinancierResponse,cooperateFinanciers.hasNext(),
-                        cooperateFinanciers.getTotalPages(),cooperateFinanciers.getTotalElements(),pageNumber,pageSize);
-
-        ApiResponse<PaginatedResponse<CooperateFinancierResponse>> apiResponse = ApiResponse.<PaginatedResponse<CooperateFinancierResponse>>builder()
-                .data(cooperateFinancierResponsePaginatedResponse)
-                .message(String.valueOf(RETURNED_SUCCESSFULLY))
-                .statusCode(HttpStatus.OK.toString())
-                .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-
     }
 
 }

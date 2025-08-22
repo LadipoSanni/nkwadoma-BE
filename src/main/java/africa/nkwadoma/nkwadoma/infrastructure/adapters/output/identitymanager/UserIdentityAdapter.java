@@ -100,7 +100,7 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
     public List<UserIdentity> findAllByRole(IdentityRole identityRole) throws MeedlException {
         MeedlValidator.validateObjectInstance(identityRole, IdentityMessages.INVALID_ROLE.getMessage());
         List<UserEntity> userEntities = userEntityRepository.findAllByRole(identityRole);
-        log.info("Found {} users by Role ", userEntities.size());
+        log.info("Found {} users by Role {} ", userEntities.size(),identityRole );
         return userEntities.stream().map(userIdentityMapper::toUserIdentity).toList();
     }
 

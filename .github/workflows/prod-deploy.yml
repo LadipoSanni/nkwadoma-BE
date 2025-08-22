@@ -4,7 +4,7 @@ env:
   REPO_URL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/meedl-prod
   AWS_REGION: us-east-1
   CLUSTER: meedl
-  SERVICE: meedl-prod
+  SERVICE: meedl_prod
   APP: meedl-prod
 
 on:
@@ -74,6 +74,6 @@ jobs:
           docker push ${{ env.REPO_URL }}:$GITHUB_SHA
 
 
-      - name: Update ECS service
-        run: |
-          aws ecs update-service --cluster ${{ env.CLUSTER }}  --service  ${{ env.SERVICE }} --force-new-deployment
+      # - name: Update ECS service
+      #   run: |
+      #     aws ecs update-service --cluster ${{ env.CLUSTER }}  --service  ${{ env.SERVICE }} --force-new-deployment

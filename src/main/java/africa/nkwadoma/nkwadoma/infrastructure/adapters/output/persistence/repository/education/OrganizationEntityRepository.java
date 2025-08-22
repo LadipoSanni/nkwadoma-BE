@@ -153,6 +153,12 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
     FROM OrganizationEntity o
     left join InstituteMetricsEntity  institute on institute.organization.id = o.id                            
     LEFT JOIN OrganizationLoanDetailEntity ld ON ld.organization.id = o.id
+     WHERE NOT EXISTS (
+            SELECT f
+            FROM FinancierEntity f
+            WHERE f.identity = o.id
+              AND f.financierType = 'COOPERATE'
+        )
 """)
     Page<OrganizationProjection> findAllOrganization(Pageable pageRequest);
 
@@ -191,4 +197,13 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
                 where o.id = :organizationId
         """)
     OrganizationProjection findByIdProjection(@Param("organizationId") String organizationId);
+
+
+    @Query("""
+    SELECT COUNT(o) > 0
+    FROM OrganizationEntity o
+    WHERE lower(o.email) = lower(:email)
+""")
+    boolean existsByEmail(@Param("email") String email);
+
 }

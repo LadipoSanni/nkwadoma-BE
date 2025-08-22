@@ -303,6 +303,7 @@ public class TestData {
         investmentVehicleDesignations.add(InvestmentVehicleDesignation.SPONSOR);
         Financier financier = buildFinancier(investmentVehicleDesignations);
         financier.setUserIdentity(userIdentity);
+        financier.setIdentity(userIdentity.getId());
         financier.setFinancierType(FinancierType.INDIVIDUAL);
         return financier;
     }

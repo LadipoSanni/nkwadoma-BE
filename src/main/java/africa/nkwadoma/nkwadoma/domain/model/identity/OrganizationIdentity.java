@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.model.identity;
 
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.OrganizationType;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -30,6 +31,7 @@ public class OrganizationIdentity {
     private String email;
     private String websiteAddress;
     private String invitedDate;
+    private String taxIdentity;
     private String rcNumber;
     private String tin;
     private String phoneNumber;
@@ -66,6 +68,7 @@ public class OrganizationIdentity {
     private String bannerImage;
     private String address;
     private String officeAddress;
+    private OrganizationType organizationType;
 
     public void validate() throws MeedlException {
         log.info("The organization being validated : {}", this.name);
@@ -86,6 +89,11 @@ public class OrganizationIdentity {
         MeedlValidator.validateDataElement(this.serviceOfferings.get(0).getIndustry().name(), "Service offering's name is required");
         log.info("Organization identity validation completed successfully {}", this.name);
 
+    }
+
+    public void validateCooperateOrganization() throws MeedlException {
+        MeedlValidator.validateObjectName(this.name,"Organization name cannot be empty","Organization");
+        MeedlValidator.validateEmail(this.email);
     }
 
 }

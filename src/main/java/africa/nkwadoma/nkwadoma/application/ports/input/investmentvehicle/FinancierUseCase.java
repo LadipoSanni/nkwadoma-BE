@@ -38,15 +38,4 @@ public interface FinancierUseCase {
     Page<Financier> searchFinancierInvestment(Financier financier) throws MeedlException;
     InvestmentSummary viewInvestmentDetailOfFinancier(String financierId, String investmentVehicleFinancierId, String userId) throws MeedlException;
 
-    String inviteColleagueFinancier(String actorID,Financier financier) throws MeedlException;
-
-    Cooperation viewCooperateFinancierDetail(String actorId) throws MeedlException;
-
-    Cooperation updateCooperateProfile(String actorId,Cooperation cooperation) throws MeedlException;
-
-    String respondToColleagueInvitation(String actorId, String financierId, ActivationStatus activationStatus) throws MeedlException;
-
-    Page<CooperateFinancier> viewAllCooperationStaff(Financier financier) throws MeedlException;
-
-    Page<CooperateFinancier> searchCooperationStaff(Financier financier) throws MeedlException;
 }

@@ -21,7 +21,6 @@ public interface FinancierRestMapper {
     Financier map(FinancierRequest financierRequest);
     @Mapping( source = "userIdentity", target = "userIdentity")
     @Mapping( source = "userIdentity.nextOfKin", target = "nextOfKin")
-    @Mapping( source = "cooperation.name", target = "organizationName")
     @Mapping( source = "investmentVehicleDesignation", target = "investmentVehicleRole")
     FinancierResponse map(Financier financier);
 
@@ -90,8 +89,8 @@ public interface FinancierRestMapper {
     Cooperation mapCooperationRequestToCooperation(CooperationRequest cooperationRequest);
 
 
-    @Mapping(target = "cooperation.name", source = "organizationName")
-    @Mapping(target = "cooperation.email", source = "organizationEmail")
+    @Mapping(target = "name", source = "organizationName")
+    @Mapping(target = "email", source = "organizationEmail")
     Financier mapToCooperateFinancier(FinancierRequest financierRequest);
 
     @Mapping(target = "cooperateFinancierId", source = "id")

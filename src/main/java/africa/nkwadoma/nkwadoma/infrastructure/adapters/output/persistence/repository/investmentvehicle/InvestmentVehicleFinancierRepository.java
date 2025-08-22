@@ -69,14 +69,14 @@ public interface InvestmentVehicleFinancierRepository extends JpaRepository<Inve
             "WHERE ivf.investmentVehicle.id = :investmentVehicleId ")
     boolean checkIfAnyFinancierExistInVehicle(String investmentVehicleId);
 
-    @Query("SELECT ivf FROM InvestmentVehicleFinancierEntity ivf WHERE ivf.financier.userIdentity.id = :userId ")
+    @Query("SELECT ivf FROM InvestmentVehicleFinancierEntity ivf WHERE ivf.financier.identity = :userId ")
     Page<InvestmentVehicleFinancierEntity> findAllInvestmentVehicleFinancierInvestedInByUserId(String userId, Pageable pageRequest);
 
     @Query("SELECT ivf FROM InvestmentVehicleFinancierEntity ivf WHERE ivf.financier.id = :finanacierId ")
     Page<InvestmentVehicleFinancierEntity> findAllInvestmentVehicleFinancierInvestedInByFinancierId(String finanacierId, Pageable pageRequest);
 
     @Query("SELECT ivf FROM InvestmentVehicleFinancierEntity ivf " +
-            "WHERE ivf.financier.userIdentity.id = :userId " +
+            "WHERE ivf.financier.identity = :userId " +
             "AND LOWER(ivf.investmentVehicle.name) LIKE LOWER(CONCAT('%', :investmentVehicleName, '%'))")
     Page<InvestmentVehicleFinancierEntity> searchFinancierInvestmentByInvestmentVehicleNameAndUserId(
             @Param("investmentVehicleName") String investmentVehicleName,

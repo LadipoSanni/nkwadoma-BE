@@ -4,7 +4,6 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetailSummary;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanAggregate;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanSummaryProjection;
 import org.springframework.data.domain.Page;
 
 public interface LoaneeLoanAggregateOutputPort {
@@ -20,7 +19,7 @@ public interface LoaneeLoanAggregateOutputPort {
 
     LoanDetailSummary getLoanAggregationSummary();
 
-    LoaneeLoanAggregate findByLoaneeLoanAgrregateByLoaneeLoanDetailId(String id) throws MeedlException;
+    LoaneeLoanAggregate findByLoaneeLoanAggregateByLoaneeLoanDetailId(String id) throws MeedlException;
 
     Page<LoaneeLoanAggregate> findAllLoanAggregateByOrganizationId(String organizationId, int pageSize, int pageNumber) throws MeedlException;
 

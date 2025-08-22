@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapp
 
 
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
+import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
@@ -55,4 +56,8 @@ public interface OrganizationIdentityMapper {
     @Mapping(target = "repaymentRate", source = "repaymentRate")
     @Mapping(target = "requestedBy", source = "inviterFullName")
     OrganizationIdentity mapProjecttionToOrganizationIdentity(OrganizationProjection organizationProjection);
+
+    @Mapping(target = "taxIdentity", source = "financier.userIdentity.taxId")
+    @Mapping(target = "phoneNumber", source = "financier.userIdentity.phoneNumber")
+    void mapCooperateDetailToOrganization(@MappingTarget  OrganizationIdentity organizationIdentity, Financier financier);
 }

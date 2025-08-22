@@ -42,5 +42,6 @@ public interface OrganizationIdentityOutputPort {
     Optional<OrganizationIdentity> findByUserId(String userId) throws MeedlException;
 
     OrganizationIdentity findByIdProjection(String organizationId) throws MeedlException;
+    boolean existByEmail(String email) throws MeedlException;
 }
 

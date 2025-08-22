@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.identity.NextOfKinMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.financier.FinancierEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.UserIdentityMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.financier.FinancierProjection;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -31,4 +32,7 @@ public interface FinancierMapper {
 
 
     void updateCooperation(@MappingTarget  Cooperation cooperate, Cooperation cooperation);
+
+
+    Financier mapProjectionToFinancier(FinancierProjection financierProjection);
 }

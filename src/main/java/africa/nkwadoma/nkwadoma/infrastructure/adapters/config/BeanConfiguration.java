@@ -1,10 +1,8 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.config;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.notification.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
-import africa.nkwadoma.nkwadoma.application.ports.output.financier.CooperateFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
@@ -18,7 +16,6 @@ import africa.nkwadoma.nkwadoma.domain.service.notification.NotificationService;
 import africa.nkwadoma.nkwadoma.domain.service.identity.UserIdentityService;
 import africa.nkwadoma.nkwadoma.domain.service.investmentvehicle.InvestmentVehicleService;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.StringTrimMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.aes.TokenUtils;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.notification.email.EmailAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identitymanager.KeycloakAdapter;
@@ -68,12 +65,11 @@ public class BeanConfiguration {
                                                    OrganizationIdentityOutputPort organizationIdentityOutputPort,
                                                    AsynchronousMailingOutputPort asynchronousMailingOutputPort,
                                                    AsynchronousNotificationOutputPort asynchronousNotificationOutputPort,
-                                                   CooperateFinancierOutputPort cooperateFinancierOutputPort,
-                                                   CooperationOutputPort cooperationOutputPort
+                                                   FinancierOutputPort financierOutputPort
                                                    ){
         return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,sendOrganizationEmployeeEmailUseCase,
                 tokenUtils, emailTokenOutputPort, blackListedTokenAdapter,
-                organizationIdentityOutputPort, asynchronousMailingOutputPort, asynchronousNotificationOutputPort,cooperateFinancierOutputPort,cooperationOutputPort
+                organizationIdentityOutputPort, asynchronousMailingOutputPort, asynchronousNotificationOutputPort,financierOutputPort
         );
     }
 

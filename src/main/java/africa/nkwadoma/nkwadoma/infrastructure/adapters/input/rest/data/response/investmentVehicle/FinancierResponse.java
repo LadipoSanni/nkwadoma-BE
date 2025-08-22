@@ -15,12 +15,12 @@ import java.util.List;
 @Setter
 public class FinancierResponse {
     private String id;
+    private String name;
     private FinancierType financierType;
     private ActivationStatus activationStatus;
     private BigDecimal totalAmountInvested;
     private NextOfKin nextOfKin;
     private List<InvestmentVehicleDesignation> investmentVehicleRole;
-    private String organizationName;
     private FinancierUserIdentityResponse userIdentity;
     private String invitedBy;
     private List<InvestmentVehicle> investmentVehicles;
