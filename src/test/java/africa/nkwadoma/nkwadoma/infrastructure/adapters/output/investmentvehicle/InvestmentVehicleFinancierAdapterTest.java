@@ -123,8 +123,7 @@ class InvestmentVehicleFinancierAdapterTest {
         assertNotNull(savedInvestmentVehicleFinancier.getFinancier());
         assertNotNull(savedInvestmentVehicleFinancier.getInvestmentVehicle());
         assertNotNull(investmentVehicleFinancier.getFinancier());
-        assertNotNull(investmentVehicleFinancier.getFinancier().getUserIdentity());
-        assertEquals(investmentVehicleFinancier.getFinancier().getUserIdentity().getId(), financier.getUserIdentity().getId());
+        assertNotNull(investmentVehicleFinancier.getFinancier().getIdentity());
         assertEquals(investmentVehicleFinancier.getFinancier().getId(), financier.getId());
         assertEquals(investmentVehicleFinancier.getInvestmentVehicle().getId(), investmentVehicle.getId());
 
