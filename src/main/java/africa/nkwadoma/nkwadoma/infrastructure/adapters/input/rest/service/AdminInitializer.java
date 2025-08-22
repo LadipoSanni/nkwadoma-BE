@@ -57,8 +57,6 @@ public class AdminInitializer {
 
     @Value("${superAdmin.lastName}")
     private String SUPER_ADMIN_LAST_NAME ;
-//    @Value("${superAdmin.createdBy}")
-//    private String CREATED_BY;
 
     private UserIdentity getUserIdentity() {
         return UserIdentity.builder()
@@ -233,7 +231,7 @@ public class AdminInitializer {
         log.info("First organization ============================> {}", organizationIdentity);
         loanMetricsUseCase.correctLoanRequestCount();
         Portfolio portfolio = createMeedlPortfolio(getPortfolio());
-        log.info("Meedl portfolio process done-- {}", portfolio);
+        log.info("Meedl portfolio process done -- {} ", portfolio);
         calculationEngineUseCase.scheduleDailyInterestCalculation();
         calculationEngineUseCase.scheduleMonthlyInterestCalculation();
     }

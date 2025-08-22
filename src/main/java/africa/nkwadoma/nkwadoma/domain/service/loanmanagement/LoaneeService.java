@@ -103,6 +103,7 @@ public class LoaneeService implements LoaneeUseCase {
                         loanee = loaneeOutputPort.findLoaneeById(id);
                         validationsForInvitingLoanee(loanee, id);
                         loanee.setUploadedStatus(UploadedStatus.INVITED);
+                        loanee.setActivationStatus(ActivationStatus.INVITED);
                         loanee = loaneeOutputPort.save(loanee);
                         log.info("Loanees found after save on loanee invite {}", loanee);
                         getLoanInCohort(loanee, cohortId);

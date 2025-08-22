@@ -226,7 +226,7 @@ public class LoanBookService implements LoanBookUseCase {
                         log.info("loan request is {}", loanRequest);
                         loanRequest.setLoanee(cohortLoanee.getLoanee());
                         acceptLoanOffer(loanRequest);
-                        startLoan(loanRequest,cohortLoanee.getUpdatedAt() );
+                        startLoan(loanRequest,cohortLoanee.getLoaneeLoanDetail().getLoanStartDate());
                     } catch (MeedlException e) {
                         log.error("Error accepting loan referral.",e);
                     }
@@ -253,6 +253,7 @@ public class LoanBookService implements LoanBookUseCase {
 
         LoanReferral loanReferral = loanReferralOutputPort.findLoanReferralByCohortLoaneeId(cohortLoanee.getId());
         loanReferral.setLoanReferralStatus(LoanReferralStatus.ACCEPTED);
+        loanReferral.setLoaneeUserId(cohortLoanee.getLoanee().getUserIdentity().getId());
         respondToLoanReferralUseCase.respondToLoanReferral(loanReferral);
         return loanReferral;
     }
