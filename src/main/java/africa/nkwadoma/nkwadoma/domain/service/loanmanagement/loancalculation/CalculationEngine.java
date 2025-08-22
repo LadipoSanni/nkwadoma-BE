@@ -331,12 +331,9 @@ public class CalculationEngine implements CalculationEngineUseCase {
 
         if (currentDate.isAfter(asOfDate)){
             log.error("Payment made in future date");
-            throw new MeedlException("Cannot make  payment in future date");
+            ///Todo work on notification for invalid date
+//            throw new MeedlException("Cannot make  payment in future date");
         }
-        if (currentDate.isEqual(asOfDate)){
-            log.info("The date is today");
-        }
-
         while (!currentDate.isAfter(asOfDate)) {
             // daily interest accrual
             BigDecimal dailyInterest = decimalPlaceRoundUp(calculateInterest(annualRate, outstanding, 1));
