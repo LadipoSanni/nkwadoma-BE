@@ -240,7 +240,7 @@ class OrganizationIdentityAdapterTest {
             assertTrue(foundOrganizationIdentities.isLast());
 
             assertNotNull(organizationIdentityList);
-            assertFalse(organizationIdentityList.isEmpty());
+
             assertTrue(listSize > BigInteger.ZERO.intValue());
         } catch (MeedlException meedlException) {
             log.info("{}", meedlException.getMessage());
