@@ -941,7 +941,7 @@ public class FinancierService implements FinancierUseCase {
             financier.setCreatedAt(LocalDateTime.now());
             financier = financierOutputPort.save(financier);
             financier.setUserIdentity(userIdentity);
-            return f
+            return financier;
         }else {
             return inviteCooperateFinancierToPlatform(financier);
         }
