@@ -73,6 +73,10 @@ public enum IdentityRole {
         return Set.of(ORGANIZATION_ADMIN, ORGANIZATION_ASSOCIATE).contains(role);
     }
 
+    public static boolean isCooperateSuperAdmin(IdentityRole role) {
+        return role.equals(COOPERATE_FINANCIER_SUPER_ADMIN);
+    }
+
 
     public boolean isMeedlRole() {
         return this == MEEDL_SUPER_ADMIN ||

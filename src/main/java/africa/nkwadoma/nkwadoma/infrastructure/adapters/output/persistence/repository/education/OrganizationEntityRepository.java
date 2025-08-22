@@ -153,6 +153,7 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
     FROM OrganizationEntity o
     left join InstituteMetricsEntity  institute on institute.organization.id = o.id                            
     LEFT JOIN OrganizationLoanDetailEntity ld ON ld.organization.id = o.id
+    JOin OrganizationServiceOfferingEntity osf on osf.organizationId = o.id
 """)
     Page<OrganizationProjection> findAllOrganization(Pageable pageRequest);
 
