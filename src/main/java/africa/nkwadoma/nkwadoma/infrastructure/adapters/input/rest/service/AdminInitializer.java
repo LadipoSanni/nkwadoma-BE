@@ -164,6 +164,7 @@ public class AdminInitializer {
         userIdentity.setCreatedBy(userIdentity.getId());
         UserIdentity foundUserIdentity = null;
         log.info("First user, after saving on keycloak: {}", userIdentity);
+        removeDuplicateSuperAdmin(userIdentity);
         try {
             foundUserIdentity = userIdentityOutputPort.findByEmail(userIdentity.getEmail());
             foundUserIdentity.setCreatedBy(foundUserIdentity.getId());
@@ -179,6 +180,10 @@ public class AdminInitializer {
             }
         }
         return userIdentity;
+    }
+
+    private void removeDuplicateSuperAdmin(UserIdentity userIdentity) {
+        identityManagerOutPutPort.getUserRepresentation(userIdentity);
     }
 
     private UserIdentity saveUserToDB(UserIdentity userIdentity) throws MeedlException {
