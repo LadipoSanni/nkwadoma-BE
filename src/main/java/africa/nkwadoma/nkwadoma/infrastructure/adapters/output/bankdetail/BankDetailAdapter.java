@@ -11,6 +11,9 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Slf4j
 @Component
 @AllArgsConstructor
@@ -41,5 +44,19 @@ public class BankDetailAdapter implements BankDetailOutputPort {
         BankDetailEntity bankDetailEntity = bankDetailRepository.findById(bankDetailId)
                 .orElseThrow(() -> new MeedlException("Bank Detail not found."));
         return bankDetailMapper.toBankDetail(bankDetailEntity);
+    }
+
+    @Override
+    public List<BankDetail> save(List<BankDetail> existingBankDetails) throws MeedlException {
+        List<BankDetailEntity> bankDetailEntities = new ArrayList<>();
+        log.info("About to save multiple bank detail. Validating and mapping each before save");
+        for (BankDetail bankDetail : existingBankDetails){
+            bankDetail.validate();
+            BankDetailEntity bankDetailEntity = bankDetailMapper.toBankDetailEntity(bankDetail);
+            bankDetailEntities.add(bankDetailEntity);
+        }
+        bankDetailEntities = bankDetailRepository.saveAll(bankDetailEntities);
+        log.info("Multiple bank details saved");
+        return bankDetailMapper.map(bankDetailEntities);
     }
 }

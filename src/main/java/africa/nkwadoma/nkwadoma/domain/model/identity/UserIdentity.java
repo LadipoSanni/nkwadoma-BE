@@ -84,5 +84,8 @@ public class UserIdentity {
         log.info("Creator ID: {}", this.createdBy);
         log.info("Finished validating for user identity in validation");
     }
+    public String getFullName(){
+        return this.firstName + " " + this.lastName;
+    }
 
 }

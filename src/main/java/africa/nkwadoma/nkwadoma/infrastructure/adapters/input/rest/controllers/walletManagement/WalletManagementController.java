@@ -38,13 +38,15 @@ public class WalletManagementController {
     private BankDetailRestMapper bankDetailMapper;
 
     @PostMapping("add/bankDetail")
-    @Operation(summary = BANK_DETAIL, description = INVITE_ORGANIZATION_DESCRIPTION)
+    @Operation(summary = BANK_DETAIL, description = ADD_BANK_DETAIL_DESCRIPTION)
     @PreAuthorize(""" 
             hasRole('MEEDL_SUPER_ADMIN')
             or hasRole('MEEDL_ADMIN')
             or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')
             or hasRole('PORTFOLIO_MANAGER')
             or hasRole('ORGANIZATION_SUPER_ADMIN')
+            or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')
+            or hasRole('COOPERATE_FINANCIER_ADMIN')
             or hasRole('ORGANIZATION_ADMIN')
             or hasRole('ORGANIZATION_ASSOCIATE')
             """)
@@ -52,6 +54,32 @@ public class WalletManagementController {
                                                              @RequestBody @Valid BankDetailRequest bankDetailRequest) throws MeedlException {
         BankDetail bankDetail = bankDetailMapper.map(meedlUser.getClaimAsString("sub"), bankDetailRequest);
         bankDetail = bankDetailUseCase.addBankDetails(bankDetail);
+        log.info("Bank details after adding {}", bankDetail);
+        ApiResponse<Object> apiResponse = ApiResponse.builder()
+                .data(QAResponse.build(bankDetail.getId()))
+                .message(bankDetail.getResponse())
+                .statusCode(HttpStatus.CREATED.name())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+    }
+
+    @PostMapping("view/bankDetail")
+    @Operation(summary = BANK_DETAIL, description = VIEW_BANK_DETAIL_DESCRIPTION)
+    @PreAuthorize(""" 
+            hasRole('MEEDL_SUPER_ADMIN')
+            or hasRole('MEEDL_ADMIN')
+            or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')
+            or hasRole('PORTFOLIO_MANAGER')
+            or hasRole('ORGANIZATION_SUPER_ADMIN')
+            or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')
+            or hasRole('COOPERATE_FINANCIER_ADMIN')
+            or hasRole('ORGANIZATION_ADMIN')
+            or hasRole('ORGANIZATION_ASSOCIATE')
+            """)
+    public ResponseEntity<ApiResponse<?>> viewBankDetail(@AuthenticationPrincipal Jwt meedlUser,
+                                                        @RequestBody @Valid BankDetailRequest bankDetailRequest) throws MeedlException {
+        BankDetail bankDetail = bankDetailMapper.map(meedlUser.getClaimAsString("sub"), bankDetailRequest);
+        bankDetail = bankDetailUseCase.viewBankDetail(bankDetail);
         log.info("Bank details after adding {}", bankDetail);
         ApiResponse<Object> apiResponse = ApiResponse.builder()
                 .data(QAResponse.build(bankDetail.getId()))

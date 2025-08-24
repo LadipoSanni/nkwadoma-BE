@@ -2,11 +2,13 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identitymanager;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.UserEntity;
@@ -17,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.List;
+import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages.USER_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.EMAIL_NOT_FOUND;
@@ -123,6 +126,14 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
     public UserIdentity findMeedlSuperAdmin() {
         UserEntity userEntity = userEntityRepository.findByRole_MeedlSuperAdmin();
         return userIdentityMapper.toUserIdentity(userEntity);
+    }
+
+    @Override
+    public Optional<UserIdentity> findFinancierSuperAdminByFinancierId(String financierId) throws MeedlException {
+        MeedlValidator.validateObjectInstance(financierId, UserMessages.INVALID_USER_ID.getMessage());
+        log.info("About to find financier super admin with financier id {}", financierId);
+        Optional<UserEntity> userEntity = userEntityRepository.findAllByRoleAndFinancierId(IdentityRole.COOPERATE_FINANCIER_SUPER_ADMIN, financierId);
+        return userEntity.map(userIdentityMapper::toUserIdentity);
     }
 
     private void validateRoles(List<IdentityRole> roles) throws MeedlException {
