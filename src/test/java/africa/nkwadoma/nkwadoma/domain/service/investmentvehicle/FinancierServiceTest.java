@@ -177,6 +177,7 @@ public class FinancierServiceTest {
             individualUserIdentity = userIdentityOutputPort.findByEmail(individualUserIdentity.getEmail());
             individualUserIdentityId = individualUserIdentity.getId();
             foundFinancier = financierOutputPort.findFinancierByUserId(individualUserIdentityId);
+            log.info("found financier {}", foundFinancier);
             individualFinancierId = foundFinancier.getId();
             log.info("Financier id for test user with id : {} is {}", individualUserIdentityId, individualFinancierId);
         } catch (MeedlException e) {
@@ -275,6 +276,7 @@ public class FinancierServiceTest {
             assertEquals(individualFinancier.getAmountToInvest(), investmentVehicleFinanciers.get(0).getAmountInvested(),
                     "The amount to invest should be updated correctly");
             financier = financierOutputPort.findFinancierByFinancierId(individualFinancierId);
+            log.info("found financier after investing");
             assertEquals(individualFinancier.getAmountToInvest(), financier.getTotalAmountInvested());
         } catch (MeedlException e) {
             log.info("{}",e.getMessage(), e);
@@ -292,6 +294,7 @@ public class FinancierServiceTest {
         try {
             investmentVehicle = investmentVehicleOutputPort.findById(privateInvestmentVehicleId);
             financier = financierOutputPort.findFinancierByFinancierId(individualFinancierId);
+            log.info("Financier in invest in vehicle {}", financier);
             List<InvestmentVehicleFinancier> investmentVehicleFinanciers = investmentVehicleFinancierOutputPort.findByAll(investmentVehicle.getId(), individualFinancierId);
             assertNotNull(financier);
             assertFalse(investmentVehicleFinanciers.isEmpty());
@@ -779,7 +782,6 @@ public class FinancierServiceTest {
         }
         assertNotNull(foundFinancier);
         assertEquals(individualFinancierId, foundFinancier.getId());
-//        assertNotNull(foundFinancier.getUserIdentity().getBankDetail());
         assertNotNull(foundFinancier.getSourceOfFunds());
         assertNotNull(foundFinancier.getBeneficialOwners());
     }
@@ -1158,7 +1160,7 @@ public class FinancierServiceTest {
         individualFinancier.setPrivacyPolicyAccepted(Boolean.TRUE);
         String message = financierUseCase.makePrivacyPolicyDecision(individualFinancier);
         assertNotNull(message);
-        Financier foundFinancier = financierOutputPort.findFinancierByFinancierId(individualFinancierId);
+        Financier foundFinancier = financierOutputPort.findById(individualFinancierId);
         assertNotNull(foundFinancier);
         assertTrue(foundFinancier.isPrivacyPolicyAccepted());
 

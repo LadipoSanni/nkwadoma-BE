@@ -97,9 +97,29 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
 
 
 
-    @Query("SELECT f FROM FinancierEntity f " +
-            "WHERE f.id = :financierId")
-    Optional<FinancierEntity> findByFinancierId(String financierId);
+    @Query("""
+    SELECT 
+        f.id AS id,
+        CASE 
+            WHEN f.financierType = 'INDIVIDUAL' THEN CONCAT(user.firstName, ' ', user.lastName)
+            WHEN f.financierType = 'COOPERATE' THEN organization.name
+            ELSE NULL
+        END AS name,
+        CASE 
+            WHEN f.financierType = 'INDIVIDUAL' THEN user.email 
+            WHEN f.financierType = 'COOPERATE' THEN organization.email
+            ELSE NULL
+        END AS email,
+        f.totalAmountInvested AS totalAmountInvested,
+        f.activationStatus AS activationStatus,
+        f.financierType AS financierType,
+        f.identity AS identity
+    FROM FinancierEntity f
+    left JOIN OrganizationEntity organization ON organization.id = f.identity AND f.financierType = 'COOPERATE'
+    left JOIN UserEntity user ON user.id = f.identity AND f.financierType = 'INDIVIDUAL'
+    WHERE f.id = :financierId
+""")
+    Optional<FinancierProjection> findByFinancierId(@Param("financierId") String financierId);
 
 
     @Query("""
@@ -138,11 +158,14 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
     FinancierEntity findByIdentity(String id);
 
     @Query("""
-    SELECT f FROM FinancierEntity f
+    SELECT f.id as id , organization.name as name , f.totalAmountInvested as totalAmountInvested,
+        f.activationStatus as activationStatus , f.financierType as financierType
+             
+         FROM FinancierEntity f     
         JOIN OrganizationEntity  organization on  organization.id = f.identity
         JOIN OrganizationEmployeeEntity  organizationEmployee on organizationEmployee.organization = organization.id
         JOIN UserEntity user on user.id = organizationEmployee.meedlUser.id
-         where user.id = :id    
+         where user.id = :id and f.identity = organization.id
     """)
-    FinancierEntity findByCooperateStaffUserId(@Param("id") String id);
+    FinancierProjection findByCooperateStaffUserId(@Param("id") String id);
 }

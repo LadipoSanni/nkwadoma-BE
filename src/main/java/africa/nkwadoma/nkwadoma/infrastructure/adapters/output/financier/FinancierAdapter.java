@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.financier.FinancierMapper;
@@ -20,6 +21,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -42,11 +45,12 @@ public class FinancierAdapter implements FinancierOutputPort {
     @Override
     public Financier findFinancierByFinancierId(String financierId) throws MeedlException {
         MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
-        FinancierEntity financierEntity = financierRepository.findByFinancierId(financierId)
+        FinancierProjection financierEntity = financierRepository.findByFinancierId(financierId)
                 .orElseThrow(()-> new MeedlException("Financier not found"));
         log.info("Financier found at the adapter level for view by financier id {}", financierEntity);
-        Financier financier = financierMapper.map(financierEntity);
-        return cooperationUserIdentityView(financier);
+        Financier financier =  financierMapper.mapProjectionToFinancier(financierEntity);
+        log.info("found financier {}",financier);
+        return financier;
     }
 
     @Override
@@ -77,7 +81,16 @@ public class FinancierAdapter implements FinancierOutputPort {
     @Override
     public Financier findFinancierByCooperateStaffUserId(String id) throws MeedlException {
         MeedlValidator.validateUUID(id, UserMessages.INVALID_USER_ID.getMessage());
-        FinancierEntity financierEntity = financierRepository.findByCooperateStaffUserId(id);
+        FinancierProjection financierEntity = financierRepository.findByCooperateStaffUserId(id);
+        return financierMapper.mapProjectionToFinancier(financierEntity);
+    }
+
+    @Override
+    public Financier findById(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id,"Financier id cannot be empty");
+
+        FinancierEntity financierEntity =
+                financierRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("Financier not found"));
         return financierMapper.map(financierEntity);
     }
 
