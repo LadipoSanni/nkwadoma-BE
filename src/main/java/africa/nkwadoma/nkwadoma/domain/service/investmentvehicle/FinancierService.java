@@ -255,13 +255,14 @@ public class FinancierService implements FinancierUseCase {
         Financier buildFinancier = buildFinancier(financier,savedCooperate.getId(),actor);
 
         Financier savedFinancier = financierOutputPort.save(buildFinancier);
-
+        financier.setId(savedFinancier.getId());
+        financier.setUserIdentity(actor);
 
         saveCooperateFinancier(organizationIdentity,savedUserIdentity,actor);
 
         savedFinancier.setUserIdentity(savedUserIdentity);
         financiersToMail.add(savedFinancier);
-        log.info("Financier with email {} added for email sending.", savedFinancier.getUserIdentity().getEmail());
+        log.info("Financier with email {} added for email sending. ", savedFinancier.getUserIdentity().getEmail());
         return financier;
     }
 
@@ -335,7 +336,7 @@ public class FinancierService implements FinancierUseCase {
     private void inviteFinancierToInvestmentVehicle(Financier financier, InvestmentVehicle investmentVehicle,UserIdentity actor) throws MeedlException {
         financier.validate();
         financier.validateFinancierDesignation();
-        log.info("Done validating financier details for a financier invite and/ added to a vehicle");
+        log.info("Done validating financier details for a financier invite and added to a vehicle");
         addFinancierToInvestmentVehicle(financier, investmentVehicle,actor);
     }
 
@@ -388,13 +389,14 @@ public class FinancierService implements FinancierUseCase {
         Financier savedFinancier;
         try {
             savedFinancier = saveFinancier(financier);
-            log.info("Saved non-existing financier with identity : {}", savedFinancier.getIdentity());
+            log.info("Saved non-existing financier : {}", savedFinancier);
             financier = updateFinancierDetails(financier, savedFinancier);
         } catch (MeedlException ex) {
-            log.error("",ex);
+            log.error("Error saving none existing financier ",ex);
             throw new InvestmentException(ex.getMessage());
         }
         financiersToMail.add(financier);
+        log.info("Added financier for email sending .");
         return financier;
     }
 
@@ -436,7 +438,9 @@ public class FinancierService implements FinancierUseCase {
     private static Financier updateFinancierDetails(Financier financier, Financier existingFinancier) {
         existingFinancier.setInvestmentVehicleId(financier.getInvestmentVehicleId());
         existingFinancier.setInvestmentVehicleDesignation(financier.getInvestmentVehicleDesignation());
+
         financier = existingFinancier;
+        log.info("Updated the financier details without saving {}", financier);
         return financier;
     }
 
@@ -963,7 +967,7 @@ public class FinancierService implements FinancierUseCase {
 
     private void notifyExistingFinancier(Financier financier,  NotificationFlag notificationFlag, InvestmentVehicle investmentVehicle,UserIdentity actor) throws MeedlException {
         log.info("Started in app notification for invite financier  == {}",financier);
-        UserIdentity userIdentity = userIdentityOutputPort.findById(financier.getIdentity());
+        UserIdentity userIdentity = userIdentityOutputPort.findById(financier.getUserIdentity().getId());
         MeedlNotification meedlNotification = MeedlNotification.builder()
                 .user(userIdentity)
                 .timestamp(LocalDateTime.now())
