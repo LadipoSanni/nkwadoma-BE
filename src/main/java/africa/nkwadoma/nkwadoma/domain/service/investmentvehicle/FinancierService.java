@@ -682,23 +682,19 @@ public class FinancierService implements FinancierUseCase {
             if (financier.isPoliticallyExposed()) {
                 saveFinancierPoliticallyExposedPeople(financier);
             }
-            userIdentityOutputPort.save(foundFinancier.getUserIdentity());
-            identityManagerOutputPort.updateUserData(foundFinancier.getUserIdentity());
-            log.info("updated user details for kyc");
-            saveFinancierPoliticallyExposedPeople(financier);
+
             if (foundFinancier.getFinancierType().equals(INDIVIDUAL)) {
                 userIdentityOutputPort.save(foundFinancier.getUserIdentity());
                 identityManagerOutputPort.updateUserData(foundFinancier.getUserIdentity());
                 log.info("updated user details for kyc");
+            }
                 Financier savedFinancier = financierOutputPort.completeKyc(financier);
                 savedFinancier.setBeneficialOwners(financier.getBeneficialOwners());
                 return savedFinancier;
-            }
         }else {
             log.info("Financier {} has already completed kyc.", foundFinancier);
             throw new InvestmentException("Kyc already done.");
         }
-        return null;
     }
 
     private void saveFinancierPoliticallyExposedPeople(Financier financier) throws MeedlException {
@@ -760,12 +756,15 @@ public class FinancierService implements FinancierUseCase {
 
     private  void mapKycFinancierUpdatedValues(Financier financier, Financier foundFinancier) throws MeedlException {
         if (foundFinancier.getFinancierType().equals(INDIVIDUAL)) {
+            log.info("Individual financier mapping kyc details ");
             mapKycUserIdentityDataIndividualFinancier(financier, foundFinancier);
             mapKycFinancierPreviousData(financier, foundFinancier);
         }else {
+            log.info("Cooperate financier mapping kyc details");
             OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(foundFinancier.getIdentity());
             organizationIdentityMapper.mapCooperateDetailToOrganization(organizationIdentity,financier);
-            organizationIdentityOutputPort.save(organizationIdentity);
+            organizationIdentity =organizationIdentityOutputPort.save(organizationIdentity);
+            financier.setOrganizationIdentity(organizationIdentity);
         }
     }
 
@@ -781,7 +780,7 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private void mapKycUserIdentityDataIndividualFinancier(Financier financier, Financier foundFinancier) throws MeedlException {
-        UserIdentity userIdentity = userIdentityOutputPort.findById(financier.getIdentity());
+        UserIdentity userIdentity = userIdentityOutputPort.findById(foundFinancier.getIdentity());
         log.info("updating user details in kyc service for user : {}", userIdentity);
 
         userIdentity.setNin(financier.getUserIdentity().getNin());

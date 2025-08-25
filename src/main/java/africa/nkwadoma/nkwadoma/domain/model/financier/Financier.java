@@ -36,7 +36,6 @@ public class Financier {
     private String id;
     private String bankDetailId;
     private BankDetail approvedBankDetail;
-    private List<BankDetail> bankDetails;
 
     private FinancierType financierType;
     private ActivationStatus activationStatus;
@@ -47,12 +46,14 @@ public class Financier {
     private Cooperation cooperation;
     private String identity;
     private UserIdentity userIdentity;
+    private OrganizationIdentity organizationIdentity;
     private int totalNumberOfInvestment;
     private int pageNumber;
     private int pageSize;
     private BigDecimal totalIncomeEarned;
     private BigDecimal portfolioValue;
     private String rcNumber;
+    private String tin;
     private LocalDateTime createdAt;
     private String actorId;
     private String cooperateId;
@@ -67,6 +68,7 @@ public class Financier {
     private String email;
     private String invitedBy;
 
+    private List<BankDetail> bankDetails;
     private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
     private List<FinancierVehicleDetail> investmentVehicleInvestedIn;
     private List<BeneficialOwner> beneficialOwners;

@@ -22,6 +22,8 @@ public class KycRequest {
     private String address;
     @NotBlank(message = "National identification number is required")
     private String nin;
+    @NotBlank(message = "TIN is required")
+    private String tin;
     @NotBlank(message = "Bvn is required")
     private String bvn;
     @NotBlank(message = "Tax id is required")

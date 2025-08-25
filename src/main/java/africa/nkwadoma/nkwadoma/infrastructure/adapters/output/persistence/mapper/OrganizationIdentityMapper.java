@@ -59,5 +59,6 @@ public interface OrganizationIdentityMapper {
 
     @Mapping(target = "taxIdentity", source = "financier.userIdentity.taxId")
     @Mapping(target = "phoneNumber", source = "financier.userIdentity.phoneNumber")
+    @Mapping(target = "tin", source = "financier.tin")
     void mapCooperateDetailToOrganization(@MappingTarget  OrganizationIdentity organizationIdentity, Financier financier);
 }
