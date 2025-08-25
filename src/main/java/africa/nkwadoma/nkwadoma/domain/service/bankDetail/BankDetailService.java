@@ -59,8 +59,8 @@ public class BankDetailService implements BankDetailUseCase {
             List<BankDetail> bankDetails = saveBankDetails(bankDetail, financier.getBankDetails());
             financier.setBankDetails(bankDetails);
             financier.setApprovedBankDetail(bankDetail);
-//            bankDetail.setEntityId(financier.getId());
-//            bankDetail = entityBankDetailOutputPort.save(bankDetail);
+            bankDetail.setEntityId(financier.getId());
+            bankDetail = entityBankDetailOutputPort.save(bankDetail);
             financierOutputPort.save(financier);
             bankDetail.setResponse("Financier bank details saved successfully");
             return bankDetail;
@@ -144,11 +144,16 @@ public class BankDetailService implements BankDetailUseCase {
         MeedlValidator.validateObjectInstance(bankDetail, "Bank detail request cannot be empty.");
         MeedlValidator.validateUUID(bankDetail.getUserId(), "Please identify user viewing bank details");
 
+        UserIdentity userIdentity;
         try {
-            userIdentityOutputPort.findById(bankDetail.getUserId());
+            userIdentity = userIdentityOutputPort.findById(bankDetail.getUserId());
+
         } catch (MeedlException e) {
             log.error("Unable to identify user view bank details. Contact admin. {}", e.getMessage(), e);
             throw new MeedlException("Unable to identify user view bank details. Contact admin.");
+        }
+        if (IdentityRole.hasOrganizationEntity(userIdentity.getRole())){
+
         }
         return bankDetailOutputPort.findByBankDetailId(bankDetail.getId());
     }

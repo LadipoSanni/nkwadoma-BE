@@ -57,6 +57,9 @@ public enum IdentityRole {
     public static boolean isMeedlStaff(IdentityRole role) {
         return getMeedlRoles().contains(role);
     }
+    public static boolean hasOrganizationEntity(IdentityRole role) {
+        return isMeedlStaff(role) || isOrganizationStaff(role) || isCooperateFinancier(role);
+    }
 
     public static boolean isOrganizationStaff(IdentityRole role) {
         return getOrganizationRoles().contains(role);
