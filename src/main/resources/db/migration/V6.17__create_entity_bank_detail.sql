@@ -11,5 +11,4 @@ CREATE TABLE entity_bank_detail (
                                     CONSTRAINT fk_entity_bank_detail_bank_detail
                                         FOREIGN KEY (bank_detail_id)
                                             REFERENCES bank_detail_entity(id)
-                                            ON DELETE CASCADE
 );
