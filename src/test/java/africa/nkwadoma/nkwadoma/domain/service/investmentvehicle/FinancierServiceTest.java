@@ -1178,7 +1178,7 @@ public class FinancierServiceTest {
         assertFalse(foundFinancier.isPrivacyPolicyAccepted());
 
     }
-//    @AfterAll
+    @AfterAll
     void tearDown() throws MeedlException {
 
         log.info("Started deleting data in financier service test." );
