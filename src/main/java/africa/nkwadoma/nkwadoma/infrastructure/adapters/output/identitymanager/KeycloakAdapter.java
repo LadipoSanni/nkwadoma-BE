@@ -478,6 +478,42 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
         }
         return roleRepresentation;
     }
+    @Override
+    public List<UserIdentity> getUsersByRole(String roleName) throws MeedlException {
+        MeedlValidator.validateDataElement(roleName, "Role name cannot be empty");
+
+        try {
+            List<UserRepresentation> users = keycloak
+                    .realm(KEYCLOAK_REALM)
+                    .roles()
+                    .get(roleName.toUpperCase().trim())
+                    .getUserMembers(0, Integer.MAX_VALUE);
+
+            return users.stream()
+                    .map(mapper::mapUserRepresentationToUserIdentity)
+                    .toList();
+        } catch (NotFoundException e) {
+            throw new IdentityException("Role not found: " + roleName);
+        }
+    }
+    @Override
+    public void changeUserRole(UserIdentity userIdentity, String newRole) throws MeedlException {
+        log.info("Changing user role from {} to {}. User Id {}", userIdentity.getRole(), newRole, userIdentity.getId());
+        UserResource userResource = getUserResource(userIdentity);
+        List<RoleRepresentation> currentRoles = userResource.roles().realmLevel().listAll();
+        if (!currentRoles.isEmpty()) {
+            userResource.roles().realmLevel().remove(currentRoles);
+        }
+
+        RoleRepresentation newRoleRep = keycloak.realm(KEYCLOAK_REALM)
+                .roles()
+                .get(newRole.toUpperCase().trim())
+                .toRepresentation();
+
+        userResource.roles().realmLevel().add(List.of(newRoleRep));
+        log.info("Updated role for user {} to {}", userIdentity.getEmail(), newRole);
+    }
+
 
 
     @Override

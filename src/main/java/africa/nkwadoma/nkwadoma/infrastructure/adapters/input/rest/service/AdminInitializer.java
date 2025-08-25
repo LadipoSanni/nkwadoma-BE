@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.Industry;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
@@ -183,7 +184,38 @@ public class AdminInitializer {
     }
 
     private void removeDuplicateSuperAdmin(UserIdentity userIdentity) {
-        identityManagerOutPutPort.getUserRepresentation(userIdentity);
+        try {
+            removeDuplicateSuperAdmins(userIdentity);
+            log.info("No duplicate roles exist after this check. All either removed or does not exist.");
+        } catch (MeedlException e) {
+            log.error("Error finding {} by role to make change update",userIdentity.getRole().name(), e);
+        }
+    }
+
+    private void removeDuplicateSuperAdmins(UserIdentity userIdentity) throws MeedlException {
+        List<UserIdentity> superAdmins = identityManagerOutPutPort.getUsersByRole(userIdentity.getRole().name());
+        if (superAdmins.isEmpty()) {
+            log.info("No users found with role {}", userIdentity.getRole());
+            return;
+        }
+
+        boolean emailExists = superAdmins.stream()
+                .anyMatch(u -> u.getEmail().equalsIgnoreCase(userIdentity.getEmail()));
+
+        if (emailExists) {
+            for (UserIdentity user : superAdmins) {
+                if (!user.getEmail().equalsIgnoreCase(userIdentity.getEmail())) {
+                    log.info("Changing role of user {} to {}", user.getEmail(), IdentityRole.MEEDL_ADMIN.name());
+                    identityManagerOutPutPort.changeUserRole(user, IdentityRole.MEEDL_ADMIN.name());
+                }
+            }
+            return;
+        }
+
+        for (UserIdentity user : superAdmins) {
+            log.info("Changing role of user {} to {}", user.getEmail(), IdentityRole.MEEDL_ADMIN.name());
+            identityManagerOutPutPort.changeUserRole(user, IdentityRole.MEEDL_ADMIN.name());
+        }
     }
 
     private UserIdentity saveUserToDB(UserIdentity userIdentity) throws MeedlException {

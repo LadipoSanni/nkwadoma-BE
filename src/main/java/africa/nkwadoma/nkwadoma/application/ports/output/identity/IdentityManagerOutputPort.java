@@ -23,6 +23,11 @@ public interface IdentityManagerOutputPort {
 
     OrganizationIdentity createKeycloakClient(OrganizationIdentity organizationIdentity) throws MeedlException;
     UserIdentity createPassword(UserIdentity userIdentity) throws MeedlException;
+
+    List<UserIdentity> getUsersByRole(String roleName) throws MeedlException;
+
+    void changeUserRole(UserIdentity userIdentity, String newRole) throws MeedlException;
+
     void logout(UserIdentity userIdentity) throws MeedlException;
     void enableClient(OrganizationIdentity foundOrganization) throws MeedlException;
     void disableClient(OrganizationIdentity organizationIdentity) throws MeedlException;
