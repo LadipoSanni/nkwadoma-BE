@@ -16,6 +16,8 @@ import java.time.LocalDateTime;
 @Builder
 public class BankDetail {
     private String id;
+    private String entityId;
+    private String entityBankDetailId;
     private String userId;
     private String bankName;
     private String bankNumber;

@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.bankDetail;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.bankdetail.BankDetailOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.BankDetailMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
@@ -11,6 +12,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -25,12 +28,15 @@ class BankDetailServiceTest {
 
     @Mock
     private BankDetailOutputPort bankDetailOutputPort;
+    @Mock
+    private UserIdentityOutputPort userIdentityOutputPort;
 
     private BankDetail builtBankDetail;
 
     @BeforeEach
     void setUp() {
         builtBankDetail = BankDetail.builder()
+                .userId(UUID.randomUUID().toString())
                 .bankName("Lagos Main")
                 .bankNumber("1234567890")
                 .build();
@@ -74,4 +80,63 @@ class BankDetailServiceTest {
         assertEquals("Validation failed", exception.getMessage());
         verifyNoInteractions(bankDetailOutputPort);
     }
+
+
+
+        @Test
+        void viewBankDetail_WithNullBankDetail_ThrowsException() {
+            MeedlException ex = assertThrows(MeedlException.class,
+                    () -> bankDetailService.viewBankDetail(null));
+
+            assertTrue(ex.getMessage().contains("Bank detail request cannot be empty."));
+            verifyNoInteractions(userIdentityOutputPort, bankDetailOutputPort);
+        }
+
+        @Test
+        void viewBankDetail_WithInvalidUUID_ThrowsException() {
+            builtBankDetail.setUserId("invalid-uuid");
+
+            MeedlException ex = assertThrows(MeedlException.class,
+                    () -> bankDetailService.viewBankDetail(builtBankDetail));
+
+            assertTrue(ex.getMessage().contains("Please identify user viewing bank details"));
+            verifyNoInteractions(userIdentityOutputPort, bankDetailOutputPort);
+        }
+
+    @Test
+    void viewBankDetail_WhenUserNotFound_ThrowsWrappedException() throws MeedlException {
+        doThrow(new MeedlException("User not found"))
+                .when(userIdentityOutputPort).findById(builtBankDetail.getUserId());
+
+        MeedlException ex = assertThrows(MeedlException.class,
+                () -> bankDetailService.viewBankDetail(builtBankDetail));
+
+        assertEquals("Unable to identify user view bank details. Contact admin.", ex.getMessage());
+        verify(userIdentityOutputPort, times(1)).findById(builtBankDetail.getUserId());
+        verifyNoInteractions(bankDetailOutputPort);
+    }
+
+    @Test
+    void viewBankDetail_WithValidData_ReturnsBankDetail() throws MeedlException {
+        BankDetail expected = BankDetail.builder()
+                .id(builtBankDetail.getId())
+                .userId(builtBankDetail.getUserId())
+                .bankName("Zenith")
+                .bankNumber("9876543210")
+                .build();
+
+        when(userIdentityOutputPort.findById(builtBankDetail.getUserId()))
+                .thenReturn(null); // doesn't matter, just no exception
+        when(bankDetailOutputPort.findByBankDetailId(builtBankDetail.getId()))
+                .thenReturn(expected);
+
+        BankDetail result = bankDetailService.viewBankDetail(builtBankDetail);
+
+        assertNotNull(result);
+        assertEquals("Zenith", result.getBankName());
+        assertEquals("9876543210", result.getBankNumber());
+        verify(userIdentityOutputPort, times(1)).findById(builtBankDetail.getUserId());
+        verify(bankDetailOutputPort, times(1)).findByBankDetailId(builtBankDetail.getId());
+    }
+
 }

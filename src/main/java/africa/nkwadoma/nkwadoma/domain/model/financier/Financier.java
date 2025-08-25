@@ -9,6 +9,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.InvestmentException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.Cooperation;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
@@ -33,7 +34,8 @@ import java.util.Set;
 @Builder
 public class Financier {
     private String id;
-    private String bankDetailId;
+    private BankDetail approvedBankDetail;
+    private List<BankDetail> bankDetails;
     private List<BeneficialOwner> beneficialOwners;
 
     private FinancierType financierType;

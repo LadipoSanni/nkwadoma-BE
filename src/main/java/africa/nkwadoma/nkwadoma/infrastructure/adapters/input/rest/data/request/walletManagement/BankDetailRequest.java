@@ -6,6 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class BankDetailRequest {
+    private String id;
     private String bankName;
     private String bankNumber;
 }
