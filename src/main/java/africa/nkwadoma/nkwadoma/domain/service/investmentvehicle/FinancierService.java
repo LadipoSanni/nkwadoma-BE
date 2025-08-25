@@ -763,8 +763,10 @@ public class FinancierService implements FinancierUseCase {
             log.info("Cooperate financier mapping kyc details");
             OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(foundFinancier.getIdentity());
             organizationIdentityMapper.mapCooperateDetailToOrganization(organizationIdentity,financier);
+            organizationIdentity.setOrganizationType(OrganizationType.COOPERATE);
             organizationIdentity =organizationIdentityOutputPort.save(organizationIdentity);
             financier.setOrganizationIdentity(organizationIdentity);
+            financier.setId(foundFinancier.getId());
         }
     }
 

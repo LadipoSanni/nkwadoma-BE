@@ -53,6 +53,7 @@ public interface FinancierRestMapper {
     @Mapping(target = "userIdentity.bvn", source = "kycRequest.bvn")
     @Mapping(target = "userIdentity.phoneNumber", source = "kycRequest.phoneNumber")
     @Mapping(target = "rcNumber", source = "rcNumber")
+    @Mapping(target = "tin", source = "tin")
     Financier map(KycRequest kycRequest);
 
     @Mapping(target = "userIdentity.id", source = "userId")

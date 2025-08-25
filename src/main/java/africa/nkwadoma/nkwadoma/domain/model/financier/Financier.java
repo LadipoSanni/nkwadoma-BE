@@ -34,6 +34,7 @@ import java.util.Set;
 @Builder
 public class Financier {
     private String id;
+    private String tin;
     private String bankDetailId;
     private BankDetail approvedBankDetail;
 
@@ -53,7 +54,6 @@ public class Financier {
     private BigDecimal totalIncomeEarned;
     private BigDecimal portfolioValue;
     private String rcNumber;
-    private String tin;
     private LocalDateTime createdAt;
     private String actorId;
     private String cooperateId;
