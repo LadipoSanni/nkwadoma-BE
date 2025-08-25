@@ -34,7 +34,6 @@ import java.util.Set;
 public class Financier {
     private String id;
     private String bankDetailId;
-    private List<BeneficialOwner> beneficialOwners;
 
     private FinancierType financierType;
     private ActivationStatus activationStatus;
@@ -42,7 +41,6 @@ public class Financier {
     private String investmentVehicleId;
     private BigDecimal amountToInvest;
     private BigDecimal totalAmountInvested;
-    private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
     private Cooperation cooperation;
     private String identity;
     private UserIdentity userIdentity;
@@ -51,8 +49,6 @@ public class Financier {
     private int pageSize;
     private BigDecimal totalIncomeEarned;
     private BigDecimal portfolioValue;
-    private List<FinancierVehicleDetail> investmentVehicleInvestedIn;
-    private List<InvestmentVehicle> investmentVehicles;
     private String rcNumber;
     private LocalDateTime createdAt;
     private String actorId;
@@ -67,6 +63,11 @@ public class Financier {
     private String name;
     private String email;
     private String invitedBy;
+
+    private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
+    private List<FinancierVehicleDetail> investmentVehicleInvestedIn;
+    private List<BeneficialOwner> beneficialOwners;
+    private List<InvestmentVehicle> investmentVehicles;
 
     //source of fund
     private Set<String> sourceOfFunds;

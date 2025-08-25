@@ -35,7 +35,6 @@ import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.*;
-import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.Cooperation;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -330,7 +329,7 @@ public class FinancierService implements FinancierUseCase {
             financier = getFinancierByUserIdentity(financier);
         } catch (MeedlException e) {
             financier = saveNonExistingFinancier(financier, e.getMessage());
-            log.info("Financier with email {} added for email sending.", financier.getIdentity());
+            log.info("Financier with id {} added for email sending.", financier.getIdentity());
         }
     }
     private void inviteFinancierToInvestmentVehicle(Financier financier, InvestmentVehicle investmentVehicle,UserIdentity actor) throws MeedlException {
@@ -761,7 +760,7 @@ public class FinancierService implements FinancierUseCase {
 
     private  void mapKycFinancierUpdatedValues(Financier financier, Financier foundFinancier) throws MeedlException {
         if (foundFinancier.getFinancierType().equals(INDIVIDUAL)) {
-            mapKycUserIdentityData(financier, foundFinancier);
+            mapKycUserIdentityDataIndividualFinancier(financier, foundFinancier);
             mapKycFinancierPreviousData(financier, foundFinancier);
         }else {
             OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(foundFinancier.getIdentity());
@@ -781,9 +780,9 @@ public class FinancierService implements FinancierUseCase {
         financier.setId(foundFinancier.getId());
     }
 
-    private void mapKycUserIdentityData(Financier financier, Financier foundFinancier) throws MeedlException {
-        UserIdentity userIdentity = foundFinancier.getUserIdentity();
-        log.info("updating user details in kyc service : {}", userIdentity);
+    private void mapKycUserIdentityDataIndividualFinancier(Financier financier, Financier foundFinancier) throws MeedlException {
+        UserIdentity userIdentity = userIdentityOutputPort.findById(financier.getIdentity());
+        log.info("updating user details in kyc service for user : {}", userIdentity);
 
         userIdentity.setNin(financier.getUserIdentity().getNin());
         userIdentity.setTaxId(financier.getUserIdentity().getTaxId());
