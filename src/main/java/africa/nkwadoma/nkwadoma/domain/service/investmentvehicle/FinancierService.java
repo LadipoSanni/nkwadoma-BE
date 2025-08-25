@@ -389,7 +389,7 @@ public class FinancierService implements FinancierUseCase {
         Financier savedFinancier;
         try {
             savedFinancier = saveFinancier(financier);
-            log.info("Saved non-existing financier : {}", savedFinancier);
+            log.info("Saved non-existing financier with identity : {}", savedFinancier.getIdentity());
             financier = updateFinancierDetails(financier, savedFinancier);
         } catch (MeedlException ex) {
             log.error("Error saving none existing financier ",ex);
