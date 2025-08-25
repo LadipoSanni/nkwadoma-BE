@@ -614,10 +614,17 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
             log.info("No organization id was provided by Meedl staff to view organization details");
             OrganizationEmployeeIdentity organizationEmployeeIdentity =
                     organizationEmployeeIdentityOutputPort.findByCreatedBy(userIdentity.getId());
+            log.info("Organization staff viewing organization details {}", organizationEmployeeIdentity);
             organizationId = organizationEmployeeIdentity.getOrganization();
         }
             MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-            OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findByIdProjection(organizationId);
+        OrganizationIdentity organizationIdentity;
+        if (userIdentity.getRole().isMeedlRole()){
+            organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
+        }else {
+            organizationIdentity = organizationIdentityOutputPort.findByIdProjection(organizationId);
+        }
+            log.info("organization identity: {}", organizationIdentity);
             List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity.getId());
             organizationIdentity.setServiceOfferings(serviceOfferings);
             log.info("Service offering has been gotten during view organization detail {}", serviceOfferings);

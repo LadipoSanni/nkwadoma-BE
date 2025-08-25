@@ -24,14 +24,13 @@ public interface FinancierRestMapper {
     @Mapping( source = "investmentVehicleDesignation", target = "investmentVehicleRole")
     FinancierResponse map(Financier financier);
 
-    @Mapping(target = "firstName", source="userIdentity.firstName")
-    @Mapping(target = "lastName", source="userIdentity.lastName")
-    @Mapping(target = "organizationName", source = "cooperation.name")
+
+    @Mapping(target = "name", source = "name")
     @Mapping(target = "financierType", source="financierType")
     @Mapping(target = "nextOfKin", source="userIdentity.nextOfKin")
     @Mapping(target = "taxId", source="userIdentity.taxId")
     @Mapping(target = "totalAmountInvested", source="totalAmountInvested")
-    @Mapping(target = "email", source="userIdentity.email")
+    @Mapping(target = "email", source="email")
     @Mapping(target = "phoneNumber", source="userIdentity.phoneNumber")
     @Mapping(target = "address", source="userIdentity.address")
     @Mapping(target = "rcNumber", source = "rcNumber")

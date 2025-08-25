@@ -13,9 +13,11 @@ public interface FinancierProjection {
     FinancierType getFinancierType();
     ActivationStatus getActivationStatus();
     BigDecimal getAmountInvested();
+    BigDecimal getTotalAmountInvested();
     BigDecimal getAmountEarned();
     BigDecimal getPayout();
     BigDecimal getPortfolioValue();
     String getInvitedBy();
+    String getEmail();
 
 }

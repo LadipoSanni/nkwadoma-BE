@@ -444,13 +444,19 @@ public class FinancierService implements FinancierUseCase {
     @Override
     public Financier viewFinancierDetail(String userId, String financierId) throws MeedlException {
         Financier financier = null;
-        if (isFinancier(userId)) {
+        UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
+        if (userIdentity.getRole().isFinancier()) {
             log.info("User is a financier.");
-            financier = financierOutputPort.findFinancierByUserId(userId);
+            if (userIdentity.getRole().isCooperateStaff()) {
+                financier = financierOutputPort.findFinancierByCooperateStaffUserId(userIdentity.getId());
+            }else {
+                financier = financierOutputPort.findFinancierByUserId(userId);
+            }
         } else {
             log.info("User is not a financier");
             MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
             financier = financierOutputPort.findFinancierByFinancierId(financierId);
+            log.info("found financier {}", financier);
         }
         return updateFinancierDetail(financier);
     }

@@ -98,5 +98,7 @@ public enum IdentityRole {
         return this == COOPERATE_FINANCIER_SUPER_ADMIN || this == COOPERATE_FINANCIER_ADMIN;
     }
 
-
+    public boolean isFinancier(){
+        return this == FINANCIER || this == COOPERATE_FINANCIER_SUPER_ADMIN || this == COOPERATE_FINANCIER_ADMIN;
+    }
 }

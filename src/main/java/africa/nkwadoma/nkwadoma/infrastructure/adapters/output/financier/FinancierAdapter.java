@@ -42,11 +42,12 @@ public class FinancierAdapter implements FinancierOutputPort {
     @Override
     public Financier findFinancierByFinancierId(String financierId) throws MeedlException {
         MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
-        FinancierEntity financierEntity = financierRepository.findByFinancierId(financierId)
+        FinancierProjection financierEntity = financierRepository.findByFinancierId(financierId)
                 .orElseThrow(()-> new MeedlException("Financier not found"));
         log.info("Financier found at the adapter level for view by financier id {}", financierEntity);
-        Financier financier = financierMapper.map(financierEntity);
-        return cooperationUserIdentityView(financier);
+        Financier financier =  financierMapper.mapProjectionToFinancier(financierEntity);
+        log.info("found financier {}",financier);
+        return financier;
     }
 
     @Override
@@ -77,8 +78,8 @@ public class FinancierAdapter implements FinancierOutputPort {
     @Override
     public Financier findFinancierByCooperateStaffUserId(String id) throws MeedlException {
         MeedlValidator.validateUUID(id, UserMessages.INVALID_USER_ID.getMessage());
-        FinancierEntity financierEntity = financierRepository.findByCooperateStaffUserId(id);
-        return financierMapper.map(financierEntity);
+        FinancierProjection financierEntity = financierRepository.findByCooperateStaffUserId(id);
+        return financierMapper.mapProjectionToFinancier(financierEntity);
     }
 
 
