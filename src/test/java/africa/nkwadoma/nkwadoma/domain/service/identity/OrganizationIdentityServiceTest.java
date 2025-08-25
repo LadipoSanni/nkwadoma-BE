@@ -402,7 +402,7 @@ class OrganizationIdentityServiceTest {
                 .build();
         when(userIdentityOutputPort.findById(mockId)).thenReturn(sarah);
         when(userIdentityOutputPort.findById(roseCouture.getCreatedBy())).thenReturn(sarah);
-        when(organizationIdentityOutputPort.findByIdProjection(roseCouture.getId())).thenReturn(roseCouture);
+        when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
         when(organizationIdentityOutputPort.getServiceOfferings(roseCouture.getId())).thenReturn(roseCouture.getServiceOfferings());
         when(organizationLoanDetailOutputPort.findByOrganizationId(roseCouture.getId())).thenReturn(loanDetail);
         when(loanOfferOutputPort.countNumberOfPendingLoanOfferForOrganization(roseCouture.getId())).thenReturn(3);
