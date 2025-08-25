@@ -6,4 +6,6 @@ import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
 public interface BankDetailUseCase {
 
     BankDetail addBankDetails(BankDetail bankDetail) throws MeedlException;
+
+    BankDetail viewBankDetail(BankDetail bankDetail) throws MeedlException;
 }
