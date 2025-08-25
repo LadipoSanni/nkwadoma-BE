@@ -453,7 +453,7 @@ public class FinancierService implements FinancierUseCase {
             if (userIdentity.getRole().isCooperateStaff()) {
                 financier = financierOutputPort.findFinancierByCooperateStaffUserId(userIdentity.getId());
             }else {
-                financier = financierOutputPort.findFinancierByUserId(userId);
+                financier = financierOutputPort.findFinancierByUserId(userIdentity.getId());
             }
         } else {
             log.info("User is not a financier");
@@ -621,7 +621,7 @@ public class FinancierService implements FinancierUseCase {
 
     private void updateFinancierTotalAmountInvested(Financier financier) throws MeedlException {
         log.info("Update financier total amount invested ...");
-        Financier financierToBeUpdate = financierOutputPort.findFinancierByFinancierId(financier.getId());
+        Financier financierToBeUpdate = financierOutputPort.findById(financier.getId());
         BigDecimal currentTotalAmountInvested = financierToBeUpdate.getTotalAmountInvested();
         if (currentTotalAmountInvested == null) {
             currentTotalAmountInvested = BigDecimal.ZERO;

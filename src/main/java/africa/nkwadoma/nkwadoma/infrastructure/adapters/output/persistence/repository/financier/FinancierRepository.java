@@ -112,7 +112,8 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
         END AS email,
         f.totalAmountInvested AS totalAmountInvested,
         f.activationStatus AS activationStatus,
-        f.financierType AS financierType
+        f.financierType AS financierType,
+        f.identity AS identity
     FROM FinancierEntity f
     left JOIN OrganizationEntity organization ON organization.id = f.identity AND f.financierType = 'COOPERATE'
     left JOIN UserEntity user ON user.id = f.identity AND f.financierType = 'INDIVIDUAL'

@@ -19,5 +19,6 @@ public interface FinancierProjection {
     BigDecimal getPortfolioValue();
     String getInvitedBy();
     String getEmail();
+    String getIdentity();
 
 }

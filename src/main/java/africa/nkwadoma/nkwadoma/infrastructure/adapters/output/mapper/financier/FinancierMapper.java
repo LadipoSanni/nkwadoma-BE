@@ -13,6 +13,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
+import java.util.Optional;
+
 @Mapper(componentModel = "spring", uses ={UserIdentityMapper.class, NextOfKinMapper.class }, nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface FinancierMapper {
     FinancierEntity map(Financier financier);
@@ -35,4 +37,6 @@ public interface FinancierMapper {
 
 
     Financier mapProjectionToFinancier(FinancierProjection financierProjection);
+
+
 }
