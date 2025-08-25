@@ -263,6 +263,7 @@ public class MeedlValidator {
     }
 
     public static void validateTin(String tin) throws MeedlException {
+        MeedlValidator.validateDataElement(tin, "Please provide TIN");
         boolean patternMatches = Pattern.compile(MeedlPatterns.TIN_REGEX_PATTERN).matcher(tin).matches();
         if (!patternMatches) {
             log.error("{} - {}", MeedlMessages.INVALID_TIN.getMessage(), tin);

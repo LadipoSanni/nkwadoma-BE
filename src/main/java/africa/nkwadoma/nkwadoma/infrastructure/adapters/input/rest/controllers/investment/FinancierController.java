@@ -63,6 +63,7 @@ public class FinancierController {
 
     private List<Financier> mapValues(String meedlUserId, List<FinancierRequest> financierRequests) throws MeedlException {
         MeedlValidator.validateObjectInstance(financierRequests, "The list of financier is missing.");
+        validateFinanciers(financierRequests);
         return financierRequests.stream().map(financierRequest ->{
             Financier financier = financierRestMapper.map(financierRequest);
             if (financierRequest.getFinancierType() == FinancierType.COOPERATE){
@@ -74,6 +75,14 @@ public class FinancierController {
             financier.getUserIdentity().setCreatedAt(LocalDateTime.now());
             return financier;
         }).toList();
+    }
+
+    private void validateFinanciers(List<FinancierRequest> financierRequests) throws MeedlException {
+        for (FinancierRequest financierRequest : financierRequests){
+            MeedlValidator.validateObjectInstance(financierRequest, "Financier invite request cannot be empty");
+            MeedlValidator.validateObjectInstance(financierRequest.getUserIdentity(), "Financier user detail cannot be empty");
+            MeedlValidator.validateObjectInstance(financierRequest.getFinancierType(), "Financier type must be provided");
+        }
     }
 
 

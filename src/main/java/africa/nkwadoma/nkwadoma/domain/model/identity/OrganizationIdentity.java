@@ -94,6 +94,7 @@ public class OrganizationIdentity {
     public void validateCooperateOrganization() throws MeedlException {
         MeedlValidator.validateObjectName(this.name,"Organization name cannot be empty","Organization");
         MeedlValidator.validateEmail(this.email);
+        log.info("Validation for cooperate organization done");
     }
 
 }
