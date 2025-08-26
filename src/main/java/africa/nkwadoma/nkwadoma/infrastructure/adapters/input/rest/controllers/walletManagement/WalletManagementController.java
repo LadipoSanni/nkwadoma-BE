@@ -71,6 +71,7 @@ public class WalletManagementController {
             or hasRole('ORGANIZATION_SUPER_ADMIN')
             or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')
             or hasRole('COOPERATE_FINANCIER_ADMIN')
+            or hasRole('FINANCIER')
             or hasRole('ORGANIZATION_ADMIN')
             or hasRole('ORGANIZATION_ASSOCIATE')
             """)

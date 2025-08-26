@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutp
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.BankDetailMessages;
@@ -160,9 +161,21 @@ public class BankDetailService implements BankDetailUseCase {
             throw new MeedlException("Unable to identify user view bank details. Contact admin.");
         }
         if (IdentityRole.isFinancier(userIdentity.getRole())){
-            Financier financier = financierOutputPort.findFinancierByUserId(userIdentity.getId());
+            Financier financier = null;
+            if (IdentityRole.FINANCIER.equals(userIdentity.getRole())) {
+                 financier = financierOutputPort.findFinancierByUserId(userIdentity.getId());
+            }else {
+                Optional<OrganizationIdentity> optionalOrganizationIdentity = organizationIdentityOutputPort.findByUserId(userIdentity.getId());
+                if (optionalOrganizationIdentity.isEmpty()){
+                    /// Notify meedl admin of attempt
+                    log.error("User with id {} is not a cooperate financier as organization is not found ", userIdentity.getId());
+                    throw new MeedlException(FinancierMessages.NOT_A_FINANCIER.getMessage());
+                }
+                 financier = financierOutputPort.findFinancierByOrganizationId(optionalOrganizationIdentity.get().getId());
+            }
             log.info("Finding bank detail by financier id {} in view bank detail", financier.getId());
             FinancierBankDetail financierBankDetail = financierBankDetailOutputPort.findApprovedBankDetailByFinancierId(financier);
+            log.info("The approved  bank detail of the financier is {}", financierBankDetail.getBankDetail());
             return financierBankDetail.getBankDetail();
         }
         return bankDetailOutputPort.findByBankDetailId(bankDetail.getId());

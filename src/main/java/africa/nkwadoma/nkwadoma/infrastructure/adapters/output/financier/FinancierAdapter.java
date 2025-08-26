@@ -56,7 +56,7 @@ public class FinancierAdapter implements FinancierOutputPort {
     public Financier findFinancierByOrganizationId(String organizationId) throws MeedlException {
         MeedlValidator.validateUUID(organizationId, "Organization id is required to view financier details.");
         FinancierEntity foundFinancier = financierRepository.findByOrganizationId(organizationId)
-                .orElseThrow(()-> new MeedlException("Apparently, you are not a financier. Contact admin.") );
+                .orElseThrow(()-> new MeedlException(FinancierMessages.NOT_A_FINANCIER.getMessage()) );
         Financier financier = financierMapper.map(foundFinancier);
         return cooperationUserIdentityView(financier);
     }
@@ -65,7 +65,7 @@ public class FinancierAdapter implements FinancierOutputPort {
     public Financier findFinancierByUserId(String id) throws MeedlException {
         MeedlValidator.validateUUID(id, "User id is required to view financier details.");
         FinancierEntity foundFinancier = financierRepository.findByUserIdentity_Id(id)
-                .orElseThrow(()-> new MeedlException("Apparently, you are not a financier. Contact admin.") );
+                .orElseThrow(()-> new MeedlException(FinancierMessages.NOT_A_FINANCIER.getMessage()));
         Financier financier = financierMapper.map(foundFinancier);
         return cooperationUserIdentityView(financier);
     }
