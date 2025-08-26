@@ -30,4 +30,8 @@ public interface OrganizationProjection {
     String getInviterFullName();
     Double getDebtPercentage();
     Double getRepaymentRate();
+    String getPhoneNumber();
+    String getAddress();
+    String getBannerImage();
+    String getTaxIdentity();
 }
