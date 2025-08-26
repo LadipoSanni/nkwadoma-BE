@@ -10,7 +10,7 @@ public enum ActivationStatus {
     ACTIVE("Active"),
     INACTIVE("Inactive"),
     INVITED("Invited"),
-    DEACTIVATED("Deactivated"),
+    DEACTIVATED("Deactivate"),
     PENDING_APPROVAL("Pending approval"),
     PENDING_INVITE("Pending invite"),
     APPROVED("Approved"),
