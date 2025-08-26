@@ -87,7 +87,7 @@ public class FinancierController {
 
 
     @PostMapping("financier/complete-kyc")
-    @PreAuthorize("hasRole('FINANCIER') or  hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('FINANCIER') or  hasRole('COOPERATE_FINANCIER_SUPER_ADMIN') or hasRole('COOPERATE_FINANCIER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> completeKyc(@AuthenticationPrincipal Jwt meedlUser,
                                                       @RequestBody KycRequest kycRequest) throws MeedlException {
         log.info("Kyc request controller {} , {}",LocalDateTime.now(), kycRequest);
