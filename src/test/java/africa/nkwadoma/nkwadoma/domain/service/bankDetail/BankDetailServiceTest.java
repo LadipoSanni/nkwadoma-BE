@@ -1,10 +1,16 @@
 package africa.nkwadoma.nkwadoma.domain.service.bankDetail;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.bankdetail.BankDetailOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.bankdetail.FinancierBankDetailOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.BankDetailMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
+import africa.nkwadoma.nkwadoma.domain.model.bankdetail.FinancierBankDetail;
+import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +34,10 @@ class BankDetailServiceTest {
 
     @Mock
     private BankDetailOutputPort bankDetailOutputPort;
+    @Mock
+    private FinancierBankDetailOutputPort financierBankDetailOutputPort;
+    @Mock
+    private FinancierOutputPort financierOutputPort;
     @Mock
     private UserIdentityOutputPort userIdentityOutputPort;
 
@@ -124,11 +134,17 @@ class BankDetailServiceTest {
                 .bankName("Zenith")
                 .bankNumber("9876543210")
                 .build();
+        Financier financier = Financier.builder()
+                .id(UUID.randomUUID().toString())
+                .build();
 
+        when(financierOutputPort.findFinancierByUserId(any()))
+                .thenReturn(financier); // doesn't matter, just no exception
+
+        when(financierBankDetailOutputPort.findApprovedBankDetailByFinancierId(financier))
+                .thenReturn(FinancierBankDetail.builder().bankDetail(expected).financier(financier).build());
         when(userIdentityOutputPort.findById(builtBankDetail.getUserId()))
-                .thenReturn(null); // doesn't matter, just no exception
-        when(bankDetailOutputPort.findByBankDetailId(builtBankDetail.getId()))
-                .thenReturn(expected);
+                .thenReturn(UserIdentity.builder().role(IdentityRole.FINANCIER).build()); // doesn't matter, just no exception
 
         BankDetail result = bankDetailService.viewBankDetail(builtBankDetail);
 
@@ -136,7 +152,6 @@ class BankDetailServiceTest {
         assertEquals("Zenith", result.getBankName());
         assertEquals("9876543210", result.getBankNumber());
         verify(userIdentityOutputPort, times(1)).findById(builtBankDetail.getUserId());
-        verify(bankDetailOutputPort, times(1)).findByBankDetailId(builtBankDetail.getId());
     }
 
 }
