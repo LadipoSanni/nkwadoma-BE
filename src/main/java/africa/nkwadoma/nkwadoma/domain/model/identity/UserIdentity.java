@@ -70,7 +70,7 @@ public class UserIdentity {
     private NextOfKin nextOfKin;
     private BankDetail bankDetail;
 
-    private String  MFAPhoneNumber;
+    private String MFAPhoneNumber;
     private MFAType mfaType;
 
     public void validate() throws MeedlException {
