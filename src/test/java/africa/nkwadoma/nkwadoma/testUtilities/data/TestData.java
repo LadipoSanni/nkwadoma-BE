@@ -88,6 +88,7 @@ public class TestData {
         organizationIdentity.getServiceOfferings().get(0).setName(ServiceOfferingType.TRAINING.name());
         organizationIdentity.setPhoneNumber("09876365713");
         organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
+        organizationIdentity.setRequestedInvitationDate(LocalDateTime.now());
         organizationIdentity.setWebsiteAddress("testdata.org");
         organizationIdentity.setOrganizationEmployees(employeePeter);
         organizationIdentity.setLogoImage("logo-img.png");
