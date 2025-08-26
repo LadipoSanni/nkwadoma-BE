@@ -19,10 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ControllerConstant.*;
 
@@ -63,7 +60,7 @@ public class WalletManagementController {
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
-    @PostMapping("view/bankDetail")
+    @GetMapping("view/bankDetail")
     @Operation(summary = BANK_DETAIL, description = VIEW_BANK_DETAIL_DESCRIPTION)
     @PreAuthorize(""" 
             hasRole('MEEDL_SUPER_ADMIN')
@@ -76,11 +73,10 @@ public class WalletManagementController {
             or hasRole('ORGANIZATION_ADMIN')
             or hasRole('ORGANIZATION_ASSOCIATE')
             """)
-    public ResponseEntity<ApiResponse<?>> viewBankDetail(@AuthenticationPrincipal Jwt meedlUser,
-                                                        @RequestBody @Valid BankDetailRequest bankDetailRequest) throws MeedlException {
-        BankDetail bankDetail = bankDetailMapper.map(meedlUser.getClaimAsString("sub"), bankDetailRequest);
+    public ResponseEntity<ApiResponse<?>> viewBankDetail(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
+        BankDetail bankDetail = bankDetailMapper.map(meedlUser.getClaimAsString("sub"));
         bankDetail = bankDetailUseCase.viewBankDetail(bankDetail);
-        log.info("Bank details after adding {}", bankDetail);
+        log.info("Viewing bank details {}", bankDetail);
         ApiResponse<Object> apiResponse = ApiResponse.builder()
                 .data(QAResponse.build(bankDetail.getId()))
                 .message(bankDetail.getResponse())

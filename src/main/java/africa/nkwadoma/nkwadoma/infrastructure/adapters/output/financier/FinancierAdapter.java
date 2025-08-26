@@ -52,6 +52,14 @@ public class FinancierAdapter implements FinancierOutputPort {
         log.info("found financier {}",financier);
         return financier;
     }
+    @Override
+    public Financier findFinancierByOrganizationId(String organizationId) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId, "Organization id is required to view financier details.");
+        FinancierEntity foundFinancier = financierRepository.findByOrganizationId(organizationId)
+                .orElseThrow(()-> new MeedlException("Apparently, you are not a financier. Contact admin.") );
+        Financier financier = financierMapper.map(foundFinancier);
+        return cooperationUserIdentityView(financier);
+    }
 
     @Override
     public Financier findFinancierByUserId(String id) throws MeedlException {
