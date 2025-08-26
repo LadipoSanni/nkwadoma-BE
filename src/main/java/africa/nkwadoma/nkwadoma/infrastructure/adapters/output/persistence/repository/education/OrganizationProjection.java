@@ -34,4 +34,5 @@ public interface OrganizationProjection {
     String getAddress();
     String getBannerImage();
     String getTaxIdentity();
+    LocalDateTime getRequestedInvitationDate();
 }
