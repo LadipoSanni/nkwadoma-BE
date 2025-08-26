@@ -203,15 +203,8 @@ public class UserIdentityService implements UserUseCase {
 
     @Override
     public void changePassword(UserIdentity userIdentity) throws MeedlException {
-        MeedlValidator.validateObjectInstance(userIdentity, USER_IDENTITY_CANNOT_BE_NULL.getMessage());
-        MeedlValidator.validatePassword(tokenUtils.decryptAES(userIdentity.getPassword(), "Invalid password for current password"));
-        MeedlValidator.validatePassword(tokenUtils.decryptAES(userIdentity.getNewPassword(), "Invalid new password provided"));
-        try {
-            login(userIdentity);
-        }catch (MeedlException e){
-            log.info("Password invalid on change password {} user email {}", e.getMessage(), userIdentity.getEmail());
-            throw new MeedlException("Password incorrect");
-        }
+        MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
+        validatePasswordsForChangePassword(userIdentity);
         if (userIdentity.getNewPassword().equals(userIdentity.getPassword())){
             log.warn("{}", UserMessages.NEW_PASSWORD_AND_CURRENT_PASSWORD_CANNOT_BE_SAME.getMessage());
             throw new IdentityException(UserMessages.NEW_PASSWORD_AND_CURRENT_PASSWORD_CANNOT_BE_SAME.getMessage());
@@ -225,6 +218,29 @@ public class UserIdentityService implements UserUseCase {
         userIdentity.setNewPassword(tokenUtils.decryptAES(userIdentity.getNewPassword(), "Provide valid password to update"));
         identityManagerOutPutPort.setPassword(userIdentity);
         log.info("Password changed successfully for user with id: {}",userIdentity.getId());
+    }
+
+    private void validatePasswordsForChangePassword(UserIdentity userIdentity) throws MeedlException {
+        String currentPassword = tokenUtils.decryptAES(userIdentity.getPassword(), "Invalid password entered for current password");
+        try{
+            MeedlValidator.validatePassword(currentPassword);
+        }catch (MeedlException meedlException){
+            log.error("Error validating current password ",meedlException);
+            throw new MeedlException(PASSWORD_INCORRECT.getMessage());
+        }
+        String newPassword = tokenUtils.decryptAES(userIdentity.getNewPassword(), "Invalid new password provided");
+        try {
+            MeedlValidator.validatePassword(newPassword);
+        }catch (MeedlException e){
+            log.error("Weak password provided for new password in change password validation. ",e);
+            throw new MeedlException(String.format("Invalid new password provided: %n %s ", e.getMessage()));
+        }
+        try {
+            login(userIdentity);
+        }catch (MeedlException e){
+            log.info("Password invalid on change password {} user email {}", e.getMessage(), userIdentity.getEmail());
+            throw new MeedlException(PASSWORD_INCORRECT.getMessage());
+        }
     }
 
     @Override

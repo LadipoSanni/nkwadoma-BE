@@ -43,6 +43,7 @@ public class TokenUtils implements AesOutputPort {
         } catch (Exception e) {
             log.error("Error processing identity verification. Error decrypting identity with root cause : {}", e.getMessage());
             log.error(message);
+            ///Todo notify back office admin
             throw new MeedlException(message);
         }
         log.info("Decryption completed");
