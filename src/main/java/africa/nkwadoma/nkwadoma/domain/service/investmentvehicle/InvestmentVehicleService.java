@@ -63,7 +63,6 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final VehicleOperationOutputPort vehicleOperationOutputPort;
     private final CouponDistributionOutputPort couponDistributionOutputPort;
-    private final VehicleOperationMapper vehicleOperationMapper;
     private final VehicleClosureOutputPort vehicleClosureOutputPort;
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
 
