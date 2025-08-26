@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Slf4j
@@ -29,7 +30,7 @@ public class BeneficialOwner {
     private String beneficialOwnerFirstName;
     private String beneficialOwnerLastName;
     private UserRelationship beneficialOwnerRelationship;
-    private LocalDateTime beneficialOwnerDateOfBirth;
+    private LocalDate beneficialOwnerDateOfBirth;
     private double percentageOwnershipOrShare;
     //    Gov ID
     private String votersCard;

@@ -633,7 +633,7 @@ public class TestData {
                 .beneficialOwnerFirstName("Beneficial first name")
                 .beneficialOwnerLastName("Beneficial last name")
                 .beneficialOwnerRelationship(UserRelationship.BROTHER)
-                .beneficialOwnerDateOfBirth(LocalDateTime.now())
+                .beneficialOwnerDateOfBirth(LocalDate.now())
                 .percentageOwnershipOrShare(percentageOwnershipOrShare)
                 .votersCard("Voters card")
                 .nationalIdCard("national id card")
