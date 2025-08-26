@@ -23,6 +23,15 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
     Optional<FinancierEntity> findByUserIdentity_Id(@Param("id") String id);
 
     @Query("""
+    select financier
+        from FinancierEntity financier
+            join OrganizationEntity organization on organization.id = financier.identity
+         where financier.identity  = :id
+        
+    """)
+    Optional<FinancierEntity> findByOrganizationId(@Param("organizationId") String organizationId);
+
+    @Query("""
     select financier 
         from FinancierEntity financier
         join UserEntity  user on user.id = financier.identity 
