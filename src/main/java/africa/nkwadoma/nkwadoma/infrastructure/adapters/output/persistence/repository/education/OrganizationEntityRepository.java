@@ -16,7 +16,7 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
     Optional<OrganizationEntity> findByRcNumber(String rcNumber);
 
     @Query("SELECT o FROM OrganizationEntity o WHERE LOWER(o.name) LIKE LOWER(CONCAT('%', :name, '%')) " +
-            "AND (:status IS NULL OR o.activationStatus = :status)")
+            "AND (:status IS NULL OR o.activationStatus = :status) order by o.invitedDate desc ")
     Page<OrganizationEntity> findByNameContainingIgnoreCaseAndStatus(@Param("name") String name,
                                                                      @Param("status") ActivationStatus status,
                                                                      Pageable pageable);
@@ -76,13 +76,24 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
             WHEN COALESCE(ld.amountReceived, 0) = 0 THEN 0.0 
             ELSE (ld.amountRepaid / ld.amountReceived * 100.0) 
         END as repaymentRate,
+            CASE
+               WHEN UPPER(o.activationStatus) = 'PENDING_APPROVAL'
+               THEN o.requestedInvitationDate
+               ELSE NULL
+            END as requestedInvitationDate,         
              
                    CONCAT(u.firstName, ' ', u.lastName) as inviterFullName
                    from OrganizationEntity o
                   left join InstituteMetricsEntity  institute on institute.organization.id = o.id                            
                    join OrganizationLoanDetailEntity ld on ld.organization.id = o.id  
                    JOIN UserEntity u ON u.id = o.createdBy      
-                   WHERE UPPER(o.activationStatus) IN :activationStatuses
+                   WHERE UPPER(o.activationStatus) IN :activationStatuses 
+                           ORDER BY
+                          CASE
+                              WHEN UPPER(o.activationStatus) = 'PENDING_APPROVAL'
+                                   THEN o.requestedInvitationDate
+                              ELSE o.invitedDate
+                          END DESC
                         """)
     Page<OrganizationProjection> findAllByStatus(@Param("activationStatuses") List<String> activationStatuses, Pageable pageable);
 
@@ -163,6 +174,7 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
             WHERE f.identity = o.id
               AND f.financierType = 'COOPERATE'
         )
+        order by o.invitedDate desc
 """)
     Page<OrganizationProjection> findAllOrganization(Pageable pageRequest);
 

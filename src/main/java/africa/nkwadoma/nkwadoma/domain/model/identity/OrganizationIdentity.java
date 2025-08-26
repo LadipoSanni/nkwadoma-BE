@@ -38,6 +38,7 @@ public class OrganizationIdentity {
     private int numberOfPrograms;
     private boolean isEnabled;
     private String requestedBy;
+    private LocalDateTime requestedInvitationDate;
     private String createdBy;
     private String updatedBy;
     private int loanRequestCount;

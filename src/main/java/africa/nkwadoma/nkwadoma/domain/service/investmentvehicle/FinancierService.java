@@ -243,7 +243,8 @@ public class FinancierService implements FinancierUseCase {
         validateCooperationDoesNotExist(financier,financier.getUserIdentity().getEmail());
 
         OrganizationIdentity organizationIdentity = OrganizationIdentity.builder().name(financier.getName())
-                .email(financier.getEmail()).createdBy(financier.getUserIdentity().getCreatedBy()).build();
+                .email(financier.getEmail()).createdBy(financier.getUserIdentity().getCreatedBy())
+                .requestedInvitationDate(LocalDateTime.now()).build();
 
         OrganizationIdentity savedCooperate = saveCooperation(organizationIdentity);
 

@@ -311,6 +311,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
             organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
         }else {
             organizationIdentity.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
+            organizationIdentity.setRequestedInvitationDate(LocalDateTime.now());
         }
         organizationIdentityOutputPort.save(organizationIdentity);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
