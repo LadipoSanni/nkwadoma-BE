@@ -339,8 +339,8 @@ public class UserIdentityService implements UserUseCase {
                 IdentityRole.ORGANIZATION_ADMIN.equals(foundActor.getRole())) {
             Optional <OrganizationEmployeeIdentity> deactivatingEmployee = organizationEmployeeIdentityOutputPort.findByMeedlUserId(userToDeactivate.getId());
                     if (deactivatingEmployee.isEmpty()) {
-                        log.error("User can not perform {} as user is not an employee on the platform", activationStatus.getStatusName());
-                        throw new MeedlException("You cannot "+activationStatus+" this user, please contact Meedl admin!");
+                        log.error("User can not perform {} as user is not an employee on the platform", activationStatus.getStatusName().toLowerCase());
+                        throw new MeedlException("You cannot "+activationStatus.getStatusName().toLowerCase()+" this user, please contact Meedl admin!");
                     };
             Optional <OrganizationEmployeeIdentity> employeeToDeactivate = organizationEmployeeIdentityOutputPort.findByMeedlUserId(userToDeactivate.getId());
             Optional <OrganizationEmployeeIdentity> actorEmployeeDeactivating = organizationEmployeeIdentityOutputPort.findByMeedlUserId(foundActor.getId());
@@ -349,8 +349,8 @@ public class UserIdentityService implements UserUseCase {
                 throw new MeedlException("You can only "+activationStatus.getStatusName()+" employees in your organizations");
             };
             if (actorEmployeeDeactivating.isEmpty()) {
-                log.error("Actor on {} is not an employee, actors organization employee identity cannot empty. user id is {}", activationStatus.getStatusName(), foundActor.getId());
-                throw new MeedlException("You can only "+activationStatus.getStatusName()+" employees in your organizations");
+                log.error("Actor attempting to {} is not an employee, actors organization employee identity cannot empty. user id is {}", activationStatus.getStatusName(), foundActor.getId());
+                throw new MeedlException("You can only "+activationStatus.getStatusName().toLowerCase()+" employees in your organizations");
             };
 
             log.info("Finding employee to deactivate, by organization id {} to ensure deactivation is allowed", employeeToDeactivate.get().getOrganization());

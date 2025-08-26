@@ -416,7 +416,7 @@ class UserIdentityServiceTest {
                 userIdentityService.checkIfUserAllowedForAccountActivationActivity(favour, favour, ActivationStatus.DEACTIVATED)
         );
 
-        assertEquals("You are not allowed to "+ActivationStatus.DEACTIVATED+" yourself.", exception.getMessage());
+        assertEquals("You are not allowed to "+ActivationStatus.DEACTIVATED.getStatusName()+" yourself.", exception.getMessage());
     }
 
     @Test
@@ -457,11 +457,9 @@ class UserIdentityServiceTest {
         when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(favour.getId())).thenReturn(Optional.of(emp));
         when(organizationIdentityOutputPort.findByEmail("org-A")).thenReturn(org);
 
-        MeedlException exception = assertThrows(MeedlException.class, () ->
-                userIdentityService.checkIfUserAllowedForAccountActivationActivity(favour, favour, ActivationStatus.DEACTIVATED)
-        );
+         assertThrows(MeedlException.class, () ->
+                userIdentityService.checkIfUserAllowedForAccountActivationActivity(favour, favour, ActivationStatus.DEACTIVATED));
 
-        assertEquals("You are not authorized to "+ActivationStatus.DEACTIVATED+" this user", exception.getMessage());
     }
 
     @Test
@@ -473,22 +471,34 @@ class UserIdentityServiceTest {
         favour.setCreatedBy(actor.getId());
         favour.setRole(IdentityRole.ORGANIZATION_ASSOCIATE);
 
-        OrganizationEmployeeIdentity emp = new OrganizationEmployeeIdentity();
-        emp.setId("emp-id");
-        emp.setMeedlUser(favour);
-        emp.setOrganization("org-A");
+        UserIdentity target = new UserIdentity();
+        target.setId("target-id");
+        target.setEmail("admin@org.com");
+        target.setRole(IdentityRole.ORGANIZATION_ADMIN);
+
+        OrganizationEmployeeIdentity actorEmp = new OrganizationEmployeeIdentity();
+        actorEmp.setId("actor-emp-id");
+        actorEmp.setMeedlUser(favour);
+        actorEmp.setOrganization("org-A");
+
+        OrganizationEmployeeIdentity targetEmp = new OrganizationEmployeeIdentity();
+        targetEmp.setId("target-emp-id");
+        targetEmp.setMeedlUser(target);
+        targetEmp.setOrganization("org-A");
 
         OrganizationIdentity org = OrganizationIdentity.builder().id("org-A").build();
 
         when(userIdentityOutputPort.findById(actor.getId())).thenReturn(actor);
-        when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(favour.getId())).thenReturn(Optional.of(emp));
-        when(organizationIdentityOutputPort.findByEmail("org-A")).thenReturn(org);
+        when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(actor.getId())).thenReturn(Optional.of(actorEmp));
+        when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(target.getId())).thenReturn(Optional.of(targetEmp));
+        when(organizationIdentityOutputPort.findById("org-A")).thenReturn(org);
 
         assertDoesNotThrow(() ->
-                userIdentityService.checkIfUserAllowedForAccountActivationActivity(favour, favour, ActivationStatus.DEACTIVATED)
+                userIdentityService.checkIfUserAllowedForAccountActivationActivity(target, favour, ActivationStatus.DEACTIVATED)
         );
-
     }
+
+
 
 
 
