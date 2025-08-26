@@ -88,7 +88,7 @@ public class LoanController {
     }
 
     @GetMapping("/loan-product/all")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     @Operation(summary = LOAN_PRODUCT_VIEW_ALL, description = LOAN_PRODUCT_VIEW_ALL_DESCRIPTION )
     public ResponseEntity<ApiResponse<?>> viewAllLoanProduct(@AuthenticationPrincipal Jwt meedl,
                                                              @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
@@ -110,7 +110,7 @@ public class LoanController {
         );
     }
     @GetMapping("/loan-product/search")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> searchLoanProduct(
             @RequestParam @NotBlank(message = "Loan product name is required") String loanProductName,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
@@ -208,7 +208,8 @@ public class LoanController {
 
 
     @GetMapping("/loanOffer/all")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('LOANEE') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')" +
+            " or hasRole('LOANEE') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> viewLoanOffers(@AuthenticationPrincipal Jwt meedlUser,
                                                          @RequestParam(required = false) String organizationId ,
                                                          @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
@@ -276,7 +277,7 @@ public class LoanController {
     }
 
     @GetMapping("/view-all-disbursal")
-    @PreAuthorize("hasRole('LOANEE') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('LOANEE') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> viewAllDisbursedLoan(@RequestParam(required = false) String organizationId,
                                                                @RequestParam(required = false) String loaneeId,
                                                                @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
@@ -309,7 +310,7 @@ public class LoanController {
 
     @GetMapping("/total")
     @PreAuthorize("hasRole('LOANEE') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') " +
-                  "or hasRole('PORTFOLIO_MANAGER') or hasRole('ORGANIZATION_ADMIN')")
+                  "or hasRole('PORTFOLIO_MANAGER') or hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> viewTotalAmount(@AuthenticationPrincipal Jwt  meedlUser,
                                                           @RequestParam(required = false, name = "loaneeId") String loaneeId) throws MeedlException {
 
