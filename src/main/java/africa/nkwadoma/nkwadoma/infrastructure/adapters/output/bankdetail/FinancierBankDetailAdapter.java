@@ -1,0 +1,39 @@
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.bankdetail;
+
+import africa.nkwadoma.nkwadoma.application.ports.output.bankdetail.FinancierBankDetailOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.BankDetailMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.model.bankdetail.FinancierBankDetail;
+import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.bankdetail.FinancierBankDetailMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.bankdetail.FinancierBankDetailEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.bankdetail.FinancierBankDetailRepository;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+@Slf4j
+@Component
+@AllArgsConstructor
+public class FinancierBankDetailAdapter implements FinancierBankDetailOutputPort {
+    private final FinancierBankDetailMapper financierBankDetailMapper;
+    private final FinancierBankDetailRepository financierBankDetailRepository;
+
+    @Override
+    public FinancierBankDetail save(FinancierBankDetail financierBankDetail){
+        MeedlValidator.validateObjectInstance(financierBankDetail, "Provide a valid financier bank detail to save");
+        MeedlValidator.validateObjectInstance(financierBankDetail.getBankDetail(), BankDetailMessages.INVALID_BANK_DETAIL.getMessage());
+        MeedlValidator.validateObjectInstance(financierBankDetail.getFinancier(), FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
+        FinancierBankDetailEntity financierBankDetailEntity = financierBankDetailMapper.map(financierBankDetail);
+        financierBankDetailEntity = financierBankDetailRepository.save(financierBankDetailEntity);
+        return financierBankDetailMapper.map(financierBankDetailEntity);
+    }
+
+    @Override
+    public FinancierBankDetail findByFinancierIdAndStatus(Financier financier, ActivationStatus activationStatus) {
+        MeedlValidator.validateObjectInstance(financier, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
+        return null;
+    }
+}

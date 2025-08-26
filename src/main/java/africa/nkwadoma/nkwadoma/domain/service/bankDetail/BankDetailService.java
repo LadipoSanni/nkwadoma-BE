@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.service.bankDetail;
 import africa.nkwadoma.nkwadoma.application.ports.input.walletManagement.BankDetailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.bankdetail.BankDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.bankdetail.EntityBankDetailOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.bankdetail.FinancierBankDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
@@ -12,6 +13,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.BankDetailMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
+import africa.nkwadoma.nkwadoma.domain.model.bankdetail.FinancierBankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
@@ -36,6 +38,7 @@ public class BankDetailService implements BankDetailUseCase {
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final EntityBankDetailOutputPort entityBankDetailOutputPort;
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
+    private final FinancierBankDetailOutputPort financierBankDetailOutputPort;
 
 
     @Override
@@ -58,9 +61,7 @@ public class BankDetailService implements BankDetailUseCase {
             bankDetail.setActivationStatus(ActivationStatus.APPROVED);
             List<BankDetail> bankDetails = saveBankDetails(bankDetail, financier.getBankDetails());
             financier.setBankDetails(bankDetails);
-            financier.setApprovedBankDetail(bankDetail);
-            bankDetail.setEntityId(financier.getId());
-            bankDetail = entityBankDetailOutputPort.save(bankDetail);
+            saveFinancierBankDetail(financier, bankDetail);
             financierOutputPort.save(financier);
             bankDetail.setResponse("Financier bank details saved successfully");
             return bankDetail;
@@ -94,14 +95,21 @@ public class BankDetailService implements BankDetailUseCase {
         return bankDetail;
     }
 
+    private void saveFinancierBankDetail(Financier financier, BankDetail bankDetail) {
+        FinancierBankDetail financierBankDetail = FinancierBankDetail.builder()
+                .financier(financier)
+                .bankDetail(bankDetail)
+                .build();
+        log.info("saving financier bank detail. Financier id {}, bank detail {}", financier.getId(), bankDetail.getId());
+        financierBankDetailOutputPort.save(financierBankDetail);
+    }
+
     private BankDetail addCooperateFinancierBankDetail(BankDetail bankDetail, Financier financier, ActivationStatus activationStatus) throws MeedlException {
         bankDetail.setActivationStatus(activationStatus);
         List<BankDetail> bankDetails = saveBankDetails(bankDetail, financier.getBankDetails());
         financier.setBankDetails(bankDetails);
-        if (ActivationStatus.APPROVED.equals(bankDetail.getActivationStatus())){
-            financier.setApprovedBankDetail(bankDetail);
-        }
         financierOutputPort.save(financier);
+        saveFinancierBankDetail(financier, bankDetail);
         bankDetail.setResponse("Cooperate financier bank detail is "+activationStatus.getStatusName());
         log.info("Bank detail id {} for cooperate financier with id {} status {}", bankDetail.getId(), financier.getId(), activationStatus);
         return bankDetail;
@@ -152,8 +160,11 @@ public class BankDetailService implements BankDetailUseCase {
             log.error("Unable to identify user view bank details. Contact admin. {}", e.getMessage(), e);
             throw new MeedlException("Unable to identify user view bank details. Contact admin.");
         }
-        if (IdentityRole.hasOrganizationEntity(userIdentity.getRole())){
-
+        if (IdentityRole.isFinancier(userIdentity.getRole())){
+            Financier financier = financierOutputPort.findFinancierByUserId(userIdentity.getId());
+            log.info("Finding bank detail by financier id {} in view bank detail", financier.getId());
+            FinancierBankDetail financierBankDetail = financierBankDetailOutputPort.findByFinancierIdAndStatus(financier, ActivationStatus.APPROVED);
+            return financierBankDetail.getBankDetail();
         }
         return bankDetailOutputPort.findByBankDetailId(bankDetail.getId());
     }

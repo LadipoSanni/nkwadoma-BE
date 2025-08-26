@@ -80,6 +80,10 @@ public enum IdentityRole {
         return role.equals(COOPERATE_FINANCIER_SUPER_ADMIN);
     }
 
+    public static boolean isFinancier(IdentityRole role) {
+        return isCooperateFinancier(role) || IdentityRole.FINANCIER.equals(role);
+    }
+
 
     public boolean isMeedlRole() {
         return this == MEEDL_SUPER_ADMIN ||

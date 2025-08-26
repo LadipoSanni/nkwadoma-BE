@@ -9,11 +9,10 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface EntityBankDetailMapper {
-    @Mapping(target = "entityId", source = "bankDetail.entityId")
     @Mapping(target = "bankDetail", source = "bankDetail")
     EntityBankDetail map(BankDetail bankDetail);
 
-    @Mapping(target = "entityBankDetailId", source = "id")
+//    @Mapping(target = "entityBankDetailId", source = "id")
 //    @Mapping(target = "entityBankDetailId", source = "id")
     BankDetail map(EntityBankDetail entityBankDetail);
 }
