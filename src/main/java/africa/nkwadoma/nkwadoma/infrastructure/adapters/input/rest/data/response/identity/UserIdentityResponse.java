@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity;
 
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.MFAType;
 import lombok.*;
 
 @Setter
@@ -35,4 +36,7 @@ public class UserIdentityResponse {
     private String reactivationReason;
     private boolean additionalDetailsCompleted;
     private NextOfKinResponse nextOfKinResponse;
+
+    private String  MFAPhoneNumber;
+    private MFAType mfaType;
 }
