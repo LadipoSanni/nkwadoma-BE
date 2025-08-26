@@ -425,7 +425,8 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
                 throw new MeedlException("Unfortunately you don't belong to an organization to upload image to.\nContact admin");
             }
             OrganizationIdentity foundOrganization = optionalOrganization.get();
-            foundOrganization.setBannerImage(foundOrganization.getBannerImage());
+            foundOrganization.setBannerImage(organizationIdentity.getBannerImage());
+            foundOrganization.setOrganizationType(OrganizationType.COOPERATE);
             organizationIdentityOutputPort.save(foundOrganization);
             log.info("Image uploaded success.");
         }else {
