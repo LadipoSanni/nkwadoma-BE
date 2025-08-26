@@ -59,8 +59,7 @@ public class BankDetailService implements BankDetailUseCase {
             Financier financier = financierOutputPort.findFinancierByUserId(userIdentity.getId());
             log.info("Financier adding bank detail with financier id as {}", financier.getId());
             bankDetail.setActivationStatus(ActivationStatus.APPROVED);
-            List<BankDetail> bankDetails = saveBankDetails(bankDetail, financier.getBankDetails());
-            financier.setBankDetails(bankDetails);
+            saveBankDetails(bankDetail, financier);
             saveFinancierBankDetail(financier, bankDetail);
             financierOutputPort.save(financier);
             bankDetail.setResponse("Financier bank details saved successfully");
@@ -106,8 +105,7 @@ public class BankDetailService implements BankDetailUseCase {
 
     private BankDetail addCooperateFinancierBankDetail(BankDetail bankDetail, Financier financier, ActivationStatus activationStatus) throws MeedlException {
         bankDetail.setActivationStatus(activationStatus);
-        List<BankDetail> bankDetails = saveBankDetails(bankDetail, financier.getBankDetails());
-        financier.setBankDetails(bankDetails);
+        saveBankDetails(bankDetail, financier);
         financierOutputPort.save(financier);
         saveFinancierBankDetail(financier, bankDetail);
         bankDetail.setResponse("Cooperate financier bank detail is "+activationStatus.getStatusName());
@@ -115,7 +113,8 @@ public class BankDetailService implements BankDetailUseCase {
         return bankDetail;
     }
 
-    private List<BankDetail> saveBankDetails(BankDetail bankDetailToSave, List<BankDetail> existingBankDetails) throws MeedlException {
+    private void saveBankDetails(BankDetail bankDetailToSave, Financier financier) throws MeedlException {
+        List<BankDetail> existingBankDetails = financierBankDetailOutputPort.findAllBankDetailOfFinancier(financier);
         BankDetail savedBankDetail = bankDetailOutputPort.save(bankDetailToSave);
         bankDetailToSave.setId(savedBankDetail.getId());
         if (MeedlValidator.isEmptyCollection(existingBankDetails)){
@@ -127,7 +126,7 @@ public class BankDetailService implements BankDetailUseCase {
             }
             existingBankDetails.add(bankDetailToSave);
         }
-        return existingBankDetails;
+        financier.setBankDetails(existingBankDetails);
     }
 
     private BankDetail addOrganizationBankDetail(BankDetail bankDetail, UserIdentity userIdentity, ActivationStatus activationStatus) throws MeedlException {
