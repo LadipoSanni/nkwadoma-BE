@@ -2,7 +2,6 @@ package africa.nkwadoma.nkwadoma.domain.service.bankDetail;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.walletManagement.BankDetailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.bankdetail.BankDetailOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.bankdetail.EntityBankDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.bankdetail.FinancierBankDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
@@ -37,7 +36,6 @@ public class BankDetailService implements BankDetailUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final FinancierOutputPort financierOutputPort;
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
-    private final EntityBankDetailOutputPort entityBankDetailOutputPort;
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
     private final FinancierBankDetailOutputPort financierBankDetailOutputPort;
 
@@ -175,8 +173,12 @@ public class BankDetailService implements BankDetailUseCase {
             }
             log.info("Finding bank detail by financier id {} in view bank detail", financier.getId());
             FinancierBankDetail financierBankDetail = financierBankDetailOutputPort.findApprovedBankDetailByFinancierId(financier);
-            log.info("The approved  bank detail of the financier is {}", financierBankDetail.getBankDetail());
-            return financierBankDetail.getBankDetail();
+            if (ObjectUtils.isNotEmpty(financierBankDetail)) {
+                log.info("The approved  bank detail of the financier is {}", financierBankDetail.getBankDetail());
+                return financierBankDetail.getBankDetail();
+            }else {
+                return null;
+            }
         }
         return bankDetailOutputPort.findByBankDetailId(bankDetail.getId());
     }

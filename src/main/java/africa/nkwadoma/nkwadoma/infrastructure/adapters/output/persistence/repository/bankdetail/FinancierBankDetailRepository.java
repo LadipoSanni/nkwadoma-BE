@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface FinancierBankDetailRepository extends JpaRepository<FinancierBankDetailEntity, String> {
     @Query("""
-        SELECT fbd 
+        SELECT fbd
         FROM FinancierBankDetailEntity fbd
         WHERE fbd.financierEntity.id = :financierId
           AND fbd.bankDetailEntity.activationStatus = 'APPROVED'
