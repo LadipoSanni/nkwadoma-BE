@@ -315,6 +315,7 @@ class InvestmentVehicleServiceTest {
             when(investmentVehicleOutputPort.findById(investmentVehicleId))
                     .thenReturn(privateVehicle);
             UserIdentity mockUser = UserIdentity.builder()
+                    .id(testFinancierId)
                     .role(IdentityRole.FINANCIER)
                     .build();
             when(userIdentityOutputPort.findById(testFinancierId))
