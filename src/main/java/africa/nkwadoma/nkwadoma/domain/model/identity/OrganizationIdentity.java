@@ -38,6 +38,7 @@ public class OrganizationIdentity {
     private int numberOfPrograms;
     private boolean isEnabled;
     private String requestedBy;
+    private LocalDateTime requestedInvitationDate;
     private String createdBy;
     private String updatedBy;
     private int loanRequestCount;
@@ -79,16 +80,6 @@ public class OrganizationIdentity {
         MeedlValidator.validateRCNumber(this.rcNumber);
         MeedlValidator.validateTin(this.tin);
         MeedlValidator.validateDataElement(this.phoneNumber, "Phone number is required");
-
-        if (this.serviceOfferings == null
-                || this.serviceOfferings.isEmpty()
-                || this.serviceOfferings.get(0).getIndustry() == null) {
-            log.error("{} : {}", INVALID_INDUSTRY_OR_SERVICE_OFFERING.getMessage(), this.serviceOfferings);
-            throw new IdentityException(INVALID_INDUSTRY_OR_SERVICE_OFFERING.getMessage());
-        }
-        MeedlValidator.validateDataElement(this.serviceOfferings.get(0).getIndustry().name(), "Service offering's name is required");
-        log.info("Organization identity validation completed successfully {}", this.name);
-
     }
 
     public void validateCooperateOrganization() throws MeedlException {

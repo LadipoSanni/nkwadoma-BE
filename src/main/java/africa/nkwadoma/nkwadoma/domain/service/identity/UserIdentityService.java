@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.UserUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
@@ -23,6 +24,7 @@ import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identitymanager.BlackListedTokenAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.BlackListedToken;
@@ -61,6 +63,7 @@ public class UserIdentityService implements UserUseCase {
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
     private final FinancierOutputPort financierOutputPort;
+    private final LoaneeOutputPort loaneeOutputPort;
 
     @Override
     public AccessTokenResponse login(UserIdentity userIdentity)throws MeedlException {
@@ -129,7 +132,7 @@ public class UserIdentityService implements UserUseCase {
         userIdentity.setRole(foundUser.getRole());
         log.info("User Identity after password has been created: {}", foundUser);
 
-        activateCooperateFinancier(userIdentity);
+        activateOrganizationAndEmployee(userIdentity);
 
 //        blackListedTokenAdapter.blackListToken(createBlackList(token));
 //        log.info("done getting user identity frm token {}",userIdentity);
@@ -138,28 +141,39 @@ public class UserIdentityService implements UserUseCase {
         return userIdentity;
     }
 
-    private void activateCooperateFinancier(UserIdentity userIdentity) throws MeedlException {
-        if (userIdentity.getRole().isCooperateStaff()){
+    private void activateOrganizationAndEmployee(UserIdentity userIdentity) throws MeedlException {
+        if (userIdentity.getRole().isAnyStaff()){
             OrganizationEmployeeIdentity organizationEmployeeIdentity =
                     organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId())
                             .orElseThrow(() -> new MeedlException("Organization employee identity not found"));
             organizationEmployeeIdentity.setActivationStatus(ActivationStatus.ACTIVE);
             organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
-            activateCooperation(userIdentity, organizationEmployeeIdentity);
+            activateOrganization(userIdentity, organizationEmployeeIdentity);
+        }if (userIdentity.getRole().equals(IdentityRole.LOANEE)){
+            Optional<Loanee> loanee = loaneeOutputPort.findByUserId(userIdentity.getId());
+            if (loanee.isPresent()){
+                loanee.get().setActivationStatus(ActivationStatus.ACTIVE);
+                loaneeOutputPort.save(loanee.get());
+            }
+        }if (userIdentity.getRole().equals(IdentityRole.FINANCIER)){
+            Financier financier =  financierOutputPort.findFinancierByUserId(userIdentity.getId());
+            financier.setActivationStatus(ActivationStatus.ACTIVE);
+            financierOutputPort.save(financier);
         }
     }
 
-    private void activateCooperation(UserIdentity userIdentity, OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
-        if (userIdentity.getRole().equals(IdentityRole.COOPERATE_FINANCIER_SUPER_ADMIN)){
+    private void activateOrganization(UserIdentity userIdentity, OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
+        if (userIdentity.getRole().isCooperateOrOrganizationStaff()){
             OrganizationIdentity organizationIdentity =
                     organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
             organizationIdentity.setActivationStatus(ActivationStatus.ACTIVE);
-            organizationIdentity.setOrganizationType(OrganizationType.COOPERATE);
+            if (userIdentity.getRole().equals(IdentityRole.COOPERATE_FINANCIER_SUPER_ADMIN)) {
+                organizationIdentity.setOrganizationType(OrganizationType.COOPERATE);
+                Financier financier = financierOutputPort.findByIdentity(organizationIdentity.getId());
+                financier.setActivationStatus(ActivationStatus.ACTIVE);
+                financierOutputPort.save(financier);
+            }
             organizationIdentityOutputPort.save(organizationIdentity);
-
-            Financier financier = financierOutputPort.findByIdentity(organizationIdentity.getId());
-            financier.setActivationStatus(ActivationStatus.ACTIVE);
-            financierOutputPort.save(financier);
         }
     }
 
@@ -189,15 +203,8 @@ public class UserIdentityService implements UserUseCase {
 
     @Override
     public void changePassword(UserIdentity userIdentity) throws MeedlException {
-        MeedlValidator.validateObjectInstance(userIdentity, USER_IDENTITY_CANNOT_BE_NULL.getMessage());
-        MeedlValidator.validatePassword(tokenUtils.decryptAES(userIdentity.getPassword(), "Invalid password for current password"));
-        MeedlValidator.validatePassword(tokenUtils.decryptAES(userIdentity.getNewPassword(), "Invalid new password provided"));
-        try {
-            login(userIdentity);
-        }catch (MeedlException e){
-            log.info("Password invalid on change password {} user email {}", e.getMessage(), userIdentity.getEmail());
-            throw new MeedlException("Password incorrect");
-        }
+        MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
+        validatePasswordsForChangePassword(userIdentity);
         if (userIdentity.getNewPassword().equals(userIdentity.getPassword())){
             log.warn("{}", UserMessages.NEW_PASSWORD_AND_CURRENT_PASSWORD_CANNOT_BE_SAME.getMessage());
             throw new IdentityException(UserMessages.NEW_PASSWORD_AND_CURRENT_PASSWORD_CANNOT_BE_SAME.getMessage());
@@ -211,6 +218,29 @@ public class UserIdentityService implements UserUseCase {
         userIdentity.setNewPassword(tokenUtils.decryptAES(userIdentity.getNewPassword(), "Provide valid password to update"));
         identityManagerOutPutPort.setPassword(userIdentity);
         log.info("Password changed successfully for user with id: {}",userIdentity.getId());
+    }
+
+    private void validatePasswordsForChangePassword(UserIdentity userIdentity) throws MeedlException {
+        String currentPassword = tokenUtils.decryptAES(userIdentity.getPassword(), "Invalid password entered for current password");
+        try{
+            MeedlValidator.validatePassword(currentPassword);
+        }catch (MeedlException meedlException){
+            log.error("Error validating current password ",meedlException);
+            throw new MeedlException(PASSWORD_INCORRECT.getMessage());
+        }
+        String newPassword = tokenUtils.decryptAES(userIdentity.getNewPassword(), "Invalid new password provided");
+        try {
+            MeedlValidator.validatePassword(newPassword);
+        }catch (MeedlException e){
+            log.error("Weak password provided for new password in change password validation. ",e);
+            throw new MeedlException(String.format("Invalid new password provided: %n %s ", e.getMessage()));
+        }
+        try {
+            login(userIdentity);
+        }catch (MeedlException e){
+            log.info("Password invalid on change password {} user email {}", e.getMessage(), userIdentity.getEmail());
+            throw new MeedlException(PASSWORD_INCORRECT.getMessage());
+        }
     }
 
     @Override

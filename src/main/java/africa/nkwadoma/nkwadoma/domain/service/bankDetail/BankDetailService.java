@@ -95,7 +95,7 @@ public class BankDetailService implements BankDetailUseCase {
         return bankDetail;
     }
 
-    private void saveFinancierBankDetail(Financier financier, BankDetail bankDetail) {
+    private void saveFinancierBankDetail(Financier financier, BankDetail bankDetail) throws MeedlException {
         FinancierBankDetail financierBankDetail = FinancierBankDetail.builder()
                 .financier(financier)
                 .bankDetail(bankDetail)
@@ -163,7 +163,7 @@ public class BankDetailService implements BankDetailUseCase {
         if (IdentityRole.isFinancier(userIdentity.getRole())){
             Financier financier = financierOutputPort.findFinancierByUserId(userIdentity.getId());
             log.info("Finding bank detail by financier id {} in view bank detail", financier.getId());
-            FinancierBankDetail financierBankDetail = financierBankDetailOutputPort.findByFinancierIdAndStatus(financier, ActivationStatus.APPROVED);
+            FinancierBankDetail financierBankDetail = financierBankDetailOutputPort.findApprovedBankDetailByFinancierId(financier);
             return financierBankDetail.getBankDetail();
         }
         return bankDetailOutputPort.findByBankDetailId(bankDetail.getId());

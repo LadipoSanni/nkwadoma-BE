@@ -311,6 +311,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
             organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
         }else {
             organizationIdentity.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
+            organizationIdentity.setRequestedInvitationDate(LocalDateTime.now());
         }
         organizationIdentityOutputPort.save(organizationIdentity);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
@@ -425,7 +426,8 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
                 throw new MeedlException("Unfortunately you don't belong to an organization to upload image to.\nContact admin");
             }
             OrganizationIdentity foundOrganization = optionalOrganization.get();
-            foundOrganization.setBannerImage(foundOrganization.getBannerImage());
+            foundOrganization.setBannerImage(organizationIdentity.getBannerImage());
+            foundOrganization.setOrganizationType(OrganizationType.COOPERATE);
             organizationIdentityOutputPort.save(foundOrganization);
             log.info("Image uploaded success.");
         }else {
@@ -614,10 +616,17 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
             log.info("No organization id was provided by Meedl staff to view organization details");
             OrganizationEmployeeIdentity organizationEmployeeIdentity =
                     organizationEmployeeIdentityOutputPort.findByCreatedBy(userIdentity.getId());
+            log.info("Organization staff viewing organization details {}", organizationEmployeeIdentity);
             organizationId = organizationEmployeeIdentity.getOrganization();
         }
             MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-            OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findByIdProjection(organizationId);
+        OrganizationIdentity organizationIdentity;
+        if (userIdentity.getRole().isMeedlRole()){
+            organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
+        }else {
+            organizationIdentity = organizationIdentityOutputPort.findByIdProjection(organizationId);
+        }
+            log.info("organization identity: {}", organizationIdentity);
             List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity.getId());
             organizationIdentity.setServiceOfferings(serviceOfferings);
             log.info("Service offering has been gotten during view organization detail {}", serviceOfferings);

@@ -18,8 +18,8 @@ public class FinancierBankDetailEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-    @OneToMany
+    @ManyToOne
     private FinancierEntity financierEntity;
-    @OneToMany
+    @ManyToOne
     private BankDetailEntity bankDetailEntity;
 }

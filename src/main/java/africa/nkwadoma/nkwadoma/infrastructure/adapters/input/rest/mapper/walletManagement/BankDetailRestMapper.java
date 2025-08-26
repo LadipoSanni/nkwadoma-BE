@@ -12,4 +12,7 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 public interface BankDetailRestMapper {
     @Mapping(target = "userId", source = "userId")
     BankDetail map(String userId, @Valid BankDetailRequest bankDetailRequest);
+
+    @Mapping(target = "userId", source = "userId")
+    BankDetail map(String userId);
 }

@@ -105,5 +105,19 @@ public enum IdentityRole {
         return this == COOPERATE_FINANCIER_SUPER_ADMIN || this == COOPERATE_FINANCIER_ADMIN;
     }
 
+    public boolean isFinancier(){
+        return this == FINANCIER || this == COOPERATE_FINANCIER_SUPER_ADMIN || this == COOPERATE_FINANCIER_ADMIN;
+    }
 
+    public boolean isAnyStaff(){
+        return this == COOPERATE_FINANCIER_SUPER_ADMIN || this == COOPERATE_FINANCIER_ADMIN
+                || this == ORGANIZATION_ADMIN || this == ORGANIZATION_ASSOCIATE || this == ORGANIZATION_SUPER_ADMIN
+                || this == MEEDL_SUPER_ADMIN || this == MEEDL_ADMIN || this == PORTFOLIO_MANAGER_ASSOCIATE
+                || this == PORTFOLIO_MANAGER;
+    }
+
+    public boolean isCooperateOrOrganizationStaff(){
+        return this == COOPERATE_FINANCIER_SUPER_ADMIN || this == COOPERATE_FINANCIER_ADMIN
+                || this == ORGANIZATION_ADMIN || this == ORGANIZATION_ASSOCIATE || this == ORGANIZATION_SUPER_ADMIN;
+    }
 }

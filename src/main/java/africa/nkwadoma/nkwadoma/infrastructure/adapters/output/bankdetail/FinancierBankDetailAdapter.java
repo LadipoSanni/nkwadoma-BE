@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.bankdetail.FinancierBan
 import africa.nkwadoma.nkwadoma.domain.enums.constants.BankDetailMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.bankdetail.FinancierBankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -22,7 +23,7 @@ public class FinancierBankDetailAdapter implements FinancierBankDetailOutputPort
     private final FinancierBankDetailRepository financierBankDetailRepository;
 
     @Override
-    public FinancierBankDetail save(FinancierBankDetail financierBankDetail){
+    public FinancierBankDetail save(FinancierBankDetail financierBankDetail) throws MeedlException {
         MeedlValidator.validateObjectInstance(financierBankDetail, "Provide a valid financier bank detail to save");
         MeedlValidator.validateObjectInstance(financierBankDetail.getBankDetail(), BankDetailMessages.INVALID_BANK_DETAIL.getMessage());
         MeedlValidator.validateObjectInstance(financierBankDetail.getFinancier(), FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
@@ -32,8 +33,15 @@ public class FinancierBankDetailAdapter implements FinancierBankDetailOutputPort
     }
 
     @Override
-    public FinancierBankDetail findByFinancierIdAndStatus(Financier financier, ActivationStatus activationStatus) {
+    public FinancierBankDetail findByFinancierIdAndStatus(Financier financier, ActivationStatus activationStatus) throws MeedlException {
         MeedlValidator.validateObjectInstance(financier, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
         return null;
+    }
+    @Override
+    public FinancierBankDetail findApprovedBankDetailByFinancierId(Financier financier) throws MeedlException {
+        MeedlValidator.validateObjectInstance(financier, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
+        MeedlValidator.validateUUID(financier.getId(), FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+        FinancierBankDetailEntity financierBankDetailEntity = financierBankDetailRepository.findApprovedBankDetailByFinancierId(financier.getId());
+        return financierBankDetailMapper.map(financierBankDetailEntity);
     }
 }

@@ -14,9 +14,7 @@ import java.util.List;
 @Setter
 public class FinancierDashboardResponse {
     private String id;
-    private String firstName;
-    private String lastName;
-    private String organizationName;
+    private String name;
     private FinancierType financierType;
     private ActivationStatus activationStatus;
     private AccreditationStatus accreditationStatus;

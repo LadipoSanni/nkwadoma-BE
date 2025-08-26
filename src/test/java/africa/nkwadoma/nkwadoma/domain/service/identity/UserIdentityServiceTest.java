@@ -491,8 +491,6 @@ class UserIdentityServiceTest {
     }
 
 
-
-
     @Test
     @DisplayName("Should disable MFA when disableMFA flag is set")
     void disableMFA() throws MeedlException {
