@@ -8,4 +8,6 @@ public interface WalletOutputPort {
     BankDetail addBankDetails(BankDetail bankDetail) throws MeedlException;
 
     BankDetail viewBankDetail(BankDetail bankDetail) throws MeedlException;
+
+    BankDetail respondToAddBankDetail(BankDetail bankDetail) throws MeedlException;
 }

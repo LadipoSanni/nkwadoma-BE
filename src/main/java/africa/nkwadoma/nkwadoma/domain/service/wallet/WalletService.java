@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutp
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
@@ -163,7 +164,7 @@ public class WalletService implements WalletOutputPort {
             existingBankDetails = List.of(bankDetailToSave);
         }else {
             if (ActivationStatus.APPROVED.equals(bankDetailToSave.getActivationStatus())){
-                existingBankDetails.forEach(existingBankDetail -> existingBankDetail.setActivationStatus(ActivationStatus.DEACTIVATED));
+                existingBankDetails.forEach(existingBankDetail -> existingBankDetail.setActivationStatus(ActivationStatus.DECLINED));
                 bankDetailOutputPort.save(existingBankDetails);
             }
             existingBankDetails.add(bankDetailToSave);
@@ -244,5 +245,23 @@ public class WalletService implements WalletOutputPort {
 //            OrganizationIdentity organizationIdentity =
         }
         return null;
+    }
+    @Override
+    public BankDetail respondToAddBankDetail(BankDetail bankDetail) throws MeedlException {
+        MeedlValidator.validateObjectInstance(bankDetail, BankDetailMessages.INVALID_BANK_DETAIL.getMessage());
+        MeedlValidator.validateUUID(bankDetail.getId(), BankDetailMessages.INVALID_BANK_DETAIL_ID.getMessage());
+        MeedlValidator.validateUUID(bankDetail.getUserId(), UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateObjectInstance(bankDetail.getActivationStatus(), BankDetailMessages.INVALID_BANK_DETAIL.getMessage());
+
+        UserIdentity userIdentity = userIdentityOutputPort.findById(bankDetail.getUserId());
+        BankDetail foundBankDetail = bankDetailOutputPort.findByBankDetailId(bankDetail.getId());
+        foundBankDetail.setActivationStatus(bankDetail.getActivationStatus());
+        if (IdentityRole.isFinancier(userIdentity.getRole())){
+            Financier financier = financierOutputPort.findFinancierByUserId(bankDetail.getUserId());
+            saveBankDetails(foundBankDetail, financier);
+            bankDetail.setResponse("Bank detail has been "+ bankDetail.getActivationStatus().getStatusName());
+            return bankDetail;
+        }
+        return bankDetail;
     }
 }
