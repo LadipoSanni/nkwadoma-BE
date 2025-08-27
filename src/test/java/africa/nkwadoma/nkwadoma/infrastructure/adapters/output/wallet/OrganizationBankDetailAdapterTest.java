@@ -14,6 +14,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,6 +46,7 @@ class OrganizationBankDetailAdapterTest {
                 .id(UUID.randomUUID().toString())
                 .name("Test Org")
                 .email("mak@email.com")
+                .requestedInvitationDate(LocalDateTime.now())
                 .organizationType(OrganizationType.COOPERATE)
                 .build();
         bankDetail = BankDetail.builder()
