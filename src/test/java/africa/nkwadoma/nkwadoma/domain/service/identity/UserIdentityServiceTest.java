@@ -434,7 +434,7 @@ class UserIdentityServiceTest {
                 userIdentityService.checkIfUserAllowedForAccountActivationActivity(favour, favour, ActivationStatus.DEACTIVATED)
         );
 
-        assertEquals("You cannot "+ActivationStatus.DEACTIVATED.getStatusName()+" this user, please contact Meedl admin!", exception.getMessage());
+        assertEquals("You cannot "+ActivationStatus.DEACTIVATED.getStatusName().toLowerCase()+" this user, please contact Meedl admin!", exception.getMessage());
     }
 
     @Test
@@ -496,10 +496,6 @@ class UserIdentityServiceTest {
                 userIdentityService.checkIfUserAllowedForAccountActivationActivity(target, favour, ActivationStatus.DEACTIVATED)
         );
     }
-
-
-
-
 
 
     @Test

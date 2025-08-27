@@ -155,6 +155,7 @@ public class FinancierController {
     @GetMapping("financier/view")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
             "or hasRole('PORTFOLIO_MANAGER') " +
+            "or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')"+
             "or hasRole('FINANCIER')" +
             "or hasRole('COOPERATE_FINANCIER_ADMIN')" +
             "or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')"
