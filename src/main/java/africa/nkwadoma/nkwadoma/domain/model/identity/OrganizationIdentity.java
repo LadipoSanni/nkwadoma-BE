@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.identity.OrganizationType;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.*;
@@ -26,7 +27,6 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.INVA
 @ToString
 public class OrganizationIdentity {
     private String id;
-    private String bankDetailId;
     private String name;
     private String email;
     private String websiteAddress;
@@ -47,7 +47,6 @@ public class OrganizationIdentity {
     private int loanReferralCount;
     private LoanType loanType;
     private LocalDateTime timeUpdated;
-    private List<ServiceOffering> serviceOfferings;
     private ActivationStatus activationStatus;
     private UserIdentity userIdentity;
     private List<OrganizationEmployeeIdentity> organizationEmployees;
@@ -70,6 +69,8 @@ public class OrganizationIdentity {
     private String address;
     private String officeAddress;
     private OrganizationType organizationType;
+    private List<ServiceOffering> serviceOfferings;
+    private List<BankDetail> bankDetails;
 
     public void validate() throws MeedlException {
         log.info("The organization being validated : {}", this.name);

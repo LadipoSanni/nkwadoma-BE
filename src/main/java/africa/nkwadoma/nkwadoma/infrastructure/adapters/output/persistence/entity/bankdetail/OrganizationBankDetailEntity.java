@@ -1,24 +1,23 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.bankdetail;
 
-import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
-import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.financier.FinancierEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class FinancierBankDetailEntity {
-
+public class OrganizationBankDetailEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     @ManyToOne
-    private FinancierEntity financierEntity;
+    private OrganizationEntity organizationEntity;
     @ManyToOne
     private BankDetailEntity bankDetailEntity;
 }
