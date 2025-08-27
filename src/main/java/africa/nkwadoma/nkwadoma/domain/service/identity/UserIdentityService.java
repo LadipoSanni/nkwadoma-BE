@@ -262,7 +262,7 @@ public class UserIdentityService implements UserUseCase {
         MeedlValidator.validateDataElement(userIdentity.getReactivationReason(), "Reason for reactivation is required.");
         UserIdentity userToActivate = userIdentityOutputPort.findById(userIdentity.getId());
 
-        checkIfUserAllowedForAccountActivationActivity(userIdentity, userIdentity, ActivationStatus.ACTIVE);
+        checkIfUserAllowedForAccountActivationActivity(userToActivate, userIdentity, ActivationStatus.ACTIVE);
         userIdentity.setReactivationReason("User activated by : "+ userIdentity.getCreatedBy() + ". Reason : "+userIdentity.getDeactivationReason());
 
         userIdentity = identityManagerOutPutPort.enableUserAccount(userToActivate);
@@ -325,7 +325,7 @@ public class UserIdentityService implements UserUseCase {
     private void checkIfPortfolioManagerCanPerformAccountActivationActivity(UserIdentity userToDeactivate, UserIdentity foundActor, ActivationStatus activationStatus) throws MeedlException {
         if (IdentityRole.PORTFOLIO_MANAGER.equals(foundActor.getRole())) {
             log.info("Checking to see if portfolio manager can perform activation activity");
-            checkDeactivationIsAuthorised(
+            checkActivationIsAuthorised(
                     activationStatus,
                     foundActor,
                     userToDeactivate,
@@ -362,7 +362,7 @@ public class UserIdentityService implements UserUseCase {
                 throw new MeedlException("You are not allowed to "+activationStatus+" a user that is not in your organization");
             }
             log.info("Checking if actor with role {} can perform activation activity {}", foundActor.getRole(), activationStatus.getStatusName());
-            checkDeactivationIsAuthorised(
+            checkActivationIsAuthorised(
                     activationStatus,
                     foundActor,
                     userToDeactivate,
@@ -372,7 +372,7 @@ public class UserIdentityService implements UserUseCase {
     }
 
 
-    private void checkDeactivationIsAuthorised(ActivationStatus activationStatus, UserIdentity foundActor , UserIdentity userToDeactivate, Set<IdentityRole> allowedTargetRoles) throws MeedlException {
+    private void checkActivationIsAuthorised(ActivationStatus activationStatus, UserIdentity foundActor , UserIdentity userToDeactivate, Set<IdentityRole> allowedTargetRoles) throws MeedlException {
         if (!allowedTargetRoles.contains(userToDeactivate.getRole())) {
             log.error("You are not authorized to {} user with role {} for user with email {}. The actor email is {} and the role of the actor is {}",
                     activationStatus, userToDeactivate.getRole(), userToDeactivate.getEmail(), foundActor.getEmail(), foundActor.getRole());
