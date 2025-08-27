@@ -507,6 +507,10 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     private void declineInvitation(ActivationStatus activationStatus, UserIdentity organizationCreator, OrganizationIdentity organizationIdentity, UserIdentity actor) throws MeedlException {
         sendNotificationToOrganizationCreator(activationStatus, organizationCreator, organizationIdentity,
                 actor,NotificationFlag.ORGANIZATION_INVITATION_DECLINED);
+        for(OrganizationEmployeeIdentity organizationEmployeeIdentity : organizationIdentity.getOrganizationEmployees()) {
+            organizationEmployeeIdentity.setActivationStatus(ActivationStatus.DECLINED);
+            organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
+        }
         organizationIdentity.setActivationStatus(ActivationStatus.DECLINED);
     }
 
