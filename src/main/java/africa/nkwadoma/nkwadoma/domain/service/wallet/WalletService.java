@@ -251,7 +251,7 @@ public class WalletService implements WalletOutputPort {
         MeedlValidator.validateObjectInstance(bankDetail, BankDetailMessages.INVALID_BANK_DETAIL.getMessage());
         MeedlValidator.validateUUID(bankDetail.getId(), BankDetailMessages.INVALID_BANK_DETAIL_ID.getMessage());
         MeedlValidator.validateUUID(bankDetail.getUserId(), UserMessages.INVALID_USER_ID.getMessage());
-        MeedlValidator.validateObjectInstance(bankDetail.getActivationStatus(), BankDetailMessages.INVALID_BANK_DETAIL.getMessage());
+        MeedlValidator.validateObjectInstance(bankDetail.getActivationStatus(), BankDetailMessages.INVALID_BANK_DETAIL_ACTIVATION_STATUS.getMessage());
 
         UserIdentity userIdentity = userIdentityOutputPort.findById(bankDetail.getUserId());
         BankDetail foundBankDetail = bankDetailOutputPort.findByBankDetailId(bankDetail.getId());
