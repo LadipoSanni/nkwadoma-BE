@@ -127,5 +127,16 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
                 loanReferralRepository.findAllByCohortLoanee_Loanee_UserIdentity_idAndLoanReferralStatus(id,loanReferralStatus);
         return loanReferralEntities.stream().map(loanReferralMapper::toLoanReferral).collect(Collectors.toList());
     }
+
+    @Override
+    public Page<LoanReferral> findAllLoanReferrals(LoanReferral loanReferral) throws MeedlException {
+        MeedlValidator.validatePageSize(loanReferral.getPageSize());
+        MeedlValidator.validatePageNumber(loanReferral.getPageNumber());
+        Pageable pageRequest = PageRequest.of(loanReferral.getPageNumber(), loanReferral.getPageSize());
+
+        Page<LoanReferralProjection> loanReferralProjections =
+                loanReferralRepository.findAllLoanReferrals(loanReferral.getProgramId(),loanReferral);
+        return null;
+    }
 }
 
