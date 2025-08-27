@@ -13,4 +13,6 @@ public interface BankDetailOutputPort {
     BankDetail findByBankDetailId(String bankDetailId) throws MeedlException;
 
     List<BankDetail> save(List<BankDetail> existingBankDetails) throws MeedlException;
+
+    void delete(String bankDetailId) throws MeedlException;
 }

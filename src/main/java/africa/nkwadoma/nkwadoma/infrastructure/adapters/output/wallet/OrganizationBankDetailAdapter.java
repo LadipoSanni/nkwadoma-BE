@@ -46,9 +46,15 @@ public class OrganizationBankDetailAdapter implements OrganizationBankDetailOutp
     public OrganizationBankDetail findApprovedBankDetailByOrganizationId(OrganizationIdentity organizationIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(organizationIdentity, OrganizationMessages.ORGANIZATION_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(organizationIdentity.getId(), OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-        log.info("Viewing organization bank detail for approved detail by financier id {} adapter level", organizationIdentity.getId());
+        log.info("Viewing organization bank detail for approved detail by organization id {} adapter level", organizationIdentity.getId());
         OrganizationBankDetailEntity organizationBankDetailEntity = organizationBankDetailRepository.findApprovedBankDetailByOrganizationId((organizationIdentity.getId()));
         return organizationBankDetailMapper.map(organizationBankDetailEntity);
+    }
+
+    @Override
+    public void deleteById(String organizationBankDetailId) throws MeedlException {
+        MeedlValidator.validateUUID(organizationBankDetailId, "Organization bank detail id is required to delete");
+        organizationBankDetailRepository.deleteById(organizationBankDetailId);
     }
 
     @Override

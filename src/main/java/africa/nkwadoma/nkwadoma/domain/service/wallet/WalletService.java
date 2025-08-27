@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.domain.service.bankDetail;
+package africa.nkwadoma.nkwadoma.domain.service.wallet;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.walletManagement.WalletOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.bankdetail.BankDetailOutputPort;

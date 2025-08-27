@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.wallet;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.bankdetail.BankDetailOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.BankDetailMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -58,5 +59,11 @@ public class BankDetailAdapter implements BankDetailOutputPort {
         bankDetailEntities = bankDetailRepository.saveAll(bankDetailEntities);
         log.info("Multiple bank details saved");
         return bankDetailMapper.map(bankDetailEntities);
+    }
+
+    @Override
+    public void delete(String bankDetailId) throws MeedlException {
+        MeedlValidator.validateUUID(bankDetailId, BankDetailMessages.INVALID_BANK_DETAIL_ID.getMessage());
+        bankDetailRepository.deleteById(bankDetailId);
     }
 }

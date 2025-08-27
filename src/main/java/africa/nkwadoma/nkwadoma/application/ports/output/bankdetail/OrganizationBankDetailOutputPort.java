@@ -13,4 +13,6 @@ public interface OrganizationBankDetailOutputPort {
     OrganizationBankDetail save(OrganizationBankDetail organizationBankDetail) throws MeedlException;
 
     OrganizationBankDetail findApprovedBankDetailByOrganizationId(OrganizationIdentity organizationIdentity) throws MeedlException;
+
+    void deleteById(String organizationBankDetailId) throws MeedlException;
 }
