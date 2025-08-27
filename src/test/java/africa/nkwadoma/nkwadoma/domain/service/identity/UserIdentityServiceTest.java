@@ -434,7 +434,7 @@ class UserIdentityServiceTest {
                 userIdentityService.checkIfUserAllowedForAccountActivationActivity(favour, favour, ActivationStatus.DEACTIVATED)
         );
 
-        assertEquals("You cannot "+ActivationStatus.DEACTIVATED+" this user, please contact Meedl admin!", exception.getMessage());
+        assertEquals("You cannot "+ActivationStatus.DEACTIVATED.getStatusName()+" this user, please contact Meedl admin!", exception.getMessage());
     }
 
     @Test
@@ -455,7 +455,6 @@ class UserIdentityServiceTest {
 
         when(userIdentityOutputPort.findById(actor.getId())).thenReturn(actor);
         when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(favour.getId())).thenReturn(Optional.of(emp));
-        when(organizationIdentityOutputPort.findByEmail("org-A")).thenReturn(org);
 
          assertThrows(MeedlException.class, () ->
                 userIdentityService.checkIfUserAllowedForAccountActivationActivity(favour, favour, ActivationStatus.DEACTIVATED));
