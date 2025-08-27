@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.walletManagement.BankDetailRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.QAResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.walletResponse.BankDetailResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.walletManagement.BankDetailRestMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -43,6 +44,7 @@ public class WalletManagementController {
             or hasRole('PORTFOLIO_MANAGER')
             or hasRole('ORGANIZATION_SUPER_ADMIN')
             or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')
+            or hasRole('FINANCIER')
             or hasRole('COOPERATE_FINANCIER_ADMIN')
             or hasRole('ORGANIZATION_ADMIN')
             or hasRole('ORGANIZATION_ASSOCIATE')
@@ -70,6 +72,7 @@ public class WalletManagementController {
             or hasRole('ORGANIZATION_SUPER_ADMIN')
             or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')
             or hasRole('COOPERATE_FINANCIER_ADMIN')
+            or hasRole('FINANCIER')
             or hasRole('ORGANIZATION_ADMIN')
             or hasRole('ORGANIZATION_ASSOCIATE')
             """)
@@ -77,10 +80,11 @@ public class WalletManagementController {
         BankDetail bankDetail = bankDetailMapper.map(meedlUser.getClaimAsString("sub"));
         bankDetail = bankDetailUseCase.viewBankDetail(bankDetail);
         log.info("Viewing bank details {}", bankDetail);
+        BankDetailResponse bankDetailResponse = bankDetailMapper.map(bankDetail);
         ApiResponse<Object> apiResponse = ApiResponse.builder()
-                .data(QAResponse.build(bankDetail.getId()))
-                .message(bankDetail.getResponse())
-                .statusCode(HttpStatus.CREATED.name())
+                .data(bankDetailResponse)
+                .message("Bank detail viewed successfully")
+                .statusCode(HttpStatus.OK.name())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }

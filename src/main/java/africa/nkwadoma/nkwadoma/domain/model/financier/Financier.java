@@ -36,7 +36,6 @@ public class Financier {
     private String id;
     private String tin;
     private String bankDetailId;
-    private BankDetail approvedBankDetail;
 
     private FinancierType financierType;
     private ActivationStatus activationStatus;
