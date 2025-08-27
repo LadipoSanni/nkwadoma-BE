@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.service.bankDetail;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.walletManagement.BankDetailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.walletManagement.WalletOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.bankdetail.BankDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.bankdetail.FinancierBankDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.bankdetail.OrganizationBankDetailOutputPort;
@@ -17,9 +17,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.bankdetail.FinancierBankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.bankdetail.OrganizationBankDetail;
-import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -34,7 +32,7 @@ import java.util.Optional;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class BankDetailService implements BankDetailUseCase {
+public class WalletService implements WalletOutputPort {
     private final BankDetailOutputPort bankDetailOutputPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final FinancierOutputPort financierOutputPort;
@@ -93,7 +91,6 @@ public class BankDetailService implements BankDetailUseCase {
 //            notifyActor();
             return bankDetail;
         }
-
         return bankDetail;
     }
 
@@ -132,7 +129,7 @@ public class BankDetailService implements BankDetailUseCase {
         financierBankDetailOutputPort.save(financierBankDetail);
     }
 
-    private void saveOrganizationBankDetail(BankDetail bankDetail, OrganizationIdentity organizationIdentity) {
+    private void saveOrganizationBankDetail(BankDetail bankDetail, OrganizationIdentity organizationIdentity) throws MeedlException {
         OrganizationBankDetail organizationBankDetail = OrganizationBankDetail.builder()
                 .organizationIdentity(organizationIdentity)
                 .bankDetail(bankDetail)
@@ -175,11 +172,6 @@ public class BankDetailService implements BankDetailUseCase {
     }
 
 
-
-
-
-
-
     @Override
     public BankDetail viewBankDetail(BankDetail bankDetail) throws MeedlException {
         MeedlValidator.validateObjectInstance(bankDetail, "Bank detail request cannot be empty.");
@@ -198,25 +190,50 @@ public class BankDetailService implements BankDetailUseCase {
             if (IdentityRole.FINANCIER.equals(userIdentity.getRole())) {
                  financier = financierOutputPort.findFinancierByUserId(userIdentity.getId());
             }else {
-                Optional<OrganizationIdentity> optionalOrganizationIdentity = organizationIdentityOutputPort.findByUserId(userIdentity.getId());
-                if (optionalOrganizationIdentity.isEmpty()){
-                    /// Notify meedl admin of attempt
-                    log.error("User with id {} is not a cooperate financier as organization is not found ", userIdentity.getId());
-                    throw new MeedlException(FinancierMessages.NOT_A_FINANCIER.getMessage());
-                }
-                 financier = financierOutputPort.findFinancierByOrganizationId(optionalOrganizationIdentity.get().getId());
+                OrganizationIdentity optionalOrganizationIdentity = getOrganizationIdentityByUserId(userIdentity);
+                financier = financierOutputPort.findFinancierByOrganizationId(optionalOrganizationIdentity.getId());
             }
             log.info("Finding bank detail by financier id {} in view bank detail", financier.getId());
             FinancierBankDetail financierBankDetail = financierBankDetailOutputPort.findApprovedBankDetailByFinancierId(financier);
-            if (ObjectUtils.isNotEmpty(financierBankDetail)) {
-                log.info("The approved  bank detail of the financier is {}", financierBankDetail.getBankDetail());
-                return financierBankDetail.getBankDetail();
-            }else {
-                return null;
-            }
+            return viewBankDetail(financierBankDetail);
+        }
+        if (IdentityRole.isOrganizationStaff(userIdentity.getRole()) ||
+            IdentityRole.isMeedlStaff(userIdentity.getRole())){
+            OrganizationIdentity organizationIdentity = getOrganizationIdentityByUserId(userIdentity);
+            OrganizationBankDetail organizationBankDetail = organizationBankDetailOutputPort.findApprovedBankDetailByOrganizationId(organizationIdentity);
+            return viewBankDetail(organizationBankDetail);
         }
         return bankDetailOutputPort.findByBankDetailId(bankDetail.getId());
     }
+
+    private static BankDetail viewBankDetail(OrganizationBankDetail organizationBankDetail) {
+        if (ObjectUtils.isNotEmpty(organizationBankDetail)) {
+            log.info("The approved  bank detail of the financier is {}", organizationBankDetail.getBankDetail());
+            return organizationBankDetail.getBankDetail();
+        }else {
+            return null;
+        }
+    }
+
+    private static BankDetail viewBankDetail(FinancierBankDetail financierBankDetail) {
+        if (ObjectUtils.isNotEmpty(financierBankDetail)) {
+            log.info("The approved  bank detail of the financier is {}", financierBankDetail.getBankDetail());
+            return financierBankDetail.getBankDetail();
+        }else {
+            return null;
+        }
+    }
+
+    private OrganizationIdentity getOrganizationIdentityByUserId(UserIdentity userIdentity) throws MeedlException {
+        Optional<OrganizationIdentity> optionalOrganizationIdentity = organizationIdentityOutputPort.findByUserId(userIdentity.getId());
+        if (optionalOrganizationIdentity.isEmpty()){
+            /// Notify meedl admin of attempt
+            log.error("User with id {} is not a cooperate financier as organization is not found ", userIdentity.getId());
+            throw new MeedlException(FinancierMessages.NOT_A_FINANCIER.getMessage());
+        }
+        return optionalOrganizationIdentity.get();
+    }
+
     public BankDetail viewAllBankDetail(BankDetail bankDetail) throws MeedlException {
         MeedlValidator.validateObjectInstance(bankDetail, BankDetailMessages.INVALID_BANK_DETAIL.getMessage());
         MeedlValidator.validateUUID(bankDetail.getUserId(), BankDetailMessages.INVALID_BANK_DETAIL.getMessage());

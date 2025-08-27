@@ -262,7 +262,7 @@ public class UserIdentityService implements UserUseCase {
         MeedlValidator.validateDataElement(userIdentity.getReactivationReason(), "Reason for reactivation is required.");
         UserIdentity userToActivate = userIdentityOutputPort.findById(userIdentity.getId());
 
-        checkIfUserAllowedForAccountActivationActivity(userToActivate, userIdentity, ActivationStatus.ACTIVE);
+        checkIfUserAllowedForAccountActivationActivity(userIdentity, userIdentity, ActivationStatus.ACTIVE);
         userIdentity.setReactivationReason("User activated by : "+ userIdentity.getCreatedBy() + ". Reason : "+userIdentity.getDeactivationReason());
 
         userIdentity = identityManagerOutPutPort.enableUserAccount(userToActivate);

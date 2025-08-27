@@ -30,7 +30,7 @@ import static org.mockito.Mockito.*;
 class BankDetailServiceTest {
 
     @InjectMocks
-    private BankDetailService bankDetailService;
+    private WalletService bankDetailService;
 
     @Mock
     private BankDetailOutputPort bankDetailOutputPort;

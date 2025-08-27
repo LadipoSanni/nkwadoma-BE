@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.bankdetail;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.wallet;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.bankdetail.BankDetailOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;

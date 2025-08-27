@@ -1,7 +1,6 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.bankdetail;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.wallet;
 
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.bankdetail.BankDetailEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.bankdetail.FinancierBankDetailEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.wallet.FinancierBankDetailEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

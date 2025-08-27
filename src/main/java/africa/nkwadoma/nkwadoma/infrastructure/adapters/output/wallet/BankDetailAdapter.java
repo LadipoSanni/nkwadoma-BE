@@ -1,12 +1,12 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.bankdetail;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.wallet;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.bankdetail.BankDetailOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.bankdetail.BankDetailMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.bankdetail.BankDetailEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.bankdetail.BankDetailRepository;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.wallet.BankDetailMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.wallet.BankDetailEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.wallet.BankDetailRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
