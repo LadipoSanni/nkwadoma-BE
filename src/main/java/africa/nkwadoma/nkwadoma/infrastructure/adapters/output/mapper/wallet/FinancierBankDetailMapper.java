@@ -1,7 +1,7 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.bankdetail;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.wallet;
 
 import africa.nkwadoma.nkwadoma.domain.model.bankdetail.FinancierBankDetail;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.bankdetail.FinancierBankDetailEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.wallet.FinancierBankDetailEntity;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

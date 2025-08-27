@@ -1,9 +1,8 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.walletManagement;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.walletManagement.BankDetailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.walletManagement.WalletOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.OrganizationRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.walletManagement.BankDetailRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.QAResponse;
@@ -31,7 +30,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @Tag(name = "Wallet management  Controller", description = "Manage wallet of different entities")
 public class WalletManagementController {
     @Autowired
-    private BankDetailUseCase bankDetailUseCase;
+    private WalletOutputPort bankDetailUseCase;
     @Autowired
     private BankDetailRestMapper bankDetailMapper;
 

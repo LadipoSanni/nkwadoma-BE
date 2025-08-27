@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.bankdetail;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.wallet;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.bankdetail.BankDetailOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
-public class BankDetailAdapterTest {
+public class WalletAdapterTest {
     @Autowired
     private BankDetailOutputPort bankDetailOutputPort;
     private final BankDetail builtBankDetail = TestData.buildBankDetail();

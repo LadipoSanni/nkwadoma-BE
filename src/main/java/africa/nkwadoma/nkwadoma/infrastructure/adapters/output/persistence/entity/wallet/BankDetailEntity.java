@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.bankdetail;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.wallet;
 
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import jakarta.persistence.*;

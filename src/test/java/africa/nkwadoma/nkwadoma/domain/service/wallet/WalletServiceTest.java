@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.domain.service.bankDetail;
+package africa.nkwadoma.nkwadoma.domain.service.wallet;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.bankdetail.BankDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.bankdetail.FinancierBankDetailOutputPort;
@@ -27,10 +27,10 @@ import static org.mockito.Mockito.*;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-class BankDetailServiceTest {
+class WalletServiceTest {
 
     @InjectMocks
-    private BankDetailService bankDetailService;
+    private WalletService bankDetailService;
 
     @Mock
     private BankDetailOutputPort bankDetailOutputPort;

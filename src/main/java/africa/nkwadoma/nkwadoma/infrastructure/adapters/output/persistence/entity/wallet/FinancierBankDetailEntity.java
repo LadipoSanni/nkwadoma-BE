@@ -1,7 +1,5 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.bankdetail;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.wallet;
 
-import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
-import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.financier.FinancierEntity;
 import jakarta.persistence.*;
 import lombok.*;

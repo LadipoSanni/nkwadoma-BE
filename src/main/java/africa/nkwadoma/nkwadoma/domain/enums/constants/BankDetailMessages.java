@@ -4,7 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum BankDetailMessages {
-    INVALID_BANK_DETAIL("Invalid bank detail");
+    INVALID_BANK_DETAIL("Invalid bank detail"),
+    INVALID_BANK_DETAIL_ID("Invalid bank detail id provided");
 
     private final String message;
 
