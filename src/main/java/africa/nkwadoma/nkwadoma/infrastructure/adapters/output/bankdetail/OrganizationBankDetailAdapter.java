@@ -4,9 +4,14 @@ import africa.nkwadoma.nkwadoma.application.ports.output.bankdetail.Organization
 import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.bankdetail.OrganizationBankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
-
+@Slf4j
+@Component
+@AllArgsConstructor
 public class OrganizationBankDetailAdapter implements OrganizationBankDetailOutputPort {
     @Override
     public List<BankDetail> findAllBankDetailOfOrganization(OrganizationIdentity organizationIdentity) {
