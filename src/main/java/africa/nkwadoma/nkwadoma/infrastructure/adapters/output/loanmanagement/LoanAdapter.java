@@ -179,4 +179,10 @@ public class LoanAdapter implements LoanOutputPort {
                         (loan.getOrganizationName(),loan.getLoaneeId(),pageRequest);
         return loanProjection.map(loanMapper::mapProjectionToLoan);
     }
+
+    @Override
+    public boolean checkIfLoanHasBeenDisbursedForLoanOffer(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id,"Loan offer id cannot be empty");
+        return loanRepository.checkIfLoanHasStartedForLoanOffer(id);
+    }
 }
