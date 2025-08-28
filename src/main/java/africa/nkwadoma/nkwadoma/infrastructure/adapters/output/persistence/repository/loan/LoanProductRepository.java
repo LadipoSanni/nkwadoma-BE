@@ -39,4 +39,11 @@ public interface LoanProductRepository extends JpaRepository<LoanProductEntity,S
         WHERE lo.id = :loanOfferId
     """)
     LoanProductEntity findByLoanOfferId(String loanOfferId);
+
+    @Query("""
+        select lp from LoanProductEntity lp
+        join LoanOfferEntity 
+        join LoaneeLoanDetailEntity 
+        """)
+    LoanProductEntity findLoanProductByLoaneeLoanDetailId(String loaneeLoanDetailId);
 }
