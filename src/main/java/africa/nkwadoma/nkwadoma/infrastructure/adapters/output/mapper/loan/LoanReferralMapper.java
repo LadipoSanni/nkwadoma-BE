@@ -38,4 +38,6 @@ public interface LoanReferralMapper {
 
     List<LoanReferral> toLoanReferrals(List<LoanReferralEntity> loanReferralEntities);
 
+    @Mapping(target = "referralDate", source = "referralDateTime")
+    LoanReferral mapProjectionToLoanReferral(LoanReferralProjection loanReferralProjection);
 }

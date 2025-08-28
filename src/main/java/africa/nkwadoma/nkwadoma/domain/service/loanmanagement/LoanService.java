@@ -376,6 +376,13 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }
     }
 
+    @Override
+    public Page<LoanReferral> viewAllLoanReferrals(LoanReferral request) throws MeedlException {
+        MeedlValidator.validatePageSize(request.getPageSize());
+        MeedlValidator.validatePageNumber(request.getPageNumber());
+        return loanReferralOutputPort.findAllLoanReferrals(request);
+    }
+
     private String getLoanAccountId(Loanee foundLoanee) throws MeedlException {
         LoaneeLoanAccount loaneeLoanAccount = loaneeLoanAccountOutputPort.findByLoaneeId(foundLoanee.getId());
         log.info("Found loanee account: {}", loaneeLoanAccount);
@@ -886,6 +893,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }
          throw new LoanException(loanOffer.getType().name()+" is not a loan type");
     }
+
+
 
 
 }

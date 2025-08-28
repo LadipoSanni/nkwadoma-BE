@@ -94,5 +94,31 @@ public interface LoanReferralRepository extends JpaRepository<LoanReferralEntity
     """)
     List<LoanReferralEntity> findAllByCohortLoanee_Loanee_UserIdentity_idAndLoanReferralStatus(@Param("id") String id,
                                                                                                @Param("loanReferralStatus")
+
+
                                                                                                LoanReferralStatus loanReferralStatus);
+
+    @Query("""
+        SELECT lre.id AS id,
+               loaneeLoanDetailEntity.initialDeposit AS initialDeposit,
+               loaneeLoanDetailEntity.amountRequested AS loanAmountRequested,
+               user.firstName AS firstName,
+               user.lastName AS lastName,
+               cle.referralDateTime AS referralDateTime , user.isIdentityVerified as identityVerified
+        FROM LoanReferralEntity lre
+        JOIN CohortLoaneeEntity cle ON cle.id = lre.cohortLoanee.id
+        JOIN LoaneeLoanDetailEntity loaneeLoanDetailEntity ON loaneeLoanDetailEntity.id = cle.loaneeLoanDetail.id
+        JOIN LoaneeEntity loanee ON loanee.id = cle.loanee.id
+        JOIN CohortEntity cohort ON cohort.id = cle.cohort.id
+        JOIN ProgramEntity program ON program.id = cohort.programId
+        JOIN OrganizationEntity organization ON organization.id = program.organizationIdentity.id
+        JOIN UserEntity user ON user.id = loanee.userIdentity.id
+        WHERE (:organizationId IS NULL OR organization.id = :organizationId)
+        AND (:programId IS NULL OR program.id = :programId)
+        
+        order by cle.referralDateTime desc
+""")
+    Page<LoanReferralProjection> findAllLoanReferrals(@Param("programId") String programId,
+                                                      @Param("organizationId") String organizationId,
+                                                      Pageable pageRequest);
 }
