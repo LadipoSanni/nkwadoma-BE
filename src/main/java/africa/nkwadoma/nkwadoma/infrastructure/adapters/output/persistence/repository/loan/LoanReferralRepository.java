@@ -118,7 +118,7 @@ public interface LoanReferralRepository extends JpaRepository<LoanReferralEntity
         
         order by cle.referralDateTime desc
 """)
-    Page<LoanReferralProjection> findAllLoanReferrals(@Param("organizationId") String organizationId,
-                                                      @Param("programId") String programId,
+    Page<LoanReferralProjection> findAllLoanReferrals(@Param("programId") String programId,
+                                                      @Param("organizationId") String organizationId,
                                                       Pageable pageRequest);
 }

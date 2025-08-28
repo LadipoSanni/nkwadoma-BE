@@ -60,6 +60,8 @@ class LoanReferralAdapterTest {
     private LoaneeOutputPort loaneeOutputPort;
     @Autowired
     private LoanReferralOutputPort loanReferralOutputPort;
+    private int pageSize = 10;
+    private int pageNumber = 0;
 
 
     @BeforeAll
@@ -142,7 +144,7 @@ class LoanReferralAdapterTest {
     @Test
     void findAllLoanReferrals(){
         Page<LoanReferral> foundLoanReferral = Page.empty();
-        LoanReferral request = LoanReferral.builder().build();
+        LoanReferral request = LoanReferral.builder().pageNumber(pageNumber).pageSize(pageSize).build();
         try{
             foundLoanReferral = loanReferralOutputPort.findAllLoanReferrals(request);
         }catch (MeedlException meedlException){
@@ -155,7 +157,7 @@ class LoanReferralAdapterTest {
     @Test
     void findAllLoanReferralsByProgramId(){
         Page<LoanReferral> foundLoanReferral = Page.empty();
-        LoanReferral request = LoanReferral.builder().build();
+        LoanReferral request = LoanReferral.builder().programId(program.getId()).pageNumber(pageNumber).pageSize(pageSize).build();
         try{
             foundLoanReferral = loanReferralOutputPort.findAllLoanReferrals(request);
         }catch (MeedlException meedlException){
@@ -169,7 +171,7 @@ class LoanReferralAdapterTest {
     @Test
     void findAllLoanReferralsOrganizationId(){
         Page<LoanReferral> foundLoanReferral = Page.empty();
-        LoanReferral request = LoanReferral.builder().build();
+        LoanReferral request = LoanReferral.builder().organizationId(organizationIdentity.getId()).pageNumber(pageNumber).pageSize(pageSize).build();
         try{
             foundLoanReferral = loanReferralOutputPort.findAllLoanReferrals(request);
         }catch (MeedlException meedlException){

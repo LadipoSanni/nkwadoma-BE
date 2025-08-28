@@ -388,13 +388,14 @@ public class LoanController {
 
     @GetMapping("/view/loan-referrals")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
-    public ResponseEntity<ApiResponse<?>> viewAllLoanReferrals(@RequestParam(required = false) String programId,
-                                                               @RequestParam(required = false) String organizationId,
+    public ResponseEntity<ApiResponse<?>> viewAllLoanReferrals(@RequestParam(name = "programId", required = false) String programId,
+                                                               @RequestParam(name = "organizationId" , required = false) String organizationId,
                                                                @RequestParam(defaultValue = "10") int pageSize,
                                                                @RequestParam(defaultValue = "0") int pageNumber) throws MeedlException {
 
         LoanReferral request = LoanReferral.builder().programId(programId).organizationId(organizationId)
                 .pageNumber(pageNumber).pageSize(pageSize).build();
+        log.info("request that got in ----- ProgramID == {}  organizationID == {}",request.getProgramId(),request.getOrganizationId());
         Page<LoanReferral> loanReferrals = loanUseCase.viewAllLoanReferrals(request);
         Page<AllLoanReferralResponse> allLoanReferralResponses =
                 loanReferrals.map(loanReferralRestMapper::allLoanReferralResponse);
