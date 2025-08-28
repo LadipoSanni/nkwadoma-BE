@@ -115,9 +115,9 @@ class LoaneeBankDetailAdapterTest {
 
     @AfterAll
     void tearDown() throws MeedlException {
-        userIdentityOutputPort.deleteUserById(userIdentity.getId());
         loaneeBankDetailOutputPort.deleteById(loaneeBankDetailId);
         loaneeOutputPort.deleteLoanee(loaneeId);
+        userIdentityOutputPort.deleteUserById(userIdentity.getId());
         bankDetailOutputPort.deleteById(bankDetailId);
         log.info("Deleted all after test. FinancierBankDetail");
     }
