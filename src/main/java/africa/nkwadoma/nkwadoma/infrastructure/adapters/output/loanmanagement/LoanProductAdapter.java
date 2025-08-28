@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanOfferMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
@@ -82,6 +83,18 @@ public class LoanProductAdapter implements LoanProductOutputPort {
                 .map(LoanProductVendor::getVendorEntity)
                 .map(loanProductMapper::mapVendorEntityToVendor)
                 .toList();
+    }
+
+    @Override
+    public LoanProduct findLoanProductByLoanOfferId(String loanOfferId) throws MeedlException {
+        MeedlValidator.validateUUID(loanOfferId, LoanOfferMessages.INVALID_LOAN_OFFER_ID.getMessage());
+        LoanProductEntity loanProductEntity = loanProductRepository.findByLoanOfferId(loanOfferId);
+        return loanProductMapper.mapEntityToLoanProduct(loanProductEntity);
+    }
+
+    @Override
+    public LoanProduct findByLoaneeLoanDetailId(String LoaneeLoanDetailId) {
+        return null;
     }
 
     @Transactional

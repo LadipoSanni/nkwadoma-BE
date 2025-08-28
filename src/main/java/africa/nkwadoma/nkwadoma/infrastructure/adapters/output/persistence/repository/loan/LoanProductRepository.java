@@ -32,4 +32,11 @@ public interface LoanProductRepository extends JpaRepository<LoanProductEntity,S
     """)
     LoanProductEntity findByCohortLoaneeId(@Param("id") String id);
 
+
+    @Query("""
+    select lo.loanProduct
+        FROM LoanOfferEntity lo
+        WHERE lo.id = :loanOfferId
+    """)
+    LoanProductEntity findByLoanOfferId(String loanOfferId);
 }

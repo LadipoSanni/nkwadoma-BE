@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoanDet
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramLoanDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationLoanDetailOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanAggregateOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.DailyInterestOutputPort;
@@ -16,6 +17,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.education.ProgramLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationLoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanAggregate;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
@@ -50,6 +52,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
     private final MonthlyInterestOutputPort monthlyInterestOutputPort;
     private final JobScheduler jobScheduler;
     private final LoaneeLoanAggregateOutputPort loaneeLoanAggregateOutputPort;
+    private final LoanProductOutputPort loanProductOutputPort;
 
 
     @Override
@@ -709,6 +712,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
 
                 MonthlyInterest monthlyInterest = saveMonthlyInterest(accumulatedInterestForTheMonth, loaneeLoanDetail, LocalDateTime.now());
 
+                updateLoanProductLoanOutstanding(monthlyInterest);
                 updateInterestIncurredOnLoaneeLoanDetail(loaneeLoanDetail, accumulatedInterestForTheMonth, monthlyInterest);
 
                 CohortLoanDetail cohortLoanDetail = updateInterestIncurredOnCohortLoanDetail(loaneeLoanDetail, monthlyInterest);
@@ -719,6 +723,13 @@ public class CalculationEngine implements CalculationEngineUseCase {
                 updateInterestIncurredOnOrganizationLoanDetail(programLoanDetail, monthlyInterest);
             }
         }
+
+    }
+
+    private void updateLoanProductLoanOutstanding(MonthlyInterest monthlyInterest) {
+        LoanProduct loanProduct = loanProductOutputPort.findByLoaneeLoanDetailId(monthlyInterest.getLoaneeLoanDetail().getId());
+        loanProduct.setTotalOutstandingLoan(loanProduct.getTotalOutstandingLoan().add(monthlyInterest.getInterest()));
+        loanProductOutputPort.save(loanProduct);
 
     }
 
