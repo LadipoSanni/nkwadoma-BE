@@ -140,5 +140,18 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
 
         return loanReferralProjections.map(loanReferralMapper::mapProjectionToLoanReferral);
     }
+
+    @Override
+    public Page<LoanReferral> searchLoanReferrals(LoanReferral loanReferral) throws MeedlException {
+        MeedlValidator.validatePageSize(loanReferral.getPageSize());
+        MeedlValidator.validatePageNumber(loanReferral.getPageNumber());
+        Pageable pageRequest = PageRequest.of(loanReferral.getPageNumber(), loanReferral.getPageSize());
+
+        Page<LoanReferralProjection> loanReferralProjections =
+                loanReferralRepository.searchLoanReferrals(
+                        loanReferral.getName(),loanReferral.getProgramId(),loanReferral.getOrganizationId(),pageRequest);
+
+        return loanReferralProjections.map(loanReferralMapper::mapProjectionToLoanReferral);
+    }
 }
 

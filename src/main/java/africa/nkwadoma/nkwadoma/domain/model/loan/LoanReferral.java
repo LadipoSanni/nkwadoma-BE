@@ -46,6 +46,7 @@ public class LoanReferral {
     private int pageNumber;
     private String programId;
     private String organizationId;
+    private String name;
 
     public void validateLoanReferralStatus() throws MeedlException {
         MeedlValidator.validateObjectInstance(loanReferralStatus, LoanMessages.LOAN_REFERRAL_STATUS_CANNOT_BE_EMPTY.getMessage());
