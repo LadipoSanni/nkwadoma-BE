@@ -87,5 +87,24 @@ public class WalletManagementController {
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
+    @GetMapping("approve/bankDetail")
+    @Operation(summary = BANK_DETAIL, description = APPROVE_OR_DECLINE_BANK_DETAIL_DESCRIPTION)
+    @PreAuthorize(""" 
+            hasRole('MEEDL_SUPER_ADMIN')
+            or hasRole('ORGANIZATION_SUPER_ADMIN')
+            or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')
+            """)
+    public ResponseEntity<ApiResponse<?>> respondToAddBankDetail(@AuthenticationPrincipal Jwt meedlUser,
+                                                         @RequestBody BankDetailRequest bankDetailRequest) throws MeedlException {
+        BankDetail bankDetail = bankDetailMapper.map(meedlUser.getClaimAsString("sub"), bankDetailRequest);
+        bankDetail = bankDetailUseCase.respondToAddBankDetail(bankDetail);
+        log.info("respond to add bank details as {} with response {}", bankDetail.getActivationStatus(), bankDetail.getResponse());
+        ApiResponse<Object> apiResponse = ApiResponse.builder()
+                .message(bankDetail.getResponse())
+                .statusCode(HttpStatus.OK.name())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+    }
+
 
 }

@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
-public class WalletAdapterTest {
+public class BankDetailAdapterTest {
     @Autowired
     private BankDetailOutputPort bankDetailOutputPort;
     private final BankDetail builtBankDetail = TestData.buildBankDetail();

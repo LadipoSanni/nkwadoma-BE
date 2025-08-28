@@ -61,9 +61,4 @@ public class BankDetailAdapter implements BankDetailOutputPort {
         return bankDetailMapper.map(bankDetailEntities);
     }
 
-    @Override
-    public void delete(String bankDetailId) throws MeedlException {
-        MeedlValidator.validateUUID(bankDetailId, BankDetailMessages.INVALID_BANK_DETAIL_ID.getMessage());
-        bankDetailRepository.deleteById(bankDetailId);
-    }
 }

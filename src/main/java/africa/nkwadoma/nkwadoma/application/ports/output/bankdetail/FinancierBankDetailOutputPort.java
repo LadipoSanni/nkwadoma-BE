@@ -16,4 +16,6 @@ public interface FinancierBankDetailOutputPort {
     FinancierBankDetail findApprovedBankDetailByFinancierId(Financier financier) throws MeedlException;
 
     List<BankDetail> findAllBankDetailOfFinancier(Financier financier) throws MeedlException;
+
+    void deleteById(String financierBankDetailId) throws MeedlException;
 }

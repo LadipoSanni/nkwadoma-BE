@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.wallet;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.bankdetail.FinancierBankDetailOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.BankDetailMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -32,6 +33,10 @@ public class FinancierBankDetailAdapter implements FinancierBankDetailOutputPort
         MeedlValidator.validateObjectInstance(financierBankDetail, "Provide a valid financier bank detail to save");
         MeedlValidator.validateObjectInstance(financierBankDetail.getBankDetail(), BankDetailMessages.INVALID_BANK_DETAIL.getMessage());
         MeedlValidator.validateObjectInstance(financierBankDetail.getFinancier(), FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
+        MeedlValidator.validateUUID(financierBankDetail.getBankDetail().getId(), BankDetailMessages.INVALID_BANK_DETAIL_ID.getMessage());
+        MeedlValidator.validateUUID(financierBankDetail.getFinancier().getId(), FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+
+        log.info("Done validating for financier bank detail");
         FinancierBankDetailEntity financierBankDetailEntity = financierBankDetailMapper.map(financierBankDetail);
         financierBankDetailEntity = financierBankDetailRepository.save(financierBankDetailEntity);
         return financierBankDetailMapper.map(financierBankDetailEntity);
@@ -63,5 +68,11 @@ public class FinancierBankDetailAdapter implements FinancierBankDetailOutputPort
                 .map(FinancierBankDetailEntity::getBankDetailEntity)
                 .map(bankDetailMapper::toBankDetail)
                 .toList();
+    }
+
+    @Override
+    public void deleteById(String financierBankDetailId) throws MeedlException {
+        MeedlValidator.validateUUID(financierBankDetailId, "financier bank detail id is required to delete");
+        financierBankDetailRepository.deleteById(financierBankDetailId);
     }
 }

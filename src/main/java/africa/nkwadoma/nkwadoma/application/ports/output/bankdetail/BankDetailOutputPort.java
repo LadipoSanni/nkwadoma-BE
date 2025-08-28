@@ -14,5 +14,4 @@ public interface BankDetailOutputPort {
 
     List<BankDetail> save(List<BankDetail> existingBankDetails) throws MeedlException;
 
-    void delete(String bankDetailId) throws MeedlException;
 }

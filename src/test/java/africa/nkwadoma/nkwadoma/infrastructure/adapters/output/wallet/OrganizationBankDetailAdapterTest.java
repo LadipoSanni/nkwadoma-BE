@@ -26,7 +26,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Slf4j
 class OrganizationBankDetailAdapterTest {
 
-
     @Autowired
     private OrganizationBankDetailOutputPort organizationBankDetailOutputPort;
 
@@ -112,7 +111,7 @@ class OrganizationBankDetailAdapterTest {
     void tearDown() throws MeedlException {
         organizationBankDetailOutputPort.deleteById(organizationBankDetailId);
         organizationIdentityOutputPort.delete(organizationIdentityId);
-        bankDetailOutputPort.delete(bankDetailId);
+        bankDetailOutputPort.deleteById(bankDetailId);
         log.info("Deleted all after test");
     }
 }
