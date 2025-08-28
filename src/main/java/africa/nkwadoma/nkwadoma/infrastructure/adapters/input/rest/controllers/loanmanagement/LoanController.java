@@ -384,4 +384,34 @@ public class LoanController {
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
 
+
+
+    @GetMapping("/view/loan-referrals")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
+    public ResponseEntity<ApiResponse<?>> viewAllLoanReferrals(@RequestParam(required = false) String programId,
+                                                               @RequestParam(required = false) String organizationId,
+                                                               @RequestParam(defaultValue = "10") int pageSize,
+                                                               @RequestParam(defaultValue = "0") int pageNumber) throws MeedlException {
+
+        LoanReferral request = LoanReferral.builder().programId(programId).organizationId(organizationId)
+                .pageNumber(pageNumber).pageSize(pageSize).build();
+        Page<LoanReferral> loanReferrals = loanUseCase.viewAllLoanReferrals(request);
+        Page<AllLoanReferralResponse> allLoanReferralResponses =
+                loanReferrals.map(loanReferralRestMapper::allLoanReferralResponse);
+
+        PaginatedResponse<AllLoanReferralResponse> paginatedResponse =
+                PaginatedResponse.<AllLoanReferralResponse>builder()
+                        .body(allLoanReferralResponses.getContent())
+                        .pageSize(pageSize)
+                        .pageNumber(pageNumber)
+                        .totalPages(allLoanReferralResponses.getTotalPages())
+                        .hasNextPage(allLoanReferralResponses.hasNext())
+                        .build();
+        ApiResponse<PaginatedResponse<AllLoanReferralResponse>> apiResponse = ApiResponse.<PaginatedResponse<AllLoanReferralResponse>>builder()
+                .data(paginatedResponse)
+                .message(ALL_LOAN)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
 }

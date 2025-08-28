@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loan;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetailSummary;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import org.springframework.data.domain.Page;
 
@@ -18,4 +19,6 @@ public interface LoanUseCase {
     LoanDetailSummary viewLoanTotal(String actorId,String loaneeId) throws MeedlException;
 
     Page<Loan> searchDisbursedLoan(Loan loan) throws MeedlException;
+
+    Page<LoanReferral> viewAllLoanReferrals(LoanReferral request) throws MeedlException;
 }

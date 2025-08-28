@@ -135,8 +135,10 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
         Pageable pageRequest = PageRequest.of(loanReferral.getPageNumber(), loanReferral.getPageSize());
 
         Page<LoanReferralProjection> loanReferralProjections =
-                loanReferralRepository.findAllLoanReferrals(loanReferral.getProgramId(),loanReferral);
-        return null;
+                loanReferralRepository.findAllLoanReferrals(
+                        loanReferral.getProgramId(),loanReferral.getOrganizationId(),pageRequest);
+
+        return loanReferralProjections.map(loanReferralMapper::mapProjectionToLoanReferral);
     }
 }
 

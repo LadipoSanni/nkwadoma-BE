@@ -36,6 +36,7 @@ public class LoanReferral {
     private String loaneeImage;
     private BigDecimal loanAmountRequested;
     private BigDecimal initialDeposit;
+    private LocalDateTime referralDate;
     private BigDecimal tuitionAmount;
     private LocalDate cohortStartDate;
     private String programName;
