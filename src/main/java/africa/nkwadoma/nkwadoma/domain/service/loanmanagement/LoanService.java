@@ -383,6 +383,13 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         return loanReferralOutputPort.findAllLoanReferrals(request);
     }
 
+    @Override
+    public Page<LoanReferral> searchLoanReferrals(LoanReferral request) throws MeedlException {
+        MeedlValidator.validatePageSize(request.getPageSize());
+        MeedlValidator.validatePageNumber(request.getPageNumber());
+        return loanReferralOutputPort.searchLoanReferrals(request);
+    }
+
     private String getLoanAccountId(Loanee foundLoanee) throws MeedlException {
         LoaneeLoanAccount loaneeLoanAccount = loaneeLoanAccountOutputPort.findByLoaneeId(foundLoanee.getId());
         log.info("Found loanee account: {}", loaneeLoanAccount);

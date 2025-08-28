@@ -418,6 +418,38 @@ public class LoanController {
     }
 
 
+    @GetMapping("/search/loan-referrals")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
+    public ResponseEntity<ApiResponse<?>> searchLoanReferrals(@RequestParam(name = "name") String name,
+                                                              @RequestParam(name = "programId", required = false) String programId,
+                                                              @RequestParam(name = "organizationId" , required = false) String organizationId,
+                                                              @RequestParam(defaultValue = "10") int pageSize,
+                                                              @RequestParam(defaultValue = "0") int pageNumber) throws MeedlException {
+
+        LoanReferral request = LoanReferral.builder().name(name).programId(programId).organizationId(organizationId)
+                .pageNumber(pageNumber).pageSize(pageSize).build();
+        log.info("request that got in ----- ProgramID == {}  organizationID == {}",request.getProgramId(),request.getOrganizationId());
+        Page<LoanReferral> loanReferrals = loanUseCase.searchLoanReferrals(request);
+        Page<AllLoanReferralResponse> allLoanReferralResponses =
+                loanReferrals.map(loanReferralRestMapper::allLoanReferralResponse);
+
+        PaginatedResponse<AllLoanReferralResponse> paginatedResponse =
+                PaginatedResponse.<AllLoanReferralResponse>builder()
+                        .body(allLoanReferralResponses.getContent())
+                        .pageSize(pageSize)
+                        .pageNumber(pageNumber)
+                        .totalPages(allLoanReferralResponses.getTotalPages())
+                        .hasNextPage(allLoanReferralResponses.hasNext())
+                        .build();
+        ApiResponse<PaginatedResponse<AllLoanReferralResponse>> apiResponse = ApiResponse.<PaginatedResponse<AllLoanReferralResponse>>builder()
+                .data(paginatedResponse)
+                .message(ALL_LOAN)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+
+
     @PostMapping("/withdraw/loan-offer")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') ")
     public ResponseEntity<ApiResponse<?>> withdrawLoanOffer(@RequestParam(name = "loanOfferId") String loanOfferId,

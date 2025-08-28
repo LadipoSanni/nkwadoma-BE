@@ -180,6 +180,57 @@ class LoanReferralAdapterTest {
         assertEquals(1, foundLoanReferral.getTotalElements());
     }
 
+    @Order(5)
+    @Test
+    void searchLoanReferrals(){
+        Page<LoanReferral> foundLoanReferral = Page.empty();
+        LoanReferral request = LoanReferral.builder().name("j").pageNumber(pageNumber).pageSize(pageSize).build();
+        try{
+            foundLoanReferral = loanReferralOutputPort.searchLoanReferrals(request);
+        }catch (MeedlException meedlException){
+            log.info("Failed to find loanReferrals {}", meedlException.getMessage());
+        }
+        assertEquals(1, foundLoanReferral.getTotalElements());
+    }
+
+     @Order(6)
+    @Test
+    void searchLoanReferralsWithProgramId(){
+        Page<LoanReferral> foundLoanReferral = Page.empty();
+        LoanReferral request = LoanReferral.builder().name("j").programId(program.getId()).pageNumber(pageNumber).pageSize(pageSize).build();
+        try{
+            foundLoanReferral = loanReferralOutputPort.searchLoanReferrals(request);
+        }catch (MeedlException meedlException){
+            log.info("Failed to find loanReferrals {}", meedlException.getMessage());
+        }
+        assertEquals(1, foundLoanReferral.getTotalElements());
+    }
+
+    @Order(7)
+    @Test
+    void searchLoanReferralsWithOrganizationId(){
+        Page<LoanReferral> foundLoanReferral = Page.empty();
+        LoanReferral request = LoanReferral.builder().name("j").organizationId(organizationIdentity.getId()).pageNumber(pageNumber).pageSize(pageSize).build();
+        try{
+            foundLoanReferral = loanReferralOutputPort.searchLoanReferrals(request);
+        }catch (MeedlException meedlException){
+            log.info("Failed to find loanReferrals {}", meedlException.getMessage());
+        }
+        assertEquals(1, foundLoanReferral.getTotalElements());
+    }
+
+    @Order(8)
+    @Test
+    void searchLoanReferralsWithWithNotExistingLoaneeName(){
+        Page<LoanReferral> foundLoanReferral = Page.empty();
+        LoanReferral request = LoanReferral.builder().name("z").pageNumber(pageNumber).pageSize(pageSize).build();
+        try {
+            foundLoanReferral = loanReferralOutputPort.searchLoanReferrals(request);
+        }catch (MeedlException meedlException){
+            log.info("Failed to find loanReferrals {}", meedlException.getMessage());
+        }
+        assertEquals(0, foundLoanReferral.getTotalElements());
+    }
 
     @AfterAll
     void cleanUp() throws MeedlException {
