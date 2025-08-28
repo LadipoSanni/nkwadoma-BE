@@ -139,6 +139,7 @@ public class LoanController {
                                                                           String loanProductId) throws MeedlException {
         log.info("View loan product details by id was called.... {}", loanProductId);
         LoanProduct createdLoanProduct = viewLoanProductUseCase.viewLoanProductDetailsById(loanProductId);
+        log.info("At controller the created loan product : {}", createdLoanProduct);
         LoanProductResponse loanProductResponse = loanProductMapper.mapToLoanProductResponse(createdLoanProduct);
         ApiResponse<LoanProductResponse> apiResponse = ApiResponse.<LoanProductResponse>builder()
                 .data(loanProductResponse)

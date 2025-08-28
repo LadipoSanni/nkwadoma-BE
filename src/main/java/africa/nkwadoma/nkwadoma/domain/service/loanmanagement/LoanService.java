@@ -389,7 +389,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     @Override
     public LoanProduct viewLoanProductDetailsById(String loanProductId) throws MeedlException {
         MeedlValidator.validateUUID(loanProductId, LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
-        return loanProductOutputPort.findById(loanProductId);
+        LoanProduct loanProduct = loanProductOutputPort.findById(loanProductId);
+        List<Vendor> vendors = loanProductOutputPort.getVendorsByLoanProductId(loanProductId);
+        loanProduct.setVendors(vendors);
+        return loanProduct;
     }
 
     @Override
