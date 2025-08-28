@@ -31,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -194,15 +195,22 @@ public class WalletService implements WalletOutputPort {
     }
 
     private List<BankDetail> saveBankDetails(BankDetail bankDetailToSave, List<BankDetail> existingBankDetails) throws MeedlException {
+        existingBankDetails = (existingBankDetails == null)
+                ? new ArrayList<>()
+                : new ArrayList<>(existingBankDetails);
         BankDetail savedBankDetail = bankDetailOutputPort.save(bankDetailToSave);
         bankDetailToSave.setId(savedBankDetail.getId());
         if (MeedlValidator.isEmptyCollection(existingBankDetails)) {
-            existingBankDetails = List.of(bankDetailToSave);
+            log.info("The existing bank details is empty...");
+            existingBankDetails = new ArrayList<>();
+            existingBankDetails.add(bankDetailToSave);
         } else {
+            log.info("Existing bank details is not empty... {}", existingBankDetails);
             if (ActivationStatus.APPROVED.equals(bankDetailToSave.getActivationStatus())) {
                 existingBankDetails.forEach(existingBankDetail -> existingBankDetail.setActivationStatus(ActivationStatus.DECLINED));
                 bankDetailOutputPort.save(existingBankDetails);
             }
+            log.info("Bank detail to save {}", bankDetailToSave);
             existingBankDetails.add(bankDetailToSave);
         }
         return existingBankDetails;
