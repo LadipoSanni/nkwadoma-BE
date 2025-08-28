@@ -726,7 +726,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
 
     }
 
-    private void updateLoanProductLoanOutstanding(MonthlyInterest monthlyInterest) {
+    private void updateLoanProductLoanOutstanding(MonthlyInterest monthlyInterest) throws MeedlException {
         LoanProduct loanProduct = loanProductOutputPort.findByLoaneeLoanDetailId(monthlyInterest.getLoaneeLoanDetail().getId());
         loanProduct.setTotalOutstandingLoan(loanProduct.getTotalOutstandingLoan().add(monthlyInterest.getInterest()));
         loanProductOutputPort.save(loanProduct);

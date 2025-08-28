@@ -384,6 +384,20 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }
     }
 
+    @Override
+    public Page<LoanReferral> viewAllLoanReferrals(LoanReferral request) throws MeedlException {
+        MeedlValidator.validatePageSize(request.getPageSize());
+        MeedlValidator.validatePageNumber(request.getPageNumber());
+        return loanReferralOutputPort.findAllLoanReferrals(request);
+    }
+
+    @Override
+    public Page<LoanReferral> searchLoanReferrals(LoanReferral request) throws MeedlException {
+        MeedlValidator.validatePageSize(request.getPageSize());
+        MeedlValidator.validatePageNumber(request.getPageNumber());
+        return loanReferralOutputPort.searchLoanReferrals(request);
+    }
+
     private String getLoanAccountId(Loanee foundLoanee) throws MeedlException {
         LoaneeLoanAccount loaneeLoanAccount = loaneeLoanAccountOutputPort.findByLoaneeId(foundLoanee.getId());
         log.info("Found loanee account: {}", loaneeLoanAccount);
@@ -876,6 +890,19 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         return filterResult(loanOffer);
     }
 
+    @Override
+    public LoanOffer withdrawLoanOffer(String loanOfferId, LoanOfferStatus loanOfferStatus) throws MeedlException {
+        MeedlValidator.validateUUID(loanOfferId,"Loan offer id cannot be empty ");
+        MeedlValidator.validateObjectInstance(loanOfferStatus,"Loan offer status cannot be empty");
+        LoanOffer loanOffer = loanOfferOutputPort.findLoanOfferById(loanOfferId);
+        boolean loanHasStarted = loanOutputPort.checkIfLoanHasBeenDisbursedForLoanOffer(loanOffer.getId());
+        if (loanHasStarted){
+            throw new LoanException("Loan offer has already been disbursed, it can't be withdraw");
+        }
+        loanOffer.setLoanOfferStatus(loanOfferStatus);
+        return  loanOfferOutputPort.save(loanOffer);
+    }
+
     private Page<LoanDetail> filterResult(LoanOffer loanOffer) throws MeedlException {
         Page<LoanDetail> loanDetails;
         if (loanOffer.getType().equals(LoanType.LOAN_OFFER)){
@@ -897,6 +924,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }
          throw new LoanException(loanOffer.getType().name()+" is not a loan type");
     }
+
+
 
 
 }

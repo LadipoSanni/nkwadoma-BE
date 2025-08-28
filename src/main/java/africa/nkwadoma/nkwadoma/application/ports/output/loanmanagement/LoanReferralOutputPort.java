@@ -29,4 +29,8 @@ public interface LoanReferralOutputPort {
     Page<LoanReferral> findAllLoanReferralsForLoanee(String loaneeId, int pageNumber, int pageSize) throws MeedlException;
 
     List<LoanReferral> findAllLoanReferralsByUserIdAndStatus(String id,LoanReferralStatus loanReferralStatus) throws MeedlException;
+
+    Page<LoanReferral> findAllLoanReferrals(LoanReferral loanReferral) throws MeedlException;
+
+    Page<LoanReferral> searchLoanReferrals(LoanReferral request) throws MeedlException;
 }
