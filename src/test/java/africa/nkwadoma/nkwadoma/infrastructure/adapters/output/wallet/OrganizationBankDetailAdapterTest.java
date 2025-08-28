@@ -26,7 +26,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Slf4j
 class OrganizationBankDetailAdapterTest {
 
-
     @Autowired
     private OrganizationBankDetailOutputPort organizationBankDetailOutputPort;
 

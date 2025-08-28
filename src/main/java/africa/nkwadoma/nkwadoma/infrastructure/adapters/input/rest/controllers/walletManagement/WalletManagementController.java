@@ -94,14 +94,13 @@ public class WalletManagementController {
             or hasRole('ORGANIZATION_SUPER_ADMIN')
             or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')
             """)
-    public ResponseEntity<ApiResponse<?>> viewBankDetail(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
-        BankDetail bankDetail = bankDetailMapper.map(meedlUser.getClaimAsString("sub"));
-        bankDetail = bankDetailUseCase.viewBankDetail(bankDetail);
-        log.info("Viewing bank details {}", bankDetail);
-        BankDetailResponse bankDetailResponse = bankDetailMapper.map(bankDetail);
+    public ResponseEntity<ApiResponse<?>> respondToAddBankDetail(@AuthenticationPrincipal Jwt meedlUser,
+                                                         @RequestBody BankDetailRequest bankDetailRequest) throws MeedlException {
+        BankDetail bankDetail = bankDetailMapper.map(meedlUser.getClaimAsString("sub"), bankDetailRequest);
+        bankDetail = bankDetailUseCase.respondToAddBankDetail(bankDetail);
+        log.info("respond to add bank details as {} with response {}", bankDetail.getActivationStatus(), bankDetail.getResponse());
         ApiResponse<Object> apiResponse = ApiResponse.builder()
-                .data(bankDetailResponse)
-                .message("Bank detail viewed successfully")
+                .message(bankDetail.getResponse())
                 .statusCode(HttpStatus.OK.name())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);

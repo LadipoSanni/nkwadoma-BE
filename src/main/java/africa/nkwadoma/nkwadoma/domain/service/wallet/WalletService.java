@@ -3,7 +3,9 @@ package africa.nkwadoma.nkwadoma.domain.service.wallet;
 import africa.nkwadoma.nkwadoma.application.ports.input.walletManagement.WalletOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.bankdetail.BankDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.bankdetail.FinancierBankDetailOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.bankdetail.LoaneeBankDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.bankdetail.OrganizationBankDetailOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
@@ -17,10 +19,12 @@ import africa.nkwadoma.nkwadoma.domain.enums.identity.OrganizationType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.bankdetail.FinancierBankDetail;
+import africa.nkwadoma.nkwadoma.domain.model.bankdetail.LoaneeBankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.bankdetail.OrganizationBankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +45,8 @@ public class WalletService implements WalletOutputPort {
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
     private final FinancierBankDetailOutputPort financierBankDetailOutputPort;
     private final OrganizationBankDetailOutputPort organizationBankDetailOutputPort;
+    private final LoaneeOutputPort loaneeOutputPort;
+    private final LoaneeBankDetailOutputPort loaneeBankDetailOutputPort;
 
 
     @Override
@@ -78,7 +84,7 @@ public class WalletService implements WalletOutputPort {
             if (IdentityRole.COOPERATE_FINANCIER_SUPER_ADMIN.equals(userIdentity.getRole())){
                 return addCooperateFinancierBankDetail(bankDetail, financier, ActivationStatus.APPROVED);
             }else {
-                bankDetail = addCooperateFinancierBankDetail(bankDetail, financier, ActivationStatus.PENDING_APPROVAL);
+                addCooperateFinancierBankDetail(bankDetail, financier, ActivationStatus.PENDING_APPROVAL);
                 asynchronousNotificationOutputPort.notifyCooperateSuperAdminToApproveBankDetail(bankDetail, financier);
                 return bankDetail;
             }
@@ -92,14 +98,33 @@ public class WalletService implements WalletOutputPort {
 //            notifyActor();
             return bankDetail;
         }
+        if (IdentityRole.LOANEE.equals(userIdentity.getRole())){
+            addLoaneeBankDetail(bankDetail, userIdentity, ActivationStatus.APPROVED);
+        }
         return bankDetail;
     }
+
+    private void addLoaneeBankDetail(BankDetail bankDetail, UserIdentity userIdentity, ActivationStatus activationStatus) throws MeedlException {
+        Optional<Loanee> optionalLoanee =  loaneeOutputPort.findByUserId(userIdentity.getId());
+        if (optionalLoanee.isPresent()) {
+            Loanee loanee = optionalLoanee.get();
+            bankDetail.setActivationStatus(activationStatus);
+            saveBankDetails(bankDetail, loanee);
+            saveLoaneeBankDetail(bankDetail, loanee);
+//            loaneeOutputPort.save(loanee);
+            log.info("{} successfully added bank details", userIdentity.getRole().getRoleName());
+        }else {
+            log.error("Unable to find {} . With user id {}",userIdentity.getRole().getRoleName(), userIdentity.getId());
+        }
+
+    }
+
 
     private BankDetail addCooperateFinancierBankDetail(BankDetail bankDetail, Financier financier, ActivationStatus activationStatus) throws MeedlException {
         bankDetail.setActivationStatus(activationStatus);
         saveBankDetails(bankDetail, financier);
-        financierOutputPort.save(financier);
         saveFinancierBankDetail(financier, bankDetail);
+//        financierOutputPort.save(financier);
         bankDetail.setResponse("Cooperate financier bank detail is "+activationStatus.getStatusName());
         log.info("Bank detail id {} for cooperate financier with id {} status {}", bankDetail.getId(), financier.getId(), activationStatus);
         return bankDetail;
@@ -112,8 +137,8 @@ public class WalletService implements WalletOutputPort {
             bankDetail.setActivationStatus(activationStatus);
             saveBankDetails(bankDetail, organizationIdentity);
             saveOrganizationBankDetail(bankDetail, organizationIdentity);
-            organizationIdentity.setOrganizationType(OrganizationType.COOPERATE);
-            organizationIdentityOutputPort.save(organizationIdentity);
+//            organizationIdentity.setOrganizationType(OrganizationType.COOPERATE);
+//            organizationIdentityOutputPort.save(organizationIdentity);
             log.info("{} successfully added bank details", userIdentity.getRole().getRoleName());
         }else {
             log.error("Unable to find {} organization. user id {}",userIdentity.getRole().getRoleName(), userIdentity.getId());
@@ -130,6 +155,15 @@ public class WalletService implements WalletOutputPort {
         financierBankDetailOutputPort.save(financierBankDetail);
     }
 
+    private void saveLoaneeBankDetail(BankDetail bankDetail, Loanee loanee) throws MeedlException {
+        LoaneeBankDetail loaneeBankDetail = LoaneeBankDetail.builder()
+                .loanee(loanee)
+                .bankDetail(bankDetail)
+                .build();
+        log.info("saving loanee's bank detail. organization id {}, bank detail {}", loaneeBankDetail.getId(), bankDetail.getId());
+        loaneeBankDetailOutputPort.save(loaneeBankDetail);
+    }
+
     private void saveOrganizationBankDetail(BankDetail bankDetail, OrganizationIdentity organizationIdentity) throws MeedlException {
         OrganizationBankDetail organizationBankDetail = OrganizationBankDetail.builder()
                 .organizationIdentity(organizationIdentity)
@@ -139,37 +173,39 @@ public class WalletService implements WalletOutputPort {
         organizationBankDetailOutputPort.save(organizationBankDetail);
     }
 
+    private void saveBankDetails(BankDetail bankDetailToSave, Loanee loanee) throws MeedlException {
+        List<BankDetail> existingBankDetails = loaneeBankDetailOutputPort.findAllBankDetailOfLoanee(loanee);
+        existingBankDetails = saveBankDetails(bankDetailToSave, existingBankDetails);
+        loanee.setBankDetails(existingBankDetails);
+    }
+
+
     private void saveBankDetails(BankDetail bankDetailToSave, OrganizationIdentity organizationIdentity) throws MeedlException {
         List<BankDetail> existingBankDetails = organizationBankDetailOutputPort.findAllBankDetailOfOrganization(organizationIdentity);
-        BankDetail savedBankDetail = bankDetailOutputPort.save(bankDetailToSave);
-        bankDetailToSave.setId(savedBankDetail.getId());
-        if (MeedlValidator.isEmptyCollection(existingBankDetails)){
-            existingBankDetails = List.of(bankDetailToSave);
-        }else {
-            if (ActivationStatus.APPROVED.equals(bankDetailToSave.getActivationStatus())){
-                existingBankDetails.forEach(existingBankDetail -> existingBankDetail.setActivationStatus(ActivationStatus.DEACTIVATED));
-                bankDetailOutputPort.save(existingBankDetails);
-            }
-            existingBankDetails.add(bankDetailToSave);
-        }
+        existingBankDetails = saveBankDetails(bankDetailToSave, existingBankDetails);
         organizationIdentity.setBankDetails(existingBankDetails);
     }
 
 
     private void saveBankDetails(BankDetail bankDetailToSave, Financier financier) throws MeedlException {
         List<BankDetail> existingBankDetails = financierBankDetailOutputPort.findAllBankDetailOfFinancier(financier);
+        existingBankDetails = saveBankDetails(bankDetailToSave, existingBankDetails);
+        financier.setBankDetails(existingBankDetails);
+    }
+
+    private List<BankDetail> saveBankDetails(BankDetail bankDetailToSave, List<BankDetail> existingBankDetails) throws MeedlException {
         BankDetail savedBankDetail = bankDetailOutputPort.save(bankDetailToSave);
         bankDetailToSave.setId(savedBankDetail.getId());
-        if (MeedlValidator.isEmptyCollection(existingBankDetails)){
+        if (MeedlValidator.isEmptyCollection(existingBankDetails)) {
             existingBankDetails = List.of(bankDetailToSave);
-        }else {
-            if (ActivationStatus.APPROVED.equals(bankDetailToSave.getActivationStatus())){
+        } else {
+            if (ActivationStatus.APPROVED.equals(bankDetailToSave.getActivationStatus())) {
                 existingBankDetails.forEach(existingBankDetail -> existingBankDetail.setActivationStatus(ActivationStatus.DECLINED));
                 bankDetailOutputPort.save(existingBankDetails);
             }
             existingBankDetails.add(bankDetailToSave);
         }
-        financier.setBankDetails(existingBankDetails);
+        return existingBankDetails;
     }
 
 
