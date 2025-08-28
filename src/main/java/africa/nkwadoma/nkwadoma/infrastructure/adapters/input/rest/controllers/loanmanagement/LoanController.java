@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.LoanUseCase;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanOfferStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
@@ -188,7 +189,7 @@ public class LoanController {
     }
 
     @PostMapping("/accept/loan-offer")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('LOANEE')")
     public ResponseEntity<ApiResponse<?>> acceptLoanOffer(@AuthenticationPrincipal Jwt meedlUser,
                                                           @Valid @RequestBody LoanOfferAcceptRequest loanOfferRequest) throws MeedlException {
         log.info("process of accept loan offer request started: {}", loanOfferRequest);
@@ -447,4 +448,22 @@ public class LoanController {
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
+
+
+    @PostMapping("/withdraw/loan-offer")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') ")
+    public ResponseEntity<ApiResponse<?>> withdrawLoanOffer(@RequestParam(name = "loanOfferId") String loanOfferId,
+                                                            @RequestParam(name = "loanOfferStatus")LoanOfferStatus loanOfferStatus) throws MeedlException {
+
+        LoanOffer loanOffer = loanOfferUseCase.withdrawLoanOffer(loanOfferId,loanOfferStatus);
+        WithDrawLoanOfferResponse withDrawLoanOfferResponse = loanOfferRestMapper.toWithDrawnLoanOfferResponse(loanOffer);
+        ApiResponse<WithDrawLoanOfferResponse> apiResponse = ApiResponse.<WithDrawLoanOfferResponse>builder()
+                .data(withDrawLoanOfferResponse)
+                .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+
+
 }

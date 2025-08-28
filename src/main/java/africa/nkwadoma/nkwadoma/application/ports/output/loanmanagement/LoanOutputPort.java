@@ -30,4 +30,6 @@ public interface LoanOutputPort {
     Page<Loan> searchLoanByOrganizationNameAndLoaneeId(Loan loan) throws MeedlException;
 
     Page<Loan> searchLoanByOrganizationNameAndUserId(Loan loan, String id) throws MeedlException;
+
+    boolean checkIfLoanHasBeenDisbursedForLoanOffer(String id) throws MeedlException;
 }

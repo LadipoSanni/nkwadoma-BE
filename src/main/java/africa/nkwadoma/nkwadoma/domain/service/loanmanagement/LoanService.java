@@ -879,6 +879,19 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         return filterResult(loanOffer);
     }
 
+    @Override
+    public LoanOffer withdrawLoanOffer(String loanOfferId, LoanOfferStatus loanOfferStatus) throws MeedlException {
+        MeedlValidator.validateUUID(loanOfferId,"Loan offer id cannot be empty ");
+        MeedlValidator.validateObjectInstance(loanOfferStatus,"Loan offer status cannot be empty");
+        LoanOffer loanOffer = loanOfferOutputPort.findLoanOfferById(loanOfferId);
+        boolean loanHasStarted = loanOutputPort.checkIfLoanHasBeenDisbursedForLoanOffer(loanOffer.getId());
+        if (loanHasStarted){
+            throw new LoanException("Loan offer has already been disbursed, it can't be withdraw");
+        }
+        loanOffer.setLoanOfferStatus(loanOfferStatus);
+        return  loanOfferOutputPort.save(loanOffer);
+    }
+
     private Page<LoanDetail> filterResult(LoanOffer loanOffer) throws MeedlException {
         Page<LoanDetail> loanDetails;
         if (loanOffer.getType().equals(LoanType.LOAN_OFFER)){
