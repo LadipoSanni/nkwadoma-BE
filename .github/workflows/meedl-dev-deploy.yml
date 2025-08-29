@@ -3,7 +3,7 @@ name: Deploy Nkwadoma Service to Development environment
 on:
   push:
     branches:
-      - 'dev-1'
+      - 'dev'
 
 env:
   REPO_URL: 357586184453.dkr.ecr.us-east-1.amazonaws.com/nkwadoma
