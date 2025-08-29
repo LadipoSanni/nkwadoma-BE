@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoanDet
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramLoanDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationLoanDetailOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanAggregateOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.DailyInterestOutputPort;
@@ -16,6 +17,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.education.ProgramLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationLoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanAggregate;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
@@ -53,6 +55,8 @@ public class LoanCalculationEngineTest {
     private CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
     @Mock
     private ProgramLoanDetailOutputPort programLoanDetailOutputPort;
+    @Mock
+    private LoanProductOutputPort loanProductOutputPort;
     @Mock
     private OrganizationLoanDetailOutputPort organizationLoanDetailOutputPort;
     @Mock
@@ -899,6 +903,11 @@ public class LoanCalculationEngineTest {
         loanDetail.setAmountOutstanding(BigDecimal.valueOf(30416.67));
         loanDetail.setInterestRate(12);
         loanDetail.setInterestIncurred(BigDecimal.ZERO);
+
+        LoanProduct loanProduct = TestData.buildTestLoanProduct();
+        loanProduct.setTotalOutstandingLoan(BigDecimal.ZERO);
+        when(loanProductOutputPort.save(loanProduct)).thenReturn(loanProduct);
+        when(loanProductOutputPort.findByLoaneeLoanDetailId(anyString())).thenReturn(loanProduct);
         when(loaneeLoanDetailsOutputPort.findAllWithDailyInterestByMonthAndYear(Month.AUGUST,2025))
                 .thenReturn(List.of(loanDetail));
         when(dailyInterestOutputPort.findAllInterestForAMonth(Month.AUGUST,2025,loanDetail.getId()))
