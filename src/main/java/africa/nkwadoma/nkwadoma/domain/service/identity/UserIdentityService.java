@@ -205,9 +205,6 @@ public class UserIdentityService implements UserUseCase {
     public void changePassword(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
         validatePasswordsForChangePassword(userIdentity);
-        if(checkNewPasswordMatchLastFive(userIdentity)){
-            throw new IdentityException(PASSWORD_NOT_ACCEPTED.getMessage());
-        }
         userIdentity.setEmailVerified(true);
         userIdentity.setEnabled(true);
         userIdentity.setCreatedAt(LocalDateTime.now());
@@ -220,6 +217,9 @@ public class UserIdentityService implements UserUseCase {
         if (userIdentity.getNewPassword().equals(userIdentity.getPassword())){
             log.warn("{}", UserMessages.NEW_PASSWORD_AND_CURRENT_PASSWORD_CANNOT_BE_SAME.getMessage());
             throw new IdentityException(UserMessages.NEW_PASSWORD_AND_CURRENT_PASSWORD_CANNOT_BE_SAME.getMessage());
+        }
+        if(checkNewPasswordMatchLastFive(userIdentity)){
+            throw new IdentityException(PASSWORD_NOT_ACCEPTED.getMessage());
         }
         String currentPassword = tokenUtils.decryptAES(userIdentity.getPassword(), "Invalid password entered for current password");
         try{
