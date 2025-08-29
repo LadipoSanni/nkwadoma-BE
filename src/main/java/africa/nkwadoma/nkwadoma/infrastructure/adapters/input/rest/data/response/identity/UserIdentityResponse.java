@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.respons
 
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.MFAType;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.LevelOfEducation;
 import lombok.*;
 
 @Setter
@@ -22,6 +23,7 @@ public class UserIdentityResponse {
     private String stateOfOrigin;
     private String maritalStatus;
     private String stateOfResidence;
+    private LevelOfEducation levelOfEduction;
     private String nationality;
     private String residentialAddress;
     private IdentityRole role;
