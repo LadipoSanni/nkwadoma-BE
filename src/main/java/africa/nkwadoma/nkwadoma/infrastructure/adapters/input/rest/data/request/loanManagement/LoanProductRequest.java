@@ -18,6 +18,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 public class LoanProductRequest {
     private String id;
     private String investmentVehicleId;
+    private List<String> sponsorIds;
     private BigDecimal totalAmountAvailable;
     private BigDecimal totalAmountEarned;
     private BigDecimal totalAmountDisbursed;
@@ -35,7 +36,6 @@ public class LoanProductRequest {
 
     @NotBlank(message = LOAN_PRODUCT_MANDATE_REQUIRED)
     private String mandate;
-
 
     private BigDecimal loanProductSize;
     private BigDecimal obligorLoanLimit;

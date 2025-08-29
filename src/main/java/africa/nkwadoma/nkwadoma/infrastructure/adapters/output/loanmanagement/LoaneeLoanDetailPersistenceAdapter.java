@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLo
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeLoanDetailMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetailSummary;
@@ -37,7 +38,7 @@ public class LoaneeLoanDetailPersistenceAdapter implements LoaneeLoanDetailsOutp
 
     @Override
     public void delete(String LoaneeLoanDetailId) throws MeedlException {
-        MeedlValidator.validateUUID(LoaneeLoanDetailId, "Please provide a valid Loanee LoanDetailId");
+        MeedlValidator.validateUUID(LoaneeLoanDetailId, LoaneeLoanDetailMessages.INVALID_LOANEE_LOAN_DETAIL_ID.getMessage());
         Optional<LoaneeLoanDetailEntity> loaneeLoanDetailEntity = loaneeLoanDetailRepository.findById(LoaneeLoanDetailId);
         loaneeLoanDetailEntity.ifPresent(loaneeLoanDetailRepository::delete);
     }
