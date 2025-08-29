@@ -194,6 +194,7 @@ public class LoaneeService implements LoaneeUseCase {
 
     private void updateMeedlPortfolio(Loanee loanee) throws MeedlException {
        boolean newLoanee =  cohortLoaneeOutputPort.checkIfLoaneeIsNew(loanee.getId());
+       log.info("is this a new loanee = {}", newLoanee);
        if(newLoanee){
            Portfolio portfolio = Portfolio.builder().portfolioName("Meedl").build();
            portfolio = portfolioOutputPort.findPortfolio(portfolio);

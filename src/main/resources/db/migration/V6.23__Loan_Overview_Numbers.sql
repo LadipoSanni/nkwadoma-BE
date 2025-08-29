@@ -60,3 +60,8 @@ WHERE EXISTS (
     FROM cohort_entity ce
     WHERE ce.id = cle.cohort_id AND ce.cohort_type = 'LOAN_BOOK'
 );
+
+
+
+ALTER TABLE loan_product
+    add column if not exists  total_outstanding_loan DECIMAL(10,2) DEFAULT 0;

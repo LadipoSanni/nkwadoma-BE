@@ -176,7 +176,7 @@ public class CohortLoaneePersistenceAdapter implements CohortLoaneeOutputPort {
     public boolean checkIfLoaneeIsNew(String id) throws MeedlException {
         MeedlValidator.validateUUID(id, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
         Long count =  cohortLoaneeRepository.countByLoaneeId(id);
-        return count > 1;
+        return count > 0;
     }
 
     @Override

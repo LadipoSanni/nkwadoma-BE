@@ -212,7 +212,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private void updateLoanProductOutstandingAmount(LoanOffer loanOffer, Loan savedLoan) throws MeedlException {
         LoanProduct loanProduct = loanProductOutputPort.findLoanProductByLoanOfferId(loanOffer.getId());
         loanProduct.setTotalOutstandingLoan(loanProduct.getTotalOutstandingLoan()
-                .add(savedLoan.getLoanAmountOutstanding()));
+                .add(loanOffer.getAmountApproved()));
         loanProductOutputPort.save(loanProduct);
     }
 

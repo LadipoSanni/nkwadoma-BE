@@ -39,6 +39,7 @@ public class LoanProductEntity {
     private BigDecimal totalAmountEarned = BigDecimal.ZERO;
     private BigDecimal totalAmountDisbursed = BigDecimal.ZERO;
     private BigDecimal totalAmountRepaid = BigDecimal.ZERO;
+    private BigDecimal totalOutstandingLoan = BigDecimal.ZERO;
 
     @Size(max=5500)
     private String mandate;
