@@ -48,6 +48,8 @@ class LoanServiceTest {
     @Mock
     private LoanOutputPort loanOutputPort;
     @Mock
+    private LoanProductOutputPort loanProductOutputPort;
+    @Mock
     private LoaneeLoanAccountPersistenceAdapter loaneeLoanAccountOutputPort;
     @Mock
     private LoanRequestOutputPort loanRequestOutputPort;
@@ -138,6 +140,7 @@ class LoanServiceTest {
         loan.setPageNumber(0);
         loan.setPageSize(10);
         loan.setActorId(userIdentity.getId());
+        loan.setLoanAmountOutstanding(BigDecimal.ZERO);
         cohort = TestData.createCohortData("elites",testId,testId,List.of(new LoanBreakdown()),testId);
 
         cohortLoanee = TestData.buildCohortLoanee(loanee,cohort,loaneeLoanDetail,testId);
@@ -371,7 +374,9 @@ class LoanServiceTest {
                 loanStatus(LoanStatus.PERFORMING).
                 loanAccountId(loaneeLoanAccount.getId()).
                 loanOfferId(testId).
-                loaneeId(loanee.getId()).build();
+                loaneeId(loanee.getId())
+                .loanAmountOutstanding(BigDecimal.ZERO)
+                .build();
 
         LoanOffer loanOffer = new LoanOffer();
         loanOffer.setId(testId);
@@ -408,6 +413,10 @@ class LoanServiceTest {
             when(loanMetricsOutputPort.findByOrganizationId(organizationIdentity.getId()))
                     .thenReturn(Optional.of(loanMetrics));
             when(loanMetricsOutputPort.save(loanMetrics)).thenReturn(loanMetrics);
+            LoanProduct loanProduct = TestData.buildTestLoanProduct();
+            loanProduct.setTotalOutstandingLoan(BigDecimal.ZERO);
+            when(loanProductOutputPort.save(loanProduct)).thenReturn(loanProduct);
+            when(loanProductOutputPort.findLoanProductByLoanOfferId(anyString())).thenReturn(loanProduct);
             when(investmentVehicleOutputPort.findInvestmentVehicleByLoanOfferId(startedLoan.getLoanOfferId()))
                     .thenReturn(investmentVehicle);
             when(investmentVehicleOutputPort.save(investmentVehicle)).thenReturn(investmentVehicle);

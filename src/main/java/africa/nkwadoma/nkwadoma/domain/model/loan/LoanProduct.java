@@ -36,6 +36,7 @@ public class LoanProduct {
     private BigDecimal obligorLoanLimit;
     private BigDecimal loanProductSize;
     private BigDecimal totalAmountAvailable;
+    private BigDecimal totalOutstandingLoan;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private BigDecimal totalAmountEarned;

@@ -36,11 +36,17 @@ public class LoanReferral {
     private String loaneeImage;
     private BigDecimal loanAmountRequested;
     private BigDecimal initialDeposit;
+    private LocalDateTime referralDate;
     private BigDecimal tuitionAmount;
     private LocalDate cohortStartDate;
     private String programName;
     private List<LoaneeLoanBreakdown> loaneeLoanBreakdowns;
     private String cohortLoaneeId;
+    private int pageSize;
+    private int pageNumber;
+    private String programId;
+    private String organizationId;
+    private String name;
 
     public void validateLoanReferralStatus() throws MeedlException {
         MeedlValidator.validateObjectInstance(loanReferralStatus, LoanMessages.LOAN_REFERRAL_STATUS_CANNOT_BE_EMPTY.getMessage());

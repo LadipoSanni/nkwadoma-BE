@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-public interface LoanProductEntityRepository extends JpaRepository<LoanProductEntity,String> {
+public interface LoanProductRepository extends JpaRepository<LoanProductEntity,String> {
     boolean existsByName(String name);
 
     Optional<LoanProductEntity> findByName(String name);
@@ -31,4 +31,19 @@ public interface LoanProductEntityRepository extends JpaRepository<LoanProductEn
                 
     """)
     LoanProductEntity findByCohortLoaneeId(@Param("id") String id);
+
+
+    @Query("""
+    select lo.loanProduct
+        FROM LoanOfferEntity lo
+        WHERE lo.id = :loanOfferId
+    """)
+    LoanProductEntity findByLoanOfferId(String loanOfferId);
+
+    @Query("""
+        select lp from LoanProductEntity lp
+        join LoanOfferEntity 
+        join LoaneeLoanDetailEntity 
+        """)
+    LoanProductEntity findLoanProductByLoaneeLoanDetailId(String loaneeLoanDetailId);
 }

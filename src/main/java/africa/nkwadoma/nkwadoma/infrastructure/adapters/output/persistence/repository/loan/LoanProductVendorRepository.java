@@ -6,6 +6,8 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 public interface LoanProductVendorRepository extends JpaRepository<LoanProductVendor,String> {
     void deleteAllByVendorEntity(VendorEntity vendorEntity);
 
@@ -13,4 +15,6 @@ public interface LoanProductVendorRepository extends JpaRepository<LoanProductVe
 
     @Transactional
     void deleteByVendorEntityId(String id);
+
+    List<LoanProductVendor> findAllByLoanProductEntity_Id(String loanProductEntityId);
 }

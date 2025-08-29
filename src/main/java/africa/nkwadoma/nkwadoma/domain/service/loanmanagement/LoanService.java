@@ -186,12 +186,20 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }
 
         Loan savedLoan = loanOutputPort.save(loan);
+        updateLoanProductOutstandingAmount(loanOffer, savedLoan);
         log.info("Saved loan: {}", savedLoan);
         updateLoanDetail(foundLoanee,loanOffer,savedLoan.getStartDate());
         String referBy = loanOutputPort.findLoanReferal(savedLoan.getId());
         updateLoanDisbursalOnLoamMatrics(referBy);
         updateInvestmentVehicleTalentFunded(savedLoan);
         return savedLoan;
+    }
+
+    private void updateLoanProductOutstandingAmount(LoanOffer loanOffer, Loan savedLoan) throws MeedlException {
+        LoanProduct loanProduct = loanProductOutputPort.findLoanProductByLoanOfferId(loanOffer.getId());
+        loanProduct.setTotalOutstandingLoan(loanProduct.getTotalOutstandingLoan()
+                .add(savedLoan.getLoanAmountOutstanding()));
+        loanProductOutputPort.save(loanProduct);
     }
 
     private void updateLoanDetail(Loanee loanee ,LoanOffer loanOffer,LocalDateTime localDateTime) throws MeedlException {
@@ -376,6 +384,20 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }
     }
 
+    @Override
+    public Page<LoanReferral> viewAllLoanReferrals(LoanReferral request) throws MeedlException {
+        MeedlValidator.validatePageSize(request.getPageSize());
+        MeedlValidator.validatePageNumber(request.getPageNumber());
+        return loanReferralOutputPort.findAllLoanReferrals(request);
+    }
+
+    @Override
+    public Page<LoanReferral> searchLoanReferrals(LoanReferral request) throws MeedlException {
+        MeedlValidator.validatePageSize(request.getPageSize());
+        MeedlValidator.validatePageNumber(request.getPageNumber());
+        return loanReferralOutputPort.searchLoanReferrals(request);
+    }
+
     private String getLoanAccountId(Loanee foundLoanee) throws MeedlException {
         LoaneeLoanAccount loaneeLoanAccount = loaneeLoanAccountOutputPort.findByLoaneeId(foundLoanee.getId());
         log.info("Found loanee account: {}", loaneeLoanAccount);
@@ -389,7 +411,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     @Override
     public LoanProduct viewLoanProductDetailsById(String loanProductId) throws MeedlException {
         MeedlValidator.validateUUID(loanProductId, LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
-        return loanProductOutputPort.findById(loanProductId);
+        LoanProduct loanProduct = loanProductOutputPort.findById(loanProductId);
+        List<Vendor> vendors = loanProductOutputPort.getVendorsByLoanProductId(loanProductId);
+        loanProduct.setVendors(vendors);
+        return loanProduct;
     }
 
     @Override
@@ -865,6 +890,19 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         return filterResult(loanOffer);
     }
 
+    @Override
+    public LoanOffer withdrawLoanOffer(String loanOfferId, LoanOfferStatus loanOfferStatus) throws MeedlException {
+        MeedlValidator.validateUUID(loanOfferId,"Loan offer id cannot be empty ");
+        MeedlValidator.validateObjectInstance(loanOfferStatus,"Loan offer status cannot be empty");
+        LoanOffer loanOffer = loanOfferOutputPort.findById(loanOfferId);
+        boolean loanHasStarted = loanOutputPort.checkIfLoanHasBeenDisbursedForLoanOffer(loanOffer.getId());
+        if (loanHasStarted){
+            throw new LoanException("Loan offer has already been disbursed, it can't be withdraw");
+        }
+        loanOffer.setLoanOfferStatus(loanOfferStatus);
+        return  loanOfferOutputPort.save(loanOffer);
+    }
+
     private Page<LoanDetail> filterResult(LoanOffer loanOffer) throws MeedlException {
         Page<LoanDetail> loanDetails;
         if (loanOffer.getType().equals(LoanType.LOAN_OFFER)){
@@ -886,6 +924,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }
          throw new LoanException(loanOffer.getType().name()+" is not a loan type");
     }
+
+
 
 
 }

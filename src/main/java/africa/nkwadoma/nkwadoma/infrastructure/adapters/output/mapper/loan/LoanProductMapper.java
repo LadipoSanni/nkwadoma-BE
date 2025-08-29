@@ -28,4 +28,5 @@ public interface LoanProductMapper {
     Vendor mapVendorEntityToVendor(VendorEntity vendorEntity);
 
     LoanProduct updateLoanProduct(@MappingTarget LoanProduct loanProduct, LoanProduct product);
+
 }
