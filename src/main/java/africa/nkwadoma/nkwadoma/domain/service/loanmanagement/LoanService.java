@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.LoanUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
@@ -82,6 +83,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final LoanMapper loanMapper;
     private final LoaneeLoanAggregateOutputPort loaneeLoanAggregateOutputPort;
     private final LoaneeLoanAggregateMapper loaneeLoanAggregateMapper;
+    private final InvestmentVehicleFinancierOutputPort investmentVehicleFinancierOutputPort;
 
     @Override
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
@@ -96,6 +98,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }
         log.info("Searching for investment vehicle with id {} ", loanProduct.getInvestmentVehicleId());
         InvestmentVehicle investmentVehicle = checkProductSizeNotMoreThanAvailableInvestmentAmount(loanProduct);
+        verifyFinanciersExistInVehicle(loanProduct, investmentVehicle);
         //TODO Coming back to add restriction for available amount
   //    TODO  investmentVehicle.setTotalAvailableAmount(investmentVehicle.getTotalAvailableAmount().subtract(loanProduct.getLoanProductSize()));
         loanProduct.addInvestmentVehicleValues(investmentVehicle);
@@ -103,6 +106,11 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         log.info("Loan product to be saved in create loan product service method {}", loanProduct);
         investmentVehicleOutputPort.save(investmentVehicle);
         return loanProductOutputPort.save(loanProduct);
+    }
+
+    private void verifyFinanciersExistInVehicle(LoanProduct loanProduct, InvestmentVehicle investmentVehicle) {
+        for (String financierId : )
+        investmentVehicleFinancierOutputPort.findAllByFinancierIdAndInvestmentVehicleId()
     }
 
     private InvestmentVehicle checkProductSizeNotMoreThanAvailableInvestmentAmount(LoanProduct loanProduct) throws MeedlException {
