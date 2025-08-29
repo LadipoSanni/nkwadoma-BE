@@ -737,15 +737,23 @@ public class CalculationEngine implements CalculationEngineUseCase {
 
     private void updateLoanProductLoanOutstanding(MonthlyInterest monthlyInterest) throws MeedlException {
         LoanProduct loanProduct = loanProductOutputPort.findByLoaneeLoanDetailId(monthlyInterest.getLoaneeLoanDetail().getId());
+        updateLoanProductLoanOutstandingIfNull(loanProduct);
         loanProduct.setTotalOutstandingLoan(loanProduct.getTotalOutstandingLoan().add(monthlyInterest.getInterest()));
         loanProductOutputPort.save(loanProduct);
 
     }
     private void updateLoanProductLoanOutstanding(LoaneeLoanDetail loaneeLoanDetail) throws MeedlException {
         LoanProduct loanProduct = loanProductOutputPort.findByLoaneeLoanDetailId(loaneeLoanDetail.getId());
+        updateLoanProductLoanOutstandingIfNull(loanProduct);
         loanProduct.setTotalOutstandingLoan(loanProduct.getTotalOutstandingLoan().subtract(loaneeLoanDetail.getAmountReceived()));
         loanProduct.setTotalOutstandingLoan(loanProduct.getTotalOutstandingLoan().add(loaneeLoanDetail.getAmountOutstanding()));
+        loanProductOutputPort.save(loanProduct);
+    }
 
+    private static void updateLoanProductLoanOutstandingIfNull(LoanProduct loanProduct) {
+        if (ObjectUtils.isEmpty(loanProduct.getTotalOutstandingLoan())){
+            loanProduct.setTotalOutstandingLoan(BigDecimal.ZERO);
+        }
     }
 
     private void updateLoaneeLoanAggregation(LoaneeLoanDetail loaneeLoanDetail, MonthlyInterest monthlyInterest) throws MeedlException {
