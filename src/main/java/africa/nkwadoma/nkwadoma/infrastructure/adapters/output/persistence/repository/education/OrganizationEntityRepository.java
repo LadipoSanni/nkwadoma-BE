@@ -46,6 +46,7 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
                 when 'LOAN_OFFER' then coalesce(lm.loanOfferCount, 0)
                 when 'LOAN_REQUEST' then coalesce(lm.loanRequestCount, 0)
                 when 'LOAN_DISBURSAL' then coalesce(lm.loanDisbursalCount, 0)
+                when 'LOAN_REFERRAL' then coalesce(lm.loanReferralCount, 0)
             else 0
         end desc,
         o.name asc
