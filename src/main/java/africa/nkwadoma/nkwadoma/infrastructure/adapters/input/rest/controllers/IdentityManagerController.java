@@ -128,9 +128,10 @@ public class IdentityManagerController {
                 .build();
         userIdentity.setCreatedBy(meedlUser.getClaimAsString("sub"));
         log.info("The user id of user performing the reactivation: {}",meedlUser.getClaimAsString("sub"));
-        UserIdentity createdUserIdentity = userUseCase.reactivateUserAccount(userIdentity);
-        return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
-                data(createdUserIdentity).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
+        UserIdentity reactivateUserAccount = userUseCase.reactivateUserAccount(userIdentity);
+        UserIdentityResponse userIdentityResponse = identityMapper.toUserIdentityResponse(reactivateUserAccount);
+        return ResponseEntity.ok(ApiResponse.<UserIdentityResponse>builder().
+                data(userIdentityResponse).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
     }
 
@@ -148,9 +149,10 @@ public class IdentityManagerController {
                 .createdBy(meedlUser.getClaimAsString("sub"))
                 .build();
         log.info("The user id of user performing the deactivation: {}",meedlUser.getClaimAsString("sub"));
-        UserIdentity createdUserIdentity = userUseCase.deactivateUserAccount(userIdentity);
-        return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
-                data(createdUserIdentity).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
+        UserIdentity deactivateUserAccount = userUseCase.deactivateUserAccount(userIdentity);
+        UserIdentityResponse userIdentityResponse = identityMapper.toUserIdentityResponse(deactivateUserAccount);
+        return ResponseEntity.ok(ApiResponse.<UserIdentityResponse>builder().
+                data(userIdentityResponse).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("auth/user/assign/role")
@@ -165,8 +167,9 @@ public class IdentityManagerController {
                 .build();
         log.info("The user id {} of user assigning role to user with id : {}",meedlUser.getClaimAsString("sub"), userId);
         UserIdentity createdUserIdentity = userUseCase.assignRole(userIdentity);
-        return ResponseEntity.ok(ApiResponse.<UserIdentity>builder()
-                .data(createdUserIdentity)
+        UserIdentityResponse userIdentityResponse = identityMapper.toUserIdentityResponse(createdUserIdentity);
+        return ResponseEntity.ok(ApiResponse.<UserIdentityResponse>builder()
+                .data(userIdentityResponse)
                 .message(ControllerConstant.ROLE_ASSIGNED_SUCCESSFULLY.getMessage())
                 .statusCode(HttpStatus.OK.name()).build());
     }
