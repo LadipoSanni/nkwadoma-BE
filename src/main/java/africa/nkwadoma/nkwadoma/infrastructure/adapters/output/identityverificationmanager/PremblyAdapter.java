@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerifi
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
+import africa.nkwadoma.nkwadoma.domain.model.identity.verificationMock.VerificationMock;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyBvnResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyLivelinessResponse;
@@ -67,8 +68,17 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
         MeedlValidator.validateObjectInstance(identityVerification, IdentityMessages.IDENTITY_CANNOT_BE_NULL.getMessage());
         identityVerification.validate();
         identityVerification.validateImageUrl();
+        if (isTestIdentityNumber(identityVerification)){
+            log.info("Nin is for testing nin: {}", identityVerification.getDecryptedNin());
+            return VerificationMock.createPremblyNinTestResponse();
+        }
         log.info("Value is meant for actual call to verification service.");
         return getNinDetails(identityVerification);
+    }
+
+    private boolean isTestIdentityNumber(IdentityVerification identityVerification) {
+        log.info("Checking if identity number is for test : {}", identityVerification.getDecryptedNin().equals("01") && identityVerification.getDecryptedBvn().equals("01"));
+        return identityVerification.getDecryptedNin().startsWith("01") && identityVerification.getDecryptedBvn().startsWith("01");
     }
 
     public PremblyNinResponse getNinDetails(IdentityVerification identityVerification) {
@@ -126,6 +136,10 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
         MeedlValidator.validateObjectInstance(identityVerification, IdentityMessages.IDENTITY_CANNOT_BE_NULL.getMessage());
         identityVerification.validate();
         identityVerification.validateImageUrl();
+        if (isTestIdentityNumber(identityVerification)){
+            log.info("Bvn is for testing bvn: {}", identityVerification.getDecryptedNin());
+            return VerificationMock.createPremblyBvnTestResponse();
+        }
         return getBvnDetails(identityVerification);
     }
 
