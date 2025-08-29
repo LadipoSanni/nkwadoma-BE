@@ -12,6 +12,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ReferenceDataResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.QAResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.InviteOrganizationResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.OrganizationResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.OrganizationRestMapper;
@@ -331,19 +332,20 @@ public class OrganizationController {
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or  hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN')  " +
                   " or hasRole('ORGANIZATION_SUPER_ADMIN')  or hasRole('ORGANIZATION_ADMIN') " +
             "or hasRole('COOPERATE_FINANCIER_ADMIN') or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')  ")
-    public ResponseEntity<ApiResponse<?>> inviteColleague(@AuthenticationPrincipal Jwt meedlUser,
+    public ResponseEntity<QAResponse<?>> inviteColleague(@AuthenticationPrincipal Jwt meedlUser,
                                                           @RequestBody InviteColleagueRequest inviteColleagueRequest) throws MeedlException {
         OrganizationIdentity organizationIdentity =
                 organizationRestMapper.mapInviteColleagueRequestToOrganizationIdentity(inviteColleagueRequest);
         log.info("request after mapping {}",organizationIdentity.getUserIdentity());
         organizationIdentity.getUserIdentity().setCreatedBy(meedlUser.getClaimAsString("sub"));
-        String response = createOrganizationUseCase.inviteColleague(organizationIdentity);
-        ApiResponse<Object> apiResponse = ApiResponse.builder()
+        UserIdentity userIdentity = createOrganizationUseCase.inviteColleague(organizationIdentity);
+        QAResponse<Object> qaResponse = QAResponse.builder()
                 .statusCode(HttpStatus.OK.toString())
-                .message(response)
-                .data(response)
+                .message(userIdentity.getResponse())
+                .id(userIdentity.getId())
+                .email(userIdentity.getEmail())
                 .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+        return new ResponseEntity<>(qaResponse, HttpStatus.CREATED);
     }
 
 }

@@ -381,7 +381,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     }
 
     @Override
-    public String inviteColleague(OrganizationIdentity organizationIdentity) throws MeedlException {
+    public UserIdentity inviteColleague(OrganizationIdentity organizationIdentity) throws MeedlException {
         log.info("Inviting colleague");
         MeedlValidator.validateObjectInstance(organizationIdentity.getUserIdentity(), IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
         UserIdentity newColleague = organizationIdentity.getUserIdentity();
@@ -408,7 +408,9 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         log.info("Saved new colleague employee identity in organization: {}", savedEmployee);
 
 
-        return handleNotificationsAndResponse(inviter, savedEmployee, savedUserIdentity);
+        String message = handleNotificationsAndResponse(inviter, savedEmployee, savedUserIdentity);
+        savedUserIdentity.setResponse(message);
+        return savedUserIdentity;
     }
 
     @Override
@@ -445,7 +447,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
             log.info("The user inviting is a super admin with organization id {}", inviter.getOrganization());
             OrganizationIdentity organization = organizationIdentityOutputPort.findById(inviter.getOrganization());
             asynchronousMailingOutputPort.sendColleagueEmail(organization.getName(), savedUserIdentity);
-            return String.format("Colleague with role %s invited", savedUserIdentity.getRole().name());
+            return String.format("Colleague with role %s invited successfully", savedUserIdentity.getRole().name());
         }
 
         IdentityRole superAdminRole;
