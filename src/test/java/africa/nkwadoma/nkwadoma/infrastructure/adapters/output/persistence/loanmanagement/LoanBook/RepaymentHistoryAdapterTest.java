@@ -20,11 +20,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.loan.FinancialConstants.NUMBER_OF_DECIMAL_PLACES;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -210,7 +212,7 @@ public class RepaymentHistoryAdapterTest {
         }
 
         assertNotNull(latest);
-        assertEquals(new BigDecimal("300.00"), latest.getAmountPaid());
+        assertEquals(decimalPlaceRoundUp(new BigDecimal("300.00")), decimalPlaceRoundUp(latest.getAmountPaid()));
     }
 
 
@@ -243,12 +245,15 @@ public class RepaymentHistoryAdapterTest {
         RepaymentHistory latestRepaymentFound = repaymentHistoryOutputPort.findLatestRepayment(loanee.getId(), randomId);
 
         assertNotNull(latestRepaymentFound);
-        assertEquals(thirdRepaymentHistory.getAmountPaid(), latestRepaymentFound.getAmountPaid());
+        assertEquals(decimalPlaceRoundUp(thirdRepaymentHistory.getAmountPaid()), decimalPlaceRoundUp(latestRepaymentFound.getAmountPaid()));
         assertEquals(roundToMicroseconds(thirdRepaymentHistory.getPaymentDateTime()), roundToMicroseconds(latestRepaymentFound.getPaymentDateTime()));
         assertEquals(thirdRepaymentHistory.getId(), latestRepaymentFound.getId());
         repaymentHistoryOutputPort.delete(firstRepaymentHistory.getId());
         repaymentHistoryOutputPort.delete(secondRepaymentHistory.getId());
         repaymentHistoryOutputPort.delete(thirdRepaymentHistory.getId());
+    }
+    private BigDecimal decimalPlaceRoundUp(BigDecimal bigDecimal) {
+        return bigDecimal.setScale(NUMBER_OF_DECIMAL_PLACES, RoundingMode.HALF_UP);
     }
     @Order(8)
     @Test
