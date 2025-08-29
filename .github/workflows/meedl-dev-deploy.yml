@@ -8,7 +8,7 @@ on:
 env:
   REPO_URL: 357586184453.dkr.ecr.us-east-1.amazonaws.com/nkwadoma
   ECR_REPOSITORY: nkwadoma
-  AWS_REGION: eu-west-1
+  AWS_REGION: us-east-1  # Changed to match ECR region
   CONTAINER_PORT: 8768
   BLUE_PORT: 8762
   GREEN_PORT: 8763
@@ -93,7 +93,7 @@ jobs:
             echo "NEW_ENV=blue" >> $GITHUB_ENV
             echo "NEW_PORT=${{ env.BLUE_PORT }}" >> $GITHUB_ENV
           fi
-          
+
       - name: Clean up stopped conflicting container
         run: |
           if [ "$(sudo docker ps -aq -f name=meedl-dev_${{ env.NEW_ENV }} -f status=exited)" ]; then
@@ -102,14 +102,14 @@ jobs:
           if [ "$(sudo docker ps -aq -f name=meedl-dev_${{ env.NEW_ENV }} -f status=created)" ]; then
             sudo docker rm meedl-dev_${{ env.NEW_ENV }}
           fi
-          
+
       - name: Start new container
         run: |
           sudo docker run -d --env-file /home/ubuntu/semicolon/meedl/dev/nkwadoma.env \
             --name meedl-dev_${{ env.NEW_ENV }} -p ${{ env.NEW_PORT }}:${{ env.CONTAINER_PORT }} \
             --restart unless-stopped \
             ${{ env.REPO_URL }}:alpha
-            
+
       - name: Health check new container
         run: |
           for i in {1..30}; do
@@ -123,19 +123,19 @@ jobs:
           sudo docker stop meedl-dev_${{ env.NEW_ENV }}
           sudo docker rm meedl-dev_${{ env.NEW_ENV }}
           exit 1
-          
+
       - name: Update Nginx configuration for api-systest
         run: |
           sudo sed -i '/server_name api-dev.meedl.africa;/,/}/ s/proxy_pass http:\/\/localhost:[0-9]\+;/proxy_pass http:\/\/localhost:${{ env.NEW_PORT }};/' /etc/nginx/sites-available/meedl.africa
           sudo nginx -t && sudo systemctl reload nginx || exit 1
-          
+
       - name: Stop and remove old container
         run: |
           if [ "${{ env.ACTIVE_ENV }}" != "${{ env.NEW_ENV }}" ]; then
             sudo docker stop meedl-dev_${{ env.ACTIVE_ENV }} 2>/dev/null || true
             sudo docker rm meedl-dev_${{ env.ACTIVE_ENV }} 2>/dev/null || true
           fi
-          
+
       - name: Confirm Deployment Success
         run: |
           if sudo docker ps --format '{{.Names}}' | grep -q "meedl-dev_${{ env.NEW_ENV }}"; then
@@ -145,53 +145,9 @@ jobs:
             echo "❌ Deployment failed!"
             exit 1
           fi
-            
+
       - name: Prune unused images
         run: sudo docker image prune -af
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -206,12 +162,13 @@ jobs:
 # env:
 #   REPO_URL: 357586184453.dkr.ecr.us-east-1.amazonaws.com/nkwadoma
 #   ECR_REPOSITORY: nkwadoma
-#   AWS_REGION: us-east-1
+#   AWS_REGION: eu-west-1
 #   CONTAINER_PORT: 8768
 #   BLUE_PORT: 8762
 #   GREEN_PORT: 8763
 #   NGINX_PORT: 443
 #   EMAILS: 'sam@semicolon.africa,joshua.o@semicolon.africa,abigail@semicolon.africa,chukwunenyeebuka@gmail.com,henry@semicolon.africa,augustineezekiel763@gmail.com,paulineyahla@gmail.com,adioldmj@gmail.com,precious@semicolon.africa,emmanuel.e@semicolon.africa,aj@semicolon.africa'
+
 # jobs:
 #   # ======================= BUILD AND PUSH =======================
 #   build-and-push:
@@ -252,7 +209,6 @@ jobs:
 #       - name: Push Docker image to Amazon ECR
 #         run: docker push $DOCKER_TAG
 
-
 #   # ======================= DEPLOY TO DEV =======================
 #   deploy-to-dev:
 #     runs-on: [ovh]
@@ -275,11 +231,9 @@ jobs:
 
 #       - name: Download .env file from S3 (DEV)
 #         run: |
-#           whoami
 #           sudo mkdir -p /home/ubuntu/semicolon/meedl/dev
-#           sudo aws s3 cp s3://semicolon-delivery/nkwadoma/backend/dev/nkwadoma.env /home/ubuntu/semicolon/meedl/dev/nkwadoma.env --region eu-west-1
+#           sudo aws s3 cp s3://semicolon-delivery/nkwadoma/backend/dev/nkwadoma.env /home/ubuntu/semicolon/meedl/dev/nkwadoma.env --region ${{ env.AWS_REGION }}
 #           sudo chown ubuntu:ubuntu /home/ubuntu/semicolon/meedl/dev/nkwadoma.env
-  
 
 #       - name: Determine active environment
 #         id: active_env
@@ -296,18 +250,17 @@ jobs:
           
 #       - name: Clean up stopped conflicting container
 #         run: |
-#           if [ "$(docker ps -aq -f name=meedl-dev_${{ env.NEW_ENV }} -f status=exited)" ]; then
-#             docker rm meedl-dev_${{ env.NEW_ENV }}
+#           if [ "$(sudo docker ps -aq -f name=meedl-dev_${{ env.NEW_ENV }} -f status=exited)" ]; then
+#             sudo docker rm meedl-dev_${{ env.NEW_ENV }}
 #           fi
-#           if [ "$(docker ps -aq -f name=meedl-dev_${{ env.NEW_ENV }} -f status=created)" ]; then
-#             docker rm meedl-dev_${{ env.NEW_ENV }}
+#           if [ "$(sudo docker ps -aq -f name=meedl-dev_${{ env.NEW_ENV }} -f status=created)" ]; then
+#             sudo docker rm meedl-dev_${{ env.NEW_ENV }}
 #           fi
           
 #       - name: Start new container
 #         run: |
-#           #sudo docker network inspect pulser_pulsar >/dev/null 2>&1 || sudo docker network create pulser_pulsar
 #           sudo docker run -d --env-file /home/ubuntu/semicolon/meedl/dev/nkwadoma.env \
-#            # --network pulser_pulsar --name nkwadoma_${{ env.NEW_ENV }} -p ${{ env.NEW_PORT }}:${{ env.CONTAINER_PORT }} \
+#             --name meedl-dev_${{ env.NEW_ENV }} -p ${{ env.NEW_PORT }}:${{ env.CONTAINER_PORT }} \
 #             --restart unless-stopped \
 #             ${{ env.REPO_URL }}:alpha
             
@@ -329,12 +282,14 @@ jobs:
 #         run: |
 #           sudo sed -i '/server_name api-dev.meedl.africa;/,/}/ s/proxy_pass http:\/\/localhost:[0-9]\+;/proxy_pass http:\/\/localhost:${{ env.NEW_PORT }};/' /etc/nginx/sites-available/meedl.africa
 #           sudo nginx -t && sudo systemctl reload nginx || exit 1
+          
 #       - name: Stop and remove old container
 #         run: |
 #           if [ "${{ env.ACTIVE_ENV }}" != "${{ env.NEW_ENV }}" ]; then
-#             sudo docker stop meedl-dev_${{ env.ACTIVE_ENV }} || true
-#             sudo docker rm meedl-dev_${{ env.ACTIVE_ENV }} || true
+#             sudo docker stop meedl-dev_${{ env.ACTIVE_ENV }} 2>/dev/null || true
+#             sudo docker rm meedl-dev_${{ env.ACTIVE_ENV }} 2>/dev/null || true
 #           fi
+          
 #       - name: Confirm Deployment Success
 #         run: |
 #           if sudo docker ps --format '{{.Names}}' | grep -q "meedl-dev_${{ env.NEW_ENV }}"; then
@@ -344,5 +299,204 @@ jobs:
 #             echo "❌ Deployment failed!"
 #             exit 1
 #           fi
+            
 #       - name: Prune unused images
 #         run: sudo docker image prune -af
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# # name: Deploy Nkwadoma Service to Development environment
+
+# # on:
+# #   push:
+# #     branches:
+# #       - 'dev-1'
+
+# # env:
+# #   REPO_URL: 357586184453.dkr.ecr.us-east-1.amazonaws.com/nkwadoma
+# #   ECR_REPOSITORY: nkwadoma
+# #   AWS_REGION: us-east-1
+# #   CONTAINER_PORT: 8768
+# #   BLUE_PORT: 8762
+# #   GREEN_PORT: 8763
+# #   NGINX_PORT: 443
+# #   EMAILS: 'sam@semicolon.africa,joshua.o@semicolon.africa,abigail@semicolon.africa,chukwunenyeebuka@gmail.com,henry@semicolon.africa,augustineezekiel763@gmail.com,paulineyahla@gmail.com,adioldmj@gmail.com,precious@semicolon.africa,emmanuel.e@semicolon.africa,aj@semicolon.africa'
+# # jobs:
+# #   # ======================= BUILD AND PUSH =======================
+# #   build-and-push:
+# #     runs-on: ubuntu-latest
+# #     steps:
+# #       - name: Checkout code
+# #         uses: actions/checkout@v2
+
+# #       - name: Set up JDK 17
+# #         uses: actions/setup-java@v2
+# #         with:
+# #           distribution: 'temurin'
+# #           java-version: '17'
+
+# #       - name: Build the application
+# #         run: mvn clean package -DskipTests
+
+# #       - name: Configure AWS credentials
+# #         uses: aws-actions/configure-aws-credentials@v1
+# #         with:
+# #           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+# #           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+# #           aws-region: ${{ env.AWS_REGION }}
+
+# #       - name: Login to Amazon ECR
+# #         id: login-ecr
+# #         uses: aws-actions/amazon-ecr-login@v1
+
+# #       - name: Build Docker image
+# #         run: docker build -t meedl-dev:$GITHUB_SHA -f Dockerfile .
+
+# #       - name: Tag Docker image
+# #         run: |
+# #           DOCKER_TAG=${{ env.REPO_URL }}:alpha
+# #           docker tag meedl-dev:$GITHUB_SHA $DOCKER_TAG
+# #           echo "DOCKER_TAG=$DOCKER_TAG" >> $GITHUB_ENV
+
+# #       - name: Push Docker image to Amazon ECR
+# #         run: docker push $DOCKER_TAG
+
+
+# #   # ======================= DEPLOY TO DEV =======================
+# #   deploy-to-dev:
+# #     runs-on: [ovh]
+# #     needs: build-and-push
+# #     steps:
+# #       - name: Configure AWS credentials
+# #         uses: aws-actions/configure-aws-credentials@v1
+# #         with:
+# #           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+# #           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+# #           aws-region: ${{ env.AWS_REGION }}
+
+# #       - name: Authenticate with Amazon ECR
+# #         run: |
+# #           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${{ env.REPO_URL }}
+
+# #       - name: Pull latest Docker image
+# #         run: |
+# #           docker pull ${{ env.REPO_URL }}:alpha
+
+# #       - name: Download .env file from S3 (DEV)
+# #         run: |
+# #           whoami
+# #           sudo mkdir -p /home/ubuntu/semicolon/meedl/dev
+# #           sudo aws s3 cp s3://semicolon-delivery/nkwadoma/backend/dev/nkwadoma.env /home/ubuntu/semicolon/meedl/dev/nkwadoma.env --region eu-west-1
+# #           sudo chown ubuntu:ubuntu /home/ubuntu/semicolon/meedl/dev/nkwadoma.env
+  
+
+# #       - name: Determine active environment
+# #         id: active_env
+# #         run: |
+# #           if sudo docker ps --format '{{.Names}}' | grep -q "meedl-dev_blue"; then
+# #             echo "ACTIVE_ENV=blue" >> $GITHUB_ENV
+# #             echo "NEW_ENV=green" >> $GITHUB_ENV
+# #             echo "NEW_PORT=${{ env.GREEN_PORT }}" >> $GITHUB_ENV
+# #           else
+# #             echo "ACTIVE_ENV=green" >> $GITHUB_ENV
+# #             echo "NEW_ENV=blue" >> $GITHUB_ENV
+# #             echo "NEW_PORT=${{ env.BLUE_PORT }}" >> $GITHUB_ENV
+# #           fi
+          
+# #       - name: Clean up stopped conflicting container
+# #         run: |
+# #           if [ "$(docker ps -aq -f name=meedl-dev_${{ env.NEW_ENV }} -f status=exited)" ]; then
+# #             docker rm meedl-dev_${{ env.NEW_ENV }}
+# #           fi
+# #           if [ "$(docker ps -aq -f name=meedl-dev_${{ env.NEW_ENV }} -f status=created)" ]; then
+# #             docker rm meedl-dev_${{ env.NEW_ENV }}
+# #           fi
+          
+# #       - name: Start new container
+# #         run: |
+# #           #sudo docker network inspect pulser_pulsar >/dev/null 2>&1 || sudo docker network create pulser_pulsar
+# #           sudo docker run -d --env-file /home/ubuntu/semicolon/meedl/dev/nkwadoma.env \
+# #            # --network pulser_pulsar --name nkwadoma_${{ env.NEW_ENV }} -p ${{ env.NEW_PORT }}:${{ env.CONTAINER_PORT }} \
+# #             --restart unless-stopped \
+# #             ${{ env.REPO_URL }}:alpha
+            
+# #       - name: Health check new container
+# #         run: |
+# #           for i in {1..30}; do
+# #             if curl -s http://localhost:${{ env.NEW_PORT }}/api/v1/actuator/health | grep -q "UP"; then
+# #               echo "New container is healthy!"
+# #               exit 0
+# #             fi
+# #             sleep 5
+# #           done
+# #           echo "Health check failed!"
+# #           sudo docker stop meedl-dev_${{ env.NEW_ENV }}
+# #           sudo docker rm meedl-dev_${{ env.NEW_ENV }}
+# #           exit 1
+          
+# #       - name: Update Nginx configuration for api-systest
+# #         run: |
+# #           sudo sed -i '/server_name api-dev.meedl.africa;/,/}/ s/proxy_pass http:\/\/localhost:[0-9]\+;/proxy_pass http:\/\/localhost:${{ env.NEW_PORT }};/' /etc/nginx/sites-available/meedl.africa
+# #           sudo nginx -t && sudo systemctl reload nginx || exit 1
+# #       - name: Stop and remove old container
+# #         run: |
+# #           if [ "${{ env.ACTIVE_ENV }}" != "${{ env.NEW_ENV }}" ]; then
+# #             sudo docker stop meedl-dev_${{ env.ACTIVE_ENV }} || true
+# #             sudo docker rm meedl-dev_${{ env.ACTIVE_ENV }} || true
+# #           fi
+# #       - name: Confirm Deployment Success
+# #         run: |
+# #           if sudo docker ps --format '{{.Names}}' | grep -q "meedl-dev_${{ env.NEW_ENV }}"; then
+# #             echo "✅ Blue-Green Deployment to Development successful!"
+# #             exit 0
+# #           else
+# #             echo "❌ Deployment failed!"
+# #             exit 1
+# #           fi
+# #       - name: Prune unused images
+# #         run: sudo docker image prune -af
