@@ -894,7 +894,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     public LoanOffer withdrawLoanOffer(String loanOfferId, LoanOfferStatus loanOfferStatus) throws MeedlException {
         MeedlValidator.validateUUID(loanOfferId,"Loan offer id cannot be empty ");
         MeedlValidator.validateObjectInstance(loanOfferStatus,"Loan offer status cannot be empty");
-        LoanOffer loanOffer = loanOfferOutputPort.findLoanOfferById(loanOfferId);
+        LoanOffer loanOffer = loanOfferOutputPort.findById(loanOfferId);
         boolean loanHasStarted = loanOutputPort.checkIfLoanHasBeenDisbursedForLoanOffer(loanOffer.getId());
         if (loanHasStarted){
             throw new LoanException("Loan offer has already been disbursed, it can't be withdraw");
