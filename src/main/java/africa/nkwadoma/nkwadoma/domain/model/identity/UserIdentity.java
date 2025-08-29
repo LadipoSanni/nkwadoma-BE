@@ -74,6 +74,7 @@ public class UserIdentity {
 
     private String MFAPhoneNumber;
     private MFAType mfaType;
+    private String response;
 
     public void validate() throws MeedlException {
         log.info("Started validating for user identity in validation");

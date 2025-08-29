@@ -100,6 +100,9 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
   //    TODO  investmentVehicle.setTotalAvailableAmount(investmentVehicle.getTotalAvailableAmount().subtract(loanProduct.getLoanProductSize()));
         loanProduct.addInvestmentVehicleValues(investmentVehicle);
         loanProduct.setTotalAmountAvailable(loanProduct.getLoanProductSize());
+        if (ObjectUtils.isEmpty(loanProduct.getTotalOutstandingLoan())) {
+            loanProduct.setTotalOutstandingLoan(BigDecimal.ZERO);
+        }
         log.info("Loan product to be saved in create loan product service method {}", loanProduct);
         investmentVehicleOutputPort.save(investmentVehicle);
         return loanProductOutputPort.save(loanProduct);
@@ -197,6 +200,9 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     private void updateLoanProductOutstandingAmount(LoanOffer loanOffer, Loan savedLoan) throws MeedlException {
         LoanProduct loanProduct = loanProductOutputPort.findLoanProductByLoanOfferId(loanOffer.getId());
+        if (ObjectUtils.isEmpty(loanProduct.getTotalOutstandingLoan())){
+            loanProduct.setTotalOutstandingLoan(BigDecimal.ZERO);
+        }
         loanProduct.setTotalOutstandingLoan(loanProduct.getTotalOutstandingLoan()
                 .add(savedLoan.getLoanAmountOutstanding()));
         loanProductOutputPort.save(loanProduct);
