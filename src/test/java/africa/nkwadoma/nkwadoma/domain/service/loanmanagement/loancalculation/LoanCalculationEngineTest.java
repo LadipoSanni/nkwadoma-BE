@@ -78,6 +78,7 @@ public class LoanCalculationEngineTest {
     @Mock
     private LoaneeLoanAggregateOutputPort loaneeLoanAggregateOutputPort;
     private LoaneeLoanAggregate loaneeLoanAggregate;
+    private LoanProduct loanProduct;
 
 
     @BeforeEach
@@ -88,6 +89,8 @@ public class LoanCalculationEngineTest {
         programLoanDetail = TestData.buildProgramLoanDetail(TestData.createProgramTestData("Mock test program"));
         organizationLoanDetail = TestData.buildOrganizationLoanDetail(TestData.createOrganizationTestData("Mock org test name", "random", null));
         loaneeLoanAggregate = TestData.buildLoaneeLoanAggregate(Loanee.builder().build());
+        loanProduct = TestData.buildTestLoanProduct();
+        loanProduct.setTotalOutstandingLoan(BigDecimal.ZERO);
     }
 
     private RepaymentHistory createRepayment(LocalDateTime time, BigDecimal amount) {
@@ -857,6 +860,7 @@ public class LoanCalculationEngineTest {
         when(loaneeLoanDetailsOutputPort.findByCohortLoaneeId(any())).thenReturn(loaneeLoanDetail);
 
         when(repaymentHistoryOutputPort.findAllRepaymentHistoryForLoan(loaneeId, cohortId)).thenReturn(new ArrayList<>());
+        when(loanProductOutputPort.findByLoaneeLoanDetailId(anyString())).thenReturn(loanProduct);
         when(loaneeLoanDetailsOutputPort.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(repaymentHistoryOutputPort.saveAllRepaymentHistory(any())).thenAnswer(invocation -> invocation.getArgument(0));
         doNothing().when(repaymentHistoryOutputPort).deleteMultipleRepaymentHistory(any());
