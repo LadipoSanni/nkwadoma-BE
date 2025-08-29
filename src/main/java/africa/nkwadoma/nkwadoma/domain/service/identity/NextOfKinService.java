@@ -15,7 +15,7 @@ import org.springframework.stereotype.*;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class NextOfKinService implements NextOfKinUseCase {
+public class NextOfKinService implements AdditionalDetail {
     private final NextOfKinOutputPort nextOfKinOutputPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
 
@@ -33,35 +33,20 @@ public class NextOfKinService implements NextOfKinUseCase {
         }
         NextOfKin savedNextOfKin = nextOfKinOutputPort.save(nextOfKin);
         log.info("Saved next of kin: {}", savedNextOfKin);
-        updateUserNextOfKinDetails(foundUserIdentity, savedNextOfKin, nextOfKin);
+        updateUserAdditionalDetails(foundUserIdentity, savedNextOfKin, nextOfKin);
         return savedNextOfKin;
     }
 
-    private void updateAlternativeDetails(UserIdentity userIdentity, NextOfKin nextOfKin) throws MeedlException {
+    private void updateUserAdditionalDetails(UserIdentity userIdentity, NextOfKin savedNextOfKin, NextOfKin nextOfKin) throws MeedlException {
+        log.info("Updating next of kin for user : {}", userIdentity);
+        userIdentity.setNextOfKin(savedNextOfKin);
+        userIdentity.setStateOfOrigin(nextOfKin.getStateOfResidence());
+        userIdentity.setLevelOfEduction(nextOfKin.getLevelOfEduction());
         userIdentity.setAlternateEmail(nextOfKin.getAlternateEmail());
         userIdentity.setAlternatePhoneNumber(nextOfKin.getAlternatePhoneNumber());
         userIdentity.setAlternateContactAddress(nextOfKin.getAlternateContactAddress());
-        userIdentityOutputPort.save(userIdentity);
-    }
-
-    private void updateUserNextOfKinDetails(UserIdentity userIdentity, NextOfKin savedNextOfKin, NextOfKin nextOfKin) throws MeedlException {
-        log.info("Updating next of kin for user : {}", userIdentity);
-        userIdentity.setNextOfKin(savedNextOfKin);
-        updateAlternativeDetails(userIdentity, nextOfKin);
         log.info("Next of kin before being updated on user db {}", userIdentity.getNextOfKin());
         userIdentityOutputPort.save(userIdentity);
     }
-//    private Loanee updateLoanee(NextOfKin nextOfKin, Loanee foundLoanee) throws MeedlException {
-//        log.info("User identity before mapping updating additional details {}", foundLoanee.getUserIdentity());
-//        boolean isIdentityVerified = foundLoanee.getUserIdentity().isIdentityVerified();
-//        UserIdentity userIdentity = userIdentityMapper.updateUser(nextOfKin.getLoanee().getUserIdentity(), foundLoanee.getUserIdentity());
-//        userIdentity.setIdentityVerified(isIdentityVerified);
-//        log.info("User identity after mapping additional details {}", foundLoanee.getUserIdentity());
-//        userIdentity = userIdentityOutputPort.save(userIdentity);
-//        log.info("Updated User identity: {}", userIdentity);
-//        foundLoanee.setUserIdentity(userIdentity);
-//        foundLoanee = loaneeOutputPort.save(foundLoanee);
-//        return foundLoanee;
-//    }
 
 }

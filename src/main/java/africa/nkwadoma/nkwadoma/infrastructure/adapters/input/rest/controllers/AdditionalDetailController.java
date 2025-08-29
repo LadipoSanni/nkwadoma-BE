@@ -4,7 +4,6 @@ import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.constants.ControllerConstant;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.*;
@@ -20,18 +19,19 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-public class NextOfKinController {
-    private final NextOfKinUseCase nextOfKinUseCase;
-    private final NextOfKinRestMapper nextOfKinRestMapper;
+public class AdditionalDetailController {
+    private final AdditionalDetail additionalDetail;
+    private final AdditionalDetailMapper additionalDetailMapper;
 
     @PostMapping("additional-details")
-    public ResponseEntity<ApiResponse<NextOfKinResponse>> createNextOfKin(@RequestBody NextOfKinRequest request,
-                                                                          @AuthenticationPrincipal Jwt meedlUserId) throws MeedlException {
-        log.info("User ID =====> " + meedlUserId.getClaim("sub"));
-        NextOfKin nextOfKin = nextOfKinRestMapper.toNextOfKin(request, meedlUserId.getClaimAsString("sub") );
-        NextOfKin createdNextOfKin = nextOfKinUseCase.saveAdditionalDetails(nextOfKin);
+    public ResponseEntity<ApiResponse<NextOfKinResponse>> additionalDetails(@RequestBody africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.AdditionalDetail request,
+                                                                            @AuthenticationPrincipal Jwt meedlUserId) throws MeedlException {
+        String id = meedlUserId.getClaim("sub");
+        log.info("User ID =====> {}", id);
+        NextOfKin nextOfKin = additionalDetailMapper.map(request, meedlUserId.getClaimAsString("sub") );
+        NextOfKin createdNextOfKin = additionalDetail.saveAdditionalDetails(nextOfKin);
         return ResponseEntity.ok(ApiResponse.<NextOfKinResponse>builder()
-               .data(nextOfKinRestMapper.toNextOfKinResponse(createdNextOfKin))
+               .data(additionalDetailMapper.toNextOfKinResponse(createdNextOfKin))
                .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage())
                .statusCode(HttpStatus.OK.name())
                .build());

@@ -6,7 +6,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import org.mapstruct.*;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE, uses = {DurationTypeMapper.class, StringTrimMapper.class})
-public interface NextOfKinRestMapper {
+public interface AdditionalDetailMapper {
     @Mapping(target = "firstName", qualifiedByName = "trimString")
     @Mapping(target = "lastName", qualifiedByName = "trimString")
     @Mapping(target = "email", qualifiedByName = "trimString")
@@ -17,7 +17,7 @@ public interface NextOfKinRestMapper {
     @Mapping(target = "alternatePhoneNumber", qualifiedByName = "trimString")
     @Mapping(target = "alternateEmail", qualifiedByName = "trimString")
     @Mapping(source = "userId", target = "userId")
-    NextOfKin toNextOfKin(NextOfKinRequest nextOfKinRequest, String userId);
+    NextOfKin map(AdditionalDetail nextOfKinRequest, String userId);
 
     NextOfKinResponse toNextOfKinResponse(NextOfKin nextOfKin);
 }

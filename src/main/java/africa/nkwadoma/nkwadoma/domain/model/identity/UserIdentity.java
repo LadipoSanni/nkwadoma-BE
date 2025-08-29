@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.MFAType;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.LevelOfEducation;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
@@ -35,12 +36,13 @@ public class UserIdentity {
     private boolean isIdentityVerified;
     private boolean enabled;
     private LocalDateTime createdAt;
+    private String stateOfResidence;
+    private LevelOfEducation levelOfEduction;
     private String image;
     private String gender;
     private String dateOfBirth;
     private String stateOfOrigin;
     private String maritalStatus;
-    private String stateOfResidence;
     private String nationality;
     private String residentialAddress;
     //
