@@ -345,7 +345,7 @@ public class FinancierService implements FinancierUseCase {
         BigDecimal amountToInvest = financier.getAmountToInvest();
         if (MeedlValidator.isValidId(financier.getId())){
             log.info("The financier has a valid id {} therefore the financier is only being added to the vehicle", financier.getId());
-            financier = financierOutputPort.findFinancierByFinancierId(financier.getId());
+            financier = financierOutputPort.findById(financier.getId());
         }else {
             try {
                 financier = getFinancierByUserIdentity(financier);
@@ -459,7 +459,7 @@ public class FinancierService implements FinancierUseCase {
         } else {
             log.info("User is not a financier");
             MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
-            financier = financierOutputPort.findFinancierByFinancierId(financierId);
+            financier = financierOutputPort.findById(financierId);
             log.info("found financier {}", financier);
         }
         return updateFinancierDetail(financier);
@@ -622,7 +622,7 @@ public class FinancierService implements FinancierUseCase {
 
     private void updateFinancierTotalAmountInvested(Financier financier) throws MeedlException {
         log.info("Update financier total amount invested ...");
-        Financier financierToBeUpdate = financierOutputPort.findById(financier.getId());
+        Financier financierToBeUpdate = financierOutputPort.findByFinancierId(financier.getId());
         BigDecimal currentTotalAmountInvested = financierToBeUpdate.getTotalAmountInvested();
         if (currentTotalAmountInvested == null) {
             currentTotalAmountInvested = BigDecimal.ZERO;
@@ -917,7 +917,7 @@ public class FinancierService implements FinancierUseCase {
             foundFinancier = financierOutputPort.findFinancierByUserId(userId);
         } else {
             MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
-            foundFinancier = financierOutputPort.findFinancierByFinancierId(financierId);
+            foundFinancier = financierOutputPort.findById(financierId);
         }
         return foundFinancier;
     }

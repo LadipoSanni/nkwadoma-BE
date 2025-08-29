@@ -53,8 +53,9 @@ public class LoanProduct {
     private String investmentVehicleId;
     private int totalNumberOfLoanee;
     private int totalNumberOfLoanProduct;
-    private List<Vendor> vendors;
     private String investmentVehicleName;
+    private List<Vendor> vendors;
+    private List<String> sponsorIds;
 
     private int pageSize;
     private int pageNumber;

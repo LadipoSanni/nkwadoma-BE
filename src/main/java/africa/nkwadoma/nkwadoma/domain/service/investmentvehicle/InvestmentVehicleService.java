@@ -27,8 +27,6 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentvehicle.InvestmentVehicleMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentvehicle.VehicleOperationMapper;
-import jdk.management.jfr.EventTypeInfo;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -263,7 +261,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
 
     private void addFinancierToVehicle(List<Financier> financiers, InvestmentVehicle investmentVehicle) throws MeedlException {
         for (Financier eachFinancier : financiers) {
-            Financier financier = financierOutputPort.findFinancierByFinancierId(eachFinancier.getId());
+            Financier financier = financierOutputPort.findById(eachFinancier.getId());
             InvestmentVehicleFinancier investmentVehicleFinancier = InvestmentVehicleFinancier.builder()
                             .investmentVehicle(investmentVehicle).financier(financier).
                     investmentVehicleDesignation(eachFinancier.getInvestmentVehicleDesignation()).build();

@@ -43,7 +43,7 @@ public class FinancierAdapter implements FinancierOutputPort {
         return financierMapper.map(savedFinancierEntity);
     }
     @Override
-    public Financier findFinancierByFinancierId(String financierId) throws MeedlException {
+    public Financier findById(String financierId) throws MeedlException {
         MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
         FinancierProjection financierEntity = financierRepository.findByFinancierId(financierId)
                 .orElseThrow(()-> new MeedlException("Financier not found"));
@@ -95,7 +95,7 @@ public class FinancierAdapter implements FinancierOutputPort {
     }
 
     @Override
-    public Financier findById(String id) throws MeedlException {
+    public Financier findByFinancierId(String id) throws MeedlException {
         MeedlValidator.validateUUID(id,"Financier id cannot be empty");
 
         FinancierEntity financierEntity =

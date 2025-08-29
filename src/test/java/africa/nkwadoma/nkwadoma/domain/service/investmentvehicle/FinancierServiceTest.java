@@ -259,7 +259,7 @@ public class FinancierServiceTest {
         try {
             investmentVehicle = investmentVehicleOutputPort.findById(privateInvestmentVehicleId);
             log.info("Financier id in invest in vehicle {}", individualFinancierId);
-            financier = financierOutputPort.findFinancierByFinancierId(individualFinancierId);
+            financier = financierOutputPort.findById(individualFinancierId);
             assertNotNull(investmentVehicle.getTotalAvailableAmount());
             assertNotNull(financier);
 
@@ -275,7 +275,7 @@ public class FinancierServiceTest {
             assertFalse(investmentVehicleFinanciers.isEmpty());
             assertEquals(individualFinancier.getAmountToInvest(), investmentVehicleFinanciers.get(0).getAmountInvested(),
                     "The amount to invest should be updated correctly");
-            financier = financierOutputPort.findFinancierByFinancierId(individualFinancierId);
+            financier = financierOutputPort.findById(individualFinancierId);
             log.info("found financier after investing");
             assertEquals(individualFinancier.getAmountToInvest(), financier.getTotalAmountInvested());
         } catch (MeedlException e) {
@@ -293,7 +293,7 @@ public class FinancierServiceTest {
         Financier financier = null;
         try {
             investmentVehicle = investmentVehicleOutputPort.findById(privateInvestmentVehicleId);
-            financier = financierOutputPort.findFinancierByFinancierId(individualFinancierId);
+            financier = financierOutputPort.findById(individualFinancierId);
             log.info("Financier in invest in vehicle {}", financier);
             List<InvestmentVehicleFinancier> investmentVehicleFinanciers = investmentVehicleFinancierOutputPort.findByAll(investmentVehicle.getId(), individualFinancierId);
             assertNotNull(financier);
@@ -305,7 +305,7 @@ public class FinancierServiceTest {
             assertEquals(FIVE_THOUSAND, initialAmount);
 
             financierUseCase.investInVehicle(individualFinancier);
-            financier = financierOutputPort.findFinancierByFinancierId(individualFinancierId);
+            financier = financierOutputPort.findById(individualFinancierId);
              investmentVehicleFinanciers = investmentVehicleFinancierOutputPort.findByAll(privateInvestmentVehicleId, individualFinancierId);
             assertFalse(investmentVehicleFinanciers.isEmpty());
             assertTrue(investmentVehicleFinanciers.size() > BigInteger.ONE.intValue());
@@ -369,7 +369,7 @@ public class FinancierServiceTest {
         Financier financier = null;
         try {
             investmentVehicle = investmentVehicleOutputPort.findById(publicInvestmentVehicleId);
-            financier = financierOutputPort.findFinancierByFinancierId(individualFinancierId);
+            financier = financierOutputPort.findById(individualFinancierId);
             List<InvestmentVehicleFinancier> investmentVehicleFinanciers = investmentVehicleFinancierOutputPort.findByAll(investmentVehicle.getId(), individualFinancierId);
             assertNotNull(investmentVehicleFinanciers);
             assertTrue(investmentVehicleFinanciers.size() == BigInteger.ONE.intValue());
@@ -382,7 +382,7 @@ public class FinancierServiceTest {
 
             financierUseCase.investInVehicle(individualFinancier);
 
-            financier = financierOutputPort.findFinancierByFinancierId(individualFinancierId);
+            financier = financierOutputPort.findById(individualFinancierId);
             investmentVehicleFinanciers = investmentVehicleFinancierOutputPort.findByAll(investmentVehicle.getId(), individualFinancierId);
             assertNotNull(investmentVehicleFinanciers);
             assertFalse(investmentVehicleFinanciers.isEmpty());
@@ -722,7 +722,7 @@ public class FinancierServiceTest {
         Page<Financier> financiersPage = null;
         try{
             individualFinancier.setActivationStatus(ActivationStatus.INVITED);
-            Financier foundFinancier = financierOutputPort.findFinancierByFinancierId(individualFinancierId);
+            Financier foundFinancier = financierOutputPort.findById(individualFinancierId);
             assertNotNull(foundFinancier);
             foundFinancier.setActivationStatus(ActivationStatus.INVITED);
             financierOutputPort.save(foundFinancier);
@@ -740,7 +740,7 @@ public class FinancierServiceTest {
         Page<Financier> financiersPage = null;
         try{
             individualFinancier.setActivationStatus(ActivationStatus.INACTIVE);
-            Financier foundFinancier = financierOutputPort.findFinancierByFinancierId(individualFinancierId);
+            Financier foundFinancier = financierOutputPort.findById(individualFinancierId);
             assertNotNull(foundFinancier);
             foundFinancier.setActivationStatus(ActivationStatus.INACTIVE);
             financierOutputPort.save(foundFinancier);
@@ -758,7 +758,7 @@ public class FinancierServiceTest {
         Page<Financier> financiersPage = null;
         try{
             individualFinancier.setActivationStatus(ActivationStatus.DEACTIVATED);
-            Financier foundFinancier = financierOutputPort.findFinancierByFinancierId(individualFinancierId);
+            Financier foundFinancier = financierOutputPort.findById(individualFinancierId);
             assertNotNull(foundFinancier);
             foundFinancier.setActivationStatus(ActivationStatus.DEACTIVATED);
             financierOutputPort.save(foundFinancier);
@@ -1150,7 +1150,7 @@ public class FinancierServiceTest {
     @Test
     void viewInvestmentDetailWithNonExistingFinancierId(){
         String testFinancierId = "547391e5-19be-42d6-b725-f7df35138dfb";
-        Exception exception = assertThrows(MeedlException.class, ()->financierOutputPort.findFinancierByFinancierId(testFinancierId));
+        Exception exception = assertThrows(MeedlException.class, ()->financierOutputPort.findById(testFinancierId));
         log.info("------->Exception message------------>"+exception.getMessage());
     }
 
@@ -1173,7 +1173,7 @@ public class FinancierServiceTest {
         individualFinancier.setUserIdentity(individualUserIdentity);
         String message = financierUseCase.makePrivacyPolicyDecision(individualFinancier);
         assertNotNull(message);
-        Financier foundFinancier = financierOutputPort.findFinancierByFinancierId(individualFinancierId);
+        Financier foundFinancier = financierOutputPort.findById(individualFinancierId);
         assertNotNull(foundFinancier);
         assertFalse(foundFinancier.isPrivacyPolicyAccepted());
 
