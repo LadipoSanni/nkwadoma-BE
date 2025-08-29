@@ -221,12 +221,16 @@ public class UserIdentityService implements UserUseCase {
     }
 
     private void validatePasswordsForChangePassword(UserIdentity userIdentity) throws MeedlException {
+        if (userIdentity.getPassword().equals(userIdentity.getNewPassword())){
+            log.error("Old an new password in change password is the same.");
+            throw new MeedlException("This password cannot be used");
+        }
         String currentPassword = tokenUtils.decryptAES(userIdentity.getPassword(), "Invalid password entered for current password");
         try{
             MeedlValidator.validatePassword(currentPassword);
         }catch (MeedlException meedlException){
             log.error("Error validating current password ",meedlException);
-            throw new MeedlException(PASSWORD_INCORRECT.getMessage());
+            throw new MeedlException(IdentityMessages.PASSWORD_INCORRECT.getMessage());
         }
         String newPassword = tokenUtils.decryptAES(userIdentity.getNewPassword(), "Invalid new password provided");
         try {
@@ -239,7 +243,7 @@ public class UserIdentityService implements UserUseCase {
             login(userIdentity);
         }catch (MeedlException e){
             log.info("Password invalid on change password {} user email {}", e.getMessage(), userIdentity.getEmail());
-            throw new MeedlException(PASSWORD_INCORRECT.getMessage());
+            throw new MeedlException(IdentityMessages.PASSWORD_INCORRECT.getMessage());
         }
     }
 
