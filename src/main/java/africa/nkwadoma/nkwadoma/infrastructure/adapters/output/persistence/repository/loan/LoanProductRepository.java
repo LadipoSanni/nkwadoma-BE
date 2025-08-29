@@ -41,9 +41,12 @@ public interface LoanProductRepository extends JpaRepository<LoanProductEntity,S
     LoanProductEntity findByLoanOfferId(String loanOfferId);
 
     @Query("""
-        select lp from LoanProductEntity lp
-        join LoanOfferEntity 
-        join LoaneeLoanDetailEntity 
-        """)
+    SELECT loe.loanProduct
+    FROM CohortLoaneeEntity cle
+    JOIN cle.loaneeLoanDetail lld
+    JOIN LoanReferralEntity lre ON lre.cohortLoanee.id = cle.id
+    JOIN LoanOfferEntity loe ON loe.id = lre.id
+    WHERE lld.id = :loaneeLoanDetailId
+""")
     LoanProductEntity findLoanProductByLoaneeLoanDetailId(String loaneeLoanDetailId);
 }
