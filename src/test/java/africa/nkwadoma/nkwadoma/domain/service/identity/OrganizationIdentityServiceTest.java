@@ -493,7 +493,9 @@ class OrganizationIdentityServiceTest {
                     .thenReturn(superAdmin);
 
 
-            response = organizationIdentityService.inviteColleague(roseCouture);
+            UserIdentity userIdentity = organizationIdentityService.inviteColleague(roseCouture);
+            assertNotNull(userIdentity);
+            response = userIdentity.getResponse();
 
         }catch (MeedlException meedlException){
             log.info(meedlException.getMessage());
