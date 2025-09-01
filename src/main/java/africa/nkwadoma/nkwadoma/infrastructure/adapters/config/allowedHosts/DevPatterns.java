@@ -13,14 +13,14 @@ public class DevPatterns implements AllowedHost{
     private String allowedHost;
     @Value("${dev2}")
     private String allowedHost2;
-    @Value("${swaggerDev}")
-    private String swaggerDev;
+//    @Value("${swaggerDev}")
+//    private String swaggerDev;
     @Override
     public String[] getPatterns() {
         return new String[]{
                 allowedHost,
                 allowedHost2,
-                swaggerDev
+//                swaggerDev
         };
     }
 }
