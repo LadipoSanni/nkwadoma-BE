@@ -263,7 +263,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
 
     private void addFinancierToVehicle(List<Financier> financiers, InvestmentVehicle investmentVehicle) throws MeedlException {
         for (Financier eachFinancier : financiers) {
-            Financier financier = financierOutputPort.findFinancierByFinancierId(eachFinancier.getId());
+            Financier financier = financierOutputPort.findById(eachFinancier.getId());
             InvestmentVehicleFinancier investmentVehicleFinancier = InvestmentVehicleFinancier.builder()
                             .investmentVehicle(investmentVehicle).financier(financier).
                     investmentVehicleDesignation(eachFinancier.getInvestmentVehicleDesignation()).build();
