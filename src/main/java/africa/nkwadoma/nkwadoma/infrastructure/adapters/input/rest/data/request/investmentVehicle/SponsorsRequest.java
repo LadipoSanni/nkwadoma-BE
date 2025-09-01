@@ -6,7 +6,6 @@ import lombok.ToString;
 
 @Getter
 @Setter
-@ToString
 public class SponsorsRequest {
     private String id;
     private String  name;

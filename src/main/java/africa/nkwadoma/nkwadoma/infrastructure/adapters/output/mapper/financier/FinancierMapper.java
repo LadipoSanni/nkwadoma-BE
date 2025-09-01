@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.identity.N
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.financier.FinancierEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.UserIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.financier.FinancierProjection;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.financier.FinancierWithDesignationProjection;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -39,4 +40,10 @@ public interface FinancierMapper {
     Financier mapProjectionToFinancier(FinancierProjection financierProjection);
 
 
+    @Mapping(target = "name", source = "financierName")
+    @Mapping(target = "totalAmountInvested", source = "totalAmountInvested")
+    @Mapping(target = "totalNumberOfInvestment", source = "numberOfInvestments")
+    @Mapping(target = "investmentVehicleDesignation", source = "investmentVehicleDesignation")
+    void updateFinancierFromProjection(FinancierWithDesignationProjection projection,
+                                       @MappingTarget Financier financier);
 }

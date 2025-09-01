@@ -58,13 +58,16 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
     public Page<Financier> viewAllFinancierInAnInvestmentVehicle(String investmentVehicleId, ActivationStatus activationStatus, Pageable pageRequest) throws MeedlException {
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
 
-        Page<FinancierWithDesignationProjection> financiersWithDesignationProjection = investmentVehicleFinancierRepository.findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatus(investmentVehicleId, activationStatus, pageRequest);
-        return financiersWithDesignationProjection.map(financierWithDesignationProjection -> {
-            log.info("The roles financier has : {}", financierWithDesignationProjection.getInvestmentVehicleDesignation());
-            Financier financier = financierMapper.map(financierWithDesignationProjection.getFinancier());
-            financier.setInvestmentVehicleDesignation(financierWithDesignationProjection.getInvestmentVehicleDesignation());
+        Page<FinancierWithDesignationProjection> financiersWithDesignationProjection = investmentVehicleFinancierRepository
+                .findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatus(investmentVehicleId, activationStatus, pageRequest);
+        return financiersWithDesignationProjection.map(projection -> {
+            Financier financier = financierMapper.map(projection.getFinancier());
+            log.info("The financier entity mapped {}", financier);
+            financierMapper.updateFinancierFromProjection(projection, financier);
+            log.info("designation === {}",financier.getInvestmentVehicleDesignation());
             return financier;
         });
+
     }
 
 

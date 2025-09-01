@@ -17,7 +17,6 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 
 @Getter
 @Setter
-@ToString
 public class LoanProductRequest {
     private String id;
     private String investmentVehicleId;

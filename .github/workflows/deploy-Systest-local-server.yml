@@ -3,7 +3,7 @@ name: Deploy Nkwadoma Service to Systest and Systest-2 environments
 on:
   push:
     branches:
-      - 'systest'
+      - 'dev'
 
 env:
   REPO_URL: 357586184453.dkr.ecr.us-east-1.amazonaws.com/nkwadoma
