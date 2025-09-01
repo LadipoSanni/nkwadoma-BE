@@ -17,4 +17,5 @@ public class LoanMetricsEntity {
     private int loanDisbursalCount;
     private int loanReferralCount;
     private int loanOfferCount;
+    private int uploadedLoanCount;
 }

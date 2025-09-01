@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.OrganizationS
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ServiceOfferingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOfferOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
@@ -18,6 +19,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanMetrics;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
@@ -89,6 +91,9 @@ class OrganizationIdentityServiceTest {
     private ServiceOfferingOutputPort serviceOfferingOutputPort;
     @Mock
     private OrganizationServiceOfferingOutputPort organizationServiceOfferingOutputPort;
+    @Mock
+    private PortfolioOutputPort portfolioOutputPort;
+    private Portfolio portfolio;
 
     @BeforeEach
     void setUp() {
@@ -124,6 +129,7 @@ class OrganizationIdentityServiceTest {
         roseCouture.setEnabled(Boolean.TRUE);
 
         superAdmin = TestData.createTestUserIdentity("superAdmin@grr.la");
+        portfolio = Portfolio.builder().portfolioName("Meedl").build();
 
     }
 
@@ -142,6 +148,8 @@ class OrganizationIdentityServiceTest {
             when(identityManagerOutPutPort.getClientRepresentationByName(roseCouture.getName())).thenReturn(new ClientRepresentation());
             when(identityManagerOutPutPort.getUserByEmail(roseCouture.getOrganizationEmployees().get(0).getMeedlUser().getEmail())).thenReturn(Optional.empty());
             doNothing().when(asynchronousMailingOutputPort).sendEmailToInvitedOrganization(any(UserIdentity.class));
+            when(portfolioOutputPort.findPortfolio(any(Portfolio.class))).thenReturn(portfolio);
+            when(portfolioOutputPort.save(any(Portfolio.class))).thenReturn(portfolio);
 //            when()
 //            doNothing().when(asynchronousNotificationOutputPort).notifySuperAdminOfNewOrganization(any(UserIdentity.class),
 //                    any(OrganizationIdentity.class), any(NotificationFlag.class));
@@ -452,7 +460,9 @@ class OrganizationIdentityServiceTest {
         roseCouture.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
         when(organizationEmployeeIdentityOutputPort.save(employeeSarah)).thenReturn(employeeSarah);
         doNothing().when(asynchronousMailingOutputPort).sendEmailToInvitedOrganization(any(UserIdentity.class));
-        when(meedlNotificationOutputPort.save(any(MeedlNotification.class))).thenReturn(any(MeedlNotification.class));
+        when(meedlNotificationOutputPort.save(any(MeedlNotification.class))).thenReturn(new MeedlNotification());
+        when(portfolioOutputPort.findPortfolio(any(Portfolio.class))).thenReturn(portfolio);
+        when(portfolioOutputPort.save(any(Portfolio.class))).thenReturn(portfolio);
         String response = organizationIdentityService.respondToOrganizationInvite(mockId,mockId,ActivationStatus.APPROVED);
         assertNotNull(response);
     }

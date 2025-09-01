@@ -912,9 +912,9 @@ public class LoanCalculationEngineTest {
         loanProduct.setTotalOutstandingLoan(BigDecimal.ZERO);
         when(loanProductOutputPort.save(loanProduct)).thenReturn(loanProduct);
         when(loanProductOutputPort.findByLoaneeLoanDetailId(anyString())).thenReturn(loanProduct);
-        when(loaneeLoanDetailsOutputPort.findAllWithDailyInterestByMonthAndYear(Month.AUGUST,2025))
+        when(loaneeLoanDetailsOutputPort.findAllWithDailyInterestByMonthAndYear(LocalDateTime.now().getMonth(),2025))
                 .thenReturn(List.of(loanDetail));
-        when(dailyInterestOutputPort.findAllInterestForAMonth(Month.AUGUST,2025,loanDetail.getId()))
+        when(dailyInterestOutputPort.findAllInterestForAMonth(LocalDateTime.now().getMonth(),2025,loanDetail.getId()))
                 .thenReturn(List.of(
                         DailyInterest.builder().interest(new BigDecimal("50.00")).build(),
                         DailyInterest.builder().interest(new BigDecimal("50.00")).build()));
@@ -942,7 +942,7 @@ public class LoanCalculationEngineTest {
         calculationEngine.calculateMonthlyInterest();
 
         verify(loaneeLoanDetailsOutputPort, times(1))
-                .findAllWithDailyInterestByMonthAndYear(Month.AUGUST, 2025);
+                .findAllWithDailyInterestByMonthAndYear(LocalDateTime.now().getMonth(), 2025);
     }
 
 

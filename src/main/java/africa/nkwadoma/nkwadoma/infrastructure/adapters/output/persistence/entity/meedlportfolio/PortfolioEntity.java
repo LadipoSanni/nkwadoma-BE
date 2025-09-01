@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.math.BigDecimal;
+
 @Setter
 @Getter
 @Entity
@@ -26,5 +28,13 @@ public class PortfolioEntity {
     private double loanReferralPercentage = 0.0;
     private double loanRequestPercentage = 0.0;
     private double loanDisbursalPercentage = 0.0;
+    private int numberOfLoanees;
+    private int numberOfOrganizations;
+    private int numberOfLoanProducts;
+    private BigDecimal historicalDebt = BigDecimal.ZERO;
+    private BigDecimal disbursedLoanAmount = BigDecimal.ZERO;
+    private BigDecimal netLoanPortfolio = BigDecimal.ZERO;
+    private BigDecimal totalAmountEarned = BigDecimal.ZERO;
+
 
 }
