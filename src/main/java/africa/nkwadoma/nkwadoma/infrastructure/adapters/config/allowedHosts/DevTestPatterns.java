@@ -8,19 +8,16 @@ import org.springframework.stereotype.Component;
 
 @Profile("dev")
 @Component
-public class DevPatterns implements AllowedHost{
+public class DevTestPatterns implements AllowedHost{
     @Value("${dev}")
     private String allowedHost;
     @Value("${dev2}")
     private String allowedHost2;
-//    @Value("${swaggerDev}")
-//    private String swaggerDev;
     @Override
     public String[] getPatterns() {
         return new String[]{
                 allowedHost,
-                allowedHost2,
-//                swaggerDev
+                allowedHost2
         };
     }
 }
