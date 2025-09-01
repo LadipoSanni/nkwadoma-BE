@@ -61,6 +61,7 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
                 .findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatus(investmentVehicleId, activationStatus, pageRequest);
         return financiersWithDesignationProjection.map(projection -> {
             Financier financier = financierMapper.map(projection.getFinancier());
+            log.info("The financier entity mapped {}", financier);
             financierMapper.updateFinancierFromProjection(projection, financier);
             log.info("designation === {}",financier.getInvestmentVehicleDesignation());
             return financier;
