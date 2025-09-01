@@ -27,14 +27,35 @@ public interface InvestmentVehicleFinancierRepository extends JpaRepository<Inve
             Pageable pageable
     );
 
-    @Query("SELECT ivf FROM InvestmentVehicleFinancierEntity ivf " +
-            "WHERE ivf.investmentVehicle.id = :investmentVehicleId " +
-            "AND (:activationStatus IS NULL OR ivf.financier.activationStatus = :activationStatus)")
+    @Query("""
+    SELECT ivf.financier AS financier,
+           CASE
+               WHEN financierEntity.financierType = 'INDIVIDUAL' THEN CONCAT(user.firstName, ' ', user.lastName)
+               WHEN financierEntity.financierType = 'COOPERATE' THEN organization.name
+               ELSE NULL
+           END AS financierName,
+           SUM(ivf.amountInvested) AS totalAmountInvested,
+           COUNT(ivf) AS numberOfInvestments
+    FROM InvestmentVehicleFinancierEntity ivf
+    JOIN FinancierEntity financierEntity ON financierEntity.id = ivf.financier.id
+    LEFT JOIN OrganizationEntity organization ON organization.id = financierEntity.identity
+    LEFT JOIN UserEntity user ON user.id = financierEntity.identity
+    WHERE ivf.investmentVehicle.id = :investmentVehicleId
+    AND (:activationStatus IS NULL OR ivf.financier.activationStatus = :activationStatus)
+    GROUP BY ivf.financier,
+             CASE
+                 WHEN financierEntity.financierType = 'INDIVIDUAL' THEN CONCAT(user.firstName, ' ', user.lastName)
+                 WHEN financierEntity.financierType = 'COOPERATE' THEN organization.name
+                 ELSE NULL
+             END
+""")
     Page<FinancierWithDesignationProjection> findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatus(
             @Param("investmentVehicleId") String investmentVehicleId,
             @Param("activationStatus") ActivationStatus activationStatus,
             Pageable pageable
     );
+
+
 
     void deleteByInvestmentVehicleIdAndFinancierId(String investmentId, String id);
 
