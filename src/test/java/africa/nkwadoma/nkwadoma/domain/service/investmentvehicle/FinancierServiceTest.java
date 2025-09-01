@@ -1160,7 +1160,7 @@ public class FinancierServiceTest {
         individualFinancier.setPrivacyPolicyAccepted(Boolean.TRUE);
         String message = financierUseCase.makePrivacyPolicyDecision(individualFinancier);
         assertNotNull(message);
-        Financier foundFinancier = financierOutputPort.findById(individualFinancierId);
+        Financier foundFinancier = financierOutputPort.findByFinancierId(individualFinancierId);
         assertNotNull(foundFinancier);
         assertTrue(foundFinancier.isPrivacyPolicyAccepted());
 

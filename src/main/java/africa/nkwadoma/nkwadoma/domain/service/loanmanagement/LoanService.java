@@ -122,6 +122,9 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     private void verifyFinanciersExistInVehicle(LoanProduct loanProduct, InvestmentVehicle investmentVehicle) throws MeedlException {
+        if (loanProduct.getSponsorIds() == null){
+            return;
+        }
         for (String financierId : loanProduct.getSponsorIds()){
 
             Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findAllByFinancierIdAndInvestmentVehicleId(financierId, investmentVehicle.getId());
