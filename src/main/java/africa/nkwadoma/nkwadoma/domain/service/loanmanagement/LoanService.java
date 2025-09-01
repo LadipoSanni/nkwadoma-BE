@@ -4,7 +4,6 @@ import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.LoanUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
-import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleOutputPort;
@@ -56,7 +55,6 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         RespondToLoanReferralUseCase, LoanOfferUseCase, LoanUseCase {
     private final LoanProductOutputPort loanProductOutputPort;
     private final LoaneeOutputPort loaneeOutputPort;
-    private final LoanMetricsUseCase loanMetricsUseCase;
     private final LoanProductMapper loanProductMapper;
     private final LoanRequestMapper loanRequestMapper;
     private final LoanRequestOutputPort loanRequestOutputPort;
@@ -69,7 +67,6 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     private final LoaneeLoanAccountOutputPort loaneeLoanAccountOutputPort;
-    private final IdentityVerificationUseCase verificationUseCase;
     private final InvestmentVehicleOutputPort investmentVehicleOutputPort;
     private final LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
     private final ProgramOutputPort programOutputPort;
@@ -80,13 +77,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final CohortOutputPort cohortOutputPort;
     private final ProgramLoanDetailOutputPort programLoanDetailOutputPort;
     private final OrganizationLoanDetailOutputPort organizationLoanDetailOutputPort;
-    private final LoaneeUseCase loaneeUseCase;
     private final LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
-    private final LoanMapper loanMapper;
     private final LoaneeLoanAggregateOutputPort loaneeLoanAggregateOutputPort;
     private final LoaneeLoanAggregateMapper loaneeLoanAggregateMapper;
     private final InvestmentVehicleFinancierOutputPort investmentVehicleFinancierOutputPort;
-    private final FinancierOutputPort financierOutputPort;
 
     @Override
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
@@ -114,13 +108,17 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         return loanProductOutputPort.save(loanProduct);
     }
 
-    private void verifyFinanciersExistInVehicle(LoanProduct loanProduct, InvestmentVehicle investmentVehicle) {
+    private void verifyFinanciersExistInVehicle(LoanProduct loanProduct, InvestmentVehicle investmentVehicle) throws MeedlException {
         for (String financierId : loanProduct.getSponsorIds()){
 
-            Financier financier = financierOutputPort.findById()
-            InvestmentVehicleFinancier investmentVehicleFinancier = investmentVehicleFinancierOutputPort.findAllByFinancierIdAndInvestmentVehicleId()
+            Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findAllByFinancierIdAndInvestmentVehicleId(financierId, investmentVehicle.getId());
+            if (optionalInvestmentVehicleFinancier.isEmpty()){
+                log.error("Investment vehicle financier not found for financier with id {} and vehicle with id {}", financierId, investmentVehicle.getId());
+                throw new MeedlException("Apparently financier with name %s is not part of %s".formatted( financierId,  investmentVehicle.getName()));
+            }
 
         }
+        log.info("Done verifying if financiers are part of the select vehicle {}", investmentVehicle.getId());
     }
 
     private InvestmentVehicle checkProductSizeNotMoreThanAvailableInvestmentAmount(LoanProduct loanProduct) throws MeedlException {

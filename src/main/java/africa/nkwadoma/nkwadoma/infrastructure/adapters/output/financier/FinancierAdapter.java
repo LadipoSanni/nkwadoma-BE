@@ -46,11 +46,19 @@ public class FinancierAdapter implements FinancierOutputPort {
     public Financier findById(String financierId) throws MeedlException {
         MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
         FinancierProjection financierEntity = financierRepository.findByFinancierId(financierId)
-                .orElseThrow(()-> new MeedlException("Financier not found"));
+                .orElseThrow(()-> new MeedlException(FinancierMessages.FINANCIER_NOT_FOUND.getMessage()));
         log.info("Financier found at the adapter level for view by financier id {}", financierEntity);
         Financier financier =  financierMapper.mapProjectionToFinancier(financierEntity);
         log.info("found financier {}",financier);
         return financier;
+    }
+    @Override
+    public Financier findByFinancierId(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id,"Financier id cannot be empty");
+
+        FinancierEntity financierEntity =
+                financierRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException(FinancierMessages.FINANCIER_NOT_FOUND.getMessage()));
+        return financierMapper.map(financierEntity);
     }
     @Override
     public Financier findFinancierByOrganizationId(String organizationId) throws MeedlException {
@@ -93,16 +101,6 @@ public class FinancierAdapter implements FinancierOutputPort {
         FinancierProjection financierEntity = financierRepository.findByCooperateStaffUserId(id);
         return financierMapper.mapProjectionToFinancier(financierEntity);
     }
-
-    @Override
-    public Financier findByFinancierId(String id) throws MeedlException {
-        MeedlValidator.validateUUID(id,"Financier id cannot be empty");
-
-        FinancierEntity financierEntity =
-                financierRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("Financier not found"));
-        return financierMapper.map(financierEntity);
-    }
-
 
     @Override
     public void delete(String financierId) throws MeedlException {

@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.enti
 
 
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicleDesignation;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -9,6 +10,8 @@ import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
 
 @Setter
 @Getter
@@ -51,4 +54,8 @@ public class LoanProductEntity {
     @Column(nullable = false, columnDefinition = "int DEFAULT 0")
     private int totalNumberOfLoanee;
     private int totalNumberOfLoanProduct;
+
+    @Column(name = "loan_product_sponsors")
+    private List<String> sponsorIds;
+
 }

@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -154,8 +155,18 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
         MeedlValidator.validateUUID(investmentVehicleFinancierId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
         checkIfInvestmentExist(investmentVehicleFinancierId);
         InvestmentVehicleFinancierEntity investmentVehicleFinancierEntity =
-                investmentVehicleFinancierRepository.findByFinancierIdAndInvestmentVehicleId(financierId, investmentVehicleFinancierId);
+                investmentVehicleFinancierRepository.findByFinancierIdAndInvestmentVehicleFinancierId(financierId, investmentVehicleFinancierId);
         return investmentVehicleFinancierMapper.toInvestmentVehicleFinancier(investmentVehicleFinancierEntity);
+    }
+
+    @Override
+    public Optional<InvestmentVehicleFinancier> findAllByFinancierIdAndInvestmentVehicleId(String financierId, String investmentVehicleId) throws MeedlException {
+        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+        MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+        Optional<InvestmentVehicleFinancierEntity> optionalInvestmentVehicleFinancierEntity =
+                investmentVehicleFinancierRepository.findByFinancier_IdAndInvestmentVehicle_Id(financierId, investmentVehicleId);
+        optionalInvestmentVehicleFinancierEntity.ifPresent(investmentVehicleFinancierMapper::toInvestmentVehicleFinancier);
+        return Optional.empty();
     }
 
     public void checkIfInvestmentExist(String investmentVehicleFinancierId) throws MeedlException {
