@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.InstituteMetricsOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.InstituteMetrics;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -38,6 +39,12 @@ public class InstituteMetricsPersistenceAdapter implements InstituteMetricsOutpu
         MeedlValidator.validateUUID(id,"Institute metrics id cannot be empty");
         instituteMetricsRepository.deleteById(id);
     }
+    @Override
+    public void deleteByOrganizationId(String organizationId) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+        instituteMetricsRepository.deleteByOrganization_Id(organizationId);
+    }
+
 
     @Override
     public InstituteMetrics findByOrganizationId(String id) throws MeedlException {

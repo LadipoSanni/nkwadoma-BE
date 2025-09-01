@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.loanmanagement.loanbook;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.LoanBookUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.InstituteMetricsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
@@ -13,6 +14,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.CohortType;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.education.InstituteMetrics;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
@@ -23,11 +25,13 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.VendorEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.InstituteMetricsRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanProductVendorRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.VendorEntityRepository;
 import africa.nkwadoma.nkwadoma.testUtilities.TestUtils;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -83,6 +87,8 @@ public class LoanBookServiceTest {
     private LoanProduct loanProduct;
     @Autowired
     private VendorEntityRepository vendorEntityRepository;
+    @Autowired
+    private InstituteMetricsOutputPort instituteMetricsOutputPort;
 
     @BeforeAll
     void setUp() throws IOException, MeedlException {
@@ -278,6 +284,12 @@ public class LoanBookServiceTest {
         log.info("program id = {}", program.getId());
         programOutputPort.deleteProgram(program.getId());
         log.info("org id = {}", organizationIdentity.getId());
+        InstituteMetrics instituteMetrics = instituteMetricsOutputPort.findByOrganizationId(organizationId);
+        if (ObjectUtils.isNotEmpty(instituteMetrics)){
+            log.info("Metrics was found for this organization");
+            instituteMetricsOutputPort.delete(instituteMetrics.getId());
+        }
+        instituteMetricsOutputPort.deleteByOrganizationId(organizationId);
         organizationIdentityOutputPort.delete(organizationIdentity.getId());
         log.info("meedl id = {}", meedleUser.getId());
         userIdentityOutputPort.deleteUserById(meedleUser.getId());
