@@ -29,7 +29,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.loan.FinancialConstants.*;
@@ -82,18 +81,23 @@ public class CalculationEngine implements CalculationEngineUseCase {
         if (isSkipableCalculation(calculationContext.getRepaymentHistories(), calculationContext.getLoanee())) return;
         calculationContext.setDefaultValues();
         List<RepaymentHistory> previousRepaymentHistory = repaymentHistoryOutputPort.findAllRepaymentHistoryForLoan(calculationContext.getLoanee().getId(), calculationContext.getCohort().getId());
-        LoaneeLoanDetail loaneeLoanDetail = getLoaneeLoanDetail(calculationContext);
-        calculationContext.setLoaneeLoanDetail(loaneeLoanDetail);
+        setLoaneeLoanDetailToContext(calculationContext);
         deletePreciousInterestHistory(calculationContext);
         List<RepaymentHistory> allRepayments = combineAndSortRepaymentHistories(calculationContext.getRepaymentHistories(), previousRepaymentHistory);
         calculationContext.setRepaymentHistories(allRepayments);
         calculationContext.setAsOfDate(LocalDate.now());
 
         processRepaymentHistoryCalculations(calculationContext);
-        finalizeRepaymentHistoryCalculation(allRepayments, previousRepaymentHistory, loaneeLoanDetail);
+        finalizeRepaymentHistoryCalculation(allRepayments, previousRepaymentHistory, calculationContext.getLoaneeLoanDetail());
         updateLoanDetails(calculationContext);
     }
 
+    private BigDecimal bigDecimalOrZero(BigDecimal amount){
+        if (ObjectUtils.isEmpty(amount)){
+            return BigDecimal.ZERO;
+        }
+        return amount;
+    }
     private void deletePreciousInterestHistory(CalculationContext calculationContext) throws MeedlException {
         log.info("Deleting previously existing monthly and daily interest for this particular loan if any exist. Loanee loan detail id is {}", calculationContext.getLoaneeLoanDetail().getId());
         monthlyInterestOutputPort.deleteAllByLoaneeLoanDetailId(calculationContext.getLoaneeLoanDetail().getId());
@@ -360,12 +364,14 @@ public class CalculationEngine implements CalculationEngineUseCase {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private LoaneeLoanDetail getLoaneeLoanDetail(CalculationContext context) throws MeedlException {
-        CohortLoanee cohortLoanee = cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(context.getLoanee().getId(), context.getCohort().getId());
+    private void setLoaneeLoanDetailToContext(CalculationContext calculationContext) throws MeedlException {
+        CohortLoanee cohortLoanee = cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(calculationContext.getLoanee().getId(), calculationContext.getCohort().getId());
         LoaneeLoanDetail loaneeLoanDetail = loaneeLoanDetailsOutputPort.findByCohortLoaneeId(cohortLoanee.getId());
-        context.setPreviousTotalAmountPaid(loaneeLoanDetail.getAmountRepaid());
-        context.setPreviousTotalInterestIncurred(loaneeLoanDetail.getInterestIncurred());
-        return loaneeLoanDetail;
+        calculationContext.setPreviousTotalAmountPaid(bigDecimalOrZero(loaneeLoanDetail.getAmountRepaid()));
+        calculationContext.setPreviousTotalInterestIncurred(bigDecimalOrZero(loaneeLoanDetail.getInterestIncurred()));
+        calculationContext.setPreviousOutstandingAmount(bigDecimalOrZero(loaneeLoanDetail.getAmountOutstanding()));
+        calculationContext.setLoaneeLoanDetail(loaneeLoanDetail);
+
     }
 
 
