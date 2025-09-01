@@ -571,6 +571,7 @@ public class TestData {
     public static InvestmentVehicleFinancier buildInvestmentVehicleFinancier(Financier financier, InvestmentVehicle investmentVehicle) {
         return InvestmentVehicleFinancier.builder()
                 .financier(financier)
+                .investmentVehicleDesignation(Set.of(InvestmentVehicleDesignation.DONOR))
                 .investmentVehicle(investmentVehicle)
                 .build();
     }
