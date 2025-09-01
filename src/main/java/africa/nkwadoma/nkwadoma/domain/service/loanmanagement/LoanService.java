@@ -19,6 +19,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanenums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
+import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
@@ -122,15 +123,12 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     private void verifyFinanciersExistInVehicle(LoanProduct loanProduct, InvestmentVehicle investmentVehicle) throws MeedlException {
-        if (loanProduct.getSponsorIds() == null){
-            return;
-        }
-        for (String financierId : loanProduct.getSponsorIds()){
-
+        for (Financier financier : loanProduct.getSponsors()){
+            String financierId = financier.getId();
             Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findAllByFinancierIdAndInvestmentVehicleId(financierId, investmentVehicle.getId());
             if (optionalInvestmentVehicleFinancier.isEmpty()){
                 log.error("Investment vehicle financier not found for financier with id {} and vehicle with id {}", financierId, investmentVehicle.getId());
-                throw new MeedlException("Apparently financier with name %s is not part of %s".formatted( financierId,  investmentVehicle.getName()));
+                throw new MeedlException("Apparently financier with name %s is not part of %s".formatted( financier.getName(),  investmentVehicle.getName()));
             }
 
         }

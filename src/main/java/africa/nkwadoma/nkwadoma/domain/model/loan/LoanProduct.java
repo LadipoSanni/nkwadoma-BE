@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.InvalidInputException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanException;
@@ -56,6 +57,7 @@ public class LoanProduct {
     private String investmentVehicleName;
     private List<Vendor> vendors;
     private List<String> sponsorIds;
+    private List<Financier> sponsors;
 
     private int pageSize;
     private int pageNumber;
