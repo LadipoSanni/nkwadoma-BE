@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.OrganizationS
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ServiceOfferingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
@@ -22,6 +23,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEntity;
@@ -67,6 +69,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     private final ServiceOfferingOutputPort serviceOfferingOutputPort;
     private final OrganizationServiceOfferingOutputPort organizationServiceOfferingOutputPort;
     private final InstituteMetricsOutputPort instituteMetricsOutputPort;
+    private final PortfolioOutputPort portfolioOutputPort;
 
 
     @Override
@@ -89,6 +92,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
 
         if (userIdentity.getRole().equals(IdentityRole.MEEDL_SUPER_ADMIN)){
             asynchronousMailingOutputPort.sendEmailToInvitedOrganization(organizationEmployeeIdentity.getMeedlUser());
+            updateNumberOfOrganizationOnMeedlPortfolio();
             log.info("sent email");
         }
 
@@ -111,6 +115,13 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
                     userIdentity,organizationIdentity, NotificationFlag.APPROVE_INVITE_ORGANIZATION);
         }
         return organizationIdentity;
+    }
+
+    private void updateNumberOfOrganizationOnMeedlPortfolio() throws MeedlException {
+        Portfolio portfolio = Portfolio.builder().portfolioName("Meedl").build();
+        portfolio = portfolioOutputPort.findPortfolio(portfolio);
+        portfolio.setNumberOfOrganizations(portfolio.getNumberOfOrganizations() + 1);
+        portfolioOutputPort.save(portfolio);
     }
 
     private  InstituteMetrics buildInstituteMetrics(OrganizationIdentity organizationIdentity) {
@@ -372,6 +383,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
 
         if (activationStatus.equals(ActivationStatus.APPROVED)){
             approveInvitation(activationStatus, organizationIdentity, organizationCreator, actor);
+            updateNumberOfOrganizationOnMeedlPortfolio();
         }else {
             declineInvitation(activationStatus, organizationCreator, organizationIdentity, actor);
 

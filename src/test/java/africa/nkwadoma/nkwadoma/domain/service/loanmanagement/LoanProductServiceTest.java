@@ -4,10 +4,12 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanProductMapper;
 import africa.nkwadoma.nkwadoma.testUtilities.data.*;
 import lombok.extern.slf4j.Slf4j;
@@ -54,8 +56,11 @@ class LoanProductServiceTest {
     private LoaneeLoanBreakdown loaneeLoanBreakdown;
     @Mock
     private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
+    @Mock
+    private PortfolioOutputPort portfolioOutputPort;
     private int pageSize = 10;
     private int pageNumber = 10;
+    private Portfolio portfolio;
 
     @BeforeEach
     void setUp() {
@@ -84,6 +89,8 @@ class LoanProductServiceTest {
         loanProduct.setPageSize(10);
         loanProduct.setPageNumber(0);
         loanProduct.setVendors(List.of(vendor));
+        portfolio = Portfolio.builder().portfolioName("Meedl").build();
+
 
     }
     @Test
@@ -94,6 +101,8 @@ class LoanProductServiceTest {
             when(loanProductOutputPort.save(loanProduct)).thenReturn(loanProduct);
             when(investmentVehicleOutputPort.findById(loanProduct.getId()))
                     .thenReturn(investmentVehicle);
+            when(portfolioOutputPort.findPortfolio(any(Portfolio.class))).thenReturn(portfolio);
+            when(portfolioOutputPort.save(any(Portfolio.class))).thenReturn(portfolio);
             LoanProduct createdLoanProduct = loanService.createLoanProduct(loanProduct);
             assertNotNull(createdLoanProduct);
             assertNotNull(createdLoanProduct.getId());

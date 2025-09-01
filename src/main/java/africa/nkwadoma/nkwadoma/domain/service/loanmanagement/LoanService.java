@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
@@ -22,6 +23,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanOfferMapper;
@@ -82,6 +84,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final LoanMapper loanMapper;
     private final LoaneeLoanAggregateOutputPort loaneeLoanAggregateOutputPort;
     private final LoaneeLoanAggregateMapper loaneeLoanAggregateMapper;
+    private final PortfolioOutputPort portfolioOutputPort;
+    private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
 
     @Override
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
@@ -105,7 +109,16 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }
         log.info("Loan product to be saved in create loan product service method {}", loanProduct);
         investmentVehicleOutputPort.save(investmentVehicle);
-        return loanProductOutputPort.save(loanProduct);
+        loanProduct = loanProductOutputPort.save(loanProduct);
+        updateNumberOfLoanProductOnMeedlPortfolio();
+        return loanProduct;
+    }
+
+    private void updateNumberOfLoanProductOnMeedlPortfolio() throws MeedlException {
+        Portfolio portfolio = Portfolio.builder().portfolioName("Meedl").build();
+        portfolio = portfolioOutputPort.findPortfolio(portfolio);
+        portfolio.setNumberOfLoanProducts(portfolio.getNumberOfLoanProducts() + 1);
+        portfolioOutputPort.save(portfolio);
     }
 
     private InvestmentVehicle checkProductSizeNotMoreThanAvailableInvestmentAmount(LoanProduct loanProduct) throws MeedlException {
@@ -193,7 +206,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         log.info("Saved loan: {}", savedLoan);
         updateLoanDetail(foundLoanee,loanOffer,savedLoan.getStartDate());
         String referBy = loanOutputPort.findLoanReferal(savedLoan.getId());
-        updateLoanDisbursalOnLoamMatrics(referBy);
+        CohortLoanee cohortLoanee = cohortLoaneeOutputPort.findCohortLoaneeByLoanId(savedLoan.getId());
+        updateLoanDisbursalOnLoamMatrics(referBy,cohortLoanee.getOnboardingMode());
         updateInvestmentVehicleTalentFunded(savedLoan);
         return savedLoan;
     }
@@ -204,7 +218,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             loanProduct.setTotalOutstandingLoan(BigDecimal.ZERO);
         }
         loanProduct.setTotalOutstandingLoan(loanProduct.getTotalOutstandingLoan()
-                .add(savedLoan.getLoanAmountOutstanding()));
+                .add(loanOffer.getAmountApproved()));
         loanProductOutputPort.save(loanProduct);
     }
 
@@ -221,6 +235,19 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         updateProgramDetail(loanOffer, cohort);
 
         updateOrganizationLoanDetail(loanOffer, cohort);
+
+        updateMeedlPortfolio(loanOffer);
+    }
+
+    private void updateMeedlPortfolio(LoanOffer loanOffer) throws MeedlException {
+        Portfolio portfolio = Portfolio.builder().portfolioName("Meedl").build();
+        portfolio = portfolioOutputPort.findPortfolio(portfolio);
+        portfolio.setDisbursedLoanAmount(
+                portfolio.getDisbursedLoanAmount().add(loanOffer.getAmountApproved()));
+        portfolio.setHistoricalDebt(
+                portfolio.getHistoricalDebt().add(loanOffer.getAmountApproved())
+        );
+        portfolioOutputPort.save(portfolio);
     }
 
     private void updateLoaneeLoanAggregate(Loanee loanee, LoanOffer loanOffer) throws MeedlException {
@@ -289,7 +316,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         investmentVehicleOutputPort.save(investmentVehicle);
     }
 
-    private void updateLoanDisbursalOnLoamMatrics(String referBy) throws MeedlException {
+    private void updateLoanDisbursalOnLoamMatrics(String referBy,OnboardingMode onboardingMode) throws MeedlException {
         Optional<OrganizationIdentity> organizationByName =
                 organizationIdentityOutputPort.findOrganizationByName(referBy);
         if (organizationByName.isEmpty()) {
@@ -303,6 +330,11 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanMetrics.get().setLoanDisbursalCount(
                 loanMetrics.get().getLoanDisbursalCount() + 1
         );
+        if (onboardingMode.equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)){
+            loanMetrics.get().setUploadedLoanCount(
+                    loanMetrics.get().getUploadedLoanCount() + 1
+            );
+        }
         loanMetricsOutputPort.save(loanMetrics.get());
     }
 
