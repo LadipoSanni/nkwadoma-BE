@@ -13,6 +13,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,6 +31,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @Slf4j
 public class CohortLoanDetailPersistenceAdapterTest {
 
+    @Autowired
+    private InstituteMetricsOutputPort instituteMetricsOutputPort;
     private UserIdentity userIdentity;
     private UserIdentity meedleUser;
     private OrganizationEmployeeIdentity employeeIdentity;
@@ -146,6 +149,11 @@ public class CohortLoanDetailPersistenceAdapterTest {
         log.info("program id = {}", program.getId());
         programOutputPort.deleteProgram(program.getId());
         log.info("org id = {}", organizationIdentity.getId());
+        InstituteMetrics instituteMetrics = instituteMetricsOutputPort.findByOrganizationId(organizationIdentity.getId());
+        if (ObjectUtils.isNotEmpty(instituteMetrics)){
+            log.info("Metrics was found for this organization");
+            instituteMetricsOutputPort.delete(instituteMetrics.getId());
+        }
         organizationIdentityOutputPort.delete(organizationIdentity.getId());
         log.info("org empoyee  = {}", employeeIdentity.getId());
         organizationEmployeeIdentityOutputPort.delete(employeeIdentity.getId());

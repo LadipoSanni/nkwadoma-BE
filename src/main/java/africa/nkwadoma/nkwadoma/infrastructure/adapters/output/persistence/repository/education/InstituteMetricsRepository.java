@@ -5,4 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface InstituteMetricsRepository extends JpaRepository<InstituteMetricsEntity, String> {
     InstituteMetricsEntity findByOrganizationId(String id);
+
+    void deleteByOrganization_Id(String organizationId);
 }
