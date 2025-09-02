@@ -20,6 +20,8 @@ public class FinancierDashboardResponse {
     private AccreditationStatus accreditationStatus;
     private String email;
     private String phoneNumber;
+    private String cooperateAdminEmail;
+    private String cooperateAdminName;
     private String address;
     private NextOfKin nextOfKin;
     private String taxId;

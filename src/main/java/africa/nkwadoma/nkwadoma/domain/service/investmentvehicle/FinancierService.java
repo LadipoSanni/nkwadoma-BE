@@ -460,6 +460,12 @@ public class FinancierService implements FinancierUseCase {
             log.info("User is not a financier");
             MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
             financier = financierOutputPort.findById(financierId);
+            if (financier.getFinancierType().equals(FinancierType.COOPERATE)) {
+                Financier cooperateFinancier = financierOutputPort.findCooperateFinancierById(financier.getId());
+                financier.setCooperateAdminEmail(cooperateFinancier.getCooperateAdminEmail());
+                financier.setCooperateAdminName(cooperateFinancier.getCooperateAdminName());
+                log.info("cooperate super admin mail {} ==== super admin name {}",financier.getCooperateAdminEmail(),financier.getCooperateAdminName());
+            }
             log.info("found financier {}", financier);
         }
         return updateFinancierDetail(financier);
