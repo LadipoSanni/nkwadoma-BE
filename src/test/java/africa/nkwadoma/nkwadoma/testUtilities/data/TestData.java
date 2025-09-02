@@ -213,6 +213,7 @@ public class TestData {
         loanProduct.setPageSize(pageSize);
         loanProduct.setPageNumber(pageNumber);
         loanProduct.setVendors(List.of(vendor));
+        loanProduct.setSponsors(List.of(Financier.builder().id(UUID.randomUUID().toString()).name("ifnf").build()));
         return loanProduct;
     }
     public static Vendor createTestVendor(String name) {
