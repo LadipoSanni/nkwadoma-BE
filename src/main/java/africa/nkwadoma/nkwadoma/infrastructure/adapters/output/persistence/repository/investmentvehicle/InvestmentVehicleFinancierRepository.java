@@ -30,30 +30,43 @@ public interface InvestmentVehicleFinancierRepository extends JpaRepository<Inve
     );
 
     @Query(value = """
-    SELECT ivf.financier_id AS financier,
-           array_agg(DISTINCT ivfd.investment_vehicle_designation ORDER BY ivfd.investment_vehicle_designation) 
-                FILTER (WHERE ivfd.investment_vehicle_designation IS NOT NULL) AS investment_vehicle_designation,
-           CASE
-               WHEN fe.financier_type = 'INDIVIDUAL' THEN CONCAT(u.first_name, ' ', u.last_name)
-               WHEN fe.financier_type = 'COOPERATE' THEN o.name
-               ELSE NULL
-           END AS financier_name,
-           COALESCE(SUM(DISTINCT ivf.amount_invested), 0) AS total_amount_invested, -- ✅ prevent duplicate SUM
-           COUNT(DISTINCT ivf.id) AS number_of_investments                          -- ✅ distinct count
-    FROM investment_vehicle_financier_entity ivf
-    LEFT JOIN investment_vehicle_financier_entity_investment_vehicle_designation ivfd
-           ON ivfd.investment_vehicle_financier_entity_id = ivf.id
-    JOIN financier_entity fe ON fe.id = ivf.financier_id
-    LEFT JOIN organization o ON o.id = fe.identity
-    LEFT JOIN meedl_user u ON u.id = fe.identity
-    WHERE ivf.investment_vehicle_id = :investmentVehicleId
-      AND (:activationStatus IS NULL OR fe.activation_status = :activationStatus)
-    GROUP BY ivf.financier_id,
-             CASE
-                 WHEN fe.financier_type = 'INDIVIDUAL' THEN CONCAT(u.first_name, ' ', u.last_name)
-                 WHEN fe.financier_type = 'COOPERATE' THEN o.name
-                 ELSE NULL
-             END
+    WITH financier_investments AS (
+        SELECT 
+            ivf.financier_id,
+            ivf.id AS investment_id,
+            ivf.amount_invested,
+            CASE
+                WHEN fe.financier_type = 'INDIVIDUAL' THEN CONCAT(u.first_name, ' ', u.last_name)
+                WHEN fe.financier_type = 'COOPERATE' THEN o.name
+                ELSE NULL
+            END AS financier_name
+        FROM investment_vehicle_financier_entity ivf
+        JOIN financier_entity fe ON fe.id = ivf.financier_id
+        LEFT JOIN organization o ON o.id = fe.identity
+        LEFT JOIN meedl_user u ON u.id = fe.identity
+        WHERE ivf.investment_vehicle_id = :investmentVehicleId
+        AND (:activationStatus IS NULL OR fe.activation_status = :activationStatus)
+    ),
+    financier_designations AS (
+        SELECT 
+            ivf.financier_id,
+            array_agg(DISTINCT ivfd.investment_vehicle_designation ORDER BY ivfd.investment_vehicle_designation) AS designations
+        FROM investment_vehicle_financier_entity ivf
+        JOIN investment_vehicle_financier_entity_investment_vehicle_designation ivfd 
+            ON ivfd.investment_vehicle_financier_entity_id = ivf.id
+        WHERE ivf.investment_vehicle_id = :investmentVehicleId
+        AND ivfd.investment_vehicle_designation IS NOT NULL
+        GROUP BY ivf.financier_id
+    )
+    SELECT 
+        fi.financier_id AS financier,
+        COALESCE(fd.designations, '{}') AS investment_vehicle_designation,
+        fi.financier_name,
+        SUM(fi.amount_invested) AS total_amount_invested,
+        COUNT(fi.investment_id) AS number_of_investments
+    FROM financier_investments fi
+    LEFT JOIN financier_designations fd ON fd.financier_id = fi.financier_id
+    GROUP BY fi.financier_id, fi.financier_name, fd.designations
 """, nativeQuery = true)
     Page<FinancierWithDesignationProjection> findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatus(
             @Param("investmentVehicleId") String investmentVehicleId,

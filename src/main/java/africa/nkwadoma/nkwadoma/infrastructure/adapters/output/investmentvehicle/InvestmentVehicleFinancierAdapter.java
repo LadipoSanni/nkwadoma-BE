@@ -63,33 +63,15 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
     }
 
     @Override
-    public Page<Financier> viewAllFinancierInAnInvestmentVehicle(
-            String investmentVehicleId,
-            ActivationStatus activationStatus,
-            Pageable pageRequest
-    ) throws MeedlException {
-        MeedlValidator.validateUUID(
-                investmentVehicleId,
-                InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage()
-        );
-
+    public Page<Financier> viewAllFinancierInAnInvestmentVehicle(String investmentVehicleId,ActivationStatus activationStatus, Pageable pageRequest) throws MeedlException {
+        MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
         Page<FinancierWithDesignationProjection> financiersWithDesignationProjection;
         if (ObjectUtils.isNotEmpty(activationStatus)) {
-            financiersWithDesignationProjection =
-                    investmentVehicleFinancierRepository
-                            .findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatus(
-                                    investmentVehicleId,
-                                    activationStatus.getStatusName(),
-                                    pageRequest
-                            );
+            financiersWithDesignationProjection = investmentVehicleFinancierRepository
+                            .findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatus(investmentVehicleId, activationStatus.getStatusName(), pageRequest);
         } else {
-            financiersWithDesignationProjection =
-                    investmentVehicleFinancierRepository
-                            .findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatus(
-                                    investmentVehicleId,
-                                    null,
-                                    pageRequest
-                            );
+            financiersWithDesignationProjection = investmentVehicleFinancierRepository
+                    .findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatus(investmentVehicleId, null, pageRequest);
         }
 
         return financiersWithDesignationProjection.map(projection -> {
@@ -99,7 +81,6 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
 
             log.info("The financier entity mapped {}", financier);
 
-            // Convert List<String> to Set<InvestmentVehicleDesignation>
             Set<InvestmentVehicleDesignation> designations =
                     projection.getInvestmentVehicleDesignation().stream()
                             .filter(Objects::nonNull)
