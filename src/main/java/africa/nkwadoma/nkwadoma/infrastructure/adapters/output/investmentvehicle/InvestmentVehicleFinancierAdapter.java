@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicleDesignation;
 import africa.nkwadoma.nkwadoma.domain.exceptions.InvestmentException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
@@ -12,11 +13,14 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.financier.FinancierMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentvehicle.InvestmentVehicleFinancierMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.financier.FinancierEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentvehicle.InvestmentVehicleFinancierEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.financier.FinancierRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.financier.FinancierWithDesignationProjection;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentvehicle.InvestmentVehicleFinancierRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +29,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -33,6 +40,7 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
     private final InvestmentVehicleFinancierRepository investmentVehicleFinancierRepository;
     private final InvestmentVehicleFinancierMapper investmentVehicleFinancierMapper;
     private final FinancierMapper financierMapper;
+    private final FinancierRepository financierRepository;
 
     @Override
     public InvestmentVehicleFinancier save(InvestmentVehicleFinancier investmentVehicleFinancier) throws MeedlException {
@@ -54,20 +62,59 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
     }
 
     @Override
-    public Page<Financier> viewAllFinancierInAnInvestmentVehicle(String investmentVehicleId, ActivationStatus activationStatus, Pageable pageRequest) throws MeedlException {
-        MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+    public Page<Financier> viewAllFinancierInAnInvestmentVehicle(
+            String investmentVehicleId,
+            ActivationStatus activationStatus,
+            Pageable pageRequest
+    ) throws MeedlException {
+        MeedlValidator.validateUUID(
+                investmentVehicleId,
+                InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage()
+        );
 
-        Page<FinancierWithDesignationProjection> financiersWithDesignationProjection = investmentVehicleFinancierRepository
-                .findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatus(investmentVehicleId, activationStatus, pageRequest);
+        Page<FinancierWithDesignationProjection> financiersWithDesignationProjection;
+        if (ObjectUtils.isNotEmpty(activationStatus)) {
+            financiersWithDesignationProjection =
+                    investmentVehicleFinancierRepository
+                            .findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatus(
+                                    investmentVehicleId,
+                                    activationStatus.getStatusName(),
+                                    pageRequest
+                            );
+        } else {
+            financiersWithDesignationProjection =
+                    investmentVehicleFinancierRepository
+                            .findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatus(
+                                    investmentVehicleId,
+                                    null,
+                                    pageRequest
+                            );
+        }
+
         return financiersWithDesignationProjection.map(projection -> {
-            Financier financier = financierMapper.map(projection.getFinancier());
+            FinancierEntity financierEntity =
+                    financierRepository.findById(projection.getFinancier()).orElse(null);
+            Financier financier = financierMapper.map(financierEntity);
+
             log.info("The financier entity mapped {}", financier);
-            financierMapper.updateFinancierFromProjection(projection, financier);
-            log.info("designation === {}",financier.getInvestmentVehicleDesignation());
+
+            // Convert List<String> to Set<InvestmentVehicleDesignation>
+            Set<InvestmentVehicleDesignation> designations =
+                    projection.getInvestmentVehicleDesignation().stream()
+                            .filter(Objects::nonNull)
+                            .map(InvestmentVehicleDesignation::valueOf)
+                            .collect(Collectors.toSet());
+
+            financier.setInvestmentVehicleDesignation(designations);
+            financier.setTotalAmountInvested(projection.getTotalAmountInvested());
+            financier.setTotalNumberOfInvestment(projection.getNumberOfInvestments());
+            financier.setName(projection.getFinancierName());
+
+            log.info("designation === {}", financier.getInvestmentVehicleDesignation());
             return financier;
         });
-
     }
+
 
 
     @Transactional

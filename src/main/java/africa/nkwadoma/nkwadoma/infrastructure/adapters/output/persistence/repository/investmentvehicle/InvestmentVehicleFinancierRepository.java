@@ -27,37 +27,37 @@ public interface InvestmentVehicleFinancierRepository extends JpaRepository<Inve
             Pageable pageable
     );
 
-    @Query("""
-  SELECT ivf.financier AS financier,
-         d AS investmentVehicleDesignation,
-         CASE
-             WHEN financierEntity.financierType = 'INDIVIDUAL' THEN CONCAT(user.firstName, ' ', user.lastName)
-             WHEN financierEntity.financierType = 'COOPERATE' THEN organization.name
-             ELSE NULL
-         END AS financierName,
-         SUM(ivf.amountInvested) AS totalAmountInvested,
-         COUNT(ivf) AS numberOfInvestments
-  FROM InvestmentVehicleFinancierEntity ivf
-  JOIN ivf.investmentVehicleDesignation d
-  JOIN FinancierEntity financierEntity ON financierEntity.id = ivf.financier.id
-  LEFT JOIN OrganizationEntity organization ON organization.id = financierEntity.identity
-  LEFT JOIN UserEntity user ON user.id = financierEntity.identity
-  WHERE ivf.investmentVehicle.id = :investmentVehicleId
-  AND (:activationStatus IS NULL OR ivf.financier.activationStatus = :activationStatus)
-  GROUP BY ivf.financier, d,
+    @Query(value = """
+    SELECT ivf.financier_id AS financier,
+           array_agg(DISTINCT ivfd.investment_vehicle_designation ORDER BY ivfd.investment_vehicle_designation) 
+                FILTER (WHERE ivfd.investment_vehicle_designation IS NOT NULL) AS investment_vehicle_designation,
            CASE
-               WHEN financierEntity.financierType = 'INDIVIDUAL' THEN CONCAT(user.firstName, ' ', user.lastName)
-               WHEN financierEntity.financierType = 'COOPERATE' THEN organization.name
+               WHEN fe.financier_type = 'INDIVIDUAL' THEN CONCAT(u.first_name, ' ', u.last_name)
+               WHEN fe.financier_type = 'COOPERATE' THEN o.name
                ELSE NULL
-           END
-  
-""")
+           END AS financier_name,
+           COALESCE(SUM(DISTINCT ivf.amount_invested), 0) AS total_amount_invested, -- ✅ prevent duplicate SUM
+           COUNT(DISTINCT ivf.id) AS number_of_investments                          -- ✅ distinct count
+    FROM investment_vehicle_financier_entity ivf
+    LEFT JOIN investment_vehicle_financier_entity_investment_vehicle_designation ivfd
+           ON ivfd.investment_vehicle_financier_entity_id = ivf.id
+    JOIN financier_entity fe ON fe.id = ivf.financier_id
+    LEFT JOIN organization o ON o.id = fe.identity
+    LEFT JOIN meedl_user u ON u.id = fe.identity
+    WHERE ivf.investment_vehicle_id = :investmentVehicleId
+      AND (:activationStatus IS NULL OR fe.activation_status = :activationStatus)
+    GROUP BY ivf.financier_id,
+             CASE
+                 WHEN fe.financier_type = 'INDIVIDUAL' THEN CONCAT(u.first_name, ' ', u.last_name)
+                 WHEN fe.financier_type = 'COOPERATE' THEN o.name
+                 ELSE NULL
+             END
+""", nativeQuery = true)
     Page<FinancierWithDesignationProjection> findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatus(
             @Param("investmentVehicleId") String investmentVehicleId,
-            @Param("activationStatus") ActivationStatus activationStatus,
+            @Param("activationStatus") String activationStatus,
             Pageable pageable
     );
-
 
 
 
