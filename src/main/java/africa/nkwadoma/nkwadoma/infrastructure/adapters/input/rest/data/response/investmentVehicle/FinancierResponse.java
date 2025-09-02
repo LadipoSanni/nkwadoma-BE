@@ -19,6 +19,7 @@ public class FinancierResponse {
     private FinancierType financierType;
     private ActivationStatus activationStatus;
     private BigDecimal totalAmountInvested;
+    private int totalNumberOfInvestment;
     private NextOfKin nextOfKin;
     private List<InvestmentVehicleDesignation> investmentVehicleRole;
     private FinancierUserIdentityResponse userIdentity;
