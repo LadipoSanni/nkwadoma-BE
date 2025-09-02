@@ -173,6 +173,7 @@ public class UserIdentityService implements UserUseCase {
                 financier.setActivationStatus(ActivationStatus.ACTIVE);
                 financierOutputPort.save(financier);
             }
+            organizationIdentity.setOrganizationType(OrganizationType.COOPERATE);
             organizationIdentityOutputPort.save(organizationIdentity);
         }
     }
