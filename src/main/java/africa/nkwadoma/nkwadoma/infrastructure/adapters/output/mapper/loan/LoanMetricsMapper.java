@@ -12,6 +12,7 @@ public interface LoanMetricsMapper {
     LoanMetrics toLoanMetrics(LoanMetricsEntity loanMetricsEntity);
 
     @Mapping(target = "loanRequestCount", expression = "java(existingLoanMetrics.getLoanRequestCount() + updatedLoanMetrics.getLoanRequestCount())")
+    @Mapping(target = "uploadedLoanCount", expression = "java(existingLoanMetrics.getUploadedLoanCount() + updatedLoanMetrics.getUploadedLoanCount())")
     @Mapping(target = "loanReferralCount", expression = "java(existingLoanMetrics.getLoanReferralCount() + updatedLoanMetrics.getLoanReferralCount())")
     @Mapping(target = "loanOfferCount", expression = "java(existingLoanMetrics.getLoanOfferCount() + updatedLoanMetrics.getLoanOfferCount())")
     @Mapping(target = "loanDisbursalCount", expression = "java(existingLoanMetrics.getLoanDisbursalCount() + updatedLoanMetrics.getLoanDisbursalCount())")

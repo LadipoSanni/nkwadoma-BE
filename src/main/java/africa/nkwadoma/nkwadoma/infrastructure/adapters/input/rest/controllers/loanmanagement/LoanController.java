@@ -59,8 +59,9 @@ public class LoanController {
     @PostMapping("/loan-product/create")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = LOAN_PRODUCT_CREATION,description = LOAN_PRODUCT_CREATION_DESCRIPTION)
-    public ResponseEntity<ApiResponse<?>> createLoanProduct (@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid LoanProductRequest request) throws MeedlException {
-        log.info("Create loan product called.... ");
+    public ResponseEntity<ApiResponse<?>> createLoanProduct (@AuthenticationPrincipal Jwt meedlUser,
+                                                             @RequestBody @Valid LoanProductRequest request) throws MeedlException {
+        log.info("Create loan product called....");
         LoanProduct loanProduct = loanProductMapper.mapToLoanProduct(request);
         loanProduct.setCreatedBy(meedlUser.getClaimAsString("sub"));
             LoanProduct createdLoanProduct = createLoanProductUseCase.createLoanProduct(loanProduct);

@@ -11,6 +11,7 @@ import java.util.List;
 @Setter
 @Getter
 public class InviteOrganizationResponse {
+    private String id;
     private String createdBy;
     private String email;
     private ServiceOffering serviceOffering;

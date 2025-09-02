@@ -205,13 +205,6 @@ public class UserIdentityService implements UserUseCase {
     public void changePassword(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
         validatePasswordsForChangePassword(userIdentity);
-        if (userIdentity.getNewPassword().equals(userIdentity.getPassword())){
-            log.warn("{}", UserMessages.NEW_PASSWORD_AND_CURRENT_PASSWORD_CANNOT_BE_SAME.getMessage());
-            throw new IdentityException(UserMessages.NEW_PASSWORD_AND_CURRENT_PASSWORD_CANNOT_BE_SAME.getMessage());
-        }
-        if(checkNewPasswordMatchLastFive(userIdentity)){
-            throw new IdentityException(PASSWORD_NOT_ACCEPTED.getMessage());
-        }
         userIdentity.setEmailVerified(true);
         userIdentity.setEnabled(true);
         userIdentity.setCreatedAt(LocalDateTime.now());
@@ -221,12 +214,19 @@ public class UserIdentityService implements UserUseCase {
     }
 
     private void validatePasswordsForChangePassword(UserIdentity userIdentity) throws MeedlException {
+        if (userIdentity.getNewPassword().equals(userIdentity.getPassword())){
+            log.warn("{}", UserMessages.NEW_PASSWORD_AND_CURRENT_PASSWORD_CANNOT_BE_SAME.getMessage());
+            throw new IdentityException(UserMessages.NEW_PASSWORD_AND_CURRENT_PASSWORD_CANNOT_BE_SAME.getMessage());
+        }
+        if(checkNewPasswordMatchLastFive(userIdentity)){
+            throw new IdentityException(PASSWORD_NOT_ACCEPTED.getMessage());
+        }
         String currentPassword = tokenUtils.decryptAES(userIdentity.getPassword(), "Invalid password entered for current password");
         try{
             MeedlValidator.validatePassword(currentPassword);
         }catch (MeedlException meedlException){
             log.error("Error validating current password ",meedlException);
-            throw new MeedlException(PASSWORD_INCORRECT.getMessage());
+            throw new MeedlException(IdentityMessages.PASSWORD_INCORRECT.getMessage());
         }
         String newPassword = tokenUtils.decryptAES(userIdentity.getNewPassword(), "Invalid new password provided");
         try {
@@ -239,7 +239,7 @@ public class UserIdentityService implements UserUseCase {
             login(userIdentity);
         }catch (MeedlException e){
             log.info("Password invalid on change password {} user email {}", e.getMessage(), userIdentity.getEmail());
-            throw new MeedlException(PASSWORD_INCORRECT.getMessage());
+            throw new MeedlException(IdentityMessages.PASSWORD_INCORRECT.getMessage());
         }
     }
 

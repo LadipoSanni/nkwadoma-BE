@@ -2,12 +2,17 @@ package africa.nkwadoma.nkwadoma.domain.service.loanmanagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
+import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanProductMapper;
 import africa.nkwadoma.nkwadoma.testUtilities.data.*;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +50,8 @@ class LoanProductServiceTest {
     private LoanOutputPort loanOutputPort;
     @Mock
     private InvestmentVehicleOutputPort investmentVehicleOutputPort;
+    @Mock
+    private InvestmentVehicleFinancierOutputPort investmentVehicleFinancierOutputPort;
     @InjectMocks
     private LoanService loanService;
     private Loan loan;
@@ -54,8 +61,12 @@ class LoanProductServiceTest {
     private LoaneeLoanBreakdown loaneeLoanBreakdown;
     @Mock
     private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
+    @Mock
+    private PortfolioOutputPort portfolioOutputPort;
     private int pageSize = 10;
     private int pageNumber = 10;
+    private Portfolio portfolio;
+    private Financier financier;
 
     @BeforeEach
     void setUp() {
@@ -68,7 +79,7 @@ class LoanProductServiceTest {
         loanee.setCohortId("e4fda779-3c21-4dd6-b66a-3a8742f6ecb1");
         loaneeLoanBreakdown = TestData.createTestLoaneeLoanBreakdown
                 ("1886df42-1f75-4d17-bdef-e0b016707885");
-
+        financier = Financier.builder().id(UUID.randomUUID().toString()).name("walker").build();
         Vendor vendor = new Vendor();
         loanProduct = new LoanProduct();
         loanProduct.setId("3a6d1124-1349-4f5b-831a-ac269369a90f");
@@ -84,6 +95,9 @@ class LoanProductServiceTest {
         loanProduct.setPageSize(10);
         loanProduct.setPageNumber(0);
         loanProduct.setVendors(List.of(vendor));
+        loanProduct.setSponsors(List.of(financier));
+        portfolio = Portfolio.builder().portfolioName("Meedl").build();
+
 
     }
     @Test
@@ -92,8 +106,11 @@ class LoanProductServiceTest {
             when(userIdentityOutputPort.findById(any())).thenReturn(new UserIdentity());
             when(identityManagerOutPutPort.verifyUserExistsAndIsEnabled(any())).thenReturn(new UserIdentity());
             when(loanProductOutputPort.save(loanProduct)).thenReturn(loanProduct);
+            when(investmentVehicleFinancierOutputPort.findAllByFinancierIdAndInvestmentVehicleId(financier.getId(), investmentVehicle.getId())).thenReturn(Optional.of(InvestmentVehicleFinancier.builder().build()));
             when(investmentVehicleOutputPort.findById(loanProduct.getId()))
                     .thenReturn(investmentVehicle);
+            when(portfolioOutputPort.findPortfolio(any(Portfolio.class))).thenReturn(portfolio);
+            when(portfolioOutputPort.save(any(Portfolio.class))).thenReturn(portfolio);
             LoanProduct createdLoanProduct = loanService.createLoanProduct(loanProduct);
             assertNotNull(createdLoanProduct);
             assertNotNull(createdLoanProduct.getId());

@@ -251,7 +251,7 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
     }
 
     @Override
-    public String respondToColleagueInvitation(String actorId,String organizationEmployeeId,ActivationStatus activationStatus) throws MeedlException {
+    public OrganizationEmployeeIdentity respondToColleagueInvitation(String actorId,String organizationEmployeeId,ActivationStatus activationStatus) throws MeedlException {
         MeedlValidator.validateUUID(organizationEmployeeId,IdentityMessages.INVALID_ORGANIZATION_EMPLOYEE.getMessage());
         MeedlValidator.validateObjectInstance(activationStatus,"Activation status cannot be null");
         decisionMustEitherBeApprovedOrDeclined(activationStatus);
@@ -267,15 +267,17 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
             asynchronousMailingOutputPort.sendColleagueEmail(organizationIdentity.getName(), organizationEmployeeIdentity.getMeedlUser());
             organizationEmployeeIdentity.setActivationStatus(ActivationStatus.INVITED);
             organizationEmployeeOutputPort.save(organizationEmployeeIdentity);
-            return "Colleague invitation APPROVED for " + organizationEmployeeIdentity.getMeedlUser().getFirstName() + " "
-                    + organizationEmployeeIdentity.getMeedlUser().getLastName();
+            String response = "Colleague invitation APPROVED for " + organizationEmployeeIdentity.getMeedlUser().getFullName();
+            organizationEmployeeIdentity.setResponse(response);
+            return organizationEmployeeIdentity;
         }else {
             organizationEmployeeIdentity.setActivationStatus(ActivationStatus.DECLINED);
             organizationEmployeeOutputPort.save(organizationEmployeeIdentity);
             UserIdentity createdBy = userIdentityOutputPort.findById(organizationEmployeeIdentity.getCreatedBy());
             asynchronousNotificationOutputPort.sendDeclineColleagueNotification(organizationEmployeeIdentity,userIdentity,createdBy);
-            return "Colleague invitation DECLINED for " + organizationEmployeeIdentity.getMeedlUser().getFirstName() +" "
-                    + organizationEmployeeIdentity.getMeedlUser().getLastName();
+            String response = "Colleague invitation DECLINED for " + organizationEmployeeIdentity.getMeedlUser().getFullName();
+            organizationEmployeeIdentity.setResponse(response);
+            return organizationEmployeeIdentity;
         }
     }
 

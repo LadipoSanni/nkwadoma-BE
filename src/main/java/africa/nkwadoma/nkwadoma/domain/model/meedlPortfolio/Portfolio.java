@@ -30,6 +30,13 @@ public class Portfolio {
     private double loanRequestPercentage;
     private double loanDisbursalPercentage;
     private double loanOfferPercentage;
+    private int numberOfLoanees;
+    private int numberOfOrganizations;
+    private int numberOfLoanProducts;
+    private BigDecimal historicalDebt ;
+    private BigDecimal disbursedLoanAmount;
+    private BigDecimal netLoanPortfolio;
+    private BigDecimal totalAmountEarned;
     private String assetUnderManagement;
     private double aumPercentage;
     private BigDecimal totalAvailable;

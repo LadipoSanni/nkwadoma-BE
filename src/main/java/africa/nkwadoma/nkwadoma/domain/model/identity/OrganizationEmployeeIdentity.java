@@ -24,6 +24,7 @@ public class OrganizationEmployeeIdentity {
     private Set<IdentityRole> identityRoles;
     private Set<ActivationStatus> activationStatuses;
     private UserIdentity meedlUser;
+    private String response;
     private int pageNumber;
     private int pageSize;
 

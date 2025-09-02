@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.OrganizationS
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ServiceOfferingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
@@ -22,6 +23,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEntity;
@@ -67,6 +69,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     private final ServiceOfferingOutputPort serviceOfferingOutputPort;
     private final OrganizationServiceOfferingOutputPort organizationServiceOfferingOutputPort;
     private final InstituteMetricsOutputPort instituteMetricsOutputPort;
+    private final PortfolioOutputPort portfolioOutputPort;
 
 
     @Override
@@ -89,6 +92,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
 
         if (userIdentity.getRole().equals(IdentityRole.MEEDL_SUPER_ADMIN)){
             asynchronousMailingOutputPort.sendEmailToInvitedOrganization(organizationEmployeeIdentity.getMeedlUser());
+            updateNumberOfOrganizationOnMeedlPortfolio();
             log.info("sent email");
         }
 
@@ -111,6 +115,13 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
                     userIdentity,organizationIdentity, NotificationFlag.APPROVE_INVITE_ORGANIZATION);
         }
         return organizationIdentity;
+    }
+
+    private void updateNumberOfOrganizationOnMeedlPortfolio() throws MeedlException {
+        Portfolio portfolio = Portfolio.builder().portfolioName("Meedl").build();
+        portfolio = portfolioOutputPort.findPortfolio(portfolio);
+        portfolio.setNumberOfOrganizations(portfolio.getNumberOfOrganizations() + 1);
+        portfolioOutputPort.save(portfolio);
     }
 
     private  InstituteMetrics buildInstituteMetrics(OrganizationIdentity organizationIdentity) {
@@ -309,6 +320,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         if (identityRole.equals(IdentityRole.MEEDL_SUPER_ADMIN)) {
             organizationIdentity.setActivationStatus(ActivationStatus.INVITED);
             organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
+            organizationIdentity.setRequestedInvitationDate(LocalDateTime.now());
         }else {
             organizationIdentity.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
             organizationIdentity.setRequestedInvitationDate(LocalDateTime.now());
@@ -358,7 +370,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     }
 
     @Override
-    public String respondToOrganizationInvite(String actorId, String organizationId, ActivationStatus activationStatus) throws MeedlException {
+    public OrganizationIdentity respondToOrganizationInvite(String actorId, String organizationId, ActivationStatus activationStatus) throws MeedlException {
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         MeedlValidator.validateObjectInstance(activationStatus,"Activation status cannot be empty");
         MeedlValidator.validateActivationSatus(activationStatus);
@@ -372,16 +384,18 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
 
         if (activationStatus.equals(ActivationStatus.APPROVED)){
             approveInvitation(activationStatus, organizationIdentity, organizationCreator, actor);
+            updateNumberOfOrganizationOnMeedlPortfolio();
         }else {
             declineInvitation(activationStatus, organizationCreator, organizationIdentity, actor);
 
         }
         organizationIdentityOutputPort.save(organizationIdentity);
-        return "Invitation "+activationStatus.name();
+        organizationIdentity.setResponse("Invitation "+activationStatus.getStatusName());
+        return organizationIdentity;
     }
 
     @Override
-    public String inviteColleague(OrganizationIdentity organizationIdentity) throws MeedlException {
+    public UserIdentity inviteColleague(OrganizationIdentity organizationIdentity) throws MeedlException {
         log.info("Inviting colleague");
         MeedlValidator.validateObjectInstance(organizationIdentity.getUserIdentity(), IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
         UserIdentity newColleague = organizationIdentity.getUserIdentity();
@@ -408,7 +422,9 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         log.info("Saved new colleague employee identity in organization: {}", savedEmployee);
 
 
-        return handleNotificationsAndResponse(inviter, savedEmployee, savedUserIdentity);
+        String message = handleNotificationsAndResponse(inviter, savedEmployee, savedUserIdentity);
+        savedUserIdentity.setResponse(message);
+        return savedUserIdentity;
     }
 
     @Override
@@ -445,7 +461,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
             log.info("The user inviting is a super admin with organization id {}", inviter.getOrganization());
             OrganizationIdentity organization = organizationIdentityOutputPort.findById(inviter.getOrganization());
             asynchronousMailingOutputPort.sendColleagueEmail(organization.getName(), savedUserIdentity);
-            return String.format("Colleague with role %s invited", savedUserIdentity.getRole().name());
+            return String.format("Colleague with role %s invited successfully", savedUserIdentity.getRole().name());
         }
 
         IdentityRole superAdminRole;

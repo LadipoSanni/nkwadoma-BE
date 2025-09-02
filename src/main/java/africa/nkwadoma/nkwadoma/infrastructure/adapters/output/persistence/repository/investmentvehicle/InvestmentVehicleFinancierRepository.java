@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentvehicle;
 
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.financier.FinancierEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentvehicle.InvestmentVehicleFinancierEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.financier.FinancierWithDesignationProjection;
@@ -11,6 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface InvestmentVehicleFinancierRepository extends JpaRepository<InvestmentVehicleFinancierEntity,String> {
 
@@ -87,7 +89,7 @@ public interface InvestmentVehicleFinancierRepository extends JpaRepository<Inve
             "LEFT JOIN FETCH ivf.investmentVehicleDesignation " +
             "WHERE ivf.financier.id = :financierId " +
             "AND ivf.id = :investmentVehicleFinancierId")
-    InvestmentVehicleFinancierEntity findByFinancierIdAndInvestmentVehicleId(String financierId, String investmentVehicleFinancierId);
+    InvestmentVehicleFinancierEntity findByFinancierIdAndInvestmentVehicleFinancierId(String financierId, String investmentVehicleFinancierId);
 
     @Query("SELECT CASE WHEN COUNT(ivf) > 0 THEN true ELSE false END " +
             "FROM InvestmentVehicleFinancierEntity ivf " +
@@ -115,4 +117,6 @@ public interface InvestmentVehicleFinancierRepository extends JpaRepository<Inve
     Page<InvestmentVehicleFinancierEntity> searchFinancierInvestmentByInvestmentVehicleNameAndFinancierId(
             @Param("investmentVehicleName") String investmentVehicleName,
             @Param("financierId") String financierId, Pageable pageRequest);
+
+    Optional<InvestmentVehicleFinancierEntity> findByFinancier_IdAndInvestmentVehicle_Id(String financierId, String investmentVehicleId);
 }

@@ -15,4 +15,5 @@ public class LoanMetrics {
     private int loanDisbursalCount;
     private int loanReferralCount;
     private int loanOfferCount;
+    private int uploadedLoanCount;
 }

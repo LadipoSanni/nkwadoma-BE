@@ -19,4 +19,5 @@ public class AllLoanOfferResponse {
     private String firstName;
     private String lastName;
     private LoanDecision loanOfferResponse;
+    private String status;
 }

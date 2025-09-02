@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -204,8 +205,19 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
         MeedlValidator.validateUUID(investmentVehicleFinancierId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
         checkIfInvestmentExist(investmentVehicleFinancierId);
         InvestmentVehicleFinancierEntity investmentVehicleFinancierEntity =
-                investmentVehicleFinancierRepository.findByFinancierIdAndInvestmentVehicleId(financierId, investmentVehicleFinancierId);
+                investmentVehicleFinancierRepository.findByFinancierIdAndInvestmentVehicleFinancierId(financierId, investmentVehicleFinancierId);
         return investmentVehicleFinancierMapper.toInvestmentVehicleFinancier(investmentVehicleFinancierEntity);
+    }
+
+    @Override
+    public Optional<InvestmentVehicleFinancier> findAllByFinancierIdAndInvestmentVehicleId(String financierId, String investmentVehicleId) throws MeedlException {
+        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+        MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+        log.info("Find all -- financier id {} investment vehicle id {}", financierId, investmentVehicleId);
+        Optional<InvestmentVehicleFinancierEntity> optionalInvestmentVehicleFinancierEntity =
+                investmentVehicleFinancierRepository.findByFinancier_IdAndInvestmentVehicle_Id(financierId, investmentVehicleId);
+        log.info("Found is empty {}", optionalInvestmentVehicleFinancierEntity.isEmpty());
+        return optionalInvestmentVehicleFinancierEntity.map(investmentVehicleFinancierMapper::toInvestmentVehicleFinancier);
     }
 
     public void checkIfInvestmentExist(String investmentVehicleFinancierId) throws MeedlException {

@@ -622,7 +622,7 @@ public class FinancierService implements FinancierUseCase {
 
     private void updateFinancierTotalAmountInvested(Financier financier) throws MeedlException {
         log.info("Update financier total amount invested ...");
-        Financier financierToBeUpdate = financierOutputPort.findById(financier.getId());
+        Financier financierToBeUpdate = financierOutputPort.findByFinancierId(financier.getId());
         BigDecimal currentTotalAmountInvested = financierToBeUpdate.getTotalAmountInvested();
         if (currentTotalAmountInvested == null) {
             currentTotalAmountInvested = BigDecimal.ZERO;
