@@ -81,6 +81,17 @@ jobs:
           sudo aws s3 cp s3://semicolon-delivery/nkwadoma/backend/dev/nkwadoma.env /home/ubuntu/semicolon/meedl/dev/nkwadoma.env --region ${{ env.AWS_REGION }}
           sudo chown ubuntu:ubuntu /home/ubuntu/semicolon/meedl/dev/nkwadoma.env
 
+      - name: Fix context path in .env file
+        run: |
+          sudo sed -i 's/server.servlet.context-path=api.versioning/server.servlet.context-path=\/api\/v1/' /home/ubuntu/semicolon/meedl/dev/nkwadoma.env
+           sudo sed -i '/api.versioning=/d' /home/ubuntu/semicolon/meedl/dev/nkwadoma.env
+
+      - name: Debug environment variables
+        run: |
+          echo "ACTIVE_ENV=${{ env.ACTIVE_ENV }}"
+          echo "NEW_ENV=${{ env.NEW_ENV }}"
+          echo "NEW_PORT=${{ env.NEW_PORT }}"   
+
       - name: Determine active environment
         id: active_env
         run: |
@@ -94,14 +105,24 @@ jobs:
             echo "NEW_PORT=${{ env.BLUE_PORT }}" >> $GITHUB_ENV
           fi
 
-      - name: Clean up stopped conflicting container
+      # - name: Clean up stopped conflicting container
+      #   run: |
+      #     if [ "$(sudo docker ps -aq -f name=meedl-dev_${{ env.NEW_ENV }} -f status=exited)" ]; then
+      #       sudo docker rm meedl-dev_${{ env.NEW_ENV }}
+      #     fi
+      #     if [ "$(sudo docker ps -aq -f name=meedl-dev_${{ env.NEW_ENV }} -f status=created)" ]; then
+      #       sudo docker rm meedl-dev_${{ env.NEW_ENV }}
+      #     fi
+
+      
+
+      - name: Clean up conflicting container if exists
         run: |
-          if [ "$(sudo docker ps -aq -f name=meedl-dev_${{ env.NEW_ENV }} -f status=exited)" ]; then
-            sudo docker rm meedl-dev_${{ env.NEW_ENV }}
+          if [ "$(sudo docker ps -aq -f name=meedl-dev_${{ env.NEW_ENV }})" ]; then
+            sudo docker stop meedl-dev_${{ env.NEW_ENV }} 2>/dev/null || true
+            sudo docker rm -f meedl-dev_${{ env.NEW_ENV }} 2>/dev/null || true
           fi
-          if [ "$(sudo docker ps -aq -f name=meedl-dev_${{ env.NEW_ENV }} -f status=created)" ]; then
-            sudo docker rm meedl-dev_${{ env.NEW_ENV }}
-          fi
+    
 
       - name: Start new container
         run: |

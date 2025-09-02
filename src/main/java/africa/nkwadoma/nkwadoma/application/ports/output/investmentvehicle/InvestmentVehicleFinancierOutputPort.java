@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface InvestmentVehicleFinancierOutputPort {
     InvestmentVehicleFinancier save(InvestmentVehicleFinancier investmentVehicleFinancier) throws MeedlException;
@@ -37,4 +38,6 @@ public interface InvestmentVehicleFinancierOutputPort {
     Page<InvestmentVehicleFinancier> searchFinancierInvestmentByInvestmentVehicleNameAndFinancierId(String investmentVehicleName, String id, int pageSize, int pageNumber) throws MeedlException;
 
     InvestmentVehicleFinancier findByFinancierIdAndInvestmentVehicleFinancierId(String id, String investmentVehicleFinancierId) throws MeedlException;
+
+    Optional<InvestmentVehicleFinancier> findAllByFinancierIdAndInvestmentVehicleId(String financierId, String investmentVehicleId) throws MeedlException;
 }

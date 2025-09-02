@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement;
 
 import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.FinancierResponse;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
@@ -38,4 +39,5 @@ LoanProductResponse {
     private int totalNumberOfLoanee;
     private BigDecimal minRepaymentAmount;
     private List<Vendor> vendors;
+    private List<FinancierResponse> sponsors;
 }

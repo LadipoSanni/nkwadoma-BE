@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.InstituteMetrics;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -76,6 +77,11 @@ public class InstituteMetricsPersistenceAdapterTest {
 
     @AfterAll
     void tearDown() throws MeedlException {
+        InstituteMetrics instituteMetrics = instituteMetricsOutputPort.findByOrganizationId(organizationIdentity.getId());
+        if (ObjectUtils.isNotEmpty(instituteMetrics)){
+            log.info("Metrics was found for this organization");
+            instituteMetricsOutputPort.delete(instituteMetrics.getId());
+        }
         organizationIdentityOutputPort.delete(organizationIdentity.getId());
         instituteMetricsOutputPort.delete(instituteMetrics.getId());
     }

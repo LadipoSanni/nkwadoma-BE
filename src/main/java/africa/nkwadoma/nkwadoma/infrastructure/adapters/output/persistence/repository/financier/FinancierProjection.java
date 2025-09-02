@@ -20,5 +20,10 @@ public interface FinancierProjection {
     String getInvitedBy();
     String getEmail();
     String getIdentity();
+    String getCooperateAdminEmail();
+    String getCooperateAdminName();
+    String getPhoneNumber();
+    String getAddress();
+
 
 }

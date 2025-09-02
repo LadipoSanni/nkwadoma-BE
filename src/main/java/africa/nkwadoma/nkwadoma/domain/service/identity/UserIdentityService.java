@@ -163,7 +163,7 @@ public class UserIdentityService implements UserUseCase {
     }
 
     private void activateOrganization(UserIdentity userIdentity, OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
-        if (userIdentity.getRole().isCooperateOrOrganizationStaff()){
+        if (userIdentity.getRole().isCooperateOrOrganizationSuperAdmin()){
             OrganizationIdentity organizationIdentity =
                     organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
             organizationIdentity.setActivationStatus(ActivationStatus.ACTIVE);

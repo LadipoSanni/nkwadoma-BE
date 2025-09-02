@@ -4,7 +4,9 @@ import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.LoanUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
@@ -18,9 +20,11 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanenums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
+import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
+import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
@@ -55,7 +59,6 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         RespondToLoanReferralUseCase, LoanOfferUseCase, LoanUseCase {
     private final LoanProductOutputPort loanProductOutputPort;
     private final LoaneeOutputPort loaneeOutputPort;
-    private final LoanMetricsUseCase loanMetricsUseCase;
     private final LoanProductMapper loanProductMapper;
     private final LoanRequestMapper loanRequestMapper;
     private final LoanRequestOutputPort loanRequestOutputPort;
@@ -68,7 +71,6 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     private final LoaneeLoanAccountOutputPort loaneeLoanAccountOutputPort;
-    private final IdentityVerificationUseCase verificationUseCase;
     private final InvestmentVehicleOutputPort investmentVehicleOutputPort;
     private final LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
     private final ProgramOutputPort programOutputPort;
@@ -79,13 +81,13 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final CohortOutputPort cohortOutputPort;
     private final ProgramLoanDetailOutputPort programLoanDetailOutputPort;
     private final OrganizationLoanDetailOutputPort organizationLoanDetailOutputPort;
-    private final LoaneeUseCase loaneeUseCase;
     private final LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
-    private final LoanMapper loanMapper;
     private final LoaneeLoanAggregateOutputPort loaneeLoanAggregateOutputPort;
     private final LoaneeLoanAggregateMapper loaneeLoanAggregateMapper;
+    private final InvestmentVehicleFinancierOutputPort investmentVehicleFinancierOutputPort;
     private final PortfolioOutputPort portfolioOutputPort;
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
+    private final FinancierOutputPort financierOutputPort;
 
     @Override
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
@@ -100,6 +102,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }
         log.info("Searching for investment vehicle with id {} ", loanProduct.getInvestmentVehicleId());
         InvestmentVehicle investmentVehicle = checkProductSizeNotMoreThanAvailableInvestmentAmount(loanProduct);
+        verifyFinanciersExistInVehicle(loanProduct, investmentVehicle);
         //TODO Coming back to add restriction for available amount
   //    TODO  investmentVehicle.setTotalAvailableAmount(investmentVehicle.getTotalAvailableAmount().subtract(loanProduct.getLoanProductSize()));
         loanProduct.addInvestmentVehicleValues(investmentVehicle);
@@ -119,6 +122,20 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         portfolio = portfolioOutputPort.findPortfolio(portfolio);
         portfolio.setNumberOfLoanProducts(portfolio.getNumberOfLoanProducts() + 1);
         portfolioOutputPort.save(portfolio);
+    }
+
+    private void verifyFinanciersExistInVehicle(LoanProduct loanProduct, InvestmentVehicle investmentVehicle) throws MeedlException {
+        List<String> sponsorsIds = new ArrayList<>();
+        for (Financier financier : loanProduct.getSponsors()){
+            Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findAllByFinancierIdAndInvestmentVehicleId(financier.getId(), investmentVehicle.getId());
+            if (optionalInvestmentVehicleFinancier.isEmpty()){
+                log.error("Investment vehicle financier not found for financier with id {} and vehicle with id {}", financier.getId(), investmentVehicle.getId());
+                throw new MeedlException("Apparently financier with name %s is not part of %s".formatted( financier.getName(),  investmentVehicle.getName()));
+            }
+            sponsorsIds.add(financier.getId());
+        }
+        loanProduct.setSponsorIds(sponsorsIds);
+        log.info("Done verifying if financiers are part of the select vehicle {}", investmentVehicle.getId());
     }
 
     private InvestmentVehicle checkProductSizeNotMoreThanAvailableInvestmentAmount(LoanProduct loanProduct) throws MeedlException {
@@ -449,10 +466,26 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     @Override
     public LoanProduct viewLoanProductDetailsById(String loanProductId) throws MeedlException {
         MeedlValidator.validateUUID(loanProductId, LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
+        log.info("Service level of view loan product {}", loanProductId);
         LoanProduct loanProduct = loanProductOutputPort.findById(loanProductId);
+        log.info("Updating loan product vendors on the view ");
         List<Vendor> vendors = loanProductOutputPort.getVendorsByLoanProductId(loanProductId);
         loanProduct.setVendors(vendors);
+        getLoanProductSponsors(loanProduct);
         return loanProduct;
+    }
+
+    private void getLoanProductSponsors(LoanProduct loanProduct) throws MeedlException {
+        if (ObjectUtils.isEmpty(loanProduct.getSponsorIds())){
+            log.warn("Loan product has no sponsors");
+            return;
+        }
+        log.info("Updating sponsors list in view loan product");
+        List<Financier> sponsors = new ArrayList<>();
+        for (String financierId : loanProduct.getSponsorIds()){
+            sponsors.add(financierOutputPort.findById(financierId));
+        }
+        loanProduct.setSponsors(sponsors);
     }
 
     @Override

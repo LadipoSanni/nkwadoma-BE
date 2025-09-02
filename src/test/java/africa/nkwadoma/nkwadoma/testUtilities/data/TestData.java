@@ -78,7 +78,7 @@ public class TestData {
         organizationIdentity.setName(name);
         organizationIdentity.setId(testId);
         organizationIdentity.setEmail("testorganizationdata@gmail.com");
-        organizationIdentity.setTin("7682-5627");
+        organizationIdentity.setTin("7682-56"+TestUtils.generateName(3));
         organizationIdentity.setRcNumber(rcNumber);
         organizationIdentity.setActivationStatus(ActivationStatus.INVITED);
         organizationIdentity.setServiceOfferings(List.of(new ServiceOffering()));
@@ -213,6 +213,7 @@ public class TestData {
         loanProduct.setPageSize(pageSize);
         loanProduct.setPageNumber(pageNumber);
         loanProduct.setVendors(List.of(vendor));
+        loanProduct.setSponsors(List.of(Financier.builder().id(UUID.randomUUID().toString()).name("ifnf").build()));
         return loanProduct;
     }
     public static Vendor createTestVendor(String name) {
@@ -571,6 +572,7 @@ public class TestData {
     public static InvestmentVehicleFinancier buildInvestmentVehicleFinancier(Financier financier, InvestmentVehicle investmentVehicle) {
         return InvestmentVehicleFinancier.builder()
                 .financier(financier)
+                .investmentVehicleDesignation(Set.of(InvestmentVehicleDesignation.DONOR))
                 .investmentVehicle(investmentVehicle)
                 .build();
     }

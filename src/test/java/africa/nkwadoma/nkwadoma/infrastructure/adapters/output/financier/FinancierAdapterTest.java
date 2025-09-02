@@ -5,7 +5,6 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.NextOfKinOutpu
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -175,10 +174,10 @@ class FinancierAdapterTest {
     }
     @Test
     @Order(2)
-    void findFinancierByFinancierId() {
+    void findById() {
         Financier foundFinancier = null;
         try {
-            foundFinancier = financierOutputPort.findFinancierByFinancierId(financierId);
+            foundFinancier = financierOutputPort.findById(financierId);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
@@ -201,7 +200,7 @@ class FinancierAdapterTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ndnifeif"})
     void findFinancierByInvalidFinancierId(String invalidId) {
-        assertThrows(MeedlException.class, ()-> financierOutputPort.findFinancierByFinancierId(invalidId));
+        assertThrows(MeedlException.class, ()-> financierOutputPort.findById(invalidId));
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ndnifeif"})
@@ -397,13 +396,13 @@ class FinancierAdapterTest {
     @Order(10)
     public void deleteFinancier(){
         try {
-            Financier financier = financierOutputPort.findFinancierByFinancierId(financierId);
+            Financier financier = financierOutputPort.findById(financierId);
             assertNotNull(financier);
             financierOutputPort.delete(financierId);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
-        assertThrows(MeedlException.class, ()-> financierOutputPort.findFinancierByFinancierId(financierId));
+        assertThrows(MeedlException.class, ()-> financierOutputPort.findById(financierId));
     }
 
 

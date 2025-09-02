@@ -316,13 +316,13 @@ public class OrganizationController {
 
         log.info("request that got in - organization{} == status{}",organizationDecisionRequest.getOrganizationId(),
                 organizationDecisionRequest.getActivationStatus());
-        String response = createOrganizationUseCase.respondToOrganizationInvite(meedlUser.getClaimAsString("sub"),
+        OrganizationIdentity organizationIdentity = createOrganizationUseCase.respondToOrganizationInvite(meedlUser.getClaimAsString("sub"),
                 organizationDecisionRequest.getOrganizationId(),
                 organizationDecisionRequest.getActivationStatus());
         ApiResponse<Object> apiResponse = ApiResponse.builder()
                 .statusCode(HttpStatus.OK.toString())
-                .message(response)
-                .data(response)
+                .message(organizationIdentity.getResponse())
+                .data(QAResponse.builder().id(organizationIdentity.getId()))
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
@@ -332,20 +332,19 @@ public class OrganizationController {
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or  hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN')  " +
                   " or hasRole('ORGANIZATION_SUPER_ADMIN')  or hasRole('ORGANIZATION_ADMIN') " +
             "or hasRole('COOPERATE_FINANCIER_ADMIN') or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')  ")
-    public ResponseEntity<QAResponse<?>> inviteColleague(@AuthenticationPrincipal Jwt meedlUser,
+    public ResponseEntity<ApiResponse<?>> inviteColleague(@AuthenticationPrincipal Jwt meedlUser,
                                                           @RequestBody InviteColleagueRequest inviteColleagueRequest) throws MeedlException {
         OrganizationIdentity organizationIdentity =
                 organizationRestMapper.mapInviteColleagueRequestToOrganizationIdentity(inviteColleagueRequest);
         log.info("request after mapping {}",organizationIdentity.getUserIdentity());
         organizationIdentity.getUserIdentity().setCreatedBy(meedlUser.getClaimAsString("sub"));
         UserIdentity userIdentity = createOrganizationUseCase.inviteColleague(organizationIdentity);
-        QAResponse<Object> qaResponse = QAResponse.builder()
+        ApiResponse<Object> apiResponse = ApiResponse.builder()
                 .statusCode(HttpStatus.OK.toString())
                 .message(userIdentity.getResponse())
-                .id(userIdentity.getId())
-                .email(userIdentity.getEmail())
+                .data(QAResponse.builder().id(userIdentity.getId()).email(userIdentity.getEmail()).build())
                 .build();
-        return new ResponseEntity<>(qaResponse, HttpStatus.CREATED);
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
 }

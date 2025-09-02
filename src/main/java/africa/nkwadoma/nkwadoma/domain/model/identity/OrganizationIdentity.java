@@ -69,6 +69,7 @@ public class OrganizationIdentity {
     private String address;
     private String officeAddress;
     private OrganizationType organizationType;
+    private String response;
     private List<ServiceOffering> serviceOfferings;
     private List<BankDetail> bankDetails;
 

@@ -5,6 +5,7 @@ import lombok.Getter;
 @Getter
 public enum FinancierMessages {
    INVALID_FINANCIER_ID("Invalid financier id provided."),
+    FINANCIER_NOT_FOUND("Financier not found"),
     NOT_A_FINANCIER("Apparently, you are not a financier. Contact admin."),
    FINANCIER_DESIGNATION_REQUIRED("Investment vehicle designation is required."),
    EMPTY_FINANCIER_PROVIDED("Financier object cannot be empty."),
