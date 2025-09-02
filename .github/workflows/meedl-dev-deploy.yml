@@ -114,6 +114,8 @@ jobs:
       #       sudo docker rm meedl-dev_${{ env.NEW_ENV }}
       #     fi
 
+      
+
       - name: Clean up conflicting container if exists
         run: |
           if [ "$(sudo docker ps -aq -f name=meedl-dev_${{ env.NEW_ENV }})" ]; then
