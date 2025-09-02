@@ -374,6 +374,7 @@ class OrganizationEmployeeServiceTest {
             when(userIdentityOutputPort.findById(any())).thenReturn(userIdentity);
 
             organizationEmployeeIdentity = organizationEmployeeService.respondToColleagueInvitation(mockId,mockId,ActivationStatus.DECLINED);
+            response = organizationEmployeeIdentity.getResponse()
         }catch (MeedlException meedlException){
             log.error(meedlException.getMessage());
         }
