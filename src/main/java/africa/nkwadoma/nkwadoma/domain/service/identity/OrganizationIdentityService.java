@@ -369,7 +369,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     }
 
     @Override
-    public String respondToOrganizationInvite(String actorId, String organizationId, ActivationStatus activationStatus) throws MeedlException {
+    public OrganizationIdentity respondToOrganizationInvite(String actorId, String organizationId, ActivationStatus activationStatus) throws MeedlException {
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         MeedlValidator.validateObjectInstance(activationStatus,"Activation status cannot be empty");
         MeedlValidator.validateActivationSatus(activationStatus);
@@ -389,7 +389,8 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
 
         }
         organizationIdentityOutputPort.save(organizationIdentity);
-        return "Invitation "+activationStatus.name();
+        organizationIdentity.setResponse("Invitation "+activationStatus.getStatusName());
+        return organizationIdentity;
     }
 
     @Override

@@ -463,8 +463,9 @@ class OrganizationIdentityServiceTest {
         when(meedlNotificationOutputPort.save(any(MeedlNotification.class))).thenReturn(new MeedlNotification());
         when(portfolioOutputPort.findPortfolio(any(Portfolio.class))).thenReturn(portfolio);
         when(portfolioOutputPort.save(any(Portfolio.class))).thenReturn(portfolio);
-        String response = organizationIdentityService.respondToOrganizationInvite(mockId,mockId,ActivationStatus.APPROVED);
-        assertNotNull(response);
+        OrganizationIdentity organizationIdentity = organizationIdentityService.respondToOrganizationInvite(mockId,mockId,ActivationStatus.APPROVED);
+        assertNotNull(organizationIdentity);
+        assertNotNull(organizationIdentity.getResponse());
     }
 
 
