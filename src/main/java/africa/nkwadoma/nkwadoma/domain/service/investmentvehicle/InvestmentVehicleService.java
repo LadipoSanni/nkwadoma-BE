@@ -166,19 +166,24 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
                 throw new MeedlException("Unable to find the organization you belong to as a cooperate financier");
             }
             OrganizationIdentity organizationIdentity = optionalOrganizationIdentity.get();
+            log.info("While viewing investment vehicle by financier, organization id found it {}", organizationIdentity.getId());
             foundFinancier = financierOutputPort.findFinancierByOrganizationId(organizationIdentity.getId());
         }else if (IdentityRole.FINANCIER.equals(userIdentity.getRole())) {
+            log.info("Individual financier is viewing investment vehicle detail");
             foundFinancier = financierOutputPort.findFinancierByUserId(userIdentity.getId());
         }
         MeedlValidator.validateObjectInstance(foundFinancier, "Financier viewing investment vehicle detail not found");
         MeedlValidator.validateUUID(foundFinancier.getId(), FinancierMessages.INVALID_FINANCIER_ID.getMessage());
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+        log.info("About to find investment vehicle by id {} by financier ", investmentVehicleId);
         InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
 
         if (foundInvestmentVehicle.getInvestmentVehicleVisibility() == InvestmentVehicleVisibility.PUBLIC){
+            log.info("Investment vehicle being viewed by financier is a public vehicle");
             return foundInvestmentVehicle;
         }
         if (foundInvestmentVehicle.getInvestmentVehicleVisibility() == InvestmentVehicleVisibility.PRIVATE){
+            log.info("Investment vehicle is a private vehicle being viewed by a financier");
             List<InvestmentVehicleFinancier> investmentVehicleFinancier = investmentVehicleFinancierOutputPort
                     .findByAll(investmentVehicleId, foundFinancier.getId());
             if (!investmentVehicleFinancier.isEmpty()){
