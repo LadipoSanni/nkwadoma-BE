@@ -65,8 +65,8 @@ public class FinancierAdapter implements FinancierOutputPort {
         MeedlValidator.validateUUID(organizationId, "Organization id is required to view financier details.");
         FinancierEntity foundFinancier = financierRepository.findByOrganizationId(organizationId)
                 .orElseThrow(()-> new MeedlException(FinancierMessages.NOT_A_FINANCIER.getMessage()) );
-        Financier financier = financierMapper.map(foundFinancier);
-        return cooperationUserIdentityView(financier);
+        return financierMapper.map(foundFinancier);
+
     }
 
     @Override
@@ -75,15 +75,13 @@ public class FinancierAdapter implements FinancierOutputPort {
         log.info("Adapter level, finding financier by id {}", id);
         FinancierEntity foundFinancier = financierRepository.findByUserIdentity_Id(id)
                 .orElseThrow(()-> new MeedlException(FinancierMessages.NOT_A_FINANCIER.getMessage()));
-        Financier financier = financierMapper.map(foundFinancier);
-        return cooperationUserIdentityView(financier);
+        return financierMapper.map(foundFinancier);
     }
     @Override
     public Financier findFinancierByEmail(String email) throws MeedlException {
         FinancierEntity foundFinancier = financierRepository.findByUserIdentity_Email(email)
                 .orElseThrow(()-> new MeedlException("Financier not found with email : "+email ) );
-        Financier financier = financierMapper.map(foundFinancier);
-        return cooperationUserIdentityView(financier);
+        return financierMapper.map(foundFinancier);
     }
 
     @Override
@@ -125,14 +123,6 @@ public class FinancierAdapter implements FinancierOutputPort {
         return financierEntities.map(financierMapper::mapProjectionToFinancier);
     }
 
-    private Financier cooperationUserIdentityView(Financier financierMapped) {
-        if (financierMapped.getFinancierType() == FinancierType.COOPERATE){
-            financierMapped.getUserIdentity().setFirstName(null);
-            financierMapped.getUserIdentity().setLastName(null);
-        }
-        return financierMapped;
-    }
-
     @Override
     public Financier completeKyc(Financier financier) throws MeedlException {
         log.info("Complete kyc of financier at adapter level ... ");
@@ -145,7 +135,6 @@ public class FinancierAdapter implements FinancierOutputPort {
         FinancierEntity financierEntity = financierRepository.save(financierToSave);
         log.info("Financier completed KYC successfully : {} ", financierEntity);
         Financier kycCompletedFinancier = financierMapper.map(financierEntity);
-        cooperationUserIdentityView(kycCompletedFinancier);
         log.info("Kyc completed financier {}", kycCompletedFinancier);
         return kycCompletedFinancier;
     }
