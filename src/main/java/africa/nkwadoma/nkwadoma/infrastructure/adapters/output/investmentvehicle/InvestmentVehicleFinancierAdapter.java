@@ -166,10 +166,11 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
     public Optional<InvestmentVehicleFinancier> findAllByFinancierIdAndInvestmentVehicleId(String financierId, String investmentVehicleId) throws MeedlException {
         MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+        log.info("Find all -- financier id {} investment vehicle id {}", financierId, investmentVehicleId);
         Optional<InvestmentVehicleFinancierEntity> optionalInvestmentVehicleFinancierEntity =
                 investmentVehicleFinancierRepository.findByFinancier_IdAndInvestmentVehicle_Id(financierId, investmentVehicleId);
-        optionalInvestmentVehicleFinancierEntity.ifPresent(investmentVehicleFinancierMapper::toInvestmentVehicleFinancier);
-        return Optional.empty();
+        log.info("Found is empty {}", optionalInvestmentVehicleFinancierEntity.isEmpty());
+        return optionalInvestmentVehicleFinancierEntity.map(investmentVehicleFinancierMapper::toInvestmentVehicleFinancier);
     }
 
     public void checkIfInvestmentExist(String investmentVehicleFinancierId) throws MeedlException {
