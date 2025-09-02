@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.LoanUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleOutputPort;
@@ -86,6 +87,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final InvestmentVehicleFinancierOutputPort investmentVehicleFinancierOutputPort;
     private final PortfolioOutputPort portfolioOutputPort;
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
+    private final FinancierOutputPort financierOutputPort;
 
     @Override
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
@@ -123,15 +125,16 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     private void verifyFinanciersExistInVehicle(LoanProduct loanProduct, InvestmentVehicle investmentVehicle) throws MeedlException {
+        List<String> sponsorsIds = new ArrayList<>();
         for (Financier financier : loanProduct.getSponsors()){
-            String financierId = financier.getId();
-            Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findAllByFinancierIdAndInvestmentVehicleId(financierId, investmentVehicle.getId());
+            Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findAllByFinancierIdAndInvestmentVehicleId(financier.getId(), investmentVehicle.getId());
             if (optionalInvestmentVehicleFinancier.isEmpty()){
-                log.error("Investment vehicle financier not found for financier with id {} and vehicle with id {}", financierId, investmentVehicle.getId());
+                log.error("Investment vehicle financier not found for financier with id {} and vehicle with id {}", financier.getId(), investmentVehicle.getId());
                 throw new MeedlException("Apparently financier with name %s is not part of %s".formatted( financier.getName(),  investmentVehicle.getName()));
             }
-
+            sponsorsIds.add(financier.getId());
         }
+        loanProduct.setSponsorIds(sponsorsIds);
         log.info("Done verifying if financiers are part of the select vehicle {}", investmentVehicle.getId());
     }
 
@@ -463,10 +466,26 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     @Override
     public LoanProduct viewLoanProductDetailsById(String loanProductId) throws MeedlException {
         MeedlValidator.validateUUID(loanProductId, LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
+        log.info("Service level of view loan product {}", loanProductId);
         LoanProduct loanProduct = loanProductOutputPort.findById(loanProductId);
+        log.info("Updating loan product vendors on the view ");
         List<Vendor> vendors = loanProductOutputPort.getVendorsByLoanProductId(loanProductId);
         loanProduct.setVendors(vendors);
+        getLoanProductSponsors(loanProduct);
         return loanProduct;
+    }
+
+    private void getLoanProductSponsors(LoanProduct loanProduct) throws MeedlException {
+        if (ObjectUtils.isEmpty(loanProduct.getSponsorIds())){
+            log.warn("Loan product has no sponsors");
+            return;
+        }
+        log.info("Updating sponsors list in view loan product");
+        List<Financier> sponsors = new ArrayList<>();
+        for (String financierId : loanProduct.getSponsorIds()){
+            sponsors.add(financierOutputPort.findById(financierId));
+        }
+        loanProduct.setSponsors(sponsors);
     }
 
     @Override

@@ -311,20 +311,20 @@ public class OrganizationController {
 
     @PostMapping("organization/approve/invite")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN')")
-    public ResponseEntity<ApiResponse<?>> respondToOrganizationInvite(@AuthenticationPrincipal Jwt meedlUser,
+    public ResponseEntity<QAResponse<?>> respondToOrganizationInvite(@AuthenticationPrincipal Jwt meedlUser,
                                                                       @RequestBody OrganizationDecisionRequest organizationDecisionRequest) throws MeedlException {
 
         log.info("request that got in - organization{} == status{}",organizationDecisionRequest.getOrganizationId(),
                 organizationDecisionRequest.getActivationStatus());
-        String response = createOrganizationUseCase.respondToOrganizationInvite(meedlUser.getClaimAsString("sub"),
+        OrganizationIdentity organizationIdentity = createOrganizationUseCase.respondToOrganizationInvite(meedlUser.getClaimAsString("sub"),
                 organizationDecisionRequest.getOrganizationId(),
                 organizationDecisionRequest.getActivationStatus());
-        ApiResponse<Object> apiResponse = ApiResponse.builder()
+        QAResponse<Object> qaResponse = QAResponse.builder()
                 .statusCode(HttpStatus.OK.toString())
-                .message(response)
-                .data(response)
+                .message(organizationIdentity.getResponse())
+                .id(organizationIdentity.getId())
                 .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+        return new ResponseEntity<>(qaResponse, HttpStatus.CREATED);
     }
 
 

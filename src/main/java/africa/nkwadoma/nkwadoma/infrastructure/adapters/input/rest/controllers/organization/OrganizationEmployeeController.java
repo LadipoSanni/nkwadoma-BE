@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.PaginatedResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.QAResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
@@ -157,14 +158,14 @@ public class OrganizationEmployeeController {
     @PostMapping("respond/invite/colleague")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN')  or hasRole('ORGANIZATION_SUPER_ADMIN') " +
             "or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')")
-    public ResponseEntity<ApiResponse<?>> respondToColleagueInvite(@AuthenticationPrincipal Jwt meedlUser,
+    public ResponseEntity<QAResponse<?>> respondToColleagueInvite(@AuthenticationPrincipal Jwt meedlUser,
                                                                    @RequestParam(name = "organizationEmployeeId") String organizationEmployeeId,
                                                                    @RequestParam(name = "decision") ActivationStatus activationStatus) throws MeedlException {
-        String response = viewOrganizationEmployeesUseCase.respondToColleagueInvitation(meedlUser.getClaimAsString("sub"),
+        OrganizationEmployeeIdentity organizationEmployeeIdentity = viewOrganizationEmployeesUseCase.respondToColleagueInvitation(meedlUser.getClaimAsString("sub"),
                 organizationEmployeeId,activationStatus);
-        ApiResponse<String> apiResponse = ApiResponse.<String>builder()
-                .data(response)
-                .message(response)
+        QAResponse<String> apiResponse = QAResponse.<String>builder()
+                .message(organizationEmployeeIdentity.getResponse())
+                .id(organizationEmployeeIdentity.getMeedlUser().getEmail())
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
