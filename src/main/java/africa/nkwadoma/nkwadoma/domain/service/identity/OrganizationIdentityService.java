@@ -320,6 +320,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         if (identityRole.equals(IdentityRole.MEEDL_SUPER_ADMIN)) {
             organizationIdentity.setActivationStatus(ActivationStatus.INVITED);
             organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
+            organizationIdentity.setRequestedInvitationDate(LocalDateTime.now());
         }else {
             organizationIdentity.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
             organizationIdentity.setRequestedInvitationDate(LocalDateTime.now());
