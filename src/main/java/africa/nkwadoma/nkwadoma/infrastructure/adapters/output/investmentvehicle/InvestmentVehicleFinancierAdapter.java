@@ -65,11 +65,14 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
     @Override
     public Page<Financier> viewAllFinancierInAnInvestmentVehicle(String investmentVehicleId,ActivationStatus activationStatus, Pageable pageRequest) throws MeedlException {
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+        log.info("request investment vehicle id {} ==== activation status {}", investmentVehicleId, activationStatus);
         Page<FinancierWithDesignationProjection> financiersWithDesignationProjection;
         if (ObjectUtils.isNotEmpty(activationStatus)) {
+            log.info("request investment vehicle activation status is {}", activationStatus);
             financiersWithDesignationProjection = investmentVehicleFinancierRepository
                             .findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatus(investmentVehicleId, activationStatus.getStatusName(), pageRequest);
         } else {
+            log.info("request investment vehicle activation status is {}", activationStatus);
             financiersWithDesignationProjection = investmentVehicleFinancierRepository
                     .findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatus(investmentVehicleId, null, pageRequest);
         }
