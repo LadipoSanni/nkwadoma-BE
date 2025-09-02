@@ -158,14 +158,17 @@ public class OrganizationEmployeeController {
     @PostMapping("respond/invite/colleague")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN')  or hasRole('ORGANIZATION_SUPER_ADMIN') " +
             "or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')")
-    public ResponseEntity<QAResponse<?>> respondToColleagueInvite(@AuthenticationPrincipal Jwt meedlUser,
+    public ResponseEntity<ApiResponse<?>> respondToColleagueInvite(@AuthenticationPrincipal Jwt meedlUser,
                                                                    @RequestParam(name = "organizationEmployeeId") String organizationEmployeeId,
                                                                    @RequestParam(name = "decision") ActivationStatus activationStatus) throws MeedlException {
         OrganizationEmployeeIdentity organizationEmployeeIdentity = viewOrganizationEmployeesUseCase.respondToColleagueInvitation(meedlUser.getClaimAsString("sub"),
                 organizationEmployeeId,activationStatus);
-        QAResponse<String> apiResponse = QAResponse.<String>builder()
+        ApiResponse<QAResponse> apiResponse = ApiResponse.<QAResponse>builder()
                 .message(organizationEmployeeIdentity.getResponse())
-                .id(organizationEmployeeIdentity.getMeedlUser().getEmail())
+                .data(QAResponse.builder()
+                        .id(organizationEmployeeIdentity.getMeedlUser().getId())
+                        .email(organizationEmployeeIdentity.getMeedlUser().getEmail())
+                        .build())
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);

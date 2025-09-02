@@ -54,7 +54,7 @@ public class WalletManagementController {
         bankDetail = bankDetailUseCase.addBankDetails(bankDetail);
         log.info("Bank details after adding {}", bankDetail);
         ApiResponse<Object> apiResponse = ApiResponse.builder()
-                .data(QAResponse.build(bankDetail.getId()))
+                .data(QAResponse.builder().id(bankDetail.getId()).build())
                 .message(bankDetail.getResponse())
                 .statusCode(HttpStatus.CREATED.name())
                 .build();
