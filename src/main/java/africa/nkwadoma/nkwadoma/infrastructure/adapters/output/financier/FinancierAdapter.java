@@ -70,6 +70,16 @@ public class FinancierAdapter implements FinancierOutputPort {
     }
 
     @Override
+    public Financier findCooperateFinancierById(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id,"Financier id cannot be empty");
+
+        FinancierProjection financierProjection =
+                financierRepository.findCooperateFinancierById(id);
+
+        return financierMapper.mapProjectionToFinancier(financierProjection);
+    }
+
+    @Override
     public Financier findFinancierByUserId(String id) throws MeedlException {
         MeedlValidator.validateUUID(id, "User id is required to view financier details.");
         log.info("Adapter level, finding financier by id {}", id);
