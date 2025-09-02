@@ -105,14 +105,24 @@ jobs:
             echo "NEW_PORT=${{ env.BLUE_PORT }}" >> $GITHUB_ENV
           fi
 
-      - name: Clean up stopped conflicting container
+      # - name: Clean up stopped conflicting container
+      #   run: |
+      #     if [ "$(sudo docker ps -aq -f name=meedl-dev_${{ env.NEW_ENV }} -f status=exited)" ]; then
+      #       sudo docker rm meedl-dev_${{ env.NEW_ENV }}
+      #     fi
+      #     if [ "$(sudo docker ps -aq -f name=meedl-dev_${{ env.NEW_ENV }} -f status=created)" ]; then
+      #       sudo docker rm meedl-dev_${{ env.NEW_ENV }}
+      #     fi
+
+      
+
+      - name: Clean up conflicting container if exists
         run: |
-          if [ "$(sudo docker ps -aq -f name=meedl-dev_${{ env.NEW_ENV }} -f status=exited)" ]; then
-            sudo docker rm meedl-dev_${{ env.NEW_ENV }}
+          if [ "$(sudo docker ps -aq -f name=meedl-dev_${{ env.NEW_ENV }})" ]; then
+            sudo docker stop meedl-dev_${{ env.NEW_ENV }} 2>/dev/null || true
+            sudo docker rm -f meedl-dev_${{ env.NEW_ENV }} 2>/dev/null || true
           fi
-          if [ "$(sudo docker ps -aq -f name=meedl-dev_${{ env.NEW_ENV }} -f status=created)" ]; then
-            sudo docker rm meedl-dev_${{ env.NEW_ENV }}
-          fi
+    
 
       - name: Start new container
         run: |
