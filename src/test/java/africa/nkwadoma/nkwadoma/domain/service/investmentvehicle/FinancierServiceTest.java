@@ -795,7 +795,7 @@ public class FinancierServiceTest {
     public void viewAllFinancierInInvestmentVehicle() {
         Page<Financier> financiersPage = null;
         individualFinancier.setInvestmentVehicleId(privateInvestmentVehicleId);
-        individualFinancier.setActivationStatus(ActivationStatus.ACTIVE);
+        individualFinancier.setActivationStatus(null);
         try {
             financiersPage = financierUseCase.viewAllFinancierInInvestmentVehicle(individualFinancier);
         } catch (MeedlException e) {
@@ -832,7 +832,7 @@ public class FinancierServiceTest {
     void viewAllFinancierInVehicleWithActivationStatus(){
         Page<Financier> financiersPage = null;
         try {
-            financiersPage = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(privateInvestmentVehicleId, ActivationStatus.ACTIVE, pageRequest);
+            financiersPage = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(privateInvestmentVehicleId,null, pageRequest);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }

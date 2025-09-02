@@ -3,6 +3,8 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.respons
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Setter
 @Getter
 public class LoanBeneficiaryResponse {
@@ -12,4 +14,8 @@ public class LoanBeneficiaryResponse {
     private String lastName;
     private String instituteName;
     private String performance;
+
+    private double interestEarned;
+    private BigDecimal amountDisbursed;
+    private BigDecimal loanOutstanding;
 }
