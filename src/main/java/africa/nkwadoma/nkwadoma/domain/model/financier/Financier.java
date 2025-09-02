@@ -66,6 +66,8 @@ public class Financier {
     private String name;
     private String email;
     private String invitedBy;
+    private String cooperateAdminEmail;
+    private String cooperateAdminName;
 
     private List<BankDetail> bankDetails;
     private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;

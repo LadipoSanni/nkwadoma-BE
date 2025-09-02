@@ -177,4 +177,26 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
          where user.id = :id and f.identity = organization.id
     """)
     FinancierProjection findByCooperateStaffUserId(@Param("id") String id);
+
+
+    @Query("""
+    SELECT f.id AS id,
+           f.financierType AS financierType,
+           f.activationStatus AS activationStatus,
+           f.totalAmountInvested AS totalAmountInvested,
+           organization.email AS email,
+           f.identity AS identity,
+           user.email AS cooperateAdminEmail,
+           CONCAT(user.firstName, ' ', user.lastName) AS cooperateAdminName,
+           organization.phoneNumber AS phoneNumber,
+           organization.address AS address
+    FROM FinancierEntity f
+         JOIN OrganizationEntity organization ON organization.id = f.identity
+         JOIN OrganizationEmployeeEntity organizationEmployee ON organizationEmployee.organization = organization.id
+         JOIN UserEntity user ON user.id = organizationEmployee.meedlUser.id
+    WHERE f.id = :id
+      AND user.role = 'COOPERATE_FINANCIER_SUPER_ADMIN'
+""")
+    FinancierProjection findCooperateFinancierById(@Param("id") String id);
+
 }

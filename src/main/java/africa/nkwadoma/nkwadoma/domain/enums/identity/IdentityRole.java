@@ -116,8 +116,7 @@ public enum IdentityRole {
                 || this == PORTFOLIO_MANAGER;
     }
 
-    public boolean isCooperateOrOrganizationStaff(){
-        return this == COOPERATE_FINANCIER_SUPER_ADMIN || this == COOPERATE_FINANCIER_ADMIN
-                || this == ORGANIZATION_ADMIN || this == ORGANIZATION_ASSOCIATE || this == ORGANIZATION_SUPER_ADMIN;
+    public boolean isCooperateOrOrganizationSuperAdmin(){
+        return this == COOPERATE_FINANCIER_SUPER_ADMIN || this == ORGANIZATION_SUPER_ADMIN;
     }
 }
