@@ -248,13 +248,10 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     @Override
     public InvestmentVehicle findById(String investmentVehicleId) throws MeedlException {
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
-        if (investmentVehicleId != null){
+        log.info("Investment vehicle id is {}", investmentVehicleId);
             InvestmentVehicleEntity investmentVehicleEntity =
                     investmentVehicleRepository.findById(investmentVehicleId).orElseThrow(()->new InvestmentException(InvestmentVehicleMessages.INVESTMENT_VEHICLE_NOT_FOUND.getMessage()));
             return investmentVehicleMapper.toInvestmentVehicle(investmentVehicleEntity);
-        }
-        log.info("Investment vehicle id to be viewed is null.");
-        throw new InvestmentException(InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
     }
 
     @Override
