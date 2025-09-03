@@ -176,7 +176,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         MeedlValidator.validateUUID(foundFinancier.getId(), FinancierMessages.INVALID_FINANCIER_ID.getMessage());
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
         log.info("About to find investment vehicle by id {} by financier ", investmentVehicleId);
-        InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
+        InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId.trim());
 
         if (foundInvestmentVehicle.getInvestmentVehicleVisibility() == InvestmentVehicleVisibility.PUBLIC){
             log.info("Investment vehicle being viewed by financier is a public vehicle");
