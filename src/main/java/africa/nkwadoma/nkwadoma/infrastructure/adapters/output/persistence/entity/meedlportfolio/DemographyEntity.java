@@ -1,15 +1,21 @@
-package africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.meedlportfolio;
 
-import lombok.Builder;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.UuidGenerator;
+
 
 @Setter
 @Getter
-@Builder
-public class Demography {
+@Entity
+public class DemographyEntity {
 
+    @Id
+    @UuidGenerator
     private String id;
+
     private String name;
 
     private int maleCount;
@@ -27,6 +33,7 @@ public class Demography {
     private int northEastCount;
     private int northWestCount;
     private int northCentralCount;
+    private int nonNigerian;
     private int totalGeographicCount;
 
     private int oLevelCount;
