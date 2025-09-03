@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.*;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Setter
@@ -22,6 +23,7 @@ public class OrganizationResponse {
     private String email;
     private String websiteAddress;
     private String invitedDate;
+    private LocalDateTime requestedInvitationDate;
     private String rcNumber;
     private String tin;
     private String phoneNumber;

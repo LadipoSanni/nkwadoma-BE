@@ -15,4 +15,8 @@ public interface LoanReferralRestMapper {
 
     List<LoanReferralResponse> toLoanReferralResponses(Page<LoanReferral> loanReferrals);
 
+
+    @Mapping(target = "amountReferred", source = "loanAmountRequested")
+    @Mapping(target = "referralId", source = "id")
+    AllLoanReferralResponse allLoanReferralResponse(LoanReferral loanReferral);
 }

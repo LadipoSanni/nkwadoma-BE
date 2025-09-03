@@ -2,8 +2,9 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.enti
 
 import africa.nkwadoma.nkwadoma.domain.enums.identity.MFAType;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.LevelOfEducation;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.NextOfKinEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.bankdetail.BankDetailEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.wallet.BankDetailEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -40,6 +41,7 @@ public class UserEntity {
     private String stateOfOrigin;
     private String maritalStatus;
     private String stateOfResidence;
+//    private LevelOfEducation levelOfEduction;
     private String nationality;
     private String residentialAddress;
     private String alternateEmail;

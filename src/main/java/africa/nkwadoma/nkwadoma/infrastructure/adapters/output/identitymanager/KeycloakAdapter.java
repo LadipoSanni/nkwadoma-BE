@@ -474,7 +474,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
                     .get(userIdentity.getRole().name().toUpperCase().trim())
                     .toRepresentation();
         }catch (NotFoundException exception){
-            throw new IdentityException("Not Found: Role with name "+ userIdentity.getRole());
+            throw new IdentityException("Not Found: Role with name "+ userIdentity.getRole().getRoleName());
         }
         return roleRepresentation;
     }

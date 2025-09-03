@@ -202,7 +202,7 @@ class InvestmentVehicleFinancierAdapterTest {
     void viewAllFinancierInVehicleWithActivationStatus(){
         Page<Financier> financiersPage = null;
         try {
-            financiersPage = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(investmentVehicleId, ActivationStatus.INVITED, pageRequest);
+            financiersPage = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(investmentVehicleId,null, pageRequest);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }

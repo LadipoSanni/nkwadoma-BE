@@ -20,7 +20,12 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
               cle.loaneeLoanDetail.amountRequested as amountRequested,
               lo.amountApproved as amountApproved,
               lp.name as loanProductName,
-              lo.loaneeResponse as loaneeResponse
+              lo.loaneeResponse as loaneeResponse,
+               CASE
+                  WHEN lo.loaneeResponse IS NOT NULL AND lo.loanOfferStatus != 'WITHDRAW'
+                  THEN CAST(lo.loaneeResponse AS string)
+                  ELSE CAST(lo.loanOfferStatus AS string)
+              END as status
 
     from LoanOfferEntity lo
     join LoanRequestEntity lr on lr.id = lo.id
@@ -82,7 +87,12 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
               cle.loaneeLoanDetail.amountRequested as amountRequested,
               lo.amountApproved as amountApproved,
               lp.name as loanProductName,
-              lo.loaneeResponse as loaneeResponse
+              lo.loaneeResponse as loaneeResponse,
+               CASE
+                  WHEN lo.loaneeResponse IS NOT NULL AND lo.loanOfferStatus != 'WITHDRAW'
+                  THEN CAST(lo.loaneeResponse AS string)
+                  ELSE CAST(lo.loanOfferStatus AS string)
+              END as status
  
     from LoanOfferEntity lo
     join LoanRequestEntity lr on lr.id = lo.id
@@ -98,7 +108,7 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
                  select 1 from LoanEntity loan where loan.loanOfferId = lo.id
              )
        order by lo.dateTimeOffered desc
-       """)
+    """)
     Page<LoanOfferProjection> findAllLoanOffer(Pageable pageRequest);
 
 

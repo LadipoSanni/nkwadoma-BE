@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.InvalidInputException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanException;
@@ -36,6 +37,7 @@ public class LoanProduct {
     private BigDecimal obligorLoanLimit;
     private BigDecimal loanProductSize;
     private BigDecimal totalAmountAvailable;
+    private BigDecimal totalOutstandingLoan;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private BigDecimal totalAmountEarned;
@@ -52,8 +54,10 @@ public class LoanProduct {
     private String investmentVehicleId;
     private int totalNumberOfLoanee;
     private int totalNumberOfLoanProduct;
-    private List<Vendor> vendors;
     private String investmentVehicleName;
+    private List<Vendor> vendors;
+    private List<String> sponsorIds;
+    private List<Financier> sponsors;
 
     private int pageSize;
     private int pageNumber;
@@ -73,6 +77,10 @@ public class LoanProduct {
         validateTenor();
         validateMoratorium();
         validateCostOfFund();
+        if (MeedlValidator.isEmptyCollection(sponsors)){
+            log.error("Sponsors is empty when creating loan product {}", sponsors);
+            throw new MeedlException("Sponsors for this loan product is required");
+        }
 
         log.info("Ended loan product validation successfully... ");
     }

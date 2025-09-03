@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.UserUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
@@ -23,6 +24,7 @@ import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identitymanager.BlackListedTokenAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.BlackListedToken;
@@ -61,6 +63,7 @@ public class UserIdentityService implements UserUseCase {
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
     private final FinancierOutputPort financierOutputPort;
+    private final LoaneeOutputPort loaneeOutputPort;
 
     @Override
     public AccessTokenResponse login(UserIdentity userIdentity)throws MeedlException {
@@ -129,7 +132,7 @@ public class UserIdentityService implements UserUseCase {
         userIdentity.setRole(foundUser.getRole());
         log.info("User Identity after password has been created: {}", foundUser);
 
-        activateCooperateFinancier(userIdentity);
+        activateOrganizationAndEmployee(userIdentity);
 
 //        blackListedTokenAdapter.blackListToken(createBlackList(token));
 //        log.info("done getting user identity frm token {}",userIdentity);
@@ -138,28 +141,39 @@ public class UserIdentityService implements UserUseCase {
         return userIdentity;
     }
 
-    private void activateCooperateFinancier(UserIdentity userIdentity) throws MeedlException {
-        if (userIdentity.getRole().isCooperateStaff()){
+    private void activateOrganizationAndEmployee(UserIdentity userIdentity) throws MeedlException {
+        if (userIdentity.getRole().isAnyStaff()){
             OrganizationEmployeeIdentity organizationEmployeeIdentity =
                     organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId())
                             .orElseThrow(() -> new MeedlException("Organization employee identity not found"));
             organizationEmployeeIdentity.setActivationStatus(ActivationStatus.ACTIVE);
             organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
-            activateCooperation(userIdentity, organizationEmployeeIdentity);
+            activateOrganization(userIdentity, organizationEmployeeIdentity);
+        }if (userIdentity.getRole().equals(IdentityRole.LOANEE)){
+            Optional<Loanee> loanee = loaneeOutputPort.findByUserId(userIdentity.getId());
+            if (loanee.isPresent()){
+                loanee.get().setActivationStatus(ActivationStatus.ACTIVE);
+                loaneeOutputPort.save(loanee.get());
+            }
+        }if (userIdentity.getRole().equals(IdentityRole.FINANCIER)){
+            Financier financier =  financierOutputPort.findFinancierByUserId(userIdentity.getId());
+            financier.setActivationStatus(ActivationStatus.ACTIVE);
+            financierOutputPort.save(financier);
         }
     }
 
-    private void activateCooperation(UserIdentity userIdentity, OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
-        if (userIdentity.getRole().equals(IdentityRole.COOPERATE_FINANCIER_SUPER_ADMIN)){
+    private void activateOrganization(UserIdentity userIdentity, OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
+        if (userIdentity.getRole().isCooperateOrOrganizationSuperAdmin()){
             OrganizationIdentity organizationIdentity =
                     organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
             organizationIdentity.setActivationStatus(ActivationStatus.ACTIVE);
-            organizationIdentity.setOrganizationType(OrganizationType.COOPERATE);
+            if (userIdentity.getRole().equals(IdentityRole.COOPERATE_FINANCIER_SUPER_ADMIN)) {
+                organizationIdentity.setOrganizationType(OrganizationType.COOPERATE);
+                Financier financier = financierOutputPort.findByIdentity(organizationIdentity.getId());
+                financier.setActivationStatus(ActivationStatus.ACTIVE);
+                financierOutputPort.save(financier);
+            }
             organizationIdentityOutputPort.save(organizationIdentity);
-
-            Financier financier = financierOutputPort.findByIdentity(organizationIdentity.getId());
-            financier.setActivationStatus(ActivationStatus.ACTIVE);
-            financierOutputPort.save(financier);
         }
     }
 
@@ -189,15 +203,17 @@ public class UserIdentityService implements UserUseCase {
 
     @Override
     public void changePassword(UserIdentity userIdentity) throws MeedlException {
-        MeedlValidator.validateObjectInstance(userIdentity, USER_IDENTITY_CANNOT_BE_NULL.getMessage());
-        MeedlValidator.validatePassword(tokenUtils.decryptAES(userIdentity.getPassword(), "Invalid password for current password"));
-        MeedlValidator.validatePassword(tokenUtils.decryptAES(userIdentity.getNewPassword(), "Invalid new password provided"));
-        try {
-            login(userIdentity);
-        }catch (MeedlException e){
-            log.info("Password invalid on change password {} user email {}", e.getMessage(), userIdentity.getEmail());
-            throw new MeedlException("Password incorrect");
-        }
+        MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
+        validatePasswordsForChangePassword(userIdentity);
+        userIdentity.setEmailVerified(true);
+        userIdentity.setEnabled(true);
+        userIdentity.setCreatedAt(LocalDateTime.now());
+        userIdentity.setNewPassword(tokenUtils.decryptAES(userIdentity.getNewPassword(), "Provide valid password to update"));
+        identityManagerOutPutPort.setPassword(userIdentity);
+        log.info("Password changed successfully for user with id: {}",userIdentity.getId());
+    }
+
+    private void validatePasswordsForChangePassword(UserIdentity userIdentity) throws MeedlException {
         if (userIdentity.getNewPassword().equals(userIdentity.getPassword())){
             log.warn("{}", UserMessages.NEW_PASSWORD_AND_CURRENT_PASSWORD_CANNOT_BE_SAME.getMessage());
             throw new IdentityException(UserMessages.NEW_PASSWORD_AND_CURRENT_PASSWORD_CANNOT_BE_SAME.getMessage());
@@ -205,12 +221,26 @@ public class UserIdentityService implements UserUseCase {
         if(checkNewPasswordMatchLastFive(userIdentity)){
             throw new IdentityException(PASSWORD_NOT_ACCEPTED.getMessage());
         }
-        userIdentity.setEmailVerified(true);
-        userIdentity.setEnabled(true);
-        userIdentity.setCreatedAt(LocalDateTime.now());
-        userIdentity.setNewPassword(tokenUtils.decryptAES(userIdentity.getNewPassword(), "Provide valid password to update"));
-        identityManagerOutPutPort.setPassword(userIdentity);
-        log.info("Password changed successfully for user with id: {}",userIdentity.getId());
+        String currentPassword = tokenUtils.decryptAES(userIdentity.getPassword(), "Invalid password entered for current password");
+        try{
+            MeedlValidator.validatePassword(currentPassword);
+        }catch (MeedlException meedlException){
+            log.error("Error validating current password ",meedlException);
+            throw new MeedlException(IdentityMessages.PASSWORD_INCORRECT.getMessage());
+        }
+        String newPassword = tokenUtils.decryptAES(userIdentity.getNewPassword(), "Invalid new password provided");
+        try {
+            MeedlValidator.validatePassword(newPassword);
+        }catch (MeedlException e){
+            log.error("Weak password provided for new password in change password validation. ",e);
+            throw new MeedlException(String.format("Invalid new password provided: %n %s ", e.getMessage()));
+        }
+        try {
+            login(userIdentity);
+        }catch (MeedlException e){
+            log.info("Password invalid on change password {} user email {}", e.getMessage(), userIdentity.getEmail());
+            throw new MeedlException(IdentityMessages.PASSWORD_INCORRECT.getMessage());
+        }
     }
 
     @Override
@@ -232,7 +262,7 @@ public class UserIdentityService implements UserUseCase {
         MeedlValidator.validateDataElement(userIdentity.getReactivationReason(), "Reason for reactivation is required.");
         UserIdentity userToActivate = userIdentityOutputPort.findById(userIdentity.getId());
 
-        checkIfUserAllowedForAccountActivationActivity(userIdentity, userIdentity, ActivationStatus.ACTIVE);
+        checkIfUserAllowedForAccountActivationActivity(userToActivate, userIdentity, ActivationStatus.ACTIVE);
         userIdentity.setReactivationReason("User activated by : "+ userIdentity.getCreatedBy() + ". Reason : "+userIdentity.getDeactivationReason());
 
         userIdentity = identityManagerOutPutPort.enableUserAccount(userToActivate);
@@ -267,11 +297,11 @@ public class UserIdentityService implements UserUseCase {
     private void performEmployeeActivation(UserIdentity userIdentity, ActivationStatus activationStatus) throws MeedlException {
         Optional<OrganizationEmployeeIdentity> optionalOrganizationEmployeeIdentity = organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId());
         if (optionalOrganizationEmployeeIdentity.isPresent()) {
-            log.info("User being {} is an employee. User id {}", activationStatus, userIdentity.getId());
+            log.info("User being {} is an employee. User id {}", activationStatus.getStatusName(), userIdentity.getId());
             OrganizationEmployeeIdentity organizationEmployeeIdentity = optionalOrganizationEmployeeIdentity.get();
             organizationEmployeeIdentity.setActivationStatus(activationStatus);
             organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
-            log.info("Employee {} successfully! Employee id {} , organization id {}", activationStatus, organizationEmployeeIdentity.getId(), organizationEmployeeIdentity.getOrganization());
+            log.info("Employee {} successfully! Employee id {} , organization id {}", activationStatus.getStatusName(), organizationEmployeeIdentity.getId(), organizationEmployeeIdentity.getOrganization());
         }
     }
 
@@ -280,22 +310,22 @@ public class UserIdentityService implements UserUseCase {
         log.info("Is actor with email {} and role {} , allowed to {} user with email {} and role {}", foundActor.getEmail(), foundActor.getRole(), activationStatus, userActedUpon.getEmail(), userActedUpon.getRole());
         if (foundActor.getId().equals(userActedUpon.getId())){
             log.error("User attempts to {} self found actor {}, user is {}", activationStatus, foundActor, userActedUpon);
-            throw new MeedlException("You are not allowed to "+activationStatus+" yourself.");
+            throw new MeedlException("You are not allowed to "+activationStatus.getStatusName()+" yourself.");
         }
         checkIfOrganizationAdminCanPerformAccountActivationActivity(userActedUpon, foundActor, activationStatus);
         checkIfPortfolioManagerCanPerformAccountActivationActivity(userActedUpon, foundActor, activationStatus);
         if (IdentityRole.MEEDL_SUPER_ADMIN.equals(userActedUpon.getRole())){
             log.info("An attempt was made to {} Meedl's supper admin {} \n ----------------------------> attempt on Meedls super admin was made by ------------------------->{}",activationStatus, userActedUpon, foundActor);
             asynchronousNotificationOutputPort.notifySuperAdminOfActivationActivityAttempt(foundActor);
-            throw new MeedlException("You are not allowed to "+activationStatus+" the super admin on Meedl");
+            throw new MeedlException("You are not allowed to "+activationStatus.getStatusName()+" the super admin on Meedl");
         }
-        log.info("Done with validation, actor is allowed to {} user.", activationStatus);
+        log.info("Done with validation, actor is allowed to {} user.", activationStatus.getStatusName());
     }
 
     private void checkIfPortfolioManagerCanPerformAccountActivationActivity(UserIdentity userToDeactivate, UserIdentity foundActor, ActivationStatus activationStatus) throws MeedlException {
         if (IdentityRole.PORTFOLIO_MANAGER.equals(foundActor.getRole())) {
             log.info("Checking to see if portfolio manager can perform activation activity");
-            checkDeactivationIsAuthorised(
+            checkActivationIsAuthorised(
                     activationStatus,
                     foundActor,
                     userToDeactivate,
@@ -309,23 +339,30 @@ public class UserIdentityService implements UserUseCase {
                 IdentityRole.ORGANIZATION_ADMIN.equals(foundActor.getRole())) {
             Optional <OrganizationEmployeeIdentity> deactivatingEmployee = organizationEmployeeIdentityOutputPort.findByMeedlUserId(userToDeactivate.getId());
                     if (deactivatingEmployee.isEmpty()) {
-                        log.error("User can not perform {} as user is not an employee on the platform", activationStatus);
-                        throw new MeedlException("You cannot "+activationStatus+" this user, please contact Meedl admin!");
+                        log.error("User can not perform {} as user is not an employee on the platform", activationStatus.getStatusName().toLowerCase());
+                        throw new MeedlException("You cannot "+activationStatus.getStatusName().toLowerCase()+" this user, please contact Meedl admin!");
                     };
             Optional <OrganizationEmployeeIdentity> employeeToDeactivate = organizationEmployeeIdentityOutputPort.findByMeedlUserId(userToDeactivate.getId());
+            Optional <OrganizationEmployeeIdentity> actorEmployeeDeactivating = organizationEmployeeIdentityOutputPort.findByMeedlUserId(foundActor.getId());
             if (employeeToDeactivate.isEmpty()) {
-                log.error("User to be {} is not an employee, there and organization cannot {} this user as user is meant to be an employee in the same organization as the actor.", activationStatus, activationStatus);
-                throw new MeedlException("You can only "+activationStatus+" employees in your organizations");
+                log.error("User to be {} is not an employee, organization employee identity not found. user id of employee to deactivate is {}", activationStatus.getStatusName(), userToDeactivate.getId());
+                throw new MeedlException("You can only "+activationStatus.getStatusName()+" employees in your organizations");
+            };
+            if (actorEmployeeDeactivating.isEmpty()) {
+                log.error("Actor attempting to {} is not an employee, actors organization employee identity cannot empty. user id is {}", activationStatus.getStatusName(), foundActor.getId());
+                throw new MeedlException("You can only "+activationStatus.getStatusName().toLowerCase()+" employees in your organizations");
             };
 
-            OrganizationIdentity actorOrganization = organizationIdentityOutputPort.findByEmail(employeeToDeactivate.get().getOrganization());
-            OrganizationIdentity userToDeactivateOrganization = organizationIdentityOutputPort.findByEmail(employeeToDeactivate.get().getOrganization());
+            log.info("Finding employee to deactivate, by organization id {} to ensure deactivation is allowed", employeeToDeactivate.get().getOrganization());
+            log.info("Finding employee deactivating, by organization id {} to ensure deactivation is allowed", actorEmployeeDeactivating.get().getOrganization());
+            OrganizationIdentity actorOrganization = organizationIdentityOutputPort.findById(employeeToDeactivate.get().getOrganization());
+            OrganizationIdentity userToDeactivateOrganization = organizationIdentityOutputPort.findById(employeeToDeactivate.get().getOrganization());
             if (!actorOrganization.getId().equals(userToDeactivateOrganization.getId())){
                 log.error("Attempting to {} a user in {} \nWhere as actor is in {}", actorOrganization, userToDeactivateOrganization, actorOrganization);
                 throw new MeedlException("You are not allowed to "+activationStatus+" a user that is not in your organization");
             }
-            log.info("Checking if actor with role {} can perform activation activity {}", foundActor.getRole(), activationStatus);
-            checkDeactivationIsAuthorised(
+            log.info("Checking if actor with role {} can perform activation activity {}", foundActor.getRole(), activationStatus.getStatusName());
+            checkActivationIsAuthorised(
                     activationStatus,
                     foundActor,
                     userToDeactivate,
@@ -335,7 +372,7 @@ public class UserIdentityService implements UserUseCase {
     }
 
 
-    private void checkDeactivationIsAuthorised(ActivationStatus activationStatus, UserIdentity foundActor , UserIdentity userToDeactivate, Set<IdentityRole> allowedTargetRoles) throws MeedlException {
+    private void checkActivationIsAuthorised(ActivationStatus activationStatus, UserIdentity foundActor , UserIdentity userToDeactivate, Set<IdentityRole> allowedTargetRoles) throws MeedlException {
         if (!allowedTargetRoles.contains(userToDeactivate.getRole())) {
             log.error("You are not authorized to {} user with role {} for user with email {}. The actor email is {} and the role of the actor is {}",
                     activationStatus, userToDeactivate.getRole(), userToDeactivate.getEmail(), foundActor.getEmail(), foundActor.getRole());

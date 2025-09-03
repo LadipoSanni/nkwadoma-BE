@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.investmentvehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentvehicle.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
@@ -20,12 +21,12 @@ import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.*;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentvehicle.InvestmentVehicleMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentvehicle.VehicleOperationMapper;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -38,6 +39,7 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages.INVESTMENT_VEHICLE_NAME_EXIST;
@@ -59,8 +61,8 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final VehicleOperationOutputPort vehicleOperationOutputPort;
     private final CouponDistributionOutputPort couponDistributionOutputPort;
-    private final VehicleOperationMapper vehicleOperationMapper;
     private final VehicleClosureOutputPort vehicleClosureOutputPort;
+    private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
 
 
     @Override
@@ -136,12 +138,12 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     public InvestmentVehicle viewInvestmentVehicleDetails(String investmentVehicleId, String userId) throws MeedlException {
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
-        if (userIdentity.getRole() == IdentityRole.PORTFOLIO_MANAGER) {
+        if (userIdentity.getRole().isMeedlRole()) {
             log.info("Details being viewed by portfolio manger");
             return investmentVehicleOutputPort.findById(investmentVehicleId);
         }
 
-        return getInvestmentVehicleFinancier(investmentVehicleId, userId);
+        return getInvestmentVehicleFinancier(investmentVehicleId, userIdentity);
     }
 
     @Override
@@ -155,16 +157,33 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         return foundInvestmentVehicle;
     }
 
-    private InvestmentVehicle getInvestmentVehicleFinancier(String investmentVehicleId, String userId) throws MeedlException {
-        Financier foundFinancier = financierOutputPort.findFinancierByUserId(userId);
+    private InvestmentVehicle getInvestmentVehicleFinancier(String investmentVehicleId, UserIdentity userIdentity) throws MeedlException {
+        Financier foundFinancier = null;
+        if (IdentityRole.isCooperateFinancier(userIdentity.getRole())){
+            Optional<OrganizationIdentity> optionalOrganizationIdentity = organizationIdentityOutputPort.findByUserId(userIdentity.getId());
+            if (optionalOrganizationIdentity.isEmpty()){
+                log.error("Unable to find the organization you belong to as a cooperate financier. user id {}", userIdentity.getId());
+                throw new MeedlException("Unable to find the organization you belong to as a cooperate financier");
+            }
+            OrganizationIdentity organizationIdentity = optionalOrganizationIdentity.get();
+            log.info("While viewing investment vehicle by financier, organization id found it {}", organizationIdentity.getId());
+            foundFinancier = financierOutputPort.findFinancierByOrganizationId(organizationIdentity.getId());
+        }else if (IdentityRole.FINANCIER.equals(userIdentity.getRole())) {
+            log.info("Individual financier is viewing investment vehicle detail");
+            foundFinancier = financierOutputPort.findFinancierByUserId(userIdentity.getId());
+        }
+        MeedlValidator.validateObjectInstance(foundFinancier, "Financier viewing investment vehicle detail not found");
         MeedlValidator.validateUUID(foundFinancier.getId(), FinancierMessages.INVALID_FINANCIER_ID.getMessage());
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+        log.info("About to find investment vehicle by id {} by financier ", investmentVehicleId);
         InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
 
         if (foundInvestmentVehicle.getInvestmentVehicleVisibility() == InvestmentVehicleVisibility.PUBLIC){
+            log.info("Investment vehicle being viewed by financier is a public vehicle");
             return foundInvestmentVehicle;
         }
         if (foundInvestmentVehicle.getInvestmentVehicleVisibility() == InvestmentVehicleVisibility.PRIVATE){
+            log.info("Investment vehicle is a private vehicle being viewed by a financier");
             List<InvestmentVehicleFinancier> investmentVehicleFinancier = investmentVehicleFinancierOutputPort
                     .findByAll(investmentVehicleId, foundFinancier.getId());
             if (!investmentVehicleFinancier.isEmpty()){
@@ -247,7 +266,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
 
     private void addFinancierToVehicle(List<Financier> financiers, InvestmentVehicle investmentVehicle) throws MeedlException {
         for (Financier eachFinancier : financiers) {
-            Financier financier = financierOutputPort.findFinancierByFinancierId(eachFinancier.getId());
+            Financier financier = financierOutputPort.findById(eachFinancier.getId());
             InvestmentVehicleFinancier investmentVehicleFinancier = InvestmentVehicleFinancier.builder()
                             .investmentVehicle(investmentVehicle).financier(financier).
                     investmentVehicleDesignation(eachFinancier.getInvestmentVehicleDesignation()).build();

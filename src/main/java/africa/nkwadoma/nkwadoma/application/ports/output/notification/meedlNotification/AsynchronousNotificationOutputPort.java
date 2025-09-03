@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNoti
 
 import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.financier.CooperateFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
@@ -76,4 +77,7 @@ public interface AsynchronousNotificationOutputPort {
 
     @Async
     void sendFinancierInvitationNotificationToSuperAdmin(List<Financier> financiersToMail, UserIdentity actor,UserIdentity meedlSuperAdmin) throws MeedlException;
+
+    @Async
+    void notifyCooperateSuperAdminToApproveBankDetail(BankDetail bankDetail, Financier financier) throws MeedlException;
 }

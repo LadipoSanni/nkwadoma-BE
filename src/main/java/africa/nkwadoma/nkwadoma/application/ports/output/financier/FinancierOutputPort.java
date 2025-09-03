@@ -1,6 +1,5 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.financier;
 
-import africa.nkwadoma.nkwadoma.domain.exceptions.InvestmentException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import org.springframework.data.domain.Page;
@@ -10,7 +9,7 @@ public interface FinancierOutputPort {
 
     Page<Financier> viewAllFinancier(Financier financier) throws MeedlException;
 
-    Financier findFinancierByFinancierId(String financierId) throws MeedlException;
+    Financier findById(String financierId) throws MeedlException;
 
     Financier findFinancierByUserId(String userId) throws MeedlException;
 
@@ -24,4 +23,10 @@ public interface FinancierOutputPort {
     Financier findByIdentity(String id) throws MeedlException;
 
     Financier findFinancierByCooperateStaffUserId(String id) throws MeedlException;
+
+    Financier findByFinancierId(String id) throws MeedlException;
+
+    Financier findFinancierByOrganizationId(String organizationIdentityId) throws MeedlException;
+
+    Financier findCooperateFinancierById(String id) throws MeedlException;
 }

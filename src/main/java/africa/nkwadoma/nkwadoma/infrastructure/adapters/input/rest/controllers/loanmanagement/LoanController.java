@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.LoanUseCase;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanOfferStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
@@ -58,8 +59,9 @@ public class LoanController {
     @PostMapping("/loan-product/create")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = LOAN_PRODUCT_CREATION,description = LOAN_PRODUCT_CREATION_DESCRIPTION)
-    public ResponseEntity<ApiResponse<?>> createLoanProduct (@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid LoanProductRequest request) throws MeedlException {
-        log.info("Create loan product called.... ");
+    public ResponseEntity<ApiResponse<?>> createLoanProduct (@AuthenticationPrincipal Jwt meedlUser,
+                                                             @RequestBody @Valid LoanProductRequest request) throws MeedlException {
+        log.info("Create loan product called....");
         LoanProduct loanProduct = loanProductMapper.mapToLoanProduct(request);
         loanProduct.setCreatedBy(meedlUser.getClaimAsString("sub"));
             LoanProduct createdLoanProduct = createLoanProductUseCase.createLoanProduct(loanProduct);
@@ -88,7 +90,7 @@ public class LoanController {
     }
 
     @GetMapping("/loan-product/all")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     @Operation(summary = LOAN_PRODUCT_VIEW_ALL, description = LOAN_PRODUCT_VIEW_ALL_DESCRIPTION )
     public ResponseEntity<ApiResponse<?>> viewAllLoanProduct(@AuthenticationPrincipal Jwt meedl,
                                                              @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
@@ -110,7 +112,7 @@ public class LoanController {
         );
     }
     @GetMapping("/loan-product/search")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> searchLoanProduct(
             @RequestParam @NotBlank(message = "Loan product name is required") String loanProductName,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
@@ -188,7 +190,7 @@ public class LoanController {
     }
 
     @PostMapping("/accept/loan-offer")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('LOANEE')")
     public ResponseEntity<ApiResponse<?>> acceptLoanOffer(@AuthenticationPrincipal Jwt meedlUser,
                                                           @Valid @RequestBody LoanOfferAcceptRequest loanOfferRequest) throws MeedlException {
         log.info("process of accept loan offer request started: {}", loanOfferRequest);
@@ -208,7 +210,8 @@ public class LoanController {
 
 
     @GetMapping("/loanOffer/all")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('LOANEE') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')" +
+            " or hasRole('LOANEE') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> viewLoanOffers(@AuthenticationPrincipal Jwt meedlUser,
                                                          @RequestParam(required = false) String organizationId ,
                                                          @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
@@ -276,7 +279,7 @@ public class LoanController {
     }
 
     @GetMapping("/view-all-disbursal")
-    @PreAuthorize("hasRole('LOANEE') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('LOANEE') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> viewAllDisbursedLoan(@RequestParam(required = false) String organizationId,
                                                                @RequestParam(required = false) String loaneeId,
                                                                @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
@@ -309,7 +312,7 @@ public class LoanController {
 
     @GetMapping("/total")
     @PreAuthorize("hasRole('LOANEE') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') " +
-                  "or hasRole('PORTFOLIO_MANAGER') or hasRole('ORGANIZATION_ADMIN')")
+                  "or hasRole('PORTFOLIO_MANAGER') or hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> viewTotalAmount(@AuthenticationPrincipal Jwt  meedlUser,
                                                           @RequestParam(required = false, name = "loaneeId") String loaneeId) throws MeedlException {
 
@@ -382,5 +385,86 @@ public class LoanController {
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
+
+
+
+    @GetMapping("/view/loan-referrals")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
+    public ResponseEntity<ApiResponse<?>> viewAllLoanReferrals(@RequestParam(name = "programId", required = false) String programId,
+                                                               @RequestParam(name = "organizationId" , required = false) String organizationId,
+                                                               @RequestParam(defaultValue = "10") int pageSize,
+                                                               @RequestParam(defaultValue = "0") int pageNumber) throws MeedlException {
+
+        LoanReferral request = LoanReferral.builder().programId(programId).organizationId(organizationId)
+                .pageNumber(pageNumber).pageSize(pageSize).build();
+        log.info("request that got in ----- ProgramID == {}  organizationID == {}",request.getProgramId(),request.getOrganizationId());
+        Page<LoanReferral> loanReferrals = loanUseCase.viewAllLoanReferrals(request);
+        Page<AllLoanReferralResponse> allLoanReferralResponses =
+                loanReferrals.map(loanReferralRestMapper::allLoanReferralResponse);
+
+        PaginatedResponse<AllLoanReferralResponse> paginatedResponse =
+                PaginatedResponse.<AllLoanReferralResponse>builder()
+                        .body(allLoanReferralResponses.getContent())
+                        .pageSize(pageSize)
+                        .pageNumber(pageNumber)
+                        .totalPages(allLoanReferralResponses.getTotalPages())
+                        .hasNextPage(allLoanReferralResponses.hasNext())
+                        .build();
+        ApiResponse<PaginatedResponse<AllLoanReferralResponse>> apiResponse = ApiResponse.<PaginatedResponse<AllLoanReferralResponse>>builder()
+                .data(paginatedResponse)
+                .message(ALL_LOAN)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+
+
+    @GetMapping("/search/loan-referrals")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
+    public ResponseEntity<ApiResponse<?>> searchLoanReferrals(@RequestParam(name = "name") String name,
+                                                              @RequestParam(name = "programId", required = false) String programId,
+                                                              @RequestParam(name = "organizationId" , required = false) String organizationId,
+                                                              @RequestParam(defaultValue = "10") int pageSize,
+                                                              @RequestParam(defaultValue = "0") int pageNumber) throws MeedlException {
+
+        LoanReferral request = LoanReferral.builder().name(name).programId(programId).organizationId(organizationId)
+                .pageNumber(pageNumber).pageSize(pageSize).build();
+        log.info("request that got in ----- ProgramID == {}  organizationID == {}",request.getProgramId(),request.getOrganizationId());
+        Page<LoanReferral> loanReferrals = loanUseCase.searchLoanReferrals(request);
+        Page<AllLoanReferralResponse> allLoanReferralResponses =
+                loanReferrals.map(loanReferralRestMapper::allLoanReferralResponse);
+
+        PaginatedResponse<AllLoanReferralResponse> paginatedResponse =
+                PaginatedResponse.<AllLoanReferralResponse>builder()
+                        .body(allLoanReferralResponses.getContent())
+                        .pageSize(pageSize)
+                        .pageNumber(pageNumber)
+                        .totalPages(allLoanReferralResponses.getTotalPages())
+                        .hasNextPage(allLoanReferralResponses.hasNext())
+                        .build();
+        ApiResponse<PaginatedResponse<AllLoanReferralResponse>> apiResponse = ApiResponse.<PaginatedResponse<AllLoanReferralResponse>>builder()
+                .data(paginatedResponse)
+                .message(ALL_LOAN)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+
+
+    @PostMapping("/withdraw/loan-offer")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') ")
+    public ResponseEntity<ApiResponse<?>> withdrawLoanOffer(@RequestParam(name = "loanOfferId") String loanOfferId,
+                                                            @RequestParam(name = "loanOfferStatus")LoanOfferStatus loanOfferStatus) throws MeedlException {
+
+        LoanOffer loanOffer = loanOfferUseCase.withdrawLoanOffer(loanOfferId,loanOfferStatus);
+        WithDrawLoanOfferResponse withDrawLoanOfferResponse = loanOfferRestMapper.toWithDrawnLoanOfferResponse(loanOffer);
+        ApiResponse<WithDrawLoanOfferResponse> apiResponse = ApiResponse.<WithDrawLoanOfferResponse>builder()
+                .data(withDrawLoanOfferResponse)
+                .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+
 
 }

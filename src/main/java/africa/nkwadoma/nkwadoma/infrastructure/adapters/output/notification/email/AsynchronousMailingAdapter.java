@@ -175,8 +175,12 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
 
     @Override
     public void notifyUserOnActivationActivityOnUserAccount(UserIdentity userIdentity, ActivationStatus activationStatus) {
-        log.info("Send email notification to actor for activation status {}", activationStatus);
-        userEmailUseCase.sendDeactivatedUserEmailNotification(userIdentity);
+        log.info("Send email notification to actor for activation status {}", activationStatus.getStatusName());
+        if (ActivationStatus.DEACTIVATED.equals(activationStatus)){
+            userEmailUseCase.sendDeactivatedUserEmailNotification(userIdentity);
+        }else {
+            userEmailUseCase.sendReactivatedUserEmailNotification(userIdentity);
+        }
     }
 
     @Override

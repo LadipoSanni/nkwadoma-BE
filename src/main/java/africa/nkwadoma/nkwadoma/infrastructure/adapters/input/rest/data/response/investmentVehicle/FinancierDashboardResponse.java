@@ -14,14 +14,14 @@ import java.util.List;
 @Setter
 public class FinancierDashboardResponse {
     private String id;
-    private String firstName;
-    private String lastName;
-    private String organizationName;
+    private String name;
     private FinancierType financierType;
     private ActivationStatus activationStatus;
     private AccreditationStatus accreditationStatus;
     private String email;
     private String phoneNumber;
+    private String cooperateAdminEmail;
+    private String cooperateAdminName;
     private String address;
     private NextOfKin nextOfKin;
     private String taxId;

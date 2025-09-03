@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.identity.OrganizationType;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.*;
@@ -26,7 +27,6 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.INVA
 @ToString
 public class OrganizationIdentity {
     private String id;
-    private String bankDetailId;
     private String name;
     private String email;
     private String websiteAddress;
@@ -38,6 +38,7 @@ public class OrganizationIdentity {
     private int numberOfPrograms;
     private boolean isEnabled;
     private String requestedBy;
+    private LocalDateTime requestedInvitationDate;
     private String createdBy;
     private String updatedBy;
     private int loanRequestCount;
@@ -46,7 +47,6 @@ public class OrganizationIdentity {
     private int loanReferralCount;
     private LoanType loanType;
     private LocalDateTime timeUpdated;
-    private List<ServiceOffering> serviceOfferings;
     private ActivationStatus activationStatus;
     private UserIdentity userIdentity;
     private List<OrganizationEmployeeIdentity> organizationEmployees;
@@ -69,6 +69,9 @@ public class OrganizationIdentity {
     private String address;
     private String officeAddress;
     private OrganizationType organizationType;
+    private String response;
+    private List<ServiceOffering> serviceOfferings;
+    private List<BankDetail> bankDetails;
 
     public void validate() throws MeedlException {
         log.info("The organization being validated : {}", this.name);
@@ -79,21 +82,12 @@ public class OrganizationIdentity {
         MeedlValidator.validateRCNumber(this.rcNumber);
         MeedlValidator.validateTin(this.tin);
         MeedlValidator.validateDataElement(this.phoneNumber, "Phone number is required");
-
-        if (this.serviceOfferings == null
-                || this.serviceOfferings.isEmpty()
-                || this.serviceOfferings.get(0).getIndustry() == null) {
-            log.error("{} : {}", INVALID_INDUSTRY_OR_SERVICE_OFFERING.getMessage(), this.serviceOfferings);
-            throw new IdentityException(INVALID_INDUSTRY_OR_SERVICE_OFFERING.getMessage());
-        }
-        MeedlValidator.validateDataElement(this.serviceOfferings.get(0).getIndustry().name(), "Service offering's name is required");
-        log.info("Organization identity validation completed successfully {}", this.name);
-
     }
 
     public void validateCooperateOrganization() throws MeedlException {
         MeedlValidator.validateObjectName(this.name,"Organization name cannot be empty","Organization");
         MeedlValidator.validateEmail(this.email);
+        log.info("Validation for cooperate organization done");
     }
 
 }

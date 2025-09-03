@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicleDesignation;
 import africa.nkwadoma.nkwadoma.domain.exceptions.InvestmentException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
@@ -12,11 +13,14 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.financier.FinancierMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentvehicle.InvestmentVehicleFinancierMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.financier.FinancierEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentvehicle.InvestmentVehicleFinancierEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.financier.FinancierRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.financier.FinancierWithDesignationProjection;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentvehicle.InvestmentVehicleFinancierRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +29,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -33,6 +41,7 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
     private final InvestmentVehicleFinancierRepository investmentVehicleFinancierRepository;
     private final InvestmentVehicleFinancierMapper investmentVehicleFinancierMapper;
     private final FinancierMapper financierMapper;
+    private final FinancierRepository financierRepository;
 
     @Override
     public InvestmentVehicleFinancier save(InvestmentVehicleFinancier investmentVehicleFinancier) throws MeedlException {
@@ -54,17 +63,43 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
     }
 
     @Override
-    public Page<Financier> viewAllFinancierInAnInvestmentVehicle(String investmentVehicleId, ActivationStatus activationStatus, Pageable pageRequest) throws MeedlException {
+    public Page<Financier> viewAllFinancierInAnInvestmentVehicle(String investmentVehicleId,ActivationStatus activationStatus, Pageable pageRequest) throws MeedlException {
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+        log.info("request investment vehicle id {} ==== activation status {}", investmentVehicleId, activationStatus);
+        Page<FinancierWithDesignationProjection> financiersWithDesignationProjection;
+        if (ObjectUtils.isNotEmpty(activationStatus)) {
+            log.info("request investment vehicle activation status is {}", activationStatus);
+            financiersWithDesignationProjection = investmentVehicleFinancierRepository
+                            .findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatus(investmentVehicleId, activationStatus.getStatusName(), pageRequest);
+        } else {
+            log.info("request investment vehicle activation status is {}", activationStatus);
+            financiersWithDesignationProjection = investmentVehicleFinancierRepository
+                    .findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatus(investmentVehicleId, null, pageRequest);
+        }
 
-        Page<FinancierWithDesignationProjection> financiersWithDesignationProjection = investmentVehicleFinancierRepository.findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatus(investmentVehicleId, activationStatus, pageRequest);
-        return financiersWithDesignationProjection.map(financierWithDesignationProjection -> {
-            log.info("The roles financier has : {}", financierWithDesignationProjection.getInvestmentVehicleDesignation());
-            Financier financier = financierMapper.map(financierWithDesignationProjection.getFinancier());
-            financier.setInvestmentVehicleDesignation(financierWithDesignationProjection.getInvestmentVehicleDesignation());
+        return financiersWithDesignationProjection.map(projection -> {
+            FinancierEntity financierEntity =
+                    financierRepository.findById(projection.getFinancier()).orElse(null);
+            Financier financier = financierMapper.map(financierEntity);
+
+            log.info("The financier entity mapped {}", financier);
+
+            Set<InvestmentVehicleDesignation> designations =
+                    projection.getInvestmentVehicleDesignation().stream()
+                            .filter(Objects::nonNull)
+                            .map(InvestmentVehicleDesignation::valueOf)
+                            .collect(Collectors.toSet());
+
+            financier.setInvestmentVehicleDesignation(designations);
+            financier.setTotalAmountInvested(projection.getTotalAmountInvested());
+            financier.setTotalNumberOfInvestment(projection.getNumberOfInvestments());
+            financier.setName(projection.getFinancierName());
+
+            log.info("designation === {}", financier.getInvestmentVehicleDesignation());
             return financier;
         });
     }
+
 
 
     @Transactional
@@ -154,8 +189,19 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
         MeedlValidator.validateUUID(investmentVehicleFinancierId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
         checkIfInvestmentExist(investmentVehicleFinancierId);
         InvestmentVehicleFinancierEntity investmentVehicleFinancierEntity =
-                investmentVehicleFinancierRepository.findByFinancierIdAndInvestmentVehicleId(financierId, investmentVehicleFinancierId);
+                investmentVehicleFinancierRepository.findByFinancierIdAndInvestmentVehicleFinancierId(financierId, investmentVehicleFinancierId);
         return investmentVehicleFinancierMapper.toInvestmentVehicleFinancier(investmentVehicleFinancierEntity);
+    }
+
+    @Override
+    public Optional<InvestmentVehicleFinancier> findAllByFinancierIdAndInvestmentVehicleId(String financierId, String investmentVehicleId) throws MeedlException {
+        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+        MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+        log.info("Find all -- financier id {} investment vehicle id {}", financierId, investmentVehicleId);
+        Optional<InvestmentVehicleFinancierEntity> optionalInvestmentVehicleFinancierEntity =
+                investmentVehicleFinancierRepository.findByFinancier_IdAndInvestmentVehicle_Id(financierId, investmentVehicleId);
+        log.info("Found is empty {}", optionalInvestmentVehicleFinancierEntity.isEmpty());
+        return optionalInvestmentVehicleFinancierEntity.map(investmentVehicleFinancierMapper::toInvestmentVehicleFinancier);
     }
 
     public void checkIfInvestmentExist(String investmentVehicleFinancierId) throws MeedlException {

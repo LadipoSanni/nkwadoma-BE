@@ -2,10 +2,12 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request
 
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlPatterns;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.SponsorsRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ErrorMessages;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -18,6 +20,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 public class LoanProductRequest {
     private String id;
     private String investmentVehicleId;
+    private List<SponsorsRequest> sponsors;
     private BigDecimal totalAmountAvailable;
     private BigDecimal totalAmountEarned;
     private BigDecimal totalAmountDisbursed;
@@ -35,7 +38,6 @@ public class LoanProductRequest {
 
     @NotBlank(message = LOAN_PRODUCT_MANDATE_REQUIRED)
     private String mandate;
-
 
     private BigDecimal loanProductSize;
     private BigDecimal obligorLoanLimit;

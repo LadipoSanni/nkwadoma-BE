@@ -2,11 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repo
 
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.UploadedStatus;
-import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortLoaneeEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoaneeEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeProjection;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -84,7 +80,7 @@ public interface CohortLoaneeRepository extends JpaRepository<CohortLoaneeEntity
         SELECT COUNT(cohort_loanee) FROM CohortLoaneeEntity cohort_loanee
         WHERE cohort_loanee.loanee.id = :loaneeId AND cohort_loanee.loaneeStatus = 'REFERRED'
 """)
-    Long countByLoaneeId(@Param("loaneeId") String loaneeId);
+    Long countByLoaneeIdAndStatus(@Param("loaneeId") String loaneeId);
 
 
     @Query("""
@@ -168,4 +164,22 @@ public interface CohortLoaneeRepository extends JpaRepository<CohortLoaneeEntity
        where lld.id = :id  and lld.amountOutstanding is not null and lld.amountOutstanding > 0
     """)
     CohortLoaneeEntity findByLoaneeLoanDetailId(@Param("id") String id);
+
+    @Query("""
+        SELECT COUNT(cohort_loanee) FROM CohortLoaneeEntity cohort_loanee
+        WHERE cohort_loanee.loanee.id = :loaneeId
+""")
+    Long countByLoaneeId(@Param("loaneeId") String loaneeId);
+
+
+    @Query("""
+    
+       select cl from CohortLoaneeEntity cl
+       JOIN LoanReferralEntity lr on lr.cohortLoanee.id = cl.id
+       join LoanRequestEntity lre on lre.id = lr.id
+       join LoanOfferEntity  lo on lo.id = lre.id
+       join LoanEntity  loan on loan.loanOfferId = lo.id
+      where loan.id = :id
+    """)
+    CohortLoaneeEntity findCohortLoaneeByLoanId(@Param("id") String id);
 }

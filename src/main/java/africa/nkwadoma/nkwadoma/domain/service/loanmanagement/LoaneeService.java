@@ -10,6 +10,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEm
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
@@ -38,6 +39,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdenti
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.aes.TokenUtils;
@@ -91,6 +93,7 @@ public class LoaneeService implements LoaneeUseCase {
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
     private final LoaneeLoanAggregateOutputPort loaneeLoanAggregateOutputPort;
     private final InstituteMetricsOutputPort instituteMetricsOutputPort;
+    private final PortfolioOutputPort portfolioOutputPort;
 
 
     @Override
@@ -185,7 +188,19 @@ public class LoaneeService implements LoaneeUseCase {
         log.info("Successfully added loanee = = {} ", cohortLoanee);
         saveLoaneeLoanBreakdowns(loanee, cohortLoanee);
         updateCohortValues(cohort);
+        updateMeedlPortfolio(cohortLoanee.getLoanee());
         return cohortLoanee.getLoanee();
+    }
+
+    private void updateMeedlPortfolio(Loanee loanee) throws MeedlException {
+       boolean newLoanee =  cohortLoaneeOutputPort.checkIfLoaneeIsNew(loanee.getId());
+       log.info("is this a new loanee = {}", newLoanee);
+       if(newLoanee){
+           Portfolio portfolio = Portfolio.builder().portfolioName("Meedl").build();
+           portfolio = portfolioOutputPort.findPortfolio(portfolio);
+           portfolio.setNumberOfLoanees(portfolio.getNumberOfLoanees() + 1);
+           portfolioOutputPort.save(portfolio);
+       }
     }
 
     @Override
@@ -251,6 +266,7 @@ public class LoaneeService implements LoaneeUseCase {
     private CohortLoanee addLoaneeToCohort(Loanee loanee, Cohort cohort) throws MeedlException {
         CohortLoanee cohortLoanee = CohortLoanee.builder().createdBy(loanee.getUserIdentity().getCreatedBy())
                 .createdAt(LocalDateTime.now())
+                .onboardingMode(OnboardingMode.EMAIL_REFERRED)
                 .cohort(cohort)
                 .loanee(loanee)
                 .loaneeStatus(LoaneeStatus.ADDED)

@@ -72,46 +72,12 @@ public class IdentityManagerController {
         log.info("got the request to create password {}", passwordCreateRequest.getPassword());
         UserIdentity userIdentity = identityMapper.toPasswordCreateRequest(passwordCreateRequest);
         userIdentity = userUseCase.createPassword(userIdentity.getEmail(), userIdentity.getPassword());
-        if (ObjectUtils.isNotEmpty(userIdentity) && ObjectUtils.isNotEmpty(userIdentity.getRole())){
-            activateUser(userIdentity);
-        }
         return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
                 data(userIdentity).
                 message(ControllerConstant.PASSWORD_CREATED_SUCCESSFULLY.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
     }
 
-    private void activateUser(UserIdentity userIdentity) throws MeedlException {
-        if (
-                userIdentity.getRole() == IdentityRole.ORGANIZATION_ADMIN ||
-                userIdentity.getRole() == IdentityRole.PORTFOLIO_MANAGER
-        ) {
-            activateOrganizationAndAdmin(userIdentity);
-        }else if(userIdentity.getRole() == IdentityRole.FINANCIER){
-            activateFinancier(userIdentity);
-        } else if (userIdentity.getRole() == IdentityRole.LOANEE) {
-            activateLoanee(userIdentity);
-        }
-    }
-
-    private void activateLoanee(UserIdentity userIdentity) {
-        log.info("Started updating loanee status");
-        Loanee loanee = Loanee.builder().userIdentity(userIdentity).build();
-        loaneeUseCase.updateLoaneeStatus(loanee);
-    }
-
-    private void activateFinancier(UserIdentity userIdentity) {
-        log.info("Started updating financier status");
-        Financier financier = Financier.builder().userIdentity(userIdentity).build();
-        financierUseCase.updateFinancierStatus(financier);
-    }
-
-    private void activateOrganizationAndAdmin(UserIdentity userIdentity) throws MeedlException {
-        log.info("Started updating employee status");
-        OrganizationIdentity organizationIdentity = new OrganizationIdentity();
-        organizationIdentity.setUserIdentity(userIdentity);
-        createOrganizationUseCase.updateOrganizationStatus(organizationIdentity);
-    }
 
 
     @PostMapping("auth/password/forgotPassword/{email}")
@@ -162,9 +128,10 @@ public class IdentityManagerController {
                 .build();
         userIdentity.setCreatedBy(meedlUser.getClaimAsString("sub"));
         log.info("The user id of user performing the reactivation: {}",meedlUser.getClaimAsString("sub"));
-        UserIdentity createdUserIdentity = userUseCase.reactivateUserAccount(userIdentity);
-        return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
-                data(createdUserIdentity).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
+        UserIdentity reactivateUserAccount = userUseCase.reactivateUserAccount(userIdentity);
+        UserIdentityResponse userIdentityResponse = identityMapper.toUserIdentityResponse(reactivateUserAccount);
+        return ResponseEntity.ok(ApiResponse.<UserIdentityResponse>builder().
+                data(userIdentityResponse).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
     }
 
@@ -182,9 +149,10 @@ public class IdentityManagerController {
                 .createdBy(meedlUser.getClaimAsString("sub"))
                 .build();
         log.info("The user id of user performing the deactivation: {}",meedlUser.getClaimAsString("sub"));
-        UserIdentity createdUserIdentity = userUseCase.deactivateUserAccount(userIdentity);
-        return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
-                data(createdUserIdentity).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
+        UserIdentity deactivateUserAccount = userUseCase.deactivateUserAccount(userIdentity);
+        UserIdentityResponse userIdentityResponse = identityMapper.toUserIdentityResponse(deactivateUserAccount);
+        return ResponseEntity.ok(ApiResponse.<UserIdentityResponse>builder().
+                data(userIdentityResponse).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("auth/user/assign/role")
@@ -199,8 +167,9 @@ public class IdentityManagerController {
                 .build();
         log.info("The user id {} of user assigning role to user with id : {}",meedlUser.getClaimAsString("sub"), userId);
         UserIdentity createdUserIdentity = userUseCase.assignRole(userIdentity);
-        return ResponseEntity.ok(ApiResponse.<UserIdentity>builder()
-                .data(createdUserIdentity)
+        UserIdentityResponse userIdentityResponse = identityMapper.toUserIdentityResponse(createdUserIdentity);
+        return ResponseEntity.ok(ApiResponse.<UserIdentityResponse>builder()
+                .data(userIdentityResponse)
                 .message(ControllerConstant.ROLE_ASSIGNED_SUCCESSFULLY.getMessage())
                 .statusCode(HttpStatus.OK.name()).build());
     }

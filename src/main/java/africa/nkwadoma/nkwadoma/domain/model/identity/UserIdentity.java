@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.MFAType;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.LevelOfEducation;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
@@ -35,12 +36,13 @@ public class UserIdentity {
     private boolean isIdentityVerified;
     private boolean enabled;
     private LocalDateTime createdAt;
+    private String stateOfResidence;
+    private LevelOfEducation levelOfEduction;
     private String image;
     private String gender;
     private String dateOfBirth;
     private String stateOfOrigin;
     private String maritalStatus;
-    private String stateOfResidence;
     private String nationality;
     private String residentialAddress;
     //
@@ -70,8 +72,9 @@ public class UserIdentity {
     private NextOfKin nextOfKin;
     private BankDetail bankDetail;
 
-    private String  MFAPhoneNumber;
+    private String MFAPhoneNumber;
     private MFAType mfaType;
+    private String response;
 
     public void validate() throws MeedlException {
         log.info("Started validating for user identity in validation");
@@ -83,6 +86,9 @@ public class UserIdentity {
         MeedlValidator.validateUUID(this.createdBy, MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
         log.info("Creator ID: {}", this.createdBy);
         log.info("Finished validating for user identity in validation");
+    }
+    public String getFullName(){
+        return this.firstName + " " + this.lastName;
     }
 
 }

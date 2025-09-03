@@ -22,6 +22,7 @@ public class OrganizationEntity {
     private String email;
     private String websiteAddress;
     private LocalDateTime invitedDate;
+    private LocalDateTime requestedInvitationDate;
     private String registrationNumber;
     @Column(unique = true)
     private String taxIdentity;

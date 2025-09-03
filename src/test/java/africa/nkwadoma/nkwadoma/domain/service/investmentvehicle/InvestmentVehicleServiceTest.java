@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicleVisibility;
@@ -117,6 +118,7 @@ class InvestmentVehicleServiceTest {
         String nonExistingId = "f593a10f-6854-44d4-acc2-259065d3e5c8";
         String validFinancierId = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
         UserIdentity mockUser = UserIdentity.builder()
+                .id(validFinancierId)
                 .role(IdentityRole.FINANCIER)
                 .build();
         try {
@@ -200,7 +202,7 @@ class InvestmentVehicleServiceTest {
         fundGrowth.setInvestmentVehicleVisibility(null);
         when(investmentVehicleOutputPort.findByNameExcludingDraftStatus(fundGrowth.getName(), DRAFT))
                 .thenReturn(null);
-        when(financierOutputPort.findFinancierByFinancierId(mockId)).thenReturn(financier);
+        when(financierOutputPort.findById(mockId)).thenReturn(financier);
         when(portfolioOutputPort.findPortfolio(any()))
                 .thenReturn(portfolio);
         fundGrowth.setInvestmentVehicleStatus(DRAFT);
@@ -284,6 +286,7 @@ class InvestmentVehicleServiceTest {
     @Test
     void viewInvestmentVehicleWithInvestmentVehicleIdThatDoesNotExistInTheDB() {
         UserIdentity mockUser = UserIdentity.builder()
+                .id(testFinancierId)
                 .role(IdentityRole.FINANCIER)
                 .build();
         try {
@@ -312,6 +315,7 @@ class InvestmentVehicleServiceTest {
             when(investmentVehicleOutputPort.findById(investmentVehicleId))
                     .thenReturn(privateVehicle);
             UserIdentity mockUser = UserIdentity.builder()
+                    .id(testFinancierId)
                     .role(IdentityRole.FINANCIER)
                     .build();
             when(userIdentityOutputPort.findById(testFinancierId))
@@ -348,6 +352,7 @@ class InvestmentVehicleServiceTest {
         when(investmentVehicleOutputPort.findById(investmentVehicleId))
                 .thenReturn(publicVehicle);
         UserIdentity mockUser = UserIdentity.builder()
+                .id(testFinancierId)
                 .role(IdentityRole.FINANCIER)
                 .build();
         when(userIdentityOutputPort.findById(testFinancierId))
@@ -371,12 +376,14 @@ class InvestmentVehicleServiceTest {
         when(investmentVehicleOutputPort.findById(investmentVehicleId))
                 .thenReturn(privateVehicle);
         UserIdentity mockUser = UserIdentity.builder()
+                .id(testFinancierId)
                 .role(IdentityRole.FINANCIER)
                 .build();
         when(userIdentityOutputPort.findById(testFinancierId))
                 .thenReturn(mockUser);
         Financier mockFinancier = Financier.builder()
                 .id(testFinancierId)
+                .financierType(FinancierType.INDIVIDUAL)
                 .build();
         when(financierOutputPort.findFinancierByUserId(testFinancierId))
                 .thenReturn(mockFinancier);
@@ -392,6 +399,7 @@ class InvestmentVehicleServiceTest {
     @Test
     void financierAccessingDefaultInvestmentVehicle() throws MeedlException {
         UserIdentity mockUser = UserIdentity.builder()
+                .id(testFinancierId)
                 .role(IdentityRole.FINANCIER)
                 .build();
         when(userIdentityOutputPort.findById(testFinancierId))

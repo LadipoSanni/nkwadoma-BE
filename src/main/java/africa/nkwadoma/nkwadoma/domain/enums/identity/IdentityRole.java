@@ -57,6 +57,9 @@ public enum IdentityRole {
     public static boolean isMeedlStaff(IdentityRole role) {
         return getMeedlRoles().contains(role);
     }
+    public static boolean hasOrganizationEntity(IdentityRole role) {
+        return isMeedlStaff(role) || isOrganizationStaff(role) || isCooperateFinancier(role);
+    }
 
     public static boolean isOrganizationStaff(IdentityRole role) {
         return getOrganizationRoles().contains(role);
@@ -75,6 +78,10 @@ public enum IdentityRole {
 
     public static boolean isCooperateSuperAdmin(IdentityRole role) {
         return role.equals(COOPERATE_FINANCIER_SUPER_ADMIN);
+    }
+
+    public static boolean isFinancier(IdentityRole role) {
+        return isCooperateFinancier(role) || IdentityRole.FINANCIER.equals(role);
     }
 
 
@@ -98,5 +105,18 @@ public enum IdentityRole {
         return this == COOPERATE_FINANCIER_SUPER_ADMIN || this == COOPERATE_FINANCIER_ADMIN;
     }
 
+    public boolean isFinancier(){
+        return this == FINANCIER || this == COOPERATE_FINANCIER_SUPER_ADMIN || this == COOPERATE_FINANCIER_ADMIN;
+    }
 
+    public boolean isAnyStaff(){
+        return this == COOPERATE_FINANCIER_SUPER_ADMIN || this == COOPERATE_FINANCIER_ADMIN
+                || this == ORGANIZATION_ADMIN || this == ORGANIZATION_ASSOCIATE || this == ORGANIZATION_SUPER_ADMIN
+                || this == MEEDL_SUPER_ADMIN || this == MEEDL_ADMIN || this == PORTFOLIO_MANAGER_ASSOCIATE
+                || this == PORTFOLIO_MANAGER;
+    }
+
+    public boolean isCooperateOrOrganizationSuperAdmin(){
+        return this == COOPERATE_FINANCIER_SUPER_ADMIN || this == ORGANIZATION_SUPER_ADMIN;
+    }
 }

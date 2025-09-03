@@ -355,13 +355,12 @@ class OrganizationEmployeeServiceTest {
             when(organizationEmployeeOutputPort.findById(any())).thenReturn(organizationEmployeeIdentity);
             when(organizationIdentityOutputPort.findById(any())).thenReturn(organization);
             when(organizationEmployeeOutputPort.save(organizationEmployeeIdentity)).thenReturn(organizationEmployeeIdentity);
-            response = organizationEmployeeService.respondToColleagueInvitation(mockId,mockId,ActivationStatus.APPROVED);
+            organizationEmployeeIdentity = organizationEmployeeService.respondToColleagueInvitation(mockId,mockId,ActivationStatus.APPROVED);
         }catch (MeedlException meedlException){
             log.error(meedlException.getMessage());
         }
         assertNotNull(response);
-        assertEquals(response,"Colleague invitation APPROVED for "+organizationEmployeeIdentity.getMeedlUser().getFirstName()+" "
-                +organizationEmployeeIdentity.getMeedlUser().getLastName());
+        assertEquals(organizationEmployeeIdentity.getResponse(),"Colleague invitation APPROVED for "+organizationEmployeeIdentity.getMeedlUser().getFullName());
     }
 
     @Test
@@ -374,13 +373,13 @@ class OrganizationEmployeeServiceTest {
             when(organizationEmployeeOutputPort.save(organizationEmployeeIdentity)).thenReturn(organizationEmployeeIdentity);
             when(userIdentityOutputPort.findById(any())).thenReturn(userIdentity);
 
-            response = organizationEmployeeService.respondToColleagueInvitation(mockId,mockId,ActivationStatus.DECLINED);
+            organizationEmployeeIdentity = organizationEmployeeService.respondToColleagueInvitation(mockId,mockId,ActivationStatus.DECLINED);
+            response = organizationEmployeeIdentity.getResponse();
         }catch (MeedlException meedlException){
             log.error(meedlException.getMessage());
         }
         assertNotNull(response);
-        assertEquals(response,"Colleague invitation DECLINED for "+organizationEmployeeIdentity.getMeedlUser().getFirstName()+" "
-                +organizationEmployeeIdentity.getMeedlUser().getLastName());
+        assertEquals(response,"Colleague invitation DECLINED for "+organizationEmployeeIdentity.getMeedlUser().getFullName());
     }
 
 

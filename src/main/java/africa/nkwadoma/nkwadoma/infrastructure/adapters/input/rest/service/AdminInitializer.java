@@ -76,6 +76,7 @@ public class AdminInitializer {
                 .rcNumber("RC2892832")
                 .phoneNumber("0908965321")
                 .activationStatus(ActivationStatus.ACTIVE)
+                .requestedInvitationDate(LocalDateTime.now())
                 .organizationEmployees(List.of(OrganizationEmployeeIdentity
                         .builder()
                         .meedlUser(userIdentity)

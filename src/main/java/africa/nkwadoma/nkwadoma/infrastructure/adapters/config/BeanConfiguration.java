@@ -65,11 +65,11 @@ public class BeanConfiguration {
                                                    OrganizationIdentityOutputPort organizationIdentityOutputPort,
                                                    AsynchronousMailingOutputPort asynchronousMailingOutputPort,
                                                    AsynchronousNotificationOutputPort asynchronousNotificationOutputPort,
-                                                   FinancierOutputPort financierOutputPort
+                                                   FinancierOutputPort financierOutputPort,LoaneeOutputPort loaneeOutputPort
                                                    ){
         return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,sendOrganizationEmployeeEmailUseCase,
                 tokenUtils, emailTokenOutputPort, blackListedTokenAdapter,
-                organizationIdentityOutputPort, asynchronousMailingOutputPort, asynchronousNotificationOutputPort,financierOutputPort
+                organizationIdentityOutputPort, asynchronousMailingOutputPort, asynchronousNotificationOutputPort,financierOutputPort,loaneeOutputPort
         );
     }
 
@@ -127,11 +127,11 @@ public class BeanConfiguration {
                                                              UserIdentityOutputPort userIdentityOutputPort,
                                                              VehicleOperationOutputPort vehicleOperationOutputPort,
                                                              CouponDistributionOutputPort couponDistributionOutputPort,
-                                                             VehicleOperationMapper vehicleOperationMapper,
-                                                             VehicleClosureOutputPort vehicleClosureOutputPort){
+                                                             VehicleClosureOutputPort vehicleClosureOutputPort,
+                                                             OrganizationIdentityOutputPort organizationIdentityOutputPort){
         return new InvestmentVehicleService(investmentVehicleIdentityOutputPort,investmentVehicleMapper,portfolioOutputPort,
                 financierOutputPort,investmentVehicleFinancierOutputPort,userIdentityOutputPort,
-                vehicleOperationOutputPort,couponDistributionOutputPort,vehicleOperationMapper,vehicleClosureOutputPort);
+                vehicleOperationOutputPort,couponDistributionOutputPort,vehicleClosureOutputPort, organizationIdentityOutputPort);
     }
     @Bean
     public StringTrimMapper stringTrimMapper() {

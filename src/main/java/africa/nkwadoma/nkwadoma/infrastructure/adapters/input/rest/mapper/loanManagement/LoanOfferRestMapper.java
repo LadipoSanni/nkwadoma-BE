@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.AllLoanOfferResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanOfferResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoanOfferAcceptRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.WithDrawLoanOfferResponse;
 import jakarta.validation.Valid;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -69,4 +70,7 @@ public interface LoanOfferRestMapper {
     AllLoanOfferResponse toAllLoanOfferResponse(LoanOffer loanOffer);
 
     List<AllLoanOfferResponse> toLoanOfferResponses(Page<LoanOffer> loanOffers);
+
+    @Mapping(target = "loanOfferId", source = "id")
+    WithDrawLoanOfferResponse toWithDrawnLoanOfferResponse(LoanOffer loanOffer);
 }

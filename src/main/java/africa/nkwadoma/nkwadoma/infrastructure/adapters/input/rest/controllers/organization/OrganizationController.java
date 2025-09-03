@@ -12,6 +12,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ReferenceDataResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.QAResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.InviteOrganizationResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.OrganizationResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.OrganizationRestMapper;
@@ -47,7 +48,7 @@ public class OrganizationController {
 
     @PostMapping("organization/invite")
     @Operation(summary = INVITE_ORGANIZATION_TITLE, description = INVITE_ORGANIZATION_DESCRIPTION)
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') ")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE') ")
     public ResponseEntity<ApiResponse<?>> inviteOrganization(@AuthenticationPrincipal Jwt meedlUser,
                                                              @RequestBody @Valid OrganizationRequest inviteOrganizationRequest) throws MeedlException {
         String createdBy = meedlUser.getClaimAsString("sub");
@@ -315,13 +316,13 @@ public class OrganizationController {
 
         log.info("request that got in - organization{} == status{}",organizationDecisionRequest.getOrganizationId(),
                 organizationDecisionRequest.getActivationStatus());
-        String response = createOrganizationUseCase.respondToOrganizationInvite(meedlUser.getClaimAsString("sub"),
+        OrganizationIdentity organizationIdentity = createOrganizationUseCase.respondToOrganizationInvite(meedlUser.getClaimAsString("sub"),
                 organizationDecisionRequest.getOrganizationId(),
                 organizationDecisionRequest.getActivationStatus());
         ApiResponse<Object> apiResponse = ApiResponse.builder()
                 .statusCode(HttpStatus.OK.toString())
-                .message(response)
-                .data(response)
+                .message(organizationIdentity.getResponse())
+                .data(QAResponse.builder().id(organizationIdentity.getId()))
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
@@ -337,11 +338,11 @@ public class OrganizationController {
                 organizationRestMapper.mapInviteColleagueRequestToOrganizationIdentity(inviteColleagueRequest);
         log.info("request after mapping {}",organizationIdentity.getUserIdentity());
         organizationIdentity.getUserIdentity().setCreatedBy(meedlUser.getClaimAsString("sub"));
-        String response = createOrganizationUseCase.inviteColleague(organizationIdentity);
+        UserIdentity userIdentity = createOrganizationUseCase.inviteColleague(organizationIdentity);
         ApiResponse<Object> apiResponse = ApiResponse.builder()
                 .statusCode(HttpStatus.OK.toString())
-                .message(response)
-                .data(response)
+                .message(userIdentity.getResponse())
+                .data(QAResponse.builder().id(userIdentity.getId()).email(userIdentity.getEmail()).build())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }

@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.education;
 
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
@@ -35,4 +36,8 @@ public interface CohortLoaneeOutputPort {
     CohortLoanee findCohortLoaneeByLoanRequestId(String id) throws MeedlException;
 
     CohortLoanee findCohortLoaneeByLoaneeLoanDetailId(String id) throws MeedlException;
+
+    boolean checkIfLoaneeIsNew(String id) throws MeedlException;
+
+    CohortLoanee findCohortLoaneeByLoanId(String id) throws MeedlException;
 }

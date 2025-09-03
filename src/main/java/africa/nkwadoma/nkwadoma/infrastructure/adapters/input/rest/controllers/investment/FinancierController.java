@@ -63,6 +63,7 @@ public class FinancierController {
 
     private List<Financier> mapValues(String meedlUserId, List<FinancierRequest> financierRequests) throws MeedlException {
         MeedlValidator.validateObjectInstance(financierRequests, "The list of financier is missing.");
+        validateFinanciers(financierRequests);
         return financierRequests.stream().map(financierRequest ->{
             Financier financier = financierRestMapper.map(financierRequest);
             if (financierRequest.getFinancierType() == FinancierType.COOPERATE){
@@ -76,9 +77,17 @@ public class FinancierController {
         }).toList();
     }
 
+    private void validateFinanciers(List<FinancierRequest> financierRequests) throws MeedlException {
+        for (FinancierRequest financierRequest : financierRequests){
+            MeedlValidator.validateObjectInstance(financierRequest, "Financier invite request cannot be empty");
+            MeedlValidator.validateObjectInstance(financierRequest.getUserIdentity(), "Financier user detail cannot be empty");
+            MeedlValidator.validateObjectInstance(financierRequest.getFinancierType(), "Financier type must be provided");
+        }
+    }
+
 
     @PostMapping("financier/complete-kyc")
-    @PreAuthorize("hasRole('FINANCIER') or  hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('FINANCIER') or  hasRole('COOPERATE_FINANCIER_SUPER_ADMIN') or hasRole('COOPERATE_FINANCIER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> completeKyc(@AuthenticationPrincipal Jwt meedlUser,
                                                       @RequestBody KycRequest kycRequest) throws MeedlException {
         log.info("Kyc request controller {} , {}",LocalDateTime.now(), kycRequest);
@@ -144,7 +153,13 @@ public class FinancierController {
     }
 
     @GetMapping("financier/view")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
+            "or hasRole('PORTFOLIO_MANAGER') " +
+            "or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')"+
+            "or hasRole('FINANCIER')" +
+            "or hasRole('COOPERATE_FINANCIER_ADMIN')" +
+            "or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')"
+    )
     @FinancierDetail
     public ResponseEntity<ApiResponse<?>>viewFinancierDetail(@AuthenticationPrincipal Jwt meedlUser,@RequestParam(required = false) String financierId) throws MeedlException {
         String userId = meedlUser.getClaimAsString("sub");
