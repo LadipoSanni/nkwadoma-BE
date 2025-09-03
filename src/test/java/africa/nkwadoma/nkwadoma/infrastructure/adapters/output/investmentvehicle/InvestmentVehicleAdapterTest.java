@@ -206,7 +206,7 @@ class InvestmentVehicleAdapterTest {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
         assertNotNull(investmentVehicles);
-`        assertFalse(investmentVehicles.isEmpty());
+        assertFalse(investmentVehicles.isEmpty());
         assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleType().equals(InvestmentVehicleType.ENDOWMENT));
     }
     @Test
