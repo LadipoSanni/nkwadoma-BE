@@ -6,10 +6,14 @@ import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicle
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.Type;
 import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -56,7 +60,8 @@ public class LoanProductEntity {
     private int totalNumberOfLoanee;
     private int totalNumberOfLoanProduct;
 
-    @Column(name = "loan_product_sponsors")
-    private List<String> sponsorIds;
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    @Column(name = "loan_product_sponsors", columnDefinition = "text[]")
+    private List<String> sponsorIds = new ArrayList<>();
 
 }
