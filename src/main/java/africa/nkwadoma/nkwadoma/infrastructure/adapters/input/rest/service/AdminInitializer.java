@@ -194,29 +194,32 @@ public class AdminInitializer {
     }
 
     private void removeDuplicateSuperAdmins(UserIdentity userIdentity) throws MeedlException {
-        List<UserIdentity> superAdmins = identityManagerOutPutPort.getUsersByRole(userIdentity.getRole().name());
-        if (superAdmins.isEmpty()) {
+        List<UserIdentity> superAdminsOnKeycloak = identityManagerOutPutPort.getUsersByRole(userIdentity.getRole().name());
+        List<UserIdentity> superAdminsOnDb = userIdentityOutputPort.findAllByRole(userIdentity.getRole());
+        log.info("Role being searched for at admin initializer {}", userIdentity.getRole());
+        if (superAdminsOnKeycloak.isEmpty() && superAdminsOnDb.isEmpty()) {
             log.info("No users found with role {}", userIdentity.getRole());
             return;
         }
 
-        boolean emailExists = superAdmins.stream()
+        boolean emailExistsOnKeycloak = superAdminsOnKeycloak.stream()
                 .anyMatch(u -> u.getEmail().equalsIgnoreCase(userIdentity.getEmail()));
 
-        if (emailExists) {
-            for (UserIdentity user : superAdmins) {
+        if (emailExistsOnKeycloak) {
+            for (UserIdentity user : superAdminsOnKeycloak) {
                 if (!user.getEmail().equalsIgnoreCase(userIdentity.getEmail())) {
-                    log.info("Changing role of user {} to {}", user.getEmail(), IdentityRole.MEEDL_ADMIN.name());
+                    log.info("Changing role of user on keycloak {} to {}", user.getEmail(), IdentityRole.MEEDL_ADMIN.name());
                     identityManagerOutPutPort.changeUserRole(user, IdentityRole.MEEDL_ADMIN.name());
                 }
             }
-            return;
         }
+            for (UserIdentity user : superAdminsOnDb) {
+                if (!user.getEmail().equalsIgnoreCase(userIdentity.getEmail())) {
+                    log.info("Changing role of user on db {} to {}", user.getEmail(), IdentityRole.MEEDL_ADMIN.name());
+                    userIdentityOutputPort.changeUserRole(user.getId(), IdentityRole.MEEDL_ADMIN);
+                }
+            }
 
-        for (UserIdentity user : superAdmins) {
-            log.info("Changing role of user {} to {}", user.getEmail(), IdentityRole.MEEDL_ADMIN.name());
-            identityManagerOutPutPort.changeUserRole(user, IdentityRole.MEEDL_ADMIN.name());
-        }
     }
 
     private UserIdentity saveUserToDB(UserIdentity userIdentity) throws MeedlException {
