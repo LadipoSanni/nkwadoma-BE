@@ -28,4 +28,6 @@ public interface UserIdentityOutputPort {
     UserIdentity findMeedlSuperAdmin();
 
     Optional<UserIdentity> findFinancierSuperAdminByFinancierId(String financierId) throws MeedlException;
+
+    void changeUserRole(String userId, IdentityRole identityRole) throws MeedlException;
 }
