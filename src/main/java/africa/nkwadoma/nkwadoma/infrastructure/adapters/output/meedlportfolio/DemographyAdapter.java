@@ -8,10 +8,12 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.DemographyMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.meedlportfolio.DemographyRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class DemographyAdapter implements DemographyOutputPort {
 
     private final DemographyRepository demographyRepository;
@@ -30,5 +32,13 @@ public class DemographyAdapter implements DemographyOutputPort {
     public void deleteById(String demographyId) throws MeedlException {
         MeedlValidator.validateUUID(demographyId,"Demography id cannot be empty");
         demographyRepository.deleteById(demographyId);
+    }
+
+    @Override
+    public Demography findDemographyByName(String meedl) throws MeedlException {
+        MeedlValidator.validateObjectInstance(meedl,"Demography name cannot be empty");
+        DemographyEntity demographyEntity = demographyRepository.findByName(meedl);
+        log.info("demography found: {}", demographyEntity);
+        return demographyMapper.toDemography(demographyEntity);
     }
 }

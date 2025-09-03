@@ -7,4 +7,6 @@ public interface DemographyOutputPort {
     Demography save(Demography demography) throws MeedlException;
 
     void deleteById(String demographyId) throws MeedlException;
+
+    Demography findDemographyByName(String meedl) throws MeedlException;
 }

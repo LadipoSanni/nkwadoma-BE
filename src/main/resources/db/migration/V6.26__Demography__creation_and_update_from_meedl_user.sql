@@ -1,6 +1,6 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-CREATE TABLE demography (
+CREATE TABLE demography_entity (
     id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255),
 
@@ -27,7 +27,7 @@ CREATE TABLE demography (
     total_education_level_count INT DEFAULT 0
 );
 
-INSERT INTO demography (id, name,
+INSERT INTO demography_entity (id, name,
                         male_count, female_count, total_gender_count,
                         age_17_to_25_count, age_25_to_35_count, age_35_to_45_count, total_age_count,
                         south_east_count, south_west_count, south_south_count, north_east_count, north_west_count,
@@ -35,7 +35,7 @@ INSERT INTO demography (id, name,
 )
 SELECT
     uuid_generate_v4()::text AS id,
-    'MEEDL' AS name,
+    'Meedl' AS name,
 
     -- Gender counts (case sensitive)
     SUM(CASE WHEN gender = 'Male' THEN 1 ELSE 0 END) AS male_count,

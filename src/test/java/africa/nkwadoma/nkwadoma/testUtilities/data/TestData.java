@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.testUtilities.data;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.Country;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
@@ -796,7 +797,6 @@ public class TestData {
                 .age17To25Count(2)
                 .age25To35Count(3)
                 .age35To45Count(2)
-                .totalAgeCount(7)
                 .femaleCount(2)
                 .maleCount(3)
                 .totalGenderCount(5)
@@ -806,11 +806,9 @@ public class TestData {
                 .southWestCount(5)
                 .southEastCount(6)
                 .southSouthCount(6)
-                .totalGeographicCount(26)
                 .oLevelCount(3)
                 .tertiaryCount(2)
-                .totalEducationLevelCount(5)
-                .name("MEEDL")
+                .name(MeedlConstants.MEEDL)
                 .build();
     }
 }
