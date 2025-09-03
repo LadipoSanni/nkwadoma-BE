@@ -63,7 +63,7 @@ class InvestmentVehicleAdapterTest {
     @Test
     void createInvestmentVehicle() {
         try {
-            assertThrows(InvestmentException.class, () -> investmentVehicleOutputPort.findById(capitalGrowth.getId()));
+            assertThrows(MeedlException.class, () -> investmentVehicleOutputPort.findById(capitalGrowth.getId()));
             InvestmentVehicle savedInvestmentVehicle =
                     investmentVehicleOutputPort.save(capitalGrowth);
             assertNotNull(savedInvestmentVehicle);
@@ -206,7 +206,7 @@ class InvestmentVehicleAdapterTest {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
         assertNotNull(investmentVehicles);
-        assertFalse(investmentVehicles.isEmpty());
+`        assertFalse(investmentVehicles.isEmpty());
         assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleType().equals(InvestmentVehicleType.ENDOWMENT));
     }
     @Test
