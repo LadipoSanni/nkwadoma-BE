@@ -26,9 +26,9 @@ CREATE TABLE demography_entity (
 
 INSERT INTO demography_entity (id, name,
                         male_count, female_count, total_gender_count,
-                        age_17_to_25_count, age_25_to_35_count, age_35_to_45_count, total_age_count,
+                        age_17_to_25_count, age_25_to_35_count, age_35_to_45_count,
                         south_east_count, south_west_count, south_south_count, north_east_count, north_west_count,
-                        north_central_count, non_nigerian, total_geographic_count
+                        north_central_count, non_nigerian
 )
 SELECT
     uuid_generate_v4()::text AS id,
