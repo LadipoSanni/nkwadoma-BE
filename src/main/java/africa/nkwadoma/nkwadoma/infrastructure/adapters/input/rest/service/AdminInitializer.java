@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.Industry;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
@@ -165,6 +166,7 @@ public class AdminInitializer {
         userIdentity.setCreatedBy(userIdentity.getId());
         UserIdentity foundUserIdentity = null;
         log.info("First user, after saving on keycloak: {}", userIdentity);
+        removeDuplicateSuperAdmin(userIdentity);
         try {
             foundUserIdentity = userIdentityOutputPort.findByEmail(userIdentity.getEmail());
             foundUserIdentity.setCreatedBy(foundUserIdentity.getId());
@@ -180,6 +182,44 @@ public class AdminInitializer {
             }
         }
         return userIdentity;
+    }
+
+    private void removeDuplicateSuperAdmin(UserIdentity userIdentity) {
+        try {
+            removeDuplicateSuperAdmins(userIdentity);
+            log.info("No duplicate roles exist after this check. All either removed or does not exist.");
+        } catch (MeedlException e) {
+            log.error("Error finding {} by role to make change update",userIdentity.getRole().name(), e);
+        }
+    }
+
+    private void removeDuplicateSuperAdmins(UserIdentity userIdentity) throws MeedlException {
+        List<UserIdentity> superAdminsOnKeycloak = identityManagerOutPutPort.getUsersByRole(userIdentity.getRole().name());
+        List<UserIdentity> superAdminsOnDb = userIdentityOutputPort.findAllByRole(userIdentity.getRole());
+        log.info("Role being searched for at admin initializer {}", userIdentity.getRole());
+        if (superAdminsOnKeycloak.isEmpty() && superAdminsOnDb.isEmpty()) {
+            log.info("No users found with role {}", userIdentity.getRole());
+            return;
+        }
+
+        boolean emailExistsOnKeycloak = superAdminsOnKeycloak.stream()
+                .anyMatch(u -> u.getEmail().equalsIgnoreCase(userIdentity.getEmail()));
+
+        if (emailExistsOnKeycloak) {
+            for (UserIdentity user : superAdminsOnKeycloak) {
+                if (!user.getEmail().equalsIgnoreCase(userIdentity.getEmail())) {
+                    log.info("Changing role of user on keycloak {} to {}", user.getEmail(), IdentityRole.MEEDL_ADMIN.name());
+                    identityManagerOutPutPort.changeUserRole(user, IdentityRole.MEEDL_ADMIN.name());
+                }
+            }
+        }
+            for (UserIdentity user : superAdminsOnDb) {
+                if (!user.getEmail().equalsIgnoreCase(userIdentity.getEmail())) {
+                    log.info("Changing role of user on db {} to {}", user.getEmail(), IdentityRole.MEEDL_ADMIN.name());
+                    userIdentityOutputPort.changeUserRole(user.getId(), IdentityRole.MEEDL_ADMIN);
+                }
+            }
+
     }
 
     private UserIdentity saveUserToDB(UserIdentity userIdentity) throws MeedlException {
