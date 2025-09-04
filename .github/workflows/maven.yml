@@ -23,8 +23,10 @@ env:
   DATABASE_URL: ${{ secrets.DATABASE_URL }}
   
   # DATABASE_URL: jdbc:postgresql://localhost:5432/nkwadoma_db
-  DATABASE_USERNAME: postgres
-  DATABASE_PASSWORD: postgres
+  # DATABASE_USERNAME: postgres
+  # DATABASE_PASSWORD: postgres
+  DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
+  DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
   FRONTEND_BASE_URL: ${{ secrets.FRONTEND_BASE_URL }}
   JWT_SECRET: ${{ secrets.JWT_SECRET }}
   JWT_EXPIRATION: ${{ secrets.JWT_EXPIRATION }}
@@ -99,8 +101,10 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           # DATABASE_URL: jdbc:postgresql://localhost:5432/nkwadoma_db
-          DATABASE_USERNAME: postgres
-          DATABASE_PASSWORD: postgres
+          # DATABASE_USERNAME: postgres
+          # DATABASE_PASSWORD: postgres
+          DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
           KEYCLOAK_PASSWORD: ${{ secrets.KEYCLOAK_PASSWORD }}
           KEYCLOAK_REALM: ${{ secrets.KEYCLOAK_REALM }}
           KEYCLOAK_SERVER: ${{ secrets.KEYCLOAK_SERVER }}
