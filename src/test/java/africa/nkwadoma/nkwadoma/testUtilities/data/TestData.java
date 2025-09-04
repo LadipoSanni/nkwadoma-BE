@@ -808,7 +808,7 @@ public class TestData {
                 .southSouthCount(6)
                 .oLevelCount(3)
                 .tertiaryCount(2)
-                .name(MeedlConstants.MEEDL)
+                .name("Demo")
                 .build();
     }
 }
