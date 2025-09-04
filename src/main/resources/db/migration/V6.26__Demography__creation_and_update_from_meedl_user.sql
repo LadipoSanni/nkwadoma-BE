@@ -11,7 +11,6 @@ CREATE TABLE demography_entity (
     age_17_to_25_count INT DEFAULT 0,
     age_25_to_35_count INT DEFAULT 0,
     age_35_to_45_count INT DEFAULT 0,
-    total_age_count INT DEFAULT 0,
 
     south_east_count INT DEFAULT 0,
     south_west_count INT DEFAULT 0,
@@ -20,11 +19,9 @@ CREATE TABLE demography_entity (
     north_west_count INT DEFAULT 0,
     north_central_count INT DEFAULT 0,
     non_nigerian INT DEFAULT 0,
-    total_geographic_count INT DEFAULT 0,
 
     o_level_count INT DEFAULT 0,
-    tertiary_count INT DEFAULT 0,
-    total_education_level_count INT DEFAULT 0
+    tertiary_count INT DEFAULT 0
 );
 
 INSERT INTO demography_entity (id, name,
@@ -46,7 +43,6 @@ SELECT
     SUM(CASE WHEN date_of_birth IS NOT NULL AND date_part('year', age(current_date, date_of_birth::date)) BETWEEN 17 AND 25 THEN 1 ELSE 0 END) AS age_17_to_25_count,
     SUM(CASE WHEN date_of_birth IS NOT NULL AND date_part('year', age(current_date, date_of_birth::date)) BETWEEN 26 AND 35 THEN 1 ELSE 0 END) AS age_25_to_35_count,
     SUM(CASE WHEN date_of_birth IS NOT NULL AND date_part('year', age(current_date, date_of_birth::date)) BETWEEN 36 AND 45 THEN 1 ELSE 0 END) AS age_35_to_45_count,
-    SUM(CASE WHEN date_of_birth IS NOT NULL THEN 1 ELSE 0 END) AS total_age_count,
 
     -- Geopolitical zones (NULL excluded)
     SUM(CASE WHEN state_of_origin IS NOT NULL AND state_of_origin ILIKE ANY(ARRAY['Abia','Anambra','Ebonyi','Enugu','Imo']) THEN 1 ELSE 0 END) AS south_east_count,
@@ -62,7 +58,6 @@ SELECT
             'Adamawa','Bauchi','Borno','Gombe','Taraba','Yobe',
             'Jigawa','Kaduna','Kano','Katsina','Kebbi','Sokoto','Zamfara',
             'Benue','Kogi','Kwara','Nasarawa','Niger','Plateau','FCT']
-        ) THEN 1 ELSE 0 END) AS non_nigerian,
-    SUM(CASE WHEN state_of_origin IS NOT NULL THEN 1 ELSE 0 END) AS total_geographic_count
+        ) THEN 1 ELSE 0 END) AS non_nigerian
 FROM meedl_user
 WHERE role = 'LOANEE';
