@@ -51,7 +51,7 @@ public class DemographyAdapterTest {
     void findDemographyByName() {
         Demography foundDemography = Demography.builder().build();
         try {
-            foundDemography = demographyOutputPort.findDemographyByName(MeedlConstants.MEEDL);
+            foundDemography = demographyOutputPort.findDemographyByName("Demo");
         }catch (MeedlException meedlException){
             log.error(meedlException.getMessage());
         }
