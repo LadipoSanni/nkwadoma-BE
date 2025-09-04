@@ -20,7 +20,9 @@ env:
   KEYCLOAK_CLIENT_ID: ${{ secrets.KEYCLOAK_CLIENT_ID }}
   KEYCLOAK_CLIENT_SECRET: ${{ secrets.KEYCLOAK_CLIENT_SECRET }}
   KEYCLOAK_USERNAME: ${{ secrets.KEYCLOAK_USERNAME }}
-  DATABASE_URL: jdbc:postgresql://localhost:5432/nkwadoma_db
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  
+  # DATABASE_URL: jdbc:postgresql://localhost:5432/nkwadoma_db
   DATABASE_USERNAME: postgres
   DATABASE_PASSWORD: postgres
   FRONTEND_BASE_URL: ${{ secrets.FRONTEND_BASE_URL }}
