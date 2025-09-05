@@ -84,6 +84,8 @@ SELECT
             'Adamawa','Bauchi','Borno','Gombe','Taraba','Yobe',
             'Jigawa','Kaduna','Kano','Katsina','Kebbi','Sokoto','Zamfara',
             'Benue','Kogi','Kwara','Nasarawa','Niger','Plateau','FCT']
-        ) THEN 1 ELSE 0 END) AS non_nigerian
+        ) THEN 1 ELSE 0 END) AS non_nigerian,
+    0 AS o_level_count,
+    0 AS tertiary_count
 FROM meedl_user
 WHERE role = 'LOANEE';
