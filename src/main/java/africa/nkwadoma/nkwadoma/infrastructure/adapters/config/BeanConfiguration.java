@@ -1,6 +1,5 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.config;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.notification.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
@@ -17,7 +16,6 @@ import africa.nkwadoma.nkwadoma.domain.service.notification.NotificationService;
 import africa.nkwadoma.nkwadoma.domain.service.identity.UserIdentityService;
 import africa.nkwadoma.nkwadoma.domain.service.investmentvehicle.InvestmentVehicleService;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.StringTrimMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.aes.TokenUtils;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.notification.email.EmailAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identitymanager.KeycloakAdapter;
@@ -66,11 +64,12 @@ public class BeanConfiguration {
                                                    BlackListedTokenAdapter blackListedTokenAdapter,
                                                    OrganizationIdentityOutputPort organizationIdentityOutputPort,
                                                    AsynchronousMailingOutputPort asynchronousMailingOutputPort,
-                                                   AsynchronousNotificationOutputPort asynchronousNotificationOutputPort
+                                                   AsynchronousNotificationOutputPort asynchronousNotificationOutputPort,
+                                                   FinancierOutputPort financierOutputPort,LoaneeOutputPort loaneeOutputPort
                                                    ){
         return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,sendOrganizationEmployeeEmailUseCase,
                 tokenUtils, emailTokenOutputPort, blackListedTokenAdapter,
-                organizationIdentityOutputPort, asynchronousMailingOutputPort, asynchronousNotificationOutputPort
+                organizationIdentityOutputPort, asynchronousMailingOutputPort, asynchronousNotificationOutputPort,financierOutputPort,loaneeOutputPort
         );
     }
 
@@ -128,11 +127,11 @@ public class BeanConfiguration {
                                                              UserIdentityOutputPort userIdentityOutputPort,
                                                              VehicleOperationOutputPort vehicleOperationOutputPort,
                                                              CouponDistributionOutputPort couponDistributionOutputPort,
-                                                             VehicleOperationMapper vehicleOperationMapper,
-                                                             VehicleClosureOutputPort vehicleClosureOutputPort){
+                                                             VehicleClosureOutputPort vehicleClosureOutputPort,
+                                                             OrganizationIdentityOutputPort organizationIdentityOutputPort){
         return new InvestmentVehicleService(investmentVehicleIdentityOutputPort,investmentVehicleMapper,portfolioOutputPort,
                 financierOutputPort,investmentVehicleFinancierOutputPort,userIdentityOutputPort,
-                vehicleOperationOutputPort,couponDistributionOutputPort,vehicleOperationMapper,vehicleClosureOutputPort);
+                vehicleOperationOutputPort,couponDistributionOutputPort,vehicleClosureOutputPort, organizationIdentityOutputPort);
     }
     @Bean
     public StringTrimMapper stringTrimMapper() {

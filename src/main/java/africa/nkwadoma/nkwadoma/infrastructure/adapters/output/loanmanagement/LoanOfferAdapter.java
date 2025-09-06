@@ -4,10 +4,11 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOffe
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanOfferMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loan;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoanOfferEntity;
@@ -139,5 +140,14 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
     public int countNumberOfPendingLoanOfferForOrganization(String id) throws MeedlException {
         MeedlValidator.validateUUID(id, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         return loanOfferEntityRepository.countPendingOfferByOrganizationId(id);
+    }
+
+    @Override
+    public LoanOffer findById(String loanOfferId) throws MeedlException {
+        MeedlValidator.validateUUID(loanOfferId, LoanOfferMessages.INVALID_LOAN_OFFER_ID.getMessage());
+        LoanOfferEntity loanOfferEntity =
+                loanOfferEntityRepository.findById(loanOfferId).orElseThrow(()->
+                        new LoanException("Loan offer not found"));
+        return loanOfferMapper.toLoanOffer(loanOfferEntity);
     }
 }

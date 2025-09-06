@@ -2,6 +2,8 @@ package africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNoti
 
 import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
+import africa.nkwadoma.nkwadoma.domain.model.financier.CooperateFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -60,4 +62,22 @@ public interface AsynchronousNotificationOutputPort {
     @Async
     void sendNotificationToSuperAdmin(OrganizationEmployeeIdentity organizationEmployeeIdentity, OrganizationEmployeeIdentity
             savedEmployee, OrganizationEmployeeIdentity organizationSuperAdmin) throws MeedlException ;
+
+    @Async
+    void sendDeclineColleagueNotification(OrganizationEmployeeIdentity organizationEmployeeIdentity,
+                                          UserIdentity userIdentity,UserIdentity createdBy) throws MeedlException;
+
+    @Async
+    void notifyInviterForColleagueInvitationApproval(UserIdentity userIdentity, UserIdentity financierCreator, CooperateFinancier cooperateFinancier) throws MeedlException;
+
+    @Async
+    void notifyInviterForColleagueInvitationDeclined(UserIdentity userIdentity, UserIdentity financierCreator, CooperateFinancier cooperateFinancier) throws MeedlException;
+    @Async
+    void sendNotificationToCooperateSuperAdmin(CooperateFinancier inviter, CooperateFinancier newCooperateFinancier, CooperateFinancier superAdminFinancier) throws MeedlException;
+
+    @Async
+    void sendFinancierInvitationNotificationToSuperAdmin(List<Financier> financiersToMail, UserIdentity actor,UserIdentity meedlSuperAdmin) throws MeedlException;
+
+    @Async
+    void notifyCooperateSuperAdminToApproveBankDetail(BankDetail bankDetail, Financier financier) throws MeedlException;
 }

@@ -1,28 +1,21 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.education.*;
-import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
-import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.*;
 import africa.nkwadoma.nkwadoma.testUtilities.data.*;
 import lombok.extern.slf4j.*;
-import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.params.*;
-import org.junit.jupiter.params.provider.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.boot.test.context.*;
+import org.springframework.data.domain.Page;
 
-import java.math.*;
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.ServiceOfferingType.TRAINING;
@@ -67,6 +60,8 @@ class LoanReferralAdapterTest {
     private LoaneeOutputPort loaneeOutputPort;
     @Autowired
     private LoanReferralOutputPort loanReferralOutputPort;
+    private int pageSize = 10;
+    private int pageNumber = 0;
 
 
     @BeforeAll
@@ -143,6 +138,98 @@ class LoanReferralAdapterTest {
         }
         assertEquals(savedLoanReferral.getCohortLoanee().getCohort().getId(),cohortLoanee.getCohort().getId());
         assertEquals(savedLoanReferral.getLoanReferralStatus(),loanReferral.getLoanReferralStatus());
+    }
+
+    @Order(2)
+    @Test
+    void findAllLoanReferrals(){
+        Page<LoanReferral> foundLoanReferral = Page.empty();
+        LoanReferral request = LoanReferral.builder().pageNumber(pageNumber).pageSize(pageSize).build();
+        try{
+            foundLoanReferral = loanReferralOutputPort.findAllLoanReferrals(request);
+        }catch (MeedlException meedlException){
+            log.info("Failed to find loanReferrals {}", meedlException.getMessage());
+        }
+        assertEquals(1, foundLoanReferral.getTotalElements());
+    }
+
+    @Order(3)
+    @Test
+    void findAllLoanReferralsByProgramId(){
+        Page<LoanReferral> foundLoanReferral = Page.empty();
+        LoanReferral request = LoanReferral.builder().programId(program.getId()).pageNumber(pageNumber).pageSize(pageSize).build();
+        try{
+            foundLoanReferral = loanReferralOutputPort.findAllLoanReferrals(request);
+        }catch (MeedlException meedlException){
+            log.info("Failed to find loanReferrals {}", meedlException.getMessage());
+        }
+        assertEquals(1, foundLoanReferral.getTotalElements());
+    }
+
+
+    @Order(4)
+    @Test
+    void findAllLoanReferralsOrganizationId(){
+        Page<LoanReferral> foundLoanReferral = Page.empty();
+        LoanReferral request = LoanReferral.builder().organizationId(organizationIdentity.getId()).pageNumber(pageNumber).pageSize(pageSize).build();
+        try{
+            foundLoanReferral = loanReferralOutputPort.findAllLoanReferrals(request);
+        }catch (MeedlException meedlException){
+            log.info("Failed to find loanReferrals {}", meedlException.getMessage());
+        }
+        assertEquals(1, foundLoanReferral.getTotalElements());
+    }
+
+    @Order(5)
+    @Test
+    void searchLoanReferrals(){
+        Page<LoanReferral> foundLoanReferral = Page.empty();
+        LoanReferral request = LoanReferral.builder().name("j").pageNumber(pageNumber).pageSize(pageSize).build();
+        try{
+            foundLoanReferral = loanReferralOutputPort.searchLoanReferrals(request);
+        }catch (MeedlException meedlException){
+            log.info("Failed to find loanReferrals {}", meedlException.getMessage());
+        }
+        assertEquals(1, foundLoanReferral.getTotalElements());
+    }
+
+     @Order(6)
+    @Test
+    void searchLoanReferralsWithProgramId(){
+        Page<LoanReferral> foundLoanReferral = Page.empty();
+        LoanReferral request = LoanReferral.builder().name("j").programId(program.getId()).pageNumber(pageNumber).pageSize(pageSize).build();
+        try{
+            foundLoanReferral = loanReferralOutputPort.searchLoanReferrals(request);
+        }catch (MeedlException meedlException){
+            log.info("Failed to find loanReferrals {}", meedlException.getMessage());
+        }
+        assertEquals(1, foundLoanReferral.getTotalElements());
+    }
+
+    @Order(7)
+    @Test
+    void searchLoanReferralsWithOrganizationId(){
+        Page<LoanReferral> foundLoanReferral = Page.empty();
+        LoanReferral request = LoanReferral.builder().name("j").organizationId(organizationIdentity.getId()).pageNumber(pageNumber).pageSize(pageSize).build();
+        try{
+            foundLoanReferral = loanReferralOutputPort.searchLoanReferrals(request);
+        }catch (MeedlException meedlException){
+            log.info("Failed to find loanReferrals {}", meedlException.getMessage());
+        }
+        assertEquals(1, foundLoanReferral.getTotalElements());
+    }
+
+    @Order(8)
+    @Test
+    void searchLoanReferralsWithWithNotExistingLoaneeName(){
+        Page<LoanReferral> foundLoanReferral = Page.empty();
+        LoanReferral request = LoanReferral.builder().name("z").pageNumber(pageNumber).pageSize(pageSize).build();
+        try {
+            foundLoanReferral = loanReferralOutputPort.searchLoanReferrals(request);
+        }catch (MeedlException meedlException){
+            log.info("Failed to find loanReferrals {}", meedlException.getMessage());
+        }
+        assertEquals(0, foundLoanReferral.getTotalElements());
     }
 
     @AfterAll

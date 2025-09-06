@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.model.loan.NextOfKin;
 import lombok.Getter;
@@ -14,14 +14,14 @@ import java.util.List;
 @Setter
 public class FinancierDashboardResponse {
     private String id;
-    private String firstName;
-    private String lastName;
-    private String organizationName;
+    private String name;
     private FinancierType financierType;
     private ActivationStatus activationStatus;
     private AccreditationStatus accreditationStatus;
     private String email;
     private String phoneNumber;
+    private String cooperateAdminEmail;
+    private String cooperateAdminName;
     private String address;
     private NextOfKin nextOfKin;
     private String taxId;

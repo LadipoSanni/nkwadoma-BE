@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity;
 
-import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import lombok.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.*;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Setter
@@ -22,11 +23,13 @@ public class OrganizationResponse {
     private String email;
     private String websiteAddress;
     private String invitedDate;
+    private LocalDateTime requestedInvitationDate;
     private String rcNumber;
     private String tin;
     private String phoneNumber;
     private int numberOfPrograms;
-    private ActivationStatus status;
+    private ActivationStatus activationStatus;
+    private String requestedBy;
     private String createdBy;
     private int numberOfLoanees;
     private int stillInTraining;

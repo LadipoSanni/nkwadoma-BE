@@ -68,6 +68,9 @@ public interface LoaneeRestMapper {
     @Mapping(target = "firstName", source = "loanee.userIdentity.firstName")
     @Mapping(target = "lastName", source = "loanee.userIdentity.lastName")
     @Mapping(target = "instituteName", source = "referredBy")
+    @Mapping(target = "interestEarned", source = "loaneeLoanDetail.interestIncurred")
+    @Mapping(target = "amountDisbursed", source = "loaneeLoanDetail.amountReceived")
+    @Mapping(target = "loanOutstanding", source = "loaneeLoanDetail.amountOutstanding")
     LoanBeneficiaryResponse toLoanBeneficiaryResponse(CohortLoanee loanee);
 
     @Mapping(target = "id", source = "id")

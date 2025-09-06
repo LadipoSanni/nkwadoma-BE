@@ -1,15 +1,15 @@
 package africa.nkwadoma.nkwadoma.domain.model.financier;
 
 import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicleDesignation;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicleType;
-import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.InvestmentException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.Cooperation;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
@@ -34,7 +34,8 @@ import java.util.Set;
 @Builder
 public class Financier {
     private String id;
-    private List<BeneficialOwner> beneficialOwners;
+    private String tin;
+    private String bankDetailId;
 
     private FinancierType financierType;
     private ActivationStatus activationStatus;
@@ -42,19 +43,19 @@ public class Financier {
     private String investmentVehicleId;
     private BigDecimal amountToInvest;
     private BigDecimal totalAmountInvested;
-    private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
     private Cooperation cooperation;
+    private String identity;
     private UserIdentity userIdentity;
+    private OrganizationIdentity organizationIdentity;
     private int totalNumberOfInvestment;
     private int pageNumber;
     private int pageSize;
     private BigDecimal totalIncomeEarned;
     private BigDecimal portfolioValue;
-    private List<FinancierVehicleDetail> investmentVehicleInvestedIn;
-    private List<InvestmentVehicle> investmentVehicles;
     private String rcNumber;
     private LocalDateTime createdAt;
     private String actorId;
+    private String cooperateId;
     private InvestmentVehicleType investmentVehicleType;
     private String investmentId;
     private String investmentVehicleName;
@@ -62,6 +63,17 @@ public class Financier {
     private LocalDate dateInvested;
     private BigDecimal incomeEarned;
     private BigDecimal netAssertValue;
+    private String name;
+    private String email;
+    private String invitedBy;
+    private String cooperateAdminEmail;
+    private String cooperateAdminName;
+
+    private List<BankDetail> bankDetails;
+    private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
+    private List<FinancierVehicleDetail> investmentVehicleInvestedIn;
+    private List<BeneficialOwner> beneficialOwners;
+    private List<InvestmentVehicle> investmentVehicles;
 
     //source of fund
     private Set<String> sourceOfFunds;
@@ -72,6 +84,7 @@ public class Financier {
     //Declaration
     private boolean declarationAndAgreement;
     private boolean politicallyExposed;
+    private boolean privacyPolicyAccepted;
     private List<PoliticallyExposedPerson> politicallyExposedPeople;
 
     private void validateUserIdentity() throws InvestmentException, MeedlException {
@@ -102,11 +115,7 @@ public class Financier {
             MeedlValidator.validateObjectInstance(this.financierType, FinancierMessages.INVALID_FINANCIER_TYPE.getMessage());
             MeedlValidator.validateObjectInstance(this.getUserIdentity(), UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
             MeedlValidator.validateUUID(this.getUserIdentity().getCreatedBy(), "Valid user identification for user performing this action is required");
-            if (financierIsIndividual()) {
-                validateUserIdentity();
-            } else {
-                validateCooperation();
-            }
+            validateUserIdentity();
         }
     }
     private boolean financierIsIndividual(){
@@ -121,7 +130,7 @@ public class Financier {
     private void validateCooperation() throws MeedlException {
         log.info("Started cooperation validation in financier");
         MeedlValidator.validateObjectInstance(cooperation, UserMessages.COOPERATION_MUST_NOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateObjectName(this.cooperation.getName(), " name cannot be empty", "Cooperation");
+        MeedlValidator.validateObjectName(this.cooperation.getName(), "name cannot be empty", "Cooperation");
         MeedlValidator.validateObjectInstance(this.userIdentity, UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validateEmail(this.userIdentity.getEmail());
     }
@@ -236,6 +245,4 @@ public class Financier {
         MeedlValidator.validateUUID(this.userIdentity.getId(), UserMessages.INVALID_USER_ID.getMessage());
         MeedlValidator.validateBigDecimalDataElement(this.amountToInvest, FinancierMessages.AMOUNT_TO_INVEST_REQUIRED.getMessage());
     }
-
-
 }

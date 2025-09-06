@@ -4,6 +4,8 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
@@ -14,7 +16,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.*;
@@ -80,26 +81,12 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         MeedlValidator.validateObjectInstance(program, ProgramMessages.PROGRAM_CANNOT_BE_EMPTY.getMessage());
         program.validate();
         log.info("Saving program with name: {}", program.getName());
-        ProgramPersistenceAdapter.validateServiceOfferings(program.getOrganizationIdentity().getServiceOfferings());
         log.info("Program at persistence layer: ========>{}", program);
-        OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(program.getOrganizationIdentity());
         ProgramEntity programEntity = programMapper.toProgramEntity(program);
-        programEntity.setOrganizationIdentity(organizationEntity);
-        programEntity.setProgramStatus(ActivationStatus.ACTIVE);
         programEntity = programRepository.save(programEntity);
-        updateOrganization(program, organizationEntity);
-        Program retrivedProgram  = programMapper.toProgram(programEntity);
-        retrivedProgram.setOrganizationId(organizationEntity.getId());
-        return retrivedProgram;
+        return programMapper.toProgram(programEntity);
     }
 
-    private void updateOrganization(Program program, OrganizationEntity organizationEntity) {
-        if (StringUtils.isEmpty(program.getId())) {
-            organizationEntity.setNumberOfPrograms(organizationEntity.getNumberOfPrograms() + BigInteger.ONE.intValue());
-            log.info("Updating total number of programs in organization to {}",organizationEntity.getNumberOfPrograms());
-            organizationEntityRepository.save(organizationEntity);
-        }
-    }
     @Override
     public  OrganizationIdentity findCreatorOrganization(String meedlUserId) throws MeedlException {
         MeedlValidator.validateUUID(meedlUserId, MeedlMessages.INVALID_CREATED_BY_ID.getMessage());

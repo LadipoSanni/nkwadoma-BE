@@ -1,7 +1,11 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentvehicle;
 
+import africa.nkwadoma.nkwadoma.domain.model.financier.CooperateFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.InviteColleagueRequest;
+import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.Cooperation;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.CooperationRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.KycRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.FinancierRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.*;
@@ -17,18 +21,16 @@ public interface FinancierRestMapper {
     Financier map(FinancierRequest financierRequest);
     @Mapping( source = "userIdentity", target = "userIdentity")
     @Mapping( source = "userIdentity.nextOfKin", target = "nextOfKin")
-    @Mapping( source = "cooperation.name", target = "organizationName")
     @Mapping( source = "investmentVehicleDesignation", target = "investmentVehicleRole")
     FinancierResponse map(Financier financier);
 
-    @Mapping(target = "firstName", source="userIdentity.firstName")
-    @Mapping(target = "lastName", source="userIdentity.lastName")
-    @Mapping(target = "organizationName", source = "cooperation.name")
+
+    @Mapping(target = "name", source = "name")
     @Mapping(target = "financierType", source="financierType")
     @Mapping(target = "nextOfKin", source="userIdentity.nextOfKin")
     @Mapping(target = "taxId", source="userIdentity.taxId")
     @Mapping(target = "totalAmountInvested", source="totalAmountInvested")
-    @Mapping(target = "email", source="userIdentity.email")
+    @Mapping(target = "email", source="email")
     @Mapping(target = "phoneNumber", source="userIdentity.phoneNumber")
     @Mapping(target = "address", source="userIdentity.address")
     @Mapping(target = "rcNumber", source = "rcNumber")
@@ -50,6 +52,7 @@ public interface FinancierRestMapper {
     @Mapping(target = "userIdentity.bvn", source = "kycRequest.bvn")
     @Mapping(target = "userIdentity.phoneNumber", source = "kycRequest.phoneNumber")
     @Mapping(target = "rcNumber", source = "rcNumber")
+    @Mapping(target = "tin", source = "tin")
     Financier map(KycRequest kycRequest);
 
     @Mapping(target = "userIdentity.id", source = "userId")
@@ -70,4 +73,26 @@ public interface FinancierRestMapper {
     @Mapping(target = "investmentId", source = "investmentId")
     @Mapping(target = "investmentVehicleType", source = "investmentVehicleType")
     FinancierInvestmentResponse mapToFinancierInvestment(Financier financier);
+
+    @Mapping(target = "userIdentity.id", source = "userId")
+    @Mapping(target = "privacyPolicyAccepted", source = "privacyPolicyDecision")
+    Financier map(String userId, boolean privacyPolicyDecision);
+
+    @Mapping(target = "userIdentity.firstName", source = "firstName")
+    @Mapping(target = "userIdentity.lastName", source = "lastName")
+    @Mapping(target = "userIdentity.email", source = "email")
+    @Mapping(target = "userIdentity.role", source = "role")
+    Financier mapInviteColleagueRequestToFinancier(InviteColleagueRequest inviteColleagueRequest);
+
+    CooperationResponse mapToCooperationResponse(Cooperation cooperation);
+
+    Cooperation mapCooperationRequestToCooperation(CooperationRequest cooperationRequest);
+
+
+    @Mapping(target = "name", source = "organizationName")
+    @Mapping(target = "email", source = "organizationEmail")
+    Financier mapToCooperateFinancier(FinancierRequest financierRequest);
+
+    @Mapping(target = "cooperateFinancierId", source = "id")
+    CooperateFinancierResponse mapToCooperateFinancierResponse(CooperateFinancier cooperateFinancier);
 }

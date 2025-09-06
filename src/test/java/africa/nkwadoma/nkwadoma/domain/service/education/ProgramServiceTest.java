@@ -1,14 +1,14 @@
 package africa.nkwadoma.nkwadoma.domain.service.education;
 
-import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoanDetailOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramLoanDetailOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.education.InstituteMetrics;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.education.ProgramLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -64,6 +64,9 @@ class ProgramServiceTest {
     private  CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
     @Mock
     private  CohortOutputPort cohortOutputPort;
+    @Mock
+    private InstituteMetricsOutputPort instituteMetricsOutputPort;
+    private InstituteMetrics instituteMetrics;
 
     @BeforeEach
     void setUp() {
@@ -77,7 +80,9 @@ class ProgramServiceTest {
                 createdBy(testId).deliveryType(DeliveryType.ONSITE).
                 mode(ProgramMode.FULL_TIME).duration(BigInteger.ONE.intValue()).build();
         organizationIdentity = TestData.createOrganizationTestData("organization","RC12345678",List.of(employeeIdentity));
+        organizationIdentity.setId(testId);
         programLoanDetail = TestData.buildProgramLoanDetail(program);
+        instituteMetrics = TestData.createInstituteMetrics(organizationIdentity);
     }
 
     @Test
@@ -86,6 +91,10 @@ class ProgramServiceTest {
             when(programOutputPort.findCreatorOrganization(program.getCreatedBy())).thenReturn(OrganizationIdentity.builder().build());
             when(programOutputPort.programExistsInOrganization(program)).thenReturn(false);
             when(programOutputPort.saveProgram(program)).thenReturn(program);
+            when(programLoanDetailOutputPort.save(any(ProgramLoanDetail.class))).thenReturn(programLoanDetail);
+            when(instituteMetricsOutputPort.findByOrganizationId(any())).thenReturn(instituteMetrics);
+            when(instituteMetricsOutputPort.save(any(InstituteMetrics.class))).thenReturn(instituteMetrics);
+
             Program addedProgram = programService.createProgram(program);
             verify(programOutputPort, times(1)).saveProgram(program);
 
@@ -121,6 +130,10 @@ class ProgramServiceTest {
             when(programOutputPort.findCreatorOrganization(program.getCreatedBy())).thenReturn(OrganizationIdentity.builder().build());
             when(programOutputPort.programExistsInOrganization(program)).thenReturn(false);
             when(programOutputPort.saveProgram(program)).thenReturn(program);
+            when(programLoanDetailOutputPort.save(any(ProgramLoanDetail.class))).thenReturn(programLoanDetail);
+            when(instituteMetricsOutputPort.findByOrganizationId(any())).thenReturn(instituteMetrics);
+            when(instituteMetricsOutputPort.save(any(InstituteMetrics.class))).thenReturn(instituteMetrics);
+
             Program createdProgram = programService.createProgram(program);
             assertNotNull(createdProgram);
             verify(programOutputPort, times(1)).saveProgram(program);
@@ -135,27 +148,15 @@ class ProgramServiceTest {
     @Test
     void updateProgram() {
         try {
-            when(programOutputPort.saveProgram(program)).thenReturn(program);
-            when(programOutputPort.findCreatorOrganization(program.getCreatedBy())).thenReturn(OrganizationIdentity.builder().build());
-            when(programOutputPort.programExistsInOrganization(program)).thenReturn(false);
-            Program addedProgram = programService.createProgram(program);
-
-            log.info("Program: {}", addedProgram);
-            addedProgram.setId(program.getId());
-            addedProgram.setName("New program name");
-            addedProgram.setProgramDescription("New program description");
-            addedProgram.setDuration(3);
-            addedProgram.setMode(ProgramMode.PART_TIME);
-            addedProgram.setDeliveryType(DeliveryType.ONLINE);
 
             when(programOutputPort.findProgramById(program.getId())).thenReturn(program);
 //            when(programMapper.updateProgram(addedProgram, program)).thenReturn(void);
             when(programOutputPort.saveProgram(program)).thenReturn(program);
-            Program updatedProgram = programService.updateProgram(addedProgram);
+            Program updatedProgram = programService.updateProgram(program);
 
-            verify(programOutputPort, times(2)).saveProgram(addedProgram);
+            verify(programOutputPort, times(1)).saveProgram(program);
             assertNotNull(updatedProgram);
-            assertEquals(updatedProgram.getProgramDescription(), addedProgram.getProgramDescription());
+            assertEquals(updatedProgram.getProgramDescription(), program.getProgramDescription());
         } catch (MeedlException e) {
             log.error("Error updating program", e);
         }

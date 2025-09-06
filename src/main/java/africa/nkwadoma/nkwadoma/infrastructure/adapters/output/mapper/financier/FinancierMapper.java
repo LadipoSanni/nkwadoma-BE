@@ -1,13 +1,20 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.financier;
 
+import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.Cooperation;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.identity.NextOfKinMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.financier.FinancierEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.UserIdentityMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.financier.FinancierProjection;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.financier.FinancierWithDesignationProjection;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
+
+import java.util.Optional;
 
 @Mapper(componentModel = "spring", uses ={UserIdentityMapper.class, NextOfKinMapper.class }, nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface FinancierMapper {
@@ -23,4 +30,20 @@ public interface FinancierMapper {
     @Mapping(target = "netAssertValue", source = "financier.netAssertValue")
     @Mapping(target = "portfolioValue", source = "financier.portfolioValue")
     @Mapping(target = "investmentId", source = "id")
-    Financier mapToFinancierInvestment(InvestmentVehicleFinancier investmentVehicleFinancier);}
+    Financier mapToFinancierInvestment(InvestmentVehicleFinancier investmentVehicleFinancier);
+
+
+
+    void updateCooperation(@MappingTarget  Cooperation cooperate, Cooperation cooperation);
+
+
+    Financier mapProjectionToFinancier(FinancierProjection financierProjection);
+
+
+    @Mapping(target = "name", source = "financierName")
+    @Mapping(target = "totalAmountInvested", source = "totalAmountInvested")
+    @Mapping(target = "totalNumberOfInvestment", source = "numberOfInvestments")
+    @Mapping(target = "investmentVehicleDesignation", source = "investmentVehicleDesignation")
+    void updateFinancierFromProjection(FinancierWithDesignationProjection projection,
+                                       @MappingTarget Financier financier);
+}

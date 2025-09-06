@@ -1,5 +1,5 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization;
-import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -22,23 +22,19 @@ public class OrganizationEntity {
     private String email;
     private String websiteAddress;
     private LocalDateTime invitedDate;
+    private LocalDateTime requestedInvitationDate;
     private String registrationNumber;
     @Column(unique = true)
     private String taxIdentity;
     private String phoneNumber;
     @Enumerated(EnumType.STRING)
-    private ActivationStatus status;
+    private ActivationStatus activationStatus;
     @Column(unique = true)
     private String rcNumber;
     private String createdBy;
     private String updatedBy;
     private LocalDateTime timeUpdated;
-    private int numberOfLoanees;
-    private int stillInTraining;
-    private int numberOfCohort;
     private boolean isEnabled;
-    @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
-    private int numberOfPrograms;
     private String logoImage;
     private String bannerImage;
     private String address;

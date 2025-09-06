@@ -360,4 +360,14 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
     """)
     Page<LoanProjection> findAllLoanDisbursedByOrganizationNameAndUserId(@Param("organizationName") String organizationName,
                                                                          @Param("userId") String userId, Pageable pageRequest);
+
+
+    @Query("""
+    SELECT CASE WHEN EXISTS(
+        SELECT loan
+        FROM LoanEntity loan
+        WHERE loan.loanOfferId = :id)
+    THEN true ELSE false END
+   """)
+    boolean checkIfLoanHasStartedForLoanOffer(@Param("id") String id);
 }

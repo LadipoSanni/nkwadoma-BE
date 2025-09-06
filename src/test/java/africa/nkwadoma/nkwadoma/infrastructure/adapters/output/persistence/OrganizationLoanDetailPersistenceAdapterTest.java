@@ -1,17 +1,19 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.InstituteMetricsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationLoanDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.education.InstituteMetrics;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,6 +30,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class OrganizationLoanDetailPersistenceAdapterTest {
 
 
+        @Autowired
+        private InstituteMetricsOutputPort instituteMetricsOutputPort;
     private UserIdentity meedleUser;
     private OrganizationEmployeeIdentity employeeIdentity;
     private OrganizationIdentity organizationIdentity;
@@ -111,6 +115,11 @@ public class OrganizationLoanDetailPersistenceAdapterTest {
     void cleanUp() throws MeedlException {
         organizationLoanDetailOutputPort.delete(loanDetailsId);
         log.info("org id = {}", organizationIdentity.getId());
+        InstituteMetrics instituteMetrics = instituteMetricsOutputPort.findByOrganizationId(organizationIdentity.getId());
+        if (ObjectUtils.isNotEmpty(instituteMetrics)){
+            log.info("Metrics was found for this organization");
+            instituteMetricsOutputPort.delete(instituteMetrics.getId());
+        }
         organizationIdentityOutputPort.delete(organizationIdentity.getId());
         log.info("org empoyee  = {}", employeeIdentity.getId());
         organizationEmployeeIdentityOutputPort.delete(employeeIdentity.getId());

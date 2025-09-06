@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoanDet
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramLoanDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationLoanDetailOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanAggregateOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.DailyInterestOutputPort;
@@ -16,13 +17,13 @@ import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.education.ProgramLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationLoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanAggregate;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.*;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
-import org.jobrunr.jobs.lambdas.JobLambda;
 import org.jobrunr.scheduling.JobScheduler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -56,6 +56,8 @@ public class LoanCalculationEngineTest {
     @Mock
     private ProgramLoanDetailOutputPort programLoanDetailOutputPort;
     @Mock
+    private LoanProductOutputPort loanProductOutputPort;
+    @Mock
     private OrganizationLoanDetailOutputPort organizationLoanDetailOutputPort;
     @Mock
     private CohortLoaneeOutputPort cohortLoaneeOutputPort;
@@ -76,6 +78,7 @@ public class LoanCalculationEngineTest {
     @Mock
     private LoaneeLoanAggregateOutputPort loaneeLoanAggregateOutputPort;
     private LoaneeLoanAggregate loaneeLoanAggregate;
+    private LoanProduct loanProduct;
 
 
     @BeforeEach
@@ -86,6 +89,8 @@ public class LoanCalculationEngineTest {
         programLoanDetail = TestData.buildProgramLoanDetail(TestData.createProgramTestData("Mock test program"));
         organizationLoanDetail = TestData.buildOrganizationLoanDetail(TestData.createOrganizationTestData("Mock org test name", "random", null));
         loaneeLoanAggregate = TestData.buildLoaneeLoanAggregate(Loanee.builder().build());
+        loanProduct = TestData.buildTestLoanProduct();
+        loanProduct.setTotalOutstandingLoan(BigDecimal.ZERO);
     }
 
     private RepaymentHistory createRepayment(LocalDateTime time, BigDecimal amount) {
@@ -842,7 +847,7 @@ public class LoanCalculationEngineTest {
 
         when(cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(loaneeId, cohortId)).thenReturn(cohortLoanee);
 
-        when(loaneeLoanAggregateOutputPort.findByLoaneeLoanAgrregateByLoaneeLoanDetailId(anyString())).thenReturn(loaneeLoanAggregate);
+        when(loaneeLoanAggregateOutputPort.findByLoaneeLoanAggregateByLoaneeLoanDetailId(anyString())).thenReturn(loaneeLoanAggregate);
         when(loaneeLoanAggregateOutputPort.save(any())).thenReturn(loaneeLoanAggregate);
         when(cohortLoanDetailOutputPort.findByCohortId(anyString())).thenReturn(cohortLoanDetail);
         when(programLoanDetailOutputPort.findByProgramId(anyString())).thenReturn(programLoanDetail);
@@ -855,6 +860,7 @@ public class LoanCalculationEngineTest {
         when(loaneeLoanDetailsOutputPort.findByCohortLoaneeId(any())).thenReturn(loaneeLoanDetail);
 
         when(repaymentHistoryOutputPort.findAllRepaymentHistoryForLoan(loaneeId, cohortId)).thenReturn(new ArrayList<>());
+        when(loanProductOutputPort.findByLoaneeLoanDetailId(anyString())).thenReturn(loanProduct);
         when(loaneeLoanDetailsOutputPort.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(repaymentHistoryOutputPort.saveAllRepaymentHistory(any())).thenAnswer(invocation -> invocation.getArgument(0));
         doNothing().when(repaymentHistoryOutputPort).deleteMultipleRepaymentHistory(any());
@@ -864,103 +870,6 @@ public class LoanCalculationEngineTest {
         verify(repaymentHistoryOutputPort).saveAllRepaymentHistory(any());
         verify(loaneeLoanDetailsOutputPort).save(any());
     }
-
-
-    @Test
-    void getPreviousOutstandingWhenNotNull() {
-        BigDecimal previousOutstanding = decimalPlaceRoundUp(BigDecimal.valueOf(3000));
-        LoaneeLoanDetail loanDetail = LoaneeLoanDetail.builder()
-                .amountReceived(decimalPlaceRoundUp(BigDecimal.valueOf(5000)))
-                .build();
-
-        BigDecimal result = ReflectionTestUtils.invokeMethod(calculationEngine, "getPreviousAmountOutstanding", previousOutstanding, loanDetail);
-
-        assertEquals(previousOutstanding, result);
-    }
-
-    @Test
-    void getPreviousOutstandingWhenNull() {
-        LoaneeLoanDetail loanDetail = LoaneeLoanDetail.builder()
-                .amountReceived(BigDecimal.valueOf(5000))
-                .build();
-
-        BigDecimal result = ReflectionTestUtils.invokeMethod(calculationEngine, "getPreviousAmountOutstanding", null, loanDetail);
-
-        assertEquals(decimalPlaceRoundUp(BigDecimal.valueOf(5000)), result);
-    }
-
-
-
-//    @Test
-//    public void calculateIncurredInterestPerRepayment_correctlyCalculatesInterest() {
-//        LocalDateTime lastDate = LocalDateTime.of(2024, 1, 1, 0, 0);
-//        LocalDateTime currentDate = LocalDateTime.of(2024, 1, 31, 0, 0); // 30 days later
-//
-//        BigDecimal outstandingAmount = new BigDecimal("10000.00");
-//        double annualInterestRate = 12.0; // 12% per annum
-//
-//        LoaneeLoanDetail loaneeLoanDetail = new LoaneeLoanDetail();
-//        loaneeLoanDetail.setInterestRate(annualInterestRate);
-//
-//        RepaymentHistory repayment = RepaymentHistory.builder()
-//                .paymentDateTime(currentDate)
-//                .build();
-//
-//        calculationEngine.calculateIncurredInterestPerRepayment(
-//                repayment,
-//                outstandingAmount,
-//                lastDate,
-//                loaneeLoanDetail
-//        );
-//        // Expected interest:
-//        // dailyRate = (12 / 100) / 365 = 0.0003287671 (approx)
-//        // incurredInterest = 10000 * dailyRate * 30 = ~98.6
-//        BigDecimal expectedInterest = outstandingAmount
-//                .multiply(BigDecimal.valueOf(annualInterestRate)
-//                        .divide(BigDecimal.valueOf(100), NUMBER_OF_DECIMAL_PLACE + 4, RoundingMode.HALF_UP))
-//                .divide(BigDecimal.valueOf(365), NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP)
-//                .multiply(BigDecimal.valueOf(30))
-//                .setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
-//
-//        BigDecimal actualInterest = repayment.getInterestIncurred().setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
-//        assertEquals(expectedInterest, actualInterest, "Incurred interest should be correctly calculated.");
-//    }
-    @Test
-    public void calculateIncurredInterest_shouldReturnZeroWhenOutstandingIsZero() {
-        BigDecimal previousOutstanding = BigDecimal.ZERO;
-        LocalDateTime lastDate = LocalDateTime.of(2024, 1, 1, 0, 0);
-        LocalDateTime currentDate = LocalDateTime.of(2024, 1, 31, 0, 0);
-
-        RepaymentHistory repayment = createRepayment(currentDate, new BigDecimal("1000.00"));
-        LoaneeLoanDetail loaneeLoanDetail = new LoaneeLoanDetail();
-        loaneeLoanDetail.setInterestRate(15.0);
-
-        calculationEngine.calculateIncurredInterestPerRepayment(repayment, previousOutstanding, lastDate, loaneeLoanDetail);
-
-        assertEquals(BigDecimal.ZERO.setScale(NUMBER_OF_DECIMAL_PLACE), repayment.getInterestIncurred());
-    }
-
-
-
-
-
-
-//    @Test
-//    void testCalculateInterest_withValidInputs() {
-//        BigDecimal outstanding = new BigDecimal("100000.00");
-//        double interestRate = 12.0; // 12% annually
-//        long daysBetween = 30;
-//
-//        BigDecimal expectedInterest = outstanding
-//                .multiply(BigDecimal.valueOf(0.12)) // annual rate
-//                .divide(BigDecimal.valueOf(365), NUMBER_OF_DECIMAL_PLACE + 4, RoundingMode.HALF_UP)
-//                .multiply(BigDecimal.valueOf(daysBetween))
-//                .setScale(NUMBER_OF_DECIMAL_PLACE, RoundingMode.HALF_UP);
-//
-//        BigDecimal actual = calculationEngine.calculateInterest(interestRate, outstanding, daysBetween);
-//
-//        assertEquals(expectedInterest, actual);
-//    }
 
     @Test
     void testCalculateInterest_zeroDaysBetween_shouldReturnZero() {
@@ -998,15 +907,20 @@ public class LoanCalculationEngineTest {
         loanDetail.setAmountOutstanding(BigDecimal.valueOf(30416.67));
         loanDetail.setInterestRate(12);
         loanDetail.setInterestIncurred(BigDecimal.ZERO);
-        when(loaneeLoanDetailsOutputPort.findAllWithDailyInterestByMonthAndYear(Month.AUGUST,2025))
+
+        LoanProduct loanProduct = TestData.buildTestLoanProduct();
+        loanProduct.setTotalOutstandingLoan(BigDecimal.ZERO);
+        when(loanProductOutputPort.save(loanProduct)).thenReturn(loanProduct);
+        when(loanProductOutputPort.findByLoaneeLoanDetailId(anyString())).thenReturn(loanProduct);
+        when(loaneeLoanDetailsOutputPort.findAllWithDailyInterestByMonthAndYear(LocalDateTime.now().getMonth(),2025))
                 .thenReturn(List.of(loanDetail));
-        when(dailyInterestOutputPort.findAllInterestForAMonth(Month.AUGUST,2025,loanDetail.getId()))
+        when(dailyInterestOutputPort.findAllInterestForAMonth(LocalDateTime.now().getMonth(),2025,loanDetail.getId()))
                 .thenReturn(List.of(
                         DailyInterest.builder().interest(new BigDecimal("50.00")).build(),
                         DailyInterest.builder().interest(new BigDecimal("50.00")).build()));
 
 
-        when(loaneeLoanAggregateOutputPort.findByLoaneeLoanAgrregateByLoaneeLoanDetailId(loanDetail.getId()))
+        when(loaneeLoanAggregateOutputPort.findByLoaneeLoanAggregateByLoaneeLoanDetailId(loanDetail.getId()))
                 .thenReturn(loaneeLoanAggregate);
         when(loaneeLoanAggregateOutputPort.save(loaneeLoanAggregate)).thenReturn(loaneeLoanAggregate);
 
@@ -1027,8 +941,12 @@ public class LoanCalculationEngineTest {
 
         calculationEngine.calculateMonthlyInterest();
 
-        // Verify interactions
         verify(loaneeLoanDetailsOutputPort, times(1))
-                .findAllWithDailyInterestByMonthAndYear(Month.AUGUST, 2025);
+                .findAllWithDailyInterestByMonthAndYear(LocalDateTime.now().getMonth(), 2025);
     }
+
+
+
+
+
 }

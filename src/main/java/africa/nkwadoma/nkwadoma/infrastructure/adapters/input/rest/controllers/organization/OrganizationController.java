@@ -2,16 +2,17 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.OrganizationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.ViewOrganizationUseCase;
-import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ReferenceDataResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.QAResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.InviteOrganizationResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.OrganizationResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.OrganizationRestMapper;
@@ -47,7 +48,7 @@ public class OrganizationController {
 
     @PostMapping("organization/invite")
     @Operation(summary = INVITE_ORGANIZATION_TITLE, description = INVITE_ORGANIZATION_DESCRIPTION)
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') ")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE') ")
     public ResponseEntity<ApiResponse<?>> inviteOrganization(@AuthenticationPrincipal Jwt meedlUser,
                                                              @RequestBody @Valid OrganizationRequest inviteOrganizationRequest) throws MeedlException {
         String createdBy = meedlUser.getClaimAsString("sub");
@@ -66,7 +67,7 @@ public class OrganizationController {
 
     @PatchMapping("organization/update")
     @Operation(summary = "Update an existing organization")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> updateOrganization(@RequestBody @Valid OrganizationUpdateRequest organizationUpdateRequest,
                                                              @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
         OrganizationIdentity organizationIdentity = organizationRestMapper.maptoOrganizationIdentity(organizationUpdateRequest);
@@ -83,7 +84,7 @@ public class OrganizationController {
     @Operation(summary = "Search for organization(s) by similar or precise name")
      @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
              "or hasRole('MEEDL_ADMIN')" +
-             "or hasRole('MEEDL_ASSOCIATE')" +
+             "or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')" +
              "or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> searchOrganizationByName(
                                                                        @RequestParam(name = "name") String name,
@@ -92,7 +93,7 @@ public class OrganizationController {
                                                                        @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                                                        @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber)
             throws MeedlException {
-        OrganizationIdentity organizationIdentity = OrganizationIdentity.builder().name(name).status(status).loanType(loanType)
+        OrganizationIdentity organizationIdentity = OrganizationIdentity.builder().name(name).activationStatus(status).loanType(loanType)
                 .pageNumber(pageNumber).pageSize(pageSize).build();
         Page<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase.search(organizationIdentity);
         List<OrganizationResponse> organizationResponses =
@@ -141,7 +142,7 @@ public class OrganizationController {
     @GetMapping("organization/details")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
             "or hasRole('MEEDL_ADMIN')" +
-            "or hasRole('MEEDL_ASSOCIATE')" +
+            "or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')" +
             "or hasRole('ORGANIZATION_SUPER_ADMIN')" +
             "or hasRole('ORGANIZATION_ASSOCIATE')" +
             "or hasRole('ORGANIZATION_ADMIN')" +
@@ -211,7 +212,7 @@ public class OrganizationController {
     @Operation(summary = "View all Organizations", description = "Fetch all organizations ")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
             "or hasRole('MEEDL_ADMIN')" +
-            "or hasRole('MEEDL_ASSOCIATE')" +
+            "or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')" +
             "or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewAllOrganization(@RequestParam int pageNumber, @RequestParam int pageSize)
             throws MeedlException {
@@ -228,7 +229,7 @@ public class OrganizationController {
     @Operation(summary = "View all Organizations with status", description = "Fetch all organizations with status")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
             "or hasRole('MEEDL_ADMIN')" +
-            "or hasRole('MEEDL_ASSOCIATE')" +
+            "or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')" +
             "or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewAllOrganizationByStatus(@RequestParam int pageNumber, @RequestParam int pageSize, @RequestParam ActivationStatus status)
             throws MeedlException {
@@ -289,6 +290,24 @@ public class OrganizationController {
                 .build();
     }
 
+    @PostMapping("organization/upload/image")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
+            "or hasRole('MEEDL_ADMIN')" +
+            "or hasRole('PORTFOLIO_MANAGER')" +
+            "or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')" +
+            "or hasRole('COOPERATE_FINANCIER_ADMIN')" +
+            "or hasRole('ORGANIZATION_SUPER_ADMIN')" +
+            "or hasRole('ORGANIZATION_ADMIN')")
+    public ResponseEntity<ApiResponse<?>> uploadImage(@AuthenticationPrincipal Jwt meedlUser,
+                                                      @RequestBody UploadImage uploadImage) throws MeedlException {
+        OrganizationIdentity organizationIdentity = OrganizationIdentity.builder().actorId(meedlUser.getClaimAsString("sub")).bannerImage(uploadImage.getImageUrl()).build();
+        log.info("The organization updating image: {} ",meedlUser.getClaimAsString("sub"));
+        createOrganizationUseCase.uploadImage(organizationIdentity);
+        return ResponseEntity.ok(ApiResponse.<String>builder()
+                .message("Image uploaded successfully.")
+                .statusCode(HttpStatus.OK.name()).build());
+    }
+
 
     @PostMapping("organization/approve/invite")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN')")
@@ -297,32 +316,33 @@ public class OrganizationController {
 
         log.info("request that got in - organization{} == status{}",organizationDecisionRequest.getOrganizationId(),
                 organizationDecisionRequest.getActivationStatus());
-        String response = createOrganizationUseCase.respondToOrganizationInvite(meedlUser.getClaimAsString("sub"),
+        OrganizationIdentity organizationIdentity = createOrganizationUseCase.respondToOrganizationInvite(meedlUser.getClaimAsString("sub"),
                 organizationDecisionRequest.getOrganizationId(),
                 organizationDecisionRequest.getActivationStatus());
         ApiResponse<Object> apiResponse = ApiResponse.builder()
                 .statusCode(HttpStatus.OK.toString())
-                .message(response)
-                .data(response)
+                .message(organizationIdentity.getResponse())
+                .data(QAResponse.builder().id(organizationIdentity.getId()).email(organizationIdentity.getEmail()).build())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
 
     @PostMapping("organization/colleague/invite")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN')  " +
-                  " or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('ORGANIZATION_ADMIN') ")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or  hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN')  " +
+                  " or hasRole('ORGANIZATION_SUPER_ADMIN')  or hasRole('ORGANIZATION_ADMIN') " +
+            "or hasRole('COOPERATE_FINANCIER_ADMIN') or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')  ")
     public ResponseEntity<ApiResponse<?>> inviteColleague(@AuthenticationPrincipal Jwt meedlUser,
                                                           @RequestBody InviteColleagueRequest inviteColleagueRequest) throws MeedlException {
         OrganizationIdentity organizationIdentity =
                 organizationRestMapper.mapInviteColleagueRequestToOrganizationIdentity(inviteColleagueRequest);
         log.info("request after mapping {}",organizationIdentity.getUserIdentity());
         organizationIdentity.getUserIdentity().setCreatedBy(meedlUser.getClaimAsString("sub"));
-        String response = createOrganizationUseCase.inviteColleague(organizationIdentity);
+        UserIdentity userIdentity = createOrganizationUseCase.inviteColleague(organizationIdentity);
         ApiResponse<Object> apiResponse = ApiResponse.builder()
                 .statusCode(HttpStatus.OK.toString())
-                .message(response)
-                .data(response)
+                .message(userIdentity.getResponse())
+                .data(QAResponse.builder().id(userIdentity.getId()).email(userIdentity.getEmail()).build())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }

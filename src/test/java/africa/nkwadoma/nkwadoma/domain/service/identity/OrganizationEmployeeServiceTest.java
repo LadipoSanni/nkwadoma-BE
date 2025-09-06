@@ -2,8 +2,9 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -22,7 +23,6 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @Slf4j
@@ -44,6 +44,8 @@ class OrganizationEmployeeServiceTest {
     private OrganizationIdentity organization ;
     @Mock
     private AsynchronousMailingOutputPort asynchronousMailingOutputPort;
+    @Mock
+    private AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
 
 
     @BeforeEach
@@ -219,7 +221,7 @@ class OrganizationEmployeeServiceTest {
 
         organizationEmployeeService.setRolesToView(organizationEmployeeIdentity, userIdentity);
 
-        assertEquals(Set.of(IdentityRole.PORTFOLIO_MANAGER, IdentityRole.MEEDL_ASSOCIATE),
+        assertEquals(Set.of(IdentityRole.PORTFOLIO_MANAGER, IdentityRole.PORTFOLIO_MANAGER_ASSOCIATE),
                 organizationEmployeeIdentity.getIdentityRoles());
     }
 
@@ -235,7 +237,7 @@ class OrganizationEmployeeServiceTest {
 
     @Test
     void setsMeedlRolesForNonPendingApprovalByMeedlStaff() {
-        userIdentity.setRole(IdentityRole.MEEDL_ASSOCIATE);
+        userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER_ASSOCIATE);
         organizationEmployeeIdentity.setActivationStatus(ActivationStatus.ACTIVE);
 
         organizationEmployeeService.setRolesToView(organizationEmployeeIdentity, userIdentity);
@@ -267,7 +269,7 @@ class OrganizationEmployeeServiceTest {
 
     @Test
     void nonPendingApprovalWithRolesProvidedDoesNotOverride() {
-        userIdentity.setRole(IdentityRole.MEEDL_ASSOCIATE);
+        userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER_ASSOCIATE);
         organizationEmployeeIdentity.setActivationStatus(ActivationStatus.ACTIVE);
         organizationEmployeeIdentity.setIdentityRoles(Set.of(IdentityRole.MEEDL_ADMIN));
 
@@ -346,20 +348,38 @@ class OrganizationEmployeeServiceTest {
 
 
     @Test
-    void respondToColleagueInvitation(){
+    void approveColleagueInvitation(){
         String response = "";
         try {
             organizationEmployeeIdentity.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
             when(organizationEmployeeOutputPort.findById(any())).thenReturn(organizationEmployeeIdentity);
             when(organizationIdentityOutputPort.findById(any())).thenReturn(organization);
             when(organizationEmployeeOutputPort.save(organizationEmployeeIdentity)).thenReturn(organizationEmployeeIdentity);
-            response = organizationEmployeeService.respondToColleagueInvitation(mockId);
+            organizationEmployeeIdentity = organizationEmployeeService.respondToColleagueInvitation(mockId,mockId,ActivationStatus.APPROVED);
         }catch (MeedlException meedlException){
             log.error(meedlException.getMessage());
         }
         assertNotNull(response);
-        assertEquals(response,"Colleague invitation approved for "+organizationEmployeeIdentity.getMeedlUser().getFirstName()+" "
-                +organizationEmployeeIdentity.getMeedlUser().getLastName());
+        assertEquals(organizationEmployeeIdentity.getResponse(),"Colleague invitation APPROVED for "+organizationEmployeeIdentity.getMeedlUser().getFullName());
+    }
+
+    @Test
+    void declineColleagueInvitation(){
+        String response = "";
+        try {
+            organizationEmployeeIdentity.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
+            when(organizationEmployeeOutputPort.findById(any())).thenReturn(organizationEmployeeIdentity);
+            when(organizationIdentityOutputPort.findById(any())).thenReturn(organization);
+            when(organizationEmployeeOutputPort.save(organizationEmployeeIdentity)).thenReturn(organizationEmployeeIdentity);
+            when(userIdentityOutputPort.findById(any())).thenReturn(userIdentity);
+
+            organizationEmployeeIdentity = organizationEmployeeService.respondToColleagueInvitation(mockId,mockId,ActivationStatus.DECLINED);
+            response = organizationEmployeeIdentity.getResponse();
+        }catch (MeedlException meedlException){
+            log.error(meedlException.getMessage());
+        }
+        assertNotNull(response);
+        assertEquals(response,"Colleague invitation DECLINED for "+organizationEmployeeIdentity.getMeedlUser().getFullName());
     }
 
 
@@ -367,11 +387,50 @@ class OrganizationEmployeeServiceTest {
     void cannotRespondToActiveColleagueInvitation() throws MeedlException {
         organizationEmployeeIdentity.setActivationStatus(ActivationStatus.ACTIVE);
         when(organizationEmployeeOutputPort.findById(any())).thenReturn(organizationEmployeeIdentity);
-        assertThrows(MeedlException.class , () ->organizationEmployeeService.respondToColleagueInvitation(mockId));
+        assertThrows(MeedlException.class , () ->organizationEmployeeService.respondToColleagueInvitation(mockId,mockId,ActivationStatus.APPROVED));
     }
 
     @Test
-    void respondToColleagueInvitationWithNullOrganizationEmployeeId() throws MeedlException {
-            assertThrows(MeedlException.class , () ->organizationEmployeeService.respondToColleagueInvitation(null));
+    void respondToColleagueInvitationWithNullOrganizationEmployeeId(){
+            assertThrows(MeedlException.class , () ->organizationEmployeeService.respondToColleagueInvitation(mockId,null,ActivationStatus.APPROVED));
     }
+
+
+
+    @Test
+    void viewEmployeeDetailWithValidId() throws MeedlException {
+        organizationEmployeeIdentity.setId(mockId);
+        OrganizationEmployeeIdentity expectedEmployee = new OrganizationEmployeeIdentity();
+        expectedEmployee.setId(mockId);
+
+        when(organizationEmployeeOutputPort.findById(mockId))
+                .thenReturn(expectedEmployee);
+
+        OrganizationEmployeeIdentity result =
+                organizationEmployeeService.viewEmployeeDetail(organizationEmployeeIdentity);
+
+        assertNotNull(result);
+        assertEquals(mockId, result.getId());
+        Mockito.verify(organizationEmployeeOutputPort, Mockito.times(1))
+                .findById(mockId);
+    }
+
+    @Test
+    void viewEmployeeDetailWithInvalidUUID() {
+        organizationEmployeeIdentity.setId("not-a-uuid");
+
+        assertThrows(MeedlException.class,
+                () -> organizationEmployeeService.viewEmployeeDetail(organizationEmployeeIdentity));
+
+        Mockito.verifyNoInteractions(organizationEmployeeOutputPort);
+    }
+
+    @Test
+    void viewEmployeeDetailWithNullOrganizationEmployeeIdentity() {
+        assertThrows(MeedlException.class,
+                () -> organizationEmployeeService.viewEmployeeDetail(null));
+
+        Mockito.verifyNoInteractions(organizationEmployeeOutputPort);
+    }
+
 }

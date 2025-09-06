@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityverification;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -25,7 +25,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.*;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.PORTFOLIO_MANAGER;
+import static africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole.PORTFOLIO_MANAGER;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest

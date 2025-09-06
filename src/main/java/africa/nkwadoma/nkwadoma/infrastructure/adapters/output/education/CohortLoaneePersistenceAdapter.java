@@ -5,13 +5,13 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanException;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortLoaneeEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoaneeEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.CohortLoaneeMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortLoaneeProjection;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortLoaneeRepository;
@@ -93,7 +93,7 @@ public class CohortLoaneePersistenceAdapter implements CohortLoaneeOutputPort {
     @Override
     public boolean checkIfLoaneeHasBeenPreviouslyReferred(String loaneeId) throws MeedlException {
         MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
-        Long count = cohortLoaneeRepository.countByLoaneeId(loaneeId);
+        Long count = cohortLoaneeRepository.countByLoaneeIdAndStatus(loaneeId);
         log.info("loan referral count = {}", count);
         return count > 1;
     }
@@ -169,6 +169,21 @@ public class CohortLoaneePersistenceAdapter implements CohortLoaneeOutputPort {
     public CohortLoanee findCohortLoaneeByLoaneeLoanDetailId(String id) throws MeedlException {
         MeedlValidator.validateUUID(id, "Loanee loan detail id cannot be empty ");
         CohortLoaneeEntity cohortLoaneeEntity = cohortLoaneeRepository.findByLoaneeLoanDetailId(id);
+        return cohortLoaneeMapper.toCohortLoanee(cohortLoaneeEntity);
+    }
+
+    @Override
+    public boolean checkIfLoaneeIsNew(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+        Long count =  cohortLoaneeRepository.countByLoaneeId(id);
+        return count > 0;
+    }
+
+    @Override
+    public CohortLoanee findCohortLoaneeByLoanId(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id, "Loan id cannot be empty ");
+        CohortLoaneeEntity cohortLoaneeEntity =
+                cohortLoaneeRepository.findCohortLoaneeByLoanId(id);
         return cohortLoaneeMapper.toCohortLoanee(cohortLoaneeEntity);
     }
 }

@@ -2,7 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.EmailResendUseCase;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ public class EmailResendController {
     private EmailResendUseCase emailResendUseCase;
 
     @PostMapping("loanee/refer/email/resend/{email}")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> resendEmail(@PathVariable @Valid String email) throws MeedlException {
         emailResendUseCase.resendReferralEmail(email);
         return ResponseEntity.ok(ApiResponse.<String>builder()

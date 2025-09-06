@@ -1,0 +1,110 @@
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.walletManagement;
+
+import africa.nkwadoma.nkwadoma.application.ports.input.walletManagement.WalletOutputPort;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.walletManagement.BankDetailRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.QAResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.walletResponse.BankDetailResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.walletManagement.BankDetailRestMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.*;
+
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ControllerConstant.*;
+
+@Slf4j
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("wallet")
+@Tag(name = "Wallet management  Controller", description = "Manage wallet of different entities")
+public class WalletManagementController {
+    @Autowired
+    private WalletOutputPort bankDetailUseCase;
+    @Autowired
+    private BankDetailRestMapper bankDetailMapper;
+
+    @PostMapping("add/bankDetail")
+    @Operation(summary = BANK_DETAIL, description = ADD_BANK_DETAIL_DESCRIPTION)
+    @PreAuthorize(""" 
+            hasRole('MEEDL_SUPER_ADMIN')
+            or hasRole('MEEDL_ADMIN')
+            or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')
+            or hasRole('PORTFOLIO_MANAGER')
+            or hasRole('ORGANIZATION_SUPER_ADMIN')
+            or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')
+            or hasRole('FINANCIER')
+            or hasRole('COOPERATE_FINANCIER_ADMIN')
+            or hasRole('ORGANIZATION_ADMIN')
+            or hasRole('ORGANIZATION_ASSOCIATE')
+            """)
+            public ResponseEntity<ApiResponse<?>> addBankDetail(@AuthenticationPrincipal Jwt meedlUser,
+                                                             @RequestBody @Valid BankDetailRequest bankDetailRequest) throws MeedlException {
+        BankDetail bankDetail = bankDetailMapper.map(meedlUser.getClaimAsString("sub"), bankDetailRequest);
+        bankDetail = bankDetailUseCase.addBankDetails(bankDetail);
+        log.info("Bank details after adding {}", bankDetail);
+        ApiResponse<Object> apiResponse = ApiResponse.builder()
+                .data(QAResponse.builder().id(bankDetail.getId()).build())
+                .message(bankDetail.getResponse())
+                .statusCode(HttpStatus.CREATED.name())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+    }
+
+    @GetMapping("view/bankDetail")
+    @Operation(summary = BANK_DETAIL, description = VIEW_BANK_DETAIL_DESCRIPTION)
+    @PreAuthorize(""" 
+            hasRole('MEEDL_SUPER_ADMIN')
+            or hasRole('MEEDL_ADMIN')
+            or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')
+            or hasRole('PORTFOLIO_MANAGER')
+            or hasRole('ORGANIZATION_SUPER_ADMIN')
+            or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')
+            or hasRole('COOPERATE_FINANCIER_ADMIN')
+            or hasRole('FINANCIER')
+            or hasRole('ORGANIZATION_ADMIN')
+            or hasRole('ORGANIZATION_ASSOCIATE')
+            """)
+    public ResponseEntity<ApiResponse<?>> viewBankDetail(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
+        BankDetail bankDetail = bankDetailMapper.map(meedlUser.getClaimAsString("sub"));
+        bankDetail = bankDetailUseCase.viewBankDetail(bankDetail);
+        log.info("Viewing bank details {}", bankDetail);
+        BankDetailResponse bankDetailResponse = bankDetailMapper.map(bankDetail);
+        ApiResponse<Object> apiResponse = ApiResponse.builder()
+                .data(bankDetailResponse)
+                .message("Bank detail viewed successfully")
+                .statusCode(HttpStatus.OK.name())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+    }
+    @GetMapping("approve/bankDetail")
+    @Operation(summary = BANK_DETAIL, description = APPROVE_OR_DECLINE_BANK_DETAIL_DESCRIPTION)
+    @PreAuthorize(""" 
+            hasRole('MEEDL_SUPER_ADMIN')
+            or hasRole('ORGANIZATION_SUPER_ADMIN')
+            or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')
+            """)
+    public ResponseEntity<ApiResponse<?>> respondToAddBankDetail(@AuthenticationPrincipal Jwt meedlUser,
+                                                         @RequestBody BankDetailRequest bankDetailRequest) throws MeedlException {
+        BankDetail bankDetail = bankDetailMapper.map(meedlUser.getClaimAsString("sub"), bankDetailRequest);
+        bankDetail = bankDetailUseCase.respondToAddBankDetail(bankDetail);
+        log.info("respond to add bank details as {} with response {}", bankDetail.getActivationStatus(), bankDetail.getResponse());
+        ApiResponse<Object> apiResponse = ApiResponse.builder()
+                .message(bankDetail.getResponse())
+                .statusCode(HttpStatus.OK.name())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+    }
+
+
+}

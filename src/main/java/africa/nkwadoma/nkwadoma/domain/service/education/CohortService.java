@@ -8,14 +8,14 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOfferOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortType;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
@@ -65,6 +65,7 @@ public class CohortService implements CohortUseCase {
     private final CohortLoanDetailMapper cohortLoanDetailMapper;
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
     private final LoanOfferOutputPort loanOfferOutputPort;
+    private final InstituteMetricsOutputPort instituteMetricsOutputPort;
 
     @Override
     public Cohort createCohort(Cohort cohort) throws MeedlException {
@@ -72,7 +73,7 @@ public class CohortService implements CohortUseCase {
         cohort.validate();
         String cohortName = cohort.getName();
         UserIdentity userIdentity = userIdentityOutputPort.findById(cohort.getCreatedBy());
-        if (userIdentity.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)) {
+        if (IdentityRole.isOrganizationAdminOrSuperAdmin(userIdentity.getRole())) {
             cohort.validateLoanBreakDowns();
             cohort.setCohortType(CohortType.NON_LOAN_BOOK);
         }else {
@@ -93,7 +94,7 @@ public class CohortService implements CohortUseCase {
         savedCohort = cohortOutputPort.save(savedCohort);
         savedCohort.setLoanBreakdowns(savedLoanBreakdowns);
         savedCohort.setProgramName(program.getName());
-        updateNumberOfCohortInOrganization(program.getOrganizationId());
+        updateNumberOfCohortInInstituteMetrics(program.getOrganizationId());
 
         CohortLoanDetail cohortLoanDetail = buildCohortLoanDetail(savedCohort);
         cohortLoanDetailOutputPort.save(cohortLoanDetail);
@@ -111,10 +112,10 @@ public class CohortService implements CohortUseCase {
                 .build();
     }
 
-    public void updateNumberOfCohortInOrganization(String organizationId) throws MeedlException {
-        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
-        organizationIdentity.setNumberOfCohort(organizationIdentity.getNumberOfCohort() + 1);
-        organizationIdentityOutputPort.save(organizationIdentity);
+    public void updateNumberOfCohortInInstituteMetrics(String organizationId) throws MeedlException {
+        InstituteMetrics instituteMetrics = instituteMetricsOutputPort.findByOrganizationId(organizationId);
+        instituteMetrics.setNumberOfCohort(instituteMetrics.getNumberOfCohort() + 1);
+        instituteMetricsOutputPort.save(instituteMetrics);
     }
 
     private Program checkifCohortNameExistInProgram(Cohort cohort, String cohortName) throws MeedlException {
@@ -289,7 +290,7 @@ public class CohortService implements CohortUseCase {
     public Page<Cohort> searchForCohort(String userId, Cohort cohort) throws MeedlException {
         MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
-        if (userIdentity.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)){
+        if (IdentityRole.isOrganizationStaff(userIdentity.getRole() )){
             if (ObjectUtils.isEmpty(cohort.getProgramId())) {
                 OrganizationIdentity organizationIdentity = programOutputPort.findCreatorOrganization(userId);
                 return cohortOutputPort.searchCohortInOrganization(organizationIdentity.getId(),cohort.getName(),

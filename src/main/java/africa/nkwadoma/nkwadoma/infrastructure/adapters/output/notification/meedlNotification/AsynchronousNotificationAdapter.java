@@ -5,10 +5,13 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputP
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.financier.CooperateFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -27,6 +30,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -72,7 +76,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                     .title("New Organization Invite Awaiting Approval")
                     .callToAction(Boolean.TRUE)
                     .senderMail(userIdentity.getEmail())
-                    .senderFullName(userIdentity.getFirstName() + " " + userIdentity.getLastName())
+                    .senderFullName(userIdentity.getFullName())
                     .contentDetail("New organization with the name " + organizationIdentity.getName())
                     .notificationFlag(notificationFlag)
                     .build();
@@ -91,9 +95,9 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                     .user(organizationEmployeeIdentity.getMeedlUser())
                     .timestamp(LocalDateTime.now())
                     .contentId(loanId)
-                    .contentDetail(loanee.getUserIdentity().getFirstName() + " " + loanee.getUserIdentity().getLastName() + " requested to defer loan")
+                    .contentDetail(loanee.getUserIdentity().getFullName() + " requested to defer loan")
                     .senderMail(loanee.getUserIdentity().getEmail())
-                    .senderFullName(loanee.getUserIdentity().getFirstName() + " " + loanee.getUserIdentity().getLastName())
+                    .senderFullName(loanee.getUserIdentity().getFullName())
                     .title("Defer Loan Request")
                     .notificationFlag(notificationFlag)
                     .build();
@@ -122,7 +126,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                 .contentDetail(message)
                 .timestamp(LocalDateTime.now())
                 .senderMail(userIdentity.getEmail())
-                .senderFullName(userIdentity.getFirstName()+" "+ userIdentity.getLastName())
+                .senderFullName(userIdentity.getFullName())
                 .callToAction(true)
                 .contentId(userIdentity.getId())
                 .build();
@@ -173,7 +177,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                 .title(title)
                 .callToAction(Boolean.TRUE)
                 .senderMail(portfolioManager.getEmail())
-                .senderFullName(portfolioManager.getFirstName() + " " + portfolioManager.getLastName())
+                .senderFullName(portfolioManager.getFullName())
                 .contentDetail(message)
                 .notificationFlag(flag)
                 .build();
@@ -219,7 +223,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                     .title("Attempt to deactivate super admin made")
                     .callToAction(Boolean.TRUE)
                     .senderMail(foundActor.getEmail())
-                    .senderFullName(superAdmin.getFirstName() + " " + superAdmin.getLastName())
+                    .senderFullName(superAdmin.getFullName())
                     .contentDetail("An attempt was made to deactivate the super admin account of Meedl's platform. \nThe attempt was made by "+foundActor.getFirstName() + " "+ foundActor.getLastName()+ ". User email is "+foundActor.getEmail() + ".\nUser role is "+foundActor.getRole())
                     .notificationFlag(NotificationFlag.MEEDL_SUPER_ADMIN_DEACTIVATION_ATTEMPT)
                     .build();
@@ -240,7 +244,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                 .title("Organization has been " + status)
                 .callToAction(Boolean.TRUE)
                 .senderMail(portfolioManager.getEmail())
-                .senderFullName(portfolioManager.getFirstName() + " " + portfolioManager.getLastName())
+                .senderFullName(portfolioManager.getFullName())
                 .contentDetail("Organization with name " + organization.getName() + " has been " + status)
                 .notificationFlag(flag)
                 .build();
@@ -257,7 +261,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                 .title("Failed to upload repayment history: " + loanBook.getFile().getName())
                 .callToAction(Boolean.FALSE)
                 .senderMail(foundActor.getEmail())
-                .senderFullName(foundActor.getFirstName() + " "+foundActor.getLastName())
+                .senderFullName(foundActor.getFullName())
                 .contentDetail(validationErrorMessage.toString())
                 .notificationFlag(NotificationFlag.REPAYMENT_UPLOAD_FAILURE)
                 .build();
@@ -290,7 +294,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                 .title("Failed to upload user data: " + loanBook.getFile().getName())
                 .callToAction(Boolean.FALSE)
                 .senderMail(foundActor.getEmail())
-                .senderFullName(foundActor.getFirstName())
+                .senderFullName(foundActor.getFullName())
                 .contentDetail(validationErrorMessage.toString())
                 .notificationFlag(NotificationFlag.LOANEE_DATA_UPLOAD_FAILURE)
                 .build();
@@ -307,7 +311,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                 .title("Successfully Uploaded Repayment History")
                 .callToAction(Boolean.TRUE)
                 .senderMail(foundActor.getEmail())
-                .senderFullName(foundActor.getFirstName())
+                .senderFullName(foundActor.getFullName())
                 .contentDetail("Repayment history upload completed")
                 .notificationFlag(NotificationFlag.REPAYMENT_UPLOAD_SUCCESS)
                 .build();
@@ -324,7 +328,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                 .title("Successfully Uploaded User Data")
                 .callToAction(Boolean.TRUE)
                 .senderMail(foundActor.getEmail())
-                .senderFullName(foundActor.getFirstName())
+                .senderFullName(foundActor.getFullName())
                 .contentDetail("User data upload completed")
                 .notificationFlag(NotificationFlag.LOANEE_DATA_UPLOAD_SUCCESS)
                 .build();
@@ -356,7 +360,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                         " has been invited to the " + investmentVehicle.getName() +
                         " investment vehicle.\n" +
                         "Click the link to view financier detail.")
-                .senderFullName(sender.getFirstName())
+                .senderFullName(sender.getFullName())
                 .senderMail(sender.getEmail())
                 .callToAction(true)
                 .callToActionRoute("view/financier/details/not merge during this implementation. Should be updated")
@@ -372,7 +376,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                         " financier " + financier.getUserIdentity().getFirstName() +
                         " has been invited to the platform." +
                         "Click the link to view financier detail.")
-                .senderFullName(sender.getFirstName() +" "+ sender.getFirstName())
+                .senderFullName(sender.getFullName())
                 .senderMail(sender.getEmail())
                 .callToAction(true)
                 .callToActionRoute("view/financier/details/not merge during this implementation. Should be updated")
@@ -384,7 +388,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                 .title("Loan Offer Decision Made")
                 .contentId(loanOffer.getId())
                 .contentDetail("A Loan Offer has been "+ loanOffer.getLoaneeResponse())
-                .senderFullName(sender.getFirstName() +" "+ sender.getFirstName())
+                .senderFullName(sender.getFullName())
                 .senderMail(sender.getEmail())
                 .callToAction(true)
                 .callToActionRoute("view/loan/offer/not merge during this implementation. Should be updated")
@@ -397,7 +401,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
         MeedlNotification meedlNotification = MeedlNotification.builder()
                 .title("Pending colleague invitation")
                 .contentDetail("Need Approval for colleague invitation")
-                .senderFullName(foundActor.getMeedlUser().getFirstName()+" "+ foundActor.getMeedlUser().getLastName())
+                .senderFullName(foundActor.getMeedlUser().getFullName())
                 .senderMail(foundActor.getMeedlUser().getEmail())
                 .notificationFlag(NotificationFlag.INVITE_COLLEAGUE)
                 .timestamp(LocalDateTime.now())
@@ -408,5 +412,132 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
         log.info("done building notification for super admin to approve colleague invitation{}", meedlNotification);
         meedlNotificationUsecase.sendNotification(meedlNotification);
         log.info("notification sent ====---=-=---=-");
+    }
+
+    @Override
+    public void sendDeclineColleagueNotification(OrganizationEmployeeIdentity organizationEmployeeIdentity,
+                                                 UserIdentity userIdentity,UserIdentity createdBy) throws MeedlException {
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .title("Decline colleague invitation")
+                .contentDetail("Decline invitation for "+organizationEmployeeIdentity.getMeedlUser().getFirstName()+
+                        " "+organizationEmployeeIdentity.getMeedlUser().getLastName())
+                .senderFullName(userIdentity.getFullName())
+                .senderMail(userIdentity.getEmail())
+                .notificationFlag(NotificationFlag.DECLINE_COLLEAGUE_INVITE)
+                .timestamp(LocalDateTime.now())
+                .contentId(organizationEmployeeIdentity.getId())
+                .callToAction(true)
+                .user(createdBy)
+                .build();
+        log.info("done building notification for decline colleague invitation{}", meedlNotification);
+        meedlNotificationUsecase.sendNotification(meedlNotification);
+        log.info("notification sent ====---=-==---=-");
+    }
+
+    @Override
+    public void sendFinancierInvitationNotificationToSuperAdmin(List<Financier> financiersToMail, UserIdentity actor, UserIdentity meedlSuperAdmin) {
+
+        financiersToMail.forEach(financier -> {
+            MeedlNotification meedlNotification = MeedlNotification.builder()
+                    .title("Financier invitation")
+                    .contentId(financier.getId())
+                    .senderMail(actor.getEmail())
+                    .senderFullName(actor.getFullName())
+                    .notificationFlag(NotificationFlag.REQUESTING_APPROVAL_FINANCIER_INVITATION)
+                    .timestamp(LocalDateTime.now())
+                    .callToAction(true)
+                    .user(meedlSuperAdmin)
+                    .build();
+
+            if (financier.getFinancierType().equals(FinancierType.COOPERATE)){
+                meedlNotification.setContentDetail("Request for cooperation financier invitation ");
+            }else {
+                meedlNotification.setContentDetail("Request for an individual financier invitation ");
+            }
+            log.info("done building notification for financier invitation colleague invitation{}", meedlNotification);
+            try {
+                meedlNotificationUsecase.sendNotification(meedlNotification);
+            } catch (MeedlException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    @Override
+    public void notifyCooperateSuperAdminToApproveBankDetail(BankDetail bankDetail, Financier financier) throws MeedlException {
+        UserIdentity actor = userIdentityOutputPort.findById(financier.getUserIdentity().getId());
+        Optional<UserIdentity> optionalFoundSuperAdmin = userIdentityOutputPort.findFinancierSuperAdminByFinancierId(financier.getId());
+        UserIdentity financierSuperAdmin ;
+        if (optionalFoundSuperAdmin.isPresent()){
+            financierSuperAdmin = optionalFoundSuperAdmin.get();
+        }else {
+            //Notify back office admin;
+            throw new MeedlException("Financier super admin not found to send approve bank notification");
+        }
+
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .contentId(bankDetail.getId())
+                .senderFullName(actor.getFullName())
+                .user(financierSuperAdmin)
+                .title("Approve bank detail")
+                .contentDetail("""
+                A request to approve bank details. with details:
+                Bank name :
+                account number :
+                admin requesting approval :
+                """)
+                .build();
+        meedlNotificationUsecase.sendNotification(meedlNotification);
+    }
+
+    @Override
+    public void notifyInviterForColleagueInvitationApproval(UserIdentity userIdentity, UserIdentity financierCreator, CooperateFinancier cooperateFinancier) throws MeedlException {
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .title("Colleague invitation approval")
+                .user(financierCreator)
+                .callToAction(true)
+                .timestamp(LocalDateTime.now())
+                .contentId(cooperateFinancier.getId())
+                .notificationFlag(NotificationFlag.INVITE_COOPERATE_COLLEAGUE_APPROVAL)
+                .senderFullName(userIdentity.getFullName())
+                .senderMail(userIdentity.getEmail())
+                .contentDetail("Colleague invitation approved for "+cooperateFinancier.getFinancier().getUserIdentity().getFirstName())
+                .build();
+        meedlNotificationUsecase.sendNotification(meedlNotification);
+    }
+
+    @Override
+    public void notifyInviterForColleagueInvitationDeclined(UserIdentity userIdentity, UserIdentity financierCreator, CooperateFinancier cooperateFinancier) throws MeedlException {
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .title("Colleague invitation declined")
+                .user(financierCreator)
+                .callToAction(true)
+                .timestamp(LocalDateTime.now())
+                .contentId(cooperateFinancier.getId())
+                .notificationFlag(NotificationFlag.INVITE_COOPERATE_COLLEAGUE_DECLINED)
+                .senderFullName(userIdentity.getFullName())
+                .senderMail(userIdentity.getEmail())
+                .contentDetail("Colleague invitation declined for "+cooperateFinancier.getFinancier().getUserIdentity().getFirstName())
+                .build();
+        meedlNotificationUsecase.sendNotification(meedlNotification);
+    }
+
+    @Override
+    public void sendNotificationToCooperateSuperAdmin(CooperateFinancier inviter, CooperateFinancier newCooperateFinancier, CooperateFinancier superAdminFinancier) throws MeedlException {
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .title("Pending colleague invitation")
+                .contentDetail("Need Approval for colleague invitation")
+                .senderFullName(inviter.getFinancier().getUserIdentity().getFirstName()+" "+ inviter.getFinancier().getUserIdentity().getLastName())
+                .senderMail(inviter.getFinancier().getUserIdentity().getEmail())
+                .notificationFlag(NotificationFlag.INVITE_COLLEAGUE)
+                .timestamp(LocalDateTime.now())
+                .contentId(newCooperateFinancier.getId())
+                .callToAction(true)
+                .user(superAdminFinancier.getFinancier().getUserIdentity())
+                .build();
+        log.info("done building notification for super admin to approve colleague invitation{}", meedlNotification);
+        meedlNotificationUsecase.sendNotification(meedlNotification);
+        log.info("notification sent ====---=-=---=-");
+
     }
 }

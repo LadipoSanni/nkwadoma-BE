@@ -11,6 +11,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
+
 
 @Slf4j
 @Component
@@ -36,5 +39,21 @@ public class MonthlyInterestAdapter implements MonthlyInterestOutputPort {
     public void deleteById(String monthlyInterestId) throws MeedlException {
         MeedlValidator.validateUUID(monthlyInterestId,"Monthly interest id cannot be empty");
         monthlyInterestRepository.deleteById(monthlyInterestId);
+    }
+
+    public MonthlyInterest findByDateCreated(LocalDateTime dateCreated, String id) throws MeedlException {
+        MeedlValidator.validateUUID(id,"Loanee loan detail id cannot be empty");
+        MeedlValidator.validateObjectInstance(dateCreated,"Date created cannot be empty");
+        MonthlyInterestEntity monthlyInterestEntity =
+                monthlyInterestRepository.findByLoaneeLoanDetailIdAndCreatedAtMonthAndCreatedAtYear(id,dateCreated.getMonth().getValue()
+                        ,dateCreated.getYear());
+
+        return monthlyInterestMapper.toMonthlyInterest(monthlyInterestEntity);
+    }
+
+    @Override
+    public void deleteAllByLoaneeLoanDetailId(String loaneeLoanDetailId) throws MeedlException {
+        MeedlValidator.validateUUID(loaneeLoanDetailId, "Provide a valid loanee loan detail id");
+        monthlyInterestRepository.deleteAllByLoaneeLoanDetail_Id(loaneeLoanDetailId);
     }
 }

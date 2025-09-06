@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository;
 
-import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEmployeeEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.identity.*;
 import org.springframework.data.domain.*;
@@ -32,20 +32,45 @@ public interface EmployeeAdminEntityRepository extends JpaRepository<Organizatio
 
     List<OrganizationEmployeeEntity> findAllByOrganization(String organizationId);
 
-    @Query("SELECT o FROM OrganizationEmployeeEntity o " +
-            "WHERE o.organization = :organizationId " +
-            "AND (:roles IS NULL OR o.meedlUser.role IN :roles) " +
-            "AND (:activationStatuses IS NULL OR o.activationStatus IN :activationStatuses) " +
-            "AND (:enabled IS NULL OR o.meedlUser.enabled = :enabled)" +
-            "AND (" +
-            "   upper(concat(o.meedlUser.firstName, ' ', o.meedlUser.lastName)) LIKE upper(concat('%', :nameFragment, '%')) " +
-            "   OR upper(concat(o.meedlUser.lastName, ' ', o.meedlUser.firstName)) LIKE upper(concat('%', :nameFragment, '%')) " +
-            "   OR upper(o.meedlUser.firstName) LIKE upper(concat('%', :nameFragment, '%')) " +
-            "   OR upper(o.meedlUser.lastName) LIKE upper(concat('%', :nameFragment, '%')) " +
-            "   OR upper(o.meedlUser.email) LIKE upper(concat('%', :nameFragment, '%'))" +
-            ") " +
-            "ORDER BY o.meedlUser.createdAt DESC")
-    Page<OrganizationEmployeeEntity> findAdminsByNameFilters(
+    @Query("""
+       SELECT
+          o.id AS id,
+          o.meedlUser AS meedlUser,
+          o.organization AS organization,
+          o.createdBy AS createdBy,
+          o.activationStatus AS activationStatus,
+          CONCAT(u.firstName, ' ', u.lastName) AS requestedBy
+       FROM OrganizationEmployeeEntity o
+       JOIN UserEntity u ON u.id = o.createdBy
+       WHERE o.id = :id
+       """)
+    Optional<OrganizationEmployeeEntityProjection> findEmployeeById(@Param("id") String id);
+
+    @Query("""
+
+          SELECT
+          o.id AS id,
+          o.meedlUser AS meedlUser,
+         o.organization AS organization,
+         o.createdBy AS createdBy,
+         o.activationStatus AS activationStatus,
+         CONCAT(u.firstName, ' ', u.lastName) AS requestedBy
+         FROM OrganizationEmployeeEntity o
+        JOIN UserEntity u ON u.id = o.createdBy
+        WHERE o.organization = :organizationId
+      AND (:roles IS NULL OR o.meedlUser.role IN :roles)
+      AND (:activationStatuses IS NULL OR o.activationStatus IN :activationStatuses)
+      AND (:enabled IS NULL OR o.meedlUser.enabled = :enabled)
+      AND (
+           upper(concat(o.meedlUser.firstName, ' ', o.meedlUser.lastName)) LIKE upper(concat('%', :nameFragment, '%'))
+        OR upper(concat(o.meedlUser.lastName, ' ', o.meedlUser.firstName)) LIKE upper(concat('%', :nameFragment, '%'))
+        OR upper(o.meedlUser.firstName) LIKE upper(concat('%', :nameFragment, '%'))
+        OR upper(o.meedlUser.lastName) LIKE upper(concat('%', :nameFragment, '%'))
+        OR upper(o.meedlUser.email) LIKE upper(concat('%', :nameFragment, '%'))
+      )
+    ORDER BY o.meedlUser.createdAt DESC
+""")
+    Page<OrganizationEmployeeEntityProjection> findAdminsByNameFilters(
             @Param("organizationId") String organizationId,
             @Param("nameFragment") String nameFragment,
             @Param("roles") Set<IdentityRole> roles,
@@ -56,14 +81,22 @@ public interface EmployeeAdminEntityRepository extends JpaRepository<Organizatio
 
 
     @Query("""
-    SELECT e FROM OrganizationEmployeeEntity e
+    SELECT
+    e.id AS id,
+          e.meedlUser AS meedlUser,
+         e.organization AS organization,
+         e.createdBy AS createdBy,
+         e.activationStatus AS activationStatus,
+         CONCAT(u.firstName, ' ', u.lastName) AS requestedBy
+    FROM OrganizationEmployeeEntity e
+        JOIN UserEntity u ON u.id = e.createdBy
     WHERE e.organization = :organizationId
       AND e.meedlUser.role IN :roles
       AND (:activationStatuses IS NULL OR e.activationStatus IN :activationStatuses)
       AND (:enabled IS NULL OR e.meedlUser.enabled = :enabled)
       ORDER BY e.meedlUser.createdAt DESC
 """)
-    Page<OrganizationEmployeeEntity> findAllByOrgIdRoleInAndOptionalFilters(
+    Page<OrganizationEmployeeEntityProjection> findAllByOrgIdRoleInAndOptionalFilters(
             @Param("organizationId") String organizationId,
             @Param("roles") Set<IdentityRole> roles,
             @Param("activationStatuses") Set<ActivationStatus>  activationStatuses,

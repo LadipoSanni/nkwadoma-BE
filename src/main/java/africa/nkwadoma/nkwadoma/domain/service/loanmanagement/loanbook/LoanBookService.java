@@ -13,9 +13,10 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProd
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanReferralOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanAggregateOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UploadType;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanDecision;
@@ -33,6 +34,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.CalculationContext;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.validation.LoanBookValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -76,6 +78,7 @@ public class LoanBookService implements LoanBookUseCase {
     private final LoanUseCase loanUseCase;
     private final AesOutputPort aesOutputPort;
     private final LoaneeLoanAggregateOutputPort loaneeLoanAggregateOutputPort;
+    private final PortfolioOutputPort portfolioOutputPort;
 
     @Override
     public void upLoadUserData(LoanBook loanBook) throws MeedlException {
@@ -226,7 +229,7 @@ public class LoanBookService implements LoanBookUseCase {
                         log.info("loan request is {}", loanRequest);
                         loanRequest.setLoanee(cohortLoanee.getLoanee());
                         acceptLoanOffer(loanRequest);
-                        startLoan(loanRequest,cohortLoanee.getUpdatedAt() );
+                        startLoan(loanRequest,cohortLoanee.getLoaneeLoanDetail().getLoanStartDate());
                     } catch (MeedlException e) {
                         log.error("Error accepting loan referral.",e);
                     }
@@ -253,6 +256,7 @@ public class LoanBookService implements LoanBookUseCase {
 
         LoanReferral loanReferral = loanReferralOutputPort.findLoanReferralByCohortLoaneeId(cohortLoanee.getId());
         loanReferral.setLoanReferralStatus(LoanReferralStatus.ACCEPTED);
+        loanReferral.setLoaneeUserId(cohortLoanee.getLoanee().getUserIdentity().getId());
         respondToLoanReferralUseCase.respondToLoanReferral(loanReferral);
         return loanReferral;
     }
@@ -452,6 +456,7 @@ public class LoanBookService implements LoanBookUseCase {
             CohortLoanee cohortLoanee = CohortLoanee.builder()
                     .loaneeLoanDetail(loaneeLoanDetail)
                     .loaneeStatus(LoaneeStatus.ADDED)
+                    .onboardingMode(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)
                     .loanee(loanee)
                     .cohort(cohort)
                     .createdBy(cohort.getCreatedBy())
@@ -488,7 +493,7 @@ public class LoanBookService implements LoanBookUseCase {
                 cohortLoanee.setLoaneeLoanDetail(savedLoaneeLoanDetail);
 
                 Loanee savedLoanee = getSavedLoanee(cohortLoanee);
-
+                updateMeedlPortfolio(savedLoanee);
                 log.info("saved loanee in upload process == {} ",savedLoanee);
                 savedLoanee.setLoanProductName(cohortLoanee.getLoanee().getLoanProductName());
                 cohortLoanee.setLoanee(savedLoanee);
@@ -505,6 +510,17 @@ public class LoanBookService implements LoanBookUseCase {
         }
         log.info("Done saving loanee data from file to db. cohortLoanees size {}", savedLoanees.size());
         return savedLoanees;
+    }
+
+
+    private void updateMeedlPortfolio(Loanee loanee) throws MeedlException {
+        boolean newLoanee =  cohortLoaneeOutputPort.checkIfLoaneeIsNew(loanee.getId());
+        if(newLoanee){
+            Portfolio portfolio = Portfolio.builder().portfolioName("Meedl").build();
+            portfolio = portfolioOutputPort.findPortfolio(portfolio);
+            portfolio.setNumberOfLoanees(portfolio.getNumberOfLoanees() + 1);
+            portfolioOutputPort.save(portfolio);
+        }
     }
 
     private Loanee getSavedLoanee(CohortLoanee cohortLoanee) throws MeedlException {

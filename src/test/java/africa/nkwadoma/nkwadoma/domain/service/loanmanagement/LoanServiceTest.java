@@ -5,17 +5,19 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoaneeLoanAggregateMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanSummaryProjection;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
@@ -47,6 +49,8 @@ class LoanServiceTest {
     private LoaneeOutputPort loaneeOutputPort;
     @Mock
     private LoanOutputPort loanOutputPort;
+    @Mock
+    private LoanProductOutputPort loanProductOutputPort;
     @Mock
     private LoaneeLoanAccountPersistenceAdapter loaneeLoanAccountOutputPort;
     @Mock
@@ -105,7 +109,11 @@ class LoanServiceTest {
     @Mock
     private LoaneeLoanAggregateMapper loaneeLoanAggregateMapper;
     private LoanOffer loanOffer;
-
+    @Mock
+    private PortfolioOutputPort portfolioOutputPort;
+    private Portfolio portfolio;
+    @Mock
+    private CohortLoaneeOutputPort cohortLoaneeOutputPort;
 
     @BeforeEach
     void setUp() {
@@ -138,6 +146,7 @@ class LoanServiceTest {
         loan.setPageNumber(0);
         loan.setPageSize(10);
         loan.setActorId(userIdentity.getId());
+        loan.setLoanAmountOutstanding(BigDecimal.ZERO);
         cohort = TestData.createCohortData("elites",testId,testId,List.of(new LoanBreakdown()),testId);
 
         cohortLoanee = TestData.buildCohortLoanee(loanee,cohort,loaneeLoanDetail,testId);
@@ -169,6 +178,9 @@ class LoanServiceTest {
         loaneeLoanAggregate = TestData.buildLoaneeLoanAggregate(loanee);
         organizationEmployeeIdentity = TestData.createOrganizationEmployeeIdentityTestData(userIdentity);
         loanOffer = TestData.buildLoanOffer(loanRequest);
+        portfolio = Portfolio.builder().portfolioName("Meedl").build();
+        portfolio.setDisbursedLoanAmount(BigDecimal.ZERO);
+        portfolio.setHistoricalDebt(BigDecimal.ZERO);
     }
 
     @Test
@@ -371,7 +383,9 @@ class LoanServiceTest {
                 loanStatus(LoanStatus.PERFORMING).
                 loanAccountId(loaneeLoanAccount.getId()).
                 loanOfferId(testId).
-                loaneeId(loanee.getId()).build();
+                loaneeId(loanee.getId())
+                .loanAmountOutstanding(BigDecimal.ZERO)
+                .build();
 
         LoanOffer loanOffer = new LoanOffer();
         loanOffer.setId(testId);
@@ -408,6 +422,13 @@ class LoanServiceTest {
             when(loanMetricsOutputPort.findByOrganizationId(organizationIdentity.getId()))
                     .thenReturn(Optional.of(loanMetrics));
             when(loanMetricsOutputPort.save(loanMetrics)).thenReturn(loanMetrics);
+            LoanProduct loanProduct = TestData.buildTestLoanProduct();
+            loanProduct.setTotalOutstandingLoan(BigDecimal.ZERO);
+            when(loanProductOutputPort.save(loanProduct)).thenReturn(loanProduct);
+            when(cohortLoaneeOutputPort.findCohortLoaneeByLoanId(any())).thenReturn(cohortLoanee);
+            when(portfolioOutputPort.findPortfolio(any(Portfolio.class))).thenReturn(portfolio);
+            when(portfolioOutputPort.save(any(Portfolio.class))).thenReturn(portfolio);
+            when(loanProductOutputPort.findLoanProductByLoanOfferId(anyString())).thenReturn(loanProduct);
             when(investmentVehicleOutputPort.findInvestmentVehicleByLoanOfferId(startedLoan.getLoanOfferId()))
                     .thenReturn(investmentVehicle);
             when(investmentVehicleOutputPort.save(investmentVehicle)).thenReturn(investmentVehicle);

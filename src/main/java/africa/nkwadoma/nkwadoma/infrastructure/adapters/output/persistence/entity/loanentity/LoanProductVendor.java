@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.enti
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
@@ -16,8 +17,8 @@ public class LoanProductVendor {
     @Id
     @UuidGenerator
     private String id;
-    @OneToOne
+    @ManyToOne
     private VendorEntity vendorEntity;
-    @OneToOne
+    @ManyToOne
     private LoanProductEntity loanProductEntity;
 }

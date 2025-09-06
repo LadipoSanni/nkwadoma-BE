@@ -1,8 +1,12 @@
 package africa.nkwadoma.nkwadoma.application.ports.input.investmentvehicle;
 
+
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.financier.CooperateFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
+import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.Cooperation;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentSummary;
 import org.springframework.data.domain.Page;
 
@@ -10,6 +14,8 @@ import java.util.List;
 
 public interface FinancierUseCase {
     String inviteFinancier(List<Financier> financier, String investmentVehicleId) throws MeedlException;
+
+    String makePrivacyPolicyDecision(Financier financier) throws MeedlException;
 
     Financier viewFinancierDetail(String userId, String financierId) throws MeedlException;
 

@@ -1,10 +1,8 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.financier;
 
 import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.UserEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentvehicle.CooperationEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,8 +27,8 @@ public class FinancierEntity {
     private AccreditationStatus accreditationStatus;
     @Enumerated(EnumType.STRING)
     private FinancierType financierType;
-    @OneToOne
-    private UserEntity userIdentity;
+
+    private String identity;
 
     //source of fund
     @ElementCollection(fetch = FetchType.EAGER)
@@ -40,8 +38,7 @@ public class FinancierEntity {
     private boolean declarationAndAgreement;
     private boolean politicallyExposed;
 
-    @OneToOne
-    private CooperationEntity cooperation;
     private BigDecimal totalAmountInvested;
     private LocalDateTime createdAt;
+    private boolean privacyPolicyAccepted;
 }

@@ -2,7 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.investmentvehicl
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.InvestmentVehicleMode;
@@ -245,16 +245,13 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
         return investmentVehicles.map(investmentVehicleMapper::toInvestmentVehicle);
     }
 
-
     @Override
-    public InvestmentVehicle findById(String id) throws MeedlException {
-        if (id != null){
+    public InvestmentVehicle findById(String investmentVehicleId) throws MeedlException {
+        MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+        log.info("Investment vehicle id is {}", investmentVehicleId);
             InvestmentVehicleEntity investmentVehicleEntity =
-                    investmentVehicleRepository.findById(id).orElseThrow(()->new InvestmentException(InvestmentVehicleMessages.INVESTMENT_VEHICLE_NOT_FOUND.getMessage()));
+                    investmentVehicleRepository.findById(investmentVehicleId).orElseThrow(()->new InvestmentException(InvestmentVehicleMessages.INVESTMENT_VEHICLE_NOT_FOUND.getMessage()));
             return investmentVehicleMapper.toInvestmentVehicle(investmentVehicleEntity);
-        }
-        log.info("Investment vehicle id to be viewed is null.");
-        throw new InvestmentException(InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
     }
 
     @Override

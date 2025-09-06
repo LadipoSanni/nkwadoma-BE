@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity;
 
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityVerificationEnum;
-import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityVerificationEnum;
 import lombok.Getter;
 import lombok.Setter;
 

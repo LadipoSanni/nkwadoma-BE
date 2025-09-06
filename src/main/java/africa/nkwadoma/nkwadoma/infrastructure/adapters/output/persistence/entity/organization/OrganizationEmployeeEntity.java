@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization;
 
-import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,4 +23,5 @@ public class OrganizationEmployeeEntity {
     private ActivationStatus activationStatus;
     @ManyToOne
     private UserEntity meedlUser;
+    private String createdBy;
 }

@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,7 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.*;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter

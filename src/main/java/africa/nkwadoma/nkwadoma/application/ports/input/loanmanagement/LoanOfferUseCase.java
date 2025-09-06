@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement;
 
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanOfferStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import org.springframework.data.domain.Page;
@@ -16,4 +17,6 @@ public interface LoanOfferUseCase {
     Page<LoanDetail> searchLoan(LoanOffer loanOffer) throws MeedlException;
 
     Page<LoanDetail> filterLoanByProgram(LoanOffer loanOffer) throws MeedlException;
+
+    LoanOffer withdrawLoanOffer(String loanOfferId, LoanOfferStatus loanOfferStatus) throws MeedlException;
 }

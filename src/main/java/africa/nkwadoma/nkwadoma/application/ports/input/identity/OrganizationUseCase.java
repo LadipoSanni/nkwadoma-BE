@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.application.ports.input.identity;
 
-import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 
@@ -15,7 +15,9 @@ public interface OrganizationUseCase {
 
     void updateOrganizationStatus(OrganizationIdentity organizationIdentity) throws MeedlException;
 
-    String respondToOrganizationInvite(String actorId,String organizationId, ActivationStatus activationStatus) throws MeedlException;
+    OrganizationIdentity respondToOrganizationInvite(String actorId,String organizationId, ActivationStatus activationStatus) throws MeedlException;
 
-    String inviteColleague(OrganizationIdentity organizationIdentity) throws MeedlException;
+    UserIdentity inviteColleague(OrganizationIdentity organizationIdentity) throws MeedlException;
+
+    void uploadImage(OrganizationIdentity organizationIdentity) throws MeedlException;
 }

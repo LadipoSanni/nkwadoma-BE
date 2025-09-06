@@ -1,13 +1,14 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education;
 
-import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public interface OrganizationProjection {
     String getOrganizationId();
     String getName();
+    String getRcNumber();
     Integer getLoanRequestCount();
     Integer getLoanDisbursalCount();
     Integer getLoanReferralCount();
@@ -15,16 +16,23 @@ public interface OrganizationProjection {
     String getLogoImage();
     String getEmail();
     String getWebsiteAddress();
-    String getInvitedDate();
+    LocalDateTime getInvitedDate();
     Integer getNumberOfLoanees();
     Integer getNumberOfCohort();
     Integer getNumberOfPrograms();
+    Integer getStillInTraining();
     BigDecimal getTotalDebtRepaid();
     BigDecimal getTotalCurrentDebt();
     BigDecimal getTotalHistoricalDebt();
     BigDecimal getTotalAmountReceived ();
     BigDecimal getTotalAmountRequested ();
-    ActivationStatus getStatus();
+    ActivationStatus getActivationStatus();
+    String getInviterFullName();
     Double getDebtPercentage();
     Double getRepaymentRate();
+    String getPhoneNumber();
+    String getAddress();
+    String getBannerImage();
+    String getTaxIdentity();
+    LocalDateTime getRequestedInvitationDate();
 }

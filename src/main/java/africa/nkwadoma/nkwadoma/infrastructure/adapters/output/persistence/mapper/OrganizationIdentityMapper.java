@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapp
 
 
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
+import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
@@ -13,24 +14,14 @@ import java.util.*;
 public interface OrganizationIdentityMapper {
     @Mapping(source = "rcNumber", target = "registrationNumber")
     @Mapping(source = "tin", target = "taxIdentity")
-    @Mapping(source = "numberOfPrograms", target = "numberOfPrograms", defaultValue = "0")
     OrganizationEntity toOrganizationEntity(OrganizationIdentity organizationIdentity);
 
     @InheritInverseConfiguration
     OrganizationIdentity toOrganizationIdentity(OrganizationEntity organizationEntity);
 
-    List<ServiceOfferingEntity> toServiceOfferingEntity(List<ServiceOffering> serviceOfferings);
-
-    @Mapping(source = "serviceOfferingEntity", target = ".")
-    ServiceOffering toServiceOfferingModel(OrganizationServiceOfferingEntity organizationServiceOfferingEntity);
-    List<ServiceOffering> toServiceOfferingEntitiesServiceOfferings(List<ServiceOfferingEntity> serviceOfferingEntities);
     ServiceOffering toServiceOffering(ServiceOfferingEntity serviceOfferingEntity);
     List<ServiceOffering> toServiceOfferings(List<OrganizationServiceOfferingEntity> organizationServiceOfferings);
 
-    @Mapping(target = "serviceOffering", source = "serviceOfferingEntity")
-    @Mapping(target = "serviceOffering.transactionLowerBound", source = "serviceOfferingEntity.transactionLowerBound", defaultValue = "0.00")
-    @Mapping(target = "serviceOffering.transactionUpperBound", source = "serviceOfferingEntity.transactionUpperBound", defaultValue = "0.00")
-    OrganizationServiceOffering toOrganizationServiceOffering(OrganizationServiceOfferingEntity organizationServiceOfferingEntity);
 
     List<OrganizationServiceOffering> toOrganizationServiceOfferings(List<OrganizationServiceOfferingEntity> organizationServiceOfferings);
 
@@ -55,7 +46,7 @@ public interface OrganizationIdentityMapper {
     void mapOrganizationLoanDetailsToOrganization(@MappingTarget OrganizationIdentity organizationIdentity, OrganizationLoanDetail organizationLoanDetail);
 
     @Mapping(target = "id", source = "organizationId")
-    @Mapping(target = "status", source = "status")
+    @Mapping(target = "activationStatus", source = "activationStatus")
     @Mapping(target = "numberOfLoanees", source = "numberOfLoanees")
     @Mapping(target = "numberOfCohort", source = "numberOfCohort")
     @Mapping(target = "numberOfPrograms", source = "numberOfPrograms")
@@ -63,5 +54,11 @@ public interface OrganizationIdentityMapper {
     @Mapping(target = "websiteAddress", source = "websiteAddress")
     @Mapping(target = "debtPercentage", source = "debtPercentage")
     @Mapping(target = "repaymentRate", source = "repaymentRate")
+    @Mapping(target = "requestedBy", source = "inviterFullName")
     OrganizationIdentity mapProjecttionToOrganizationIdentity(OrganizationProjection organizationProjection);
+
+    @Mapping(target = "taxIdentity", source = "financier.userIdentity.taxId")
+    @Mapping(target = "phoneNumber", source = "financier.userIdentity.phoneNumber")
+    @Mapping(target = "tin", source = "financier.tin")
+    void mapCooperateDetailToOrganization(@MappingTarget  OrganizationIdentity organizationIdentity, Financier financier);
 }

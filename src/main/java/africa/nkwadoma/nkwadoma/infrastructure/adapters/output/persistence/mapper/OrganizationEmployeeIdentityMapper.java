@@ -13,6 +13,8 @@ public interface OrganizationEmployeeIdentityMapper {
     @InheritInverseConfiguration
     OrganizationEmployeeIdentity toOrganizationEmployeeIdentity(OrganizationEmployeeEntity organizationEmployeeEntity);
 
+    OrganizationEmployeeIdentity toOrganizationEmployeeIdentity(OrganizationEmployeeEntityProjection organizationEmployeeEntity);
+
     @Mapping(target = "meedlUser.firstName", source = "firstName")
     @Mapping(target = "meedlUser.lastName", source = "lastName")
     @Mapping(target = "meedlUser.email", source = "email")

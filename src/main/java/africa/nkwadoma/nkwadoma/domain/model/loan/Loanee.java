@@ -1,15 +1,16 @@
 package africa.nkwadoma.nkwadoma.domain.model.loan;
 
 
-import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.UploadedStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -36,7 +37,6 @@ public class Loanee {
     private String registryId;
     private UserIdentity userIdentity;
     private LoaneeLoanDetail loaneeLoanDetail;
-    private List<LoaneeLoanBreakdown> loanBreakdowns;
     private LoaneeStatus loaneeStatus;
     private OnboardingMode onboardingMode;
     private UploadedStatus uploadedStatus;
@@ -67,6 +67,8 @@ public class Loanee {
     private String loanReferralId;
     private String cohortLoaneeId;
     private String organizationId;
+    private List<LoaneeLoanBreakdown> loanBreakdowns;
+    private List<BankDetail> bankDetails;
 
 
     public void validate() throws MeedlException {

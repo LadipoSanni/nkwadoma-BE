@@ -8,7 +8,8 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.constants.ControllerConstant;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanBreakdownResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.education.*;
@@ -26,7 +27,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort.SuccessMessages.*;
 
 @Slf4j
@@ -38,7 +38,7 @@ public class CohortController {
 
     @PostMapping("cohort/create")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') " +
-            "or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ASSOCIATE')")
+            "or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> createCohort(@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid
             CreateCohortRequest createCohortRequest) throws MeedlException {
         Cohort cohort = cohortMapper.toCohort(createCohortRequest);
@@ -57,8 +57,8 @@ public class CohortController {
     }
 
     @GetMapping("cohort-details")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') " +
-            "or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ASSOCIATE')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_ASSOCIATE') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') " +
+            "or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> viewCohortDetails(
             @AuthenticationPrincipal Jwt meedlUser,
             @RequestParam @NotBlank(message = "Cohort ID is required") String cohortId) throws MeedlException {
@@ -107,7 +107,7 @@ public class CohortController {
 
     @PostMapping("cohort/loanee/refer")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') " +
-            "or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ASSOCIATE')")
+            "or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> inviteCohort(
             @AuthenticationPrincipal Jwt meedl,
             @RequestBody ReferCohortRequest referCohortRequest) throws MeedlException {
@@ -123,8 +123,8 @@ public class CohortController {
 
 
     @GetMapping("searchCohort")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') " +
-            "or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ASSOCIATE')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_ASSOCIATE') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') " +
+            "or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> searchCohort(
             @AuthenticationPrincipal Jwt meedl,
             @RequestParam @NotBlank(message = "Cohort name is required") String cohortName,
@@ -150,8 +150,8 @@ public class CohortController {
     }
 
     @GetMapping("cohort/all")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') " +
-            "or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ASSOCIATE')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_ASSOCIATE') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') " +
+            "or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     public ResponseEntity<ApiResponse<PaginatedResponse<CohortResponse>>> viewAllCohortsInAProgram(
             @RequestParam @NotBlank(message = "Program ID is required") String programId,
             @RequestParam(name = "cohortStatus",required = false) CohortStatus cohortStatus,
@@ -174,8 +174,8 @@ public class CohortController {
 
 
     @GetMapping("organization-cohort/all")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') " +
-            "or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ASSOCIATE')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_ASSOCIATE') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') " +
+            "or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     public ResponseEntity<ApiResponse<PaginatedResponse<CohortResponse>>> viewAllCohortsInOrganization(
             @AuthenticationPrincipal Jwt meedl,
             @RequestParam(name = "organizationId", required = false) String organizationId,
@@ -198,7 +198,7 @@ public class CohortController {
     }
 
     @GetMapping("cohort/loanbreakdown")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') ")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_ASSOCIATE') or hasRole('ORGANIZATION_SUPER_ADMIN') ")
     public ResponseEntity<ApiResponse<?>> getLoanBreakDown(@RequestParam @NotBlank(message = "Cohort id is required") String cohortId) throws MeedlException {
         List<LoanBreakdown> loanBreakdowns = cohortUseCase.getCohortLoanBreakDown(cohortId);
         List<LoanBreakdownResponse> loanBreakdownResponses = cohortMapper.toLoanBreakdownResponses(loanBreakdowns);

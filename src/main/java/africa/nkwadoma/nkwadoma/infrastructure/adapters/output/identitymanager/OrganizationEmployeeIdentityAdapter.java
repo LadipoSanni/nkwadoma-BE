@@ -2,8 +2,9 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identitymanager;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
@@ -24,7 +25,7 @@ import java.util.*;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.EMPTY_INPUT_FIELD_ERROR;
 
 @RequiredArgsConstructor
@@ -47,8 +48,8 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
     @Override
     public OrganizationEmployeeIdentity findById(String id)throws MeedlException {
         MeedlValidator.validateUUID(id, "Please provide a valid employee identification");
-        OrganizationEmployeeEntity organizationEmployeeIdentity = employeeAdminEntityRepository.findById(id).orElseThrow(()->new IdentityException(USER_NOT_FOUND.getMessage()));
-        return organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(organizationEmployeeIdentity);
+        OrganizationEmployeeEntityProjection organizationEmployeeEntityProjection = employeeAdminEntityRepository.findEmployeeById(id).orElseThrow(()->new IdentityException(USER_NOT_FOUND.getMessage()));
+        return organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(organizationEmployeeEntityProjection);
     }
 
     @Override
@@ -143,7 +144,7 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
         Pageable pageRequest = PageRequest
                 .of(organizationEmployeeIdentity.getPageNumber(),
                         organizationEmployeeIdentity.getPageSize());
-        Page<OrganizationEmployeeEntity> organizationEmployeeEntities ;
+        Page<OrganizationEmployeeEntityProjection> organizationEmployeeEntities ;
         if (MeedlValidator.isNotEmptyString(organizationEmployeeIdentity.getName())){
             log.info("output port search for employee with name {}", organizationEmployeeIdentity.getName());
             organizationEmployeeEntities =

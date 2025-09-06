@@ -3,9 +3,10 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identitymanager;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
@@ -19,6 +20,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.*;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,7 +31,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.ORGANIZATION_NOT_FOUND;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages.ORGANIZATION_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.EMAIL_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages.INVALID_ORGANIZATION_ID;
 
@@ -48,23 +50,16 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     public OrganizationIdentity save(OrganizationIdentity organizationIdentity) throws MeedlException {
         log.info("Organization identity before saving {}", organizationIdentity);
         MeedlValidator.validateObjectInstance(organizationIdentity, OrganizationMessages.ORGANIZATION_MUST_NOT_BE_EMPTY.getMessage());
-        organizationIdentity.validate();
-        MeedlValidator.validateOrganizationUserIdentities(organizationIdentity.getOrganizationEmployees());
+        if (ObjectUtils.isNotEmpty(organizationIdentity.getOrganizationType())){
+            organizationIdentity.validateCooperateOrganization();
+        }else {
+            organizationIdentity.validate();
+        }
 
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
-        organizationEntity.setInvitedDate(LocalDateTime.now());
         organizationEntity = organizationEntityRepository.save(organizationEntity);
-
-        List<ServiceOfferingEntity> serviceOfferingEntities = saveServiceOfferingEntities(organizationIdentity);
-        saveOrganizationServiceOfferings(serviceOfferingEntities, organizationEntity);
-        log.info("Organization entity saved successfully {}", organizationEntity);
-        List<ServiceOffering> savedServiceOfferings = organizationIdentityMapper.
-                toServiceOfferingEntitiesServiceOfferings(serviceOfferingEntities);
         log.info("Organization entity saved successfully");
-
-        organizationIdentity = organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
-        organizationIdentity.setServiceOfferings(savedServiceOfferings);
-        return organizationIdentity;
+        return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
     }
 
     @Override
@@ -74,21 +69,6 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         return organizationEntityRepository.findByRcNumber(rcNumber);
     }
 
-    private List<ServiceOfferingEntity> saveServiceOfferingEntities(OrganizationIdentity organizationIdentity) {
-        List<ServiceOffering> serviceOfferings = organizationIdentity.getServiceOfferings();
-        List<ServiceOfferingEntity> serviceOfferingEntity = organizationIdentityMapper.toServiceOfferingEntity(serviceOfferings);
-        log.info("Saving all service offerings");
-        return serviceOfferEntityRepository.saveAll(serviceOfferingEntity);
-    }
-
-    private void saveOrganizationServiceOfferings(List<ServiceOfferingEntity> serviceOfferingEntities, OrganizationEntity organizationEntity) {
-        for (ServiceOfferingEntity foundServiceOffering : serviceOfferingEntities) {
-            OrganizationServiceOfferingEntity organizationServiceOfferingEntity =
-                    OrganizationServiceOfferingEntity.builder().organizationId(organizationEntity.getId()).
-                            serviceOfferingEntity(foundServiceOffering).build();
-            organizationServiceOfferingRepository.save(organizationServiceOfferingEntity);
-        }
-    }
 
     @Override
     public OrganizationIdentity findByEmail(String email) throws MeedlException {
@@ -149,15 +129,16 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     }
 
     @Override
-    public Page<OrganizationIdentity> viewAllOrganizationByStatus(OrganizationIdentity organizationIdentity, ActivationStatus status) throws MeedlException {
+    public Page<OrganizationIdentity> viewAllOrganizationByStatus(OrganizationIdentity organizationIdentity, List<String> activationStatuses) throws MeedlException {
         MeedlValidator.validateObjectInstance(organizationIdentity, OrganizationMessages.ORGANIZATION_TYPE_MUST_NOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateObjectInstance(status, OrganizationMessages.ORGANIZATION_STATUS_MUST_NOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectInstance(activationStatuses, OrganizationMessages.ORGANIZATION_STATUS_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validatePageSize(organizationIdentity.getPageSize());
         MeedlValidator.validatePageNumber(organizationIdentity.getPageNumber());
         Pageable pageRequest = PageRequest.of(organizationIdentity.getPageNumber(), organizationIdentity.getPageSize(), Sort.by(Sort.Direction.DESC, "invitedDate"));
 
-        Page<OrganizationProjection> organizationEntities= organizationEntityRepository.findAllByStatus(String.valueOf(status),pageRequest);
-        log.info("Organization entities {}", organizationEntities.stream().toList());
+        log.info("List of statuses {}", activationStatuses);
+        Page<OrganizationProjection> organizationEntities= organizationEntityRepository.findAllByStatus(activationStatuses,pageRequest);
+        log.info("Organization entities {}", organizationEntities.stream().peek(or -> log.info("Each org invited date {}", or.getInvitedDate())).toList());
         return organizationEntities.map(organizationIdentityMapper::mapProjecttionToOrganizationIdentity);
     }
 
@@ -308,5 +289,22 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         OrganizationIdentity organizationIdentity = organizationIdentityMapper.toOrganizationIdentity(organizationEntity.get());
         log.info("Mapped Organization identity, found with user id: {}", organizationEntity.get());
         return Optional.of(organizationIdentity);
+    }
+
+    @Override
+    public OrganizationIdentity findByIdProjection(String organizationId) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId, INVALID_ORGANIZATION_ID.getMessage());
+
+        OrganizationProjection organizationProjection =
+                organizationEntityRepository.findByIdProjection(organizationId);
+
+        return organizationIdentityMapper.mapProjecttionToOrganizationIdentity(organizationProjection);
+    }
+
+
+    @Override
+    public boolean existByEmail(String email) throws MeedlException {
+        MeedlValidator.validateEmail(email);
+        return organizationEntityRepository.existsByEmail(email);
     }
 }

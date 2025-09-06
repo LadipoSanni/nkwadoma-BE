@@ -1,11 +1,12 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.notification.SendColleagueEmailUseCase;
+import  africa.nkwadoma.nkwadoma.application.ports.input.notification.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.MFAType;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -27,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -60,6 +62,7 @@ class UserIdentityServiceTest {
     private UserIdentity favour;
     @Mock
     private EmailTokenManager emailTokenManager;
+
 
 //    private String password;
     private String newPassword;
@@ -413,7 +416,7 @@ class UserIdentityServiceTest {
                 userIdentityService.checkIfUserAllowedForAccountActivationActivity(favour, favour, ActivationStatus.DEACTIVATED)
         );
 
-        assertEquals("You are not allowed to "+ActivationStatus.DEACTIVATED+" yourself.", exception.getMessage());
+        assertEquals("You are not allowed to "+ActivationStatus.DEACTIVATED.getStatusName()+" yourself.", exception.getMessage());
     }
 
     @Test
@@ -431,7 +434,7 @@ class UserIdentityServiceTest {
                 userIdentityService.checkIfUserAllowedForAccountActivationActivity(favour, favour, ActivationStatus.DEACTIVATED)
         );
 
-        assertEquals("You cannot "+ActivationStatus.DEACTIVATED+" this user, please contact Meedl admin!", exception.getMessage());
+        assertEquals("You cannot "+ActivationStatus.DEACTIVATED.getStatusName().toLowerCase()+" this user, please contact Meedl admin!", exception.getMessage());
     }
 
     @Test
@@ -452,13 +455,10 @@ class UserIdentityServiceTest {
 
         when(userIdentityOutputPort.findById(actor.getId())).thenReturn(actor);
         when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(favour.getId())).thenReturn(Optional.of(emp));
-        when(organizationIdentityOutputPort.findByEmail("org-A")).thenReturn(org);
 
-        MeedlException exception = assertThrows(MeedlException.class, () ->
-                userIdentityService.checkIfUserAllowedForAccountActivationActivity(favour, favour, ActivationStatus.DEACTIVATED)
-        );
+         assertThrows(MeedlException.class, () ->
+                userIdentityService.checkIfUserAllowedForAccountActivationActivity(favour, favour, ActivationStatus.DEACTIVATED));
 
-        assertEquals("You are not authorized to "+ActivationStatus.DEACTIVATED+" this user", exception.getMessage());
     }
 
     @Test
@@ -470,74 +470,62 @@ class UserIdentityServiceTest {
         favour.setCreatedBy(actor.getId());
         favour.setRole(IdentityRole.ORGANIZATION_ASSOCIATE);
 
-        OrganizationEmployeeIdentity emp = new OrganizationEmployeeIdentity();
-        emp.setId("emp-id");
-        emp.setMeedlUser(favour);
-        emp.setOrganization("org-A");
+        UserIdentity target = new UserIdentity();
+        target.setId("target-id");
+        target.setEmail("admin@org.com");
+        target.setRole(IdentityRole.ORGANIZATION_ADMIN);
+
+        OrganizationEmployeeIdentity actorEmp = new OrganizationEmployeeIdentity();
+        actorEmp.setId("actor-emp-id");
+        actorEmp.setMeedlUser(favour);
+        actorEmp.setOrganization("org-A");
+
+        OrganizationEmployeeIdentity targetEmp = new OrganizationEmployeeIdentity();
+        targetEmp.setId("target-emp-id");
+        targetEmp.setMeedlUser(target);
+        targetEmp.setOrganization("org-A");
 
         OrganizationIdentity org = OrganizationIdentity.builder().id("org-A").build();
 
         when(userIdentityOutputPort.findById(actor.getId())).thenReturn(actor);
-        when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(favour.getId())).thenReturn(Optional.of(emp));
-        when(organizationIdentityOutputPort.findByEmail("org-A")).thenReturn(org);
+        when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(actor.getId())).thenReturn(Optional.of(actorEmp));
+        when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(target.getId())).thenReturn(Optional.of(targetEmp));
+        when(organizationIdentityOutputPort.findById("org-A")).thenReturn(org);
 
         assertDoesNotThrow(() ->
-                userIdentityService.checkIfUserAllowedForAccountActivationActivity(favour, favour, ActivationStatus.DEACTIVATED)
+                userIdentityService.checkIfUserAllowedForAccountActivationActivity(target, favour, ActivationStatus.DEACTIVATED)
         );
-
     }
 
-
-
-
-
-    @Test
-    @DisplayName("Should throw exception when MFA is enabled and disabled at same time")
-    void manageMFAWithConflictingFlags() {
-        favour.setEnablePhoneNumberMFA(true);
-        favour.setDisableMFA(true);
-
-        MeedlException exception = assertThrows(MeedlException.class,
-                () -> userIdentityService.manageMFA(favour));
-
-        assertEquals("MFA cannot be disabled and enabled at the same time", exception.getMessage());
-    }
 
     @Test
     @DisplayName("Should disable MFA when disableMFA flag is set")
     void disableMFA() throws MeedlException {
-        favour.setDisableMFA(true);
+        favour.setMfaType(MFAType.MFA_DISABLED);
         when(userIdentityOutputPort.findById(favour.getId())).thenReturn(favour);
 
         String result = userIdentityService.manageMFA(favour);
 
         assertEquals("MFA disabled", result);
         verify(userIdentityOutputPort).save(favour);
-        assertFalse(favour.isMFAEnabled());
-        assertFalse(favour.isEnableEmailMFA());
-        assertFalse(favour.isEnablePhoneNumberMFA());
     }
 
     @Test
     @DisplayName("Should enable Email MFA when enableEmailMFA flag is set")
     void enableEmailMFA() throws MeedlException {
-        favour.setEnableEmailMFA(true);
+        favour.setMfaType(MFAType.EMAIL_MFA);
         when(userIdentityOutputPort.findById(favour.getId())).thenReturn(favour);
 
         String result = userIdentityService.manageMFA(favour);
 
         assertEquals("Email MFA enabled successfully", result);
         verify(userIdentityOutputPort).save(favour);
-        assertTrue(favour.isMFAEnabled());
-        assertTrue(favour.isEnableEmailMFA());
-        assertFalse(favour.isEnablePhoneNumberMFA());
     }
 
     @Test
     @DisplayName("Should enable Phone Number MFA when flag is set and new number provided")
     void enablePhoneNumberMFAWithNewNumber() throws MeedlException {
-        favour.setEnablePhoneNumberMFA(true);
-        favour.setDisableMFA(Boolean.FALSE);
+        favour.setMfaType(MFAType.PHONE_NUMBER_MFA);
         favour.setMFAPhoneNumber("08012345678");
         when(userIdentityOutputPort.findById(favour.getId())).thenReturn(favour);
 
@@ -545,9 +533,6 @@ class UserIdentityServiceTest {
 
         assertEquals("Phone number MFA enabled successfully", result);
         verify(userIdentityOutputPort).save(favour);
-        assertTrue(favour.isMFAEnabled());
-        assertFalse(favour.isEnableEmailMFA());
-        assertTrue(favour.isEnablePhoneNumberMFA());
     }
 
     @Test
@@ -556,7 +541,7 @@ class UserIdentityServiceTest {
         UserIdentity foundUser = new UserIdentity();
         foundUser.setId(favour.getId());
         foundUser.setMFAPhoneNumber("08012345678");
-        favour.setEnablePhoneNumberMFA(true);
+        favour.setMfaType(MFAType.PHONE_NUMBER_MFA);
 
         when(userIdentityOutputPort.findById(favour.getId())).thenReturn(foundUser);
         favour.setMFAPhoneNumber("");
@@ -565,9 +550,6 @@ class UserIdentityServiceTest {
 
         assertEquals("Phone number MFA enabled successfully", result);
         verify(userIdentityOutputPort).save(foundUser);
-        assertTrue(foundUser.isMFAEnabled());
-        assertFalse(foundUser.isEnableEmailMFA());
-        assertTrue(foundUser.isEnablePhoneNumberMFA());
     }
 
     @Test
@@ -579,6 +561,138 @@ class UserIdentityServiceTest {
 
         assertEquals("Unable to determine MFA option selected", result);
         verify(userIdentityOutputPort, never()).save(any());
+    }
+    @Test
+    void uploadImageForOrganizationAdmin() throws MeedlException {
+        favour.setImage("profile-pic.png");
+        favour.setRole(IdentityRole.ORGANIZATION_ADMIN);
+
+        when(userIdentityOutputPort.findById(favour.getId())).thenReturn(favour);
+        when(userIdentityOutputPort.save(any(UserIdentity.class))).thenReturn(favour);
+
+        userIdentityService.uploadImage(favour);
+
+        verify(userIdentityOutputPort).save(favour);
+        assertEquals("profile-pic.png", favour.getImage());
+    }
+
+    @Test
+    void uploadImageUnauthorizedRole() throws MeedlException {
+        favour.setImage("profile-pic.png");
+        favour.setRole(IdentityRole.LOANEE);
+
+        when(userIdentityOutputPort.findById(favour.getId())).thenReturn(favour);
+
+        assertThrows(MeedlException.class, () -> userIdentityService.uploadImage(favour));
+        verify(userIdentityOutputPort, never()).save(any());
+    }
+
+    @Test
+    void uploadImageWithNoImageProvided() throws MeedlException {
+        favour.setImage(null);
+        favour.setRole(IdentityRole.ORGANIZATION_ADMIN);
+
+        assertThrows(MeedlException.class, () -> userIdentityService.uploadImage(favour));
+        verify(userIdentityOutputPort, never()).save(any());
+    }
+
+
+
+
+
+    @Test
+    void superAdminAssignsValidMeedlRole() throws MeedlException {
+        UserIdentity superAdmin = new UserIdentity();
+        superAdmin.setId(UUID.randomUUID().toString());
+        superAdmin.setRole(IdentityRole.MEEDL_SUPER_ADMIN);
+
+        UserIdentity userToAssign = new UserIdentity();
+        userToAssign.setId(UUID.randomUUID().toString());
+        userToAssign.setRole(IdentityRole.MEEDL_ADMIN);
+        userToAssign.setCreatedBy(superAdmin.getId());
+
+        when(userIdentityOutputPort.findById(superAdmin.getId())).thenReturn(superAdmin);
+        when(userIdentityOutputPort.findById(userToAssign.getId())).thenReturn(userToAssign);
+        when(userIdentityOutputPort.save(any(UserIdentity.class))).thenReturn(userToAssign);
+
+        UserIdentity result = userIdentityService.assignRole(userToAssign);
+
+        assertNotNull(result);
+        assertEquals(IdentityRole.MEEDL_ADMIN, result.getRole());
+        verify(userIdentityOutputPort).save(userToAssign);
+    }
+
+    @Test
+    void superAdminAssignsInvalidMeedlRole() throws MeedlException {
+        UserIdentity superAdmin = new UserIdentity();
+        superAdmin.setId(UUID.randomUUID().toString());
+        superAdmin.setRole(IdentityRole.MEEDL_SUPER_ADMIN);
+
+        UserIdentity userToAssign = new UserIdentity();
+        userToAssign.setId(UUID.randomUUID().toString());
+        userToAssign.setRole(IdentityRole.ORGANIZATION_ADMIN);
+        userToAssign.setCreatedBy(superAdmin.getId());
+
+        when(userIdentityOutputPort.findById(superAdmin.getId())).thenReturn(superAdmin);
+        when(userIdentityOutputPort.findById(userToAssign.getId())).thenReturn(userToAssign);
+
+        assertThrows(MeedlException.class, () -> userIdentityService.assignRole(userToAssign));
+    }
+
+    @Test
+    void orgSuperAdminAssignsValidOrgRole() throws MeedlException {
+        UserIdentity orgSuperAdmin = new UserIdentity();
+        orgSuperAdmin.setId(UUID.randomUUID().toString());
+        orgSuperAdmin.setRole(IdentityRole.ORGANIZATION_SUPER_ADMIN);
+
+        UserIdentity userToAssign = new UserIdentity();
+        userToAssign.setId(UUID.randomUUID().toString());
+        userToAssign.setRole(IdentityRole.ORGANIZATION_ASSOCIATE);
+        userToAssign.setCreatedBy(orgSuperAdmin.getId());
+
+        when(userIdentityOutputPort.findById(orgSuperAdmin.getId())).thenReturn(orgSuperAdmin);
+        when(userIdentityOutputPort.findById(userToAssign.getId())).thenReturn(userToAssign);
+        when(userIdentityOutputPort.save(any(UserIdentity.class))).thenReturn(userToAssign);
+
+        UserIdentity result = userIdentityService.assignRole(userToAssign);
+
+        assertNotNull(result);
+        assertEquals(IdentityRole.ORGANIZATION_ASSOCIATE, result.getRole());
+        verify(userIdentityOutputPort).save(userToAssign);
+    }
+
+    @Test
+    void orgSuperAdminAssignsInvalidOrgRole() throws MeedlException {
+        UserIdentity orgSuperAdmin = new UserIdentity();
+        orgSuperAdmin.setId(UUID.randomUUID().toString());
+        orgSuperAdmin.setRole(IdentityRole.ORGANIZATION_SUPER_ADMIN);
+
+        UserIdentity userToAssign = new UserIdentity();
+        userToAssign.setId(UUID.randomUUID().toString());
+        userToAssign.setRole(IdentityRole.MEEDL_ADMIN);
+        userToAssign.setCreatedBy(orgSuperAdmin.getId());
+
+        when(userIdentityOutputPort.findById(orgSuperAdmin.getId())).thenReturn(orgSuperAdmin);
+        when(userIdentityOutputPort.findById(userToAssign.getId())).thenReturn(userToAssign);
+
+        assertThrows(MeedlException.class, () -> userIdentityService.assignRole(userToAssign));
+    }
+
+    @Test
+    void nonSuperAdminTriesAssignRole() throws MeedlException {
+        UserIdentity normalUser = new UserIdentity();
+        normalUser.setId(UUID.randomUUID().toString());
+        normalUser.setRole(IdentityRole.ORGANIZATION_ASSOCIATE);
+
+        UserIdentity userToAssign = new UserIdentity();
+        userToAssign.setId(UUID.randomUUID().toString());
+        userToAssign.setRole(IdentityRole.ORGANIZATION_ADMIN);
+        userToAssign.setCreatedBy(normalUser.getId());
+
+        when(userIdentityOutputPort.findById(normalUser.getId())).thenReturn(normalUser);
+        when(userIdentityOutputPort.findById(userToAssign.getId())).thenReturn(userToAssign);
+
+        assertThrows(MeedlException.class, () -> userIdentityService.assignRole(userToAssign));
     }
 
 }

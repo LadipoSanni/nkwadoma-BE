@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity;
 
-import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -18,6 +19,8 @@ public class OrganizationEmployeeResponse {
     private String lastName;
     private String email;
     private String userId;
+    private String requestedBy;
+    private String createdBy;
     private LocalDateTime createdAt;
     private ActivationStatus activationStatus;
     private IdentityRole role;

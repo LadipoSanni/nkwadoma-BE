@@ -5,18 +5,15 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEm
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanBreakdownOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
-import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,6 +31,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @Slf4j
 public class CohortLoanDetailPersistenceAdapterTest {
 
+    @Autowired
+    private InstituteMetricsOutputPort instituteMetricsOutputPort;
     private UserIdentity userIdentity;
     private UserIdentity meedleUser;
     private OrganizationEmployeeIdentity employeeIdentity;
@@ -150,6 +149,11 @@ public class CohortLoanDetailPersistenceAdapterTest {
         log.info("program id = {}", program.getId());
         programOutputPort.deleteProgram(program.getId());
         log.info("org id = {}", organizationIdentity.getId());
+        InstituteMetrics instituteMetrics = instituteMetricsOutputPort.findByOrganizationId(organizationIdentity.getId());
+        if (ObjectUtils.isNotEmpty(instituteMetrics)){
+            log.info("Metrics was found for this organization");
+            instituteMetricsOutputPort.delete(instituteMetrics.getId());
+        }
         organizationIdentityOutputPort.delete(organizationIdentity.getId());
         log.info("org empoyee  = {}", employeeIdentity.getId());
         organizationEmployeeIdentityOutputPort.delete(employeeIdentity.getId());

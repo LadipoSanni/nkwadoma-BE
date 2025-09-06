@@ -16,7 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Optional;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.PORTFOLIO_MANAGER;
+import static africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole.PORTFOLIO_MANAGER;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest

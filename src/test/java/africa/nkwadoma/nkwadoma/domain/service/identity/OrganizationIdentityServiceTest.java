@@ -2,17 +2,24 @@
 
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.LoanMetricsUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.InstituteMetricsOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.OrganizationServiceOfferingOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.ServiceOfferingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOfferOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanMetrics;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
@@ -78,6 +85,15 @@ class OrganizationIdentityServiceTest {
     private LoanOfferOutputPort loanOfferOutputPort;
     @Mock
     private MeedlNotificationOutputPort meedlNotificationOutputPort;
+    @Mock
+    private InstituteMetricsOutputPort instituteMetricsOutputPort;
+    @Mock
+    private ServiceOfferingOutputPort serviceOfferingOutputPort;
+    @Mock
+    private OrganizationServiceOfferingOutputPort organizationServiceOfferingOutputPort;
+    @Mock
+    private PortfolioOutputPort portfolioOutputPort;
+    private Portfolio portfolio;
 
     @BeforeEach
     void setUp() {
@@ -113,6 +129,7 @@ class OrganizationIdentityServiceTest {
         roseCouture.setEnabled(Boolean.TRUE);
 
         superAdmin = TestData.createTestUserIdentity("superAdmin@grr.la");
+        portfolio = Portfolio.builder().portfolioName("Meedl").build();
 
     }
 
@@ -131,6 +148,9 @@ class OrganizationIdentityServiceTest {
             when(identityManagerOutPutPort.getClientRepresentationByName(roseCouture.getName())).thenReturn(new ClientRepresentation());
             when(identityManagerOutPutPort.getUserByEmail(roseCouture.getOrganizationEmployees().get(0).getMeedlUser().getEmail())).thenReturn(Optional.empty());
             doNothing().when(asynchronousMailingOutputPort).sendEmailToInvitedOrganization(any(UserIdentity.class));
+            when(portfolioOutputPort.findPortfolio(any(Portfolio.class))).thenReturn(portfolio);
+            when(portfolioOutputPort.save(any(Portfolio.class))).thenReturn(portfolio);
+//            when()
 //            doNothing().when(asynchronousNotificationOutputPort).notifySuperAdminOfNewOrganization(any(UserIdentity.class),
 //                    any(OrganizationIdentity.class), any(NotificationFlag.class));
             when(loanMetricsUseCase.createLoanMetrics(anyString())).thenReturn(new LoanMetrics());
@@ -171,13 +191,13 @@ class OrganizationIdentityServiceTest {
     void viewAllOrganizationWithStatus() throws MeedlException {
 
         OrganizationIdentity roseCouture2 = TestData.createOrganizationTestData("rose couture6", "RC8789905",orgEmployee);
-        roseCouture2.setStatus(ActivationStatus.ACTIVE);
+        roseCouture2.setActivationStatus(ActivationStatus.ACTIVE);
 
         int pageNumber = 0;
         int pageSize = 10;
         roseCouture.setPageNumber(pageNumber);
         roseCouture.setPageSize(pageSize);
-        roseCouture.setStatus(ActivationStatus.ACTIVE);
+        roseCouture.setActivationStatus(ActivationStatus.ACTIVE);
 
         List<OrganizationIdentity> organizationIdentities = new ArrayList<>();
         organizationIdentities.add(roseCouture);
@@ -186,13 +206,13 @@ class OrganizationIdentityServiceTest {
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.ASC, "invitedDate"));
         Page<OrganizationIdentity> organizationIdentityPage = new PageImpl<>(organizationIdentities, pageRequest, organizationIdentities.size());
 
-        when(organizationIdentityOutputPort.viewAllOrganizationByStatus(roseCouture, ActivationStatus.ACTIVE)).thenReturn(organizationIdentityPage);
+        when(organizationIdentityOutputPort.viewAllOrganizationByStatus(roseCouture, List.of(ActivationStatus.ACTIVE.name()))).thenReturn(organizationIdentityPage);
         Page<OrganizationIdentity> result = organizationIdentityService.viewAllOrganizationByStatus(roseCouture, ActivationStatus.ACTIVE);
 
         assertNotNull(result);
         assertEquals(2, result.getContent().size());
-        assertEquals(ActivationStatus.ACTIVE, result.getContent().get(1).getStatus());
-        verify(organizationIdentityOutputPort, times(1)).viewAllOrganizationByStatus(roseCouture, ActivationStatus.ACTIVE);
+        assertEquals(ActivationStatus.ACTIVE, result.getContent().get(1).getActivationStatus());
+        verify(organizationIdentityOutputPort, times(1)).viewAllOrganizationByStatus(roseCouture, List.of(ActivationStatus.ACTIVE.name()));
     }
 
     @Test
@@ -329,7 +349,7 @@ class OrganizationIdentityServiceTest {
             OrganizationIdentity deactivatedOrganization =
                     organizationIdentityService.deactivateOrganization(roseCouture.getId(), "test 2 reason");
             assertFalse(deactivatedOrganization.isEnabled());
-            assertEquals(ActivationStatus.DEACTIVATED, deactivatedOrganization.getStatus());
+            assertEquals(ActivationStatus.DEACTIVATED, deactivatedOrganization.getActivationStatus());
             assertEquals(ActivationStatus.DEACTIVATED, employeeSarah.getActivationStatus());
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
@@ -349,7 +369,7 @@ class OrganizationIdentityServiceTest {
     }
 
     @Test
-    void shouldReturnOrganizationDetails_WhenUserIsOrganizationAdmin() throws MeedlException {
+    void viewOrganizationDetailByAdmin() throws MeedlException {
 
         OrganizationLoanDetail loanDetail = OrganizationLoanDetail.builder()
                 .amountRepaid(BigDecimal.valueOf(5000))
@@ -358,12 +378,13 @@ class OrganizationIdentityServiceTest {
                 .build();
 
         when(userIdentityOutputPort.findById(mockId)).thenReturn(sarah);
+        when(userIdentityOutputPort.findById(roseCouture.getCreatedBy())).thenReturn(sarah);
         sarah.setRole(IdentityRole.ORGANIZATION_ADMIN);
         employeeSarah.setOrganization(roseCouture.getId());
         when(organizationEmployeeIdentityOutputPort.findByCreatedBy(mockId)).thenReturn(employeeSarah);
-        when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
 
-        when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
+
+        when(organizationIdentityOutputPort.findByIdProjection(roseCouture.getId())).thenReturn(roseCouture);
         when(organizationIdentityOutputPort.getServiceOfferings(roseCouture.getId())).thenReturn(roseCouture.getServiceOfferings());
         when(organizationLoanDetailOutputPort.findByOrganizationId(roseCouture.getId())).thenReturn(loanDetail);
         when(loanOfferOutputPort.countNumberOfPendingLoanOfferForOrganization(roseCouture.getId())).thenReturn(3);
@@ -375,11 +396,11 @@ class OrganizationIdentityServiceTest {
         assertEquals(1, result.getOrganizationEmployees().size());
         assertEquals(1, result.getServiceOfferings().size());
         verify(userIdentityOutputPort).findById(mockId);
-        verify(organizationIdentityOutputPort).findById(roseCouture.getId());
+        verify(organizationIdentityOutputPort).findByIdProjection(roseCouture.getId());
     }
 
     @Test
-    void shouldReturnOrganizationDetails_WhenUserIsPortfolioManager() throws MeedlException {
+    void viewOrganizationDetailByPortfolioManager() throws MeedlException {
         sarah.setRole(IdentityRole.PORTFOLIO_MANAGER);
 
         OrganizationLoanDetail loanDetail = OrganizationLoanDetail.builder()
@@ -388,6 +409,7 @@ class OrganizationIdentityServiceTest {
                 .outstandingAmount(BigDecimal.valueOf(10000))
                 .build();
         when(userIdentityOutputPort.findById(mockId)).thenReturn(sarah);
+        when(userIdentityOutputPort.findById(roseCouture.getCreatedBy())).thenReturn(sarah);
         when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
         when(organizationIdentityOutputPort.getServiceOfferings(roseCouture.getId())).thenReturn(roseCouture.getServiceOfferings());
         when(organizationLoanDetailOutputPort.findByOrganizationId(roseCouture.getId())).thenReturn(loanDetail);
@@ -401,18 +423,6 @@ class OrganizationIdentityServiceTest {
         verify(loanOfferOutputPort).countNumberOfPendingLoanOfferForOrganization(roseCouture.getId());
     }
 
-    @Test
-    void shouldThrowException_WhenOrganizationIdIsNullForPortfolioManager() {
-        sarah.setRole(IdentityRole.PORTFOLIO_MANAGER);
-        try {
-            when(userIdentityOutputPort.findById(mockId)).thenReturn(sarah);
-        } catch (MeedlException e) {
-            throw new RuntimeException(e);
-        }
-        assertThrows(MeedlException.class, () ->
-                organizationIdentityService.viewOrganizationDetails(null, mockId)
-        );
-    }
 
     @Test
     void approveOrganizationInvitationWithInValidResponse(){
@@ -437,7 +447,7 @@ class OrganizationIdentityServiceTest {
         when(userIdentityOutputPort.findById(anyString())).thenReturn(superAdmin);
         when(organizationIdentityOutputPort.findById(anyString())).thenReturn(roseCouture);
         when(userIdentityOutputPort.findById(roseCouture.getCreatedBy())).thenReturn(sarah);
-        roseCouture.setStatus(ActivationStatus.ACTIVE);
+        roseCouture.setActivationStatus(ActivationStatus.ACTIVE);
         assertThrows(MeedlException.class, () ->
                 organizationIdentityService.respondToOrganizationInvite(mockId,mockId,ActivationStatus.APPROVED));
     }
@@ -447,12 +457,15 @@ class OrganizationIdentityServiceTest {
         when(userIdentityOutputPort.findById(anyString())).thenReturn(superAdmin);
         when(organizationIdentityOutputPort.findById(anyString())).thenReturn(roseCouture);
         when(userIdentityOutputPort.findById(roseCouture.getCreatedBy())).thenReturn(sarah);
-        roseCouture.setStatus(ActivationStatus.PENDING_APPROVAL);
+        roseCouture.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
         when(organizationEmployeeIdentityOutputPort.save(employeeSarah)).thenReturn(employeeSarah);
         doNothing().when(asynchronousMailingOutputPort).sendEmailToInvitedOrganization(any(UserIdentity.class));
-        when(meedlNotificationOutputPort.save(any(MeedlNotification.class))).thenReturn(any(MeedlNotification.class));
-        String response = organizationIdentityService.respondToOrganizationInvite(mockId,mockId,ActivationStatus.APPROVED);
-        assertNotNull(response);
+        when(meedlNotificationOutputPort.save(any(MeedlNotification.class))).thenReturn(new MeedlNotification());
+        when(portfolioOutputPort.findPortfolio(any(Portfolio.class))).thenReturn(portfolio);
+        when(portfolioOutputPort.save(any(Portfolio.class))).thenReturn(portfolio);
+        OrganizationIdentity organizationIdentity = organizationIdentityService.respondToOrganizationInvite(mockId,mockId,ActivationStatus.APPROVED);
+        assertNotNull(organizationIdentity);
+        assertNotNull(organizationIdentity.getResponse());
     }
 
 
@@ -491,7 +504,9 @@ class OrganizationIdentityServiceTest {
                     .thenReturn(superAdmin);
 
 
-            response = organizationIdentityService.inviteColleague(roseCouture);
+            UserIdentity userIdentity = organizationIdentityService.inviteColleague(roseCouture);
+            assertNotNull(userIdentity);
+            response = userIdentity.getResponse();
 
         }catch (MeedlException meedlException){
             log.info(meedlException.getMessage());

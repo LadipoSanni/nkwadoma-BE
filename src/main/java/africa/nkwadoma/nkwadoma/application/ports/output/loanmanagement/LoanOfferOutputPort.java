@@ -27,4 +27,6 @@ public interface LoanOfferOutputPort {
     int countNumberOfPendingLoanOfferForCohort(String id) throws MeedlException;
 
     int countNumberOfPendingLoanOfferForOrganization(String id) throws MeedlException;
+
+    LoanOffer findById(String loanOfferId) throws MeedlException;
 }

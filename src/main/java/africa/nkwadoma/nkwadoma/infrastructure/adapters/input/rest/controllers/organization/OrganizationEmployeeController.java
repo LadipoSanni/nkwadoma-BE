@@ -1,11 +1,13 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.organization;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
-import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.PaginatedResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.QAResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
@@ -22,7 +24,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @RestController
@@ -57,14 +58,43 @@ public class OrganizationEmployeeController {
                 HttpStatus.OK.toString()));
     }
 
-    @GetMapping("view-all/admin")
+    @GetMapping("view/employee/details")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
             "or hasRole('MEEDL_ADMIN')" +
-            "or hasRole('MEEDL_ASSOCIATE')" +
+            "or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')" +
             "or hasRole('PORTFOLIO_MANAGER')" +
             "or hasRole('ORGANIZATION_SUPER_ADMIN')" +
             "or hasRole('ORGANIZATION_ADMIN')" +
+            "or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')" +
+            "or hasRole('COOPERATE_FINANCIER_ADMIN')" +
             "or hasRole('ORGANIZATION_ASSOCIATE')")
+    public ResponseEntity<?> viewAllAdminInOrganization(@AuthenticationPrincipal Jwt meedlUser,
+                                                        @RequestParam(required = false) String employeeId) throws MeedlException {
+        OrganizationEmployeeIdentity organizationEmployeeIdentity =
+                OrganizationEmployeeIdentity.builder().id(employeeId).meedlUser(UserIdentity.builder().id(meedlUser.getClaimAsString("sub")).build()).build();
+        log.info("The organization employee detail with id at the controller {}",employeeId);
+        OrganizationEmployeeIdentity foundOrganizationEmployeeIdentity =
+                viewOrganizationEmployeesUseCase.viewEmployeeDetail(organizationEmployeeIdentity);
+
+        OrganizationEmployeeResponse organizationEmployeeResponse = organizationEmployeeRestMapper
+                .toOrganizationEmployeeResponse(foundOrganizationEmployeeIdentity);
+
+        ApiResponse<OrganizationEmployeeResponse> apiResponse = ApiResponse.
+                        <OrganizationEmployeeResponse>builder()
+                .data(organizationEmployeeResponse)
+                .message(ControllerConstant.RETURNED_SUCCESSFULLY.getMessage())
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+    @GetMapping("view-all/admin")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') " +
+            "or hasRole('MEEDL_ADMIN')" +
+            "or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')" +
+            "or hasRole('PORTFOLIO_MANAGER')" +
+            "or hasRole('ORGANIZATION_SUPER_ADMIN')" +
+            "or hasRole('ORGANIZATION_ADMIN')" + "or hasRole('ORGANIZATION_ASSOCIATE')"+
+            "or hasRole('COOPERATE_FINANCIER_ADMIN') or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN') " )
     public ResponseEntity<?> viewAllAdminInOrganization(@AuthenticationPrincipal Jwt meedlUser,
                                                         @RequestParam(required = false) String name,
                                                         @RequestParam(required = false) Set<IdentityRole> identityRoles,
@@ -80,7 +110,8 @@ public class OrganizationEmployeeController {
                 viewOrganizationEmployeesUseCase.viewAllAdminInOrganization(organizationEmployeeIdentity);
 
         List<OrganizationEmployeeResponse> organizationEmployeeResponses =
-                organizationEmployeeIdentities.stream().map(organizationEmployeeRestMapper::toOrganizationEmployeeResponse).toList();
+                organizationEmployeeIdentities.stream()
+                        .map(organizationEmployeeRestMapper::toOrganizationEmployeeResponse).toList();
 
         PaginatedResponse<OrganizationEmployeeResponse> paginatedResponse =new PaginatedResponse<>(
                 organizationEmployeeResponses,
@@ -102,7 +133,7 @@ public class OrganizationEmployeeController {
 
     @Deprecated
     @GetMapping("search-admin")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<?> searchAllAdminInOrganization(@RequestParam @NotBlank(message = "Organization id is required") String organizationId,
                                                           @RequestParam @NotBlank(message = "name") String name,
                                                           @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
@@ -124,13 +155,20 @@ public class OrganizationEmployeeController {
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
 
-    @PostMapping("approve/invite/colleague")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN')")
-    public ResponseEntity<ApiResponse<?>> respondToColleagueInvite(@RequestParam(name = "organizationEmployeeId") String organizationEmployeeId) throws MeedlException {
-        String response = viewOrganizationEmployeesUseCase.respondToColleagueInvitation(organizationEmployeeId);
-        ApiResponse<String> apiResponse = ApiResponse.<String>builder()
-                .data(response)
-                .message(response)
+    @PostMapping("respond/invite/colleague")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN')  or hasRole('ORGANIZATION_SUPER_ADMIN') " +
+            "or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<?>> respondToColleagueInvite(@AuthenticationPrincipal Jwt meedlUser,
+                                                                   @RequestParam(name = "organizationEmployeeId") String organizationEmployeeId,
+                                                                   @RequestParam(name = "decision") ActivationStatus activationStatus) throws MeedlException {
+        OrganizationEmployeeIdentity organizationEmployeeIdentity = viewOrganizationEmployeesUseCase.respondToColleagueInvitation(meedlUser.getClaimAsString("sub"),
+                organizationEmployeeId,activationStatus);
+        ApiResponse<QAResponse> apiResponse = ApiResponse.<QAResponse>builder()
+                .message(organizationEmployeeIdentity.getResponse())
+                .data(QAResponse.builder()
+                        .id(organizationEmployeeIdentity.getId())
+                        .email(organizationEmployeeIdentity.getMeedlUser().getEmail())
+                        .build())
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);

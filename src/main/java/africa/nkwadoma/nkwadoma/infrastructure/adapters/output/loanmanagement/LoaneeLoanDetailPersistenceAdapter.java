@@ -2,15 +2,14 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeLoanDetailMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetailSummary;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.LoanDetailEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoaneeLoanDetailEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoaneeLoanDetailMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanSummaryProjection;
@@ -18,7 +17,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.math.BigDecimal;
 import java.time.Month;
 import java.util.*;
 
@@ -40,7 +38,7 @@ public class LoaneeLoanDetailPersistenceAdapter implements LoaneeLoanDetailsOutp
 
     @Override
     public void delete(String LoaneeLoanDetailId) throws MeedlException {
-        MeedlValidator.validateUUID(LoaneeLoanDetailId, "Please provide a valid Loanee LoanDetailId");
+        MeedlValidator.validateUUID(LoaneeLoanDetailId, LoaneeLoanDetailMessages.INVALID_LOANEE_LOAN_DETAIL_ID.getMessage());
         Optional<LoaneeLoanDetailEntity> loaneeLoanDetailEntity = loaneeLoanDetailRepository.findById(LoaneeLoanDetailId);
         loaneeLoanDetailEntity.ifPresent(loaneeLoanDetailRepository::delete);
     }
@@ -49,7 +47,7 @@ public class LoaneeLoanDetailPersistenceAdapter implements LoaneeLoanDetailsOutp
     public LoaneeLoanDetail findByCohortLoaneeId(String cohortLoaneeId) throws MeedlException {
         MeedlValidator.validateUUID(cohortLoaneeId, CohortMessages.COHORT_LOANEE_ID_CANNOT_BE_EMPTY.getMessage());
         LoaneeLoanDetailEntity loaneeLoanDetailEntity = loaneeLoanDetailRepository.findByCohortLoaneeId(cohortLoaneeId);
-        log.info("Found loaneeLoanDetailEntity: {}", loaneeLoanDetailEntity);
+        log.info("Found loanee Loan Detail Entity: {}", loaneeLoanDetailEntity);
         return loaneeLoanDetailMapper.toLoaneeLoanDetails(loaneeLoanDetailEntity);
     }
 

@@ -4,7 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
@@ -123,8 +123,7 @@ class InvestmentVehicleFinancierAdapterTest {
         assertNotNull(savedInvestmentVehicleFinancier.getFinancier());
         assertNotNull(savedInvestmentVehicleFinancier.getInvestmentVehicle());
         assertNotNull(investmentVehicleFinancier.getFinancier());
-        assertNotNull(investmentVehicleFinancier.getFinancier().getUserIdentity());
-        assertEquals(investmentVehicleFinancier.getFinancier().getUserIdentity().getId(), financier.getUserIdentity().getId());
+        assertNotNull(investmentVehicleFinancier.getFinancier().getIdentity());
         assertEquals(investmentVehicleFinancier.getFinancier().getId(), financier.getId());
         assertEquals(investmentVehicleFinancier.getInvestmentVehicle().getId(), investmentVehicle.getId());
 
@@ -203,7 +202,7 @@ class InvestmentVehicleFinancierAdapterTest {
     void viewAllFinancierInVehicleWithActivationStatus(){
         Page<Financier> financiersPage = null;
         try {
-            financiersPage = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(investmentVehicleId, ActivationStatus.INVITED, pageRequest);
+            financiersPage = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(investmentVehicleId,null, pageRequest);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }

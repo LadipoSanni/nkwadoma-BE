@@ -4,9 +4,11 @@ import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -27,6 +29,7 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
+    private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
 
     @Override
     public Page<OrganizationEmployeeIdentity> viewOrganizationEmployees
@@ -46,12 +49,20 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
         }
         return organizationEmployees;
     }
+    @Override
+    public OrganizationEmployeeIdentity viewEmployeeDetail
+            (OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(organizationEmployeeIdentity, OrganizationMessages.ORGANIZATION_MUST_NOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateUUID(organizationEmployeeIdentity.getId(), OrganizationMessages.INVALID_ORGANIZATION_EMPLOYEE_ID.getMessage());
 
+        return organizationEmployeeOutputPort.
+                findById(organizationEmployeeIdentity.getId());
+    }
 
     @Override
     public OrganizationEmployeeIdentity viewEmployeeDetails(OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(organizationEmployeeIdentity, OrganizationMessages.ORGANIZATION_MUST_NOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateUUID(organizationEmployeeIdentity.getId(), "Valid organization employee id is required");
+        MeedlValidator.validateUUID(organizationEmployeeIdentity.getId(), OrganizationMessages.INVALID_ORGANIZATION_EMPLOYEE_ID.getMessage());
         return organizationEmployeeOutputPort.findByEmployeeId(organizationEmployeeIdentity.getId());
     }
     @Override
@@ -116,17 +127,20 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
     }
 
     private void assignRolesForPendingApproval(OrganizationEmployeeIdentity orgEmployee, UserIdentity foundActor) {
-        if (IdentityRole.isMeedlAdminOrSuperAdmin(foundActor)) {
+        if (IdentityRole.isMeedlAdminOrMeedlSuperAdmin(foundActor.getRole())) {
             log.info("The found actor to view pending approval is a meedl staff with role {}", foundActor.getRole());
             orgEmployee.setIdentityRoles(IdentityRole.getMeedlRoles());
         }
         else if (IdentityRole.PORTFOLIO_MANAGER.equals(foundActor.getRole())) {
             log.info("The found actor to view employees pending approval is a meedl staff {}", foundActor.getRole());
-            orgEmployee.setIdentityRoles(Set.of(IdentityRole.PORTFOLIO_MANAGER, IdentityRole.MEEDL_ASSOCIATE));
+            orgEmployee.setIdentityRoles(Set.of(IdentityRole.PORTFOLIO_MANAGER, IdentityRole.PORTFOLIO_MANAGER_ASSOCIATE));
         }
-        else if (IdentityRole.isOrganizationAdminOrSuperAdmin(foundActor)) {
+        else if (IdentityRole.isOrganizationAdminOrSuperAdmin(foundActor.getRole())) {
             log.info("The found actor viewing employees with pending approval is an organization staff with role {}", foundActor.getRole());
             orgEmployee.setIdentityRoles(IdentityRole.getOrganizationRoles());
+        }else if(IdentityRole.isCooperateSuperAdmin(foundActor.getRole())) {
+            log.info("The found actor viewing employees with pending approval is an cooperation staff with role {}", foundActor.getRole());
+            orgEmployee.setIdentityRoles(Set.of(IdentityRole.COOPERATE_FINANCIER_ADMIN));
         }
     }
 
@@ -135,9 +149,12 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
             log.info("The found actor is a meedl staff with role {}", foundActor.getRole());
             orgEmployee.setIdentityRoles(IdentityRole.getMeedlRoles());
         }
-        else if (IdentityRole.isOrganizationStaff(foundActor.getRole())) {
+        if (IdentityRole.isOrganizationStaff(foundActor.getRole())) {
             log.info("The found actor is an organization staff with role {}", foundActor.getRole());
             orgEmployee.setIdentityRoles(IdentityRole.getOrganizationRoles());
+        }if (IdentityRole.isCooperateSuperAdmin(foundActor.getRole())) {
+            log.info("The found actor is an cooperate staff with role {}", foundActor.getRole());
+            orgEmployee.setIdentityRoles(IdentityRole.getCooperateFinancierRoles());
         }
     }
 
@@ -148,13 +165,13 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
         IdentityRole actorRole = foundActor.getRole();
         log.error("Actor role while verifying view permission {}", actorRole);
         switch (actorRole) {
-            case ORGANIZATION_ASSOCIATE, MEEDL_ASSOCIATE -> {
+            case ORGANIZATION_ASSOCIATE, PORTFOLIO_MANAGER_ASSOCIATE , COOPERATE_FINANCIER_ADMIN -> {
                 log.error("You are not permitted to view pending invites.");
                 return Boolean.FALSE;
             }
             case PORTFOLIO_MANAGER -> {
                 boolean allowed = employeeRoles.stream().allMatch(
-                        role -> role == IdentityRole.PORTFOLIO_MANAGER || role == IdentityRole.MEEDL_ASSOCIATE
+                        role -> role == IdentityRole.PORTFOLIO_MANAGER || role == IdentityRole.PORTFOLIO_MANAGER_ASSOCIATE
                 );
                 if (!allowed) {
                     log.error("Portfolio Managers can only view Portfolio Managers or Meedl Associates.");
@@ -177,6 +194,13 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
                     return Boolean.FALSE;
                 }
             }
+            case COOPERATE_FINANCIER_SUPER_ADMIN -> {
+                boolean allowed = employeeRoles.stream().allMatch(IdentityRole::isCooperateSuperAdmin);
+                if (!allowed) {
+                    log.error("You are only permited to view Cooperate financier staff invites.");
+                    return Boolean.FALSE;
+                }
+            }
             default -> {
                 log.error("You are not permitted to view pending invites user with role {}", actorRole);
                 return Boolean.FALSE;
@@ -194,6 +218,8 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
         boolean userIsMeedlStaff = IdentityRole.isMeedlStaff(foundActor.getRole());
         boolean employeeHasMeedlRole = organizationEmployeeIdentity.getIdentityRoles().stream().anyMatch(IdentityRole::isMeedlStaff);
         boolean employeeHasOrganizationRole = organizationEmployeeIdentity.getIdentityRoles().stream().anyMatch(IdentityRole::isOrganizationStaff);
+        boolean userIsCorporateStaff = IdentityRole.isCooperateFinancier(foundActor.getRole());
+        boolean employeeIsCorporateStaff = organizationEmployeeIdentity.getIdentityRoles().stream().anyMatch(IdentityRole::isCooperateFinancier);
 
         if (!userIsMeedlStaff && employeeHasMeedlRole) {
             log.error("A none meedl staff {} is attempting to view staffs that are meedl staffs. \n ---------------------------------------------------------------------> Roles atempted to view {}", foundActor, organizationEmployeeIdentity.getIdentityRoles());
@@ -204,6 +230,12 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
             log.error("A meedl staff {} is attempting to view staffs that are in another organization not meedl. \n ---------------------------------------------------------------------> Roles atempted to view {}", foundActor, organizationEmployeeIdentity.getIdentityRoles());
             return Boolean.FALSE;
         }
+        if (employeeIsCorporateStaff && !userIsCorporateStaff) {
+            log.error("Unauthorized: non-corporate staff {} attempted to view corporate staff. \n ---> Roles attempted: {}",
+                    foundActor, organizationEmployeeIdentity.getIdentityRoles());
+            return Boolean.FALSE;
+        }
+
         log.info("Actor has the permissions to view");
         return Boolean.TRUE;
     }
@@ -219,9 +251,11 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
     }
 
     @Override
-    public String respondToColleagueInvitation(String organizationEmployeeId) throws MeedlException {
+    public OrganizationEmployeeIdentity respondToColleagueInvitation(String actorId,String organizationEmployeeId,ActivationStatus activationStatus) throws MeedlException {
         MeedlValidator.validateUUID(organizationEmployeeId,IdentityMessages.INVALID_ORGANIZATION_EMPLOYEE.getMessage());
-
+        MeedlValidator.validateObjectInstance(activationStatus,"Activation status cannot be null");
+        decisionMustEitherBeApprovedOrDeclined(activationStatus);
+        UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = organizationEmployeeOutputPort.findById(organizationEmployeeId);
         if (organizationEmployeeIdentity.getActivationStatus().equals(ActivationStatus.ACTIVE)) {
             throw new IdentityException(OrganizationMessages.ORGANIZATION_EMPLOYEE_IS_ACTIVE.getMessage());
@@ -229,10 +263,27 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
 
         OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
 
-        asynchronousMailingOutputPort.sendColleagueEmail(organizationIdentity.getName(),organizationEmployeeIdentity.getMeedlUser());
-        organizationEmployeeIdentity.setActivationStatus(ActivationStatus.INVITED);
-        organizationEmployeeOutputPort.save(organizationEmployeeIdentity);
-        return "Colleague invitation approved for "+organizationEmployeeIdentity.getMeedlUser().getFirstName()+" "
-                +organizationEmployeeIdentity.getMeedlUser().getLastName();
+        if (activationStatus.equals(ActivationStatus.APPROVED)) {
+            asynchronousMailingOutputPort.sendColleagueEmail(organizationIdentity.getName(), organizationEmployeeIdentity.getMeedlUser());
+            organizationEmployeeIdentity.setActivationStatus(ActivationStatus.INVITED);
+            organizationEmployeeOutputPort.save(organizationEmployeeIdentity);
+            String response = "Colleague invitation APPROVED for " + organizationEmployeeIdentity.getMeedlUser().getFullName();
+            organizationEmployeeIdentity.setResponse(response);
+            return organizationEmployeeIdentity;
+        }else {
+            organizationEmployeeIdentity.setActivationStatus(ActivationStatus.DECLINED);
+            organizationEmployeeOutputPort.save(organizationEmployeeIdentity);
+            UserIdentity createdBy = userIdentityOutputPort.findById(organizationEmployeeIdentity.getCreatedBy());
+            asynchronousNotificationOutputPort.sendDeclineColleagueNotification(organizationEmployeeIdentity,userIdentity,createdBy);
+            String response = "Colleague invitation DECLINED for " + organizationEmployeeIdentity.getMeedlUser().getFullName();
+            organizationEmployeeIdentity.setResponse(response);
+            return organizationEmployeeIdentity;
+        }
+    }
+
+    private void decisionMustEitherBeApprovedOrDeclined(ActivationStatus activationStatus) throws IdentityException {
+        if (! activationStatus.equals(ActivationStatus.APPROVED) && !activationStatus.equals(ActivationStatus.DECLINED)) {
+            throw new IdentityException(OrganizationMessages.DECISION_CAN_EITHER_BE_APPROVED_OR_DECLINED.getMessage());
+        }
     }
 }

@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.model.loan;
 
 import africa.nkwadoma.nkwadoma.domain.enums.identity.UserRelationship;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.LevelOfEducation;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import lombok.*;
@@ -19,6 +20,8 @@ public class NextOfKin {
     private String email;
     private String phoneNumber;
     private String nextOfKinRelationship;
+    private String stateOfResidence;
+    private LevelOfEducation levelOfEduction;
 //    private UserRelationship nextOfKinRelationship;
     private String contactAddress;
     private String userId;

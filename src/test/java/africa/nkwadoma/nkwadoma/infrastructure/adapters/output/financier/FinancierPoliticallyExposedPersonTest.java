@@ -31,13 +31,13 @@ public class FinancierPoliticallyExposedPersonTest {
     private PoliticallyExposedPersonOutputPort politicallyExposedPersonOutputPort;
     private FinancierPoliticallyExposedPerson financierPoliticallyExposedPerson;
     private String politicallyExposedPersonId;
-    private final String email = String.format("testfinancier%spoliticallyexposedpersonemail@email.com", TestUtils.generateName(4));;
+    private final String email = String.format("testfinancier%spoliticallyexposedpersonemail@email.com", TestUtils.generateName(4)).toLowerCase();;
     @BeforeAll
     void setUp() {
         financierPoliticallyExposedPerson = TestData.buildFinancierPoliticallyExposedPerson(email);
         try {
             UserIdentity userIdentity = userIdentityOutputPort.save(financierPoliticallyExposedPerson.getFinancier().getUserIdentity());
-            financierPoliticallyExposedPerson.getFinancier().setUserIdentity(userIdentity);
+            financierPoliticallyExposedPerson.getFinancier().setIdentity(userIdentity.getId());
             Financier financier = financierOutputPort.save(financierPoliticallyExposedPerson.getFinancier());
             PoliticallyExposedPerson politicallyExposedPerson = politicallyExposedPersonOutputPort.save(financierPoliticallyExposedPerson.getPoliticallyExposedPerson());
             financierPoliticallyExposedPerson.setPoliticallyExposedPerson(politicallyExposedPerson);
@@ -81,9 +81,7 @@ public class FinancierPoliticallyExposedPersonTest {
         }
         assertNotNull(savedFinancierPoliticallyExposedPerson);
         assertNotNull(savedFinancierPoliticallyExposedPerson.getFinancier());
-        assertNotNull(savedFinancierPoliticallyExposedPerson.getFinancier().getUserIdentity());
-        assertNotNull(savedFinancierPoliticallyExposedPerson.getFinancier().getUserIdentity().getEmail());
-        assertEquals(email, savedFinancierPoliticallyExposedPerson.getFinancier().getUserIdentity().getEmail());
+        assertNotNull(savedFinancierPoliticallyExposedPerson.getFinancier().getIdentity());
         assertNotNull(savedFinancierPoliticallyExposedPerson.getPoliticallyExposedPerson());
         assertNotNull(savedFinancierPoliticallyExposedPerson.getPoliticallyExposedPerson().getPositionHeld());
         assertNotNull(savedFinancierPoliticallyExposedPerson.getPoliticallyExposedPerson().getCountry());

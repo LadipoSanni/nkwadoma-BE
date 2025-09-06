@@ -1,8 +1,10 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity;
 
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.MFAType;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.LevelOfEducation;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.NextOfKinEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.bankdetail.BankDetailEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.wallet.BankDetailEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -39,6 +41,7 @@ public class UserEntity {
     private String stateOfOrigin;
     private String maritalStatus;
     private String stateOfResidence;
+//    private LevelOfEducation levelOfEduction;
     private String nationality;
     private String residentialAddress;
     private String alternateEmail;
@@ -53,12 +56,9 @@ public class UserEntity {
     private String taxId;
     @Column(name = "mfa_phone_number")
     private String  MFAPhoneNumber;
-    @Column(name = "enable_phone_number_mfa")
-    private boolean enablePhoneNumberMFA;
-    @Column(name = "enable_email_mfa")
-    private boolean enableEmailMFA;
-    @Column(name = "mfa_enabled")
-    private boolean MFAEnabled;
+    @Enumerated(EnumType.STRING)
+    private MFAType mfaType;
+
     @OneToOne
     private BankDetailEntity bankDetailEntity;
     @OneToOne

@@ -1,7 +1,10 @@
 package africa.nkwadoma.nkwadoma.testUtilities.data;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.Country;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.UserRelationship;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
@@ -17,6 +20,7 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.*;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Demography;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
@@ -76,9 +80,9 @@ public class TestData {
         organizationIdentity.setName(name);
         organizationIdentity.setId(testId);
         organizationIdentity.setEmail("testorganizationdata@gmail.com");
-        organizationIdentity.setTin("7682-5627");
+        organizationIdentity.setTin("7682-56"+TestUtils.generateName(3));
         organizationIdentity.setRcNumber(rcNumber);
-        organizationIdentity.setStatus(ActivationStatus.INVITED);
+        organizationIdentity.setActivationStatus(ActivationStatus.INVITED);
         organizationIdentity.setServiceOfferings(List.of(new ServiceOffering()));
         organizationIdentity.getServiceOfferings().get(0).setIndustry(Industry.EDUCATION);
         organizationIdentity.getServiceOfferings().get(0).setTransactionLowerBound(new BigDecimal("0.00"));
@@ -86,6 +90,7 @@ public class TestData {
         organizationIdentity.getServiceOfferings().get(0).setName(ServiceOfferingType.TRAINING.name());
         organizationIdentity.setPhoneNumber("09876365713");
         organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
+        organizationIdentity.setRequestedInvitationDate(LocalDateTime.now());
         organizationIdentity.setWebsiteAddress("testdata.org");
         organizationIdentity.setOrganizationEmployees(employeePeter);
         organizationIdentity.setLogoImage("logo-img.png");
@@ -210,6 +215,7 @@ public class TestData {
         loanProduct.setPageSize(pageSize);
         loanProduct.setPageNumber(pageNumber);
         loanProduct.setVendors(List.of(vendor));
+        loanProduct.setSponsors(List.of(Financier.builder().id(UUID.randomUUID().toString()).name("ifnf").build()));
         return loanProduct;
     }
     public static Vendor createTestVendor(String name) {
@@ -301,6 +307,7 @@ public class TestData {
         investmentVehicleDesignations.add(InvestmentVehicleDesignation.SPONSOR);
         Financier financier = buildFinancier(investmentVehicleDesignations);
         financier.setUserIdentity(userIdentity);
+        financier.setIdentity(userIdentity.getId());
         financier.setFinancierType(FinancierType.INDIVIDUAL);
         return financier;
     }
@@ -325,9 +332,10 @@ public class TestData {
                 .file(new File(absolutePath))
                 .build();
     }
-    public static Cooperation buildCooperation(String name){
+    public static Cooperation buildCooperation(String name,String emial){
         return Cooperation.builder()
                 .name(name)
+                .email(emial)
                 .build();
     }
 
@@ -566,6 +574,7 @@ public class TestData {
     public static InvestmentVehicleFinancier buildInvestmentVehicleFinancier(Financier financier, InvestmentVehicle investmentVehicle) {
         return InvestmentVehicleFinancier.builder()
                 .financier(financier)
+                .investmentVehicleDesignation(Set.of(InvestmentVehicleDesignation.DONOR))
                 .investmentVehicle(investmentVehicle)
                 .build();
     }
@@ -628,7 +637,7 @@ public class TestData {
                 .beneficialOwnerFirstName("Beneficial first name")
                 .beneficialOwnerLastName("Beneficial last name")
                 .beneficialOwnerRelationship(UserRelationship.BROTHER)
-                .beneficialOwnerDateOfBirth(LocalDateTime.now())
+                .beneficialOwnerDateOfBirth(LocalDate.now())
                 .percentageOwnershipOrShare(percentageOwnershipOrShare)
                 .votersCard("Voters card")
                 .nationalIdCard("national id card")
@@ -761,6 +770,45 @@ public class TestData {
                 .numberOfLoans(2)
                 .loanee(loanee)
                 .totalAmountRepaid(BigDecimal.valueOf(500.00))
+                .build();
+    }
+
+    public static CooperateFinancier buildCooperateFinancier(Financier financier, Cooperation cooperation) {
+        return CooperateFinancier.builder()
+                .id(testId)
+                .activationStatus(ActivationStatus.ACTIVE)
+                .financier(financier)
+                .cooperate(cooperation)
+                .build();
+    }
+
+    public static InstituteMetrics createInstituteMetrics(OrganizationIdentity organizationIdentity) {
+        return InstituteMetrics.builder()
+                .id(testId)
+                .numberOfCohort(0)
+                .numberOfLoanees(0)
+                .stillInTraining(0)
+                .organization(organizationIdentity)
+                .build();
+    }
+
+    public static Demography buildDemography() {
+        return Demography.builder()
+                .age17To25Count(2)
+                .age25To35Count(3)
+                .age35To45Count(2)
+                .femaleCount(2)
+                .maleCount(3)
+                .totalGenderCount(5)
+                .northCentralCount(2)
+                .northEastCount(3)
+                .northWestCount(4)
+                .southWestCount(5)
+                .southEastCount(6)
+                .southSouthCount(6)
+                .oLevelCount(3)
+                .tertiaryCount(2)
+                .name("Demo")
                 .build();
     }
 }

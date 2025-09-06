@@ -1,14 +1,12 @@
 package africa.nkwadoma.nkwadoma.domain.service.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.AddProgramUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoanDetailOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramLoanDetailOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanBreakdownOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
@@ -24,6 +22,7 @@ import org.springframework.stereotype.*;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_ALREADY_EXISTS;
@@ -41,6 +40,7 @@ public class ProgramService implements AddProgramUseCase {
     private final LoanBreakdownOutputPort loanBreakdownOutputPort;
     private final CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
     private final CohortOutputPort cohortOutputPort;
+    private final InstituteMetricsOutputPort instituteMetricsOutputPort;
 
     @Override
     public Program createProgram(Program program) throws MeedlException {
@@ -50,11 +50,22 @@ public class ProgramService implements AddProgramUseCase {
         program.setOrganizationIdentity(organizationIdentity);
         checkIfProgramExistByNameInOrganization(program);
 
+        program.setProgramStatus(ActivationStatus.ACTIVE);
+
         program = programOutputPort.saveProgram(program);
 
         ProgramLoanDetail programLoanDetail = buildProgramLoanDetail(program);
         programLoanDetailOutputPort.save(programLoanDetail);
+
+        updateInstituteMetrics(organizationIdentity);
         return program;
+    }
+
+    private void updateInstituteMetrics(OrganizationIdentity organizationIdentity) throws MeedlException {
+        InstituteMetrics instituteMetrics = instituteMetricsOutputPort.findByOrganizationId(organizationIdentity.getId());
+        instituteMetrics.setNumberOfPrograms(instituteMetrics.getNumberOfPrograms() + BigInteger.ONE.intValue());
+        log.info("Updating total number of programs in institute metrics to {}",instituteMetrics.getNumberOfPrograms());
+        instituteMetricsOutputPort.save(instituteMetrics);
     }
 
     private static ProgramLoanDetail buildProgramLoanDetail(Program program) {

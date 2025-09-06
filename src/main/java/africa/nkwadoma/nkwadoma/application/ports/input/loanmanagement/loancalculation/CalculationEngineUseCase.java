@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loancalc
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.CalculationContext;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -17,5 +18,5 @@ public interface CalculationEngineUseCase {
 
     void scheduleDailyInterestCalculation();
 
-    void scheduleMonthlyInterestCalculation();
+    void  scheduleMonthlyInterestCalculation();
 }

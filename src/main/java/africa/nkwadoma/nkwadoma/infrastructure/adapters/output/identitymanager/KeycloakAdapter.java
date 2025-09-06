@@ -2,6 +2,8 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identitymanager;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -36,9 +38,7 @@ import org.springframework.web.client.*;
 import java.util.List;
 import java.util.Optional;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages.INVALID_USER_ID;
-
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages.*;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -88,7 +88,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
     @Override
     public UserIdentity updateUserData(UserIdentity userIdentity) throws MeedlException {
         validateUserIdentityDetails(userIdentity);
-        MeedlValidator.validateUUID(userIdentity.getId(), INVALID_USER_ID.getMessage());
+        MeedlValidator.validateUUID(userIdentity.getId(), UserMessages.INVALID_USER_ID.getMessage());
         log.info("Done validating user identity details in keycloak adapter for update : {}",userIdentity);
         UserRepresentation userRepresentation = mapper.map(userIdentity);
         UserIdentity foundUserIdentity = getUserById(userIdentity.getId());
@@ -457,7 +457,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
     }
     public UserResource getUserResource(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
-        MeedlValidator.validateUUID(userIdentity.getId(), INVALID_USER_ID.getMessage());
+        MeedlValidator.validateUUID(userIdentity.getId(), UserMessages.INVALID_USER_ID.getMessage());
         return keycloak
                 .realm(KEYCLOAK_REALM)
                 .users()
@@ -474,10 +474,46 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
                     .get(userIdentity.getRole().name().toUpperCase().trim())
                     .toRepresentation();
         }catch (NotFoundException exception){
-            throw new IdentityException("Not Found: Role with name "+ userIdentity.getRole());
+            throw new IdentityException("Not Found: Role with name "+ userIdentity.getRole().getRoleName());
         }
         return roleRepresentation;
     }
+    @Override
+    public List<UserIdentity> getUsersByRole(String roleName) throws MeedlException {
+        MeedlValidator.validateDataElement(roleName, "Role name cannot be empty");
+
+        try {
+            List<UserRepresentation> users = keycloak
+                    .realm(KEYCLOAK_REALM)
+                    .roles()
+                    .get(roleName.toUpperCase().trim())
+                    .getUserMembers(0, Integer.MAX_VALUE);
+
+            return users.stream()
+                    .map(mapper::mapUserRepresentationToUserIdentity)
+                    .toList();
+        } catch (NotFoundException e) {
+            throw new IdentityException("Role not found: " + roleName);
+        }
+    }
+    @Override
+    public void changeUserRole(UserIdentity userIdentity, String newRole) throws MeedlException {
+        log.info("Changing user role from {} to {}. User Id {}", userIdentity.getRole(), newRole, userIdentity.getId());
+        UserResource userResource = getUserResource(userIdentity);
+        List<RoleRepresentation> currentRoles = userResource.roles().realmLevel().listAll();
+        if (!currentRoles.isEmpty()) {
+            userResource.roles().realmLevel().remove(currentRoles);
+        }
+
+        RoleRepresentation newRoleRep = keycloak.realm(KEYCLOAK_REALM)
+                .roles()
+                .get(newRole.toUpperCase().trim())
+                .toRepresentation();
+
+        userResource.roles().realmLevel().add(List.of(newRoleRep));
+        log.info("Updated role for user {} to {}", userIdentity.getEmail(), newRole);
+    }
+
 
 
     @Override

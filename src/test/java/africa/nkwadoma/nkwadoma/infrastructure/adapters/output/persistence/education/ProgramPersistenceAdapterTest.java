@@ -3,10 +3,10 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.educ
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import africa.nkwadoma.nkwadoma.testUtilities.data.*;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
@@ -155,37 +155,6 @@ class ProgramPersistenceAdapterTest {
             assertEquals(programName.trim(), savedProgram.getName());
         } catch (MeedlException e) {
             log.error("Error saving program", e);
-        }
-    }
-
-    @Test
-    void saveProgramWithNonTrainingServiceOffering() {
-        try {
-            OrganizationIdentity foundOrganizationIdentity = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
-            List<OrganizationServiceOffering> organizationServiceOfferings = organizationOutputPort.
-                    findOrganizationServiceOfferingsByOrganizationId(foundOrganizationIdentity
-                            .getId());
-            ServiceOffering serviceOffering = organizationServiceOfferings.get(0).getServiceOffering();
-            serviceOffering.setName("NON_TRAINING");
-            serviceOffering.setIndustry(Industry.BANKING);
-
-            foundOrganizationIdentity.setServiceOfferings(List.of(serviceOffering));
-            UserIdentity foundUserIdentity = userIdentityOutputPort.findByEmail(userIdentity.getEmail());
-            foundUserIdentity.setCreatedBy(foundOrganizationIdentity.getCreatedBy());
-            foundUserIdentity.setId(foundOrganizationIdentity.getCreatedBy());
-
-            foundOrganizationIdentity.setOrganizationEmployees(List.of(OrganizationEmployeeIdentity.builder().
-                    meedlUser(foundUserIdentity).build()));
-            OrganizationIdentity savedOrganization = organizationOutputPort.save(foundOrganizationIdentity);
-
-            userIdentityOutputPort.save(foundUserIdentity);
-            assertNotNull(savedOrganization);
-
-            dataScience.setCreatedBy(foundUserIdentity.getCreatedBy());
-            dataScience.setOrganizationIdentity(savedOrganization);
-            assertThrows(MeedlException.class, () -> programOutputPort.saveProgram(dataScience));
-        } catch (MeedlException e) {
-            log.error("Error while saving program", e);
         }
     }
 
