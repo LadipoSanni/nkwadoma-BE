@@ -12,6 +12,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerifi
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanMetricsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanReferralOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanRequestOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.DemographyOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ServiceProvider;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
@@ -26,6 +27,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanMetrics;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Demography;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.identity.IdentityVerificationMapper;
@@ -38,9 +40,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages.IDENTITY_NOT_VERIFIED;
 
@@ -78,6 +84,8 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     private CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
     @Autowired
     private CohortOutputPort cohortOutputPort;
+    @Autowired
+    private DemographyOutputPort demographyOutputPort;
 
     @Override
     public String verifyIdentity(String loanReferralId) throws IdentityException, MeedlException {
@@ -393,6 +401,70 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         updateLoaneeDetail(identityVerification, userId , premblyResponse);
         addedToLoaneeLoan(identityVerification.getLoanReferralId());
         log.info("Identity is verified: Loan referral id {}. Verified", identityVerification.getLoanReferralId());
+        updateDemography(premblyResponse);
+    }
+
+    private void updateDemography(PremblyNinResponse premblyResponse) throws MeedlException {
+
+        Demography demography = demographyOutputPort.findDemographyByName(MEEDL);
+        updateGenderCount(premblyResponse.getNinData().getGender(),demography);
+
+        updateAgeRangeCount(premblyResponse.getNinData().getBirthDate(),demography);
+
+        updateStateOfOriginCount(premblyResponse.getNinData(),demography);
+
+        demographyOutputPort.save(demography);
+
+        //TODO
+        //EDUCATIONAL LEVEL
+    }
+
+    private String normalizeStateName(String state) {
+        return state.replace(" State", "").replace(" state", "").trim().toLowerCase();
+    }
+
+    private void updateStateOfOriginCount(PremblyNinResponse.NinData ninData, Demography demography) {
+        String birthCountry = ninData.getBirthCountry();
+        if (!NIGERIA.equalsIgnoreCase(birthCountry)) {
+            demography.setNonNigerian(demography.getNonNigerian() + ONE);
+        } else {
+            String birthState = normalizeStateName(ninData.getBirthState().trim());
+            if (SOUTH_EAST.contains(birthState)) {
+                demography.setSouthEastCount(demography.getSouthEastCount() + ONE);
+            } else if (SOUTH_WEST.contains(birthState)) {
+                demography.setSouthWestCount(demography.getSouthWestCount() + ONE);
+            } else if (SOUTH_SOUTH.contains(birthState)) {
+                demography.setSouthSouthCount(demography.getSouthSouthCount() + ONE);
+            } else if (NORTH_EAST.contains(birthState)) {
+                demography.setNorthEastCount(demography.getNorthEastCount() + ONE);
+            } else if (NORTH_WEST.contains(birthState)) {
+                demography.setNorthWestCount(demography.getNorthWestCount() + ONE);
+            } else if (NORTH_CENTRAL.contains(birthState)) {
+                demography.setNorthCentralCount(demography.getNorthCentralCount() + ONE);
+            }
+        }
+    }
+
+    private void updateAgeRangeCount(String birthDate, Demography demography) {
+        LocalDate birthLocalDate = LocalDate.parse(birthDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+        int age = Period.between(birthLocalDate, LocalDate.now()).getYears();
+        if (age >= 17 && age <= 25) {
+            demography.setAge17To25Count(demography.getAge17To25Count() + ONE);
+        } else if (age >= 26 && age <= 35) {
+            demography.setAge25To35Count(demography.getAge25To35Count() + ONE);
+        } else if (age >= 36 && age <= 45) {
+            demography.setAge35To45Count(demography.getAge35To45Count() + ONE);
+        }
+    }
+
+    private void updateGenderCount(String gender, Demography demography){
+        String normalizeGender = GENDER_TO_FULL.get(gender.toLowerCase());
+        if (normalizeGender.equalsIgnoreCase(MALE)){
+            demography.setMaleCount(demography.getMaleCount() + ONE);
+        }else if (normalizeGender.equalsIgnoreCase(FEMALE)){
+            demography.setFemaleCount(demography.getFemaleCount() + ONE);
+        }
+        demography.setTotalGenderCount(demography.getTotalGenderCount() + ONE);
     }
 
     private void handleFailedVerification(UserIdentity userIdentity, PremblyResponse premblyResponse) throws MeedlException {
