@@ -114,7 +114,7 @@ public interface LoanReferralRepository extends JpaRepository<LoanReferralEntity
         JOIN OrganizationEntity organization ON organization.id = program.organizationIdentity.id
         JOIN UserEntity user ON user.id = loanee.userIdentity.id
         WHERE (:organizationId IS NULL OR organization.id = :organizationId)
-        AND (:programId IS NULL OR program.id = :programId)
+        AND (:programId IS NULL OR program.id = :programId) And lre.loanReferralStatus != 'AUTHORIZED'
         
         order by cle.referralDateTime desc
 """)
@@ -140,7 +140,7 @@ public interface LoanReferralRepository extends JpaRepository<LoanReferralEntity
         JOIN OrganizationEntity organization ON organization.id = program.organizationIdentity.id
         JOIN UserEntity user ON user.id = loanee.userIdentity.id
         WHERE (:organizationId IS NULL OR organization.id = :organizationId)
-        AND (:programId IS NULL OR program.id = :programId)
+        AND (:programId IS NULL OR program.id = :programId) AND lre.loanReferralStatus != 'AUTHORIZED'
         AND (LOWER(user.firstName) LIKE LOWER(CONCAT('%', :name, '%'))
             OR LOWER(user.lastName) LIKE LOWER(CONCAT('%', :name, '%')))
         ORDER BY cle.referralDateTime DESC
