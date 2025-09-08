@@ -319,7 +319,11 @@ public class FinancierService implements FinancierUseCase {
         }
         if (identityManagerOutputPort.existByEmail(email, Boolean.TRUE)) {
             log.error("Cooperate financier with email already exists");
-            throw new InvestmentException("User with email already exists");
+            throw new InvestmentException("User with email already exists. Contact admin");
+        }
+        if (identityManagerOutputPort.clientExistByName(financier.getName())){
+            log.error("Financier cooperation with name already exists");
+            throw new InvestmentException("Cooperation with name already exists");
         }
     }
 
