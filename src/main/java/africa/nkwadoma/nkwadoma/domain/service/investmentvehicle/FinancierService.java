@@ -60,6 +60,7 @@ import java.util.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType.COOPERATE;
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType.INDIVIDUAL;
 
+
 @AllArgsConstructor
 @Service
 @EnableAsync
