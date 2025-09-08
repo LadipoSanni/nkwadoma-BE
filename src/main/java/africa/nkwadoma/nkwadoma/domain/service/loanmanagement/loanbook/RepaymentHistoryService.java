@@ -20,6 +20,9 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -81,18 +84,55 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
     @Override
     public List<RepaymentHistory> generateRepaymentHistory(String loanRequestId) throws MeedlException {
 
+        List<RepaymentHistory> repaymentSchedule = new ArrayList<>();
+
         MeedlValidator.validateUUID(loanRequestId,"Loan request id cannot ");
 
         LoanOffer loanOffer = loanOfferOutputPort.findById(loanRequestId);
 
         int totalMonths = loanOffer.getLoanProduct().getTenor() * FinancialConstants.MONTHS_PER_YEAR;
-        BigDecimal monthlyRate = BigDecimal.valueOf(totalMonths / FinancialConstants.PERCENTAGE_BASE_INT / FinancialConstants.MONTHS_PER_YEAR);
+
+        BigDecimal annualRate = BigDecimal.valueOf(loanOffer.getLoanProduct().getInterestRate())
+                .divide(BigDecimal.valueOf(FinancialConstants.PERCENTAGE_BASE_INT), 10, RoundingMode.HALF_UP);
+        BigDecimal monthlyRate = annualRate.divide(BigDecimal.valueOf(FinancialConstants.MONTHS_PER_YEAR), 10, RoundingMode.HALF_UP);
 
         BigDecimal principal = loanOffer.getAmountApproved().setScale(2, RoundingMode.HALF_UP);
 
+        BigDecimal onePlusRate = BigDecimal.ONE.add(monthlyRate);
+        BigDecimal onePlusRatePowN = onePlusRate.pow(totalMonths);
+        BigDecimal expectedMonthlyInterest = principal.multiply(monthlyRate)
+                .multiply(onePlusRatePowN)
+                .divide(onePlusRatePowN.subtract(BigDecimal.ONE), 2, RoundingMode.HALF_UP);
 
 
-        return null;
+        BigDecimal balance = principal;
+        BigDecimal totalRepaid = BigDecimal.ZERO;
+        LocalDate paymentDate = LocalDate.from(loanOffer.getDateTimeOffered()
+                .with(TemporalAdjusters.lastDayOfMonth()).plusMonths(1));
+
+
+        for (int eachMonth = 1 ; eachMonth <= totalMonths ; eachMonth++) {
+            BigDecimal interest = balance.multiply(monthlyRate).setScale(2, RoundingMode.HALF_UP);
+
+            BigDecimal principalPayment = expectedMonthlyInterest.subtract(interest).setScale(2, RoundingMode.HALF_UP);
+
+            balance = balance.subtract(principalPayment).setScale(2, RoundingMode.HALF_UP);
+
+            totalRepaid = totalRepaid.add(expectedMonthlyInterest).setScale(2, RoundingMode.HALF_UP);
+
+            RepaymentHistory scheduleRepayment = RepaymentHistory.builder().
+                    totalAmountRepaid(totalRepaid).amountOutstanding(balance).paymentDate(paymentDate)
+                    .amountPaid(expectedMonthlyInterest).interestIncurred(interest).principalPayment(principalPayment)
+                    .build();
+
+            repaymentSchedule.add(scheduleRepayment);
+            paymentDate = paymentDate.plusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
+        }
+
+        repaymentSchedule.get(repaymentSchedule.size() - 1).setTenor(loanOffer.getLoanProduct().getTenor());
+        repaymentSchedule.get(repaymentSchedule.size() - 1).setMoratorium(loanOffer.getLoanProduct().getMoratorium());
+
+        return repaymentSchedule;
     }
 
 }
