@@ -294,7 +294,10 @@ public class AdminInitializer {
     }
 
     private Demography getDemography() {
-        return Demography.builder().name(MEEDL).build();
+        return Demography.builder().name(MEEDL).age35To45Count(0).age25To35Count(0).age17To25Count(0)
+                .totalGenderCount(0).femaleCount(0).maleCount(0).southEastCount(0).southSouthCount(0)
+                .southWestCount(0).northWestCount(0).northEastCount(0).northCentralCount(0)
+                .nonNigerian(0).tertiaryCount(0).oLevelCount(0).build();
     }
 
     private final Environment environment;
