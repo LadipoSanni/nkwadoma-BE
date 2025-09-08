@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Setter
@@ -22,12 +23,14 @@ public class RepaymentHistory {
     private String lastName;
     private Loanee loanee;
     private LocalDateTime paymentDateTime;
+    private LocalDate paymentDate;
     private Integer month;
     private Integer year;
     private BigDecimal amountPaid;
     private ModeOfPayment modeOfPayment;
     private BigDecimal totalAmountRepaid;
     private BigDecimal amountOutstanding;
+    private BigDecimal principalPayment;
     private BigDecimal interestIncurred;
     private Cohort cohort;
     private String actorId;
@@ -35,6 +38,8 @@ public class RepaymentHistory {
     private String loaneeName;
     private Integer firstYear;
     private Integer lastYear;
+    private int tenor;
+    private int moratorium;
 
     public void validate() throws MeedlException {
 //        MeedlValidator.validateObjectInstance(paymentDateTime,"Payment date cannot be empty");

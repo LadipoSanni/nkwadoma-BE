@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loancalcu
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.LoanMetricsUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.DemographyOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.Industry;
@@ -15,6 +16,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdenti
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Demography;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
 import jakarta.annotation.PostConstruct;
@@ -34,6 +36,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants.MEEDL;
 import static africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole.MEEDL_SUPER_ADMIN;
 
 @Component
@@ -49,6 +52,7 @@ public class AdminInitializer {
     private final PortfolioOutputPort portfolioOutputPort;
     private final CalculationEngineUseCase calculationEngineUseCase;
     private final OrganizationLoanDetailOutputPort organizationLoanDetailOutputPort;
+    private final DemographyOutputPort demographyOutputPort;
 
     @Value("${superAdmin.email}")
     private String SUPER_ADMIN_EMAIL ;
@@ -265,6 +269,16 @@ public class AdminInitializer {
         return foundPortfolio;
     }
 
+    public Demography createDemography(Demography demography) throws MeedlException {
+        Demography foundDemography = demographyOutputPort.findDemographyByName(MEEDL);
+        log.info("found demography -- {}", foundDemography);
+        if (ObjectUtils.isEmpty(foundDemography)) {
+            log.info("about to create Demography -- {}", demography);
+            return demographyOutputPort.save(demography);
+        }
+        return foundDemography;
+    }
+
     @PostConstruct
     public void init() throws MeedlException {
         UserIdentity userIdentity = inviteFirstUser(getUserIdentity());
@@ -273,9 +287,16 @@ public class AdminInitializer {
         loanMetricsUseCase.correctLoanRequestCount();
         Portfolio portfolio = createMeedlPortfolio(getPortfolio());
         log.info("Meedl portfolio process done -- {} ", portfolio);
+        Demography demography = createDemography(getDemography());
+        log.info("Demography process done -- {} ", demography);
         calculationEngineUseCase.scheduleDailyInterestCalculation();
         calculationEngineUseCase.scheduleMonthlyInterestCalculation();
     }
+
+    private Demography getDemography() {
+        return Demography.builder().name(MEEDL).build();
+    }
+
     private final Environment environment;
     @EventListener(ApplicationReadyEvent.class)
     public void logContextPath() {

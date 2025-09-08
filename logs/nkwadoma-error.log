@@ -104,3 +104,5 @@ Caused by: org.springframework.context.annotation.ConflictingBeanDefinitionExcep
 	at org.springframework.context.annotation.ConfigurationClassParser.parse(ConfigurationClassParser.java:197)
 	at org.springframework.context.annotation.ConfigurationClassParser.parse(ConfigurationClassParser.java:165)
 	... 16 common frames omitted
+2025-09-08 16:22:42 [restartedMain] ERROR a.n.n.i.a.o.i.KeycloakAdapter - Conflict - User with this identity already exists --- Error occurred on attempting to create user on keycloak
+2025-09-08 16:23:22 [restartedMain] ERROR a.n.n.i.a.o.i.KeycloakAdapter - Conflict - User with this identity already exists --- Error occurred on attempting to create user on keycloak
