@@ -410,6 +410,7 @@ public class FinancierService implements FinancierUseCase {
         }
         try {
             Financier existingFinancier = financierOutputPort.findFinancierByUserId(userIdentity.getId());
+            financier.getUserIdentity().setId(userIdentity.getId());
             log.info("Financier found by user identity id {}", userIdentity.getId());
             return updateFinancierDetails(financier, existingFinancier);
 
@@ -439,7 +440,7 @@ public class FinancierService implements FinancierUseCase {
     private static Financier updateFinancierDetails(Financier financier, Financier existingFinancier) {
         existingFinancier.setInvestmentVehicleId(financier.getInvestmentVehicleId());
         existingFinancier.setInvestmentVehicleDesignation(financier.getInvestmentVehicleDesignation());
-
+        existingFinancier.setUserIdentity(financier.getUserIdentity());
         financier = existingFinancier;
         log.info("Updated the financier details without saving {}", financier);
         return financier;
