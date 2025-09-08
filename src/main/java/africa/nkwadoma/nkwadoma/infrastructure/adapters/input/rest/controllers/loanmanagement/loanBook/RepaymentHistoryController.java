@@ -7,6 +7,8 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanBook.RepaymentHistoryResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanBook.RepaymentScheduleEntry;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanBook.RepaymentScheduleResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanBook.YearRangeResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loanManagement.loanBook.RepaymentHistoryRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages;
@@ -116,6 +118,33 @@ public class RepaymentHistoryController {
                 .message(YEAR_RANGE_RETRIEVED)
                 .statusCode(HttpStatus.OK.toString())
                 .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+
+    @GetMapping("generate/repayment/schedule")
+    @PreAuthorize("hasRole('LOANEE') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
+    public ResponseEntity<ApiResponse<?>> generateRepaymentSchedule(@RequestParam(name = "loanRequestId")String loanRequestId) throws MeedlException {
+
+        log.info("request that got in loan request id {}",loanRequestId);
+
+        List<RepaymentHistory> repaymentHistory = repaymentHistoryUseCase.generateRepaymentHistory(loanRequestId);
+
+        List<RepaymentScheduleEntry> repaymentScheduleEntries = repaymentHistory.stream()
+                .map(repaymentHistoryRestMapper::toRepaymentScheduleEntry).toList();
+
+        RepaymentScheduleResponse repaymentScheduleResponse = new RepaymentScheduleResponse();
+        repaymentScheduleResponse.setRepaymentScheduleEntries(repaymentScheduleEntries);
+        repaymentScheduleResponse.setSumTotal(repaymentHistory.get(repaymentHistory.size() - 1).getTotalAmountRepaid());
+        repaymentScheduleResponse.setTenor(repaymentHistory.get(repaymentHistory.size() - 1).getTenor());
+        repaymentScheduleResponse.setMoratorium(repaymentHistory.get(repaymentHistory.size() - 1).getMoratorium());
+
+        ApiResponse<RepaymentScheduleResponse> apiResponse = ApiResponse.<RepaymentScheduleResponse>builder()
+                .data(repaymentScheduleResponse)
+                .message("Repayment shedule")
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }
