@@ -26,6 +26,7 @@ public class Demography {
     private int northEastCount;
     private int northWestCount;
     private int northCentralCount;
+    private int nonNigerian;
 
     private int oLevelCount;
     private int tertiaryCount;

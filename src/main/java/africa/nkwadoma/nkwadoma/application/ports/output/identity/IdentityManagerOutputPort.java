@@ -61,4 +61,7 @@ public interface IdentityManagerOutputPort {
 
     void deleteClient(String clientId);
 
+    boolean userExistByEmail(String userEmail);
+
+    boolean clientExistByName(String organizationName);
 }
