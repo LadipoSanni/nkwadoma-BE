@@ -45,9 +45,7 @@ class OrganizationEmployeeIdentityAdapterTest {
 
     @BeforeAll
     void init() {
-        String testId = "ead0f7cb-5483-4bb8-b371-813970a9c367";
         joel = TestData.createTestUserIdentity("joel54@johnson.com");
-        joel.setId(testId);
         joel.setRole(IdentityRole.ORGANIZATION_ADMIN);
         List<OrganizationEmployeeIdentity> employees = List.of(OrganizationEmployeeIdentity
                 .builder().meedlUser(joel).build());
@@ -64,7 +62,6 @@ class OrganizationEmployeeIdentityAdapterTest {
         }
         try {
 
-            amazingGrace.setId(testId);
             amazingGrace.setServiceOfferings(List.of(ServiceOffering.builder().
                     name(ServiceOfferingType.TRAINING.name()).
                     industry(Industry.EDUCATION).build()));
