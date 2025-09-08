@@ -166,7 +166,7 @@ public class OrganizationEmployeeController {
         ApiResponse<QAResponse> apiResponse = ApiResponse.<QAResponse>builder()
                 .message(organizationEmployeeIdentity.getResponse())
                 .data(QAResponse.builder()
-                        .id(organizationEmployeeIdentity.getMeedlUser().getId())
+                        .id(organizationEmployeeIdentity.getId())
                         .email(organizationEmployeeIdentity.getMeedlUser().getEmail())
                         .build())
                 .statusCode(HttpStatus.OK.toString())

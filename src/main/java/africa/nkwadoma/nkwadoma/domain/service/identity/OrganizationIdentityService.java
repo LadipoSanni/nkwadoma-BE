@@ -424,6 +424,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
 
         String message = handleNotificationsAndResponse(inviter, savedEmployee, savedUserIdentity);
         savedUserIdentity.setResponse(message);
+        savedUserIdentity.setId(savedEmployee.getId());
         return savedUserIdentity;
     }
 

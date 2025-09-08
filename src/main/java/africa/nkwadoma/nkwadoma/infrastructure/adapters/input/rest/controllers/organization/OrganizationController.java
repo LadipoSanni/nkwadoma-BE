@@ -322,7 +322,7 @@ public class OrganizationController {
         ApiResponse<Object> apiResponse = ApiResponse.builder()
                 .statusCode(HttpStatus.OK.toString())
                 .message(organizationIdentity.getResponse())
-                .data(QAResponse.builder().id(organizationIdentity.getId()))
+                .data(QAResponse.builder().id(organizationIdentity.getId()).email(organizationIdentity.getEmail()).build())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
