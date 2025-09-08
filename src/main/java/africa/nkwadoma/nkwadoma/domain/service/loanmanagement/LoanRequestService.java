@@ -249,6 +249,7 @@ public class LoanRequestService implements LoanRequestUseCase {
         }
 
         LoanProduct loanProduct = loanProductOutputPort.findById(loanRequest.getLoanProductId());
+        log.info("loanProduct is {}", loanProduct);
         loanProduct.setTotalNumberOfLoanee(
                 loanProduct.getTotalNumberOfLoanee() + 1
         );
