@@ -359,6 +359,7 @@ public class FinancierService implements FinancierUseCase {
             try {
                 financier = getFinancierByUserIdentity(financier);
             } catch (MeedlException e) {
+                log.warn("",e);
                 financier = saveNonExistingFinancier(financier, e.getMessage());
             }
         }

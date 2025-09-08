@@ -415,18 +415,15 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
 
     @Override
     public boolean userExistByEmail(String userEmail) {
-        UserRepresentation userRepresentation;
         try {
-            userRepresentation = getUserRepresentation(UserIdentity.builder().email(userEmail).build(), Boolean.TRUE);
+            getUserRepresentation(UserIdentity.builder().email(userEmail).build(), Boolean.TRUE);
+            log.info("User with email {}, exist on keycloak", userEmail);
         } catch (MeedlException e) {
             log.error("Error occurred verifying user exist by email representation ", e);
             return Boolean.FALSE;
         }
-        if (!ObjectUtils.isEmpty(userRepresentation)){
             return Boolean.TRUE;
-        }else {
-            return Boolean.FALSE;
-        }
+
     }
 
     @Override
@@ -439,6 +436,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
             return Boolean.FALSE;
         }
         if (!ObjectUtils.isEmpty(clientRepresentation)){
+            log.info("Client with name {}, exist on keycloak", organizationName);
             return Boolean.TRUE;
         }else {
             return Boolean.FALSE;
