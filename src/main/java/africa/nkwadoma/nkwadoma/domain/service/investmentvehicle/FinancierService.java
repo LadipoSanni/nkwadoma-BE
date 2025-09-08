@@ -238,10 +238,8 @@ public class FinancierService implements FinancierUseCase {
     private Financier inviteCooperateFinancierToPlatform(Financier financier) throws MeedlException {
         log.info("Cooperate Financier invitation about to start ");
         validateInput(financier);
-
-
         validateCooperationDoesNotExist(financier,financier.getUserIdentity().getEmail());
-
+        log.info("Done with validation for cooperate financier invite to platform");
         OrganizationIdentity organizationIdentity = OrganizationIdentity.builder().name(financier.getName())
                 .email(financier.getEmail()).createdBy(financier.getUserIdentity().getCreatedBy())
                 .requestedInvitationDate(LocalDateTime.now()).build();
@@ -308,21 +306,23 @@ public class FinancierService implements FinancierUseCase {
 
     private void validateCooperationDoesNotExist(Financier financier,String email) throws MeedlException {
         if (organizationIdentityOutputPort.existByEmail(financier.getEmail())) {
+            log.error("Cooperation financier with email already exists {}", financier.getEmail());
             throw new InvestmentException("Cooperation with email already exists");
         }
         if (ObjectUtils.isNotEmpty(organizationIdentityOutputPort.findOrganizationByName(financier.getName()))) {
+            log.error("Cooperation financier with name already exists {}", financier.getName());
             throw new InvestmentException("Cooperation with name already exists");
         }
         if (userIdentityOutputPort.checkIfUserExistByEmail(email)) {
-            log.error("Cooperate financier with email already exists");
+            log.error("Cooperate financier with email already exists, {}", email);
             throw new InvestmentException("User with email already exists");
         }
-        if (identityManagerOutputPort.existByEmail(email, Boolean.TRUE)) {
-            log.error("Cooperate financier with email already exists");
+        if (identityManagerOutputPort.userExistByEmail(email)) {
+            log.error("Cooperate financier with email already exists on keycloak {}", email);
             throw new InvestmentException("User with email already exists. Contact admin");
         }
         if (identityManagerOutputPort.clientExistByName(financier.getName())){
-            log.error("Financier cooperation with name already exists");
+            log.error("Financier cooperation with name already exists on keycloak {}", financier.getName());
             throw new InvestmentException("Cooperation with name already exists");
         }
     }

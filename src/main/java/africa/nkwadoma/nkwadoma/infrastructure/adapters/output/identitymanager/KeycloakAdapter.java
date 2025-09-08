@@ -414,6 +414,38 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
     }
 
     @Override
+    public boolean userExistByEmail(String userEmail) {
+        UserRepresentation userRepresentation;
+        try {
+            userRepresentation = getUserRepresentation(UserIdentity.builder().email(userEmail).build(), Boolean.TRUE);
+        } catch (MeedlException e) {
+            log.error("Error occurred verifying user exist by email representation ", e);
+            return Boolean.FALSE;
+        }
+        if (!ObjectUtils.isEmpty(userRepresentation)){
+            return Boolean.TRUE;
+        }else {
+            return Boolean.FALSE;
+        }
+    }
+
+    @Override
+    public boolean clientExistByName(String organizationName) {
+        ClientRepresentation clientRepresentation;
+        try {
+            clientRepresentation = getClientRepresentationByClientId(organizationName);
+        } catch (MeedlException e) {
+            log.error("Error occurred verifying client exist by organization name representation ", e);
+            return Boolean.FALSE;
+        }
+        if (!ObjectUtils.isEmpty(clientRepresentation)){
+            return Boolean.TRUE;
+        }else {
+            return Boolean.FALSE;
+        }
+    }
+
+    @Override
     public ClientRepresentation getClientRepresentationByName(String clientName) throws MeedlException {
         return keycloak.realm(KEYCLOAK_REALM)
                 .clients()
