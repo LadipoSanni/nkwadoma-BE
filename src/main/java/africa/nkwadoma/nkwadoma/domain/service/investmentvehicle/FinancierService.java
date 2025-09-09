@@ -452,7 +452,6 @@ public class FinancierService implements FinancierUseCase {
         existingFinancier.setInvestmentVehicleDesignation(financier.getInvestmentVehicleDesignation());
         existingFinancier.setUserIdentity(financier.getUserIdentity());
         existingFinancier.setName(financier.getName());
-        log.info("Financier name is for company {}", financier.getName());
         financier = existingFinancier;
         log.info("Updated the financier details without saving {}", financier);
         return financier;

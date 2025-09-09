@@ -160,7 +160,6 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
     }
 
     private static void addOrganizationNameToFinancierForEmailing(List<Financier> financiersToMail) {
-        financiersToMail.forEach(financier -> log.info(" financiers loop ---- > {}",financier));
         log.info("Size is  {}", financiersToMail.size());
         if (financiersToMail.size() == 2){
             log.info(" financiers is exactly 2");
