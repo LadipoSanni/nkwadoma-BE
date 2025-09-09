@@ -238,10 +238,8 @@ public class FinancierService implements FinancierUseCase {
     private Financier inviteCooperateFinancierToPlatform(Financier financier) throws MeedlException {
         log.info("Cooperate Financier invitation about to start ");
         validateInput(financier);
-
-
         validateCooperationDoesNotExist(financier,financier.getUserIdentity().getEmail());
-
+        log.info("Done with validation for cooperate financier invite to platform");
         OrganizationIdentity organizationIdentity = OrganizationIdentity.builder().name(financier.getName())
                 .email(financier.getEmail()).createdBy(financier.getUserIdentity().getCreatedBy())
                 .requestedInvitationDate(LocalDateTime.now()).build();
@@ -308,13 +306,24 @@ public class FinancierService implements FinancierUseCase {
 
     private void validateCooperationDoesNotExist(Financier financier,String email) throws MeedlException {
         if (organizationIdentityOutputPort.existByEmail(financier.getEmail())) {
+            log.error("Cooperation financier with email already exists {}", financier.getEmail());
             throw new InvestmentException("Cooperation with email already exists");
         }
         if (ObjectUtils.isNotEmpty(organizationIdentityOutputPort.findOrganizationByName(financier.getName()))) {
+            log.error("Cooperation financier with name already exists {}", financier.getName());
             throw new InvestmentException("Cooperation with name already exists");
         }
         if (userIdentityOutputPort.checkIfUserExistByEmail(email)) {
+            log.error("Cooperate financier with email already exists, {}", email);
             throw new InvestmentException("User with email already exists");
+        }
+        if (identityManagerOutputPort.userExistByEmail(email)) {
+            log.error("Cooperate financier with email already exists on keycloak {}", email);
+            throw new InvestmentException("User with email already exists. Contact admin");
+        }
+        if (identityManagerOutputPort.clientExistByName(financier.getName())){
+            log.error("Financier cooperation with name already exists on keycloak {}", financier.getName());
+            throw new InvestmentException("Cooperation with name already exists");
         }
     }
 
@@ -350,6 +359,7 @@ public class FinancierService implements FinancierUseCase {
             try {
                 financier = getFinancierByUserIdentity(financier);
             } catch (MeedlException e) {
+                log.warn("",e);
                 financier = saveNonExistingFinancier(financier, e.getMessage());
             }
         }
@@ -410,6 +420,7 @@ public class FinancierService implements FinancierUseCase {
         }
         try {
             Financier existingFinancier = financierOutputPort.findFinancierByUserId(userIdentity.getId());
+            financier.getUserIdentity().setId(userIdentity.getId());
             log.info("Financier found by user identity id {}", userIdentity.getId());
             return updateFinancierDetails(financier, existingFinancier);
 
@@ -439,7 +450,7 @@ public class FinancierService implements FinancierUseCase {
     private static Financier updateFinancierDetails(Financier financier, Financier existingFinancier) {
         existingFinancier.setInvestmentVehicleId(financier.getInvestmentVehicleId());
         existingFinancier.setInvestmentVehicleDesignation(financier.getInvestmentVehicleDesignation());
-
+        existingFinancier.setUserIdentity(financier.getUserIdentity());
         financier = existingFinancier;
         log.info("Updated the financier details without saving {}", financier);
         return financier;

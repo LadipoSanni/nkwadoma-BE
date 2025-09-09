@@ -414,6 +414,36 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
     }
 
     @Override
+    public boolean userExistByEmail(String userEmail) {
+        try {
+            getUserRepresentation(UserIdentity.builder().email(userEmail).build(), Boolean.TRUE);
+            log.info("User with email {}, exist on keycloak", userEmail);
+        } catch (MeedlException e) {
+            log.error("Error occurred verifying user exist by email representation ", e);
+            return Boolean.FALSE;
+        }
+            return Boolean.TRUE;
+
+    }
+
+    @Override
+    public boolean clientExistByName(String organizationName) {
+        ClientRepresentation clientRepresentation;
+        try {
+            clientRepresentation = getClientRepresentationByClientId(organizationName);
+        } catch (MeedlException e) {
+            log.error("Error occurred verifying client exist by organization name representation ", e);
+            return Boolean.FALSE;
+        }
+        if (!ObjectUtils.isEmpty(clientRepresentation)){
+            log.info("Client with name {}, exist on keycloak", organizationName);
+            return Boolean.TRUE;
+        }else {
+            return Boolean.FALSE;
+        }
+    }
+
+    @Override
     public ClientRepresentation getClientRepresentationByName(String clientName) throws MeedlException {
         return keycloak.realm(KEYCLOAK_REALM)
                 .clients()
@@ -478,6 +508,42 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
         }
         return roleRepresentation;
     }
+    @Override
+    public List<UserIdentity> getUsersByRole(String roleName) throws MeedlException {
+        MeedlValidator.validateDataElement(roleName, "Role name cannot be empty");
+
+        try {
+            List<UserRepresentation> users = keycloak
+                    .realm(KEYCLOAK_REALM)
+                    .roles()
+                    .get(roleName.toUpperCase().trim())
+                    .getUserMembers(0, Integer.MAX_VALUE);
+
+            return users.stream()
+                    .map(mapper::mapUserRepresentationToUserIdentity)
+                    .toList();
+        } catch (NotFoundException e) {
+            throw new IdentityException("Role not found: " + roleName);
+        }
+    }
+    @Override
+    public void changeUserRole(UserIdentity userIdentity, String newRole) throws MeedlException {
+        log.info("Changing user role from {} to {}. User Id {}", userIdentity.getRole(), newRole, userIdentity.getId());
+        UserResource userResource = getUserResource(userIdentity);
+        List<RoleRepresentation> currentRoles = userResource.roles().realmLevel().listAll();
+        if (!currentRoles.isEmpty()) {
+            userResource.roles().realmLevel().remove(currentRoles);
+        }
+
+        RoleRepresentation newRoleRep = keycloak.realm(KEYCLOAK_REALM)
+                .roles()
+                .get(newRole.toUpperCase().trim())
+                .toRepresentation();
+
+        userResource.roles().realmLevel().add(List.of(newRoleRep));
+        log.info("Updated role for user {} to {}", userIdentity.getEmail(), newRole);
+    }
+
 
 
     @Override

@@ -17,6 +17,7 @@ public class FinancialConstants {
     public static final int DAYS_IN_YEAR = 365;
 
     public static final BigDecimal PERCENTAGE_BASE = BigDecimal.valueOf(100);
+    public static final int PERCENTAGE_BASE_INT = 100;
 
     public static final int MINIMUM_MULTIPLIER = 1;
 

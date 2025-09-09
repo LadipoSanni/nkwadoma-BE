@@ -138,7 +138,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     public InvestmentVehicle viewInvestmentVehicleDetails(String investmentVehicleId, String userId) throws MeedlException {
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
-        if (userIdentity.getRole() == IdentityRole.PORTFOLIO_MANAGER) {
+        if (userIdentity.getRole().isMeedlRole()) {
             log.info("Details being viewed by portfolio manger");
             return investmentVehicleOutputPort.findById(investmentVehicleId);
         }

@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanMetricsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanReferralOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.DemographyOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ServiceProvider;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
@@ -18,6 +19,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.LoanMetrics;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Demography;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.identity.IdentityVerificationMapper;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
@@ -31,6 +33,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.Optional;
@@ -40,6 +43,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityM
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages.IDENTITY_VERIFIED;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @Slf4j
@@ -91,6 +95,10 @@ class IdentityVerificationServiceTest {
     private OrganizationLoanDetail organizationLoanDetail;
     private LoanMetrics loanMetrics;
     private OrganizationIdentity organizationIdentity;
+    @Mock
+    private DemographyOutputPort demographyOutputPort;
+    private Demography demography;
+
 
     @BeforeEach
     void setUp() {
@@ -123,6 +131,7 @@ class IdentityVerificationServiceTest {
                 .userId(testId)
                 .serviceProvider(ServiceProvider.SMILEID)
                 .build();
+        demography = TestData.buildDemography();
     }
 
     @Test
@@ -137,7 +146,7 @@ class IdentityVerificationServiceTest {
 
         PremblyNinResponse premblyNinResponse = new PremblyNinResponse();
         premblyNinResponse.setVerification(Verification.builder().status("VERIFIED").build());
-        premblyNinResponse.setNinData(PremblyNinResponse.NinData.builder().gender("m").build());
+        premblyNinResponse.setNinData(PremblyNinResponse.NinData.builder().birthDate("20-04-1993").gender("m").build());
         premblyNinResponse.setFaceData(PremblyFaceData.builder().faceVerified(true).build());
 
         when(identityVerificationOutputPort.verifyNinLikeness(identityVerification)).thenReturn(premblyNinResponse);
@@ -148,8 +157,9 @@ class IdentityVerificationServiceTest {
         premblyResponse.setVerification(Verification.builder().status("VERIFIED").build());
         PremblyBvnResponse premblyBvnResponse = new PremblyBvnResponse();
         premblyBvnResponse.setVerification(Verification.builder().status("VERIFIED").build());
-        premblyBvnResponse.setData(PremblyBvnResponse.BvnData.builder().
+        premblyBvnResponse.setData(PremblyBvnResponse.BvnData.builder().dateOfBirth("20-04-1993").gender("m").
                 faceData(PremblyFaceData.builder().faceVerified(true).build()).build());
+
 
         when(identityVerificationOutputPort.verifyBvnLikeness(identityVerification)).thenReturn(premblyBvnResponse);
         premblyBvnResponse.setLikenessCheckSuccessful(Boolean.TRUE);
@@ -185,7 +195,8 @@ class IdentityVerificationServiceTest {
         when(programLoanDetailOutputPort.save(programLoanDetail)).thenReturn(programLoanDetail);
         when(organizationLoanDetailOutputPort.findByOrganizationId(cohort.getOrganizationId())).thenReturn(organizationLoanDetail);
         when(organizationLoanDetailOutputPort.save(organizationLoanDetail)).thenReturn(organizationLoanDetail);
-
+        when(demographyOutputPort.findDemographyByName(anyString())).thenReturn(demography);
+        when(demographyOutputPort.save(demography)).thenReturn(demography);
 
 
 

@@ -5,15 +5,18 @@ import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loancalcu
 import africa.nkwadoma.nkwadoma.application.ports.input.notification.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.LoanMetricsUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.DemographyOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.Industry;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Demography;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
 import jakarta.annotation.PostConstruct;
@@ -33,6 +36,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants.MEEDL;
 import static africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole.MEEDL_SUPER_ADMIN;
 
 @Component
@@ -48,6 +52,7 @@ public class AdminInitializer {
     private final PortfolioOutputPort portfolioOutputPort;
     private final CalculationEngineUseCase calculationEngineUseCase;
     private final OrganizationLoanDetailOutputPort organizationLoanDetailOutputPort;
+    private final DemographyOutputPort demographyOutputPort;
 
     @Value("${superAdmin.email}")
     private String SUPER_ADMIN_EMAIL ;
@@ -165,6 +170,7 @@ public class AdminInitializer {
         userIdentity.setCreatedBy(userIdentity.getId());
         UserIdentity foundUserIdentity = null;
         log.info("First user, after saving on keycloak: {}", userIdentity);
+        removeDuplicateSuperAdmin(userIdentity);
         try {
             foundUserIdentity = userIdentityOutputPort.findByEmail(userIdentity.getEmail());
             foundUserIdentity.setCreatedBy(foundUserIdentity.getId());
@@ -180,6 +186,44 @@ public class AdminInitializer {
             }
         }
         return userIdentity;
+    }
+
+    private void removeDuplicateSuperAdmin(UserIdentity userIdentity) {
+        try {
+            removeDuplicateSuperAdmins(userIdentity);
+            log.info("No duplicate roles exist after this check. All either removed or does not exist.");
+        } catch (MeedlException e) {
+            log.error("Error finding {} by role to make change update",userIdentity.getRole().name(), e);
+        }
+    }
+
+    private void removeDuplicateSuperAdmins(UserIdentity userIdentity) throws MeedlException {
+        List<UserIdentity> superAdminsOnKeycloak = identityManagerOutPutPort.getUsersByRole(userIdentity.getRole().name());
+        List<UserIdentity> superAdminsOnDb = userIdentityOutputPort.findAllByRole(userIdentity.getRole());
+        log.info("Role being searched for at admin initializer {}", userIdentity.getRole());
+        if (superAdminsOnKeycloak.isEmpty() && superAdminsOnDb.isEmpty()) {
+            log.info("No users found with role {}", userIdentity.getRole());
+            return;
+        }
+
+        boolean emailExistsOnKeycloak = superAdminsOnKeycloak.stream()
+                .anyMatch(u -> u.getEmail().equalsIgnoreCase(userIdentity.getEmail()));
+
+        if (emailExistsOnKeycloak) {
+            for (UserIdentity user : superAdminsOnKeycloak) {
+                if (!user.getEmail().equalsIgnoreCase(userIdentity.getEmail())) {
+                    log.info("Changing role of user on keycloak {} to {}", user.getEmail(), IdentityRole.MEEDL_ADMIN.name());
+                    identityManagerOutPutPort.changeUserRole(user, IdentityRole.MEEDL_ADMIN.name());
+                }
+            }
+        }
+            for (UserIdentity user : superAdminsOnDb) {
+                if (!user.getEmail().equalsIgnoreCase(userIdentity.getEmail())) {
+                    log.info("Changing role of user on db {} to {}", user.getEmail(), IdentityRole.MEEDL_ADMIN.name());
+                    userIdentityOutputPort.changeUserRole(user.getId(), IdentityRole.MEEDL_ADMIN);
+                }
+            }
+
     }
 
     private UserIdentity saveUserToDB(UserIdentity userIdentity) throws MeedlException {
@@ -225,6 +269,16 @@ public class AdminInitializer {
         return foundPortfolio;
     }
 
+    public Demography createDemography(Demography demography) throws MeedlException {
+        Demography foundDemography = demographyOutputPort.findDemographyByName(MEEDL);
+        log.info("found demography -- {}", foundDemography);
+        if (ObjectUtils.isEmpty(foundDemography)) {
+            log.info("about to create Demography -- {}", demography);
+            return demographyOutputPort.save(demography);
+        }
+        return foundDemography;
+    }
+
     @PostConstruct
     public void init() throws MeedlException {
         UserIdentity userIdentity = inviteFirstUser(getUserIdentity());
@@ -233,9 +287,19 @@ public class AdminInitializer {
         loanMetricsUseCase.correctLoanRequestCount();
         Portfolio portfolio = createMeedlPortfolio(getPortfolio());
         log.info("Meedl portfolio process done -- {} ", portfolio);
+        Demography demography = createDemography(getDemography());
+        log.info("Demography process done -- {} ", demography);
         calculationEngineUseCase.scheduleDailyInterestCalculation();
         calculationEngineUseCase.scheduleMonthlyInterestCalculation();
     }
+
+    private Demography getDemography() {
+        return Demography.builder().name(MEEDL).age35To45Count(0).age25To35Count(0).age17To25Count(0)
+                .totalGenderCount(0).femaleCount(0).maleCount(0).southEastCount(0).southSouthCount(0)
+                .southWestCount(0).northWestCount(0).northEastCount(0).northCentralCount(0)
+                .nonNigerian(0).tertiaryCount(0).oLevelCount(0).build();
+    }
+
     private final Environment environment;
     @EventListener(ApplicationReadyEvent.class)
     public void logContextPath() {

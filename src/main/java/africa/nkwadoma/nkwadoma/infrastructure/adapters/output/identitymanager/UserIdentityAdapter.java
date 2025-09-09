@@ -136,6 +136,16 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
         return userEntity.map(userIdentityMapper::toUserIdentity);
     }
 
+    @Override
+    public void changeUserRole(String userId, IdentityRole identityRole) throws MeedlException {
+        MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateObjectInstance(identityRole, "Invalid role provided to change");
+        UserIdentity userIdentity = findById(userId);
+        userIdentity.setRole(identityRole);
+        UserEntity userEntity = userIdentityMapper.toUserEntity(userIdentity);
+        userEntityRepository.save(userEntity);
+    }
+
     private void validateRoles(List<IdentityRole> roles) throws MeedlException {
         MeedlValidator.validateCollection(roles, "Please provide a list of roles for search for.");
         roles.forEach(identityRole -> {

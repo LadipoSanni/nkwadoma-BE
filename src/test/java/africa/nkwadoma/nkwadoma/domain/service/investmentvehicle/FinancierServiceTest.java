@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.service.investmentvehicle;
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentvehicle.FinancierUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleOutputPort;
@@ -93,7 +94,8 @@ public class FinancierServiceTest {
     private PoliticallyExposedPersonOutputPort politicallyExposedPersonOutputPort;
     @Autowired
     private FinancierPoliticallyExposedPersonOutputPort financierPoliticallyExposedPersonOutputPort;
-
+    @Autowired
+    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
 
 
     @BeforeAll
@@ -1199,7 +1201,7 @@ public class FinancierServiceTest {
         deleteInvestmentVehicleFinancier(privateInvestmentVehicleId, individualFinancierId);
 
 
-
+        organizationIdentityOutputPort.delete(cooperateFinancier.getIdentity());
 
         deleteFinancierData(cooperateFinancierId);
         cooperateUserIdentity.setId(cooperateUserIdentityId);

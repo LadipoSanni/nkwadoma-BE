@@ -15,7 +15,5 @@ import java.util.Map;
 public class QAResponse {
     private String id;
     private String email;
-    private String message;
-    private String statusCode;
 
 }

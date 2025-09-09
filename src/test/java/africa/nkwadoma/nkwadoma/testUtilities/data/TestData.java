@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.testUtilities.data;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.Country;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
@@ -19,6 +20,7 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.*;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Demography;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
@@ -787,6 +789,26 @@ public class TestData {
                 .numberOfLoanees(0)
                 .stillInTraining(0)
                 .organization(organizationIdentity)
+                .build();
+    }
+
+    public static Demography buildDemography() {
+        return Demography.builder()
+                .age17To25Count(2)
+                .age25To35Count(3)
+                .age35To45Count(2)
+                .femaleCount(2)
+                .maleCount(3)
+                .totalGenderCount(5)
+                .northCentralCount(2)
+                .northEastCount(3)
+                .northWestCount(4)
+                .southWestCount(5)
+                .southEastCount(6)
+                .southSouthCount(6)
+                .oLevelCount(3)
+                .tertiaryCount(2)
+                .name("Demo")
                 .build();
     }
 }
