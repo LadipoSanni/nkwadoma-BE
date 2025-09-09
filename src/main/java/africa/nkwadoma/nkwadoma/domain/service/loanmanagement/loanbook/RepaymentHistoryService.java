@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
@@ -83,56 +84,92 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
 
     @Override
     public List<RepaymentHistory> generateRepaymentHistory(String loanRequestId) throws MeedlException {
-
         List<RepaymentHistory> repaymentSchedule = new ArrayList<>();
 
-        MeedlValidator.validateUUID(loanRequestId,"Loan request id cannot ");
-
+        MeedlValidator.validateUUID(loanRequestId, "Loan request id cannot be null or invalid");
         LoanOffer loanOffer = loanOfferOutputPort.findById(loanRequestId);
 
-        int totalMonths = loanOffer.getLoanProduct().getTenor() * FinancialConstants.MONTHS_PER_YEAR;
+        int tenorYears = loanOffer.getLoanProduct().getTenor();
+        int totalMonths = tenorYears * FinancialConstants.MONTHS_PER_YEAR;
+        int moratoriumMonths = loanOffer.getLoanProduct().getMoratorium();
 
         BigDecimal annualRate = BigDecimal.valueOf(loanOffer.getLoanProduct().getInterestRate())
                 .divide(BigDecimal.valueOf(FinancialConstants.PERCENTAGE_BASE_INT), 10, RoundingMode.HALF_UP);
         BigDecimal monthlyRate = annualRate.divide(BigDecimal.valueOf(FinancialConstants.MONTHS_PER_YEAR), 10, RoundingMode.HALF_UP);
 
         BigDecimal principal = loanOffer.getAmountApproved().setScale(2, RoundingMode.HALF_UP);
+        BigDecimal balance = principal;
+        BigDecimal totalRepaid = BigDecimal.ZERO;
 
+        // EMI calculation (for repayment phase only)
         BigDecimal onePlusRate = BigDecimal.ONE.add(monthlyRate);
-        BigDecimal onePlusRatePowN = onePlusRate.pow(totalMonths);
-        BigDecimal expectedMonthlyInterest = principal.multiply(monthlyRate)
+        BigDecimal onePlusRatePowN = onePlusRate.pow(totalMonths - moratoriumMonths);
+        BigDecimal expectedMonthlyRepayment = principal.multiply(monthlyRate)
                 .multiply(onePlusRatePowN)
                 .divide(onePlusRatePowN.subtract(BigDecimal.ONE), 2, RoundingMode.HALF_UP);
 
-
-        BigDecimal balance = principal;
-        BigDecimal totalRepaid = BigDecimal.ZERO;
         LocalDate paymentDate = LocalDate.from(loanOffer.getDateTimeOffered()
-                .with(TemporalAdjusters.lastDayOfMonth()).plusMonths(1));
+                .with(TemporalAdjusters.lastDayOfMonth())
+                .plusMonths(1));
 
-
-        for (int eachMonth = 1 ; eachMonth <= totalMonths ; eachMonth++) {
+        // 1) Moratorium period: interest accrues into balance
+        for (int m = 1; m <= moratoriumMonths; m++) {
             BigDecimal interest = balance.multiply(monthlyRate).setScale(2, RoundingMode.HALF_UP);
+            balance = balance.add(interest).setScale(2, RoundingMode.HALF_UP);
 
-            BigDecimal principalPayment = expectedMonthlyInterest.subtract(interest).setScale(2, RoundingMode.HALF_UP);
+            repaymentSchedule.add(
+                    RepaymentHistory.builder()
+                            .totalAmountRepaid(totalRepaid)
+                            .amountOutstanding(balance)
+                            .paymentDate(paymentDate)
+                            .amountPaid(BigDecimal.ZERO)
+                            .interestIncurred(interest)
+                            .principalPayment(BigDecimal.ZERO)
+                            .build()
+            );
 
-            balance = balance.subtract(principalPayment).setScale(2, RoundingMode.HALF_UP);
-
-            totalRepaid = totalRepaid.add(expectedMonthlyInterest).setScale(2, RoundingMode.HALF_UP);
-
-            RepaymentHistory scheduleRepayment = RepaymentHistory.builder().
-                    totalAmountRepaid(totalRepaid).amountOutstanding(balance).paymentDate(paymentDate)
-                    .amountPaid(expectedMonthlyInterest).interestIncurred(interest).principalPayment(principalPayment)
-                    .build();
-
-            repaymentSchedule.add(scheduleRepayment);
             paymentDate = paymentDate.plusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
         }
 
-        repaymentSchedule.get(repaymentSchedule.size() - 1).setTenor(loanOffer.getLoanProduct().getTenor());
-        repaymentSchedule.get(repaymentSchedule.size() - 1).setMoratorium(loanOffer.getLoanProduct().getMoratorium());
+        // 2) Repayment period
+        for (int m = 1; m <= totalMonths - moratoriumMonths; m++) {
+            BigDecimal interest = balance.multiply(monthlyRate).setScale(2, RoundingMode.HALF_UP);
+            BigDecimal principalPayment = expectedMonthlyRepayment.subtract(interest).setScale(2, RoundingMode.HALF_UP);
+
+            // Last installment adjustment
+            if (m == (totalMonths - moratoriumMonths)) {
+                principalPayment = balance;
+                expectedMonthlyRepayment = principalPayment.add(interest).setScale(2, RoundingMode.HALF_UP);
+                balance = BigDecimal.ZERO;
+            } else {
+                balance = balance.subtract(principalPayment).setScale(2, RoundingMode.HALF_UP);
+            }
+
+            BigDecimal amountPaid = expectedMonthlyRepayment;
+            totalRepaid = totalRepaid.add(amountPaid).setScale(2, RoundingMode.HALF_UP);
+
+            repaymentSchedule.add(
+                    RepaymentHistory.builder()
+                            .totalAmountRepaid(totalRepaid)
+                            .amountOutstanding(balance)
+                            .paymentDate(paymentDate)
+                            .amountPaid(amountPaid)
+                            .interestIncurred(interest)
+                            .principalPayment(principalPayment)
+                            .build()
+            );
+
+            paymentDate = paymentDate.plusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
+        }
+
+        // Add loan meta to last record
+        RepaymentHistory last = repaymentSchedule.get(repaymentSchedule.size() - 1);
+        last.setTenor(tenorYears);
+        last.setMoratorium(moratoriumMonths);
 
         return repaymentSchedule;
     }
+
+
 
 }
