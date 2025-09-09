@@ -10,8 +10,11 @@ public enum FinancierMessages {
    FINANCIER_DESIGNATION_REQUIRED("Investment vehicle designation is required."),
    EMPTY_FINANCIER_PROVIDED("Financier object cannot be empty."),
    FINANCIER_INVITE_TO_VEHICLE("financier-to-vehicle-invite"),
-   FINANCIER_INVITE_TO_PLATFORM("financier-to-platform-invite"),
+   COOPERATE_FINANCIER_INVITE_TO_VEHICLE("cooperate-financier-to-vehicle-invite"),
+   INDIVIDUAL_FINANCIER_INVITE_TO_PLATFORM("individual-financier-to-platform-invite"),
+   COOPERATE_FINANCIER_INVITE_TO_PLATFORM("cooperate-financier-to-platform-invite"),
    FINANCIER_INVITE_TO_PLATFORM_TITLE("Financier invited to Meedl platform"),
+   FINANCIER_INVITE_TO_VEHICLE_TITLE("Financier invited to vehicle on Meedl platform"),
    INVALID_FINANCIER_TYPE("Please specify if financier is individual or cooperate."),
     AMOUNT_TO_INVEST_REQUIRED("Amount to invest is require."),
     COOPERATE_FINANCIER_CANNOT_BE_EMPTY("Cooperate financier cannot be empty."),;
