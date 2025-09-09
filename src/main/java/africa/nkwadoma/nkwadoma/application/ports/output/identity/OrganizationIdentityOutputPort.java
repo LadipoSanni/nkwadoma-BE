@@ -13,7 +13,7 @@ import java.util.*;
 public interface OrganizationIdentityOutputPort {
     OrganizationIdentity save(OrganizationIdentity organizationIdentity) throws MeedlException;
 
-    Optional<OrganizationEntity> findByRcNumber(String rcNumber) throws MeedlException;
+    Optional<OrganizationIdentity> findByRcNumber(String rcNumber) throws MeedlException;
 
     OrganizationIdentity findByEmail(String email) throws MeedlException;
     void delete(String organizationId) throws MeedlException;

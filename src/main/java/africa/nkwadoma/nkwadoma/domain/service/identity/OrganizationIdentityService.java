@@ -196,10 +196,10 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     }
 
     private void validateUniqueValues(OrganizationIdentity organizationIdentity) throws MeedlException {
-        Optional<OrganizationEntity> foundOrganizationEntity =
+        Optional<OrganizationIdentity> optionalOrganizationIdentityFound =
                 organizationIdentityOutputPort.findByRcNumber(organizationIdentity.getRcNumber());
-        if (foundOrganizationEntity.isPresent()) {
-            log.info("Organization with rc number {} already exists", foundOrganizationEntity.get().getRcNumber());
+        if (optionalOrganizationIdentityFound.isPresent()) {
+            log.info("Organization with rc number {} already exists", optionalOrganizationIdentityFound.get().getRcNumber());
             throw new IdentityException(ORGANIZATION_RC_NUMBER_ALREADY_EXIST.getMessage());
         }
 

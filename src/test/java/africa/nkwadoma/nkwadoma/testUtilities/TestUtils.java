@@ -20,7 +20,7 @@ public class TestUtils {
     public static String generateEmail( String name, int emailLength){
         return String.format(name+ "%s@grr.la", generateName(emailLength) );
     }
-    public static String generateName(String actualName, int length) {
+        public static String generateName(String actualName, int length) {
         return String.format(actualName+"%s", generateName(length));
     }
     public static String generateName(int length) {
@@ -68,6 +68,23 @@ public class TestUtils {
 
         Files.write(filePath, lines);
         return emails;
+    }
+
+    public static long generateRandomNumber(int digits) {
+        if (digits <= 0) {
+            throw new IllegalArgumentException("Number of digits must be greater than 0");
+        }
+
+        Random random = new Random();
+
+        // smallest number with N digits
+        long min = (long) Math.pow(10, digits - 1);
+
+        // largest number with N digits
+        long max = (long) Math.pow(10, digits) - 1;
+
+        // generate random number in range [min, max]
+        return min + ((long) (random.nextDouble() * (max - min + 1)));
     }
     public static void generateRandomRepaymentRecordCSV(List<String> emails, String absoluteCSVFilePathAndName) throws IOException {
         Path filePath = Path.of(absoluteCSVFilePathAndName);
