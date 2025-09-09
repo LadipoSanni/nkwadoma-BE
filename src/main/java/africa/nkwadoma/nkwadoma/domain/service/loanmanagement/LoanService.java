@@ -93,6 +93,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanProduct, LoanMessages.INVALID_LOAN_PRODUCT_REQUEST_DETAILS.getMessage());
         loanProduct.validateLoanProductDetails();
+        validateSponsors(loanProduct);
         UserIdentity foundUser = userIdentityOutputPort.findById(loanProduct.getCreatedBy());
         identityManagerOutPutPort.verifyUserExistsAndIsEnabled(foundUser);
         log.info("The user with {} email has been verified ", foundUser.getEmail());
@@ -114,6 +115,13 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanProduct = loanProductOutputPort.save(loanProduct);
         updateNumberOfLoanProductOnMeedlPortfolio();
         return loanProduct;
+    }
+
+    private void validateSponsors(LoanProduct loanProduct) throws MeedlException {
+        if (MeedlValidator.isEmptyCollection(loanProduct.getSponsors())){
+            log.error("Sponsors is empty when creating loan product {}", loanProduct.getSponsors());
+            throw new MeedlException("Sponsors for this loan product is required");
+        }
     }
 
     private void updateNumberOfLoanProductOnMeedlPortfolio() throws MeedlException {

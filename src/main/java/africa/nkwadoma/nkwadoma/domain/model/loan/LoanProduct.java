@@ -77,10 +77,6 @@ public class LoanProduct {
         validateTenor();
         validateMoratorium();
         validateCostOfFund();
-//        if (MeedlValidator.isEmptyCollection(sponsors)){
-//            log.error("Sponsors is empty when creating loan product {}", sponsors);
-//            throw new MeedlException("Sponsors for this loan product is required");
-//        }
 
         log.info("Ended loan product validation successfully... ");
     }
