@@ -66,6 +66,16 @@ public class EmailAdapter implements EmailOutputPort {
     }
 
     @Override
+    public Context getFirstNameAndCompanyAndLinkContext(String link, String firstName, String companyName){
+        Context context = new Context();
+        context.setVariable(ContextMessages.CONTEXT_TOKEN.getMessage(), link);
+        context.setVariable(ContextMessages.CONTEXT_FIRST_NAME.getMessage(), firstName);
+        context.setVariable(ContextMessages.CONTEXT_ORGANIZATION_NAME.getMessage(), companyName);
+        context.setVariable(ContextMessages.CONTEXT_CURRENT_YEAR.getMessage(), LocalDate.now().getYear());
+        return context;
+    }
+
+    @Override
     public Context getNameAndLinkContextAndIndustryName(String link, String firstName, String organizationName) {
         Context context = new Context();
         context.setVariable(ContextMessages.CONTEXT_TOKEN.getMessage(), link);
@@ -105,6 +115,16 @@ public class EmailAdapter implements EmailOutputPort {
         context.setVariable(ContextMessages.CONTEXT_FIRST_NAME.getMessage(), firstName);
         context.setVariable(ContextMessages.CONTEXT_REACTIVATION_REASON.getMessage(), reactivationReason);
         context.setVariable(ContextMessages.CONTEXT_LINK.getMessage(), link);
+        return context;
+    }
+
+    @Override
+    public Context getFirstNameAndCompanyNameAndLinkContextAndInvestmentVehicleName(String financierToVehicleLink, String firstName, String investmentVehicleName, String companyName) {
+        Context context = new Context();
+        context.setVariable(ContextMessages.CONTEXT_TOKEN.getMessage(), financierToVehicleLink);
+        context.setVariable(ContextMessages.CONTEXT_FIRST_NAME.getMessage(), firstName);
+        context.setVariable(ContextMessages.CONTEXT_ORGANIZATION_NAME.getMessage(), companyName);
+        context.setVariable(ContextMessages.CONTEXT_VEHICLE_NAME.getMessage(),investmentVehicleName);
         return context;
     }
 

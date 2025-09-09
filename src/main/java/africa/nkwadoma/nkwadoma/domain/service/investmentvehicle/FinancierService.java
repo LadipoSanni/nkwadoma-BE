@@ -255,12 +255,12 @@ public class FinancierService implements FinancierUseCase {
 
         Financier savedFinancier = financierOutputPort.save(buildFinancier);
         financier.setId(savedFinancier.getId());
-        financier.setUserIdentity(actor);
+        financier.setUserIdentity(savedUserIdentity);
 
         saveCooperateFinancier(organizationIdentity,savedUserIdentity,actor);
 
         savedFinancier.setUserIdentity(savedUserIdentity);
-        financiersToMail.add(savedFinancier);
+        financiersToMail.add(financier);
         log.info("Financier with email {} added for email sending. ", savedFinancier.getUserIdentity().getEmail());
         return financier;
     }
@@ -451,6 +451,8 @@ public class FinancierService implements FinancierUseCase {
         existingFinancier.setInvestmentVehicleId(financier.getInvestmentVehicleId());
         existingFinancier.setInvestmentVehicleDesignation(financier.getInvestmentVehicleDesignation());
         existingFinancier.setUserIdentity(financier.getUserIdentity());
+        existingFinancier.setName(financier.getName());
+        log.info("Financier name is for company {}", financier.getName());
         financier = existingFinancier;
         log.info("Updated the financier details without saving {}", financier);
         return financier;

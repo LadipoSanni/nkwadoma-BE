@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotif
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -21,6 +22,7 @@ import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -135,11 +137,13 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
     @Async
     @Override
     public void sendFinancierEmail(List<Financier> financiersToMail, InvestmentVehicle investmentVehicle) {
+        addOrganizationNameToFinancierForEmailing(financiersToMail);
         if (ObjectUtils.isNotEmpty(investmentVehicle)){
             financiersToMail.forEach(financier -> {
                 try {
                     emailInviteNonExistingFinancierToVehicle(financier, investmentVehicle);
                 } catch (MeedlException e) {
+                    log.error("", e);
                     throw new RuntimeException(e);
                 }
             });
@@ -147,11 +151,25 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
         }else {
             financiersToMail.forEach(financier -> {
                 try {
-                    emailInviteNonExistingFinancierToPlatform(financier.getUserIdentity());
+                    emailInviteNonExistingFinancierToPlatform(financier);
                 } catch (MeedlException e) {
                     throw new RuntimeException(e);
                 }
             });
+        }
+    }
+
+    private static void addOrganizationNameToFinancierForEmailing(List<Financier> financiersToMail) {
+        financiersToMail.forEach(financier -> log.info(" financiers loop ---- > {}",financier));
+        log.info("Size is  {}", financiersToMail.size());
+        if (financiersToMail.size() == 2){
+            log.info(" financiers is exactly 2");
+            if (StringUtils.equals(financiersToMail.get(0).getId(), financiersToMail.get(1).getId())){
+                if (StringUtils.isEmpty(financiersToMail.get(0).getName()) && StringUtils.isNotEmpty(financiersToMail.get(1).getName())) {
+                    financiersToMail.get(0).setName(financiersToMail.get(1).getName());
+                    log.info("name updated");
+                }
+            }
         }
     }
 
@@ -201,10 +219,20 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
     }
 
     private void emailInviteNonExistingFinancierToVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
-        financierEmailUseCase.inviteFinancierToVehicle(financier.getUserIdentity(), investmentVehicle);
+        if(IdentityRole.isCooperateFinancier(financier.getUserIdentity().getRole())){
+            financierEmailUseCase.inviteCooperateFinancierToVehicle(financier, investmentVehicle);
+        }else {
+            financierEmailUseCase.inviteIndividualFinancierToVehicle(financier.getUserIdentity(), investmentVehicle);
+        }
     }
-    private void emailInviteNonExistingFinancierToPlatform(UserIdentity userIdentity) throws MeedlException {
-        financierEmailUseCase.inviteFinancierToPlatform(userIdentity);
+    private void emailInviteNonExistingFinancierToPlatform(Financier financier) throws MeedlException {
+        log.info("The user role is {}", financier.getUserIdentity().getRole());
+        if(IdentityRole.isCooperateFinancier(financier.getUserIdentity().getRole())){
+            log.info("Cooperate financier emailing started ....");
+            financierEmailUseCase.inviteCooperateFinancierToPlatform(financier);
+        }else {
+            financierEmailUseCase.inviteIndividualFinancierToPlatform(financier.getUserIdentity());
+        }
     }
 
 }

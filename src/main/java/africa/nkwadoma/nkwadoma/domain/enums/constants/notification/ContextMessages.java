@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.enums.constants.notification;
 
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.commons.IdentityVerificationMessage;
 import lombok.Getter;
 
 @Getter
