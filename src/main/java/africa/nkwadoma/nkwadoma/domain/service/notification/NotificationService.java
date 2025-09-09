@@ -14,6 +14,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanDecision;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.meedlexception.MeedlNotificationException;
+import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.notification.Email;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -298,15 +299,26 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
     }
 
     @Override
-    public void inviteFinancierToPlatform(UserIdentity userIdentity) throws MeedlException {
+    public void inviteIndividualFinancierToPlatform(UserIdentity userIdentity) throws MeedlException {
         Context context = emailOutputPort.getNameAndLinkContext(getLink(userIdentity),userIdentity.getFirstName());
         Email email = buildEmail(userIdentity, context,
                 FinancierMessages.FINANCIER_INVITE_TO_PLATFORM_TITLE.getMessage(),
-                FinancierMessages.FINANCIER_INVITE_TO_PLATFORM.getMessage());
+                FinancierMessages.INDIVIDUAL_FINANCIER_INVITE_TO_PLATFORM.getMessage());
         sendMail(userIdentity, email);
     }
+
     @Override
-    public void inviteFinancierToVehicle(UserIdentity userIdentity, InvestmentVehicle investmentVehicle) throws MeedlException {
+    public void inviteCooperateFinancierToPlatform(Financier financier) throws MeedlException {
+        UserIdentity userIdentity = financier.getUserIdentity();
+        Context context = emailOutputPort.getFirstNameAndCompanyAndLinkContext(getLink(userIdentity),userIdentity.getFirstName(), financier.getName());
+        Email email = buildEmail(userIdentity, context,
+                FinancierMessages.FINANCIER_INVITE_TO_PLATFORM_TITLE.getMessage(),
+                FinancierMessages.COOPERATE_FINANCIER_INVITE_TO_PLATFORM.getMessage());
+        sendMail(userIdentity, email);
+    }
+
+    @Override
+    public void inviteIndividualFinancierToVehicle(UserIdentity userIdentity, InvestmentVehicle investmentVehicle) throws MeedlException {
         Context context = emailOutputPort.getNameAndLinkContextAndInvestmentVehicleName(getLinkFinancierToVehicle(userIdentity, investmentVehicle),userIdentity.getFirstName(), investmentVehicle.getName());
         Email email = buildEmail(userIdentity, context,
                 FinancierMessages.FINANCIER_INVITE_TO_VEHICLE.getMessage(),
@@ -314,6 +326,18 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
 
         sendMail(userIdentity, email);
     }
+
+    @Override
+    public void inviteCooperateFinancierToVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
+        UserIdentity userIdentity = financier.getUserIdentity();
+        Context context = emailOutputPort.getFirstNameAndCompanyNameAndLinkContextAndInvestmentVehicleName(getLinkFinancierToVehicle(userIdentity, investmentVehicle),userIdentity.getFirstName(), investmentVehicle.getName(), financier.getName());
+        Email email = buildEmail(userIdentity, context,
+                FinancierMessages.FINANCIER_INVITE_TO_VEHICLE_TITLE.getMessage(),
+                FinancierMessages.COOPERATE_FINANCIER_INVITE_TO_VEHICLE.getMessage());
+
+        sendMail(userIdentity, email);
+    }
+
     private String getLinkFinancierToVehicle(UserIdentity userIdentity, InvestmentVehicle investmentVehicle) throws MeedlException {
         String token = emailTokenManager.generateToken(userIdentity.getEmail());
         log.info("Generated token for inviting financier to vehicle: {}", token);

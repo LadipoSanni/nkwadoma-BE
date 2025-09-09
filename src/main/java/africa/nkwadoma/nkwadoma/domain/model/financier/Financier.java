@@ -35,6 +35,7 @@ import java.util.Set;
 public class Financier {
     private String id;
     private String tin;
+    private String name;
     private String bankDetailId;
 
     private FinancierType financierType;
@@ -63,7 +64,6 @@ public class Financier {
     private LocalDate dateInvested;
     private BigDecimal incomeEarned;
     private BigDecimal netAssertValue;
-    private String name;
     private String email;
     private String invitedBy;
     private String cooperateAdminEmail;
