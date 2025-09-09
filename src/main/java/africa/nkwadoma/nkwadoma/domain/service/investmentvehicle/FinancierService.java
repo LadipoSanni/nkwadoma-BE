@@ -463,9 +463,11 @@ public class FinancierService implements FinancierUseCase {
         if (userIdentity.getRole().isFinancier()) {
             log.info("User is a financier.");
             if (userIdentity.getRole().isCooperateStaff()) {
+                log.info("User is a cooperate staff");
                 financier = financierOutputPort.findFinancierByCooperateStaffUserId(userIdentity.getId());
             }else {
-                financier = financierOutputPort.findFinancierByUserId(userIdentity.getId());
+                log.info("User is an individual financier with user id  {}", userIdentity.getId());
+                financier = financierOutputPort.findByIdentity(userIdentity.getId());
             }
         } else {
             log.info("User is not a financier");
@@ -479,6 +481,7 @@ public class FinancierService implements FinancierUseCase {
             }
             log.info("found financier {}", financier);
         }
+        log.info("found financier before updating values : {}", financier);
         return updateFinancierDetail(financier);
     }
 
@@ -807,6 +810,7 @@ public class FinancierService implements FinancierUseCase {
         financier.setTotalIncomeEarned(foundFinancier.getTotalIncomeEarned());
         financier.setCreatedAt(foundFinancier.getCreatedAt());
         financier.setId(foundFinancier.getId());
+        financier.setIdentity(foundFinancier.getIdentity());
     }
 
     private void mapKycUserIdentityDataIndividualFinancier(Financier financier, Financier foundFinancier) throws MeedlException {
