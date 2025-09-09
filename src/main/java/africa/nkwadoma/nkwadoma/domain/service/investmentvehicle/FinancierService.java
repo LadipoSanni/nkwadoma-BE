@@ -808,15 +808,19 @@ public class FinancierService implements FinancierUseCase {
             organizationIdentityMapper.mapCooperateDetailToOrganization(organizationIdentity,financier);
             organizationIdentity.setOrganizationType(OrganizationType.COOPERATE);
             organizationIdentity =organizationIdentityOutputPort.save(organizationIdentity);
-            financier.setOrganizationIdentity(organizationIdentity);
-            financier.setId(foundFinancier.getId());
-            financier.setName(foundFinancier.getName());
-            financier.setFinancierType(foundFinancier.getFinancierType());
-            financier.setCreatedAt(foundFinancier.getCreatedAt());
-            financier.setTotalAmountInvested(financier.getTotalAmountInvested());
-            financier.setActivationStatus(foundFinancier.getActivationStatus());
-            financier.setIdentity(foundFinancier.getIdentity());
+            updatedCooperateFinancierData(financier, foundFinancier, organizationIdentity);
         }
+    }
+
+    private static void updatedCooperateFinancierData(Financier financier, Financier foundFinancier, OrganizationIdentity organizationIdentity) {
+        financier.setOrganizationIdentity(organizationIdentity);
+        financier.setId(foundFinancier.getId());
+        financier.setName(foundFinancier.getName());
+        financier.setFinancierType(foundFinancier.getFinancierType());
+        financier.setCreatedAt(foundFinancier.getCreatedAt());
+        financier.setTotalAmountInvested(financier.getTotalAmountInvested());
+        financier.setActivationStatus(foundFinancier.getActivationStatus());
+        financier.setIdentity(foundFinancier.getIdentity());
     }
 
     private void mapKycFinancierPreviousData(Financier financier, Financier foundFinancier) {
