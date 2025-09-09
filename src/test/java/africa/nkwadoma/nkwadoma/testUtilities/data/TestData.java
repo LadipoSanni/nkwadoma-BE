@@ -273,6 +273,7 @@ public class TestData {
         financier.setBeneficialOwners(beneficialOwners);
         financier.setDeclarationAndAgreement(Boolean.TRUE);
         financier.setPoliticallyExposed(Boolean.FALSE);
+        financier.setRcNumber("RC"+TestUtils.generateRandomNumber(7));
 
         PoliticallyExposedPerson politicallyExposedPerson = new PoliticallyExposedPerson();
         politicallyExposedPerson.setPositionHeld("President");
