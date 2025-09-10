@@ -274,11 +274,11 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
     }
 
     @Override
-    public Page<MeedlNotification> viewAllNotification(String id, int pageSize, int pageNumber) throws MeedlException {
-        MeedlValidator.validateUUID(id,"User id cannot empty");
+    public Page<MeedlNotification> viewAllNotification(String userId, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(userId,UserMessages.INVALID_USER_ID.getMessage());
         MeedlValidator.validatePageNumber(pageNumber);
         MeedlValidator.validatePageSize(pageSize);
-        UserIdentity userIdentity = userIdentityOutputPort.findById(id);
+        UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
         return meedlNotificationOutputPort.findAllNotificationBelongingToAUser(userIdentity.getId(),pageSize,pageNumber);
     }
 

@@ -11,7 +11,7 @@ public interface MeedlNotificationUsecase {
 
     MeedlNotification viewNotification(String id, String notificationId) throws MeedlException;
 
-    Page<MeedlNotification> viewAllNotification(String id, int pageSize, int pageNumber) throws MeedlException;
+    Page<MeedlNotification> viewAllNotification(String userId, int pageSize, int pageNumber) throws MeedlException;
 
     void deleteMultipleNotification(String userId, List<String> notificationIdList) throws MeedlException;
     MeedlNotification fetchNotificationCount(String id) throws MeedlException;
