@@ -397,6 +397,7 @@ public class UserIdentityService implements UserUseCase {
             foundUser.setAdditionalDetailsCompleted(Boolean.TRUE);
             log.info("Alternate email {}", foundUser.getAlternateEmail());
         }
+        log.info("Found user on view user details id {}", foundUser.getId());
         return foundUser;
     }
 

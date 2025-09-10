@@ -768,9 +768,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     public LoaneeLoanAccount acceptLoanOffer(LoanOffer loanOffer, OnboardingMode onboardingMode) throws MeedlException {
         loanOffer.validateForAcceptOffer();
         log.info("Loan offer identity validated : {}", loanOffer);
-        LoanOffer offer = loanOfferOutputPort.findLoanOfferById(loanOffer.getId());
-        String referBy = offer.getReferredBy();
-        log.info("found Loan offer : {}", offer);
+        LoanOffer foundLoanOffer = loanOfferOutputPort.findLoanOfferById(loanOffer.getId());
+        log.info("found Loan offer : {}", foundLoanOffer);
         Optional<Loanee> optionalLoanee = loaneeOutputPort.findByUserId(loanOffer.getUserId());
         log.info("Loan offer: {}", loanOffer);
         if (optionalLoanee.isEmpty()) {
@@ -778,28 +777,35 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             throw new ResourceNotFoundException(LoanMessages.LOANEE_NOT_FOUND.getMessage());
         }
         Loanee loanee = optionalLoanee.get();
-        if (!offer.getLoanee().getId().equals(loanee.getId())) {
+        if (!foundLoanOffer.getLoanee().getId().equals(loanee.getId())) {
             log.info("offer not assigned to loanee: {}", loanOffer);
             throw new LoanException(LoanMessages.LOAN_OFFER_NOT_ASSIGNED_TO_LOANEE.getMessage());
         }
-        if (ObjectUtils.isNotEmpty(offer.getLoaneeResponse())) {
+        if (ObjectUtils.isNotEmpty(foundLoanOffer.getLoaneeResponse())) {
             log.info("decision made previously : {}", loanOffer);
             throw new LoanException(LoanMessages.LOAN_OFFER_DECISION_MADE.getMessage());
         }
 
-        if (loanOffer.getLoaneeResponse().equals(LoanDecision.ACCEPTED)){
+        LoaneeLoanAccount loaneeLoanAccount = acceptLoanOffer(loanOffer, foundLoanOffer, loanee, onboardingMode);
+        if (ObjectUtils.isNotEmpty(loaneeLoanAccount)){
+            return loaneeLoanAccount;
+        }
+        decreaseLoanOfferOnLoanMetrics(foundLoanOffer.getReferredBy());
+        declineLoanOffer(loanee.getUserIdentity(), loanOffer, foundLoanOffer);
+        return loaneeLoanAccount;
+    }
+    private LoaneeLoanAccount acceptLoanOffer(LoanOffer loanOffer,LoanOffer foundLoanOffer, Loanee loanee, OnboardingMode onboardingMode) throws MeedlException {
+        LoaneeLoanAccount loaneeLoanAccount = null;
+        if (loanOffer.getLoaneeResponse().equals(LoanDecision.ACCEPTED)) {
             log.info("accept offer abt to start : {}", loanOffer);
-            LoaneeLoanAccount loaneeLoanAccount = acceptLoanOffer(loanee.getUserIdentity(), loanOffer, offer,referBy);
-            if (!OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS.equals(onboardingMode)){
+            loaneeLoanAccount = acceptLoanOffer(loanOffer, foundLoanOffer);
+            if (!OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS.equals(onboardingMode)) {
                 log.info("Sending pm notification on accepting loan offer, loanee is not via file upload.");
-                notifyPortfolioManager(offer, loanee.getUserIdentity());
+                notifyPortfolioManager(foundLoanOffer, loanee.getUserIdentity());
             }
             return loaneeLoanAccount;
-
         }
-        decreaseLoanOfferOnLoanMetrics(referBy);
-        declineLoanOffer(loanee.getUserIdentity(), loanOffer, offer);
-        return null;
+        return loaneeLoanAccount;
     }
 
     private void declineLoanOffer(UserIdentity userIdentity, LoanOffer loanOffer, LoanOffer offer) throws MeedlException {
@@ -808,26 +814,26 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         notifyPortfolioManager(offer, userIdentity);
     }
 
-    private LoaneeLoanAccount acceptLoanOffer(UserIdentity userIdentity, LoanOffer loanOffer, LoanOffer offer,String referBy) throws MeedlException {
+    private LoaneeLoanAccount acceptLoanOffer(LoanOffer loanOffer, LoanOffer foundLoanOffer) throws MeedlException {
         log.info("got into accept method: {}", loanOffer);
         //Loanee Wallet would be Created
-        loanOfferMapper.updateLoanOffer(offer, loanOffer);
-        offer.setDateTimeAccepted(LocalDateTime.now());
-        LoanProduct loanProduct = loanProductOutputPort.findById(offer.getLoanProduct().getId());
+        loanOfferMapper.updateLoanOffer(foundLoanOffer, loanOffer);
+        foundLoanOffer.setDateTimeAccepted(LocalDateTime.now());
+        LoanProduct loanProduct = loanProductOutputPort.findById(foundLoanOffer.getLoanProduct().getId());
         log.info("loanProduct found : {}", loanProduct);
-        offer.setLoanProduct(loanProduct);
-        loanOfferOutputPort.save(offer);
-        log.info("after saving offer : {}", offer);
+        foundLoanOffer.setLoanProduct(loanProduct);
+        loanOfferOutputPort.save(foundLoanOffer);
+        log.info("after saving offer : {}", foundLoanOffer);
         log.info("Loanee account abt to create : {}", loanOffer);
-        LoaneeLoanAccount loaneeLoanAccount = loaneeLoanAccountOutputPort.findByLoaneeId(offer.getLoaneeId());
+        LoaneeLoanAccount loaneeLoanAccount = loaneeLoanAccountOutputPort.findByLoaneeId(foundLoanOffer.getLoaneeId());
         log.info("Loanee account is found : {}", loaneeLoanAccount);
         if (ObjectUtils.isEmpty(loaneeLoanAccount)){
             log.info("Loanee account is abt to be created : {}", loaneeLoanAccount);
-            loaneeLoanAccount = createLoaneeLoanAccount(offer.getLoaneeId());
+            loaneeLoanAccount = createLoaneeLoanAccount(foundLoanOffer.getLoaneeId());
             log.info("Loanee account is created : {}", loaneeLoanAccount);
         }
-        decreaseLoanOfferOnLoanMetrics(referBy);
-        log.info("done decreasing  : {}", offer);
+        decreaseLoanOfferOnLoanMetrics(foundLoanOffer.getReferredBy());
+        log.info("done decreasing  : {}", foundLoanOffer);
         return loaneeLoanAccount;
     }
 
