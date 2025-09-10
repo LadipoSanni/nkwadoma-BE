@@ -249,7 +249,6 @@ public class LoanController {
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
 
-
     @GetMapping("/search-loan")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> searchLoan(@RequestParam @NotBlank(message = "Program id is required") String programId,
