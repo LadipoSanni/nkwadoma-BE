@@ -20,6 +20,7 @@ import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages.USER_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.EMAIL_NOT_FOUND;
@@ -108,7 +109,7 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
     }
 
     @Override
-    public List<UserIdentity> findAllByRoles(List<IdentityRole> roles) throws MeedlException {
+    public List<UserIdentity> findAllByRoles(Set<IdentityRole> roles) throws MeedlException {
         validateRoles(roles);
         List<UserEntity> userEntities = userEntityRepository.findAllByRoles(roles);
 
@@ -146,7 +147,7 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
         userEntityRepository.save(userEntity);
     }
 
-    private void validateRoles(List<IdentityRole> roles) throws MeedlException {
+    private void validateRoles(Set<IdentityRole> roles) throws MeedlException {
         MeedlValidator.validateCollection(roles, "Please provide a list of roles for search for.");
         roles.forEach(identityRole -> {
             try {
