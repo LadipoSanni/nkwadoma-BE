@@ -733,10 +733,12 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private void validateCooperationDoesNotExistWithRcNumber(Financier financier) throws MeedlException {
-        Optional<OrganizationIdentity> optionalOrganizationIdentity = organizationIdentityOutputPort.findByRcNumber(financier.getRcNumber());
-        if (optionalOrganizationIdentity.isPresent()){
-            log.error("Organization with provided Rc number already exist on complete kyc");
-            throw new MeedlException("Cooperation with provided Rc number already exist.");
+        if (FinancierType.COOPERATE.equals(financier.getFinancierType())) {
+            Optional<OrganizationIdentity> optionalOrganizationIdentity = organizationIdentityOutputPort.findByRcNumber(financier.getRcNumber());
+            if (optionalOrganizationIdentity.isPresent()) {
+                log.error("Organization with provided Rc number already exist on complete kyc");
+                throw new MeedlException("Cooperation with provided Rc number already exist.");
+            }
         }
     }
 
