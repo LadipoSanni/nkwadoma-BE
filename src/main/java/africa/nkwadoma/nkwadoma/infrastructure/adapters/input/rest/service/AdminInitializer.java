@@ -97,7 +97,7 @@ public class AdminInitializer {
         organizationIdentity.setEnabled(Boolean.TRUE);
         organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
         organizationIdentity.setActivationStatus(ActivationStatus.ACTIVE);
-        Optional<OrganizationEntity> foundOrganization = organizationIdentityOutputPort.findByRcNumber(organizationIdentity.getRcNumber());
+        Optional<OrganizationIdentity> foundOrganization = organizationIdentityOutputPort.findByRcNumber(organizationIdentity.getRcNumber());
         organizationIdentity = getKeycloakOrganizationIdentity(organizationIdentity, foundOrganization);
         OrganizationIdentity savedOrganizationIdentity;
         try {
@@ -141,7 +141,7 @@ public class AdminInitializer {
         return savedOrganizationIdentity;
     }
 
-    private OrganizationIdentity getKeycloakOrganizationIdentity(OrganizationIdentity organizationIdentity, Optional<OrganizationEntity> foundOrganization) throws MeedlException {
+    private OrganizationIdentity getKeycloakOrganizationIdentity(OrganizationIdentity organizationIdentity, Optional<OrganizationIdentity> foundOrganization) throws MeedlException {
         try {
             if (foundOrganization.isEmpty()) {
                 log.info("Creating first organization identity");
