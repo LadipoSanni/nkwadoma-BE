@@ -13,7 +13,6 @@ import java.math.*;
 public class LoanRequestDto {
     @NotBlank(message = "Loan request ID is required")
     private String loanRequestId;
-    @NotBlank(message = "Loan product ID is required")
     private String loanProductId;
     private BigDecimal amountApproved;
     @NotNull(message = "Loan decision is required, ACCEPTED or DECLINED")
