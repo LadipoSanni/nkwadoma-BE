@@ -812,7 +812,9 @@ public class TestData {
                 .name("Demo")
                 .build();
     }
-//          if (isTestIdentityNumber(identityVerification)){
+
+    private void mockValues(){
+        //          if (isTestIdentityNumber(identityVerification)){
 //        log.info("Bvn is for testing bvn: {}", identityVerification.getDecryptedNin());
 //        return VerificationMock.createPremblyBvnTestResponse();
 //    }
@@ -825,4 +827,5 @@ public class TestData {
 //    return identityVerification.getDecryptedNin().startsWith("01") && identityVerification.getDecryptedBvn().startsWith("01");
 //}
 
+    }
 }
