@@ -140,7 +140,6 @@ public class FinancierController {
     }
     @GetMapping("financier/privacy-policy-decision")
     @PreAuthorize("hasRole('FINANCIER')")
-    @FinancierInvestmentDetailDocs
     public ResponseEntity<ApiResponse<?>> makePrivacyPolicyDecision(@AuthenticationPrincipal Jwt meedlUser, @PathVariable boolean privacyPolicyDecision) throws MeedlException {
         Financier financier = financierRestMapper.map(meedlUser.getClaimAsString("sub"), privacyPolicyDecision);
         String response = financierUseCase.makePrivacyPolicyDecision(financier);
