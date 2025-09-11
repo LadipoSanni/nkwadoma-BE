@@ -214,6 +214,9 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.ORGANIZATION_NAME_IS_REQUIRED.getMessage());
         MeedlValidator.validateDataElement(reason, "Please provide a reason for reactivating organization.");
         OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findById(organizationId);
+        if (!foundOrganization.getActivationStatus().equals(ActivationStatus.DEACTIVATED)){
+            throw new IdentityException(CANNOT_ACTIVATE_ORGANIZATION_NOT_DEACTIVATED.getMessage());
+        }
         List<OrganizationEmployeeIdentity> organizationEmployees = foundOrganization.getOrganizationEmployees();
         log.info("found organization employees to reactivate: {}",organizationEmployees.size());
 
@@ -231,6 +234,9 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         log.info("Deactivation reason : {} validated", reason);
 
         OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findById(organizationId);
+        if (foundOrganization.getActivationStatus().equals(ActivationStatus.ACTIVE)){
+            throw new IdentityException(CANNOT_DEACTIVATE_ORGANIZATION_NOT_ACTIVATED.getMessage());
+        }
         List<OrganizationEmployeeIdentity> organizationEmployees = foundOrganization.getOrganizationEmployees();
         log.info("Found organization employees: {}", organizationEmployees);
 
