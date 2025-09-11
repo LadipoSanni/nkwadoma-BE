@@ -633,7 +633,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
         log.info("Viewing organization detail for user with role {}", userIdentity.getRole());
-        if(IdentityRole.isOrganizationStaff(userIdentity.getRole())){
+        if(IdentityRole.isOrganizationStaff(userIdentity.getRole()) || IdentityRole.isCooperateFinancier(userIdentity.getRole())){
             log.info("Organization staff viewing organization detail");
             OrganizationEmployeeIdentity organizationEmployeeIdentity =
                     organizationEmployeeIdentityOutputPort.findByCreatedBy(userIdentity.getId());
