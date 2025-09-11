@@ -648,23 +648,25 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         }
             MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         OrganizationIdentity organizationIdentity;
-        if (userIdentity.getRole().isMeedlRole()){
+        if (userIdentity.getRole().isMeedlRole() || userIdentity.getRole().isCooperateStaff()){
             organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
         }else {
             organizationIdentity = organizationIdentityOutputPort.findByIdProjection(organizationId);
         }
             log.info("organization identity: {}", organizationIdentity);
+        if (IdentityRole.isOrganizationStaff(userIdentity.getRole())) {
             List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity.getId());
             organizationIdentity.setServiceOfferings(serviceOfferings);
             log.info("Service offering has been gotten during view organization detail {}", serviceOfferings);
             OrganizationLoanDetail organizationLoanDetail =
                     organizationLoanDetailOutputPort.findByOrganizationId(organizationIdentity.getId());
-            organizationIdentityMapper.mapOrganizationLoanDetailsToOrganization(organizationIdentity,organizationLoanDetail);
+            organizationIdentityMapper.mapOrganizationLoanDetailsToOrganization(organizationIdentity, organizationLoanDetail);
             getLoanPercentage(organizationIdentity, organizationLoanDetail);
             int pendingLoanOffer = loanOfferOutputPort.countNumberOfPendingLoanOfferForOrganization(organizationIdentity.getId());
-            log.info("Number of pending loan offer in organization with id {} -------> is {}",organizationId, pendingLoanOffer);
+            log.info("Number of pending loan offer in organization with id {} -------> is {}", organizationId, pendingLoanOffer);
             organizationIdentity.setPendingLoanOfferCount(pendingLoanOffer);
             updateOrganizationRequestedBy(organizationIdentity);
+        }
         return organizationIdentity;
     }
 
