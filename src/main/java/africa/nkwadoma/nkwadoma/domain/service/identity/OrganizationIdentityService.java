@@ -272,7 +272,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
             organization.setEnabled(Boolean.FALSE);
             organization.setActivationStatus(ActivationStatus.DEACTIVATED);
         }
-
+        organization.setOrganizationType(OrganizationType.COOPERATE);
         organization.setTimeUpdated(LocalDateTime.now());
         organizationIdentityOutputPort.save(organization);
     }
