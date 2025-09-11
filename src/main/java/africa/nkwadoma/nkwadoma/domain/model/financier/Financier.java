@@ -200,17 +200,15 @@ public class Financier {
         String sourceOfFundErrorMessage = "Source of fund cannot be empty";
         MeedlValidator.validateObjectInstance(this.sourceOfFunds, sourceOfFundErrorMessage);
         MeedlValidator.validateCollection(this.sourceOfFunds, sourceOfFundErrorMessage);
-        boolean atLeastOneSourceOfFund = Boolean.FALSE;
         for (String sourceOfFund : this.sourceOfFunds) {
-            if (MeedlValidator.isNotEmptyString(sourceOfFund)) {
-                atLeastOneSourceOfFund = Boolean.TRUE;
-                log.info("At least one source of fund was provided ----- {}", sourceOfFund);
-                break;
+            if (MeedlValidator.isEmptyString(sourceOfFund)){
+                log.warn("Source of fund not provided");
+                throw new MeedlException(sourceOfFundErrorMessage);
             }
-        }
-        if (!atLeastOneSourceOfFund){
-            log.warn("Source of fund not provided");
-            throw new MeedlException(sourceOfFundErrorMessage);
+            if (sourceOfFund.length() > 200) {
+                log.error("Source of fund cannot be greater than 200 characters. {}", sourceOfFund.length());
+                throw new MeedlException("Source of fund cannot be greater than 200 characters.");
+            }
         }
 //        MeedlValidator.validateDataElement(this.personalOrJointSavings, "Personal or joint savings needs to be stated.");
 //        MeedlValidator.validateDataElement(this.employmentIncome, "Employment income needs to be stated.");
