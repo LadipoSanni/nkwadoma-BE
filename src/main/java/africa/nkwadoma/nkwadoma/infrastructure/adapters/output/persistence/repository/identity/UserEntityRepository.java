@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface UserEntityRepository extends JpaRepository<UserEntity, String> {
     Optional<UserEntity> findByEmailIgnoreCase(String email);
@@ -18,7 +19,7 @@ public interface UserEntityRepository extends JpaRepository<UserEntity, String> 
     boolean existsByEmailIgnoreCase(String email);
 
     @Query("SELECT u FROM UserEntity u WHERE u.role IN (:adminRoles)")
-    List<UserEntity> findAllByRoles(List<IdentityRole> adminRoles);
+    List<UserEntity> findAllByRoles(Set<IdentityRole> adminRoles);
 
     @Query("select user from UserEntity  user where user.role = 'MEEDL_SUPER_ADMIN' ")
     UserEntity findByRole_MeedlSuperAdmin();

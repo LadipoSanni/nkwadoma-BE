@@ -103,7 +103,9 @@ public class LoanRequestService implements LoanRequestUseCase {
     @Override
     public LoanRequest respondToLoanRequest(LoanRequest loanRequest) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanRequest, LoanMessages.LOAN_REQUEST_MUST_NOT_BE_EMPTY.getMessage());
-        loanRequest.validateLoanProductIdAndAmountApproved();
+        if (loanRequest.getLoanRequestDecision().equals(LoanDecision.ACCEPTED)) {
+            loanRequest.validateLoanProductIdAndAmountApproved();
+        }
         LoanRequest foundLoanRequest = loanRequestOutputPort.findById(loanRequest.getId());
 
         log.info("Loan request retrieved: {}", foundLoanRequest);
