@@ -146,6 +146,8 @@ public class OrganizationController {
             "or hasRole('ORGANIZATION_SUPER_ADMIN')" +
             "or hasRole('ORGANIZATION_ASSOCIATE')" +
             "or hasRole('ORGANIZATION_ADMIN')" +
+            "or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')" +
+            "or hasRole('COOPERATE_FINANCIER_ADMIN')" +
             "or hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = "View organization details by organization id")
     public ResponseEntity<ApiResponse<?>> viewOrganizationDetails(@RequestParam(required = false) String organizationId,

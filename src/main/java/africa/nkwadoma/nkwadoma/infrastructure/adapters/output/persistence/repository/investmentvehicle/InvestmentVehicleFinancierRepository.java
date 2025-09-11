@@ -141,5 +141,5 @@ public interface InvestmentVehicleFinancierRepository extends JpaRepository<Inve
             @Param("investmentVehicleName") String investmentVehicleName,
             @Param("financierId") String financierId, Pageable pageRequest);
 
-    Optional<InvestmentVehicleFinancierEntity> findByFinancier_IdAndInvestmentVehicle_Id(String financierId, String investmentVehicleId);
+    int countByFinancier_IdAndInvestmentVehicle_Id(String financierId, String investmentVehicleId);
 }

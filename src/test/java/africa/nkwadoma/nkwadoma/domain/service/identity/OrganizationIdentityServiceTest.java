@@ -314,6 +314,7 @@ class OrganizationIdentityServiceTest {
     void reactivateOrganization() {
         try {
             roseCouture.setEnabled(Boolean.TRUE);
+            roseCouture.setActivationStatus(ActivationStatus.DEACTIVATED);
             doNothing().when(identityManagerOutPutPort).enableClient(roseCouture);
             when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
             when(identityManagerOutPutPort.enableUserAccount(sarah)).thenReturn(sarah);
@@ -342,6 +343,7 @@ class OrganizationIdentityServiceTest {
     void deactivateOrganization() {
         try {
             roseCouture.setEnabled(Boolean.FALSE);
+            roseCouture.setActivationStatus(ActivationStatus.ACTIVE);
             doNothing().when(identityManagerOutPutPort).disableClient(roseCouture);
             when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
             when(identityManagerOutPutPort.disableUserAccount(sarah)).thenReturn(sarah);

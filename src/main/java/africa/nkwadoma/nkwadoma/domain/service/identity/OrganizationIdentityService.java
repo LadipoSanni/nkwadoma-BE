@@ -214,6 +214,9 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.ORGANIZATION_NAME_IS_REQUIRED.getMessage());
         MeedlValidator.validateDataElement(reason, "Please provide a reason for reactivating organization.");
         OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findById(organizationId);
+        if (!foundOrganization.getActivationStatus().equals(ActivationStatus.DEACTIVATED)){
+            throw new IdentityException(CANNOT_ACTIVATE_ORGANIZATION_NOT_DEACTIVATED.getMessage());
+        }
         List<OrganizationEmployeeIdentity> organizationEmployees = foundOrganization.getOrganizationEmployees();
         log.info("found organization employees to reactivate: {}",organizationEmployees.size());
 
@@ -231,6 +234,9 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         log.info("Deactivation reason : {} validated", reason);
 
         OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findById(organizationId);
+        if (!foundOrganization.getActivationStatus().equals(ActivationStatus.ACTIVE)){
+            throw new IdentityException(CANNOT_DEACTIVATE_ORGANIZATION_NOT_ACTIVATED.getMessage());
+        }
         List<OrganizationEmployeeIdentity> organizationEmployees = foundOrganization.getOrganizationEmployees();
         log.info("Found organization employees: {}", organizationEmployees);
 
@@ -272,7 +278,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
             organization.setEnabled(Boolean.FALSE);
             organization.setActivationStatus(ActivationStatus.DEACTIVATED);
         }
-
+        organization.setOrganizationType(OrganizationType.COOPERATE);
         organization.setTimeUpdated(LocalDateTime.now());
         organizationIdentityOutputPort.save(organization);
     }
@@ -627,7 +633,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
         log.info("Viewing organization detail for user with role {}", userIdentity.getRole());
-        if(IdentityRole.isOrganizationStaff(userIdentity.getRole())){
+        if(IdentityRole.isOrganizationStaff(userIdentity.getRole()) || IdentityRole.isCooperateFinancier(userIdentity.getRole())){
             log.info("Organization staff viewing organization detail");
             OrganizationEmployeeIdentity organizationEmployeeIdentity =
                     organizationEmployeeIdentityOutputPort.findByCreatedBy(userIdentity.getId());
@@ -642,23 +648,25 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         }
             MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         OrganizationIdentity organizationIdentity;
-        if (userIdentity.getRole().isMeedlRole()){
+        if (userIdentity.getRole().isMeedlRole() || userIdentity.getRole().isCooperateStaff()){
             organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
         }else {
             organizationIdentity = organizationIdentityOutputPort.findByIdProjection(organizationId);
         }
             log.info("organization identity: {}", organizationIdentity);
+        if (IdentityRole.isOrganizationStaff(userIdentity.getRole()) || IdentityRole.isMeedlStaff(userIdentity.getRole())) {
             List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity.getId());
             organizationIdentity.setServiceOfferings(serviceOfferings);
             log.info("Service offering has been gotten during view organization detail {}", serviceOfferings);
             OrganizationLoanDetail organizationLoanDetail =
                     organizationLoanDetailOutputPort.findByOrganizationId(organizationIdentity.getId());
-            organizationIdentityMapper.mapOrganizationLoanDetailsToOrganization(organizationIdentity,organizationLoanDetail);
+            organizationIdentityMapper.mapOrganizationLoanDetailsToOrganization(organizationIdentity, organizationLoanDetail);
             getLoanPercentage(organizationIdentity, organizationLoanDetail);
             int pendingLoanOffer = loanOfferOutputPort.countNumberOfPendingLoanOfferForOrganization(organizationIdentity.getId());
-            log.info("Number of pending loan offer in organization with id {} -------> is {}",organizationId, pendingLoanOffer);
+            log.info("Number of pending loan offer in organization with id {} -------> is {}", organizationId, pendingLoanOffer);
             organizationIdentity.setPendingLoanOfferCount(pendingLoanOffer);
             updateOrganizationRequestedBy(organizationIdentity);
+        }
         return organizationIdentity;
     }
 
