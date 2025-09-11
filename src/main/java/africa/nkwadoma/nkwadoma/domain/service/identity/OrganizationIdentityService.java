@@ -654,7 +654,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
             organizationIdentity = organizationIdentityOutputPort.findByIdProjection(organizationId);
         }
             log.info("organization identity: {}", organizationIdentity);
-        if (IdentityRole.isOrganizationStaff(userIdentity.getRole())) {
+        if (IdentityRole.isOrganizationStaff(userIdentity.getRole()) || IdentityRole.isMeedlStaff(userIdentity.getRole())) {
             List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity.getId());
             organizationIdentity.setServiceOfferings(serviceOfferings);
             log.info("Service offering has been gotten during view organization detail {}", serviceOfferings);
