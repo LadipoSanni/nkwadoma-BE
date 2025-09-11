@@ -40,6 +40,7 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.financier.FinancierMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentvehicle.InvestmentVehicleMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -255,12 +256,12 @@ public class FinancierService implements FinancierUseCase {
 
         Financier savedFinancier = financierOutputPort.save(buildFinancier);
         financier.setId(savedFinancier.getId());
-        financier.setUserIdentity(actor);
+        financier.setUserIdentity(savedUserIdentity);
 
         saveCooperateFinancier(organizationIdentity,savedUserIdentity,actor);
 
         savedFinancier.setUserIdentity(savedUserIdentity);
-        financiersToMail.add(savedFinancier);
+        financiersToMail.add(financier);
         log.info("Financier with email {} added for email sending. ", savedFinancier.getUserIdentity().getEmail());
         return financier;
     }
@@ -451,6 +452,7 @@ public class FinancierService implements FinancierUseCase {
         existingFinancier.setInvestmentVehicleId(financier.getInvestmentVehicleId());
         existingFinancier.setInvestmentVehicleDesignation(financier.getInvestmentVehicleDesignation());
         existingFinancier.setUserIdentity(financier.getUserIdentity());
+        existingFinancier.setName(financier.getName());
         financier = existingFinancier;
         log.info("Updated the financier details without saving {}", financier);
         return financier;
@@ -463,9 +465,11 @@ public class FinancierService implements FinancierUseCase {
         if (userIdentity.getRole().isFinancier()) {
             log.info("User is a financier.");
             if (userIdentity.getRole().isCooperateStaff()) {
+                log.info("User is a cooperate staff");
                 financier = financierOutputPort.findFinancierByCooperateStaffUserId(userIdentity.getId());
             }else {
-                financier = financierOutputPort.findFinancierByUserId(userIdentity.getId());
+                log.info("User is an individual financier with user id  {}", userIdentity.getId());
+                financier = financierOutputPort.findByIdentity(userIdentity.getId());
             }
         } else {
             log.info("User is not a financier");
@@ -479,6 +483,7 @@ public class FinancierService implements FinancierUseCase {
             }
             log.info("found financier {}", financier);
         }
+        log.info("found financier before updating values : {}", financier);
         return updateFinancierDetail(financier);
     }
 
@@ -697,10 +702,12 @@ public class FinancierService implements FinancierUseCase {
         }else {
             foundFinancier = financierOutputPort.findFinancierByUserId(userIdentity.getId());
         }
+        log.info("THE found financier on kyc ---======> {}", foundFinancier);
         if (foundFinancier.getAccreditationStatus() != null &&
                 foundFinancier.getAccreditationStatus().equals(AccreditationStatus.UNVERIFIED)){
             log.info("Validating for kyc financier service {}", financier);
             financier.validateKyc(foundFinancier.getFinancierType());
+            validateCooperationDoesNotExistWithRcNumber(financier);
             log.info("Financier details in service to use in completing kyc {}", financier);
             mapKycFinancierUpdatedValues(financier, foundFinancier);
             if (financier.getBeneficialOwners() != null){
@@ -722,6 +729,16 @@ public class FinancierService implements FinancierUseCase {
         }else {
             log.info("Financier {} has already completed kyc.", foundFinancier);
             throw new InvestmentException("Kyc already done.");
+        }
+    }
+
+    private void validateCooperationDoesNotExistWithRcNumber(Financier financier) throws MeedlException {
+        if (FinancierType.COOPERATE.equals(financier.getFinancierType())) {
+            Optional<OrganizationIdentity> optionalOrganizationIdentity = organizationIdentityOutputPort.findByRcNumber(financier.getRcNumber());
+            if (optionalOrganizationIdentity.isPresent()) {
+                log.error("Organization with provided Rc number already exist on complete kyc");
+                throw new MeedlException("Cooperation with provided Rc number already exist.");
+            }
         }
     }
 
@@ -793,9 +810,19 @@ public class FinancierService implements FinancierUseCase {
             organizationIdentityMapper.mapCooperateDetailToOrganization(organizationIdentity,financier);
             organizationIdentity.setOrganizationType(OrganizationType.COOPERATE);
             organizationIdentity =organizationIdentityOutputPort.save(organizationIdentity);
-            financier.setOrganizationIdentity(organizationIdentity);
-            financier.setId(foundFinancier.getId());
+            updatedCooperateFinancierData(financier, foundFinancier, organizationIdentity);
         }
+    }
+
+    private static void updatedCooperateFinancierData(Financier financier, Financier foundFinancier, OrganizationIdentity organizationIdentity) {
+        financier.setOrganizationIdentity(organizationIdentity);
+        financier.setId(foundFinancier.getId());
+        financier.setName(foundFinancier.getName());
+        financier.setFinancierType(foundFinancier.getFinancierType());
+        financier.setCreatedAt(foundFinancier.getCreatedAt());
+        financier.setTotalAmountInvested(financier.getTotalAmountInvested());
+        financier.setActivationStatus(foundFinancier.getActivationStatus());
+        financier.setIdentity(foundFinancier.getIdentity());
     }
 
     private void mapKycFinancierPreviousData(Financier financier, Financier foundFinancier) {
@@ -807,6 +834,7 @@ public class FinancierService implements FinancierUseCase {
         financier.setTotalIncomeEarned(foundFinancier.getTotalIncomeEarned());
         financier.setCreatedAt(foundFinancier.getCreatedAt());
         financier.setId(foundFinancier.getId());
+        financier.setIdentity(foundFinancier.getIdentity());
     }
 
     private void mapKycUserIdentityDataIndividualFinancier(Financier financier, Financier foundFinancier) throws MeedlException {

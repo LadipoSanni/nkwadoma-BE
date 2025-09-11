@@ -9,6 +9,9 @@ public interface EmailOutputPort {
     void sendEmail(Email email) throws MeedlException;
 
     Context getNameAndLinkContext(String link, String firstName);
+
+    Context getFirstNameAndCompanyAndLinkContext(String link, String firstName, String companyName);
+
     Context getNameAndLinkContextAndIndustryName(String link, String firstName, String industryName);
 
     Context getNameAndLinkContextAndInvestmentVehicleName(String link, String firstName, String investmentVehicleName);
@@ -24,4 +27,6 @@ public interface EmailOutputPort {
     Context getNameAndDeactivationReasonContext(String firstName, String deactivationReason);
 
     Context getNameAndReactivationReasonContext(String link, String firstName, String reactivationReason);
+
+    Context getFirstNameAndCompanyNameAndLinkContextAndInvestmentVehicleName(String financierToVehicleLink, String firstName, String investmentVehicleName, String companyName);
 }

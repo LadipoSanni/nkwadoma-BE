@@ -28,10 +28,10 @@ public interface LoaneeRepository extends JpaRepository<LoaneeEntity,String> {
     @Query("""
         select l from LoaneeEntity l
                 join CohortLoaneeEntity cle on  cle.loanee.id = l.id
-                        where cle.cohort.id = :id 
-                                """)
+                        where cle.cohort.id = :id
+        """)
 
-    List<LoaneeEntity> findAllLoaneesByCohortId(String id);
+    List<LoaneeEntity> findAllLoaneesByCohortId(@Param("id") String id);
 
     @Query("""
         SELECT l FROM CohortLoaneeEntity l

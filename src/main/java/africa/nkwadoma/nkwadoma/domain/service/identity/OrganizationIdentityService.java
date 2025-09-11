@@ -196,10 +196,10 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     }
 
     private void validateUniqueValues(OrganizationIdentity organizationIdentity) throws MeedlException {
-        Optional<OrganizationEntity> foundOrganizationEntity =
+        Optional<OrganizationIdentity> optionalOrganizationIdentityFound =
                 organizationIdentityOutputPort.findByRcNumber(organizationIdentity.getRcNumber());
-        if (foundOrganizationEntity.isPresent()) {
-            log.info("Organization with rc number {} already exists", foundOrganizationEntity.get().getRcNumber());
+        if (optionalOrganizationIdentityFound.isPresent()) {
+            log.info("Organization with rc number {} already exists", optionalOrganizationIdentityFound.get().getRcNumber());
             throw new IdentityException(ORGANIZATION_RC_NUMBER_ALREADY_EXIST.getMessage());
         }
 
@@ -234,7 +234,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         log.info("Deactivation reason : {} validated", reason);
 
         OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findById(organizationId);
-        if (foundOrganization.getActivationStatus().equals(ActivationStatus.ACTIVE)){
+        if (!foundOrganization.getActivationStatus().equals(ActivationStatus.ACTIVE)){
             throw new IdentityException(CANNOT_DEACTIVATE_ORGANIZATION_NOT_ACTIVATED.getMessage());
         }
         List<OrganizationEmployeeIdentity> organizationEmployees = foundOrganization.getOrganizationEmployees();
@@ -278,7 +278,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
             organization.setEnabled(Boolean.FALSE);
             organization.setActivationStatus(ActivationStatus.DEACTIVATED);
         }
-
+        organization.setOrganizationType(OrganizationType.COOPERATE);
         organization.setTimeUpdated(LocalDateTime.now());
         organizationIdentityOutputPort.save(organization);
     }

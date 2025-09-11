@@ -25,7 +25,6 @@ public interface RepaymentHistoryRestMapper {
     @Mapping(target = "expectedMonthlyAmount", source = "amountPaid")
     @Mapping(target = "amountOutstanding", source = "amountOutstanding")
     @Mapping(target = "totalAmountRepaid", source = "totalAmountRepaid")
-    @Mapping(target = "principalPayment", source = "principalPayment")
     @Mapping(target = "interest", source = "interestIncurred")
     RepaymentScheduleEntry toRepaymentScheduleEntry(RepaymentHistory repaymentHistory);
 

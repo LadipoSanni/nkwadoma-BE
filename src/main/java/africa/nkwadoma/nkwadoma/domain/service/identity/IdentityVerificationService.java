@@ -118,6 +118,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         decryptEncryptedIdentification(identityVerification);
         UserIdentity userIdentity = userIdentityOutputPort.findByBvn(identityVerification.getEncryptedBvn());
         if (ObjectUtils.isEmpty(userIdentity)) {
+            log.info("unable to find user by bvn for verification, searching with user id {}", actorId);
             userIdentity = userIdentityOutputPort.findById(actorId);
         }
         if (isVerificationRequired(userIdentity)){

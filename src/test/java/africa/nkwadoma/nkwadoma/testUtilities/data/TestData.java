@@ -273,6 +273,7 @@ public class TestData {
         financier.setBeneficialOwners(beneficialOwners);
         financier.setDeclarationAndAgreement(Boolean.TRUE);
         financier.setPoliticallyExposed(Boolean.FALSE);
+        financier.setRcNumber("RC"+TestUtils.generateRandomNumber(7));
 
         PoliticallyExposedPerson politicallyExposedPerson = new PoliticallyExposedPerson();
         politicallyExposedPerson.setPositionHeld("President");
@@ -810,5 +811,21 @@ public class TestData {
                 .tertiaryCount(2)
                 .name("Demo")
                 .build();
+    }
+
+    private void mockValues(){
+        //          if (isTestIdentityNumber(identityVerification)){
+//        log.info("Bvn is for testing bvn: {}", identityVerification.getDecryptedNin());
+//        return VerificationMock.createPremblyBvnTestResponse();
+//    }
+//            if (isTestIdentityNumber(identityVerification)){
+//        log.info("Nin is for testing nin: {}", identityVerification.getDecryptedNin());
+//        return VerificationMock.createPremblyNinTestResponse();
+//    }
+//private boolean isTestIdentityNumber(IdentityVerification identityVerification) {
+//    log.info("Checking if identity number is for test : {}", identityVerification.getDecryptedNin().equals("01") && identityVerification.getDecryptedBvn().equals("01"));
+//    return identityVerification.getDecryptedNin().startsWith("01") && identityVerification.getDecryptedBvn().startsWith("01");
+//}
+
     }
 }
