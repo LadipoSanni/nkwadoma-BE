@@ -1,0 +1,64 @@
+name: Push to ECR
+
+on:
+  push:
+    branches:
+      - 'systest'
+
+env:
+  REPO_URL: 357586184453.dkr.ecr.us-east-1.amazonaws.com/nkwadoma
+  ECR_REPOSITORY: nkwadoma
+  AWS_REGION: us-east-1
+
+jobs:
+  # ======================= BUILD AND PUSH =======================
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build the application
+        run: mvn clean package -DskipTests
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+      - name: Build Docker image
+        run: docker build -t ${{ env.REPO_URL }}:$GITHUB_SHA .
+
+
+    
+      - name: Tag Docker image with commit sha + timestamp
+        run: |
+          TIMESTAMP=$(TZ=Africa/Lagos date +'%Y%m%d%H%M')
+          DOCKER_TAG=${{ env.REPO_URL }}:UAT-${TIMESTAMP}
+          SHA_TAG=${{ env.REPO_URL }}:$GITHUB_SHA
+          LATEST_TAG=${{ env.REPO_URL }}:Latest
+          
+          docker tag ${{ env.REPO_URL }}:$GITHUB_SHA $DOCKER_TAG
+          docker tag ${{ env.REPO_URL }}:$GITHUB_SHA $SHA_TAG
+          docker tag ${{ env.REPO_URL }}:$GITHUB_SHA $LATEST_TAG
+          
+          echo "DOCKER_TAG=$DOCKER_TAG" >> $GITHUB_ENV
+          echo "SHA_TAG=$SHA_TAG" >> $GITHUB_ENV
+          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
+                   
+      - name: Push Docker image to ECR
+        run: |
+          docker push $DOCKER_TAG
+          docker push $SHA_TAG
+          docker push $LATEST_TAG
