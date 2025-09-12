@@ -393,6 +393,7 @@ class LoanServiceTest {
         loanOffer.setAmountApproved(BigDecimal.valueOf(9000));
         loanOffer.setOrganizationId(testId);
         loanOffer.setCohortId(testId);
+        loanOffer.setLoanOfferStatus(LoanOfferStatus.OFFERED);
         try {
             loanOffer.setLoaneeId(loanee.getId());
             when(loaneeOutputPort.findLoaneeById(anyString())).thenReturn(loanee);
