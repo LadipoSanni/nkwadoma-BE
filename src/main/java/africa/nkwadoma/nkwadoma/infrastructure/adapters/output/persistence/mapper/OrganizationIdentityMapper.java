@@ -12,7 +12,7 @@ import java.util.*;
 
 @Mapper(componentModel = "spring", uses = ServiceOfferingMapper.class, nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface OrganizationIdentityMapper {
-    @Mapping(source = "rcNumber", target = "registrationNumber")
+    @Mapping(source = "rcNumber", target = "rcNumber")
     @Mapping(source = "tin", target = "taxIdentity")
     OrganizationEntity toOrganizationEntity(OrganizationIdentity organizationIdentity);
 
