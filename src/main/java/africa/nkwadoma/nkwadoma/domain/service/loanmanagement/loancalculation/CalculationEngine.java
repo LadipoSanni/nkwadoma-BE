@@ -90,7 +90,6 @@ public class CalculationEngine implements CalculationEngineUseCase {
         calculationContext.setDefaultValues();
         List<RepaymentHistory> previousRepaymentHistory = repaymentHistoryOutputPort.findAllRepaymentHistoryForLoan(calculationContext.getLoanee().getId(), calculationContext.getCohort().getId());
         LoaneeLoanDetail loaneeLoanDetail = getLoaneeLoanDetail(calculationContext);
-        calculationContext.setLoaneeLoanDetail(loaneeLoanDetail);
         deletePreciousInterestHistory(calculationContext);
         log.info("On repayment calculation, the cohort id is {} the loanee id is {}", calculationContext.getCohort().getId(), calculationContext.getLoanee().getId());
         List<RepaymentHistory> allRepayments = combineAndSortRepaymentHistories(calculationContext.getRepaymentHistories(), previousRepaymentHistory);
@@ -102,10 +101,16 @@ public class CalculationEngine implements CalculationEngineUseCase {
         calculationContext.setAsOfDate(LocalDate.now());
 
         processRepaymentHistoryCalculations(calculationContext);
-        finalizeRepaymentHistoryCalculation(allRepayments, previousRepaymentHistory, loaneeLoanDetail);
+        finalizeRepaymentHistoryCalculation(allRepayments, previousRepaymentHistory, calculationContext.getLoaneeLoanDetail());
         updateLoanDetails(calculationContext);
     }
 
+    private BigDecimal bigDecimalOrZero(BigDecimal amount){
+        if (ObjectUtils.isEmpty(amount)){
+            return BigDecimal.ZERO;
+        }
+        return amount;
+    }
     private void deletePreciousInterestHistory(CalculationContext calculationContext) throws MeedlException {
         log.info("Deleting previously existing monthly and daily interest for this particular loan if any exist. Loanee loan detail id is {}", calculationContext.getLoaneeLoanDetail().getId());
         monthlyInterestOutputPort.deleteAllByLoaneeLoanDetailId(calculationContext.getLoaneeLoanDetail().getId());
