@@ -44,7 +44,7 @@ public class ProgramCohortPersistenceAdapter implements ProgramCohortOutputPort 
         ProgramCohort programCohort = new ProgramCohort();
         log.info("Linking cohort to program {}", program.getName());
         program.setNumberOfCohort(program.getNumberOfCohort() + 1);
-        log.info("Service offering of organization is : {} ", program.getOrganizationIdentity().getServiceOfferings());
+        log.info("Service offering of organization is : {} Rc init {} ", program.getOrganizationIdentity().getServiceOfferings(), program.getOrganizationIdentity().getRcNumber());
         programOutputPort.saveProgram(program);
         programCohort.setCohort(savedCohort);
         programCohort.setProgramId(program.getId());

@@ -5,7 +5,6 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
@@ -147,7 +146,8 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         program.setOrganizationId(programEntity.getOrganizationIdentity().getId());
         OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(programEntity.getOrganizationIdentity().getId());
         program.setOrganizationIdentity(organizationIdentity);
-        log.info("Program found id: {}, for organization with id : {} :: {}", program.getId(), organizationIdentity.getId(), organizationIdentity.getServiceOfferings());
+        log.info("Program entity with organization {}", programEntity.getOrganizationIdentity().getRcNumber());
+        log.info("Program found id: {}, for organization with id : {} :: {} Rc number init {}", program.getId(), organizationIdentity.getId(), organizationIdentity.getServiceOfferings(), organizationIdentity.getRcNumber());
         return program;
     }
 
