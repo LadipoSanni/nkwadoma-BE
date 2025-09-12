@@ -134,8 +134,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private void verifyFinanciersExistInVehicle(LoanProduct loanProduct, InvestmentVehicle investmentVehicle) throws MeedlException {
         List<String> sponsorsIds = new ArrayList<>();
         for (Financier financier : loanProduct.getSponsors()){
-            Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findAllByFinancierIdAndInvestmentVehicleId(financier.getId(), investmentVehicle.getId());
-            if (optionalInvestmentVehicleFinancier.isEmpty()){
+            int count = investmentVehicleFinancierOutputPort.checkIfFinancierExistInVehicle(financier.getId(), investmentVehicle.getId());
+            if (count == 0){
                 log.error("Investment vehicle financier not found for financier with id {} and vehicle with id {}", financier.getId(), investmentVehicle.getId());
                 throw new MeedlException("Apparently financier with name %s is not part of %s".formatted( financier.getName(),  investmentVehicle.getName()));
             }

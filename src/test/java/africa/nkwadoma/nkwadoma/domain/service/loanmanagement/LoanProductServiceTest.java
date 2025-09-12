@@ -106,7 +106,7 @@ class LoanProductServiceTest {
             when(userIdentityOutputPort.findById(any())).thenReturn(new UserIdentity());
             when(identityManagerOutPutPort.verifyUserExistsAndIsEnabled(any())).thenReturn(new UserIdentity());
             when(loanProductOutputPort.save(loanProduct)).thenReturn(loanProduct);
-            when(investmentVehicleFinancierOutputPort.findAllByFinancierIdAndInvestmentVehicleId(financier.getId(), investmentVehicle.getId())).thenReturn(Optional.of(InvestmentVehicleFinancier.builder().build()));
+            when(investmentVehicleFinancierOutputPort.checkIfFinancierExistInVehicle(financier.getId(), investmentVehicle.getId())).thenReturn(1);
             when(investmentVehicleOutputPort.findById(loanProduct.getId()))
                     .thenReturn(investmentVehicle);
             when(portfolioOutputPort.findPortfolio(any(Portfolio.class))).thenReturn(portfolio);

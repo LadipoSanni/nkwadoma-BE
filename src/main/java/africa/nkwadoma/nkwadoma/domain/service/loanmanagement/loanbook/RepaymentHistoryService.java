@@ -25,6 +25,7 @@ import java.time.YearMonth;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -54,8 +55,8 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
              log.info("repayment histories gotten from adapter == {}",repaymentHistories.getContent().stream().toList());
             return repaymentHistories;
         }
-        Loanee loanee = loaneeOutputPort.findByUserId(userIdentity.getId()).get();
-        repaymentHistory.setLoaneeId(loanee.getId());
+        Optional<Loanee> optionalLoanee =  loaneeOutputPort.findByUserId(userIdentity.getId());
+        optionalLoanee.ifPresent(loanee -> repaymentHistory.setLoaneeId(loanee.getId()));
         return repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(repaymentHistory, pageSize, pageNumber);
     }
 
