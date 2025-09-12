@@ -30,6 +30,8 @@ public class Portfolio {
     private double loanRequestPercentage;
     private double loanDisbursalPercentage;
     private double loanOfferPercentage;
+    private double endowmentVehiclePercentage;
+    private double commercialVehiclePercentage;
     private int numberOfLoanees;
     private int numberOfOrganizations;
     private int numberOfLoanProducts;

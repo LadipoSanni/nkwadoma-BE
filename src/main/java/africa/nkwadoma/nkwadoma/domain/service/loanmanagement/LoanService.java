@@ -202,6 +202,9 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (! foundLoanee.getId().equals(loanOffer.getLoaneeId())) {
             throw new LoanException(LoanMessages.LOAN_DOES_NOT_BELONG_TO_LOANEE.getMessage());
         }
+        if (loanOffer.getLoanOfferStatus().equals(LoanOfferStatus.WITHDRAW)){
+            throw new LoanException(LoanMessages.LOAN_OFFER_HAS_BEEN_WITHDRAW.getMessage());
+        }
         log.info("-----> Loan offer ----> {}", loanOffer);
         log.info("-----> offer response ----> {}", loanOffer.getLoaneeResponse());
         if (loanOffer.getLoaneeResponse() == null) {

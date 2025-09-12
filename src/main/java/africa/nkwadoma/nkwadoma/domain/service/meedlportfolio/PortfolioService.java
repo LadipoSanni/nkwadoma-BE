@@ -10,11 +10,13 @@ import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.PortfolioMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanMetricsProjection;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants.MEEDL;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.loan.FinancialConstants.PERCENTAGE_BASE_INT;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class PortfolioService implements PortfolioUseCase {
@@ -31,6 +33,20 @@ public class PortfolioService implements PortfolioUseCase {
         portfolio = portfolioOutputPort.findPortfolio(portfolio);
         LoanMetricsProjection loanMetricsProjection = loanMetricsOutputPort.calculateAllMetrics();
         portfolioMapper.updateLoanMetricsOnPortfolio(portfolio,loanMetricsProjection);
+        int totalVehicles = portfolio.getTotalNumberOfInvestmentVehicle();
+
+        log.info("total vehicles: {}", totalVehicles);
+
+        if (totalVehicles == 0) {
+            portfolio.setEndowmentVehiclePercentage(0.0);
+            portfolio.setCommercialVehiclePercentage(0.0);
+        }
+
+        double endowmentPercentage = ((double) portfolio.getTotalNumberOfEndowmentFundsInvestmentVehicle() / totalVehicles) * PERCENTAGE_BASE_INT;
+        double commercialPercentage = ((double) portfolio.getTotalNumberOfCommercialFundsInvestmentVehicle() / totalVehicles) * PERCENTAGE_BASE_INT;
+
+        portfolio.setEndowmentVehiclePercentage(endowmentPercentage);
+        portfolio.setCommercialVehiclePercentage(commercialPercentage);
         return portfolio;
     }
 

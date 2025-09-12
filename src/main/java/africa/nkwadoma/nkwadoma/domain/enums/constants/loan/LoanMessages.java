@@ -72,7 +72,8 @@ public enum LoanMessages {
     LOAN_REFERRAL_DECISION_CANNOT_BE_MADE_ON_ANOTHER_LOANEE_REFERRAL(
             "Loanee cannot make a decision on this loan referral, it doesn't belong to this loanee"
     ),
-    LOAN_DOES_NOT_BELONG_TO_LOANEE("This loan does not belong to this loanee");
+    LOAN_DOES_NOT_BELONG_TO_LOANEE("This loan does not belong to this loanee"),
+    LOAN_OFFER_HAS_BEEN_WITHDRAW("Cannot start loan for a withdrawn loan offer");
     private final String message;
 
     LoanMessages(String message) {

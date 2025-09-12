@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.constants.ControllerConstant;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.AdditionalDetailRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.*;
@@ -24,7 +25,7 @@ public class AdditionalDetailController {
     private final AdditionalDetailMapper additionalDetailMapper;
 
     @PostMapping("additional-details")
-    public ResponseEntity<ApiResponse<NextOfKinResponse>> additionalDetails(@RequestBody africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.AdditionalDetail request,
+    public ResponseEntity<ApiResponse<NextOfKinResponse>> additionalDetails(@RequestBody AdditionalDetailRequest request,
                                                                             @AuthenticationPrincipal Jwt meedlUserId) throws MeedlException {
         String id = meedlUserId.getClaim("sub");
         log.info("User ID =====> {}", id);

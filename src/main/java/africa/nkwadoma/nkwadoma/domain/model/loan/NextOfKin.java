@@ -21,7 +21,7 @@ public class NextOfKin {
     private String phoneNumber;
     private String nextOfKinRelationship;
     private String stateOfResidence;
-    private LevelOfEducation levelOfEduction;
+    private String levelOfEduction;
 //    private UserRelationship nextOfKinRelationship;
     private String contactAddress;
     private String userId;

@@ -41,7 +41,7 @@ public class UserEntity {
     private String stateOfOrigin;
     private String maritalStatus;
     private String stateOfResidence;
-//    private LevelOfEducation levelOfEduction;
+    private String levelOfEduction;
     private String nationality;
     private String residentialAddress;
     private String alternateEmail;

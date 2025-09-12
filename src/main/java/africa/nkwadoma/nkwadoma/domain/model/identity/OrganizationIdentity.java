@@ -32,6 +32,7 @@ public class OrganizationIdentity {
     private String websiteAddress;
     private String invitedDate;
     private String taxIdentity;
+    private String registrationNumber;
     private String rcNumber;
     private String tin;
     private String phoneNumber;
