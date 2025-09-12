@@ -144,10 +144,9 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
                 orElseThrow(() -> new ResourceNotFoundException(PROGRAM_NOT_FOUND.getMessage()));
         Program program = programMapper.toProgram(programEntity);
         program.setOrganizationId(programEntity.getOrganizationIdentity().getId());
-        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(programEntity.getOrganizationIdentity().getId());
-        program.setOrganizationIdentity(organizationIdentity);
-        log.info("Program entity with organization {}", programEntity.getOrganizationIdentity().getRcNumber());
-        log.info("Program found id: {}, for organization with id : {} :: {} Rc number init {}", program.getId(), organizationIdentity.getId(), organizationIdentity.getServiceOfferings(), organizationIdentity.getRcNumber());
+//        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(programEntity.getOrganizationIdentity().getId());
+//        program.setOrganizationIdentity(organizationIdentity);
+        log.info("Program found id: {}, for organization with id : {} :: {} Rc number init {}", program.getId(), program.getOrganizationIdentity().getId(), program.getOrganizationIdentity().getServiceOfferings(), program.getOrganizationIdentity().getRcNumber());
         return program;
     }
 
