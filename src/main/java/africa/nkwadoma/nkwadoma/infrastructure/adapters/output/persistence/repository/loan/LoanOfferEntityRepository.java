@@ -49,7 +49,7 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
 
     @Query("""
     select lo.id as id, lo.loanOfferStatus as loanOfferStatus, lo.dateTimeOffered as dateTimeOffered,
-           l.userIdentity.firstName as firstName, l.userIdentity.lastName as lastName,
+           l.userIdentity.firstName as firstName, l.userIdentity.lastName as lastName, l.userIdentity.levelOfEduction as levelOfEducation,
            l.creditScore as creditScore, l.userIdentity.gender as gender, l.userIdentity.phoneNumber as phoneNumber,
            l.userIdentity.dateOfBirth as dateOfBirth, l.userIdentity.alternateContactAddress as alternateContactAddress,
            l.userIdentity.alternateEmail as alternateEmail, l.userIdentity.alternatePhoneNumber as alternatePhoneNumber,

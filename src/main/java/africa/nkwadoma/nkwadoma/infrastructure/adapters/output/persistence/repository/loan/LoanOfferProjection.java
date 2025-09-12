@@ -20,6 +20,7 @@ public interface LoanOfferProjection {
     LoanOfferStatus getLoanOfferStatus();
     BigDecimal getTuitionAmount();
     BigDecimal getInitialDeposit();
+    String getLevelOfEducation();
     BigDecimal getAmountRequested();
     BigDecimal getAmountApproved();
     Integer getCreditScore();

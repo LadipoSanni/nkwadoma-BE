@@ -46,6 +46,7 @@ public class LoanOffer {
     private String referredBy;
     private LoanType type;
     private String name;
+    private String levelOfEducation;
     private String status;
     private int pageSize;
     private int pageNumber;
