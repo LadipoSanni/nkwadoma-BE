@@ -37,7 +37,7 @@ public class UserIdentity {
     private boolean enabled;
     private LocalDateTime createdAt;
     private String stateOfResidence;
-    private LevelOfEducation levelOfEduction;
+    private String levelOfEduction;
     private String image;
     private String gender;
     private String dateOfBirth;

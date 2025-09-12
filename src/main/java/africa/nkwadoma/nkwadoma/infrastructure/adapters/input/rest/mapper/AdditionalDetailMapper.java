@@ -17,7 +17,7 @@ public interface AdditionalDetailMapper {
     @Mapping(target = "alternatePhoneNumber", qualifiedByName = "trimString")
     @Mapping(target = "alternateEmail", qualifiedByName = "trimString")
     @Mapping(source = "userId", target = "userId")
-    NextOfKin map(AdditionalDetail nextOfKinRequest, String userId);
+    NextOfKin map(AdditionalDetailRequest nextOfKinRequest, String userId);
 
     NextOfKinResponse toNextOfKinResponse(NextOfKin nextOfKin);
 }
