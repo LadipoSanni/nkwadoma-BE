@@ -81,6 +81,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         log.info("After success full validation and check that user or organization doesn't exists");
         organizationIdentity = createOrganizationIdentityOnKeycloak(organizationIdentity);
         log.info("OrganizationIdentity created on keycloak {}", organizationIdentity);
+        organizationIdentity.setOrganizationType(OrganizationType.INSTITUTE_ORGANIZATION);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = saveOrganisationIdentityToDatabase(organizationIdentity,userIdentity.getRole());
 
         organizationIdentity.setServiceOfferings(serviceOfferings);
@@ -238,7 +239,13 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
 
         deactivateOrganizationEmployees(reason, organizationEmployees);
         updateOrganizationActivationStatus(foundOrganization,ActivationStatus.DEACTIVATED);
-        asynchronousMailingOutputPort.sendDeactivatedEmployeesEmailNotification(organizationEmployees, foundOrganization);
+
+        OrganizationEmployeeIdentity superAdmin =
+                organizationEmployeeIdentityOutputPort.findByRoleAndOrganizationId(organizationId,ORGANIZATION_SUPER_ADMIN);
+        log.info("Organization super admin : {}", superAdmin);
+
+        asynchronousMailingOutputPort.sendDeactivatedEmployeesEmailNotification(superAdmin, foundOrganization,reason);
+
         return foundOrganization;
     }
     private void reactivateOrganizationEmployees(String reason, List<OrganizationEmployeeIdentity> organizationEmployees) {
