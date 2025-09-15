@@ -45,6 +45,7 @@ public class LoanOfferResponse {
     private String nextOfKinLastName;
     private String nextOfKinContactAddress;
     private String image;
+    private String levelOfEducation;
     private String loanProductName;
     private String cohortName;
     private String programName;
