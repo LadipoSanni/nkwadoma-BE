@@ -14,6 +14,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotif
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.OrganizationType;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
@@ -120,6 +121,7 @@ class OrganizationIdentityServiceTest {
         roseCouture.setEmail("iamoluchimercy@gmail.com");
         roseCouture.setTin("7682-5627");
         roseCouture.setRcNumber("RC8789905");
+        roseCouture.setOrganizationType(OrganizationType.INSTITUTE_ORGANIZATION);
         roseCouture.setServiceOfferings(List.of(new ServiceOffering()));
         roseCouture.getServiceOfferings().get(0).setIndustry(Industry.EDUCATION);
         roseCouture.setPhoneNumber("09876365713");
@@ -381,12 +383,12 @@ class OrganizationIdentityServiceTest {
 
         when(userIdentityOutputPort.findById(mockId)).thenReturn(sarah);
         when(userIdentityOutputPort.findById(roseCouture.getCreatedBy())).thenReturn(sarah);
-        sarah.setRole(IdentityRole.ORGANIZATION_ADMIN);
+        sarah.setRole(IdentityRole.MEEDL_SUPER_ADMIN);
         employeeSarah.setOrganization(roseCouture.getId());
         when(organizationEmployeeIdentityOutputPort.findByCreatedBy(mockId)).thenReturn(employeeSarah);
 
-
         when(organizationIdentityOutputPort.findByIdProjection(roseCouture.getId())).thenReturn(roseCouture);
+        when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
         when(organizationIdentityOutputPort.getServiceOfferings(roseCouture.getId())).thenReturn(roseCouture.getServiceOfferings());
         when(organizationLoanDetailOutputPort.findByOrganizationId(roseCouture.getId())).thenReturn(loanDetail);
         when(loanOfferOutputPort.countNumberOfPendingLoanOfferForOrganization(roseCouture.getId())).thenReturn(3);
@@ -413,6 +415,7 @@ class OrganizationIdentityServiceTest {
         when(userIdentityOutputPort.findById(mockId)).thenReturn(sarah);
         when(userIdentityOutputPort.findById(roseCouture.getCreatedBy())).thenReturn(sarah);
         when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
+        when(organizationIdentityOutputPort.findByIdProjection(roseCouture.getId())).thenReturn(roseCouture);
         when(organizationIdentityOutputPort.getServiceOfferings(roseCouture.getId())).thenReturn(roseCouture.getServiceOfferings());
         when(organizationLoanDetailOutputPort.findByOrganizationId(roseCouture.getId())).thenReturn(loanDetail);
         when(loanOfferOutputPort.countNumberOfPendingLoanOfferForOrganization(roseCouture.getId())).thenReturn(3);

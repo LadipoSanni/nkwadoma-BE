@@ -40,7 +40,6 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.financier.FinancierMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentvehicle.InvestmentVehicleMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -242,7 +241,7 @@ public class FinancierService implements FinancierUseCase {
         validateCooperationDoesNotExist(financier,financier.getUserIdentity().getEmail());
         log.info("Done with validation for cooperate financier invite to platform");
         OrganizationIdentity organizationIdentity = OrganizationIdentity.builder().name(financier.getName())
-                .email(financier.getEmail()).createdBy(financier.getUserIdentity().getCreatedBy())
+                .email(financier.getEmail()).createdBy(financier.getUserIdentity().getCreatedBy()).organizationType(OrganizationType.FINANCIER_COOPERATION)
                 .requestedInvitationDate(LocalDateTime.now()).build();
 
         OrganizationIdentity savedCooperate = saveCooperation(organizationIdentity);
@@ -299,7 +298,7 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private OrganizationIdentity saveCooperation(OrganizationIdentity organizationIdentity) throws MeedlException {
-        organizationIdentity.setOrganizationType(OrganizationType.COOPERATE);
+        organizationIdentity.setNotToValidateOtherOrganizationDetails(Boolean.TRUE);
         organizationIdentity.setId(UUID.randomUUID().toString());
         log.info("Saving new cooperation: {}", organizationIdentity.getName());
         return organizationIdentityOutputPort.save(organizationIdentity);
@@ -808,7 +807,7 @@ public class FinancierService implements FinancierUseCase {
             log.info("Cooperate financier mapping kyc details");
             OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(foundFinancier.getIdentity());
             organizationIdentityMapper.mapCooperateDetailToOrganization(organizationIdentity,financier);
-            organizationIdentity.setOrganizationType(OrganizationType.COOPERATE);
+            organizationIdentity.setNotToValidateOtherOrganizationDetails(Boolean.TRUE);
             organizationIdentity =organizationIdentityOutputPort.save(organizationIdentity);
             updatedCooperateFinancierData(financier, foundFinancier, organizationIdentity);
         }

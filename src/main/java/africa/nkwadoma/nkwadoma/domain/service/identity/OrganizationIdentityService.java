@@ -26,9 +26,6 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationServiceOfferingEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.ServiceOfferingEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +37,6 @@ import org.springframework.stereotype.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -278,7 +274,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
             organization.setEnabled(Boolean.FALSE);
             organization.setActivationStatus(ActivationStatus.DEACTIVATED);
         }
-        organization.setOrganizationType(OrganizationType.COOPERATE);
+        organization.setNotToValidateOtherOrganizationDetails(Boolean.TRUE);
         organization.setTimeUpdated(LocalDateTime.now());
         organizationIdentityOutputPort.save(organization);
     }
@@ -305,6 +301,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
 
     private void validateOrganizationIdentityDetails(OrganizationIdentity organizationIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(organizationIdentity, OrganizationMessages.ORGANIZATION_MUST_NOT_BE_EMPTY.getMessage());
+        organizationIdentity.setOrganizationType(OrganizationType.INSTITUTE_ORGANIZATION);
         organizationIdentity.validate();
         MeedlValidator.validateOrganizationUserIdentities(organizationIdentity.getOrganizationEmployees());
         log.info("Organization service validated is : {}",organizationIdentity);
@@ -450,7 +447,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
             }
             OrganizationIdentity foundOrganization = optionalOrganization.get();
             foundOrganization.setBannerImage(organizationIdentity.getBannerImage());
-            foundOrganization.setOrganizationType(OrganizationType.COOPERATE);
+                foundOrganization.setNotToValidateOtherOrganizationDetails(Boolean.TRUE);
             organizationIdentityOutputPort.save(foundOrganization);
             log.info("Image uploaded success.");
         }else {
@@ -633,27 +630,12 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
         log.info("Viewing organization detail for user with role {}", userIdentity.getRole());
-        if(IdentityRole.isOrganizationStaff(userIdentity.getRole()) || IdentityRole.isCooperateFinancier(userIdentity.getRole())){
-            log.info("Organization staff viewing organization detail");
-            OrganizationEmployeeIdentity organizationEmployeeIdentity =
-                    organizationEmployeeIdentityOutputPort.findByCreatedBy(userIdentity.getId());
-            organizationId = organizationEmployeeIdentity.getOrganization();
-        }
-        if (MeedlValidator.isEmptyString(organizationId) && IdentityRole.isMeedlStaff(userIdentity.getRole())){
-            log.info("No organization id was provided by Meedl staff to view organization details");
-            OrganizationEmployeeIdentity organizationEmployeeIdentity =
-                    organizationEmployeeIdentityOutputPort.findByCreatedBy(userIdentity.getId());
-            log.info("Organization staff viewing organization details {}", organizationEmployeeIdentity);
-            organizationId = organizationEmployeeIdentity.getOrganization();
-        }
-            MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+        organizationId = getOrganizationStaffOrCooperateFinancierOrganizatonId(organizationId, userIdentity);
+        organizationId = getOrganizationIdForMeedlStaff(organizationId, userIdentity);
+        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         OrganizationIdentity organizationIdentity;
-        if (userIdentity.getRole().isMeedlRole() || userIdentity.getRole().isCooperateStaff()){
-            organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
-        }else {
-            organizationIdentity = organizationIdentityOutputPort.findByIdProjection(organizationId);
-        }
-            log.info("organization identity: {}", organizationIdentity);
+        organizationIdentity = getOrganizationIdentityById(organizationId, userIdentity);
+        log.info("organization identity: {}", organizationIdentity);
         if (IdentityRole.isOrganizationStaff(userIdentity.getRole()) || IdentityRole.isMeedlStaff(userIdentity.getRole())) {
             List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity.getId());
             organizationIdentity.setServiceOfferings(serviceOfferings);
@@ -668,6 +650,46 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
             updateOrganizationRequestedBy(organizationIdentity);
         }
         return organizationIdentity;
+    }
+
+    private OrganizationIdentity getOrganizationIdentityById(String organizationId, UserIdentity userIdentity) throws MeedlException {
+        OrganizationIdentity organizationIdentity;
+        organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
+
+        log.info("Organization found has an organization type {} ", organizationIdentity.getOrganizationType());
+        if (IdentityRole.isMeedlStaffOrInstituteOrganizationStaff(userIdentity.getRole()) && isNotMeedlOrganizationOrFinancierCooperation(organizationIdentity)){
+            organizationIdentity = organizationIdentityOutputPort.findByIdProjection(organizationId);
+        }
+        return organizationIdentity;
+    }
+
+    private boolean isNotMeedlOrganizationOrFinancierCooperation(OrganizationIdentity organizationIdentity) {
+        if (!organizationIdentity.getOrganizationType().equals(OrganizationType.MEEDL) &&
+            !organizationIdentity.getOrganizationType().equals(OrganizationType.FINANCIER_COOPERATION)){
+            return Boolean.TRUE;
+        }
+        return Boolean.FALSE;
+    }
+
+    private String getOrganizationIdForMeedlStaff(String organizationId, UserIdentity userIdentity) throws MeedlException {
+        if (MeedlValidator.isEmptyString(organizationId) && IdentityRole.isMeedlStaff(userIdentity.getRole())){
+            log.info("No organization id was provided by Meedl staff to view organization details");
+            OrganizationEmployeeIdentity organizationEmployeeIdentity =
+                    organizationEmployeeIdentityOutputPort.findByCreatedBy(userIdentity.getId());
+            log.info("Organization staff viewing organization details {}", organizationEmployeeIdentity);
+            organizationId = organizationEmployeeIdentity.getOrganization();
+        }
+        return organizationId;
+    }
+
+    private String getOrganizationStaffOrCooperateFinancierOrganizatonId(String organizationId, UserIdentity userIdentity) throws MeedlException {
+        if(IdentityRole.isOrganizationStaff(userIdentity.getRole()) || IdentityRole.isCooperateFinancier(userIdentity.getRole())){
+            log.info("Organization staff viewing organization detail");
+            OrganizationEmployeeIdentity organizationEmployeeIdentity =
+                    organizationEmployeeIdentityOutputPort.findByCreatedBy(userIdentity.getId());
+            organizationId = organizationEmployeeIdentity.getOrganization();
+        }
+        return organizationId;
     }
 
     private void updateOrganizationRequestedBy(OrganizationIdentity organizationIdentity) {
