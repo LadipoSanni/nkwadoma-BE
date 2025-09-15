@@ -657,7 +657,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
 
         log.info("Organization found has an organization type {} ", organizationIdentity.getOrganizationType());
-        if (userIdentity.getRole().isMeedlRole() && isNotMeedlOrganizationOrFinancierCooperation(organizationIdentity)){
+        if (IdentityRole.isMeedlStaffOrInstituteOrganizationStaff(userIdentity.getRole()) && isNotMeedlOrganizationOrFinancierCooperation(organizationIdentity)){
             organizationIdentity = organizationIdentityOutputPort.findByIdProjection(organizationId);
         }
         return organizationIdentity;
