@@ -34,19 +34,22 @@ public interface LoanProductRepository extends JpaRepository<LoanProductEntity,S
 
 
     @Query("""
-    select lo.loanProduct
-        FROM LoanOfferEntity lo
-        WHERE lo.id = :loanOfferId
+        SELECT lp from LoanProductEntity lp
+   
+        JOIN LoanOfferEntity loe ON loe.loanProduct.id = lp.id
+        WHERE loe.id = :loanOfferId
     """)
-    LoanProductEntity findByLoanOfferId(String loanOfferId);
+    LoanProductEntity findByLoanOfferId(@Param("loanOfferId") String loanOfferId);
 
     @Query("""
-    SELECT loe.loanProduct
-    FROM CohortLoaneeEntity cle
-    JOIN cle.loaneeLoanDetail lld
-    JOIN LoanReferralEntity lre ON lre.cohortLoanee.id = cle.id
-    JOIN LoanOfferEntity loe ON loe.id = lre.id
-    WHERE lld.id = :loaneeLoanDetailId
+    SELECT lp from LoanProductEntity lp
+    
+    JOIN LoanOfferEntity loe ON loe.loanProduct.id = lp.id
+    JOIN LoanRequestEntity lr on lr.id = loe.id
+    JOIN LoanReferralEntity  lre on lre.id = lr.id
+    JOIN CohortLoaneeEntity cle on cle.id = lre.cohortLoanee.id
+    JOIN LoaneeLoanDetailEntity lle on lle.id = cle.loaneeLoanDetail.id
+    WHERE lle.id = :loaneeLoanDetailId and loe.loanProduct.id = lp.id
 """)
-    LoanProductEntity findLoanProductByLoaneeLoanDetailId(String loaneeLoanDetailId);
+    LoanProductEntity findLoanProductByLoaneeLoanDetailId(@Param("loaneeLoanDetailId") String loaneeLoanDetailId);
 }
