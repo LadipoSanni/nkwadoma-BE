@@ -298,7 +298,7 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private OrganizationIdentity saveCooperation(OrganizationIdentity organizationIdentity) throws MeedlException {
-        organizationIdentity.setOrganizationType(OrganizationType.VALIDATION_PASS);
+        organizationIdentity.setNotToValidateOtherOrganizationDetails(Boolean.TRUE);
         organizationIdentity.setId(UUID.randomUUID().toString());
         log.info("Saving new cooperation: {}", organizationIdentity.getName());
         return organizationIdentityOutputPort.save(organizationIdentity);
@@ -807,7 +807,7 @@ public class FinancierService implements FinancierUseCase {
             log.info("Cooperate financier mapping kyc details");
             OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(foundFinancier.getIdentity());
             organizationIdentityMapper.mapCooperateDetailToOrganization(organizationIdentity,financier);
-            organizationIdentity.setOrganizationType(OrganizationType.VALIDATION_PASS);
+            organizationIdentity.setNotToValidateOtherOrganizationDetails(Boolean.TRUE);
             organizationIdentity =organizationIdentityOutputPort.save(organizationIdentity);
             updatedCooperateFinancierData(financier, foundFinancier, organizationIdentity);
         }

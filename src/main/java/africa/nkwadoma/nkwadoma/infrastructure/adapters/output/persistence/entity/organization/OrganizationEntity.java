@@ -40,5 +40,6 @@ public class OrganizationEntity {
     private String bannerImage;
     private String address;
     private String officeAddress;
+    @Enumerated(EnumType.STRING)
     private OrganizationType organizationType;
 }

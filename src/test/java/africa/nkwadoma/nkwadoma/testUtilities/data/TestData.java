@@ -2,10 +2,8 @@ package africa.nkwadoma.nkwadoma.testUtilities.data;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.identity.Country;
-import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
-import africa.nkwadoma.nkwadoma.domain.enums.identity.UserRelationship;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.UploadedStatus;
@@ -94,6 +92,7 @@ public class TestData {
         organizationIdentity.setWebsiteAddress("testdata.org");
         organizationIdentity.setOrganizationEmployees(employeePeter);
         organizationIdentity.setLogoImage("logo-img.png");
+        organizationIdentity.setOrganizationType(OrganizationType.INSTITUTE_ORGANIZATION);
         organizationIdentity.setPageSize(pageSize);
         organizationIdentity.setPageNumber(pageNumber);
 

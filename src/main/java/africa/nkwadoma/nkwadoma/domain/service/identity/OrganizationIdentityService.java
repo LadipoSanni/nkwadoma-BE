@@ -274,7 +274,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
             organization.setEnabled(Boolean.FALSE);
             organization.setActivationStatus(ActivationStatus.DEACTIVATED);
         }
-        organization.setOrganizationType(OrganizationType.VALIDATION_PASS);
+        organization.setNotToValidateOtherOrganizationDetails(Boolean.TRUE);
         organization.setTimeUpdated(LocalDateTime.now());
         organizationIdentityOutputPort.save(organization);
     }
@@ -301,6 +301,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
 
     private void validateOrganizationIdentityDetails(OrganizationIdentity organizationIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(organizationIdentity, OrganizationMessages.ORGANIZATION_MUST_NOT_BE_EMPTY.getMessage());
+        organizationIdentity.setOrganizationType(OrganizationType.INSTITUTE_ORGANIZATION);
         organizationIdentity.validate();
         MeedlValidator.validateOrganizationUserIdentities(organizationIdentity.getOrganizationEmployees());
         log.info("Organization service validated is : {}",organizationIdentity);
@@ -319,7 +320,6 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
 
     private OrganizationEmployeeIdentity saveOrganisationIdentityToDatabase(OrganizationIdentity organizationIdentity,IdentityRole identityRole) throws MeedlException {
         organizationIdentity.setEnabled(Boolean.TRUE);
-        organizationIdentity.setOrganizationType(OrganizationType.INSTITUTE_ORGANIZATION);
         if (identityRole.equals(IdentityRole.MEEDL_SUPER_ADMIN)) {
             organizationIdentity.setActivationStatus(ActivationStatus.INVITED);
             organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
@@ -447,7 +447,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
             }
             OrganizationIdentity foundOrganization = optionalOrganization.get();
             foundOrganization.setBannerImage(organizationIdentity.getBannerImage());
-            foundOrganization.setOrganizationType(OrganizationType.VALIDATION_PASS);
+                foundOrganization.setNotToValidateOtherOrganizationDetails(Boolean.TRUE);
             organizationIdentityOutputPort.save(foundOrganization);
             log.info("Image uploaded success.");
         }else {
@@ -631,7 +631,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
         log.info("Viewing organization detail for user with role {}", userIdentity.getRole());
         organizationId = getOrganizationStaffOrCooperateFinancierOrganizatonId(organizationId, userIdentity);
-        organizationId = gerOrganizationIdForMeedlStaff(organizationId, userIdentity);
+        organizationId = getOrganizationIdForMeedlStaff(organizationId, userIdentity);
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         OrganizationIdentity organizationIdentity;
         organizationIdentity = getOrganizationIdentityById(organizationId, userIdentity);
@@ -656,8 +656,8 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         OrganizationIdentity organizationIdentity;
         organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
 
+        log.info("Organization found has an organization type {} ", organizationIdentity.getOrganizationType());
         if (userIdentity.getRole().isMeedlRole() && isNotMeedlOrganizationOrFinancierCooperation(organizationIdentity)){
-            log.info("Organization found has an organization type {} ", organizationIdentity.getOrganizationType());
             organizationIdentity = organizationIdentityOutputPort.findByIdProjection(organizationId);
         }
         return organizationIdentity;
@@ -671,7 +671,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         return Boolean.FALSE;
     }
 
-    private String gerOrganizationIdForMeedlStaff(String organizationId, UserIdentity userIdentity) throws MeedlException {
+    private String getOrganizationIdForMeedlStaff(String organizationId, UserIdentity userIdentity) throws MeedlException {
         if (MeedlValidator.isEmptyString(organizationId) && IdentityRole.isMeedlStaff(userIdentity.getRole())){
             log.info("No organization id was provided by Meedl staff to view organization details");
             OrganizationEmployeeIdentity organizationEmployeeIdentity =
