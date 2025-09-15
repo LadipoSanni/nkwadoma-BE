@@ -90,6 +90,7 @@ public class CalculationEngine implements CalculationEngineUseCase {
         calculationContext.setDefaultValues();
         List<RepaymentHistory> previousRepaymentHistory = repaymentHistoryOutputPort.findAllRepaymentHistoryForLoan(calculationContext.getLoanee().getId(), calculationContext.getCohort().getId());
         LoaneeLoanDetail loaneeLoanDetail = getLoaneeLoanDetail(calculationContext);
+        calculationContext.setLoaneeLoanDetail(loaneeLoanDetail);
         deletePreciousInterestHistory(calculationContext);
         log.info("On repayment calculation, the cohort id is {} the loanee id is {}", calculationContext.getCohort().getId(), calculationContext.getLoanee().getId());
         List<RepaymentHistory> allRepayments = combineAndSortRepaymentHistories(calculationContext.getRepaymentHistories(), previousRepaymentHistory);
@@ -748,7 +749,9 @@ public class CalculationEngine implements CalculationEngineUseCase {
 
     }
     private void updateLoanProductLoanOutstanding(LoaneeLoanDetail loaneeLoanDetail) throws MeedlException {
+        log.info("loanee loan detail {}", loaneeLoanDetail.getId());
         LoanProduct loanProduct = loanProductOutputPort.findByLoaneeLoanDetailId(loaneeLoanDetail.getId());
+        log.info("found loan product {}",loanProduct.getName());
         updateLoanProductLoanOutstandingIfNull(loanProduct);
         loanProduct.setTotalOutstandingLoan(loanProduct.getTotalOutstandingLoan().subtract(loaneeLoanDetail.getAmountReceived()));
         loanProduct.setTotalOutstandingLoan(loanProduct.getTotalOutstandingLoan().add(loaneeLoanDetail.getAmountOutstanding()));
