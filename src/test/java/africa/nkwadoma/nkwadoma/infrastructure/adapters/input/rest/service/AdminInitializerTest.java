@@ -42,8 +42,8 @@ class AdminInitializerTest {
     void setUp() {
        userIdentity = UserIdentity.builder()
                .email("kobih727@paxnw.com")
-               .firstName("test: super admin first name ")
-               .lastName("test: super admin last name")
+               .firstName("test super admin first name ")
+               .lastName("test super admin last name")
                .role(PORTFOLIO_MANAGER)
                .createdBy("61fb3beb-f200-4b16-ac58-c28d737b546c")
                .build();
