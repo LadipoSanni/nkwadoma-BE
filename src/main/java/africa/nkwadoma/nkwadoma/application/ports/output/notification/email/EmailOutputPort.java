@@ -29,4 +29,6 @@ public interface EmailOutputPort {
     Context getNameAndReactivationReasonContext(String link, String firstName, String reactivationReason);
 
     Context getFirstNameAndCompanyNameAndLinkContextAndInvestmentVehicleName(String financierToVehicleLink, String firstName, String investmentVehicleName, String companyName);
+
+    Context getDeactivateOrganizationContext(String firstName, String name, String deactivationReason);
 }

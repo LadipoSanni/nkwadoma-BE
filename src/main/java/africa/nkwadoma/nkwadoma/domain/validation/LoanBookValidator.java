@@ -146,10 +146,23 @@ public class LoanBookValidator {
             validateMonetaryValue(row.get("amountreceived"), rowCount);
 
             validateInitialDepositAndAmountApproved(row.get("initialdeposit"), row.get("amountreceived"), rowCount);
+            validateAmountRequestedAndAmountReceived(row.get("amountrequested"),row.get("amountreceived"),rowCount);
             validateDateTimeFormat(row, "loanstartdate", rowCount);
             rowCount++;
         }
         log.info("Done validating user data during upload ... ");
+    }
+
+    private void validateAmountRequestedAndAmountReceived(String amountRequested, String amountReceived, int rowCount) {
+        BigDecimal convertedAmountRequested = new BigDecimal(amountRequested);
+        BigDecimal convertedAmountReceived = new BigDecimal(amountReceived);
+        if (convertedAmountReceived.compareTo(convertedAmountRequested) > 0){
+            log.info("Amount received {} is greater than amount requested {} ",amountReceived, amountRequested);
+            validationErrorMessage.append(" Amount received is greater than amount requested for row : ")
+                    .append(rowCount)
+                    .append("\n");
+        }
+
     }
 
     private void validateLoaneeDoesNotExistInTheSameCohort(String email, Cohort cohort, int rowCount) {

@@ -31,7 +31,9 @@ public enum MeedlMessages {
     LOANEE_REFERRAL_INVITATION_SENT("loanee-referral-invitation-sent"),
     INVALID_TIN("Tax identity number must contain 9 - 15 characters and can only have a hyphen special character."),
     TIN_CANNOT_BE_EMPTY("Tax identity number cannot be empty"), CREATED_AT("createdAt"),
-    INVALID_SEARCH_PARAMETER("Please provide a valid search name.");
+    INVALID_SEARCH_PARAMETER("Please provide a valid search name."),
+    DEACTIVATE_ORGANIZATION("Deactivate organization"),
+    DEACTIVATE_ORGANIZATION_TEMPLATE("deactivate-organization"),;
 
 
     private final String message;

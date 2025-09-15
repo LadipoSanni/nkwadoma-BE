@@ -51,6 +51,7 @@ public interface LoanOfferRestMapper {
     @Mapping(target = "termsAndCondition", source = "termsAndCondition")
     @Mapping(target = "loaneeId", source = "loaneeId")
     @Mapping(target = "loanProductName", source = "loanProduct.name")
+    @Mapping(target = "levelOfEducation", source = "levelOfEducation")
     LoanOfferResponse toLoanOfferResponse(LoanOffer loanOffer);
 
     @Mapping(target = "id", source = "loanOfferId")

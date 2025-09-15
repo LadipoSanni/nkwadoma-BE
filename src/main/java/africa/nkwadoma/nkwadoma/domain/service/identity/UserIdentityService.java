@@ -17,7 +17,6 @@ import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.MFAType;
-import africa.nkwadoma.nkwadoma.domain.enums.identity.OrganizationType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
@@ -168,7 +167,7 @@ public class UserIdentityService implements UserUseCase {
                     organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
             organizationIdentity.setActivationStatus(ActivationStatus.ACTIVE);
             if (userIdentity.getRole().equals(IdentityRole.COOPERATE_FINANCIER_SUPER_ADMIN)) {
-                organizationIdentity.setOrganizationType(OrganizationType.COOPERATE);
+                organizationIdentity.setNotToValidateOtherOrganizationDetails(Boolean.TRUE);
                 Financier financier = financierOutputPort.findByIdentity(organizationIdentity.getId());
                 financier.setActivationStatus(ActivationStatus.ACTIVE);
                 financierOutputPort.save(financier);
