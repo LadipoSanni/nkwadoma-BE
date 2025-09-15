@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.OrganizationType;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
@@ -50,10 +51,11 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     public OrganizationIdentity save(OrganizationIdentity organizationIdentity) throws MeedlException {
         log.info("Organization identity before saving {}", organizationIdentity);
         MeedlValidator.validateObjectInstance(organizationIdentity, OrganizationMessages.ORGANIZATION_MUST_NOT_BE_EMPTY.getMessage());
-        if (ObjectUtils.isNotEmpty(organizationIdentity.getOrganizationType())){
-            organizationIdentity.validateCooperateOrganization();
-        }else {
+        if (ObjectUtils.isNotEmpty(organizationIdentity.getOrganizationType()) &&
+                organizationIdentity.getOrganizationType().equals(OrganizationType.INSTITUTE_ORGANIZATION)){
             organizationIdentity.validate();
+        }else {
+            organizationIdentity.validateCooperateOrganization();
         }
 
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
@@ -298,6 +300,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
 
         OrganizationProjection organizationProjection =
                 organizationEntityRepository.findByIdProjection(organizationId);
+        log.info("number of cohorts at the adapter level of view org {}", organizationProjection.getNumberOfCohort());
 
         return organizationIdentityMapper.mapProjecttionToOrganizationIdentity(organizationProjection);
     }

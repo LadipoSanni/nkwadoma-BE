@@ -1,5 +1,8 @@
 package africa.nkwadoma.nkwadoma.domain.enums.identity;
 
 public enum OrganizationType {
-    COOPERATE
+    VALIDATION_PASS,
+    INSTITUTE_ORGANIZATION,
+    FINANCIER_COOPERATION,
+    MEEDL
 }

@@ -168,7 +168,7 @@ public class UserIdentityService implements UserUseCase {
                     organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
             organizationIdentity.setActivationStatus(ActivationStatus.ACTIVE);
             if (userIdentity.getRole().equals(IdentityRole.COOPERATE_FINANCIER_SUPER_ADMIN)) {
-                organizationIdentity.setOrganizationType(OrganizationType.COOPERATE);
+                organizationIdentity.setOrganizationType(OrganizationType.VALIDATION_PASS);
                 Financier financier = financierOutputPort.findByIdentity(organizationIdentity.getId());
                 financier.setActivationStatus(ActivationStatus.ACTIVE);
                 financierOutputPort.save(financier);
