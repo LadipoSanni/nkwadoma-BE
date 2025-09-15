@@ -15,6 +15,8 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanDecision;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.meedlexception.MeedlNotificationException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.notification.Email;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -75,6 +77,20 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
                 .build();
         sendMail(userIdentity, email);
 
+    }
+
+    @Override
+    public void sendDeactivationEmail(OrganizationEmployeeIdentity organizationEmployee, OrganizationIdentity organization, String deactivationReason) {
+        Context context = emailOutputPort.getDeactivateOrganizationContext(organizationEmployee.getMeedlUser().getFirstName(),
+                organization.getName(),deactivationReason);
+        Email email = Email.builder()
+                .context(context)
+                .subject(DEACTIVATE_ORGANIZATION.getMessage())
+                .to(organizationEmployee.getMeedlUser().getEmail())
+                .template(DEACTIVATE_ORGANIZATION_TEMPLATE.getMessage())
+                .firstName(organizationEmployee.getMeedlUser().getFirstName())
+                .build();
+        sendMail(organizationEmployee.getMeedlUser(), email);
     }
 
 

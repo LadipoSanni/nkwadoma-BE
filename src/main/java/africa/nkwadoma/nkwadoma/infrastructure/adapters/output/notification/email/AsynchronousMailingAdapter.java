@@ -201,13 +201,12 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
     }
 
     @Override
-    public void sendDeactivatedEmployeesEmailNotification(List<OrganizationEmployeeIdentity> organizationEmployees, OrganizationIdentity organization) throws MeedlException {
-        organizationEmployees
-                .forEach(employee -> userEmailUseCase
-                        .sendDeactivatedUserEmailNotification(employee.getMeedlUser()));
+    public void sendDeactivatedEmployeesEmailNotification(OrganizationEmployeeIdentity organizationEmployee, OrganizationIdentity organization,String deactivationReason) throws MeedlException {
         asynchronousNotificationOutputPort
                 .notifyAllBackOfficeAdminForDeactivatedAccount(organization);
+        sendOrganizationEmployeeEmailUseCase.sendDeactivationEmail(organizationEmployee,organization,deactivationReason);
     }
+
     @Override
     public void sendReactivatedEmployeesEmailNotification(List<OrganizationEmployeeIdentity> organizationEmployees, OrganizationIdentity organization) throws MeedlException {
         organizationEmployees
