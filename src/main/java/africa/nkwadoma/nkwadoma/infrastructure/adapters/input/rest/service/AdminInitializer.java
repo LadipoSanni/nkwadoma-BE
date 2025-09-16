@@ -172,7 +172,7 @@ public class AdminInitializer {
         userIdentity.setCreatedBy(userIdentity.getId());
         UserIdentity foundUserIdentity = null;
         log.info("First user, after saving on keycloak: {}", userIdentity);
-//        removeDuplicateSuperAdmin(userIdentity);
+        removeDuplicateSuperAdmin(userIdentity);
         try {
             foundUserIdentity = userIdentityOutputPort.findByEmail(userIdentity.getEmail());
             foundUserIdentity.setCreatedBy(foundUserIdentity.getId());
@@ -200,8 +200,8 @@ public class AdminInitializer {
     }
 
     private void removeDuplicateSuperAdmins(UserIdentity userIdentity) throws MeedlException {
-        List<UserIdentity> superAdminsOnKeycloak = identityManagerOutPutPort.getUsersByRole(userIdentity.getRole().name());
-        List<UserIdentity> superAdminsOnDb = userIdentityOutputPort.findAllByRole(userIdentity.getRole());
+        List<UserIdentity> superAdminsOnKeycloak = identityManagerOutPutPort.getUsersByRole(IdentityRole.MEEDL_SUPER_ADMIN.name());
+        List<UserIdentity> superAdminsOnDb = userIdentityOutputPort.findAllByRole(IdentityRole.MEEDL_SUPER_ADMIN);
         log.info("Role being searched for at admin initializer {}", userIdentity.getRole());
         if (superAdminsOnKeycloak.isEmpty() && superAdminsOnDb.isEmpty()) {
             log.info("No users found with role {}", userIdentity.getRole());
