@@ -172,7 +172,7 @@ public class AdminInitializer {
         userIdentity.setCreatedBy(userIdentity.getId());
         UserIdentity foundUserIdentity = null;
         log.info("First user, after saving on keycloak: {}", userIdentity);
-        removeDuplicateSuperAdmin(userIdentity);
+//        removeDuplicateSuperAdmin(userIdentity);
         try {
             foundUserIdentity = userIdentityOutputPort.findByEmail(userIdentity.getEmail());
             foundUserIdentity.setCreatedBy(foundUserIdentity.getId());
