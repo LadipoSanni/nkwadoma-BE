@@ -115,7 +115,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     }
 
     private void updateNumberOfOrganizationOnMeedlPortfolio() throws MeedlException {
-        Portfolio portfolio = Portfolio.builder().portfolioName("Meedl").build();
+        Portfolio portfolio = Portfolio.builder().portfolioName(MeedlConstants.MEEDL).build();
         portfolio = portfolioOutputPort.findPortfolio(portfolio);
         portfolio.setNumberOfOrganizations(portfolio.getNumberOfOrganizations() + 1);
         portfolioOutputPort.save(portfolio);

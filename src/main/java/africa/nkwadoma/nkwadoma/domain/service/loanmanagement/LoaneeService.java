@@ -196,7 +196,7 @@ public class LoaneeService implements LoaneeUseCase {
        boolean newLoanee =  cohortLoaneeOutputPort.checkIfLoaneeIsNew(loanee.getId());
        log.info("is this a new loanee = {}", newLoanee);
        if(newLoanee){
-           Portfolio portfolio = Portfolio.builder().portfolioName("Meedl").build();
+           Portfolio portfolio = Portfolio.builder().portfolioName(MeedlConstants.MEEDL).build();
            portfolio = portfolioOutputPort.findPortfolio(portfolio);
            portfolio.setNumberOfLoanees(portfolio.getNumberOfLoanees() + 1);
            portfolioOutputPort.save(portfolio);
