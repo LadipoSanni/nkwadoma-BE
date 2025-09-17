@@ -96,15 +96,16 @@ public class FinancierServiceTest {
     private FinancierPoliticallyExposedPersonOutputPort financierPoliticallyExposedPersonOutputPort;
     @Autowired
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    private UserIdentity actor;
 
 
     @BeforeAll
     void setUp(){
         bankDetail = TestData.buildBankDetail();
-        UserIdentity actor = TestData.createTestUserIdentity(String.format("userforcreatedbyoractor%s7@mail.com", TestUtils.generateName(3)), actorId);
+        actor = TestData.createTestUserIdentity(String.format("userforcreatedbyoractor%s7@mail.com", TestUtils.generateName(3)), actorId);
         actor.setRole(IdentityRole.PORTFOLIO_MANAGER);
         try {
-            userIdentityOutputPort.save(actor);
+           actor = userIdentityOutputPort.save(actor);
         } catch (MeedlException e) {
             log.error("Error saving actor (pm) for invite financier.",e);
             throw new RuntimeException(e);
@@ -1194,6 +1195,7 @@ public class FinancierServiceTest {
         deleteFinancierData(individualFinancierId);
         identityManagerOutputPort.deleteUser(individualUserIdentity);
         userIdentityOutputPort.deleteUserById(individualUserIdentityId);
+        userIdentityOutputPort.deleteUserById(actor.getId());
         deleteNotification(portfolioManagerId);
         userIdentityOutputPort.deleteUserById(portfolioManagerId);
 
