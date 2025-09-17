@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.application.ports.output.notification.email;
 
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.notification.*;
 import org.thymeleaf.context.*;
 
@@ -12,7 +13,7 @@ public interface EmailOutputPort {
 
     Context getFirstNameAndCompanyAndLinkContext(String link, String firstName, String companyName);
 
-    Context getNameAndLinkContextAndIndustryName(String link, String firstName, String industryName);
+    Context getNameAndLinkContextAndIndustryName(String link, UserIdentity userIdentity, String industryName);
 
     Context getNameAndLinkContextAndInvestmentVehicleName(String link, String firstName, String investmentVehicleName);
 
