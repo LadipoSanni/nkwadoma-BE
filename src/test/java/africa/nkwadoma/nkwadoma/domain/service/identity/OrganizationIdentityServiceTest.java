@@ -149,7 +149,7 @@ class OrganizationIdentityServiceTest {
             when(organizationEmployeeIdentityOutputPort.save(employeeSarah)).thenReturn(employeeSarah);
             when(identityManagerOutPutPort.getClientRepresentationByName(roseCouture.getName())).thenReturn(new ClientRepresentation());
             when(identityManagerOutPutPort.getUserByEmail(roseCouture.getOrganizationEmployees().get(0).getMeedlUser().getEmail())).thenReturn(Optional.empty());
-            doNothing().when(asynchronousMailingOutputPort).sendEmailToInvitedOrganization(any(UserIdentity.class));
+            doNothing().when(asynchronousMailingOutputPort).sendEmailToInvitedOrganization(any(UserIdentity.class), anyString());
             when(portfolioOutputPort.findPortfolio(any(Portfolio.class))).thenReturn(portfolio);
             when(portfolioOutputPort.save(any(Portfolio.class))).thenReturn(portfolio);
 //            when()
@@ -464,7 +464,7 @@ class OrganizationIdentityServiceTest {
         when(userIdentityOutputPort.findById(roseCouture.getCreatedBy())).thenReturn(sarah);
         roseCouture.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
         when(organizationEmployeeIdentityOutputPort.save(employeeSarah)).thenReturn(employeeSarah);
-        doNothing().when(asynchronousMailingOutputPort).sendEmailToInvitedOrganization(any(UserIdentity.class));
+        doNothing().when(asynchronousMailingOutputPort).sendEmailToInvitedOrganization(any(UserIdentity.class), anyString());
         when(meedlNotificationOutputPort.save(any(MeedlNotification.class))).thenReturn(new MeedlNotification());
         when(portfolioOutputPort.findPortfolio(any(Portfolio.class))).thenReturn(portfolio);
         when(portfolioOutputPort.save(any(Portfolio.class))).thenReturn(portfolio);
