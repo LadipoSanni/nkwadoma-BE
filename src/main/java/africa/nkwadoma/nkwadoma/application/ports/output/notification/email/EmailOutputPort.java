@@ -9,7 +9,8 @@ import org.thymeleaf.context.*;
 public interface EmailOutputPort {
     void sendEmail(Email email) throws MeedlException;
 
-    Context getNameAndLinkContext(String link, String firstName);
+    Context getOrganizationNameAndUserNameAndLinkContext(String link, String firstName, String organizationName);
+    Context getUserFirstNameAndLinkContext(String link, String firstName);
 
     Context getFirstNameAndCompanyAndLinkContext(String link, String firstName, String companyName);
 

@@ -53,8 +53,8 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
     private String baseUrl;
 
     @Override
-    public void sendEmail(UserIdentity userIdentity) throws MeedlException {
-        Context context = emailOutputPort.getNameAndLinkContext(getLink(userIdentity), userIdentity.getFirstName());
+    public void sendEmail(UserIdentity userIdentity, String organizationName) throws MeedlException {
+        Context context = emailOutputPort.getOrganizationNameAndUserNameAndLinkContext(getLink(userIdentity), userIdentity.getFirstName(), organizationName);
         Email email = Email.builder()
                 .context(context)
                 .subject(EMAIL_INVITATION_SUBJECT.getMessage())
@@ -68,7 +68,7 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
 
     @Override
     public void sendForgotPasswordEmail(UserIdentity userIdentity) throws MeedlException {
-        Context context = emailOutputPort.getNameAndLinkContext(getForgotPasswordLink(userIdentity),userIdentity.getFirstName());
+        Context context = emailOutputPort.getUserFirstNameAndLinkContext(getForgotPasswordLink(userIdentity),userIdentity.getFirstName());
         Email email = Email.builder()
                 .context(context)
                 .subject(RESET_PASSWORD.getMessage())
@@ -186,7 +186,7 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
 
     @Override
     public void sendLoaneeHasBeenReferEmail(UserIdentity userIdentity) throws MeedlException {
-        Context context = emailOutputPort.getNameAndLinkContext(getLink(userIdentity),userIdentity.getFirstName());
+        Context context = emailOutputPort.getUserFirstNameAndLinkContext(getLink(userIdentity),userIdentity.getFirstName());
         Email email = Email.builder()
                 .context(context)
                 .subject(LoaneeMessages.LOANEE_HAS_BEEN_REFERRED.getMessage())
@@ -325,7 +325,7 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
 
     @Override
     public void inviteIndividualFinancierToPlatform(UserIdentity userIdentity) throws MeedlException {
-        Context context = emailOutputPort.getNameAndLinkContext(getLink(userIdentity),userIdentity.getFirstName());
+        Context context = emailOutputPort.getUserFirstNameAndLinkContext(getLink(userIdentity),userIdentity.getFirstName());
         Email email = buildEmail(userIdentity, context,
                 FinancierMessages.FINANCIER_INVITE_TO_PLATFORM_TITLE.getMessage(),
                 FinancierMessages.INDIVIDUAL_FINANCIER_INVITE_TO_PLATFORM.getMessage());
