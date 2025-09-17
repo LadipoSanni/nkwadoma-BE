@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.Emai
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.EmailTokenOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
@@ -97,13 +98,21 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
     @Override
     public void sendColleagueEmail(String organizationName,UserIdentity userIdentity) throws MeedlException {
         Context context = emailOutputPort.getNameAndLinkContextAndIndustryName(getLink(userIdentity),
-                                                                               userIdentity.getFirstName(),
+                                                                                userIdentity,
                                                                                 organizationName);
+        String template = "";
+        log.info("Notification service user role {}", userIdentity.getRole());
+        if (organizationName.equalsIgnoreCase(MeedlConstants.MEEDL)){
+            template = MEEDL_COLLEAGUE_INVITATION_TEMPLATE.getMessage();
+        }else {
+            template = ORGANIZATION_COLLEAGUE_INVITATION_TEMPLATE.getMessage();
+        }
+        log.info("Template for email : {}", template);
         Email email = Email.builder()
                 .context(context)
                 .subject(EMAIL_INVITATION_SUBJECT.getMessage())
                 .to(userIdentity.getEmail())
-                .template(COLLEAGUE_INVITATION_TEMPLATE.getMessage())
+                .template(template)
                 .firstName(userIdentity.getFirstName())
                 .build();
         sendMail(userIdentity, email);
