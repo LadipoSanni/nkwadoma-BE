@@ -403,11 +403,15 @@ public class LoaneeController {
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('ORGANIZATION_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> updateTrainingPerformance(@RequestParam(name = "trainingPerformance") String trainingPerformance,
                                                                     @RequestParam(name = "cohortId") String cohortId,
-                                                                    @RequestParam(name = "loaneeId") String loaneeId){
+                                                                    @RequestParam(name = "loaneeId") String loaneeId) throws MeedlException {
 
        String trainingPerformanceLink =  loaneeUseCase.updateTrainingPerformance(trainingPerformance,cohortId,loaneeId);
-
-       return null;
+       ApiResponse<String> apiResponse = ApiResponse.<String>builder()
+               .data(trainingPerformanceLink)
+               .message(TRAINING_PERFORMANCE_UPDATED)
+               .statusCode(HttpStatus.OK.toString())
+               .build();
+       return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
 }

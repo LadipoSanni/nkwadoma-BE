@@ -1059,4 +1059,18 @@ class LoaneeServiceTest {
         assertEquals(EmploymentStatus.EMPLOYED, loaneeCohort.getEmploymentStatus());
     }
 
+    @Test
+    void setTrainingPerformance(){
+        String trainingPerformance = "training perfomance link";
+        String response = "";
+        try{
+            when(cohortLoaneeOutputPort.findByLoaneeAndCohortId(mockId, mockId)).thenReturn(loaneeCohort);
+            when(cohortLoaneeOutputPort.save(loaneeCohort)).thenReturn(loaneeCohort);
+            response = loaneeService.updateTrainingPerformance(trainingPerformance,mockId,mockId);
+        }catch (MeedlException meedlException){
+            log.error(meedlException.getMessage());
+        }
+        assertEquals(trainingPerformance, response);
+    }
+
 }
