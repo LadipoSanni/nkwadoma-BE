@@ -98,15 +98,13 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
         BigDecimal principal = loanOffer.getAmountApproved().setScale(2, RoundingMode.HALF_UP);
         BigDecimal balance = principal;
         BigDecimal totalRepaid = BigDecimal.ZERO;
-
         BigDecimal expectedMonthlyRepayment =
                 equatedMonthlyInstalment(monthlyRate, tenorMonths, moratoriumMonths, principal);
 
         LocalDate paymentDate = LocalDate.from(loanOffer.getDateTimeOffered()
                 .with(TemporalAdjusters.lastDayOfMonth())
                 .plusMonths(1));
-
-        moratoriumAndTenorPeriodInterestAccruedIntoBalance(moratoriumMonths, balance, monthlyRate, 
+        moratoriumAndTenorPeriodInterestAccruedIntoBalance(moratoriumMonths, balance, monthlyRate,
                 repaymentSchedule, totalRepaid, paymentDate, tenorMonths, expectedMonthlyRepayment);
 
         RepaymentHistory last = repaymentSchedule.get(repaymentSchedule.size() - 1);

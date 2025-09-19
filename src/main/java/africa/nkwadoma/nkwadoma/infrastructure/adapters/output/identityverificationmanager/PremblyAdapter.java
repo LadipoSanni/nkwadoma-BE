@@ -9,6 +9,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.pre
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyLivelinessResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyNinResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityverificationmanager.mockVerification.VerificationMockData;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityverificationmanager.prembly.PremblyParameter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -67,9 +68,17 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
         MeedlValidator.validateObjectInstance(identityVerification, IdentityMessages.IDENTITY_CANNOT_BE_NULL.getMessage());
         identityVerification.validate();
         identityVerification.validateImageUrl();
+        if (isTestIdentityNumber(identityVerification)){
+            log.info("Nin is for testing nin: {}", identityVerification.getDecryptedNin());
+            return VerificationMockData.createPremblyNinTestResponse();
+        }
         log.info("Value is meant for actual call to verification service.");
         return getNinDetails(identityVerification);
     }
+    private boolean isTestIdentityNumber(IdentityVerification identityVerification) {
+    log.info("Checking if identity number is for test : {}", identityVerification.getDecryptedNin().equals("01") && identityVerification.getDecryptedBvn().equals("01"));
+    return identityVerification.getDecryptedNin().startsWith("01") && identityVerification.getDecryptedBvn().startsWith("01");
+}
 
     public PremblyNinResponse getNinDetails(IdentityVerification identityVerification) {
         PremblyNinResponse premblyNinResponse = getIdentityDetailsByNin(identityVerification);
@@ -126,6 +135,10 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
         MeedlValidator.validateObjectInstance(identityVerification, IdentityMessages.IDENTITY_CANNOT_BE_NULL.getMessage());
         identityVerification.validate();
         identityVerification.validateImageUrl();
+        if (isTestIdentityNumber(identityVerification)){
+            log.info("Bvn is for testing bvn: {}", identityVerification.getDecryptedNin());
+            return VerificationMockData.createPremblyBvnTestResponse();
+        }
         return getBvnDetails(identityVerification);
     }
 
