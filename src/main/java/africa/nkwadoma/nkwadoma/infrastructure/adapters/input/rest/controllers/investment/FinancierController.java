@@ -156,7 +156,7 @@ public class FinancierController {
     @PreAuthorize("hasRole('FINANCIER')")
     public ResponseEntity<ApiResponse<?>> respondToFinancierInvite(@AuthenticationPrincipal Jwt meedlUser,
                                                                    @RequestParam String financierId,
-                                                                   @RequestParam ActivationStatus activationStatus){
+                                                                   @RequestParam ActivationStatus activationStatus) throws MeedlException {
         Financier financier = financierRestMapper.map(meedlUser.getClaimAsString("sub"), financierId, activationStatus);
         financier = financierUseCase.respondToFinancierInvite(financier);
         ApiResponse<Object> apiResponse = ApiResponse.builder()
