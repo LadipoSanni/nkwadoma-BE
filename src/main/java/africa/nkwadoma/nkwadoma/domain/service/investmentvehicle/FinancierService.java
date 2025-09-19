@@ -99,14 +99,14 @@ public class FinancierService implements FinancierUseCase {
         }else {
             response = inviteMultipleFinancier(financiers, investmentVehicle,actor);
         }
-//        if (actor.getRole().isMeedlSuperAdmin()) {
+        if (actor.getRole().isMeedlSuperAdmin()) {
             asynchronousMailingOutputPort.sendFinancierEmail(financiersToMail, investmentVehicle);
             asynchronousNotificationOutputPort.notifyPortfolioManagerOfNewFinancier(financiersToMail, investmentVehicle, actor);
             updateNumberOfFinancierOnPortfolio(financiers);
-//        }else {
-//            UserIdentity meedlSuperAdmin = userIdentityOutputPort.findMeedlSuperAdmin();
-//            asynchronousNotificationOutputPort.sendFinancierInvitationNotificationToSuperAdmin(financiersToMail,actor,meedlSuperAdmin);
-//        }
+        }else {
+            UserIdentity meedlSuperAdmin = userIdentityOutputPort.findMeedlSuperAdmin();
+            asynchronousNotificationOutputPort.sendFinancierInvitationNotificationToSuperAdmin(financiersToMail,actor,meedlSuperAdmin);
+        }
         return response;
     }
     @Override
