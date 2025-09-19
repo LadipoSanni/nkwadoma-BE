@@ -12,6 +12,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.Asyn
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.OrganizationType;
@@ -131,7 +132,7 @@ class OrganizationIdentityServiceTest {
         roseCouture.setEnabled(Boolean.TRUE);
 
         superAdmin = TestData.createTestUserIdentity("superAdmin@grr.la");
-        portfolio = Portfolio.builder().portfolioName("Meedl").build();
+        portfolio = Portfolio.builder().portfolioName(MeedlConstants.MEEDL).build();
 
     }
 

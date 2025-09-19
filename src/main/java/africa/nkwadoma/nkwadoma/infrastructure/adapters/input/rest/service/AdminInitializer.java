@@ -241,7 +241,7 @@ public class AdminInitializer {
         try {
             userIdentity = identityManagerOutPutPort.createUser(userIdentity);
             log.info("User created successfully on keycloak sending email to user");
-            sendEmail.sendColleagueEmail("MEEDL",userIdentity);
+            sendEmail.sendColleagueEmail(MeedlConstants.MEEDL,userIdentity);
         } catch (MeedlException e) {
             log.warn("Unable to create user on identity manager, error : {}", e.getMessage());
             UserRepresentation userRepresentation = null;
@@ -258,7 +258,7 @@ public class AdminInitializer {
     }
 
     private Portfolio getPortfolio(){
-        return Portfolio.builder().portfolioName("Meedl").build();
+        return Portfolio.builder().portfolioName(MeedlConstants.MEEDL).build();
     }
 
     public Portfolio createMeedlPortfolio(Portfolio portfolio) throws MeedlException {

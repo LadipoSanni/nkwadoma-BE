@@ -124,7 +124,7 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private void updateNumberOfFinancierOnPortfolio(List<Financier> financiers) throws MeedlException {
-        Portfolio portfolio = Portfolio.builder().portfolioName("Meedl").build();
+        Portfolio portfolio = Portfolio.builder().portfolioName(MeedlConstants.MEEDL).build();
         portfolio = portfolioOutputPort.findPortfolio(portfolio);
         for (Financier financier : financiers) {
             if (financier.getFinancierType() == null){
