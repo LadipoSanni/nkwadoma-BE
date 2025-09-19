@@ -14,6 +14,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.Portfoli
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.EmploymentStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
@@ -932,6 +933,19 @@ public class LoaneeService implements LoaneeUseCase {
         }
     }
 
+    @Override
+    public CohortLoanee setEmploymentStatus(EmploymentStatus employmentStatus, String cohortId, String loaneeId) throws MeedlException {
+        MeedlValidator.validateUUID(cohortId,CohortMessages.INVALID_COHORT_ID.getMessage());
+        MeedlValidator.validateUUID(loaneeId,LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+        MeedlValidator.validateObjectInstance(employmentStatus,"Employment status cannot be empty");
+        CohortLoanee cohortLoanee = cohortLoaneeOutputPort.findByLoaneeAndCohortId(loaneeId,cohortId);
+        log.info("found cohort loanee === {}",cohortLoanee);
+        cohortLoanee.setEmploymentStatus(employmentStatus);
+        cohortLoanee = cohortLoaneeOutputPort.save(cohortLoanee);
+        log.info("saved cohort loanee employment status === {}",cohortLoanee.getEmploymentStatus());
+        return cohortLoanee;
+    }
+
     private void sendPortfolioManagerDropOutNotification(Loanee loanee, UserIdentity userIdentity) throws MeedlException {
         List<UserIdentity> portfolioManagers =
                 userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
@@ -965,5 +979,6 @@ public class LoaneeService implements LoaneeUseCase {
                 .build();
         meedlNotificationOutputPort.save(meedlNotification);
     }
+
 }
 

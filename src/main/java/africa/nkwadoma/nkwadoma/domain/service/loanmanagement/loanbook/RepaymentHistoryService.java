@@ -90,8 +90,7 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
         MeedlValidator.validateUUID(loanRequestId, "Loan request id cannot be null or invalid");
         LoanOffer loanOffer = loanOfferOutputPort.findById(loanRequestId);
 
-        int tenorYears = loanOffer.getLoanProduct().getTenor();
-        int totalMonths = tenorYears * FinancialConstants.MONTHS_PER_YEAR;
+        int tenorMonths = loanOffer.getLoanProduct().getTenor();
         int moratoriumMonths = loanOffer.getLoanProduct().getMoratorium();
 
         BigDecimal monthlyRate = getMonthleyRate(loanOffer);
@@ -101,17 +100,17 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
         BigDecimal totalRepaid = BigDecimal.ZERO;
 
         BigDecimal expectedMonthlyRepayment =
-                equatedMonthlyInstalment(monthlyRate, totalMonths, moratoriumMonths, principal);
+                equatedMonthlyInstalment(monthlyRate, tenorMonths, moratoriumMonths, principal);
 
         LocalDate paymentDate = LocalDate.from(loanOffer.getDateTimeOffered()
                 .with(TemporalAdjusters.lastDayOfMonth())
                 .plusMonths(1));
 
         moratoriumAndTenorPeriodInterestAccruedIntoBalance(moratoriumMonths, balance, monthlyRate, 
-                repaymentSchedule, totalRepaid, paymentDate, totalMonths, expectedMonthlyRepayment);
+                repaymentSchedule, totalRepaid, paymentDate, tenorMonths, expectedMonthlyRepayment);
 
         RepaymentHistory last = repaymentSchedule.get(repaymentSchedule.size() - 1);
-        last.setTenor(tenorYears);
+        last.setTenor(tenorMonths);
         last.setMoratorium(moratoriumMonths);
 
         return repaymentSchedule;

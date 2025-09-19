@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.model.education;
 
 
+import africa.nkwadoma.nkwadoma.domain.enums.EmploymentStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
@@ -42,6 +43,7 @@ public class CohortLoanee {
     private LoaneeStatus loaneeStatus;
     private OnboardingMode onboardingMode;
     private UploadedStatus uploadedStatus;
+    private EmploymentStatus employmentStatus;
     private LocalDateTime referralDateTime;
     private String referredBy;
     private String reasonForDropout;
@@ -58,6 +60,7 @@ public class CohortLoanee {
     private String programName;
     private String organizationName;
     private String interestIncurred;
+
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(cohort, CohortMessages.COHORT_CANNOT_BE_EMPTY.getMessage());
