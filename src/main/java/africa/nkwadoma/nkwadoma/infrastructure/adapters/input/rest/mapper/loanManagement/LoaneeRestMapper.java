@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DeferProgramRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeLoanBreakdownRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.EmploymentStatusResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.CohortLoaneeResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanBeneficiaryResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanBreakdownResponse;
@@ -117,4 +118,9 @@ public interface LoaneeRestMapper {
     LoaneeLoanDetailResponse toLoaneeLoanDetail(LoaneeLoanDetail loaneeLoanDetail);
 
     LoaneeLoanAggregateResponse toLoaneeLoanAggregateResponse(LoaneeLoanAggregate loaneeLoanAggregate);
+
+
+    @Mapping(target = "cohortId", source = "cohort.id")
+    @Mapping(target = "loaneeId", source = "loanee.id")
+    EmploymentStatusResponse mapToEmploymentStatusResponse(CohortLoanee cohortLoanee);
 }
