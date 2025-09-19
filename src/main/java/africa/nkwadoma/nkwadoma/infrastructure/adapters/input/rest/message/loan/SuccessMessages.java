@@ -18,4 +18,6 @@ public class SuccessMessages {
     public static final String LOANEE_DEAILS_IN_A_COHORT = "Loanee details in a cohort";
     public static final String LOANEE_LOAN_DETAIL_VIEW = "Loanee loan details viewed successfully";
     public static final String LOAN_AMOUNT_SUMMARY = "total loan amount";
+    public static final String EMPLOYMENT_STATUS_UPDATED = "Employment status updated successfully";
+    public static final String TRAINING_PERFORMANCE_UPDATED = "Training performance updated successfully";
 }

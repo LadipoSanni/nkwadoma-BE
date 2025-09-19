@@ -1047,4 +1047,30 @@ class LoaneeServiceTest {
         assertNotNull(loanAggregatePage);
     }
 
+    @Test
+    void setEmploymentStatus(){
+        try {
+            when(cohortLoaneeOutputPort.findByLoaneeAndCohortId(mockId, mockId)).thenReturn(loaneeCohort);
+            when(cohortLoaneeOutputPort.save(loaneeCohort)).thenReturn(loaneeCohort);
+            loaneeCohort = loaneeService.setEmploymentStatus(EmploymentStatus.EMPLOYED,mockId,mockId);
+        }catch (MeedlException meedlException){
+            log.error(meedlException.getMessage());
+        }
+        assertEquals(EmploymentStatus.EMPLOYED, loaneeCohort.getEmploymentStatus());
+    }
+
+    @Test
+    void setTrainingPerformance(){
+        String trainingPerformance = "training perfomance link";
+        String response = "";
+        try{
+            when(cohortLoaneeOutputPort.findByLoaneeAndCohortId(mockId, mockId)).thenReturn(loaneeCohort);
+            when(cohortLoaneeOutputPort.save(loaneeCohort)).thenReturn(loaneeCohort);
+            response = loaneeService.updateTrainingPerformance(trainingPerformance,mockId,mockId);
+        }catch (MeedlException meedlException){
+            log.error(meedlException.getMessage());
+        }
+        assertEquals(trainingPerformance, response);
+    }
+
 }

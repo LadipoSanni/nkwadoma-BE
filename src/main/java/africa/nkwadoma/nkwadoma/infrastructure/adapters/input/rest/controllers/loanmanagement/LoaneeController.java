@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.
 
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
+import africa.nkwadoma.nkwadoma.domain.enums.EmploymentStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.UploadedStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
@@ -14,6 +15,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeStatusRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.EmploymentStatusResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.CohortLoaneeResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanBeneficiaryResponse;
@@ -378,4 +380,38 @@ public class LoaneeController {
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
+
+
+    @PostMapping("cohort/employment/status")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('ORGANIZATION_ASSOCIATE')")
+    public ResponseEntity<ApiResponse<?>> setEmploymentStatus(@RequestParam(name = "employmentStatus") EmploymentStatus employmentStatus,
+                                                              @RequestParam(name = "cohortId") String cohortId,
+                                                              @RequestParam(name = "loaneeId") String loaneeId) throws MeedlException{
+
+        CohortLoanee cohortLoanee = loaneeUseCase.setEmploymentStatus(employmentStatus,cohortId,loaneeId);
+        EmploymentStatusResponse employmentStatusResponse = loaneeRestMapper.mapToEmploymentStatusResponse(cohortLoanee);
+        ApiResponse<EmploymentStatusResponse> apiResponse = ApiResponse.<EmploymentStatusResponse>builder()
+                .data(employmentStatusResponse)
+                .message(EMPLOYMENT_STATUS_UPDATED)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+
+    @PostMapping("cohort/training/performance")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('ORGANIZATION_ASSOCIATE')")
+    public ResponseEntity<ApiResponse<?>> updateTrainingPerformance(@RequestParam(name = "trainingPerformance") String trainingPerformance,
+                                                                    @RequestParam(name = "cohortId") String cohortId,
+                                                                    @RequestParam(name = "loaneeId") String loaneeId) throws MeedlException {
+
+       String trainingPerformanceLink =  loaneeUseCase.updateTrainingPerformance(trainingPerformance,cohortId,loaneeId);
+       ApiResponse<String> apiResponse = ApiResponse.<String>builder()
+               .data(trainingPerformanceLink)
+               .message(TRAINING_PERFORMANCE_UPDATED)
+               .statusCode(HttpStatus.OK.toString())
+               .build();
+       return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
 }

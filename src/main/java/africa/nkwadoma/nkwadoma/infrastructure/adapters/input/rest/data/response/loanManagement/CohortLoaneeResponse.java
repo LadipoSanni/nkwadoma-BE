@@ -37,6 +37,7 @@ public class CohortLoaneeResponse {
     private String nextOfKinResidentialAddress;
     private String nextOfKinRelationship;
     private String highestLevelOfEducation;
+    private String trainingPerformance;
     private String programName;
     private String cohortName;
     private String organizationName;

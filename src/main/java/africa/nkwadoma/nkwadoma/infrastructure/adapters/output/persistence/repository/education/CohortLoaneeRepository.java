@@ -35,8 +35,8 @@ public interface CohortLoaneeRepository extends JpaRepository<CohortLoaneeEntity
                 ELSE ROUND((COALESCE(SUM(repayment_history.amountPaid), 0) / loan_offer.amountApproved * 100), 8) END) AS repaymentPercentage,
                 (CASE WHEN loan_offer.amountApproved = 0 THEN NULL
                 ELSE ROUND(((loan_offer.amountApproved - COALESCE(SUM(repayment_history.amountPaid), 0)) / loan_offer.amountApproved * 100), 8) END) AS debtPercentage,
-                cohort.name as cohortName , loaneeLoanDetail.id as loaneeLoanDetailId, loaneeLoanDetail.interestIncurred as interestIncurred
-                 
+                cohort.name as cohortName , loaneeLoanDetail.id as loaneeLoanDetailId, loaneeLoanDetail.interestIncurred as interestIncurred,cohort_loanee.
+                trainingPerformance as trainingPerformance
                        
                 from CohortLoaneeEntity cohort_loanee
     
@@ -182,4 +182,13 @@ public interface CohortLoaneeRepository extends JpaRepository<CohortLoaneeEntity
       where loan.id = :id
     """)
     CohortLoaneeEntity findCohortLoaneeByLoanId(@Param("id") String id);
+
+    @Query("""
+    select cl from CohortLoaneeEntity cl
+        JOIN LoaneeEntity lo on lo.id = cl.loanee.id
+        JOIN CohortEntity co on co.id = cl.cohort.id
+
+       where co.id = :cohortId and lo.id = :loaneeId            
+    """)
+    CohortLoaneeEntity findByCohortIdAndLoaneeId(@Param("loaneeId") String loaneeId,@Param("cohortId") String cohortId);
 }
