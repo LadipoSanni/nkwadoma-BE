@@ -893,7 +893,7 @@ public class FinancierService implements FinancierUseCase {
     }
 
     @Override
-    public Financier respondToFinancierInvite(Financier financier) {
+    public Financier respondToFinancierInvite(Financier financier) throws MeedlException {
         MeedlValidator.validateUUID(financier.getId(), FinancierMessages.INVALID_FINANCIER_ID.getMessage());
         MeedlValidator.validateUUID(financier.getActorId(), UserMessages.INVALID_USER_ID.getMessage());
         validateFinancierInviteResponse(financier);
@@ -903,6 +903,7 @@ public class FinancierService implements FinancierUseCase {
             if (FinancierType.INDIVIDUAL.equals(financierToApprove.getFinancierType())){
                 UserIdentity userIdentity = userIdentityOutputPort.findById(financier.getIdentity());
                 if (ActivationStatus.APPROVED.equals(financier.getActivationStatus())){
+                    log.info("Approving individual financier invite. {}", financierToApprove.getId());
                     financierToApprove.setActivationStatus(ActivationStatus.INVITED);
                 }else {
                     financierToApprove.setActivationStatus(ActivationStatus.DECLINED);
@@ -932,18 +933,18 @@ public class FinancierService implements FinancierUseCase {
         if (ActivationStatus.APPROVED.equals(financier.getActivationStatus())) {
             asynchronousMailingOutputPort.sendColleagueEmail(organizationIdentity.getName(), organizationEmployeeIdentity.getMeedlUser());
             setCooperateFinancierActivationStatus(organizationEmployeeIdentity, ActivationStatus.INVITED, organizationIdentity, financierToApprove);
-            organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
             String response = "Financier invitation has been approved for " + organizationEmployeeIdentity.getMeedlUser().getFullName();
             financier.setResponse(response);
 
         }else {
             setCooperateFinancierActivationStatus(organizationEmployeeIdentity, ActivationStatus.DECLINED, organizationIdentity, financierToApprove);
-            organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
             UserIdentity createdBy = userIdentityOutputPort.findById(organizationEmployeeIdentity.getCreatedBy());
             asynchronousNotificationOutputPort.sendDeclineColleagueNotification(organizationEmployeeIdentity, actor,createdBy);
             String response = "Financier invitation has been declined for " + organizationEmployeeIdentity.getMeedlUser().getFullName();
             financier.setResponse(response);
         }
+        organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
+        organizationIdentityOutputPort.save(organizationIdentity);
     }
 
     private static void setCooperateFinancierActivationStatus(OrganizationEmployeeIdentity organizationEmployeeIdentity, ActivationStatus invited, OrganizationIdentity organizationIdentity, Financier financierToApprove) {

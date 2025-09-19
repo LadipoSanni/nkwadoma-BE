@@ -35,5 +35,5 @@ public interface FinancierUseCase {
     Page<Financier> searchFinancierInvestment(Financier financier) throws MeedlException;
     InvestmentSummary viewInvestmentDetailOfFinancier(String financierId, String investmentVehicleFinancierId, String userId) throws MeedlException;
 
-    Financier respondToFinancierInvite(Financier financier);
+    Financier respondToFinancierInvite(Financier financier) throws MeedlException;
 }
