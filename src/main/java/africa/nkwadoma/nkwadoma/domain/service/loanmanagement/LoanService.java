@@ -125,7 +125,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     private void updateNumberOfLoanProductOnMeedlPortfolio() throws MeedlException {
-        Portfolio portfolio = Portfolio.builder().portfolioName("Meedl").build();
+        Portfolio portfolio = Portfolio.builder().portfolioName(MeedlConstants.MEEDL).build();
         portfolio = portfolioOutputPort.findPortfolio(portfolio);
         portfolio.setNumberOfLoanProducts(portfolio.getNumberOfLoanProducts() + 1);
         portfolioOutputPort.save(portfolio);
@@ -267,7 +267,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     private void updateMeedlPortfolio(LoanOffer loanOffer) throws MeedlException {
-        Portfolio portfolio = Portfolio.builder().portfolioName("Meedl").build();
+        Portfolio portfolio = Portfolio.builder().portfolioName(MeedlConstants.MEEDL).build();
         portfolio = portfolioOutputPort.findPortfolio(portfolio);
         portfolio.setDisbursedLoanAmount(
                 portfolio.getDisbursedLoanAmount().add(loanOffer.getAmountApproved()));

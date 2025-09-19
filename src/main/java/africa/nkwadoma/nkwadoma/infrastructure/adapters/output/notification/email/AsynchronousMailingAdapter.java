@@ -180,8 +180,8 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
 
     @Async
     @Override
-    public void sendEmailToInvitedOrganization(UserIdentity userIdentity) throws MeedlException {
-        sendOrganizationEmployeeEmailUseCase.sendEmail(userIdentity);
+    public void sendEmailToInvitedOrganization(UserIdentity userIdentity, String organizationName) throws MeedlException {
+        sendOrganizationEmployeeEmailUseCase.sendEmail(userIdentity, organizationName);
     }
 
     @Override

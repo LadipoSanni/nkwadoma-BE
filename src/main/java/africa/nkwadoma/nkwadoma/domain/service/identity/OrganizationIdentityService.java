@@ -88,7 +88,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         log.info("OrganizationEmployeeIdentity created on the db {}", organizationEmployeeIdentity);
 
         if (userIdentity.getRole().equals(IdentityRole.MEEDL_SUPER_ADMIN)){
-            asynchronousMailingOutputPort.sendEmailToInvitedOrganization(organizationEmployeeIdentity.getMeedlUser());
+            asynchronousMailingOutputPort.sendEmailToInvitedOrganization(organizationEmployeeIdentity.getMeedlUser(), organizationIdentity.getName());
             updateNumberOfOrganizationOnMeedlPortfolio();
             log.info("sent email");
         }
@@ -115,7 +115,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     }
 
     private void updateNumberOfOrganizationOnMeedlPortfolio() throws MeedlException {
-        Portfolio portfolio = Portfolio.builder().portfolioName("Meedl").build();
+        Portfolio portfolio = Portfolio.builder().portfolioName(MeedlConstants.MEEDL).build();
         portfolio = portfolioOutputPort.findPortfolio(portfolio);
         portfolio.setNumberOfOrganizations(portfolio.getNumberOfOrganizations() + 1);
         portfolioOutputPort.save(portfolio);
@@ -548,7 +548,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         for(OrganizationEmployeeIdentity organizationEmployeeIdentity : organizationIdentity.getOrganizationEmployees()){
             organizationEmployeeIdentity.setActivationStatus(ActivationStatus.INVITED);
             organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
-            asynchronousMailingOutputPort.sendEmailToInvitedOrganization(organizationEmployeeIdentity.getMeedlUser());
+            asynchronousMailingOutputPort.sendEmailToInvitedOrganization(organizationEmployeeIdentity.getMeedlUser(), organizationIdentity.getName());
         }
         sendNotificationToOrganizationCreator(activationStatus, organizationCreator, organizationIdentity,
                 actor,NotificationFlag.ORGANIZATION_INVITATION_APPROVED );

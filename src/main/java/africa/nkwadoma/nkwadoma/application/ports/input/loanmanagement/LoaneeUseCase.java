@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement;
 
+import africa.nkwadoma.nkwadoma.domain.enums.EmploymentStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
@@ -57,6 +58,8 @@ public interface LoaneeUseCase {
     Page<LoaneeLoanAggregate> viewAllLoanee(String actorId,int pageSize, int pageNumber) throws MeedlException;
 
     Page<LoaneeLoanAggregate> searchLoanAggregate(Loanee loanee,int pageSize, int pageNumber) throws MeedlException;
+
+    CohortLoanee setEmploymentStatus(EmploymentStatus employmentStatus, String cohortId, String loaneeId) throws MeedlException;
 
     String updateTrainingPerformance(String trainingPerformance, String cohortId, String loaneeId) throws MeedlException;
 }

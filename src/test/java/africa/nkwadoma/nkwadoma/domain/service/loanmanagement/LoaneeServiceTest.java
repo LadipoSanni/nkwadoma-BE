@@ -15,6 +15,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanRefe
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.UploadedStatus;
@@ -168,7 +169,7 @@ class LoaneeServiceTest {
         firstLoanee.setLoaneeLoanDetail(loaneeLoanDetails);
         firstLoanee.setCreatedAt(LocalDateTime.now());
         firstLoanee.setLoanBreakdowns(List.of(loanBreakdown));
-        firstLoanee.setInstitutionName("Meedl");
+        firstLoanee.setInstitutionName(MeedlConstants.MEEDL);
 
         elites = new Cohort();
         elites.setId(mockId);
@@ -1044,6 +1045,18 @@ class LoaneeServiceTest {
             log.error(exception.getMessage());
         }
         assertNotNull(loanAggregatePage);
+    }
+
+    @Test
+    void setEmploymentStatus(){
+        try {
+            when(cohortLoaneeOutputPort.findByLoaneeAndCohortId(mockId, mockId)).thenReturn(loaneeCohort);
+            when(cohortLoaneeOutputPort.save(loaneeCohort)).thenReturn(loaneeCohort);
+            loaneeCohort = loaneeService.setEmploymentStatus(EmploymentStatus.EMPLOYED,mockId,mockId);
+        }catch (MeedlException meedlException){
+            log.error(meedlException.getMessage());
+        }
+        assertEquals(EmploymentStatus.EMPLOYED, loaneeCohort.getEmploymentStatus());
     }
 
 }

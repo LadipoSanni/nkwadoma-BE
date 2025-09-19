@@ -19,8 +19,8 @@
     <tr>
         <td style="padding: 20px; font-size: 16px; line-height: 24px; color: #344054;">
             <p>Hi <span th:text="${firstName}"></span>,</p>
-            <p>You’ve been invited to join <b th:text="${organizationName}"></b> on Meedl.</p>
-            <p>By accepting this invitation, you will gain access to the<br> organization’s workspace.</p>
+            <p>You’ve been invited to join Meedl with the role <span th:text="${role}"></span>.</p>
+            <p>By accepting this invitation, you will gain access to the<br> Meedl’s workspace.</p>
             <div style="text-align: left; margin: 20px 0;">
                 <a th:href="@{${token}}" target="_blank"
                    style="display: inline-block; background-color: #142854; color: #FFFFFF; text-decoration: none;
