@@ -932,6 +932,15 @@ public class LoaneeService implements LoaneeUseCase {
         }
     }
 
+    @Override
+    public String updateTrainingPerformance(String trainingPerformance, String cohortId, String loaneeId) throws MeedlException {
+        MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+        MeedlValidator.validateUUID(cohortId,CohortMessages.INVALID_COHORT_ID.getMessage());
+        MeedlValidator.validateUUID(trainingPerformance,"Training performamce cannot be empty");
+
+        return "";
+    }
+
     private void sendPortfolioManagerDropOutNotification(Loanee loanee, UserIdentity userIdentity) throws MeedlException {
         List<UserIdentity> portfolioManagers =
                 userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);

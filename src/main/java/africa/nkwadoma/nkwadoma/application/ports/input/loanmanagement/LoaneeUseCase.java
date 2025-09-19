@@ -57,4 +57,6 @@ public interface LoaneeUseCase {
     Page<LoaneeLoanAggregate> viewAllLoanee(String actorId,int pageSize, int pageNumber) throws MeedlException;
 
     Page<LoaneeLoanAggregate> searchLoanAggregate(Loanee loanee,int pageSize, int pageNumber) throws MeedlException;
+
+    String updateTrainingPerformance(String trainingPerformance, String cohortId, String loaneeId) throws MeedlException;
 }
