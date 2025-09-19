@@ -44,6 +44,7 @@ public class CohortLoanee {
     private OnboardingMode onboardingMode;
     private UploadedStatus uploadedStatus;
     private EmploymentStatus employmentStatus;
+    private String trainingPerformance;
     private LocalDateTime referralDateTime;
     private String referredBy;
     private String reasonForDropout;

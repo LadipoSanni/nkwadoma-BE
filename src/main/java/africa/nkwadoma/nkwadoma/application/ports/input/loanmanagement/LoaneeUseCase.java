@@ -60,4 +60,6 @@ public interface LoaneeUseCase {
     Page<LoaneeLoanAggregate> searchLoanAggregate(Loanee loanee,int pageSize, int pageNumber) throws MeedlException;
 
     CohortLoanee setEmploymentStatus(EmploymentStatus employmentStatus, String cohortId, String loaneeId) throws MeedlException;
+
+    String updateTrainingPerformance(String trainingPerformance, String cohortId, String loaneeId) throws MeedlException;
 }
