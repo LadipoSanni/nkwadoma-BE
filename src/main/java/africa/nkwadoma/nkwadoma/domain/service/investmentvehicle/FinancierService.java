@@ -892,6 +892,64 @@ public class FinancierService implements FinancierUseCase {
         return investmentVehicleMapper.toInvestmentSummary(investmentVehicle);
     }
 
+    @Override
+    public Financier respondToFinancierInvite(Financier financier) {
+        MeedlValidator.validateUUID(financier.getId(), FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+        MeedlValidator.validateUUID(financier.getActorId(), UserMessages.INVALID_USER_ID.getMessage());
+        validateFinancierInviteResponse(financier);
+        UserIdentity actor = userIdentityOutputPort.findById(financier.getActorId());
+        if (actor.getRole().isMeedlSuperAdmin()){
+            Financier financierToApprove = financierOutputPort.findByFinancierId(financier.getId());
+            if (FinancierType.INDIVIDUAL.equals(financierToApprove.getFinancierType())){
+                UserIdentity userIdentity = userIdentityOutputPort.findById(financier.getIdentity());
+                financierToApprove.setActivationStatus(ActivationStatus.INVITED);
+                financier.setUserIdentity(userIdentity);
+
+            }else if (FinancierType.COOPERATE.equals(financierToApprove.getFinancierType())){
+                OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(financier.getIdentity());
+                if (!ActivationStatus.PENDING_APPROVAL.equals(organizationIdentity.getActivationStatus())){
+                    log.error("Cooperate financier is not pending approval. Currently {}", organizationIdentity.getActivationStatus());
+                    throw new MeedlException("Only cooperate financier that is pending approval can be "+financier.getActivationStatus().getStatusName().toLowerCase());
+                }
+                List<OrganizationEmployeeIdentity> organizationEmployeeIdentities = organizationEmployeeIdentityOutputPort.findAllEmployeesInOrganizationByOrganizationIdAndRole(organizationIdentity.getId(), IdentityRole.ORGANIZATION_SUPER_ADMIN);
+                OrganizationEmployeeIdentity organizationEmployeeIdentity = organizationEmployeeIdentities.get(0);
+                financier.setUserIdentity(organizationEmployeeIdentity.getMeedlUser());
+                if (ActivationStatus.APPROVED.equals(financierToApprove.getActivationStatus())) {
+                    asynchronousMailingOutputPort.sendColleagueEmail(organizationIdentity.getName(), organizationEmployeeIdentity.getMeedlUser());
+                    setCooperateFinancierActivationStatus(organizationEmployeeIdentity, ActivationStatus.INVITED, organizationIdentity, financierToApprove);
+                    organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
+                    String response = "Financier invitation has been approved for " + organizationEmployeeIdentity.getMeedlUser().getFullName();
+                    financier.setResponse(response);
+
+                }else {
+                    setCooperateFinancierActivationStatus(organizationEmployeeIdentity, ActivationStatus.DECLINED, organizationIdentity, financierToApprove);
+                    organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
+                    UserIdentity createdBy = userIdentityOutputPort.findById(organizationEmployeeIdentity.getCreatedBy());
+                    asynchronousNotificationOutputPort.sendDeclineColleagueNotification(organizationEmployeeIdentity,actor,createdBy);
+                    String response = "Financier invitation has been declined for " + organizationEmployeeIdentity.getMeedlUser().getFullName();
+                    financier.setResponse(response);
+                }
+            }
+        }
+        return financier;
+    }
+
+    private static void setCooperateFinancierActivationStatus(OrganizationEmployeeIdentity organizationEmployeeIdentity, ActivationStatus invited, OrganizationIdentity organizationIdentity, Financier financierToApprove) {
+        organizationEmployeeIdentity.setActivationStatus(invited);
+        organizationIdentity.setActivationStatus(invited);
+        financierToApprove.setActivationStatus(invited);
+    }
+
+    private void validateFinancierInviteResponse(Financier financier) throws MeedlException {
+        MeedlValidator.validateObjectInstance(financier.getActivationStatus(), "Invalid activation status");
+        if (!ActivationStatus.APPROVED.equals(financier.getActivationStatus()) &&
+        !ActivationStatus.DECLINED.equals(financier.getActivationStatus())){
+            log.error("Financier activation status on respond to invite is neither approved or declined but is {}", financier.getActivationStatus());
+            throw new MeedlException("You can only approve or decline a financier invite");
+        }
+
+    }
+
 
     private CooperateFinancier buildCooperateFinancierIdentity(CooperateFinancier inviter, Financier newColleague) {
        CooperateFinancier newCooperateFinancier = CooperateFinancier.builder().cooperate(inviter.getCooperate())

@@ -79,6 +79,7 @@ public class Financier {
     private Set<String> sourceOfFunds;
 
     private String taxInformationNumber;
+    private String response;
 
 
     //Declaration
