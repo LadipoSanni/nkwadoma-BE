@@ -15,5 +15,5 @@ public interface RepaymentHistoryUseCase {
 
     RepaymentHistory getFirstRepaymentYearAndLastRepaymentYear(String actorId,String loaneeId) throws MeedlException;
 
-    List<RepaymentHistory> generateRepaymentHistory(String loanRequestId) throws MeedlException;
+    List<RepaymentHistory> generateRepaymentHistory(String id,String actorId) throws MeedlException;
 }
