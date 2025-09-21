@@ -240,8 +240,15 @@ public class FinancierService implements FinancierUseCase {
         validateInput(financier);
         validateCooperationDoesNotExist(financier,financier.getUserIdentity().getEmail());
         log.info("Done with validation for cooperate financier invite to platform");
-        OrganizationIdentity organizationIdentity = OrganizationIdentity.builder().name(financier.getName())
-                .email(financier.getEmail()).createdBy(financier.getUserIdentity().getCreatedBy()).organizationType(OrganizationType.FINANCIER_COOPERATION)
+        UserIdentity actor = userIdentityOutputPort.findById(financier.getUserIdentity().getCreatedBy());
+        OrganizationIdentity organizationIdentity = OrganizationIdentity.builder()
+                .name(financier.getName())
+                .activationStatus(actor.getRole().isMeedlSuperAdmin()
+                ? ActivationStatus.INVITED
+                : ActivationStatus.PENDING_APPROVAL)
+                .email(financier.getEmail())
+                .createdBy(financier.getUserIdentity().getCreatedBy())
+                .organizationType(OrganizationType.FINANCIER_COOPERATION)
                 .requestedInvitationDate(LocalDateTime.now()).build();
 
         OrganizationIdentity savedCooperate = saveCooperation(organizationIdentity);
@@ -249,7 +256,6 @@ public class FinancierService implements FinancierUseCase {
         log.info("Done saving cooperate organization with id {}", savedCooperate.getId());
         UserIdentity savedUserIdentity = saveUserIdentity(financier.getUserIdentity());
 
-        UserIdentity actor = userIdentityOutputPort.findById(savedUserIdentity.getCreatedBy());
 
         Financier buildFinancier = buildFinancier(financier,savedCooperate.getId(),actor);
 
@@ -897,18 +903,25 @@ public class FinancierService implements FinancierUseCase {
         MeedlValidator.validateUUID(financier.getId(), FinancierMessages.INVALID_FINANCIER_ID.getMessage());
         MeedlValidator.validateUUID(financier.getActorId(), UserMessages.INVALID_USER_ID.getMessage());
         validateFinancierInviteResponse(financier);
+        log.info("About to find actor by id {}",financier.getActorId());
         UserIdentity actor = userIdentityOutputPort.findById(financier.getActorId());
         if (actor.getRole().isMeedlSuperAdmin()){
             Financier financierToApprove = financierOutputPort.findByFinancierId(financier.getId());
             if (FinancierType.INDIVIDUAL.equals(financierToApprove.getFinancierType())){
-                UserIdentity userIdentity = userIdentityOutputPort.findById(financier.getIdentity());
+                log.info("Finding individual financier by identity id {} ", financier.getIdentity());
+                UserIdentity userIdentity = userIdentityOutputPort.findById(financierToApprove.getIdentity());
+                String response;
                 if (ActivationStatus.APPROVED.equals(financier.getActivationStatus())){
                     log.info("Approving individual financier invite. {}", financierToApprove.getId());
                     financierToApprove.setActivationStatus(ActivationStatus.INVITED);
+                     response = "Financier invitation has been approved for " + userIdentity.getFullName();
                 }else {
                     log.info("Declining individual financier invite");
                     financierToApprove.setActivationStatus(ActivationStatus.DECLINED);
+                     response = "Financier invitation has been declined for " + userIdentity.getFullName();
                 }
+                financier.setResponse(response);
+
                 financier.setUserIdentity(userIdentity);
 
             }else if (FinancierType.COOPERATE.equals(financierToApprove.getFinancierType())){
@@ -925,18 +938,20 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private void respondToCooperateFinancierInvite(Financier financier, Financier financierToApprove, UserIdentity actor) throws MeedlException {
-        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(financier.getIdentity());
+        log.info("The organization found in viewing cooperate financier is {}", financierToApprove.getIdentity());
+        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(financierToApprove.getIdentity());
         if (!ActivationStatus.PENDING_APPROVAL.equals(organizationIdentity.getActivationStatus())){
             log.error("Cooperate financier is not pending approval. Currently {}", organizationIdentity.getActivationStatus());
             throw new MeedlException("Only cooperate financier that is pending approval can be "+ financier.getActivationStatus().getStatusName().toLowerCase());
         }
-        List<OrganizationEmployeeIdentity> organizationEmployeeIdentities = organizationEmployeeIdentityOutputPort.findAllEmployeesInOrganizationByOrganizationIdAndRole(organizationIdentity.getId(), IdentityRole.ORGANIZATION_SUPER_ADMIN);
+        List<OrganizationEmployeeIdentity> organizationEmployeeIdentities = organizationEmployeeIdentityOutputPort.findAllEmployeesInOrganizationByOrganizationIdAndRole(organizationIdentity.getId(), IdentityRole.COOPERATE_FINANCIER_SUPER_ADMIN);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = organizationEmployeeIdentities.get(0);
+        log.info("The cooperate employee found in viewing cooperate financier is {}", organizationEmployeeIdentity.getId());
         financier.setUserIdentity(organizationEmployeeIdentity.getMeedlUser());
         if (ActivationStatus.APPROVED.equals(financier.getActivationStatus())) {
             log.info("Approving financier invite");
-            asynchronousMailingOutputPort.sendColleagueEmail(organizationIdentity.getName(), organizationEmployeeIdentity.getMeedlUser());
             setCooperateFinancierActivationStatus(organizationEmployeeIdentity, ActivationStatus.INVITED, organizationIdentity, financierToApprove);
+            asynchronousMailingOutputPort.sendColleagueEmail(organizationIdentity.getName(), organizationEmployeeIdentity.getMeedlUser());
             String response = "Financier invitation has been approved for " + organizationEmployeeIdentity.getMeedlUser().getFullName();
             financier.setResponse(response);
 
@@ -949,6 +964,7 @@ public class FinancierService implements FinancierUseCase {
             financier.setResponse(response);
         }
         organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
+        organizationIdentity.setNotToValidateOtherOrganizationDetails(Boolean.TRUE);
         organizationIdentityOutputPort.save(organizationIdentity);
     }
 

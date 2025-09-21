@@ -153,7 +153,7 @@ public class FinancierController {
     }
 
     @PostMapping("financier/respond-to-financier-invite")
-    @PreAuthorize("hasRole('FINANCIER')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<?>> respondToFinancierInvite(@AuthenticationPrincipal Jwt meedlUser,
                                                                    @RequestParam String financierId,
                                                                    @RequestParam ActivationStatus activationStatus) throws MeedlException {
