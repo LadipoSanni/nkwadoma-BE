@@ -45,9 +45,9 @@ jobs:
       - name: Tag Docker image with commit sha + timestamp
         run: |
           TIMESTAMP=$(TZ=Africa/Lagos date +'%Y%m%d%H%M')
-          DOCKER_TAG=${{ env.REPO_URL }}:beta-${TIMESTAMP}
-          SHA_TAG=${{ env.REPO_URL }}:beta-$GITHUB_SHA
-          LATEST_TAG=${{ env.REPO_URL }}:beta-Latest
+          DOCKER_TAG=${{ env.REPO_URL }}:uat-${TIMESTAMP}
+          SHA_TAG=${{ env.REPO_URL }}:uat-$GITHUB_SHA
+          LATEST_TAG=${{ env.REPO_URL }}:uat-Latest
           
           docker tag ${{ env.REPO_URL }}:$GITHUB_SHA $DOCKER_TAG
           docker tag ${{ env.REPO_URL }}:$GITHUB_SHA $SHA_TAG
