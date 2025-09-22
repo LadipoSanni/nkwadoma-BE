@@ -13,6 +13,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.FinancierRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.PaginatedResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.QAResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentvehicle.FinancierRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentvehicle.InvestmentVehicleRestMapper;
@@ -138,9 +139,9 @@ public class FinancierController {
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
-    @GetMapping("financier/privacy-policy-decision")
+    @PostMapping("financier/privacy-policy-decision")
     @PreAuthorize("hasRole('FINANCIER')")
-    public ResponseEntity<ApiResponse<?>> makePrivacyPolicyDecision(@AuthenticationPrincipal Jwt meedlUser, @PathVariable boolean privacyPolicyDecision) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> makePrivacyPolicyDecision(@AuthenticationPrincipal Jwt meedlUser, @RequestParam boolean privacyPolicyDecision) throws MeedlException {
         Financier financier = financierRestMapper.map(meedlUser.getClaimAsString("sub"), privacyPolicyDecision);
         String response = financierUseCase.makePrivacyPolicyDecision(financier);
 
@@ -149,6 +150,22 @@ public class FinancierController {
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @PostMapping("financier/respond-to-financier-invite")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<?>> respondToFinancierInvite(@AuthenticationPrincipal Jwt meedlUser,
+                                                                   @RequestParam String financierId,
+                                                                   @RequestParam ActivationStatus activationStatus) throws MeedlException {
+        Financier financier = financierRestMapper.map(meedlUser.getClaimAsString("sub"), financierId, activationStatus);
+        financier = financierUseCase.respondToFinancierInvite(financier);
+        ApiResponse<Object> apiResponse = ApiResponse.builder()
+                .statusCode(HttpStatus.OK.toString())
+                .message(financier.getResponse())
+                .data(QAResponse.builder().id(financier.getId()).email(financier.getUserIdentity().getEmail()).build())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+
     }
 
     @GetMapping("financier/view")
