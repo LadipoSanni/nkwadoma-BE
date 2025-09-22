@@ -28,4 +28,6 @@ public interface LoanProductOutputPort {
     LoanProduct findLoanProductByLoanOfferId(String loanOfferId) throws MeedlException;
 
     LoanProduct findByLoaneeLoanDetailId(String LoaneeLoanDetailId) throws MeedlException;
+
+    int countLoanOfferFromLoanProduct(String loanProductId) throws MeedlException;
 }

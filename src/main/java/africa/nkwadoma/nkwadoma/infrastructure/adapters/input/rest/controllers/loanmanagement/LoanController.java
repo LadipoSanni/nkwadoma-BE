@@ -137,7 +137,7 @@ public class LoanController {
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')")
     @Operation(summary = VIEW_LOAN_PRODUCT_DETAILS,description = VIEW_LOAN_PRODUCT_DETAILS_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> viewLoanProductDetailsById (@RequestParam
-                                                                          @NotBlank(message = "Provide a valid loan product identifier")
+                                                                          @NotBlank(message = "Provide a valid loan product id")
                                                                           String loanProductId) throws MeedlException {
         log.info("View loan product details by id was called.... {}", loanProductId);
         LoanProduct createdLoanProduct = viewLoanProductUseCase.viewLoanProductDetailsById(loanProductId);
@@ -149,6 +149,24 @@ public class LoanController {
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
+
+    @GetMapping("/loan-product/delete")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @Operation(summary = DELETE_LOAN_PRODUCT_DETAILS,description = DELETE_LOAN_PRODUCT_DETAILS_DESCRIPTION)
+    public ResponseEntity<ApiResponse<?>> deleteLoanProduct (
+                                                            @AuthenticationPrincipal Jwt meedlUser,
+                                                            @RequestParam @NotBlank(message = "Provide a valid loan product id")
+                                                              String loanProductId) throws MeedlException {
+        log.info("Delete loan product by id was called.... {}", loanProductId);
+        LoanProduct loanProduct = loanProductMapper.map(meedlUser.getClaimAsString("sub"), loanProductId);
+        createLoanProductUseCase.deleteLoanProductById(loanProduct);
+        ApiResponse<LoanProductResponse> apiResponse = ApiResponse.<LoanProductResponse>builder()
+                .message(LOAN_PRODUCT_DELETED_SUCCESSFULLY)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+
 
     @GetMapping("/loan-disbursals/{loanId}")
     public ResponseEntity<ApiResponse<?>> viewLoanDetailsById (

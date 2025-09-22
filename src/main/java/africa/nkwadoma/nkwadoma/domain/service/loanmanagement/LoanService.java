@@ -150,10 +150,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
                 investmentVehicleOutputPort.findById(loanProduct.getInvestmentVehicleId());
         log.info("Loan product size is : {}", loanProduct.getLoanProductSize());
         log.info("Investment vehicle available balance is : {}", investmentVehicle.getTotalAvailableAmount());
-//        if (loanProduct.getLoanProductSize().compareTo(investmentVehicle.getTotalAvailableAmount()) > BigInteger.ZERO.intValue()) {
-//            log.warn("Attempt to create loan product that exceeds the investment vehicle available amount.");
-//            throw new MeedlException("Loan product size cannot be greater than investment vehicle available amount.");
-//        }
+        if (loanProduct.getLoanProductSize().compareTo(investmentVehicle.getTotalAvailableAmount()) > BigInteger.ZERO.intValue()) {
+            log.warn("Attempt to create loan product that exceeds the investment vehicle available amount.");
+            throw new MeedlException("Loan product size cannot be greater than investment vehicle available amount.");
+        }
         return investmentVehicle;
     }
 
@@ -161,7 +161,15 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     public void deleteLoanProductById(LoanProduct loanProduct) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanProduct, LoanMessages.LOAN_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(loanProduct.getId(), LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
-        loanProductOutputPort.deleteById(loanProduct.getId());
+        int offerCount = loanProductOutputPort.countLoanOfferFromLoanProduct(loanProduct.getId());
+        if (offerCount == 0) {
+            loanProductOutputPort.deleteById(loanProduct.getId());
+            log.info("Successfully deleted loan product with id {}", loanProduct.getId());
+        }else {
+            log.error("This loan product cannot be deleted because it has been used in a loan offer. {}", loanProduct.getId());
+            throw new MeedlException("This loan product cannot be deleted because it has been used in a loan offer");
+        }
+
     }
 
     @Override

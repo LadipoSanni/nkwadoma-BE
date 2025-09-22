@@ -52,4 +52,11 @@ public interface LoanProductRepository extends JpaRepository<LoanProductEntity,S
     WHERE lle.id = :loaneeLoanDetailId and loe.loanProduct.id = lp.id
 """)
     LoanProductEntity findLoanProductByLoaneeLoanDetailId(@Param("loaneeLoanDetailId") String loaneeLoanDetailId);
+
+    @Query("""
+        SELECT COUNT(lo)
+        FROM LoanOfferEntity lo
+        WHERE lo.loanProduct.id = :loanProductId
+        """)
+    int countLoanOfferFromLoanProduct(String loanProductId);
 }
