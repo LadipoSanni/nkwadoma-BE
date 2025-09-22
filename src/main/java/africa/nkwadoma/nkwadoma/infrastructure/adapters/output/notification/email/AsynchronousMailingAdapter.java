@@ -159,6 +159,25 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
         }
     }
 
+    @Override
+    public void sendFinancierInviteEmail(Financier financier, InvestmentVehicle investmentVehicle) {
+        if (ObjectUtils.isNotEmpty(investmentVehicle)){
+            try {
+                emailInviteNonExistingFinancierToVehicle(financier, investmentVehicle);
+            } catch (MeedlException e) {
+                log.error("", e);
+                throw new RuntimeException(e);
+            }
+
+        }else {
+            try {
+                emailInviteNonExistingFinancierToPlatform(financier);
+            } catch (MeedlException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
     private static void addOrganizationNameToFinancierForEmailing(List<Financier> financiersToMail) {
         log.info("Size is  {}", financiersToMail.size());
         if (financiersToMail.size() == 2){

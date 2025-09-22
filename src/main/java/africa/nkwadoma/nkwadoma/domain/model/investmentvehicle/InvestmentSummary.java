@@ -8,6 +8,7 @@ import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Getter
@@ -19,7 +20,7 @@ public class InvestmentSummary {
     private String name;
     private InvestmentVehicleType investmentVehicleType;
     private String fundManager;
-    private LocalDate dateInvested;
+    private LocalDateTime dateInvested;
     private BigDecimal amountInvested;
     private BigDecimal netAssetValue;
     private double netAssetValueInPercent;

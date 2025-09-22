@@ -22,6 +22,9 @@ public interface AsynchronousMailingOutputPort {
     void sendFinancierEmail(List<Financier> financiersToMail, InvestmentVehicle investmentVehicle);
 
     @Async
+    void sendFinancierInviteEmail(Financier financier, InvestmentVehicle investmentVehicle);
+
+    @Async
     void sendColleagueEmail(String organizationName, UserIdentity userIdentity) throws MeedlException;
 
     @Async
@@ -40,4 +43,5 @@ public interface AsynchronousMailingOutputPort {
 
     @Async
     void sendReactivatedEmployeesEmailNotification(List<OrganizationEmployeeIdentity> organizationEmployees, OrganizationIdentity foundOrganization) throws MeedlException;
-}
+
+   }

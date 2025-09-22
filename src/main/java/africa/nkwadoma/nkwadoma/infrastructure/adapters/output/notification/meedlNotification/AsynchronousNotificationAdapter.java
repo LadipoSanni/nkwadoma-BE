@@ -421,8 +421,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                                                  UserIdentity userIdentity,UserIdentity createdBy) throws MeedlException {
         MeedlNotification meedlNotification = MeedlNotification.builder()
                 .title("Decline colleague invitation")
-                .contentDetail("Decline invitation for "+organizationEmployeeIdentity.getMeedlUser().getFirstName()+
-                        " "+organizationEmployeeIdentity.getMeedlUser().getLastName())
+                .contentDetail("Decline invitation for "+organizationEmployeeIdentity.getMeedlUser().getFullName())
                 .senderFullName(userIdentity.getFullName())
                 .senderMail(userIdentity.getEmail())
                 .notificationFlag(NotificationFlag.DECLINE_COLLEAGUE_INVITE)
@@ -434,6 +433,24 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
         log.info("done building notification for decline colleague invitation{}", meedlNotification);
         meedlNotificationUsecase.sendNotification(meedlNotification);
         log.info("notification sent ====---=-==---=-");
+    }
+    @Override
+    public void sendFinancierApprovalOrDeclineNotification(Financier financier, UserIdentity actor, UserIdentity inviter) throws MeedlException {
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .title("Financier invitation has been "+financier.getActivationStatus().getStatusName())
+                .contentDetail("The financier with name  "+financier.getUserIdentity().getFullName()+
+                        " has been "+financier.getActivationStatus().getStatusName().toLowerCase())
+                .senderFullName(actor.getFullName())
+                .senderMail(actor.getEmail())
+                .notificationFlag(NotificationFlag.FINANCIER_INVITATION_RESPONSE)
+                .timestamp(LocalDateTime.now())
+                .contentId(financier.getId())
+                .callToAction(true)
+                .user(inviter)
+                .build();
+        log.info("done building notification for financier invitation response{}", meedlNotification);
+        meedlNotificationUsecase.sendNotification(meedlNotification);
+        log.info("Financier invite response notification sent!");
     }
 
     @Override

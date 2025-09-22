@@ -142,4 +142,12 @@ public interface InvestmentVehicleFinancierRepository extends JpaRepository<Inve
             @Param("financierId") String financierId, Pageable pageRequest);
 
     int countByFinancier_IdAndInvestmentVehicle_Id(String financierId, String investmentVehicleId);
+
+    @Query("""
+        SELECT ivf
+        FROM InvestmentVehicleFinancierEntity ivf
+        WHERE ivf.financier.id = :financierId
+        ORDER BY ivf.dateInvested DESC
+        """)
+    Optional<InvestmentVehicleFinancierEntity> findRecentInvestmentVehicleFinancierIsAddedTo(String financierId);
 }
