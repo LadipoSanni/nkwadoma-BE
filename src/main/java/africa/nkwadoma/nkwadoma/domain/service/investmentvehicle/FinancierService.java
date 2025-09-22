@@ -520,6 +520,7 @@ public class FinancierService implements FinancierUseCase {
                 .financier(financier)
                 .investmentVehicleDesignation(financier.getInvestmentVehicleDesignation())
                 .investmentVehicle(investmentVehicle)
+                .dateInvested(LocalDateTime.now())
                 .build();
     }
 
@@ -677,7 +678,7 @@ public class FinancierService implements FinancierUseCase {
             log.info("Financier was only added to the vehicle. {}", investmentVehicle.getName());
             foundInvestmentVehicleFinancier.setAmountInvested(financier.getAmountToInvest());
             log.info("Updated the amount invested in the investment vehicle financier for {} ", foundInvestmentVehicleFinancier.getAmountInvested());
-            foundInvestmentVehicleFinancier.setDateInvested(LocalDate.now());
+            foundInvestmentVehicleFinancier.setDateInvested(LocalDateTime.now());
             investmentVehicleFinancier = foundInvestmentVehicleFinancier;
 
         }else {
@@ -687,7 +688,7 @@ public class FinancierService implements FinancierUseCase {
                         .financier(financier)
                         .investmentVehicleDesignation(financier.getInvestmentVehicleDesignation())
                         .amountInvested(financier.getAmountToInvest())
-                        .dateInvested(LocalDate.now())
+                        .dateInvested(LocalDateTime.now())
                         .build();
             }
 
@@ -910,19 +911,26 @@ public class FinancierService implements FinancierUseCase {
             if (FinancierType.INDIVIDUAL.equals(financierToApprove.getFinancierType())){
                 log.info("Finding individual financier by identity id {} ", financier.getIdentity());
                 UserIdentity userIdentity = userIdentityOutputPort.findById(financierToApprove.getIdentity());
+                financierToApprove.setUserIdentity(userIdentity);
+                financier.setUserIdentity(userIdentity);
                 String response;
                 if (ActivationStatus.APPROVED.equals(financier.getActivationStatus())){
                     log.info("Approving individual financier invite. {}", financierToApprove.getId());
                     financierToApprove.setActivationStatus(ActivationStatus.INVITED);
-                     response = "Financier invitation has been approved for " + userIdentity.getFullName();
+                    log.info("Sending in-app notification on approval of individual financier");
+                    InvestmentVehicle investmentVehicles = getRecentInvestmentVehicleFinancierIsAddedTo(financierToApprove);
+                    asynchronousMailingOutputPort.sendFinancierInviteEmail(financierToApprove, investmentVehicles);
+                    asynchronousNotificationOutputPort.sendFinancierApprovalOrDeclineNotification(financierToApprove, actor, userIdentity);
+//                     asynchronousMailingOutputPort
+                    response = "Financier invitation has been approved for " + userIdentity.getFullName();
                 }else {
                     log.info("Declining individual financier invite");
                     financierToApprove.setActivationStatus(ActivationStatus.DECLINED);
-                     response = "Financier invitation has been declined for " + userIdentity.getFullName();
+                    log.info("Sending in-app notification on decline of individual financier");
+                    asynchronousNotificationOutputPort.sendFinancierApprovalOrDeclineNotification(financierToApprove, actor, userIdentity);
+                    response = "Financier invitation has been declined for " + userIdentity.getFullName();
                 }
                 financier.setResponse(response);
-
-                financier.setUserIdentity(userIdentity);
 
             }else if (FinancierType.COOPERATE.equals(financierToApprove.getFinancierType())){
                 log.info("Responding to cooperate financier invite approval");
@@ -948,24 +956,34 @@ public class FinancierService implements FinancierUseCase {
         OrganizationEmployeeIdentity organizationEmployeeIdentity = organizationEmployeeIdentities.get(0);
         log.info("The cooperate employee found in viewing cooperate financier is {}", organizationEmployeeIdentity.getId());
         financier.setUserIdentity(organizationEmployeeIdentity.getMeedlUser());
+        financierToApprove.setUserIdentity(organizationEmployeeIdentity.getMeedlUser());
+        UserIdentity createdBy = userIdentityOutputPort.findById(organizationEmployeeIdentity.getCreatedBy());
         if (ActivationStatus.APPROVED.equals(financier.getActivationStatus())) {
             log.info("Approving financier invite");
             setCooperateFinancierActivationStatus(organizationEmployeeIdentity, ActivationStatus.INVITED, organizationIdentity, financierToApprove);
-            asynchronousMailingOutputPort.sendColleagueEmail(organizationIdentity.getName(), organizationEmployeeIdentity.getMeedlUser());
+            log.info("Sending email for cooperate financier approval");
+            InvestmentVehicle investmentVehicles = getRecentInvestmentVehicleFinancierIsAddedTo(financierToApprove);
+            asynchronousMailingOutputPort.sendFinancierInviteEmail(financierToApprove, investmentVehicles);
+            asynchronousNotificationOutputPort.sendFinancierApprovalOrDeclineNotification(financierToApprove, actor, createdBy);
             String response = "Financier invitation has been approved for " + organizationEmployeeIdentity.getMeedlUser().getFullName();
             financier.setResponse(response);
 
         }else {
             log.info("Declining financier invite");
             setCooperateFinancierActivationStatus(organizationEmployeeIdentity, ActivationStatus.DECLINED, organizationIdentity, financierToApprove);
-            UserIdentity createdBy = userIdentityOutputPort.findById(organizationEmployeeIdentity.getCreatedBy());
-            asynchronousNotificationOutputPort.sendDeclineColleagueNotification(organizationEmployeeIdentity, actor,createdBy);
+            log.info("Sending in-app notification for cooperate financier denial");
+            asynchronousNotificationOutputPort.sendFinancierApprovalOrDeclineNotification(financierToApprove, actor, createdBy);
             String response = "Financier invitation has been declined for " + organizationEmployeeIdentity.getMeedlUser().getFullName();
             financier.setResponse(response);
         }
         organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
         organizationIdentity.setNotToValidateOtherOrganizationDetails(Boolean.TRUE);
         organizationIdentityOutputPort.save(organizationIdentity);
+    }
+
+    private InvestmentVehicle getRecentInvestmentVehicleFinancierIsAddedTo(Financier financierToApprove) throws MeedlException {
+        Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findRecentInvestmentVehicleFinancierIsAddedTo(financierToApprove.getId());
+        return optionalInvestmentVehicleFinancier.map(InvestmentVehicleFinancier::getInvestmentVehicle).orElse(null);
     }
 
     private static void setCooperateFinancierActivationStatus(OrganizationEmployeeIdentity organizationEmployeeIdentity, ActivationStatus invited, OrganizationIdentity organizationIdentity, Financier financierToApprove) {

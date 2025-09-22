@@ -40,4 +40,6 @@ public interface InvestmentVehicleFinancierOutputPort {
     InvestmentVehicleFinancier findByFinancierIdAndInvestmentVehicleFinancierId(String id, String investmentVehicleFinancierId) throws MeedlException;
 
     int checkIfFinancierExistInVehicle(String financierId, String investmentVehicleId) throws MeedlException;
+
+    Optional<InvestmentVehicleFinancier> findRecentInvestmentVehicleFinancierIsAddedTo(String financierId) throws MeedlException;
 }

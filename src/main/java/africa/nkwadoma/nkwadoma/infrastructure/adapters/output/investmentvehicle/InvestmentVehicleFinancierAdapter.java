@@ -192,6 +192,14 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
                 investmentVehicleFinancierRepository.findByFinancierIdAndInvestmentVehicleFinancierId(financierId, investmentVehicleFinancierId);
         return investmentVehicleFinancierMapper.toInvestmentVehicleFinancier(investmentVehicleFinancierEntity);
     }
+    @Override
+    public Optional<InvestmentVehicleFinancier> findRecentInvestmentVehicleFinancierIsAddedTo(String financierId) throws MeedlException {
+        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+        Optional<InvestmentVehicleFinancierEntity> optionalInvestmentVehicleFinancierEntity =
+                investmentVehicleFinancierRepository.findRecentInvestmentVehicleFinancierIsAddedTo(financierId);
+        return optionalInvestmentVehicleFinancierEntity.map(investmentVehicleFinancierMapper::toInvestmentVehicleFinancier);
+
+    }
 
     @Override
     public int checkIfFinancierExistInVehicle(String financierId, String investmentVehicleId) throws MeedlException {
