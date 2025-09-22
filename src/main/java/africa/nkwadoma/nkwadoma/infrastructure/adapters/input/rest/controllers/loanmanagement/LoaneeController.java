@@ -427,7 +427,7 @@ public class LoaneeController {
         EditLoaneeDetailResponse editLoaneeDetailResponse = loaneeRestMapper.maptToEditLoaneeDetailResponse(loanee);
         ApiResponse<EditLoaneeDetailResponse> apiResponse = ApiResponse.<EditLoaneeDetailResponse>builder()
                 .data(editLoaneeDetailResponse)
-                .message("Loanee detail edited")
+                .message(LOANEE_DETAIL_EDITED)
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);

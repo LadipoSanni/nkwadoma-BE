@@ -19,15 +19,19 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.UploadedStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanRequestStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DeferProgramRequest;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
@@ -134,6 +138,13 @@ class LoaneeServiceTest {
     @Mock
     private LoaneeLoanAggregateOutputPort loaneeLoanAggregateOutputPort;
     private LoaneeLoanAggregate loaneeLoanAggregate;
+    @Mock
+    private LoanRequestOutputPort loanRequestOutputPort;
+    @Mock
+    private LoanBreakdownOutputPort loanBreakdownOutputPort;
+    private LoanRequest loanRequest;
+    private LoanBreakdown cohortLoanBreakdown;
+
     @BeforeEach
     void setUpLoanee() {
         userIdentity = UserIdentity.builder()
@@ -222,6 +233,12 @@ class LoaneeServiceTest {
         loaneeLoanAggregate = TestData.buildLoaneeLoanAggregate(firstLoanee);
 
         instituteMetrics = TestData.createInstituteMetrics(organizationIdentity);
+
+        cohortLoanBreakdown = TestData.createLoanBreakDown();
+        cohortLoanBreakdown.setItemName("juno");
+
+        loanRequest = TestData.buildLoanRequest(mockId);
+
     }
 
     @Test
@@ -1073,4 +1090,61 @@ class LoaneeServiceTest {
         assertEquals(trainingPerformance, response);
     }
 
+    @Test
+    void testEditLoaneeDetail_Success() throws MeedlException {
+        when(cohortOutputPort.findCohortById(mockId)).thenReturn(elites);
+        when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
+        when(cohortLoaneeOutputPort.findByLoaneeAndCohortId(mockId, mockId)).thenReturn(loaneeCohort);
+        loaneeCohort.setId(mockId);
+        when(loanRequestOutputPort.findByCohortLoaneeId(mockId)).thenReturn(loanRequest);
+        when(loanBreakdownOutputPort.findByItemName("juno")).thenReturn(cohortLoanBreakdown);
+        when(userIdentityOutputPort.save(any(UserIdentity.class))).thenReturn(userIdentity);
+        when(loaneeLoanDetailsOutputPort.save(any(LoaneeLoanDetail.class))).thenReturn(loaneeLoanDetails);
+        when(loaneeLoanBreakDownOutputPort.saveAll(anyList(), any(CohortLoanee.class))).thenReturn(firstLoanee.getLoanBreakdowns());
+        when(loanRequestOutputPort.save(any(LoanRequest.class))).thenReturn(loanRequest);
+
+        Loanee result = loaneeService.editLoaneeDetail(firstLoanee);
+
+        assertNotNull(result);
+        assertEquals(mockId, result.getId());
+        assertEquals(mockId, result.getCohortId());
+        assertEquals("qudus", result.getUserIdentity().getFirstName());
+        assertEquals("lekan", result.getUserIdentity().getLastName());
+        assertEquals(1, result.getLoanBreakdowns().size());
+        verify(loaneeLoanBreakDownOutputPort).deleteByCohortLoaneeid(mockId);
+    }
+
+
+    @Test
+    void testEditLoaneeDetail_InvalidCohortId_ThrowsException() {
+        firstLoanee.setCohortId("invalid-uuid");
+        assertThrows(MeedlException.class, () -> loaneeService.editLoaneeDetail(firstLoanee));
+    }
+
+
+    @Test
+    void testEditLoaneeDetail_LoanRequestApproved_ThrowsLoanException() throws MeedlException {
+
+        loaneeCohort.setId(mockId);
+        loanRequest.setStatus(LoanRequestStatus.APPROVED);
+        when(cohortOutputPort.findCohortById(mockId)).thenReturn(elites);
+        when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
+        when(cohortLoaneeOutputPort.findByLoaneeAndCohortId(mockId, mockId)).thenReturn(loaneeCohort);
+        when(loanRequestOutputPort.findByCohortLoaneeId(mockId)).thenReturn(loanRequest);
+
+        assertThrows(LoanException.class, () -> loaneeService.editLoaneeDetail(firstLoanee));
+    }
+
+
+    @Test
+    void testEditLoaneeDetail_InvalidLoanBreakdownItem_ThrowsResourceNotFoundException() throws MeedlException {
+        loaneeCohort.setId(mockId);
+        loanBreakdown.setItemName("NonExistentItem");
+        when(cohortOutputPort.findCohortById(mockId)).thenReturn(elites);
+        when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
+        when(cohortLoaneeOutputPort.findByLoaneeAndCohortId(mockId, mockId)).thenReturn(loaneeCohort);
+        when(loanRequestOutputPort.findByCohortLoaneeId(mockId)).thenReturn(loanRequest);
+        when(loanBreakdownOutputPort.findByItemName("NonExistentItem")).thenReturn(null);
+        assertThrows(ResourceNotFoundException.class, () -> loaneeService.editLoaneeDetail(firstLoanee));
+    }
 }

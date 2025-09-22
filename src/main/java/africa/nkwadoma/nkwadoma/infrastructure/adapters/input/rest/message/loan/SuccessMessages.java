@@ -20,4 +20,5 @@ public class SuccessMessages {
     public static final String LOAN_AMOUNT_SUMMARY = "total loan amount";
     public static final String EMPLOYMENT_STATUS_UPDATED = "Employment status updated successfully";
     public static final String TRAINING_PERFORMANCE_UPDATED = "Training performance updated successfully";
+    public static final String LOANEE_DETAIL_EDITED = "Loanee details edited successfully";
 }
