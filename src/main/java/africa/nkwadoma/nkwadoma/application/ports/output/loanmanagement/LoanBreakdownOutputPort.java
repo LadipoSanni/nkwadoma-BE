@@ -14,4 +14,6 @@ public interface LoanBreakdownOutputPort {
 
 
     void deleteAllBreakDownAssociateWithProgram(String id) throws MeedlException;
+
+    LoanBreakdown findByItemName(String itemName) throws MeedlException;
 }

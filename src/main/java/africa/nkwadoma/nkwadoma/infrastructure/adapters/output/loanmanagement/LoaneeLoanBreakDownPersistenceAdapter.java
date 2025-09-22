@@ -13,6 +13,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -57,5 +58,19 @@ public class LoaneeLoanBreakDownPersistenceAdapter implements LoaneeLoanBreakDow
                 loaneeLoanBreakDownRepository.findAllByCohortLoaneeId(cohortLoaneeId);
         log.info("Found loanee loan breakdown = = {} ", loanBreakdownEntities.size());
         return loaneeLoanBreakDownMapper.toLoaneeLoanBreakdown(loanBreakdownEntities);
+    }
+
+    @Override
+    public LoaneeLoanBreakdown findById(String loaneeLoanBreakdownId) throws MeedlException {
+        MeedlValidator.validateUUID(loaneeLoanBreakdownId,"Loanee loan breakdown id cannot be empty");
+        LoaneeLoanBreakdownEntity  loaneeLoanBreakdown =
+                loaneeLoanBreakDownRepository.findById(loaneeLoanBreakdownId).orElse(null);
+        return loaneeLoanBreakDownMapper.toLoanBreakdown(loaneeLoanBreakdown);
+    }
+
+    @Transactional
+    @Override
+    public void deleteByCohortLoaneeid(String id) {
+        loaneeLoanBreakDownRepository.deleteAllByCohortLoaneeId(id);
     }
 }

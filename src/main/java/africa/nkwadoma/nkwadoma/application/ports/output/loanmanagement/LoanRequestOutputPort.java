@@ -26,4 +26,6 @@ public interface LoanRequestOutputPort {
 
 
     Page<LoanRequest> viewAllLoanRequestForLoanee(String userId, int pageNumber, int pageSize) throws MeedlException;
+
+    LoanRequest findByCohortLoaneeId(String id) throws MeedlException;
 }

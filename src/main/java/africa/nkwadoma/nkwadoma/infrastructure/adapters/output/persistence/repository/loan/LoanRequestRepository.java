@@ -243,4 +243,15 @@ public interface LoanRequestRepository extends JpaRepository<LoanRequestEntity, 
         ORDER BY lr.createdDate DESC
     """)
     Page<LoanRequestProjection> findAllLoanRequestsForLoanee(@Param("userId") String userId, Pageable pageable);
+
+
+    @Query("""
+    
+        select loanRequest
+             from LoanRequestEntity loanRequest
+             join LoanReferralEntity loanReferral on loanReferral.id = loanRequest.id
+             join CohortLoaneeEntity cle on cle.id = loanReferral.cohortLoanee.id
+             where cle.id = :id
+    """)
+    LoanRequestEntity findByCohortLoaneeId(@Param("id") String id);
 }

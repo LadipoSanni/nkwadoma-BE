@@ -14,4 +14,6 @@ public interface LoaneeLoanBreakDownMapper {
     List<LoaneeLoanBreakdownEntity> toLoaneeLoanBreakdownEntities(List<LoaneeLoanBreakdown> loaneeLoanBreakdowns);
 
     List<LoaneeLoanBreakdown> toLoaneeLoanBreakdown(List<LoaneeLoanBreakdownEntity> loanBreakdownEntities);
+
+    LoaneeLoanBreakdown toLoanBreakdown(LoaneeLoanBreakdownEntity loaneeLoanBreakdown);
 }
