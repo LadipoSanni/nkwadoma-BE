@@ -124,11 +124,12 @@ public class RepaymentHistoryController {
 
     @GetMapping("generate/repayment/schedule")
     @PreAuthorize("hasRole('LOANEE') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
-    public ResponseEntity<ApiResponse<?>> generateRepaymentSchedule(@RequestParam(name = "loanRequestId")String loanRequestId) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> generateRepaymentSchedule(@AuthenticationPrincipal Jwt meedlUser,
+                                                                    @RequestParam(name = "id")String id) throws MeedlException {
 
-        log.info("request that got in loan request id {}",loanRequestId);
+        log.info("request that got in , id is ==   {}",id);
 
-        List<RepaymentHistory> repaymentHistory = repaymentHistoryUseCase.generateRepaymentHistory(loanRequestId);
+        List<RepaymentHistory> repaymentHistory = repaymentHistoryUseCase.generateRepaymentHistory(id,meedlUser.getClaimAsString("sub"));
 
         List<RepaymentScheduleEntry> repaymentScheduleEntries = repaymentHistory.stream()
                 .map(repaymentHistoryRestMapper::toRepaymentScheduleEntry).toList();
