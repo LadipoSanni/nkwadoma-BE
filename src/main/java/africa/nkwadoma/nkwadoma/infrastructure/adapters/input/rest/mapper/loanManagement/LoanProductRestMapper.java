@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoanProductRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanProductResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.StartLoanResponse;
+import jakarta.validation.constraints.NotBlank;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
@@ -30,4 +31,8 @@ public interface LoanProductRestMapper {
     StartLoanResponse toStartLoanResponse(Loan loan);
 
     List<LoanProductResponse> mapToLoanProductResponses(List<LoanProduct> loanProducts);
+
+    @Mapping(target = "createdBy", source = "userId")
+    @Mapping(target = "id", source = "loanProductId")
+    LoanProduct map(String userId, String loanProductId);
 }

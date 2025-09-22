@@ -101,6 +101,12 @@ public class LoanProductAdapter implements LoanProductOutputPort {
         return loanProductMapper.mapEntityToLoanProduct(loanProductEntity);
     }
 
+    @Override
+    public int countLoanOfferFromLoanProduct(String loanProductId) throws MeedlException {
+        MeedlValidator.validateUUID(loanProductId, LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
+        return loanProductRepository.countLoanOfferFromLoanProduct(loanProductId);
+    }
+
     @Transactional
     @Override
     public void deleteById(String id) throws MeedlException {

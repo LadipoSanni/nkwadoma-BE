@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement;
 
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlPatterns;
+import africa.nkwadoma.nkwadoma.domain.model.loan.DisbursementRule;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.SponsorsRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ErrorMessages;
@@ -51,6 +52,7 @@ public class LoanProductRequest {
     @Max(value = 999, message = "Tenor cannot exceed three digits.")
     private BigInteger tenor;
     private BigDecimal minRepaymentAmount;
+    private DisbursementRule disbursementRule;
 
     @NotBlank(message = LOAN_PRODUCT_TERMS_AND_CONDITIONS_REQUIRED)
     private String termsAndCondition;

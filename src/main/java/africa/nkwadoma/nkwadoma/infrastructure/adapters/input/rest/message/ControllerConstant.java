@@ -21,7 +21,9 @@ public class ControllerConstant {
    public static final String LOAN_BOOK_REPAYMENT_RECORD_CREATION_VIA_FILE_UPLOAD = "Loan book: Uploading users repayment record via file upload.";
    public static final String  LOAN_PRODUCT_UPDATE = "update loan product";
    public static final String  VIEW_LOAN_PRODUCT_DETAILS = "View loan product details by id.";
+   public static final String  DELETE_LOAN_PRODUCT_DETAILS = "Delete loan product by id.";
    public static final String  VIEW_LOAN_PRODUCT_DETAILS_DESCRIPTION = "This endpoint is used to view the details of a loan product with unique id";
+   public static final String  DELETE_LOAN_PRODUCT_DETAILS_DESCRIPTION = "This endpoint is used to delete a loan product with unique id";
    public static final String  LOAN_PRODUCT_CREATION_DESCRIPTION = "To create a loan product with unique name";
    public static final String LOAN_BOOK_USER_DATA_CREATION_DESCRIPTION = "To create a loan book via file upload of user data. Either an excel file or a csv file upload.";
    public static final String LOAN_BOOK_REPAYMENT_RECORD_CREATION_DESCRIPTION = "To create a loan book via file upload of users repayment records. Either an excel file or a csv file upload.";
