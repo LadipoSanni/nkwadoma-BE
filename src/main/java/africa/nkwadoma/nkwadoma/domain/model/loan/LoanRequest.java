@@ -23,6 +23,8 @@ public class LoanRequest {
     private String id;
     private String loanProductId;
     private String organizationId;
+    private String programId;
+    private String name;
     private String referredBy;
     private LoanDecision loanRequestDecision;
     private String declineReason;

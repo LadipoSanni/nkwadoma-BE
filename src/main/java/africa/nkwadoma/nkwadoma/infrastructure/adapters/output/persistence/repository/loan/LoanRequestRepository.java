@@ -9,19 +9,6 @@ import java.util.*;
 
 public interface LoanRequestRepository extends JpaRepository<LoanRequestEntity, String> {
 
-//    @Query("""
-//          select lr.id as id, l.userIdentity.firstName as firstName, l.userIdentity.lastName as lastName, c.name as cohortName,
-//                 o.name as referredBy, lr.loanAmountRequested as loanAmountRequested, lr.createdDate as createdDate,
-//                 cle.loaneeLoanDetail.initialDeposit as initialDeposit, c.startDate as cohortStartDate, p.name as programName
-//          from LoanRequestEntity lr
-//          join LoanReferralEntity  lre on lr.id = lr.id
-//          join CohortLoaneeEntity cle on cle.id = lre.id
-//          join LoaneeEntity l on l.id = cle.loanee.id
-//          join CohortEntity c on cle.cohort.id = c.id
-//          join ProgramEntity p on c.programId = p.id
-//          join OrganizationEntity o on p.organizationIdentity.id = o.id
-//          where lr.status = 'NEW' and l.userIdentity.isIdentityVerified = true
-//    """)
 
         @Query("""
         SELECT lr.id AS id,
@@ -87,18 +74,6 @@ public interface LoanRequestRepository extends JpaRepository<LoanRequestEntity, 
 """)
     Optional<LoanRequestProjection> findLoanRequestById(@Param("id") String id);
 
-//    @Query("""
-//          select lr.id as id, l.userIdentity.firstName as firstName, l.userIdentity.lastName as lastName, c.name as cohortName,
-//                 o.name as referredBy, lr.loanAmountRequested as loanAmountRequested, lr.createdDate as createdDate,
-//                 cle.loaneeLoanDetail.initialDeposit as initialDeposit, c.startDate as cohortStartDate, p.name as programName
-//          from LoanRequestEntity lr
-//          join LoanReferralEntity  lre on lr.id = lr.id
-//          join CohortLoaneeEntity cle on cle.id = lre.id
-//          join LoaneeEntity l on l.id = cle.loanee.id
-//          join CohortEntity c on cle.cohort.id = c.id          join ProgramEntity p on c.programId = p.id
-//          join OrganizationEntity o on p.organizationIdentity.id = o.id
-//          where lr.status = 'NEW' AND o.id = :organizationId AND l.userIdentity.isIdentityVerified = true
-//    """)
     @Query("""
         SELECT lr.id AS id,
                u.firstName AS firstName,
@@ -127,29 +102,31 @@ public interface LoanRequestRepository extends JpaRepository<LoanRequestEntity, 
 
 
     @Query("""
-    SELECT lr.id AS id,
-           lr.createdDate AS createdDate,
-           u.firstName AS firstName,
-           u.lastName AS lastName,
-           cle.loaneeLoanDetail.amountRequested AS loanAmountRequested,
-           cle.loaneeLoanDetail.initialDeposit AS initialDeposit,
-           c.name AS cohortName,
-           c.startDate AS cohortStartDate,
-           p.name AS programName
-               
-    FROM LoanRequestEntity lr 
-    join LoanReferralEntity  lre on lr.id  = lr.id
-          join CohortLoaneeEntity cle on cle.id = lre.id
-          join LoaneeEntity l on l.id = cle.loanee.id  
-    JOIN l.userIdentity u
-    join CohortEntity c on cle.cohort.id = c.id
-    JOIN ProgramEntity p ON p.id = c.programId
-    WHERE 
-        (LOWER(u.firstName) LIKE LOWER(CONCAT('%', :name, '%'))
-         OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :name, '%')))
-        AND c.programId = :programId
-        AND p.organizationIdentity.id = :organizationId
-        AND lr.status <> 'APPROVED'
+      SELECT lr.id AS id,
+               u.firstName AS firstName,
+               u.lastName AS lastName,
+               c.name AS cohortName,
+               o.name AS referredBy,
+               lr.loanAmountRequested AS loanAmountRequested,
+               lr.createdDate AS createdDate,
+               lld.initialDeposit AS initialDeposit,
+               c.startDate AS cohortStartDate,
+               p.name AS programName
+        FROM LoanRequestEntity lr
+        JOIN LoanReferralEntity lfe On lfe.id = lr.id
+        JOIN CohortLoaneeEntity cle ON cle.id = lfe.cohortLoanee.id
+        JOIN LoaneeEntity l ON l.id = cle.loanee.id
+        JOIN LoaneeLoanDetailEntity lld ON lld.id = cle.loaneeLoanDetail.id
+        JOIN UserEntity u ON u.id = l.userIdentity.id
+        JOIN CohortEntity c ON c.id = cle.cohort.id
+        JOIN ProgramEntity p ON p.id = c.programId
+        JOIN OrganizationEntity o ON o.id = p.organizationIdentity.id
+        WHERE lr.status = 'NEW'
+        AND u.isIdentityVerified = true
+        AND (:organizationId IS NULL OR o.id = :organizationId)
+        AND (:programId IS NULL OR p.id = :programId) AND lfe.loanReferralStatus != 'AUTHORIZED'
+        AND (LOWER(u.firstName) LIKE LOWER(CONCAT('%', :name, '%'))
+            OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :name, '%')))
     """)
     Page<LoanRequestProjection> findAllLoanRequestByLoaneeNameInOrganizationAndProgram(@Param("programId") String programId,
                                                                                        @Param("organizationId") String organizationId,
