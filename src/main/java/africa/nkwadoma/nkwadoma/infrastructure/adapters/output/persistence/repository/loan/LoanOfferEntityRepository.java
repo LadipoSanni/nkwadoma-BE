@@ -113,14 +113,19 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
 
 
     @Query("""
-    SELECT lo.id AS id,
-           u.firstName AS firstName,
-           u.lastName AS lastName,
-           lo.dateTimeOffered AS dateTimeOffered,
-           cle.loaneeLoanDetail.amountRequested AS amountRequested,
-           lo.amountApproved AS amountApproved,
-           lp.name AS loanProductName,
-           lo.loaneeResponse as loaneeResponse
+        select lo.id as id,
+              l.userIdentity.firstName as firstName,
+              l.userIdentity.lastName as lastName,
+              lo.dateTimeOffered as dateTimeOffered,
+              cle.loaneeLoanDetail.amountRequested as amountRequested,
+              lo.amountApproved as amountApproved,
+              lp.name as loanProductName,
+              lo.loaneeResponse as loaneeResponse,
+               CASE
+                  WHEN lo.loaneeResponse IS NOT NULL AND lo.loanOfferStatus != 'WITHDRAW'
+                  THEN CAST(lo.loaneeResponse AS string)
+                  ELSE CAST(lo.loanOfferStatus AS string)
+              END as status
 
    
     from LoanOfferEntity lo
@@ -131,9 +136,8 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
     join UserEntity u on u.id = l.userIdentity.id
     join CohortEntity c on cle.cohort.id = c.id
     join ProgramEntity p on c.programId = p.id
-    left join LoanProductEntity lp on lo.loanProduct.id = lp.id
-    left join NextOfKinEntity n on u.nextOfKinEntity.id = n.id
     join OrganizationEntity o on o.id = p.organizationIdentity.id
+    left join LoanProductEntity lp on lo.loanProduct.id = lp.id
     WHERE
         (LOWER(u.firstName) LIKE LOWER(CONCAT('%', :name, '%'))
          OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :name, '%')))

@@ -83,8 +83,6 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
 
     @Override
     public Page<LoanOffer> searchLoanOffer(LoanOffer loanOffer) throws MeedlException {
-        MeedlValidator.validateUUID(loanOffer.getOrganizationId(), OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-        MeedlValidator.validateUUID(loanOffer.getProgramId(), ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         MeedlValidator.validatePageSize(loanOffer.getPageSize());
         MeedlValidator.validatePageNumber(loanOffer.getPageNumber());
         Pageable pageRequest = PageRequest.of(loanOffer.getPageNumber(), loanOffer.getPageSize());
