@@ -1,6 +1,19 @@
 -- Step 1: Drop the old check constraint
-ALTER TABLE meedl_notification_entity
-DROP CONSTRAINT meedl_notification_entity_notification_flag_check;
+DO $$
+DECLARE
+constraint_name text;
+BEGIN
+SELECT conname INTO constraint_name
+FROM pg_constraint
+WHERE conrelid = 'meedl_notification_entity'::regclass
+      AND contype = 'c'
+      AND conname LIKE '%notification_flag%';
+
+IF constraint_name IS NOT NULL THEN
+        EXECUTE format('ALTER TABLE meedl_notification_entity DROP CONSTRAINT %I', constraint_name);
+END IF;
+END$$;
+
 
 -- Step 2: Add the updated check constraint with the new value
 ALTER TABLE meedl_notification_entity
