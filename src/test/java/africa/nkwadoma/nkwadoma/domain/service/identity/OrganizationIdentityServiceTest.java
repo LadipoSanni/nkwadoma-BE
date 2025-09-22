@@ -138,7 +138,7 @@ class OrganizationIdentityServiceTest {
 
     @Test
     void inviteOrganization() {
-        OrganizationIdentity invitedOrganisation = new OrganizationIdentity();
+        OrganizationIdentity invitedOrganisation ;
         try {
             superAdmin.setRole(IdentityRole.MEEDL_SUPER_ADMIN);
             roseCouture.setCreatedBy(superAdmin.getId());

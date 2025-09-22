@@ -4,11 +4,13 @@ import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOfferOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.RepaymentHistoryOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.FinancialConstants;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loan;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
@@ -36,6 +38,7 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final LoaneeOutputPort loaneeOutputPort;
     private final LoanOfferOutputPort loanOfferOutputPort;
+    private final LoanOutputPort loanOutputPort;
 
     @Override
     public Page<RepaymentHistory> findAllRepaymentHistory(RepaymentHistory repaymentHistory, int pageSize, int pageNumber) throws MeedlException {
@@ -84,11 +87,19 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
     }
 
     @Override
-    public List<RepaymentHistory> generateRepaymentHistory(String loanRequestId) throws MeedlException {
+    public List<RepaymentHistory> generateRepaymentHistory(String id,String actorId) throws MeedlException {
         List<RepaymentHistory> repaymentSchedule = new ArrayList<>();
+        MeedlValidator.validateUUID(id, "id cannot be empty or invalid");
 
-        MeedlValidator.validateUUID(loanRequestId, "Loan request id cannot be null or invalid");
-        LoanOffer loanOffer = loanOfferOutputPort.findById(loanRequestId);
+        LoanOffer loanOffer;
+        UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
+        if (userIdentity.getRole().isMeedlRole()){
+             loanOffer = loanOfferOutputPort.findById(id);
+        }else {
+            Loan loan = loanOutputPort.findLoanById(id);
+            loanOffer = loanOfferOutputPort.findById(loan.getLoanOfferId());
+            loanOffer.setDateTimeOffered(loan.getStartDate());
+        }
 
         int tenorMonths = loanOffer.getLoanProduct().getTenor();
         int moratoriumMonths = loanOffer.getLoanProduct().getMoratorium();
@@ -98,15 +109,13 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
         BigDecimal principal = loanOffer.getAmountApproved().setScale(2, RoundingMode.HALF_UP);
         BigDecimal balance = principal;
         BigDecimal totalRepaid = BigDecimal.ZERO;
-
         BigDecimal expectedMonthlyRepayment =
                 equatedMonthlyInstalment(monthlyRate, tenorMonths, moratoriumMonths, principal);
 
         LocalDate paymentDate = LocalDate.from(loanOffer.getDateTimeOffered()
                 .with(TemporalAdjusters.lastDayOfMonth())
                 .plusMonths(1));
-
-        moratoriumAndTenorPeriodInterestAccruedIntoBalance(moratoriumMonths, balance, monthlyRate, 
+        moratoriumAndTenorPeriodInterestAccruedIntoBalance(moratoriumMonths, balance, monthlyRate,
                 repaymentSchedule, totalRepaid, paymentDate, tenorMonths, expectedMonthlyRepayment);
 
         RepaymentHistory last = repaymentSchedule.get(repaymentSchedule.size() - 1);

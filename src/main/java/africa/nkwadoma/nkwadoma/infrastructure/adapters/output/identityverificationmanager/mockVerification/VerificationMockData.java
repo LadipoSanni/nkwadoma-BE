@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.testUtilities.data;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityverificationmanager.mockVerification;
 
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyBvnResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyFaceData;

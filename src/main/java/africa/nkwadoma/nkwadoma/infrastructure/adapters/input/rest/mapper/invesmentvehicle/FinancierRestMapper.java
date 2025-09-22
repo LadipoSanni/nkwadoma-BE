@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentvehicle;
 
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.model.financier.CooperateFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
@@ -95,4 +96,9 @@ public interface FinancierRestMapper {
 
     @Mapping(target = "cooperateFinancierId", source = "id")
     CooperateFinancierResponse mapToCooperateFinancierResponse(CooperateFinancier cooperateFinancier);
+
+    @Mapping(target = "actorId", source = "userId")
+    @Mapping(target = "id", source = "financierId")
+    @Mapping(target = "activationStatus", source = "activationStatus")
+    Financier map(String userId, String financierId, ActivationStatus activationStatus);
 }
