@@ -78,7 +78,7 @@ public interface AsynchronousNotificationOutputPort {
     void sendFinancierApprovalOrDeclineNotification(Financier financier,UserIdentity actor, UserIdentity inviter) throws MeedlException;
 
     @Async
-    void sendFinancierInvitationNotificationToSuperAdmin(List<Financier> financiersToMail, UserIdentity actor,UserIdentity meedlSuperAdmin) throws MeedlException;
+    void sendFinancierInvitationApprovalNotificationToSuperAdmin(List<Financier> financiersToMail, UserIdentity actor, UserIdentity meedlSuperAdmin) throws MeedlException;
 
     @Async
     void notifyCooperateSuperAdminToApproveBankDetail(BankDetail bankDetail, Financier financier) throws MeedlException;
