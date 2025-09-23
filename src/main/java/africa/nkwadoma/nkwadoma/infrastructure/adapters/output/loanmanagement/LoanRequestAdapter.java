@@ -85,6 +85,13 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
     }
 
     @Override
+    public LoanRequest findByCohortLoaneeId(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id, LoanMessages.LOAN_REQUEST_ID_CANNOT_BE_EMPTY.getMessage());
+        LoanRequestEntity loanRequestEntity = loanRequestRepository.findByCohortLoaneeId(id);
+        return loanRequestMapper.toLoanRequest(loanRequestEntity);
+    }
+
+    @Override
     public Page<LoanRequest> viewAll(String organizationId, int pageNumber, int pageSize) throws MeedlException {
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         MeedlValidator.validatePageNumber(pageNumber);
