@@ -85,6 +85,7 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
     public Page<LoanOffer> searchLoanOffer(LoanOffer loanOffer) throws MeedlException {
         MeedlValidator.validatePageSize(loanOffer.getPageSize());
         MeedlValidator.validatePageNumber(loanOffer.getPageNumber());
+        log.info("request that got into adapter {}",loanOffer.getName());
         Pageable pageRequest = PageRequest.of(loanOffer.getPageNumber(), loanOffer.getPageSize());
         Page<LoanOfferProjection> loanOfferProjections =
                 loanOfferEntityRepository.

@@ -247,6 +247,8 @@ public class LoanController {
         loanOffer.setName(name); loanOffer.setOrganizationId(organizationId);
         loanOffer.setProgramId(programId); loanOffer.setPageSize(pageSize); loanOffer.setPageNumber(pageNumber);
 
+        log.info("request that got in {} ",loanOffer);
+
         Page<LoanOffer> loanOffers = loanOfferUseCase.searchLoanOffer(loanOffer);
         List<AllLoanOfferResponse> loanOfferResponses =  loanOfferRestMapper.toLoanOfferResponses(loanOffers);
         PaginatedResponse<AllLoanOfferResponse> paginatedResponse = new PaginatedResponse<>(

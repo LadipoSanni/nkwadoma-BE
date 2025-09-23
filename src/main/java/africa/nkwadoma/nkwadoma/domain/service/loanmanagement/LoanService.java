@@ -903,6 +903,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     public Page<LoanOffer> searchLoanOffer(LoanOffer loanOffer) throws MeedlException {
         MeedlValidator.validatePageNumber(loanOffer.getPageNumber());
         MeedlValidator.validatePageSize(loanOffer.getPageSize());
+        log.info("request that got into service name == {}",loanOffer.getName());
         return loanOfferOutputPort.searchLoanOffer(loanOffer);
     }
 
