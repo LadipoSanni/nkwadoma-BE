@@ -150,7 +150,7 @@ public class LoanController {
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
 
-    @GetMapping("/loan-product/delete")
+    @DeleteMapping("/loan-product/delete")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = DELETE_LOAN_PRODUCT_DETAILS,description = DELETE_LOAN_PRODUCT_DETAILS_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> deleteLoanProduct (

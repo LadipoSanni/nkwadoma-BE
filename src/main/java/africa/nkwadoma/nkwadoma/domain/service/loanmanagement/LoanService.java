@@ -163,6 +163,12 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         MeedlValidator.validateUUID(loanProduct.getId(), LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
         int offerCount = loanProductOutputPort.countLoanOfferFromLoanProduct(loanProduct.getId());
         if (offerCount == 0) {
+            LoanProduct foundLoanProduct = loanProductOutputPort.findById(loanProduct.getId());
+            log.info("Updating the total available amount on investment vehicle with the size of the loan product");
+            InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(foundLoanProduct.getInvestmentVehicleId());
+            investmentVehicle.setTotalAvailableAmount(
+                    investmentVehicle.getTotalAvailableAmount().add(foundLoanProduct.getLoanProductSize()));
+            investmentVehicleOutputPort.save(investmentVehicle);
             loanProductOutputPort.deleteById(loanProduct.getId());
             log.info("Successfully deleted loan product with id {}", loanProduct.getId());
         }else {
