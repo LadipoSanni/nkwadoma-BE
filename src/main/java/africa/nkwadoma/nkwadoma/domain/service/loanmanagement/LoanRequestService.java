@@ -104,6 +104,7 @@ public class LoanRequestService implements LoanRequestUseCase {
     public Page<LoanRequest> searchLoanRequest(LoanRequest loanRequest) throws MeedlException {
         MeedlValidator.validatePageSize(loanRequest.getPageSize());
         MeedlValidator.validatePageNumber(loanRequest.getPageNumber());
+        log.info("request that got into service {}", loanRequest.getName());
         return loanRequestOutputPort.searchLoanRequest(loanRequest);
     }
 

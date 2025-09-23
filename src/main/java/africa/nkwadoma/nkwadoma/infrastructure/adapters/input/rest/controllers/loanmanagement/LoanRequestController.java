@@ -156,12 +156,13 @@ public class LoanRequestController {
     public ResponseEntity<ApiResponse<?>> searchLoanRequest(@RequestParam(name = "name") String name,
                                                             @RequestParam(name = "organizationId", required = false) String organizationId,
                                                             @RequestParam(name = "programId", required = false) String programId,
-                                                            @RequestParam(name = "pageSize", defaultValue = "0") int pageSize,
-                                                            @RequestParam(name = "pageNumber", defaultValue = "10") int pageNumber) throws MeedlException {
+                                                            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
 
 
         LoanRequest loanRequest = LoanRequest.builder().name(name).organizationId(organizationId).programId(programId)
                 .pageNumber(pageNumber).pageSize(pageSize).build();
+        log.info("request that got in name is == {}", loanRequest.getName());
 
         Page<LoanRequest> loanRequests = loanRequestUseCase.searchLoanRequest(loanRequest);
         List<LoanRequestResponse> loanRequestResponses = loanRequests.stream().map(loanRequestRestMapper::toLoanRequestResponse).toList();
