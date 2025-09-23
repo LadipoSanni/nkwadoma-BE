@@ -53,7 +53,7 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
             }
         }
         UserIdentity userIdentity = userIdentityOutputPort.findById(repaymentHistory.getActorId());
-        if (userIdentity.getRole().equals(IdentityRole.PORTFOLIO_MANAGER)) {
+        if (userIdentity.getRole().isMeedlRole()) {
             log.info("Portfolio manager is viewing repayment history");
             Page<RepaymentHistory> repaymentHistories = repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(repaymentHistory,
                     pageSize, pageNumber);
@@ -79,7 +79,7 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
     @Override
     public RepaymentHistory getFirstRepaymentYearAndLastRepaymentYear(String actorId, String loaneeId) throws MeedlException {
         UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
-        if (userIdentity.getRole().equals(IdentityRole.PORTFOLIO_MANAGER)) {
+        if (userIdentity.getRole().isMeedlRole()) {
             return repaymentHistoryOutputPort.getFirstAndLastYear(loaneeId);
         }
         Loanee loanee = loaneeOutputPort.findByUserId(userIdentity.getId()).get();
