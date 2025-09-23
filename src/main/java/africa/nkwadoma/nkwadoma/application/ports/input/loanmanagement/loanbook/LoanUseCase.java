@@ -23,4 +23,6 @@ public interface LoanUseCase {
     Page<LoanReferral> viewAllLoanReferrals(LoanReferral request) throws MeedlException;
 
     Page<LoanReferral> searchLoanReferrals(LoanReferral request) throws MeedlException;
+
+    Page<Loan> searchDisbursedByLoaneeName(Loan loan) throws MeedlException;
 }
