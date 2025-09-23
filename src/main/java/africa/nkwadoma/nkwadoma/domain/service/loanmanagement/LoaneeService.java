@@ -1003,6 +1003,20 @@ public class LoaneeService implements LoaneeUseCase {
         return foundLoanee;
     }
 
+    @Override
+    public String updateLoaneeProfile(Loanee loanee, String loaneeUserID) throws MeedlException {
+        UserIdentity userIdentity = loanee.getUserIdentity();
+        log.info("Updating profile for user == : {} ",userIdentity);
+        UserIdentity foundUserIdentity = userIdentityOutputPort.findById(loaneeUserID);
+        log.info("found user identity =={}", foundUserIdentity);
+        userIdentityMapper.updateUserIdentity(foundUserIdentity, userIdentity);
+        log.info("user after mapping  identity =={}", userIdentity);
+        userIdentityOutputPort.save(foundUserIdentity);
+        log.info("after saving {}", foundUserIdentity);
+        loanee.setUserIdentity(foundUserIdentity);
+        return "Profile updated successfully";
+    }
+
     private BigDecimal calculateAmountRequested(Loanee loanee, Cohort cohort, BigDecimal initialDeposit) throws MeedlException {
         BigDecimal loanBreakdownTotal = BigDecimal.ZERO;
         if (!ObjectUtils.isEmpty(loanee.getLoanBreakdowns())) {
