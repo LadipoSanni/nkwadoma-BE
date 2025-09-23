@@ -489,7 +489,7 @@ public class FinancierService implements FinancierUseCase {
                 financier.setCooperateAdminName(cooperateFinancier.getCooperateAdminName());
                 log.info("cooperate super admin mail {} ==== super admin name {}",financier.getCooperateAdminEmail(),financier.getCooperateAdminName());
             }
-            log.info("found financier {}", financier);
+            log.info("found financier details {}", financier);
         }
         log.info("found financier before updating values : {}", financier);
         return updateFinancierDetail(financier);
