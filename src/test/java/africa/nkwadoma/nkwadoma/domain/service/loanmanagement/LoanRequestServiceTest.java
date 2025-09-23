@@ -168,6 +168,55 @@ class LoanRequestServiceTest {
         }
     }
 
+
+    @Test
+    void searchLoanRequests(){
+        loanRequest.setPageNumber(0);
+        loanRequest.setPageSize(10);
+        loanRequest.setName("qudus");
+        Page<LoanRequest> loanRequests = new PageImpl<>(List.of(loanRequest));
+        try {
+            when(loanRequestOutputPort.searchLoanRequest(loanRequest)).thenReturn(loanRequests);
+            loanRequests =  loanRequestService.searchLoanRequest(loanRequest);
+        }catch (MeedlException e){
+            log.error(e.getMessage(), e);
+        }
+        assertEquals(1,loanRequests.getTotalElements());
+    }
+
+    @Test
+    void searchLoanRequestByProgramId(){
+        loanRequest.setPageNumber(0);
+        loanRequest.setPageSize(10);
+        loanRequest.setName("qudus");
+        loanRequest.setProgramId(testId);
+        Page<LoanRequest> loanRequests = new PageImpl<>(List.of(loanRequest));
+        try {
+            when(loanRequestOutputPort.searchLoanRequest(loanRequest)).thenReturn(loanRequests);
+            loanRequests =  loanRequestService.searchLoanRequest(loanRequest);
+        }catch (MeedlException e){
+            log.error(e.getMessage(), e);
+        }
+        assertEquals(1,loanRequests.getTotalElements());
+    }
+
+    @Test
+    void searchLoanRequestByOrganizationId(){
+        loanRequest.setPageNumber(0);
+        loanRequest.setPageSize(10);
+        loanRequest.setName("qudus");
+        loanRequest.setOrganizationId(testId);
+        Page<LoanRequest> loanRequests = new PageImpl<>(List.of(loanRequest));
+        try {
+            when(loanRequestOutputPort.searchLoanRequest(loanRequest)).thenReturn(loanRequests);
+            loanRequests =  loanRequestService.searchLoanRequest(loanRequest);
+        }catch (MeedlException e){
+            log.error(e.getMessage(), e);
+        }
+        assertEquals(1,loanRequests.getTotalElements());
+    }
+
+
     @Test
     void viewAllLoanRequestsForLoanee() {
         try {

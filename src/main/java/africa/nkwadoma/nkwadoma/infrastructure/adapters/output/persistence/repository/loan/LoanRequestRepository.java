@@ -121,12 +121,13 @@ public interface LoanRequestRepository extends JpaRepository<LoanRequestEntity, 
         JOIN CohortEntity c ON c.id = cle.cohort.id
         JOIN ProgramEntity p ON p.id = c.programId
         JOIN OrganizationEntity o ON o.id = p.organizationIdentity.id
-        WHERE lr.status = 'NEW'
-        AND u.isIdentityVerified = true
-        AND (:organizationId IS NULL OR o.id = :organizationId)
-        AND (:programId IS NULL OR p.id = :programId) AND lfe.loanReferralStatus != 'AUTHORIZED'
-        AND (LOWER(u.firstName) LIKE LOWER(CONCAT('%', :name, '%'))
+      WHERE lr.status = 'NEW'
+      AND u.isIdentityVerified = true
+      AND (:organizationId IS NULL OR o.id = :organizationId)
+      AND (:programId IS NULL OR p.id = :programId)
+       AND (LOWER(u.firstName) LIKE LOWER(CONCAT('%', :name, '%'))
             OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :name, '%')))
+       ORDER BY lr.createdDate DESC
     """)
     Page<LoanRequestProjection> findAllLoanRequestByLoaneeNameInOrganizationAndProgram(@Param("programId") String programId,
                                                                                        @Param("organizationId") String organizationId,
