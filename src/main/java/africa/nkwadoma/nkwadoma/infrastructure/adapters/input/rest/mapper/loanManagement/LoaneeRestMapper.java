@@ -2,9 +2,11 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loanM
 
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.EditLoaneeDetailRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DeferProgramRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeLoanBreakdownRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.EditLoaneeDetailResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.EmploymentStatusResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.CohortLoaneeResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanBeneficiaryResponse;
@@ -13,6 +15,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanee.LoaneeLoanDetailResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanee.LoaneeReferralResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanee.LoaneeResponse;
+import jakarta.validation.Valid;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -123,4 +126,23 @@ public interface LoaneeRestMapper {
     @Mapping(target = "cohortId", source = "cohort.id")
     @Mapping(target = "loaneeId", source = "loanee.id")
     EmploymentStatusResponse mapToEmploymentStatusResponse(CohortLoanee cohortLoanee);
+
+
+    @Mapping(target = "loanBreakdowns"  , source = "loanBreakdown")
+    @Mapping(target = "id"  , source = "loaneeId")
+    @Mapping(target = "userIdentity.firstName"  , source = "firstName")
+    @Mapping(target = "userIdentity.lastName"  , source = "lastName")
+    @Mapping(target = "userIdentity.email"  , source = "email")
+    @Mapping(target = "loaneeLoanDetail.initialDeposit"  , source = "initialDeposit")
+    Loanee mapToCohortLoanee(@Valid EditLoaneeDetailRequest editLoaneeDetailRequest);
+
+
+    @Mapping(target = "loanBreakdowns"  , source = "loanBreakdowns")
+    @Mapping(target = "initialDeposit" , source = "loaneeLoanDetail.initialDeposit")
+    @Mapping(target = "loaneeId"  , source = "id")
+    @Mapping(target = "firstName"  , source = "userIdentity.firstName")
+    @Mapping(target = "lastName"  , source = "userIdentity.lastName")
+    @Mapping(target = "email"  , source = "userIdentity.email")
+    EditLoaneeDetailResponse maptToEditLoaneeDetailResponse(Loanee loanee);
+
 }

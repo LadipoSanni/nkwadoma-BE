@@ -289,6 +289,9 @@ class LoanProductServiceTest {
     @Test
     void deleteLoanProductWithValidId(){
         try {
+            when(loanProductOutputPort.findById(loanProduct.getId())).thenReturn(loanProduct);
+            when(investmentVehicleOutputPort.findById(anyString())).thenReturn(investmentVehicle);
+            when(investmentVehicleOutputPort.save(investmentVehicle)).thenReturn(investmentVehicle);
             doNothing().when(loanProductOutputPort).deleteById(loanProduct.getId());
             loanService.deleteLoanProductById(loanProduct);
             verify(loanProductOutputPort, times(1)).deleteById(loanProduct.getId());

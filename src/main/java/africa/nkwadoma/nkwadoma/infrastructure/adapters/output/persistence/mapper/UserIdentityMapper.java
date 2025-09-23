@@ -25,4 +25,6 @@ public interface UserIdentityMapper {
     default String toLowerCase(String value) {
         return value == null ? null : value.toLowerCase();
     }
+
+    void updateUserIdentity(@MappingTarget UserIdentity existIdentity, UserIdentity newIdentity);
 }

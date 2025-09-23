@@ -282,7 +282,7 @@ public class UserIdentityService implements UserUseCase {
         UserIdentity foundUserToDeactivate = userIdentityOutputPort.findById(userIdentity.getId());
 
         checkIfUserAllowedForAccountActivationActivity(foundUserToDeactivate, userIdentity, ActivationStatus.DEACTIVATED);
-        foundUserToDeactivate.setDeactivationReason("User deactivated by : "+ userIdentity.getCreatedBy() + ". Reason : "+userIdentity.getDeactivationReason());
+        foundUserToDeactivate.setDeactivationReason(userIdentity.getDeactivationReason());
 
         userIdentity = identityManagerOutPutPort.disableUserAccount(foundUserToDeactivate);
         log.info("User on key cloak deactivated successfully.");
