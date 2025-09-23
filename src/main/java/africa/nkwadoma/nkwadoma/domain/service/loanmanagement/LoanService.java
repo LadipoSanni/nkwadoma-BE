@@ -197,6 +197,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         MeedlValidator.validateUUID(loanProduct.getId(), LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
         LoanProduct foundLoanProduct = loanProductOutputPort.findById(loanProduct.getId());
         if (foundLoanProduct.getTotalNumberOfLoanee() > BigInteger.ZERO.intValue()) {
+            log.error("Loan product {} cannot be updated as it has already been loaned out", foundLoanProduct.getName());
             throw new LoanException("Loan product " + foundLoanProduct.getName() + " cannot be updated as it has already been loaned out");
         }
         foundLoanProduct = loanProductMapper.updateLoanProduct(foundLoanProduct, loanProduct);
