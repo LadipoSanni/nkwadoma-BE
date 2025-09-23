@@ -112,12 +112,10 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
         BigDecimal expectedMonthlyRepayment =
                 equatedMonthlyInstalment(monthlyRate, tenorMonths, moratoriumMonths, principal);
 
-        // Calculate partial month interest from dateTimeOffered to end of current month
         LocalDateTime dateTimeOffered = loanOffer.getDateTimeOffered();
         LocalDate startDate = dateTimeOffered.toLocalDate();
         LocalDate endOfMonth = startDate.with(TemporalAdjusters.lastDayOfMonth());
 
-        // Handle partial month if dateTimeOffered is not the last day of the month
         if (!startDate.equals(endOfMonth)) {
             long daysInMonth = ChronoUnit.DAYS.between(startDate.withDayOfMonth(1), endOfMonth.plusDays(1));
             long daysRemaining = ChronoUnit.DAYS.between(startDate, endOfMonth.plusDays(1));
@@ -126,6 +124,7 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
             BigDecimal partialMonthInterest = balance.multiply(monthlyRate)
                     .multiply(prorationFactor)
                     .setScale(2, RoundingMode.HALF_UP);
+
             balance = balance.add(partialMonthInterest).setScale(2, RoundingMode.HALF_UP);
 
             repaymentSchedule.add(
@@ -140,10 +139,14 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
             );
         }
 
-        // Set paymentDate to the last day of the next month
         LocalDate paymentDate = endOfMonth.plusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
-        moratoriumAndTenorPeriodInterestAccruedIntoBalance(moratoriumMonths, balance, monthlyRate,
-                repaymentSchedule, totalRepaid, paymentDate, tenorMonths, expectedMonthlyRepayment);
+
+        moratoriumAndTenorPeriodInterestAccruedIntoBalance(
+                moratoriumMonths, balance, monthlyRate,
+                repaymentSchedule, totalRepaid, paymentDate,
+                tenorMonths, expectedMonthlyRepayment,
+                startDate.getDayOfMonth()
+        );
 
         RepaymentHistory last = repaymentSchedule.get(repaymentSchedule.size() - 1);
         last.setTenor(tenorMonths);
@@ -155,20 +158,28 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
     private static BigDecimal getMonthleyRate(LoanOffer loanOffer) {
         BigDecimal annualRate = BigDecimal.valueOf(loanOffer.getLoanProduct().getInterestRate())
                 .divide(BigDecimal.valueOf(FinancialConstants.PERCENTAGE_BASE_INT), 10, RoundingMode.HALF_UP);
-        BigDecimal monthlyRate = annualRate.divide(BigDecimal.valueOf(FinancialConstants.MONTHS_PER_YEAR), 10, RoundingMode.HALF_UP);
-        return monthlyRate;
+        return annualRate.divide(BigDecimal.valueOf(FinancialConstants.MONTHS_PER_YEAR), 10, RoundingMode.HALF_UP);
     }
 
     private static BigDecimal equatedMonthlyInstalment(BigDecimal monthlyRate, int totalMonths, int moratoriumMonths, BigDecimal principal) {
         BigDecimal onePlusRate = BigDecimal.ONE.add(monthlyRate);
         BigDecimal onePlusRatePowN = onePlusRate.pow(totalMonths - moratoriumMonths);
-        BigDecimal expectedMonthlyRepayment = principal.multiply(monthlyRate)
+        return principal.multiply(monthlyRate)
                 .multiply(onePlusRatePowN)
                 .divide(onePlusRatePowN.subtract(BigDecimal.ONE), 2, RoundingMode.HALF_UP);
-        return expectedMonthlyRepayment;
     }
 
-    private static void moratoriumAndTenorPeriodInterestAccruedIntoBalance(int moratoriumMonths, BigDecimal balance, BigDecimal monthlyRate, List<RepaymentHistory> repaymentSchedule, BigDecimal totalRepaid, LocalDate paymentDate, int totalMonths, BigDecimal expectedMonthlyRepayment) {
+    private static void moratoriumAndTenorPeriodInterestAccruedIntoBalance(
+            int moratoriumMonths,
+            BigDecimal balance,
+            BigDecimal monthlyRate,
+            List<RepaymentHistory> repaymentSchedule,
+            BigDecimal totalRepaid,
+            LocalDate paymentDate,
+            int totalMonths,
+            BigDecimal expectedMonthlyRepayment,
+            int offerDayOfMonth
+    ) {
         for (int eachMoratoriumMonth = 1; eachMoratoriumMonth <= moratoriumMonths; eachMoratoriumMonth++) {
             BigDecimal interest = balance.multiply(monthlyRate).setScale(2, RoundingMode.HALF_UP);
             balance = balance.add(interest).setScale(2, RoundingMode.HALF_UP);
@@ -195,8 +206,10 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
                 principalPayment = balance;
                 expectedMonthlyRepayment = principalPayment.add(interest).setScale(2, RoundingMode.HALF_UP);
                 balance = BigDecimal.ZERO;
-            } else {
-                balance = balance.subtract(principalPayment).setScale(2, RoundingMode.HALF_UP);
+
+                paymentDate = paymentDate.withDayOfMonth(
+                        Math.min(offerDayOfMonth, paymentDate.lengthOfMonth())
+                );
             }
 
             BigDecimal amountPaid = expectedMonthlyRepayment;
@@ -204,7 +217,9 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
 
             addScheduleToRepaymentScheduleList(balance, repaymentSchedule, totalRepaid, paymentDate, amountPaid, interest, principalPayment);
 
-            paymentDate = paymentDate.plusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
+            if (eachTenorMonth < (totalMonths - moratoriumMonths)) {
+                paymentDate = paymentDate.plusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
+            }
         }
     }
 
@@ -222,5 +237,6 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
                         .build()
         );
     }
+
 
 }
