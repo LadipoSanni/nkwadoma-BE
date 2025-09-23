@@ -30,6 +30,7 @@ public class FinancierDashboardResponse {
     private String totalAmountInvested;
     private BigDecimal totalIncomeEarned;
     private BigDecimal portfolioValue;
+    private String invitedBy;
     private List<InvestmentVehicleResponse> investmentVehicleResponses;
 
 }

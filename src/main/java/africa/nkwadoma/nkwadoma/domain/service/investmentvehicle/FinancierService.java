@@ -289,6 +289,7 @@ public class FinancierService implements FinancierUseCase {
         financier.setIdentity(organizationId);
         financier.setCreatedAt(LocalDateTime.now());
         financier.setFinancierType(COOPERATE);
+        financier.setInvitedBy(actor.getId());
         financier.setAccreditationStatus(AccreditationStatus.UNVERIFIED);
         financier.setActivationStatus(actor.getRole().isMeedlSuperAdmin()
                 ? ActivationStatus.INVITED
@@ -1098,6 +1099,7 @@ public class FinancierService implements FinancierUseCase {
         financier.setActivationStatus(actor.getRole().isMeedlSuperAdmin()
                 ? ActivationStatus.INVITED
                 : ActivationStatus.PENDING_APPROVAL);
+        financier.setInvitedBy(actor.getId());
         financier.setAccreditationStatus(AccreditationStatus.UNVERIFIED);
         if (financier.getFinancierType() == FinancierType.INDIVIDUAL) {
             UserIdentity userIdentity = financier.getUserIdentity();
