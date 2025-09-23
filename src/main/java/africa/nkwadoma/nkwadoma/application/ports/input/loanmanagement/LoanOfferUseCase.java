@@ -17,4 +17,6 @@ public interface LoanOfferUseCase {
     Page<LoanDetail> filterLoanByProgram(LoanOffer loanOffer) throws MeedlException;
 
     LoanOffer withdrawLoanOffer(String loanOfferId, LoanOfferStatus loanOfferStatus) throws MeedlException;
+
+    Page<LoanOffer> searchLoanOffer(LoanOffer loanOffer) throws MeedlException;
 }

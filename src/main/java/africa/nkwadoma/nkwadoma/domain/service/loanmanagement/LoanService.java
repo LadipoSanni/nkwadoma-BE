@@ -914,6 +914,14 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
 
     @Override
+    public Page<LoanOffer> searchLoanOffer(LoanOffer loanOffer) throws MeedlException {
+        MeedlValidator.validatePageNumber(loanOffer.getPageNumber());
+        MeedlValidator.validatePageSize(loanOffer.getPageSize());
+        log.info("request that got into service name == {}",loanOffer.getName());
+        return loanOfferOutputPort.searchLoanOffer(loanOffer);
+    }
+
+    @Override
     public LoanOffer viewLoanOfferDetails(String actorId, String loanOfferId) throws MeedlException {
         MeedlValidator.validateUUID(loanOfferId, LoanOfferMessages.INVALID_LOAN_OFFER_ID.getMessage());
         UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);

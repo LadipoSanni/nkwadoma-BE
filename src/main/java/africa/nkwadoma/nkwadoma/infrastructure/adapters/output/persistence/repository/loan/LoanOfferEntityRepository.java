@@ -113,36 +113,37 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
 
 
     @Query("""
-    SELECT lo.id AS id,
-           u.firstName AS firstName,
-           u.lastName AS lastName,
-           lo.dateTimeOffered AS dateTimeOffered,
-           cle.loaneeLoanDetail.amountRequested AS amountRequested,
-           lo.amountApproved AS amountApproved,
-           lp.name AS loanProductName,
-           lo.loaneeResponse as loaneeResponse
-
-   
-    from LoanOfferEntity lo
-    join LoanRequestEntity lr on lr.id = lo.id
-    join LoanReferralEntity lre on lre.id = lr.id
-    join CohortLoaneeEntity cle on cle.id = lre.cohortLoanee.id
-    join LoaneeEntity l on l.id = cle.loanee.id
-    join UserEntity u on u.id = l.userIdentity.id
-    join CohortEntity c on cle.cohort.id = c.id
-    join ProgramEntity p on c.programId = p.id
-    left join LoanProductEntity lp on lo.loanProduct.id = lp.id
-    left join NextOfKinEntity n on u.nextOfKinEntity.id = n.id
-    join OrganizationEntity o on o.id = p.organizationIdentity.id
-    WHERE
-        (LOWER(u.firstName) LIKE LOWER(CONCAT('%', :name, '%'))
-         OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :name, '%')))
-        AND c.programId = :programId
-        AND o.id = :organizationId
-        AND not exists (
-                      select 1 from LoanEntity loan where loan.loanOfferId = lo.id
-                  )
-    order by lo.dateTimeOffered desc
+      SELECT lo.id AS id,
+             l.userIdentity.firstName AS firstName,
+             l.userIdentity.lastName AS lastName,
+             lo.dateTimeOffered AS dateTimeOffered,
+             cle.loaneeLoanDetail.amountRequested AS amountRequested,
+             lo.amountApproved AS amountApproved,
+             lp.name AS loanProductName,
+             lo.loaneeResponse AS loaneeResponse,
+             CASE
+                 WHEN lo.loaneeResponse IS NOT NULL AND lo.loanOfferStatus != 'WITHDRAW'
+                 THEN CAST(lo.loaneeResponse AS string)
+                 ELSE CAST(lo.loanOfferStatus AS string)
+             END AS status
+      FROM LoanOfferEntity lo
+      JOIN LoanRequestEntity lr ON lr.id = lo.id
+      JOIN LoanReferralEntity lre ON lre.id = lr.id
+      JOIN CohortLoaneeEntity cle ON cle.id = lre.cohortLoanee.id
+      JOIN LoaneeEntity l ON l.id = cle.loanee.id
+      JOIN UserEntity u ON u.id = l.userIdentity.id
+      JOIN CohortEntity c ON cle.cohort.id = c.id
+      JOIN ProgramEntity p ON c.programId = p.id
+      JOIN OrganizationEntity o ON o.id = p.organizationIdentity.id
+      LEFT JOIN LoanProductEntity lp ON lo.loanProduct.id = lp.id
+      WHERE (:programId IS NULL OR p.id = :programId)
+        AND (:organizationId IS NULL OR o.id = :organizationId)
+        AND (:name IS NULL OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :name, '%'))
+                           OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :name, '%')))
+      AND NOT EXISTS (
+          SELECT 1 FROM LoanEntity loan WHERE loan.loanOfferId = lo.id
+      )
+      ORDER BY lo.dateTimeOffered DESC
     """)
     Page<LoanOfferProjection> findAllLoanOfferByLoaneeNameInOrganizationAndProgram(
             @Param("programId") String programId,
