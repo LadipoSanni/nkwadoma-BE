@@ -23,6 +23,7 @@ import java.util.*;
 public class Loan {
     private String id;
     private Loanee loanee;
+    private String name;
     private String firstName;
     private String lastName;
     private String phoneNumber;
@@ -46,6 +47,7 @@ public class Loan {
     private UserIdentity userIdentity;
     private String cohortName;
     private String programName;
+    private String programId;
     private String referredBy;
     private String organizationId;
     private String actorId;
