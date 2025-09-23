@@ -915,6 +915,14 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
 
     @Override
+    public Page<LoanOffer> searchLoanOffer(LoanOffer loanOffer) throws MeedlException {
+        MeedlValidator.validatePageNumber(loanOffer.getPageNumber());
+        MeedlValidator.validatePageSize(loanOffer.getPageSize());
+        log.info("request that got into service name == {}",loanOffer.getName());
+        return loanOfferOutputPort.searchLoanOffer(loanOffer);
+    }
+
+    @Override
     public LoanOffer viewLoanOfferDetails(String actorId, String loanOfferId) throws MeedlException {
         MeedlValidator.validateUUID(loanOfferId, LoanOfferMessages.INVALID_LOAN_OFFER_ID.getMessage());
         UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
@@ -932,46 +940,6 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
                         LoanOfferMessages.LOAN_OFFER_IS_NOT_ASSIGNED_TO_LOANEE.getMessage());
             }
         return loanOffer;
-    }
-
-    @Override
-    public Page<LoanDetail> searchLoan(LoanOffer loanOffer) throws MeedlException {
-        MeedlValidator.validateUUID(loanOffer.getOrganizationId(), OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-        MeedlValidator.validateObjectName(loanOffer.getName(),LoaneeMessages.LOANEE_NAME_CANNOT_BE_EMPTY.getMessage(),"Loan offer");
-        MeedlValidator.validateUUID(loanOffer.getProgramId(),ProgramMessages.INVALID_PROGRAM_ID.getMessage());
-        MeedlValidator.validateObjectInstance(loanOffer.getType(),"Status cannot be empty");
-        MeedlValidator.validatePageSize(loanOffer.getPageSize());
-        MeedlValidator.validatePageNumber(loanOffer.getPageNumber());
-
-        Program program = programOutputPort.findProgramById(loanOffer.getProgramId());
-        OrganizationIdentity organizationIdentity = programOutputPort.findCreatorOrganization(program.getCreatedBy());
-        if(!organizationIdentity.getId().equals(loanOffer.getOrganizationId())) {
-            throw new LoanException("Program not in organization");
-        }
-
-        return searchResult(loanOffer);
-    }
-
-    private Page<LoanDetail> searchResult(LoanOffer loanOffer) throws MeedlException {
-        Page<LoanDetail> loanDetails;
-        if (loanOffer.getType().equals(LoanType.LOAN_OFFER)){
-            Page<LoanOffer> loanOffers = loanOfferOutputPort.searchLoanOffer(loanOffer);
-            loanDetails = loanOffers.map(loanMetricsMapper::mapLoanOfferToLoanLifeCycles);
-            return loanDetails;
-        }
-        else if (loanOffer.getType().equals(LoanType.LOAN_REQUEST)){
-            Page<LoanRequest> loanRequests = loanRequestOutputPort.searchLoanRequest(loanOffer.getProgramId(),
-                    loanOffer.getOrganizationId(), loanOffer.getName(), loanOffer.getPageSize(), loanOffer.getPageNumber());
-            loanDetails = loanRequests.map(loanMetricsMapper::mapLoanRequestToLoanLifeCycles);
-            return loanDetails;
-        }
-        else if (loanOffer.getType().equals(LoanType.LOAN_DISBURSAL)){
-            Page<Loan> loans = loanOutputPort.searchLoan(loanOffer.getProgramId(),
-                    loanOffer.getOrganizationId(), loanOffer.getName(), loanOffer.getPageSize(), loanOffer.getPageNumber());
-            loanDetails = loans.map(loanMetricsMapper::mapToLoans);
-            return loanDetails;
-        }
-        throw new LoanException(loanOffer.getType().name()+" is not a loan type");
     }
 
 

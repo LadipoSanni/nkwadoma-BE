@@ -253,6 +253,34 @@ public class LoanController {
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
 
+    @GetMapping("/search/loanoffer")
+    @PreAuthorize("hasRole('LOANEE') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
+    public ResponseEntity<ApiResponse<?>> searchLoanOffer(@RequestParam(required = false, name = "name") String name,
+                                                          @RequestParam(required = false, name = "organizationId") String organizationId ,
+                                                           @RequestParam(required = false, name = "programId") String programId,
+                                                           @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                           @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
+
+        LoanOffer loanOffer = new LoanOffer();
+        loanOffer.setName(name); loanOffer.setOrganizationId(organizationId);
+        loanOffer.setProgramId(programId); loanOffer.setPageSize(pageSize); loanOffer.setPageNumber(pageNumber);
+
+        log.info("request that got in {} ",loanOffer);
+
+        Page<LoanOffer> loanOffers = loanOfferUseCase.searchLoanOffer(loanOffer);
+        List<AllLoanOfferResponse> loanOfferResponses =  loanOfferRestMapper.toLoanOfferResponses(loanOffers);
+        PaginatedResponse<AllLoanOfferResponse> paginatedResponse = new PaginatedResponse<>(
+                loanOfferResponses,loanOffers.hasNext(),loanOffers.getTotalPages(),loanOffers.getTotalElements() ,pageNumber,pageSize
+        );
+        ApiResponse<PaginatedResponse<AllLoanOfferResponse>> apiResponse = ApiResponse.<PaginatedResponse<AllLoanOfferResponse>>builder()
+                .data(paginatedResponse)
+                .message(ALL_LOAN_OFFERS)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+
+
     @GetMapping("/view-loan-offer/{loanOfferId}")
     @PreAuthorize("hasRole('LOANEE') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN')")
     public ResponseEntity<ApiResponse<?>> viewLoanOffer(@AuthenticationPrincipal Jwt meedlUser, @PathVariable @NotBlank(message = "LoanOffer ID is required")
@@ -262,34 +290,6 @@ public class LoanController {
         ApiResponse<LoanOfferResponse> apiResponse = ApiResponse.<LoanOfferResponse>builder()
                 .data(loanOfferResponse)
                 .message(LOAN_OFFER_FOUND)
-                .statusCode(HttpStatus.OK.toString())
-                .build();
-        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
-    }
-
-    @GetMapping("/search-loan")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<ApiResponse<?>> searchLoan(@RequestParam @NotBlank(message = "Program id is required") String programId,
-                                                     @RequestParam @NotBlank(message = "Organization id is required") String organizationId,
-                                                     @RequestParam LoanType status,
-                                                     @RequestParam @NotBlank(message = "Loanee name is required") String name,
-                                                     @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
-                                                     @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
-        LoanOffer loanOffer = new LoanOffer();
-        loanOffer.setProgramId(programId);
-        loanOffer.setOrganizationId(organizationId);
-        loanOffer.setType(status);
-        loanOffer.setName(name);
-        loanOffer.setPageSize(pageSize);
-        loanOffer.setPageNumber(pageNumber);
-        Page<LoanDetail> loanDetails = loanOfferUseCase.searchLoan(loanOffer);
-        List<LoanDetailsResponse> loanDetailsResponses = loanMetricsRestMapper.toLoanLifeCycleResponses(loanDetails);
-        PaginatedResponse<LoanDetailsResponse> paginatedResponse = new PaginatedResponse<>(
-                loanDetailsResponses,loanDetails.hasNext(),loanDetails.getTotalPages(),loanDetails.getTotalElements() ,pageNumber,pageSize
-        );
-        ApiResponse<PaginatedResponse<LoanDetailsResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoanDetailsResponse>>builder()
-                .data(paginatedResponse)
-                .message(ALL_LOAN)
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);

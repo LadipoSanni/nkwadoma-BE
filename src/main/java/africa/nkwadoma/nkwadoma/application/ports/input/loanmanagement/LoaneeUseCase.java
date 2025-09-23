@@ -62,4 +62,6 @@ public interface LoaneeUseCase {
     CohortLoanee setEmploymentStatus(EmploymentStatus employmentStatus, String cohortId, String loaneeId) throws MeedlException;
 
     String updateTrainingPerformance(String trainingPerformance, String cohortId, String loaneeId) throws MeedlException;
+
+    Loanee editLoaneeDetail(Loanee loanee) throws MeedlException;
 }

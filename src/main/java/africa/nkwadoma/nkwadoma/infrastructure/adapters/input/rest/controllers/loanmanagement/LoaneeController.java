@@ -11,10 +11,12 @@ import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanAggregate;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.EditLoaneeDetailRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeDeferRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeStatusRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.EditLoaneeDetailResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.EmploymentStatusResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.CohortLoaneeResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.PaginatedResponse;
@@ -414,4 +416,20 @@ public class LoaneeController {
        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
+
+
+    @PostMapping("edit/detail")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('ORGANIZATION_ASSOCIATE')")
+    public ResponseEntity<ApiResponse<?>> editLoaneeDetail(@RequestBody @Valid EditLoaneeDetailRequest editLoaneeDetailRequest) throws MeedlException {
+
+        Loanee loanee = loaneeRestMapper.mapToCohortLoanee(editLoaneeDetailRequest);
+        loanee = loaneeUseCase.editLoaneeDetail(loanee);
+        EditLoaneeDetailResponse editLoaneeDetailResponse = loaneeRestMapper.maptToEditLoaneeDetailResponse(loanee);
+        ApiResponse<EditLoaneeDetailResponse> apiResponse = ApiResponse.<EditLoaneeDetailResponse>builder()
+                .data(editLoaneeDetailResponse)
+                .message(LOANEE_DETAIL_EDITED)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
 }
