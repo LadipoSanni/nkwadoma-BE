@@ -125,6 +125,44 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
         return repaymentSchedule;
     }
 
+    @Override
+    public RepaymentHistory simulateRepayment(BigDecimal loanAmount, double interestRate, int repaymentPeriod) throws MeedlException {
+        MeedlValidator.validateNegativeAmount(loanAmount,"Loan");
+        MeedlValidator.validateFloatDataElement((float) interestRate,"Interest Rate cannot be zero or negative");
+        MeedlValidator.validatePositiveNumber(repaymentPeriod,"Repayment period cannot be zero or less than zero");
+        BigDecimal monthlyPayment;
+        BigDecimal totalRepayment;
+        BigDecimal totalInterestPaid;
+
+        if (interestRate == 0) {
+            monthlyPayment = loanAmount.divide(BigDecimal.valueOf(repaymentPeriod), 2, RoundingMode.HALF_UP);
+            totalRepayment = loanAmount;
+            totalInterestPaid = BigDecimal.ZERO;
+        } else {
+
+
+            double monthlyInterestRate = interestRate / FinancialConstants.MONTHS_PER_YEAR /
+                    FinancialConstants.PERCENTAGE_BASE_INT;
+            BigDecimal monthlyRateDecimal = BigDecimal.valueOf(monthlyInterestRate);
+
+            BigDecimal onePlusMonthlyRate = BigDecimal.ONE.add(monthlyRateDecimal);
+            BigDecimal ratePowerTotalMonths = onePlusMonthlyRate.pow(repaymentPeriod);
+
+            BigDecimal paymentNumerator = loanAmount.multiply(monthlyRateDecimal).multiply(ratePowerTotalMonths);
+            BigDecimal paymentDenominator = ratePowerTotalMonths.subtract(BigDecimal.ONE);
+
+            monthlyPayment = paymentNumerator.divide(paymentDenominator, 2, RoundingMode.HALF_UP);
+
+            totalRepayment = monthlyPayment.multiply(BigDecimal.valueOf(repaymentPeriod));
+
+            totalInterestPaid = totalRepayment.subtract(loanAmount);
+        }
+
+        return RepaymentHistory.builder().totalAmountRepaid(totalRepayment)
+                .principalPayment(monthlyPayment).interestIncurred(totalInterestPaid).build();
+
+    }
+
     private static BigDecimal getMonthleyRate(LoanOffer loanOffer) {
         BigDecimal annualRate = BigDecimal.valueOf(loanOffer.getLoanProduct().getInterestRate())
                 .divide(BigDecimal.valueOf(FinancialConstants.PERCENTAGE_BASE_INT), 10, RoundingMode.HALF_UP);
