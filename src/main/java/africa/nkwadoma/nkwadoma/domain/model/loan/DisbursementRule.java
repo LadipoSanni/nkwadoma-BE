@@ -21,6 +21,8 @@ public class DisbursementRule {
     public void validate() throws MeedlException {
         MeedlValidator.validateDataElement(name, DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE_NAME.getMessage());
         MeedlValidator.validateDataElement(query, DisbursementRuleMessages.DISBURSEMENT_RULE_QUERY_CANNOT_BE_EMPTY.getMessage());
+    }
+    public void validateActivationStatus() throws MeedlException {
         MeedlValidator.validateObjectInstance(activationStatus, DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE_ACTIVATION_STATUS.getMessage() );
     }
 }

@@ -52,7 +52,7 @@ public class LoanProductRequest {
     @Max(value = 999, message = "Tenor cannot exceed three digits.")
     private BigInteger tenor;
     private BigDecimal minRepaymentAmount;
-    private DisbursementRule disbursementRule;
+    private DisbursementRuleRequest disbursementRule;
 
     @NotBlank(message = LOAN_PRODUCT_TERMS_AND_CONDITIONS_REQUIRED)
     private String termsAndCondition;

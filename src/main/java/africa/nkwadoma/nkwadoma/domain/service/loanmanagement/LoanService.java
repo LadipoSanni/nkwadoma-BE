@@ -11,6 +11,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.DisbursementRuleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
@@ -111,25 +112,33 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (ObjectUtils.isEmpty(loanProduct.getTotalOutstandingLoan())) {
             loanProduct.setTotalOutstandingLoan(BigDecimal.ZERO);
         }
-        loanProduct = loanProductOutputPort.save(loanProduct);
+        LoanProduct savedLoanProduct = loanProductOutputPort.save(loanProduct);
+        loanProduct.setId(savedLoanProduct.getId());
         log.info("Loan product to be saved in create loan product service method {}", loanProduct);
         investmentVehicleOutputPort.save(investmentVehicle);
-        setDisbursementRule(loanProduct);
+        setDisbursementRule(loanProduct, foundUser);
         updateNumberOfLoanProductOnMeedlPortfolio();
         return loanProduct;
     }
 
-    private void setDisbursementRule(LoanProduct loanProduct) throws MeedlException {
-        log.info("Saving loan product disbursement rules");
-        DisbursementRule disbursementRule = disbursementRuleOutputPort.save(loanProduct.getDisbursementRule());
-        loanProduct.setDisbursementRule(disbursementRule);
-        log.info("Saving loan product disbursement rules from loan product");
-        LoanProductDisbursementRule loanProductDisbursementRule = LoanProductDisbursementRule.builder()
-                .disbursementRule(disbursementRule)
-                .loanProduct(loanProduct)
-                .build();
-        loanProductDisbursementRuleOutputPort.save(loanProductDisbursementRule);
-
+    private void setDisbursementRule(LoanProduct loanProduct, UserIdentity actor) throws MeedlException {
+        if (ObjectUtils.isNotEmpty(loanProduct.getDisbursementRule())) {
+            log.info("Saving loan product disbursement rules");
+            DisbursementRule disbursementRule = loanProduct.getDisbursementRule();
+            disbursementRule.setActivationStatus(actor.getRole().isMeedlSuperAdmin()
+                    ? ActivationStatus.APPROVED
+                    : ActivationStatus.PENDING_APPROVAL);
+            disbursementRule = disbursementRuleOutputPort.save(disbursementRule);
+            loanProduct.setDisbursementRule(disbursementRule);
+            log.info("Saving loan product disbursement rules from loan product");
+            LoanProductDisbursementRule loanProductDisbursementRule = LoanProductDisbursementRule.builder()
+                    .disbursementRule(disbursementRule)
+                    .loanProduct(loanProduct)
+                    .build();
+            loanProductDisbursementRuleOutputPort.save(loanProductDisbursementRule);
+        }else {
+            log.info("Disbursement rule not provided on creating loan product");
+        }
     }
 
     private void validateSponsors(LoanProduct loanProduct) throws MeedlException {
@@ -165,10 +174,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
                 investmentVehicleOutputPort.findById(loanProduct.getInvestmentVehicleId());
         log.info("Loan product size is : {}", loanProduct.getLoanProductSize());
         log.info("Investment vehicle available balance is : {}", investmentVehicle.getTotalAvailableAmount());
-        if (loanProduct.getLoanProductSize().compareTo(investmentVehicle.getTotalAvailableAmount()) > BigInteger.ZERO.intValue()) {
-            log.warn("Attempt to create loan product that exceeds the investment vehicle available amount.");
-            throw new MeedlException("Loan product size cannot be greater than investment vehicle available amount.");
-        }
+//        if (loanProduct.getLoanProductSize().compareTo(investmentVehicle.getTotalAvailableAmount()) > BigInteger.ZERO.intValue()) {
+//            log.warn("Attempt to create loan product that exceeds the investment vehicle available amount.");
+//            throw new MeedlException("Loan product size cannot be greater than investment vehicle available amount.");
+//        }
         return investmentVehicle;
     }
 

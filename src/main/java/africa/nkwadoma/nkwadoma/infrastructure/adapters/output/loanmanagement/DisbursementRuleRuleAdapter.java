@@ -23,6 +23,7 @@ public class DisbursementRuleRuleAdapter implements DisbursementRuleOutputPort {
     public DisbursementRule save(DisbursementRule disbursementRule) throws MeedlException {
         MeedlValidator.validateObjectInstance(disbursementRule, DisbursementRuleMessages.EMPTY_DISBURSEMENT_RULE.getMessage());
         disbursementRule.validate();
+        disbursementRule.validateActivationStatus();
         DisbursementRuleEntity disbursementRuleEntity = disbursementRuleMapper.map(disbursementRule);
         disbursementRuleEntity = disbursementRuleRepository.save(disbursementRuleEntity);
         log.info("disbursement rule entity in adapter level. id: {}", disbursementRuleEntity.getId());
