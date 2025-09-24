@@ -89,7 +89,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     @Override
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanProduct, LoanMessages.INVALID_LOAN_PRODUCT_REQUEST_DETAILS.getMessage());
+        MeedlValidator.validateObjectInstance(loanProduct, LoanProductMessage.INVALID_LOAN_PRODUCT_REQUEST_DETAILS.getMessage());
         loanProduct.validateLoanProductDetails();
         validateSponsors(loanProduct);
         UserIdentity foundUser = userIdentityOutputPort.findById(loanProduct.getCreatedBy());
@@ -191,17 +191,24 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     @Override
     public LoanProduct updateLoanProduct(LoanProduct loanProduct) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanProduct, LoanMessages.LOAN_PRODUCT_REQUIRED.getMessage());
-        MeedlValidator.validateUUID(loanProduct.getId(), LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
+        MeedlValidator.validateObjectInstance(loanProduct, LoanProductMessage.LOAN_PRODUCT_REQUIRED.getMessage());
+        MeedlValidator.validateUUID(loanProduct.getId(), LoanProductMessage.INVALID_LOAN_PRODUCT_ID.getMessage());
         LoanProduct foundLoanProduct = loanProductOutputPort.findById(loanProduct.getId());
         if (foundLoanProduct.getTotalNumberOfLoanee() > BigInteger.ZERO.intValue()) {
+            log.error("Loan product {} cannot be updated as it has already been loaned out", foundLoanProduct.getName());
             throw new LoanException("Loan product " + foundLoanProduct.getName() + " cannot be updated as it has already been loaned out");
         }
-        foundLoanProduct = loanProductMapper.updateLoanProduct(foundLoanProduct, loanProduct);
-        foundLoanProduct.setUpdatedAt(LocalDateTime.now());
-        log.info("Loan product updated {}", foundLoanProduct);
+        int offerCount = loanProductOutputPort.countLoanOfferFromLoanProduct(loanProduct.getId());
+        if (offerCount == 0) {
+            foundLoanProduct = loanProductMapper.updateLoanProduct(foundLoanProduct, loanProduct);
+            foundLoanProduct.setUpdatedAt(LocalDateTime.now());
+            log.info("Loan product updated {}", foundLoanProduct);
 
-        return loanProductOutputPort.save(foundLoanProduct);
+            return loanProductOutputPort.save(foundLoanProduct);
+        }else {
+            log.error("This loan product cannot be updated because it has been used in a loan offer. {}", loanProduct.getId());
+            throw new MeedlException("This loan product cannot be updated because it has been used in a loan offer");
+        }
     }
 
     @Override

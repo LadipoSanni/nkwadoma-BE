@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.model.loan;
 
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanProductMessage;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.InvalidInputException;
@@ -108,14 +109,14 @@ public class LoanProduct {
     private void validateObligorLimit() throws MeedlException {
         MeedlValidator.validateObjectInstance(obligorLoanLimit, LoanMessages.OBLIGOR_LOAN_LIMIT_REQUIRED.getMessage());
         if (obligorLoanLimit.compareTo(BigDecimal.ZERO) <= BigDecimal.ZERO.intValue()){
-            throw new LoanException(LoanMessages.INVALID_OBLIGOR_LIMIT.getMessage());
+            throw new LoanException(LoanProductMessage.INVALID_OBLIGOR_LIMIT.getMessage());
         }
     }
 
     private void validateLoanProductSize() throws MeedlException {
         MeedlValidator.validateObjectInstance(loanProductSize, LoanMessages.LOAN_PRODUCT_SIZE_REQUIRED.getMessage());
         if (loanProductSize.compareTo(BigDecimal.ZERO) <= BigDecimal.ZERO.intValue()){
-            throw new LoanException(LoanMessages.INVALID_LOAN_PRODUCT_SIZE.getMessage());
+            throw new LoanException(LoanProductMessage.INVALID_LOAN_PRODUCT_SIZE.getMessage());
         }
     }
 
