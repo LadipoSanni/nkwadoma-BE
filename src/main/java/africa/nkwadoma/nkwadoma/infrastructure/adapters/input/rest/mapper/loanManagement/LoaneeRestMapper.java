@@ -146,7 +146,7 @@ public interface LoaneeRestMapper {
     @Mapping(target = "email"  , source = "userIdentity.email")
     EditLoaneeDetailResponse maptToEditLoaneeDetailResponse(Loanee loanee);
 
-    @Mapping(target = "loanee.userIdentity.stateOfResidence", source = "stateOfResidence")
-    @Mapping(target = "loanee.userIdentity.levelOfEduction", source = "levelOfEduction")
+    @Mapping(target = "userIdentity.stateOfResidence", source = "stateOfResidence")
+    @Mapping(target = "userIdentity.levelOfEduction", source = "levelOfEducation")
     Loanee mapUpdateLoaneeProfileToLoanee(@Valid UpdateLoaneeProfileRequest updateLoaneeProfileRequest);
 }
