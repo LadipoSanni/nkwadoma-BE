@@ -332,4 +332,10 @@ public class MeedlValidator {
             throw new MeedlException(IdentityMessages.RESPONSE_FOR_INVITATION_CAN_EITHER_APPROVED_OR_DECLINED.getMessage());
         }
     }
+
+    public static void validatePositiveNumber(int number, String message) throws MeedlException {
+        if (number <= 0){
+            throw new MeedlException(message);
+        }
+    }
 }
