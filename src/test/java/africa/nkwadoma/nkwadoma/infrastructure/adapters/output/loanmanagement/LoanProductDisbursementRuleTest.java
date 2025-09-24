@@ -1,8 +1,13 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductDisbursementRuleOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.DisbursementRuleOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.loan.DisbursementRule;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProductDisbursementRule;
+import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -21,13 +26,32 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class LoanProductDisbursementRuleTest {
     @Autowired
     private LoanProductDisbursementRuleOutputPort loanProductDisbursementRuleOutputPort;
+    @Autowired
+    private DisbursementRuleOutputPort disbursementRuleOutputPort;
+    private String loanProductDisbursementRuleId;
+    private String loanProductId;
     private String disbursementRuleId;
     private LoanProductDisbursementRule loanProductDisbursementRule;
+    private DisbursementRule disbursementRule;
+    private LoanProduct loanProduct;
+    @Autowired
+    private LoanProductOutputPort loanProductOutputPort;
 
 
     @BeforeAll
-    void setUpLoanOffer() {
+    void setUpLoanOffer() throws MeedlException {
+        disbursementRule = TestData.buildDisbursementRule();
+        loanProduct = TestData.buildTestLoanProduct();
+        loanProduct = loanProductOutputPort.save(loanProduct);
+        disbursementRule = disbursementRuleOutputPort.save(disbursementRule);
+        loanProductId = loanProduct.getId();
+        disbursementRuleId = disbursementRule.getId();
+
+
         loanProductDisbursementRule = new LoanProductDisbursementRule();
+        loanProductDisbursementRule.setDisbursementRule(disbursementRule);
+        loanProductDisbursementRule.setLoanProduct(loanProduct);
+
     }
 
 
@@ -44,12 +68,12 @@ public class LoanProductDisbursementRuleTest {
         try{
             savedLoanProductDisbursementRule = loanProductDisbursementRuleOutputPort.save(loanProductDisbursementRule);
         }catch (MeedlException exception){
-            log.info("Failed to set up loan offer {}", exception.getMessage());
+            log.info("Failed to saved loan product disbursement rule {}", exception.getMessage());
         }
         assertNotNull(savedLoanProductDisbursementRule);
         assertNotNull(savedLoanProductDisbursementRule.getId());
-        disbursementRuleId = savedLoanProductDisbursementRule.getId();
-        log.info("Disbursement rule id in adapter test {}", savedLoanProductDisbursementRule.getId());
+        loanProductDisbursementRuleId = savedLoanProductDisbursementRule.getId();
+        log.info("Loan product disbursement rule id in adapter test {}", savedLoanProductDisbursementRule.getId());
     }
 
     @Test
@@ -68,9 +92,9 @@ public class LoanProductDisbursementRuleTest {
     void findLoanProductDisbursementRuleById(){
         LoanProductDisbursementRule foundLoanProductDisbursementRule = null;
         try{
-            foundLoanProductDisbursementRule = loanProductDisbursementRuleOutputPort.findById(disbursementRuleId);
+            foundLoanProductDisbursementRule = loanProductDisbursementRuleOutputPort.findById(loanProductDisbursementRuleId);
         }catch (MeedlException exception){
-            log.info("Failed to find loan Offer {}", exception.getMessage());
+            log.info("Failed to find loan product disbursement rule {}", exception.getMessage());
         }
         assertNotNull(foundLoanProductDisbursementRule);
     }
@@ -78,10 +102,16 @@ public class LoanProductDisbursementRuleTest {
     @Test
     @Order(3)
     void deleteDisbursementRule() throws MeedlException {
-        LoanProductDisbursementRule foundLoanProductDisbursementRule = loanProductDisbursementRuleOutputPort.findById(disbursementRuleId);
+        LoanProductDisbursementRule foundLoanProductDisbursementRule = loanProductDisbursementRuleOutputPort.findById(loanProductDisbursementRuleId);
         assertNotNull(foundLoanProductDisbursementRule);
-        loanProductDisbursementRuleOutputPort.deleteById(disbursementRuleId);
-        assertThrows(MeedlException.class, ()-> loanProductDisbursementRuleOutputPort.findById(disbursementRuleId));
+        loanProductDisbursementRuleOutputPort.deleteById(loanProductDisbursementRuleId);
+        assertThrows(MeedlException.class, ()-> loanProductDisbursementRuleOutputPort.findById(loanProductDisbursementRuleId));
+    }
+
+    @AfterAll
+    void tearDown() throws MeedlException {
+        loanProductOutputPort.deleteById(loanProductId);
+        disbursementRuleOutputPort.deleteById(disbursementRuleId);
     }
 
 }

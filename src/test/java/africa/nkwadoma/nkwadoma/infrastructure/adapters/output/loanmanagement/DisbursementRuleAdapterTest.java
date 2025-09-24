@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.VendorEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.DisbursementRuleRepository;
+import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -29,7 +30,7 @@ public class DisbursementRuleAdapterTest {
 
     @BeforeAll
     void setUpLoanOffer() {
-        disbursementRule = new DisbursementRule();
+        disbursementRule = TestData.buildDisbursementRule();
     }
 
 
@@ -46,7 +47,7 @@ public class DisbursementRuleAdapterTest {
         try{
             savedDisbursementRule = disbursementRuleOutputPort.save(disbursementRule);
         }catch (MeedlException exception){
-            log.info("Failed to set up loan offer {}", exception.getMessage());
+            log.info("Failed to save disbursement rule {}", exception.getMessage());
         }
         assertNotNull(savedDisbursementRule);
         assertNotNull(savedDisbursementRule.getId());
@@ -72,7 +73,7 @@ public class DisbursementRuleAdapterTest {
         try{
             foundDisbursementRule = disbursementRuleOutputPort.findById(disbursementRuleId);
         }catch (MeedlException exception){
-            log.info("Failed to find loan Offer {}", exception.getMessage());
+            log.info("Failed to find disbursement rule {}", exception.getMessage());
         }
         assertNotNull(foundDisbursementRule);
     }

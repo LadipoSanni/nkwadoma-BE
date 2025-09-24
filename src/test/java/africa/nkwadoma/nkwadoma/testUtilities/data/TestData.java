@@ -45,6 +45,13 @@ public class TestData {
         userIdentity.setId(testId);
         return userIdentity;
     }
+    public static DisbursementRule buildDisbursementRule() {
+        return  DisbursementRule.builder()
+                .query("query")
+                .activationStatus(ActivationStatus.APPROVED)
+                .name(TestUtils.generateName(5))
+                .build();
+    }
     public static UserIdentity createTestUserIdentity(String email){
         return UserIdentity.builder()
                 .id(UUID.randomUUID().toString())
@@ -811,6 +818,7 @@ public class TestData {
                 .name("Demo")
                 .build();
     }
+
 
     private void mockValues(){
         //          if (isTestIdentityNumber(identityVerification)){

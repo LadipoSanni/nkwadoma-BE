@@ -15,9 +15,10 @@ CREATE TABLE IF NOT EXISTS disbursement_rule_entity (
 -- 3. Create LoanProductRule (LoanProductDisbursementRuleEntity)
 CREATE TABLE IF NOT EXISTS loan_product_disb_rule (
                                    id VARCHAR(36) PRIMARY KEY,
-                                   loan_product_id VARCHAR(36) NOT NULL,
+                                    loan_product_entity_id VARCHAR(36) NOT NULL,
                                    disbursement_rule_entity_id VARCHAR(36) NOT NULL,
-                                   CONSTRAINT fk_loan_product FOREIGN KEY (loan_product_id)
+
+                                   CONSTRAINT fk_loan_product FOREIGN KEY (loan_product_entity_id)
                                        REFERENCES loan_product(id),
                                    CONSTRAINT fk_disbursement_rule FOREIGN KEY (disbursement_rule_entity_id)
                                        REFERENCES disbursement_rule_entity(id)

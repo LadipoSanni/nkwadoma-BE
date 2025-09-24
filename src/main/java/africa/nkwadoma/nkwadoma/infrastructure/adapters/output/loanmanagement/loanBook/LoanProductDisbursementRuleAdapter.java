@@ -35,13 +35,13 @@ public class LoanProductDisbursementRuleAdapter implements LoanProductDisburseme
     public LoanProductDisbursementRule findById(String loanProductDisbursementRuleId) throws MeedlException {
         MeedlValidator.validateUUID(loanProductDisbursementRuleId, DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE.getMessage());
         LoanProductDisbursementRuleEntity loanProductDisbursementRuleEntity = loanProductDisbursementRuleRuleRepository.findById(loanProductDisbursementRuleId)
-                .orElseThrow(()-> new MeedlException(DisbursementRuleMessages.DISBURSEMENT_RULE_NOT_FOUND.getMessage()));
+                .orElseThrow(()-> new MeedlException(LoanProductDisbursementRuleMessages.LOAN_PRODUCT_DISBURSEMENT_RULE_NOT_FOUND.getMessage()));
         return loanProductDisbursementRuleMapper.map(loanProductDisbursementRuleEntity);
     }
 
     @Override
     public void deleteById(String loanProductDisbursementRuleId) throws MeedlException {
-        MeedlValidator.validateUUID(loanProductDisbursementRuleId, DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE.getMessage());
+        MeedlValidator.validateUUID(loanProductDisbursementRuleId, LoanProductDisbursementRuleMessages.INVALID_LOAN_PRODUCT_DISBURSEMENT_RULE_ID.getMessage());
         loanProductDisbursementRuleRuleRepository.deleteById(loanProductDisbursementRuleId);
     }
 }
