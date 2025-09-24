@@ -8,7 +8,7 @@ public enum IdentityMessages {
     INVALID_USER_ID("User id cannot be empty"),
     USER_NOT_FOUND("User not found!"),
     CLIENT_NOT_FOUND("Client not found!"),
-    USER_NOT_VERIFIED("User not verified."),
+    USER_NOT_VERIFIED("User not verified. Contact admin."),
     USER_PREVIOUSLY_VERIFIED("User has added password before. Try forgot password."),
     COLLEAGUE_EXIST("Colleague exist!"),
     USER_IDENTITY_CANNOT_BE_NULL("User identity cannot be empty."),

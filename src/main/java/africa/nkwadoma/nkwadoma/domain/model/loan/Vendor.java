@@ -4,6 +4,8 @@ import africa.nkwadoma.nkwadoma.domain.enums.*;
 import lombok.*;
 import lombok.extern.slf4j.*;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @Slf4j

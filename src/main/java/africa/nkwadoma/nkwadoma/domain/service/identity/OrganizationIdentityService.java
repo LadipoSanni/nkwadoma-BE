@@ -188,7 +188,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         ClientRepresentation clientRepresentation = identityManagerOutPutPort.getClientRepresentationByName(organizationIdentity.getName());
         if (organizationIdentity.getName().equals(clientRepresentation.getName())) {
             log.error("OrganizationIdentity already exists, before trying to create organization with name {} ", organizationIdentity.getName());
-            throw new IdentityException("Organization already exists");
+            throw new IdentityException("Organization with this name already exists");
         }
     }
 
