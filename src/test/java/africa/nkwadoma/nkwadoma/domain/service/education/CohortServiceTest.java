@@ -78,6 +78,8 @@ class CohortServiceTest {
     @Mock
     private InstituteMetricsOutputPort instituteMetricsOutputPort;
     private InstituteMetrics instituteMetrics;
+    @Mock
+    private CohortLoaneeOutputPort cohortLoaneeOutputPort;
 
 
     @BeforeEach
