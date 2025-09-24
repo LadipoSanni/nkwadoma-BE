@@ -275,6 +275,7 @@ public class LoaneeService implements LoaneeUseCase {
                 .cohort(cohort)
                 .loanee(loanee)
                 .loaneeStatus(LoaneeStatus.ADDED)
+                .employmentStatus(EmploymentStatus.UNEMPLOYED)
                 .build();
         LoaneeLoanDetail loaneeLoanDetail = saveLoaneeLoanDetails(loanee.getLoaneeLoanDetail());
         cohortLoanee.setLoaneeLoanDetail(loaneeLoanDetail);
@@ -944,9 +945,24 @@ public class LoaneeService implements LoaneeUseCase {
         MeedlValidator.validateObjectInstance(employmentStatus,"Employment status cannot be empty");
         CohortLoanee cohortLoanee = cohortLoaneeOutputPort.findByLoaneeAndCohortId(loaneeId,cohortId);
         log.info("found cohort loanee === {}",cohortLoanee);
+        if (ObjectUtils.isEmpty(cohortLoanee)) {
+            throw new IdentityException(LoaneeMessages.LOANEE_DOES_NOT_EXIST_IN_COHORT.getMessage());
+        }
+        if (cohortLoanee.getEmploymentStatus().equals(employmentStatus)) {
+            throw new IdentityException("Employment status is already set to "+ employmentStatus.toString().toLowerCase());
+        }
         cohortLoanee.setEmploymentStatus(employmentStatus);
         cohortLoanee = cohortLoaneeOutputPort.save(cohortLoanee);
         log.info("saved cohort loanee employment status === {}",cohortLoanee.getEmploymentStatus());
+        Cohort loaneeCohort = cohortLoanee.getCohort();
+        if (cohortLoanee.getEmploymentStatus().equals(EmploymentStatus.EMPLOYED)) {
+            loaneeCohort.setNumberEmployed(loaneeCohort.getNumberEmployed() + 1);
+            cohortOutputPort.save(loaneeCohort);
+        }else {
+            loaneeCohort.setNumberEmployed(loaneeCohort.getNumberEmployed() - 1);
+            cohortOutputPort.save(loaneeCohort);
+        }
+
         return cohortLoanee;
     }
 
