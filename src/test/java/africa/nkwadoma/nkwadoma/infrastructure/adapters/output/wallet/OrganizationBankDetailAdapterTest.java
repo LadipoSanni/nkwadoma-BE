@@ -46,7 +46,8 @@ class OrganizationBankDetailAdapterTest {
                 .name("Test Org")
                 .email("mak@email.com")
                 .requestedInvitationDate(LocalDateTime.now())
-                .organizationType(OrganizationType.COOPERATE)
+                .organizationType(OrganizationType.INSTITUTE_ORGANIZATION)
+                .isNotToValidateOtherOrganizationDetails(Boolean.TRUE)
                 .build();
         bankDetail = BankDetail.builder()
                 .bankName("Test Account")

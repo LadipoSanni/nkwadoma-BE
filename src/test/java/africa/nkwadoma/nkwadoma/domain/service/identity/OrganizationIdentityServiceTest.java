@@ -12,8 +12,10 @@ import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.Asyn
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.OrganizationType;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
@@ -120,6 +122,7 @@ class OrganizationIdentityServiceTest {
         roseCouture.setEmail("iamoluchimercy@gmail.com");
         roseCouture.setTin("7682-5627");
         roseCouture.setRcNumber("RC8789905");
+        roseCouture.setOrganizationType(OrganizationType.INSTITUTE_ORGANIZATION);
         roseCouture.setServiceOfferings(List.of(new ServiceOffering()));
         roseCouture.getServiceOfferings().get(0).setIndustry(Industry.EDUCATION);
         roseCouture.setPhoneNumber("09876365713");
@@ -129,13 +132,13 @@ class OrganizationIdentityServiceTest {
         roseCouture.setEnabled(Boolean.TRUE);
 
         superAdmin = TestData.createTestUserIdentity("superAdmin@grr.la");
-        portfolio = Portfolio.builder().portfolioName("Meedl").build();
+        portfolio = Portfolio.builder().portfolioName(MeedlConstants.MEEDL).build();
 
     }
 
     @Test
     void inviteOrganization() {
-        OrganizationIdentity invitedOrganisation = new OrganizationIdentity();
+        OrganizationIdentity invitedOrganisation ;
         try {
             superAdmin.setRole(IdentityRole.MEEDL_SUPER_ADMIN);
             roseCouture.setCreatedBy(superAdmin.getId());
@@ -147,7 +150,7 @@ class OrganizationIdentityServiceTest {
             when(organizationEmployeeIdentityOutputPort.save(employeeSarah)).thenReturn(employeeSarah);
             when(identityManagerOutPutPort.getClientRepresentationByName(roseCouture.getName())).thenReturn(new ClientRepresentation());
             when(identityManagerOutPutPort.getUserByEmail(roseCouture.getOrganizationEmployees().get(0).getMeedlUser().getEmail())).thenReturn(Optional.empty());
-            doNothing().when(asynchronousMailingOutputPort).sendEmailToInvitedOrganization(any(UserIdentity.class));
+            doNothing().when(asynchronousMailingOutputPort).sendEmailToInvitedOrganization(any(UserIdentity.class), anyString());
             when(portfolioOutputPort.findPortfolio(any(Portfolio.class))).thenReturn(portfolio);
             when(portfolioOutputPort.save(any(Portfolio.class))).thenReturn(portfolio);
 //            when()
@@ -314,6 +317,7 @@ class OrganizationIdentityServiceTest {
     void reactivateOrganization() {
         try {
             roseCouture.setEnabled(Boolean.TRUE);
+            roseCouture.setActivationStatus(ActivationStatus.DEACTIVATED);
             doNothing().when(identityManagerOutPutPort).enableClient(roseCouture);
             when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
             when(identityManagerOutPutPort.enableUserAccount(sarah)).thenReturn(sarah);
@@ -342,6 +346,7 @@ class OrganizationIdentityServiceTest {
     void deactivateOrganization() {
         try {
             roseCouture.setEnabled(Boolean.FALSE);
+            roseCouture.setActivationStatus(ActivationStatus.ACTIVE);
             doNothing().when(identityManagerOutPutPort).disableClient(roseCouture);
             when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
             when(identityManagerOutPutPort.disableUserAccount(sarah)).thenReturn(sarah);
@@ -379,12 +384,12 @@ class OrganizationIdentityServiceTest {
 
         when(userIdentityOutputPort.findById(mockId)).thenReturn(sarah);
         when(userIdentityOutputPort.findById(roseCouture.getCreatedBy())).thenReturn(sarah);
-        sarah.setRole(IdentityRole.ORGANIZATION_ADMIN);
+        sarah.setRole(IdentityRole.MEEDL_SUPER_ADMIN);
         employeeSarah.setOrganization(roseCouture.getId());
         when(organizationEmployeeIdentityOutputPort.findByCreatedBy(mockId)).thenReturn(employeeSarah);
 
-
         when(organizationIdentityOutputPort.findByIdProjection(roseCouture.getId())).thenReturn(roseCouture);
+        when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
         when(organizationIdentityOutputPort.getServiceOfferings(roseCouture.getId())).thenReturn(roseCouture.getServiceOfferings());
         when(organizationLoanDetailOutputPort.findByOrganizationId(roseCouture.getId())).thenReturn(loanDetail);
         when(loanOfferOutputPort.countNumberOfPendingLoanOfferForOrganization(roseCouture.getId())).thenReturn(3);
@@ -411,6 +416,7 @@ class OrganizationIdentityServiceTest {
         when(userIdentityOutputPort.findById(mockId)).thenReturn(sarah);
         when(userIdentityOutputPort.findById(roseCouture.getCreatedBy())).thenReturn(sarah);
         when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
+        when(organizationIdentityOutputPort.findByIdProjection(roseCouture.getId())).thenReturn(roseCouture);
         when(organizationIdentityOutputPort.getServiceOfferings(roseCouture.getId())).thenReturn(roseCouture.getServiceOfferings());
         when(organizationLoanDetailOutputPort.findByOrganizationId(roseCouture.getId())).thenReturn(loanDetail);
         when(loanOfferOutputPort.countNumberOfPendingLoanOfferForOrganization(roseCouture.getId())).thenReturn(3);
@@ -459,7 +465,7 @@ class OrganizationIdentityServiceTest {
         when(userIdentityOutputPort.findById(roseCouture.getCreatedBy())).thenReturn(sarah);
         roseCouture.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
         when(organizationEmployeeIdentityOutputPort.save(employeeSarah)).thenReturn(employeeSarah);
-        doNothing().when(asynchronousMailingOutputPort).sendEmailToInvitedOrganization(any(UserIdentity.class));
+        doNothing().when(asynchronousMailingOutputPort).sendEmailToInvitedOrganization(any(UserIdentity.class), anyString());
         when(meedlNotificationOutputPort.save(any(MeedlNotification.class))).thenReturn(new MeedlNotification());
         when(portfolioOutputPort.findPortfolio(any(Portfolio.class))).thenReturn(portfolio);
         when(portfolioOutputPort.save(any(Portfolio.class))).thenReturn(portfolio);

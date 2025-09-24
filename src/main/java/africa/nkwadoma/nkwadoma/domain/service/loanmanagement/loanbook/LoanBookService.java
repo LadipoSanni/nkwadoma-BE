@@ -15,6 +15,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLo
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
@@ -516,7 +517,7 @@ public class LoanBookService implements LoanBookUseCase {
     private void updateMeedlPortfolio(Loanee loanee) throws MeedlException {
         boolean newLoanee =  cohortLoaneeOutputPort.checkIfLoaneeIsNew(loanee.getId());
         if(newLoanee){
-            Portfolio portfolio = Portfolio.builder().portfolioName("Meedl").build();
+            Portfolio portfolio = Portfolio.builder().portfolioName(MeedlConstants.MEEDL).build();
             portfolio = portfolioOutputPort.findPortfolio(portfolio);
             portfolio.setNumberOfLoanees(portfolio.getNumberOfLoanees() + 1);
             portfolioOutputPort.save(portfolio);

@@ -35,6 +35,7 @@ public interface InvestmentVehicleFinancierRepository extends JpaRepository<Inve
             ivf.financier_id,
             ivf.id AS investment_id,
             ivf.amount_invested,
+            ivf.date_invested,
             CASE
                 WHEN fe.financier_type = 'INDIVIDUAL' THEN CONCAT(u.first_name, ' ', u.last_name)
                 WHEN fe.financier_type = 'COOPERATE' THEN o.name
@@ -63,11 +64,20 @@ public interface InvestmentVehicleFinancierRepository extends JpaRepository<Inve
         COALESCE(fd.designations, '{}') AS investment_vehicle_designation,
         fi.financier_name,
         SUM(fi.amount_invested) AS total_amount_invested,
-        COUNT(fi.investment_id) AS number_of_investments
+        COUNT(fi.investment_id) AS number_of_investments,
+        MAX(fi.date_invested) AS latest_date_invested
     FROM financier_investments fi
     LEFT JOIN financier_designations fd ON fd.financier_id = fi.financier_id
     GROUP BY fi.financier_id, fi.financier_name, fd.designations
-""", nativeQuery = true)
+""",
+            countQuery = """
+    SELECT COUNT(DISTINCT ivf.financier_id)
+    FROM investment_vehicle_financier_entity ivf
+    JOIN financier_entity fe ON fe.id = ivf.financier_id
+    WHERE ivf.investment_vehicle_id = :investmentVehicleId
+    AND (:activationStatus IS NULL OR fe.activation_status = :activationStatus)
+""",
+            nativeQuery = true)
     Page<FinancierWithDesignationProjection> findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatus(
             @Param("investmentVehicleId") String investmentVehicleId,
             @Param("activationStatus") String activationStatus,
@@ -131,5 +141,13 @@ public interface InvestmentVehicleFinancierRepository extends JpaRepository<Inve
             @Param("investmentVehicleName") String investmentVehicleName,
             @Param("financierId") String financierId, Pageable pageRequest);
 
-    Optional<InvestmentVehicleFinancierEntity> findByFinancier_IdAndInvestmentVehicle_Id(String financierId, String investmentVehicleId);
+    int countByFinancier_IdAndInvestmentVehicle_Id(String financierId, String investmentVehicleId);
+
+    @Query("""
+        SELECT ivf
+        FROM InvestmentVehicleFinancierEntity ivf
+        WHERE ivf.financier.id = :financierId
+        ORDER BY ivf.dateInvested DESC
+        """)
+    Optional<InvestmentVehicleFinancierEntity> findRecentInvestmentVehicleFinancierIsAddedTo(String financierId);
 }

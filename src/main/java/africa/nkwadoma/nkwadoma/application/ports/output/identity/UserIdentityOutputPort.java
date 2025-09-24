@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface UserIdentityOutputPort {
     UserIdentity save(UserIdentity userIdentity) throws MeedlException;
@@ -21,7 +22,7 @@ public interface UserIdentityOutputPort {
     UserIdentity findByBvn(String bvn) throws MeedlException;
     List<UserIdentity> findAllByRole(IdentityRole identityRole) throws MeedlException;
 
-    List<UserIdentity> findAllByRoles(List<IdentityRole> roles) throws MeedlException;
+    List<UserIdentity> findAllByRoles(Set<IdentityRole> roles) throws MeedlException;
 
     boolean checkIfUserExistByEmail(String email) throws MeedlException;
 

@@ -31,6 +31,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @Component
@@ -185,7 +186,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
 
     @Override
     public void notifyAllBackOfficeAdminForDeactivatedAccount(OrganizationIdentity organization) throws MeedlException {
-        List<UserIdentity> backOfficeAdmins = userIdentityOutputPort.findAllByRoles(List.of(IdentityRole.MEEDL_SUPER_ADMIN, IdentityRole.MEEDL_ADMIN, IdentityRole.PORTFOLIO_MANAGER));
+        List<UserIdentity> backOfficeAdmins = userIdentityOutputPort.findAllByRoles(Set.of(IdentityRole.MEEDL_SUPER_ADMIN, IdentityRole.MEEDL_ADMIN, IdentityRole.PORTFOLIO_MANAGER));
         for (UserIdentity backOfficeAdmin : backOfficeAdmins) {
             MeedlNotification notification = buildOrganizationStatusNotification(
                     backOfficeAdmin,
@@ -199,7 +200,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
     }
     @Override
     public void notifyAllBackOfficeAdminForReactivatedAccount(OrganizationIdentity organization) throws MeedlException {
-        List<UserIdentity> backOfficeAdmins = userIdentityOutputPort.findAllByRoles(List.of(IdentityRole.MEEDL_SUPER_ADMIN, IdentityRole.MEEDL_ADMIN, IdentityRole.PORTFOLIO_MANAGER));
+        List<UserIdentity> backOfficeAdmins = userIdentityOutputPort.findAllByRoles(Set.of(IdentityRole.MEEDL_SUPER_ADMIN, IdentityRole.MEEDL_ADMIN, IdentityRole.PORTFOLIO_MANAGER));
         for (UserIdentity backOfficeAdmin : backOfficeAdmins) {
             MeedlNotification notification = buildOrganizationStatusNotification(
                     backOfficeAdmin,
@@ -265,12 +266,12 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                 .contentDetail(validationErrorMessage.toString())
                 .notificationFlag(NotificationFlag.REPAYMENT_UPLOAD_FAILURE)
                 .build();
-        notifyUploadFailureActors(List.of(IdentityRole.MEEDL_ADMIN), meedlNotification, foundActor);
+        notifyUploadFailureActors(Set.of(IdentityRole.MEEDL_ADMIN), meedlNotification, foundActor);
         log.info("Failure notification sent to the actor with email : {}  and other meedl admins", foundActor.getEmail());
 
     }
 
-    private void notifyUploadFailureActors(List<IdentityRole> identityRoles, MeedlNotification meedlNotification, UserIdentity foundActor) throws MeedlException {
+    private void notifyUploadFailureActors(Set<IdentityRole> identityRoles, MeedlNotification meedlNotification, UserIdentity foundActor) throws MeedlException {
         meedlNotificationUsecase.sendNotification(meedlNotification);
         List<UserIdentity> allActorsForFailureNotification = userIdentityOutputPort
                 .findAllByRoles(identityRoles);
@@ -298,7 +299,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                 .contentDetail(validationErrorMessage.toString())
                 .notificationFlag(NotificationFlag.LOANEE_DATA_UPLOAD_FAILURE)
                 .build();
-        notifyUploadFailureActors(List.of(IdentityRole.MEEDL_ADMIN), meedlNotification, foundActor);
+        notifyUploadFailureActors(Set.of(IdentityRole.MEEDL_ADMIN), meedlNotification, foundActor);
         log.info("Failure notification sent to the actor with email : {} ", foundActor.getEmail());
     }
     @Override
@@ -344,7 +345,8 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
     }
 
     private void notifyPortfolioManagers(MeedlNotification meedlNotification) throws MeedlException {
-        for (UserIdentity userIdentity : userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER)) {
+        List<UserIdentity> rolesToNotify = userIdentityOutputPort.findAllByRoles(Set.of(IdentityRole.PORTFOLIO_MANAGER, IdentityRole.MEEDL_SUPER_ADMIN, IdentityRole.PORTFOLIO_MANAGER_ASSOCIATE));
+        for (UserIdentity userIdentity : rolesToNotify) {
             meedlNotification.setUser(userIdentity);
             log.info("Notifying portfolio manager on {} ", meedlNotification.getTitle());
         meedlNotificationUsecase.sendNotification(meedlNotification);
@@ -419,8 +421,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                                                  UserIdentity userIdentity,UserIdentity createdBy) throws MeedlException {
         MeedlNotification meedlNotification = MeedlNotification.builder()
                 .title("Decline colleague invitation")
-                .contentDetail("Decline invitation for "+organizationEmployeeIdentity.getMeedlUser().getFirstName()+
-                        " "+organizationEmployeeIdentity.getMeedlUser().getLastName())
+                .contentDetail("Decline invitation for "+organizationEmployeeIdentity.getMeedlUser().getFullName())
                 .senderFullName(userIdentity.getFullName())
                 .senderMail(userIdentity.getEmail())
                 .notificationFlag(NotificationFlag.DECLINE_COLLEAGUE_INVITE)
@@ -433,9 +434,27 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
         meedlNotificationUsecase.sendNotification(meedlNotification);
         log.info("notification sent ====---=-==---=-");
     }
+    @Override
+    public void sendFinancierApprovalOrDeclineNotification(Financier financier, UserIdentity actor, UserIdentity inviter) throws MeedlException {
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .title("Financier invitation has been "+financier.getActivationStatus().getStatusName())
+                .contentDetail("The financier with name  "+financier.getUserIdentity().getFullName()+
+                        " has been "+financier.getActivationStatus().getStatusName().toLowerCase())
+                .senderFullName(actor.getFullName())
+                .senderMail(actor.getEmail())
+                .notificationFlag(NotificationFlag.FINANCIER_INVITATION_RESPONSE)
+                .timestamp(LocalDateTime.now())
+                .contentId(financier.getId())
+                .callToAction(true)
+                .user(inviter)
+                .build();
+        log.info("done building notification for financier invitation response{}", meedlNotification);
+        meedlNotificationUsecase.sendNotification(meedlNotification);
+        log.info("Financier invite response notification sent!");
+    }
 
     @Override
-    public void sendFinancierInvitationNotificationToSuperAdmin(List<Financier> financiersToMail, UserIdentity actor, UserIdentity meedlSuperAdmin) {
+    public void sendFinancierInvitationApprovalNotificationToSuperAdmin(List<Financier> financiersToMail, UserIdentity actor, UserIdentity meedlSuperAdmin) {
 
         financiersToMail.forEach(financier -> {
             MeedlNotification meedlNotification = MeedlNotification.builder()
@@ -450,14 +469,15 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                     .build();
 
             if (financier.getFinancierType().equals(FinancierType.COOPERATE)){
-                meedlNotification.setContentDetail("Request for cooperation financier invitation ");
+                meedlNotification.setContentDetail("Request for cooperation financier approval ");
             }else {
-                meedlNotification.setContentDetail("Request for an individual financier invitation ");
+                meedlNotification.setContentDetail("Request for an individual financier approval ");
             }
-            log.info("done building notification for financier invitation colleague invitation{}", meedlNotification);
+            log.info("Done building notification for financier invitation approval request sending next.{}", meedlNotification);
             try {
                 meedlNotificationUsecase.sendNotification(meedlNotification);
             } catch (MeedlException e) {
+                log.error("Error sending approval notification", e);
                 throw new RuntimeException(e);
             }
         });

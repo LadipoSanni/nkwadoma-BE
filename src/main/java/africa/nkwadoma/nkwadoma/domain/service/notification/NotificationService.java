@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.Emai
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.EmailTokenOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
@@ -14,6 +15,9 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanDecision;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.meedlexception.MeedlNotificationException;
+import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.notification.Email;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -49,8 +53,8 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
     private String baseUrl;
 
     @Override
-    public void sendEmail(UserIdentity userIdentity) throws MeedlException {
-        Context context = emailOutputPort.getNameAndLinkContext(getLink(userIdentity), userIdentity.getFirstName());
+    public void sendEmail(UserIdentity userIdentity, String organizationName) throws MeedlException {
+        Context context = emailOutputPort.getOrganizationNameAndUserNameAndLinkContext(getLink(userIdentity), userIdentity.getFirstName(), organizationName);
         Email email = Email.builder()
                 .context(context)
                 .subject(EMAIL_INVITATION_SUBJECT.getMessage())
@@ -64,7 +68,7 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
 
     @Override
     public void sendForgotPasswordEmail(UserIdentity userIdentity) throws MeedlException {
-        Context context = emailOutputPort.getNameAndLinkContext(getForgotPasswordLink(userIdentity),userIdentity.getFirstName());
+        Context context = emailOutputPort.getUserFirstNameAndLinkContext(getForgotPasswordLink(userIdentity),userIdentity.getFirstName());
         Email email = Email.builder()
                 .context(context)
                 .subject(RESET_PASSWORD.getMessage())
@@ -76,17 +80,39 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
 
     }
 
+    @Override
+    public void sendDeactivationEmail(OrganizationEmployeeIdentity organizationEmployee, OrganizationIdentity organization, String deactivationReason) {
+        Context context = emailOutputPort.getDeactivateOrganizationContext(organizationEmployee.getMeedlUser().getFirstName(),
+                organization.getName(),deactivationReason);
+        Email email = Email.builder()
+                .context(context)
+                .subject(DEACTIVATE_ORGANIZATION.getMessage())
+                .to(organizationEmployee.getMeedlUser().getEmail())
+                .template(DEACTIVATE_ORGANIZATION_TEMPLATE.getMessage())
+                .firstName(organizationEmployee.getMeedlUser().getFirstName())
+                .build();
+        sendMail(organizationEmployee.getMeedlUser(), email);
+    }
+
 
     @Override
     public void sendColleagueEmail(String organizationName,UserIdentity userIdentity) throws MeedlException {
         Context context = emailOutputPort.getNameAndLinkContextAndIndustryName(getLink(userIdentity),
-                                                                               userIdentity.getFirstName(),
+                                                                                userIdentity,
                                                                                 organizationName);
+        String template = "";
+        log.info("Notification service user role {}", userIdentity.getRole());
+        if (organizationName.equalsIgnoreCase(MeedlConstants.MEEDL)){
+            template = MEEDL_COLLEAGUE_INVITATION_TEMPLATE.getMessage();
+        }else {
+            template = ORGANIZATION_COLLEAGUE_INVITATION_TEMPLATE.getMessage();
+        }
+        log.info("Template for email : {}", template);
         Email email = Email.builder()
                 .context(context)
                 .subject(EMAIL_INVITATION_SUBJECT.getMessage())
                 .to(userIdentity.getEmail())
-                .template(COLLEAGUE_INVITATION_TEMPLATE.getMessage())
+                .template(template)
                 .firstName(userIdentity.getFirstName())
                 .build();
         sendMail(userIdentity, email);
@@ -160,7 +186,7 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
 
     @Override
     public void sendLoaneeHasBeenReferEmail(UserIdentity userIdentity) throws MeedlException {
-        Context context = emailOutputPort.getNameAndLinkContext(getLink(userIdentity),userIdentity.getFirstName());
+        Context context = emailOutputPort.getUserFirstNameAndLinkContext(getLink(userIdentity),userIdentity.getFirstName());
         Email email = Email.builder()
                 .context(context)
                 .subject(LoaneeMessages.LOANEE_HAS_BEEN_REFERRED.getMessage())
@@ -273,11 +299,11 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
     }
 
     @Override
-    public Page<MeedlNotification> viewAllNotification(String id, int pageSize, int pageNumber) throws MeedlException {
-        MeedlValidator.validateUUID(id,"User id cannot empty");
+    public Page<MeedlNotification> viewAllNotification(String userId, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(userId,UserMessages.INVALID_USER_ID.getMessage());
         MeedlValidator.validatePageNumber(pageNumber);
         MeedlValidator.validatePageSize(pageSize);
-        UserIdentity userIdentity = userIdentityOutputPort.findById(id);
+        UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
         return meedlNotificationOutputPort.findAllNotificationBelongingToAUser(userIdentity.getId(),pageSize,pageNumber);
     }
 
@@ -298,15 +324,26 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
     }
 
     @Override
-    public void inviteFinancierToPlatform(UserIdentity userIdentity) throws MeedlException {
-        Context context = emailOutputPort.getNameAndLinkContext(getLink(userIdentity),userIdentity.getFirstName());
+    public void inviteIndividualFinancierToPlatform(UserIdentity userIdentity) throws MeedlException {
+        Context context = emailOutputPort.getUserFirstNameAndLinkContext(getLink(userIdentity),userIdentity.getFirstName());
         Email email = buildEmail(userIdentity, context,
                 FinancierMessages.FINANCIER_INVITE_TO_PLATFORM_TITLE.getMessage(),
-                FinancierMessages.FINANCIER_INVITE_TO_PLATFORM.getMessage());
+                FinancierMessages.INDIVIDUAL_FINANCIER_INVITE_TO_PLATFORM.getMessage());
         sendMail(userIdentity, email);
     }
+
     @Override
-    public void inviteFinancierToVehicle(UserIdentity userIdentity, InvestmentVehicle investmentVehicle) throws MeedlException {
+    public void inviteCooperateFinancierToPlatform(Financier financier) throws MeedlException {
+        UserIdentity userIdentity = financier.getUserIdentity();
+        Context context = emailOutputPort.getFirstNameAndCompanyAndLinkContext(getLink(userIdentity),userIdentity.getFirstName(), financier.getName());
+        Email email = buildEmail(userIdentity, context,
+                FinancierMessages.FINANCIER_INVITE_TO_PLATFORM_TITLE.getMessage(),
+                FinancierMessages.COOPERATE_FINANCIER_INVITE_TO_PLATFORM.getMessage());
+        sendMail(userIdentity, email);
+    }
+
+    @Override
+    public void inviteIndividualFinancierToVehicle(UserIdentity userIdentity, InvestmentVehicle investmentVehicle) throws MeedlException {
         Context context = emailOutputPort.getNameAndLinkContextAndInvestmentVehicleName(getLinkFinancierToVehicle(userIdentity, investmentVehicle),userIdentity.getFirstName(), investmentVehicle.getName());
         Email email = buildEmail(userIdentity, context,
                 FinancierMessages.FINANCIER_INVITE_TO_VEHICLE.getMessage(),
@@ -314,6 +351,18 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
 
         sendMail(userIdentity, email);
     }
+
+    @Override
+    public void inviteCooperateFinancierToVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
+        UserIdentity userIdentity = financier.getUserIdentity();
+        Context context = emailOutputPort.getFirstNameAndCompanyNameAndLinkContextAndInvestmentVehicleName(getLinkFinancierToVehicle(userIdentity, investmentVehicle),userIdentity.getFirstName(), investmentVehicle.getName(), financier.getName());
+        Email email = buildEmail(userIdentity, context,
+                FinancierMessages.FINANCIER_INVITE_TO_VEHICLE_TITLE.getMessage(),
+                FinancierMessages.COOPERATE_FINANCIER_INVITE_TO_VEHICLE.getMessage());
+
+        sendMail(userIdentity, email);
+    }
+
     private String getLinkFinancierToVehicle(UserIdentity userIdentity, InvestmentVehicle investmentVehicle) throws MeedlException {
         String token = emailTokenManager.generateToken(userIdentity.getEmail());
         log.info("Generated token for inviting financier to vehicle: {}", token);

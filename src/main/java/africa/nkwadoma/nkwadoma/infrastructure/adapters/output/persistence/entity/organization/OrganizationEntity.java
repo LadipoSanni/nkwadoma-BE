@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.OrganizationType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -23,7 +24,7 @@ public class OrganizationEntity {
     private String websiteAddress;
     private LocalDateTime invitedDate;
     private LocalDateTime requestedInvitationDate;
-    private String registrationNumber;
+//    private String registrationNumber;
     @Column(unique = true)
     private String taxIdentity;
     private String phoneNumber;
@@ -39,4 +40,6 @@ public class OrganizationEntity {
     private String bannerImage;
     private String address;
     private String officeAddress;
+    @Enumerated(EnumType.STRING)
+    private OrganizationType organizationType;
 }

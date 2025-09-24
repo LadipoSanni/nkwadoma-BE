@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.Inves
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -96,7 +97,7 @@ class LoanProductServiceTest {
         loanProduct.setPageNumber(0);
         loanProduct.setVendors(List.of(vendor));
         loanProduct.setSponsors(List.of(financier));
-        portfolio = Portfolio.builder().portfolioName("Meedl").build();
+        portfolio = Portfolio.builder().portfolioName(MeedlConstants.MEEDL).build();
 
 
     }
@@ -106,7 +107,7 @@ class LoanProductServiceTest {
             when(userIdentityOutputPort.findById(any())).thenReturn(new UserIdentity());
             when(identityManagerOutPutPort.verifyUserExistsAndIsEnabled(any())).thenReturn(new UserIdentity());
             when(loanProductOutputPort.save(loanProduct)).thenReturn(loanProduct);
-            when(investmentVehicleFinancierOutputPort.findAllByFinancierIdAndInvestmentVehicleId(financier.getId(), investmentVehicle.getId())).thenReturn(Optional.of(InvestmentVehicleFinancier.builder().build()));
+            when(investmentVehicleFinancierOutputPort.checkIfFinancierExistInVehicle(financier.getId(), investmentVehicle.getId())).thenReturn(1);
             when(investmentVehicleOutputPort.findById(loanProduct.getId()))
                     .thenReturn(investmentVehicle);
             when(portfolioOutputPort.findPortfolio(any(Portfolio.class))).thenReturn(portfolio);
@@ -288,6 +289,9 @@ class LoanProductServiceTest {
     @Test
     void deleteLoanProductWithValidId(){
         try {
+            when(loanProductOutputPort.findById(loanProduct.getId())).thenReturn(loanProduct);
+            when(investmentVehicleOutputPort.findById(anyString())).thenReturn(investmentVehicle);
+            when(investmentVehicleOutputPort.save(investmentVehicle)).thenReturn(investmentVehicle);
             doNothing().when(loanProductOutputPort).deleteById(loanProduct.getId());
             loanService.deleteLoanProductById(loanProduct);
             verify(loanProductOutputPort, times(1)).deleteById(loanProduct.getId());

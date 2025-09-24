@@ -20,7 +20,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.*;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,7 +27,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages.ORGANIZATION_NOT_FOUND;
@@ -50,7 +48,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     public OrganizationIdentity save(OrganizationIdentity organizationIdentity) throws MeedlException {
         log.info("Organization identity before saving {}", organizationIdentity);
         MeedlValidator.validateObjectInstance(organizationIdentity, OrganizationMessages.ORGANIZATION_MUST_NOT_BE_EMPTY.getMessage());
-        if (ObjectUtils.isNotEmpty(organizationIdentity.getOrganizationType())){
+        if (organizationIdentity.isNotToValidateOtherOrganizationDetails()){
             organizationIdentity.validateCooperateOrganization();
         }else {
             organizationIdentity.validate();
@@ -63,10 +61,11 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     }
 
     @Override
-    public Optional<OrganizationEntity> findByRcNumber(String rcNumber) throws MeedlException {
+    public Optional<OrganizationIdentity> findByRcNumber(String rcNumber) throws MeedlException {
         log.info("Find organization with rcNumber {}", rcNumber);
         MeedlValidator.validateDataElement(rcNumber, OrganizationMessages.RC_NUMBER_IS_REQUIRED.getMessage());
-        return organizationEntityRepository.findByRcNumber(rcNumber);
+        Optional<OrganizationEntity> optionalOrganizationEntity = organizationEntityRepository.findByRcNumber(rcNumber);
+        return optionalOrganizationEntity.map(organizationIdentityMapper::toOrganizationIdentity);
     }
 
 
@@ -297,6 +296,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
 
         OrganizationProjection organizationProjection =
                 organizationEntityRepository.findByIdProjection(organizationId);
+        log.info("number of cohorts at the adapter level of view org {}", organizationProjection.getNumberOfCohort());
 
         return organizationIdentityMapper.mapProjecttionToOrganizationIdentity(organizationProjection);
     }

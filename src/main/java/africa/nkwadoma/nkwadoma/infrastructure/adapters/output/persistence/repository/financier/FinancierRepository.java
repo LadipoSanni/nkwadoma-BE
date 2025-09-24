@@ -168,9 +168,10 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
 
     @Query("""
     SELECT f.id as id , organization.name as name , f.totalAmountInvested as totalAmountInvested,
-        f.activationStatus as activationStatus , f.financierType as financierType
-             
-         FROM FinancierEntity f     
+        f.activationStatus as activationStatus , f.financierType as financierType,
+        f.accreditationStatus as accreditationStatus, f.identity as identity, f.createdAt as createdAt
+
+         FROM FinancierEntity f
         JOIN OrganizationEntity  organization on  organization.id = f.identity
         JOIN OrganizationEmployeeEntity  organizationEmployee on organizationEmployee.organization = organization.id
         JOIN UserEntity user on user.id = organizationEmployee.meedlUser.id

@@ -336,6 +336,74 @@ class LoanAdapterTest {
     }
 
 
+    @Test
+    @Order(11)
+    void searchAllLoanDisbursalByLoaneeName(){
+        Page<Loan> loans = Page.empty();
+        loan.setPageNumber(pageNumber);
+        loan.setPageSize(pageSize);
+        loan.setName("john");
+        try{
+            loans = loanOutputPort.searchLoanByLoaneeName(loan);
+        }catch (MeedlException e){
+            log.error("Error finding loans : {}", e.getMessage());
+        }
+        assertNotNull(loans);
+        assertEquals(1,loans.getContent().size());
+    }
+
+    @Test
+    @Order(12)
+    void searchAllLoanDisbursalByLoaneeNameAndOrganizationId(){
+        Page<Loan> loans = Page.empty();
+        loan.setPageNumber(pageNumber);
+        loan.setPageSize(pageSize);
+        loan.setName("john");
+        loan.setOrganizationId(organizationIdentity.getId());
+        try{
+            loans = loanOutputPort.searchLoanByLoaneeName(loan);
+        }catch (MeedlException e){
+            log.error("Error finding loans : {}", e.getMessage());
+        }
+        assertNotNull(loans);
+        assertEquals(1,loans.getContent().size());
+    }
+
+    @Test
+    @Order(13)
+    void searchAllLoanDisbursalByLoaneeNameAndWrongOrganizationId(){
+        Page<Loan> loans = Page.empty();
+        loan.setPageNumber(pageNumber);
+        loan.setPageSize(pageSize);
+        loan.setName("john");
+        loan.setOrganizationId(UUID.randomUUID().toString());
+        try{
+            loans = loanOutputPort.searchLoanByLoaneeName(loan);
+        }catch (MeedlException e){
+            log.error("Error finding loans : {}", e.getMessage());
+        }
+        assertTrue(loans.isEmpty());
+    }
+
+    @Test
+    @Order(12)
+    void searchAllLoanDisbursalByLoaneeNameAndOrganizationIdAndProgramId(){
+        Page<Loan> loans = Page.empty();
+        loan.setPageNumber(pageNumber);
+        loan.setPageSize(pageSize);
+        loan.setName("john");
+        loan.setOrganizationId(organizationIdentity.getId());
+        loan.setProgramId(program.getId());
+
+        try{
+            loans = loanOutputPort.searchLoanByLoaneeName(loan);
+        }catch (MeedlException e){
+            log.error("Error finding loans : {}", e.getMessage());
+        }
+        assertNotNull(loans);
+        assertEquals(1,loans.getContent().size());
+    }
+
     @AfterAll
     void cleanUp() throws MeedlException {
         VendorEntity foundGemsVendorEntity = vendorEntityRepository.findByVendorName(loanProduct.getVendors().get(0).getVendorName());

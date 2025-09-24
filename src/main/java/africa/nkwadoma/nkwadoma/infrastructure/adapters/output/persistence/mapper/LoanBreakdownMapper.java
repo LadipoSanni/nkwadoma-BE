@@ -12,4 +12,6 @@ public interface LoanBreakdownMapper {
     List<LoanBreakdown> toLoanBreakdownList(List<LoanBreakdownEntity> loanBreakdownEntities);
 
     List<LoanBreakdownEntity> toLoanBreakdownEntityList(List<LoanBreakdown> loanBreakdown);
+
+    LoanBreakdown toLoanBreakDown(LoanBreakdownEntity loanBreakdownEntity);
 }

@@ -2,10 +2,8 @@ package africa.nkwadoma.nkwadoma.testUtilities.data;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.identity.Country;
-import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
-import africa.nkwadoma.nkwadoma.domain.enums.identity.UserRelationship;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.UploadedStatus;
@@ -94,6 +92,7 @@ public class TestData {
         organizationIdentity.setWebsiteAddress("testdata.org");
         organizationIdentity.setOrganizationEmployees(employeePeter);
         organizationIdentity.setLogoImage("logo-img.png");
+        organizationIdentity.setOrganizationType(OrganizationType.INSTITUTE_ORGANIZATION);
         organizationIdentity.setPageSize(pageSize);
         organizationIdentity.setPageNumber(pageNumber);
 
@@ -273,6 +272,7 @@ public class TestData {
         financier.setBeneficialOwners(beneficialOwners);
         financier.setDeclarationAndAgreement(Boolean.TRUE);
         financier.setPoliticallyExposed(Boolean.FALSE);
+        financier.setRcNumber("RC"+TestUtils.generateRandomNumber(7));
 
         PoliticallyExposedPerson politicallyExposedPerson = new PoliticallyExposedPerson();
         politicallyExposedPerson.setPositionHeld("President");
@@ -810,5 +810,21 @@ public class TestData {
                 .tertiaryCount(2)
                 .name("Demo")
                 .build();
+    }
+
+    private void mockValues(){
+        //          if (isTestIdentityNumber(identityVerification)){
+//        log.info("Bvn is for testing bvn: {}", identityVerification.getDecryptedNin());
+//        return VerificationMock.createPremblyBvnTestResponse();
+//    }
+//            if (isTestIdentityNumber(identityVerification)){
+//        log.info("Nin is for testing nin: {}", identityVerification.getDecryptedNin());
+//        return VerificationMock.createPremblyNinTestResponse();
+//    }
+//private boolean isTestIdentityNumber(IdentityVerification identityVerification) {
+//    log.info("Checking if identity number is for test : {}", identityVerification.getDecryptedNin().equals("01") && identityVerification.getDecryptedBvn().equals("01"));
+//    return identityVerification.getDecryptedNin().startsWith("01") && identityVerification.getDecryptedBvn().startsWith("01");
+//}
+
     }
 }

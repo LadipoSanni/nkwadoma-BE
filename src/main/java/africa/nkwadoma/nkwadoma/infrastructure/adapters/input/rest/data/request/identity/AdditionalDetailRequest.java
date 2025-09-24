@@ -1,6 +1,5 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity;
 
-import africa.nkwadoma.nkwadoma.domain.enums.loanee.LevelOfEducation;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -10,7 +9,7 @@ import lombok.*;
 @Setter
 @ToString
 @Builder
-public class AdditionalDetail {
+public class AdditionalDetailRequest {
     @NotBlank(message = "First name is required")
     private String firstName;
     @NotBlank(message = "Last name is required")
@@ -24,7 +23,7 @@ public class AdditionalDetail {
     private String nextOfKinRelationship;
     private String contactAddress;
     private String stateOfResidence;
-    private LevelOfEducation levelOfEduction;
+    private String levelOfEduction;
     @Email(message = "Please provide a valid alternate email address")
     @NotBlank(message = "Alternate email address is required")
     private String alternateEmail;

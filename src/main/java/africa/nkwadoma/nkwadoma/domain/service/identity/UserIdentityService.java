@@ -17,7 +17,6 @@ import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.MFAType;
-import africa.nkwadoma.nkwadoma.domain.enums.identity.OrganizationType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
@@ -168,7 +167,7 @@ public class UserIdentityService implements UserUseCase {
                     organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
             organizationIdentity.setActivationStatus(ActivationStatus.ACTIVE);
             if (userIdentity.getRole().equals(IdentityRole.COOPERATE_FINANCIER_SUPER_ADMIN)) {
-                organizationIdentity.setOrganizationType(OrganizationType.COOPERATE);
+                organizationIdentity.setNotToValidateOtherOrganizationDetails(Boolean.TRUE);
                 Financier financier = financierOutputPort.findByIdentity(organizationIdentity.getId());
                 financier.setActivationStatus(ActivationStatus.ACTIVE);
                 financierOutputPort.save(financier);
@@ -283,7 +282,7 @@ public class UserIdentityService implements UserUseCase {
         UserIdentity foundUserToDeactivate = userIdentityOutputPort.findById(userIdentity.getId());
 
         checkIfUserAllowedForAccountActivationActivity(foundUserToDeactivate, userIdentity, ActivationStatus.DEACTIVATED);
-        foundUserToDeactivate.setDeactivationReason("User deactivated by : "+ userIdentity.getCreatedBy() + ". Reason : "+userIdentity.getDeactivationReason());
+        foundUserToDeactivate.setDeactivationReason(userIdentity.getDeactivationReason());
 
         userIdentity = identityManagerOutPutPort.disableUserAccount(foundUserToDeactivate);
         log.info("User on key cloak deactivated successfully.");
@@ -397,6 +396,7 @@ public class UserIdentityService implements UserUseCase {
             foundUser.setAdditionalDetailsCompleted(Boolean.TRUE);
             log.info("Alternate email {}", foundUser.getAlternateEmail());
         }
+        log.info("Found user on view user details id {}", foundUser.getId());
         return foundUser;
     }
 

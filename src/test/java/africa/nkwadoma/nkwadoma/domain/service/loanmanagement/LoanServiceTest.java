@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.Inves
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
@@ -178,7 +179,7 @@ class LoanServiceTest {
         loaneeLoanAggregate = TestData.buildLoaneeLoanAggregate(loanee);
         organizationEmployeeIdentity = TestData.createOrganizationEmployeeIdentityTestData(userIdentity);
         loanOffer = TestData.buildLoanOffer(loanRequest);
-        portfolio = Portfolio.builder().portfolioName("Meedl").build();
+        portfolio = Portfolio.builder().portfolioName(MeedlConstants.MEEDL).build();
         portfolio.setDisbursedLoanAmount(BigDecimal.ZERO);
         portfolio.setHistoricalDebt(BigDecimal.ZERO);
     }
@@ -393,6 +394,7 @@ class LoanServiceTest {
         loanOffer.setAmountApproved(BigDecimal.valueOf(9000));
         loanOffer.setOrganizationId(testId);
         loanOffer.setCohortId(testId);
+        loanOffer.setLoanOfferStatus(LoanOfferStatus.OFFERED);
         try {
             loanOffer.setLoaneeId(loanee.getId());
             when(loaneeOutputPort.findLoaneeById(anyString())).thenReturn(loanee);

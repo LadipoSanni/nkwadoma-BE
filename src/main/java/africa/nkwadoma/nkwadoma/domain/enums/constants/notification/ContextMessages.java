@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.enums.constants.notification;
 
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.commons.IdentityVerificationMessage;
 import lombok.Getter;
 
 @Getter
@@ -7,6 +8,7 @@ public enum ContextMessages {
     CONTEXT_TOKEN("token"),
     CONTEXT_CURRENT_YEAR("currentYear"),
     CONTEXT_ORGANIZATION_NAME("organizationName"),
+    CONTEXT_ROLE("role"),
     CONTEXT_LOAN_OFFER_ID("loanOfferId"),
     CONTEXT_LINK("link"),
     CONTEXT_FIRST_NAME("firstName"),

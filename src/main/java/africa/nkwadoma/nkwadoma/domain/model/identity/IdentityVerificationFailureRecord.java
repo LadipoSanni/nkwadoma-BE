@@ -14,4 +14,5 @@ public class IdentityVerificationFailureRecord {
     private String reason;
     private String userId;
     private ServiceProvider serviceProvider;
+
 }

@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface LoaneeLoanBreakDownRepository extends JpaRepository<LoaneeLoanBreakdownEntity,String> {
     List<LoaneeLoanBreakdownEntity> findAllByCohortLoaneeId(String cohortLoaneeId);
+
+    void deleteAllByCohortLoaneeId(String id);
 }

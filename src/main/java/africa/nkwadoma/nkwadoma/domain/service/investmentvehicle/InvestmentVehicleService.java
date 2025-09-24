@@ -11,6 +11,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.Custodian;
 import africa.nkwadoma.nkwadoma.domain.enums.FundManager;
 import africa.nkwadoma.nkwadoma.domain.enums.Trustee;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
@@ -32,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.math.BigDecimal;
@@ -100,7 +102,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     }
 
     private void setInvestmentVehicleNumbersOnMeedlPortfolio(InvestmentVehicle investmentVehicle) throws MeedlException {
-        Portfolio portfolio = portfolioOutputPort.findPortfolio(Portfolio.builder().portfolioName("Meedl").build());
+        Portfolio portfolio = portfolioOutputPort.findPortfolio(Portfolio.builder().portfolioName(MeedlConstants.MEEDL).build());
         if (investmentVehicle.getInvestmentVehicleType().equals(COMMERCIAL)){
             portfolio.setTotalNumberOfCommercialFundsInvestmentVehicle(
                     portfolio.getTotalNumberOfCommercialFundsInvestmentVehicle() + BigInteger.ONE.intValue()
@@ -243,6 +245,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     }
 
     @Override
+    @Transactional
     public InvestmentVehicle setInvestmentVehicleVisibility(String investmentVehicleId, InvestmentVehicleVisibility investmentVehicleVisibility,
                                                             List<Financier> financiers) throws MeedlException {
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());

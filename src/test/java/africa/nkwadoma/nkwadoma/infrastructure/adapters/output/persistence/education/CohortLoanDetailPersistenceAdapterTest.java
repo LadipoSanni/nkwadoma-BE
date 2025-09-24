@@ -31,8 +31,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @Slf4j
 public class CohortLoanDetailPersistenceAdapterTest {
 
-    @Autowired
-    private InstituteMetricsOutputPort instituteMetricsOutputPort;
     private UserIdentity userIdentity;
     private UserIdentity meedleUser;
     private OrganizationEmployeeIdentity employeeIdentity;
@@ -59,7 +57,7 @@ public class CohortLoanDetailPersistenceAdapterTest {
     private String cohortLoanDetailId;
     private String cohortId;
 
-    @BeforeEach
+    @BeforeAll
     public void setUp(){
         try {
             meedleUser = TestData.createTestUserIdentity("ade45@gmail.com");
@@ -149,11 +147,6 @@ public class CohortLoanDetailPersistenceAdapterTest {
         log.info("program id = {}", program.getId());
         programOutputPort.deleteProgram(program.getId());
         log.info("org id = {}", organizationIdentity.getId());
-        InstituteMetrics instituteMetrics = instituteMetricsOutputPort.findByOrganizationId(organizationIdentity.getId());
-        if (ObjectUtils.isNotEmpty(instituteMetrics)){
-            log.info("Metrics was found for this organization");
-            instituteMetricsOutputPort.delete(instituteMetrics.getId());
-        }
         organizationIdentityOutputPort.delete(organizationIdentity.getId());
         log.info("org empoyee  = {}", employeeIdentity.getId());
         organizationEmployeeIdentityOutputPort.delete(employeeIdentity.getId());

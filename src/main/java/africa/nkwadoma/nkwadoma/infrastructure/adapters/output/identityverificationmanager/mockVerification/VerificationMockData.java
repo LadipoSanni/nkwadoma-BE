@@ -1,11 +1,12 @@
-package africa.nkwadoma.nkwadoma.domain.model.identity.verificationMock;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityverificationmanager.mockVerification;
 
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyBvnResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyFaceData;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyNinResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.Verification;
 
-public class VerificationMock {
+public class VerificationMockData {
+
     public static PremblyBvnResponse createPremblyBvnTestResponse() {
         return PremblyBvnResponse.builder()
                 .verificationCallSuccessful(true)
@@ -16,7 +17,7 @@ public class VerificationMock {
                         .firstName("John")
                         .middleName("Doe")
                         .lastName("Smith")
-                        .dateOfBirth("1990-01-01")
+                        .dateOfBirth("01-01-1990")
                         .registrationDate("2020-05-15")
                         .enrollmentBank("First Bank")
                         .enrollmentBranch("Lagos Main")
@@ -71,7 +72,7 @@ public class VerificationMock {
                         .firstname("John")
                         .middleName("Doe")
                         .lastname("Smith")
-                        .birthDate("1990-01-01")
+                        .birthDate("01-01-1990")
                         .birthCountry("Nigeria")
                         .birthState("Lagos")
                         .birthLGA("Ikeja")

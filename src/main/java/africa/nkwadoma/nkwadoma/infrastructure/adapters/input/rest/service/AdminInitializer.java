@@ -7,9 +7,11 @@ import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.LoanMetri
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.DemographyOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.Industry;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.OrganizationType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
@@ -36,7 +38,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants.MEEDL;
 import static africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole.MEEDL_SUPER_ADMIN;
 
 @Component
@@ -74,11 +75,12 @@ public class AdminInitializer {
     }
     private OrganizationIdentity getOrganizationIdentity(UserIdentity userIdentity) {
         return OrganizationIdentity.builder()
-                .name("Meedl")
+                .name(MeedlConstants.MEEDL)
                 .email("meedl@meedl.com")
                 .tin("kwadoma2189")
                 .rcNumber("RC2892832")
                 .phoneNumber("0908965321")
+                .organizationType(OrganizationType.MEEDL)
                 .activationStatus(ActivationStatus.ACTIVE)
                 .requestedInvitationDate(LocalDateTime.now())
                 .organizationEmployees(List.of(OrganizationEmployeeIdentity
@@ -97,7 +99,7 @@ public class AdminInitializer {
         organizationIdentity.setEnabled(Boolean.TRUE);
         organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
         organizationIdentity.setActivationStatus(ActivationStatus.ACTIVE);
-        Optional<OrganizationEntity> foundOrganization = organizationIdentityOutputPort.findByRcNumber(organizationIdentity.getRcNumber());
+        Optional<OrganizationIdentity> foundOrganization = organizationIdentityOutputPort.findByRcNumber(organizationIdentity.getRcNumber());
         organizationIdentity = getKeycloakOrganizationIdentity(organizationIdentity, foundOrganization);
         OrganizationIdentity savedOrganizationIdentity;
         try {
@@ -141,7 +143,7 @@ public class AdminInitializer {
         return savedOrganizationIdentity;
     }
 
-    private OrganizationIdentity getKeycloakOrganizationIdentity(OrganizationIdentity organizationIdentity, Optional<OrganizationEntity> foundOrganization) throws MeedlException {
+    private OrganizationIdentity getKeycloakOrganizationIdentity(OrganizationIdentity organizationIdentity, Optional<OrganizationIdentity> foundOrganization) throws MeedlException {
         try {
             if (foundOrganization.isEmpty()) {
                 log.info("Creating first organization identity");
@@ -198,8 +200,8 @@ public class AdminInitializer {
     }
 
     private void removeDuplicateSuperAdmins(UserIdentity userIdentity) throws MeedlException {
-        List<UserIdentity> superAdminsOnKeycloak = identityManagerOutPutPort.getUsersByRole(userIdentity.getRole().name());
-        List<UserIdentity> superAdminsOnDb = userIdentityOutputPort.findAllByRole(userIdentity.getRole());
+        List<UserIdentity> superAdminsOnKeycloak = identityManagerOutPutPort.getUsersByRole(IdentityRole.MEEDL_SUPER_ADMIN.name());
+        List<UserIdentity> superAdminsOnDb = userIdentityOutputPort.findAllByRole(IdentityRole.MEEDL_SUPER_ADMIN);
         log.info("Role being searched for at admin initializer {}", userIdentity.getRole());
         if (superAdminsOnKeycloak.isEmpty() && superAdminsOnDb.isEmpty()) {
             log.info("No users found with role {}", userIdentity.getRole());
@@ -239,7 +241,7 @@ public class AdminInitializer {
         try {
             userIdentity = identityManagerOutPutPort.createUser(userIdentity);
             log.info("User created successfully on keycloak sending email to user");
-            sendEmail.sendColleagueEmail("MEEDL",userIdentity);
+            sendEmail.sendColleagueEmail(MeedlConstants.MEEDL,userIdentity);
         } catch (MeedlException e) {
             log.warn("Unable to create user on identity manager, error : {}", e.getMessage());
             UserRepresentation userRepresentation = null;
@@ -256,7 +258,7 @@ public class AdminInitializer {
     }
 
     private Portfolio getPortfolio(){
-        return Portfolio.builder().portfolioName("Meedl").build();
+        return Portfolio.builder().portfolioName(MeedlConstants.MEEDL).build();
     }
 
     public Portfolio createMeedlPortfolio(Portfolio portfolio) throws MeedlException {
@@ -270,7 +272,7 @@ public class AdminInitializer {
     }
 
     public Demography createDemography(Demography demography) throws MeedlException {
-        Demography foundDemography = demographyOutputPort.findDemographyByName(MEEDL);
+        Demography foundDemography = demographyOutputPort.findDemographyByName(MeedlConstants.MEEDL);
         log.info("found demography -- {}", foundDemography);
         if (ObjectUtils.isEmpty(foundDemography)) {
             log.info("about to create Demography -- {}", demography);
@@ -294,7 +296,10 @@ public class AdminInitializer {
     }
 
     private Demography getDemography() {
-        return Demography.builder().name(MEEDL).build();
+        return Demography.builder().name(MeedlConstants.MEEDL).age35To45Count(0).age25To35Count(0).age17To25Count(0)
+                .totalGenderCount(0).femaleCount(0).maleCount(0).southEastCount(0).southSouthCount(0)
+                .southWestCount(0).northWestCount(0).northEastCount(0).northCentralCount(0)
+                .nonNigerian(0).tertiaryCount(0).oLevelCount(0).build();
     }
 
     private final Environment environment;

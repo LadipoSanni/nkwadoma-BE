@@ -184,7 +184,7 @@ public class MeedlValidator {
     }
     public static void validateObjectName(String name,  String message, String attributeName) throws MeedlException {
         MeedlValidator.validateDataElement(name, message);
-        String regex =  "^(?=.*[A-Za-z])(?=.*['A-Za-z])[A-Za-z0-9' _-]+$";
+        String regex =  "^(?=.*[A-Za-z])(?=.*['A-Za-z])(?!-)(?!.*-$)[A-Za-z0-9' _-]+$";
         Pattern pattern = Pattern.compile(regex);
         boolean isValid = pattern.matcher(name).matches();
         if (!isValid){

@@ -14,6 +14,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.Portfoli
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.EmploymentStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
@@ -25,16 +26,16 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanReferralStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanRequestStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.UploadedStatus;
+import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
-import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
-import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
-import africa.nkwadoma.nkwadoma.domain.model.education.InstituteMetrics;
-import africa.nkwadoma.nkwadoma.domain.model.education.Program;
+import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -44,6 +45,7 @@ import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.aes.TokenUtils;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanException;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.UserIdentityMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -94,6 +96,9 @@ public class LoaneeService implements LoaneeUseCase {
     private final LoaneeLoanAggregateOutputPort loaneeLoanAggregateOutputPort;
     private final InstituteMetricsOutputPort instituteMetricsOutputPort;
     private final PortfolioOutputPort portfolioOutputPort;
+    private final UserIdentityMapper userIdentityMapper;
+    private final LoanBreakdownOutputPort loanBreakdownOutputPort;
+    private final LoanRequestOutputPort loanRequestOutputPort;
 
 
     @Override
@@ -196,7 +201,7 @@ public class LoaneeService implements LoaneeUseCase {
        boolean newLoanee =  cohortLoaneeOutputPort.checkIfLoaneeIsNew(loanee.getId());
        log.info("is this a new loanee = {}", newLoanee);
        if(newLoanee){
-           Portfolio portfolio = Portfolio.builder().portfolioName("Meedl").build();
+           Portfolio portfolio = Portfolio.builder().portfolioName(MeedlConstants.MEEDL).build();
            portfolio = portfolioOutputPort.findPortfolio(portfolio);
            portfolio.setNumberOfLoanees(portfolio.getNumberOfLoanees() + 1);
            portfolioOutputPort.save(portfolio);
@@ -932,6 +937,183 @@ public class LoaneeService implements LoaneeUseCase {
         }
     }
 
+    @Override
+    public CohortLoanee setEmploymentStatus(EmploymentStatus employmentStatus, String cohortId, String loaneeId) throws MeedlException {
+        MeedlValidator.validateUUID(cohortId,CohortMessages.INVALID_COHORT_ID.getMessage());
+        MeedlValidator.validateUUID(loaneeId,LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+        MeedlValidator.validateObjectInstance(employmentStatus,"Employment status cannot be empty");
+        CohortLoanee cohortLoanee = cohortLoaneeOutputPort.findByLoaneeAndCohortId(loaneeId,cohortId);
+        log.info("found cohort loanee === {}",cohortLoanee);
+        cohortLoanee.setEmploymentStatus(employmentStatus);
+        cohortLoanee = cohortLoaneeOutputPort.save(cohortLoanee);
+        log.info("saved cohort loanee employment status === {}",cohortLoanee.getEmploymentStatus());
+        return cohortLoanee;
+    }
+
+    @Override
+    public String updateTrainingPerformance(String trainingPerformance, String cohortId, String loaneeId) throws MeedlException {
+        MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+        MeedlValidator.validateUUID(cohortId,CohortMessages.INVALID_COHORT_ID.getMessage());
+        MeedlValidator.validateObjectInstance(trainingPerformance,"Training performance cannot be empty");
+        CohortLoanee cohortLoanee = cohortLoaneeOutputPort.findByLoaneeAndCohortId(loaneeId,cohortId);
+        cohortLoanee.setTrainingPerformance(trainingPerformance);
+        cohortLoanee = cohortLoaneeOutputPort.save(cohortLoanee);
+        return cohortLoanee.getTrainingPerformance();
+    }
+
+    public Loanee editLoaneeDetail(Loanee loanee) throws MeedlException {
+        MeedlValidator.validateUUID(loanee.getCohortId(), CohortMessages.INVALID_COHORT_ID.getMessage());
+        MeedlValidator.validateUUID(loanee.getId(), LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+
+        validateInitialDepositIfPresent(loanee);
+        validateUserIdentityIfPresent(loanee);
+        validateLoanBreakdownsIfPresent(loanee);
+
+        Cohort cohort = cohortOutputPort.findCohortById(loanee.getCohortId());
+        Loanee foundLoanee = loaneeOutputPort.findLoaneeById(loanee.getId());
+        CohortLoanee loaneeRepresentationInCohort = cohortLoaneeOutputPort.findByLoaneeAndCohortId(foundLoanee.getId(), cohort.getId());
+
+        if (loaneeRepresentationInCohort == null) {
+            throw new ResourceNotFoundException("Loanee does not exist in cohort");
+        }
+
+        BigDecimal initialDeposit = loanee.getLoaneeLoanDetail().getInitialDeposit();
+        if (initialDeposit != null && initialDeposit.compareTo(cohort.getTotalCohortFee()) > 0) {
+            throw new IdentityException("Initial deposit cannot be greater than total cohort fee");
+        }
+
+        LoanRequest loanRequest = loanRequestOutputPort.findByCohortLoaneeId(loaneeRepresentationInCohort.getId());
+        if (loanRequest != null && (loanRequest.getStatus() == LoanRequestStatus.APPROVED ||
+                loanRequest.getStatus() == LoanRequestStatus.DECLINED)) {
+            throw new LoanException("Loanee detail can't be edited because a decision has been made on the loan request");
+        }
+
+        BigDecimal newAmountRequested = calculateAmountRequested(loanee, cohort, initialDeposit);
+
+        updateUserIdentityIfPresent(loanee, foundLoanee);
+
+        LoaneeLoanDetail updatedLoaneeLoanDetail =
+                updateLoanDetailsIfPresent(loanee, loaneeRepresentationInCohort, newAmountRequested, loanRequest);
+
+        List<LoaneeLoanBreakdown> loaneeLoanBreakdownList  =
+                updateLoanBreakdownsIfPresent(loanee, loaneeRepresentationInCohort, newAmountRequested, loanRequest);
+        foundLoanee.setLoanBreakdowns(loaneeLoanBreakdownList);
+        foundLoanee.setLoaneeLoanDetail(updatedLoaneeLoanDetail);
+        foundLoanee.setCohortId(cohort.getId());
+        return foundLoanee;
+    }
+
+    private BigDecimal calculateAmountRequested(Loanee loanee, Cohort cohort, BigDecimal initialDeposit) throws MeedlException {
+        BigDecimal loanBreakdownTotal = BigDecimal.ZERO;
+        if (!ObjectUtils.isEmpty(loanee.getLoanBreakdowns())) {
+            for (LoaneeLoanBreakdown loaneeLoanBreakdown : loanee.getLoanBreakdowns()) {
+                LoanBreakdown loanBreakdown = checkIfLoanBreakdownExistsInCohort(loaneeLoanBreakdown);
+                checkIfItemAmountIsValid(loaneeLoanBreakdown, loanBreakdown);
+                loanBreakdownTotal = loanBreakdownTotal.add(loaneeLoanBreakdown.getItemAmount());
+            }
+        }
+        BigDecimal tuitionAmount = cohort.getTuitionAmount();
+        BigDecimal deposit = (initialDeposit != null) ? initialDeposit : BigDecimal.ZERO;
+        return loanBreakdownTotal.add(tuitionAmount).subtract(deposit);
+    }
+
+    private void updateUserIdentityIfPresent(Loanee loanee, Loanee foundLoanee) throws MeedlException {
+        if (ObjectUtils.isEmpty(loanee.getUserIdentity())) {
+            return;
+        }
+        UserIdentity newIdentity = loanee.getUserIdentity();
+        UserIdentity existingIdentity = foundLoanee.getUserIdentity();
+        if (ObjectUtils.isNotEmpty(newIdentity.getFirstName())) {
+            existingIdentity.setFirstName(newIdentity.getFirstName());
+        }
+        if (ObjectUtils.isNotEmpty(newIdentity.getLastName())) {
+            existingIdentity.setLastName(newIdentity.getLastName());
+        }
+        if (ObjectUtils.isNotEmpty(newIdentity.getEmail())) {
+            existingIdentity.setEmail(newIdentity.getEmail());
+        }
+        existingIdentity = userIdentityOutputPort.save(existingIdentity);
+        foundLoanee.setUserIdentity(existingIdentity);
+    }
+
+    private LoaneeLoanDetail updateLoanDetailsIfPresent(Loanee loanee, CohortLoanee loaneeRepresentationInCohort,
+                                            BigDecimal newAmountRequested, LoanRequest loanRequest) throws MeedlException {
+        if (ObjectUtils.isEmpty(loanee.getLoaneeLoanDetail().getInitialDeposit())) {
+            return null;
+        }
+        LoaneeLoanDetail loaneeLoanDetail = loaneeRepresentationInCohort.getLoaneeLoanDetail();
+        loaneeLoanDetail.setInitialDeposit(loanee.getLoaneeLoanDetail().getInitialDeposit());
+        loaneeLoanDetail.setAmountRequested(newAmountRequested);
+        loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
+        if (loanRequest != null) {
+            loanRequest.setLoanAmountRequested(newAmountRequested);
+            loanRequestOutputPort.save(loanRequest);
+        }
+        return loaneeLoanDetail;
+    }
+
+    private List<LoaneeLoanBreakdown> updateLoanBreakdownsIfPresent(Loanee loanee, CohortLoanee loaneeRepresentationInCohort,
+                                               BigDecimal newAmountRequested, LoanRequest loanRequest) throws MeedlException {
+        if (ObjectUtils.isEmpty(loanee.getLoanBreakdowns())) {
+            return null;
+        }
+        loaneeLoanBreakDownOutputPort.deleteByCohortLoaneeid(loaneeRepresentationInCohort.getId());
+        List<LoaneeLoanBreakdown> loanBreakdowns = loaneeLoanBreakDownOutputPort.saveAll(loanee.getLoanBreakdowns(), loaneeRepresentationInCohort);
+        if (loanRequest != null) {
+            loanRequest.setLoanAmountRequested(newAmountRequested);
+            loanRequestOutputPort.save(loanRequest);
+        }
+        return loanBreakdowns;
+    }
+
+    private void checkIfItemAmountIsValid(LoaneeLoanBreakdown loaneeLoanBreakdown, LoanBreakdown loanBreakdown) throws IdentityException {
+        if (loaneeLoanBreakdown.getItemAmount().compareTo(loanBreakdown.getItemAmount()) > 0) {
+            throw new IdentityException(String.format("%s amount cannot be greater than the initial amount set for this loan breakdown",
+                    loaneeLoanBreakdown.getItemName()));
+        }
+    }
+
+    private LoanBreakdown checkIfLoanBreakdownExistsInCohort(LoaneeLoanBreakdown loaneeLoanBreakdown) throws MeedlException {
+        LoanBreakdown loanBreakdown = loanBreakdownOutputPort.findByItemName(loaneeLoanBreakdown.getItemName());
+        if (loanBreakdown == null) {
+            throw new ResourceNotFoundException(String.format("%s isn't part of the loan breakdown in this cohort",
+                    loaneeLoanBreakdown.getItemName()));
+        }
+        return loanBreakdown;
+    }
+
+    private void validateInitialDepositIfPresent(Loanee loanee) throws MeedlException {
+        if (loanee.getLoaneeLoanDetail().getInitialDeposit() != null) {
+            loanee.getLoaneeLoanDetail().validate();
+        }
+    }
+
+    private void validateLoanBreakdownsIfPresent(Loanee loanee) throws MeedlException {
+        if (!ObjectUtils.isEmpty(loanee.getLoanBreakdowns())) {
+            for (LoaneeLoanBreakdown breakdown : loanee.getLoanBreakdowns()) {
+                MeedlValidator.validateUUID(breakdown.getLoaneeLoanBreakdownId(),
+                        "Loanee breakdown ID cannot be empty");
+                breakdown.validate();
+            }
+        }
+    }
+
+    private void validateUserIdentityIfPresent(Loanee loanee) throws MeedlException {
+        if (ObjectUtils.isEmpty(loanee.getUserIdentity())) {
+            return;
+        }
+        UserIdentity identity = loanee.getUserIdentity();
+        if (ObjectUtils.isNotEmpty(identity.getFirstName())) {
+            MeedlValidator.validateDataElement(identity.getFirstName(), "First name cannot be empty");
+        }
+        if (ObjectUtils.isNotEmpty(identity.getLastName())) {
+            MeedlValidator.validateDataElement(identity.getLastName(), "Last name cannot be empty");
+        }
+        if (ObjectUtils.isNotEmpty(identity.getEmail())) {
+            MeedlValidator.validateEmail(identity.getEmail());
+        }
+    }
+
     private void sendPortfolioManagerDropOutNotification(Loanee loanee, UserIdentity userIdentity) throws MeedlException {
         List<UserIdentity> portfolioManagers =
                 userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
@@ -965,5 +1147,6 @@ public class LoaneeService implements LoaneeUseCase {
                 .build();
         meedlNotificationOutputPort.save(meedlNotification);
     }
+
 }
 

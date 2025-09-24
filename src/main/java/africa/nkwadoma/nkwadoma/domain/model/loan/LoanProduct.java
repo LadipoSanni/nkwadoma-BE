@@ -61,6 +61,7 @@ public class LoanProduct {
 
     private int pageSize;
     private int pageNumber;
+    private DisbursementRule disbursementRule;
 
     public void validateCostOfFund() throws MeedlException{
         if (costOfFund > 100) throw new MeedlException("Cost of fund cannot be greater than 100");
@@ -77,10 +78,6 @@ public class LoanProduct {
         validateTenor();
         validateMoratorium();
         validateCostOfFund();
-//        if (MeedlValidator.isEmptyCollection(sponsors)){
-//            log.error("Sponsors is empty when creating loan product {}", sponsors);
-//            throw new MeedlException("Sponsors for this loan product is required");
-//        }
 
         log.info("Ended loan product validation successfully... ");
     }

@@ -53,7 +53,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -105,7 +104,7 @@ public class FinancierService implements FinancierUseCase {
             updateNumberOfFinancierOnPortfolio(financiers);
         }else {
             UserIdentity meedlSuperAdmin = userIdentityOutputPort.findMeedlSuperAdmin();
-            asynchronousNotificationOutputPort.sendFinancierInvitationNotificationToSuperAdmin(financiersToMail,actor,meedlSuperAdmin);
+            asynchronousNotificationOutputPort.sendFinancierInvitationApprovalNotificationToSuperAdmin(financiersToMail,actor,meedlSuperAdmin);
         }
         return response;
     }
@@ -124,7 +123,7 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private void updateNumberOfFinancierOnPortfolio(List<Financier> financiers) throws MeedlException {
-        Portfolio portfolio = Portfolio.builder().portfolioName("Meedl").build();
+        Portfolio portfolio = Portfolio.builder().portfolioName(MeedlConstants.MEEDL).build();
         portfolio = portfolioOutputPort.findPortfolio(portfolio);
         for (Financier financier : financiers) {
             if (financier.getFinancierType() == null){
@@ -228,22 +227,28 @@ public class FinancierService implements FinancierUseCase {
 
     private void inviteFinancierToPlatform(Financier financier) throws MeedlException {
         financier.validate();
+        UserIdentity actor = userIdentityOutputPort.findById(financier.getUserIdentity().getCreatedBy());
+
         if (financier.getFinancierType() == FinancierType.INDIVIDUAL) {
             inviteIndividualFinancierToPlatform(financier);
         }else {
-            inviteCooperateFinancierToPlatform(financier);
+            inviteCooperateFinancierToPlatform(financier, actor);
         }
     }
 
-    private Financier inviteCooperateFinancierToPlatform(Financier financier) throws MeedlException {
+    private Financier inviteCooperateFinancierToPlatform(Financier financier, UserIdentity actor) throws MeedlException {
         log.info("Cooperate Financier invitation about to start ");
         validateInput(financier);
-
-
         validateCooperationDoesNotExist(financier,financier.getUserIdentity().getEmail());
-
-        OrganizationIdentity organizationIdentity = OrganizationIdentity.builder().name(financier.getName())
-                .email(financier.getEmail()).createdBy(financier.getUserIdentity().getCreatedBy())
+        log.info("Done with validation for cooperate financier invite to platform");
+        OrganizationIdentity organizationIdentity = OrganizationIdentity.builder()
+                .name(financier.getName())
+                .activationStatus(actor.getRole().isMeedlSuperAdmin()
+                ? ActivationStatus.INVITED
+                : ActivationStatus.PENDING_APPROVAL)
+                .email(financier.getEmail())
+                .createdBy(financier.getUserIdentity().getCreatedBy())
+                .organizationType(OrganizationType.FINANCIER_COOPERATION)
                 .requestedInvitationDate(LocalDateTime.now()).build();
 
         OrganizationIdentity savedCooperate = saveCooperation(organizationIdentity);
@@ -251,18 +256,17 @@ public class FinancierService implements FinancierUseCase {
         log.info("Done saving cooperate organization with id {}", savedCooperate.getId());
         UserIdentity savedUserIdentity = saveUserIdentity(financier.getUserIdentity());
 
-        UserIdentity actor = userIdentityOutputPort.findById(savedUserIdentity.getCreatedBy());
 
         Financier buildFinancier = buildFinancier(financier,savedCooperate.getId(),actor);
 
         Financier savedFinancier = financierOutputPort.save(buildFinancier);
         financier.setId(savedFinancier.getId());
-        financier.setUserIdentity(actor);
+        financier.setUserIdentity(savedUserIdentity);
 
         saveCooperateFinancier(organizationIdentity,savedUserIdentity,actor);
 
         savedFinancier.setUserIdentity(savedUserIdentity);
-        financiersToMail.add(savedFinancier);
+        financiersToMail.add(financier);
         log.info("Financier with email {} added for email sending. ", savedFinancier.getUserIdentity().getEmail());
         return financier;
     }
@@ -285,6 +289,7 @@ public class FinancierService implements FinancierUseCase {
         financier.setIdentity(organizationId);
         financier.setCreatedAt(LocalDateTime.now());
         financier.setFinancierType(COOPERATE);
+        financier.setInvitedBy(actor.getId());
         financier.setAccreditationStatus(AccreditationStatus.UNVERIFIED);
         financier.setActivationStatus(actor.getRole().isMeedlSuperAdmin()
                 ? ActivationStatus.INVITED
@@ -300,7 +305,7 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private OrganizationIdentity saveCooperation(OrganizationIdentity organizationIdentity) throws MeedlException {
-        organizationIdentity.setOrganizationType(OrganizationType.COOPERATE);
+        organizationIdentity.setNotToValidateOtherOrganizationDetails(Boolean.TRUE);
         organizationIdentity.setId(UUID.randomUUID().toString());
         log.info("Saving new cooperation: {}", organizationIdentity.getName());
         return organizationIdentityOutputPort.save(organizationIdentity);
@@ -308,13 +313,24 @@ public class FinancierService implements FinancierUseCase {
 
     private void validateCooperationDoesNotExist(Financier financier,String email) throws MeedlException {
         if (organizationIdentityOutputPort.existByEmail(financier.getEmail())) {
+            log.error("Cooperation financier with email already exists {}", financier.getEmail());
             throw new InvestmentException("Cooperation with email already exists");
         }
         if (ObjectUtils.isNotEmpty(organizationIdentityOutputPort.findOrganizationByName(financier.getName()))) {
+            log.error("Cooperation financier with name already exists {}", financier.getName());
             throw new InvestmentException("Cooperation with name already exists");
         }
         if (userIdentityOutputPort.checkIfUserExistByEmail(email)) {
+            log.error("Cooperate financier with email already exists, {}", email);
             throw new InvestmentException("User with email already exists");
+        }
+        if (identityManagerOutputPort.userExistByEmail(email)) {
+            log.error("Cooperate financier with email already exists on keycloak {}", email);
+            throw new InvestmentException("User with email already exists. Contact admin");
+        }
+        if (identityManagerOutputPort.clientExistByName(financier.getName())){
+            log.error("Financier cooperation with name already exists on keycloak {}", financier.getName());
+            throw new InvestmentException("Cooperation with name already exists");
         }
     }
 
@@ -350,6 +366,7 @@ public class FinancierService implements FinancierUseCase {
             try {
                 financier = getFinancierByUserIdentity(financier);
             } catch (MeedlException e) {
+                log.warn("",e);
                 financier = saveNonExistingFinancier(financier, e.getMessage());
             }
         }
@@ -389,7 +406,9 @@ public class FinancierService implements FinancierUseCase {
         log.warn("Started saving non existing financier {}", financier.getUserIdentity().getEmail());
         Financier savedFinancier;
         try {
-            savedFinancier = saveFinancier(financier);
+            UserIdentity actor = userIdentityOutputPort.findById(financier.getUserIdentity().getCreatedBy());
+            log.info("Actor found is {}", actor.getEmail());
+            savedFinancier = saveFinancier(financier, actor);
             log.info("Saved non-existing financier with identity : {}", savedFinancier.getIdentity());
             financier = updateFinancierDetails(financier, savedFinancier);
         } catch (MeedlException ex) {
@@ -410,6 +429,7 @@ public class FinancierService implements FinancierUseCase {
         }
         try {
             Financier existingFinancier = financierOutputPort.findFinancierByUserId(userIdentity.getId());
+            financier.getUserIdentity().setId(userIdentity.getId());
             log.info("Financier found by user identity id {}", userIdentity.getId());
             return updateFinancierDetails(financier, existingFinancier);
 
@@ -439,7 +459,8 @@ public class FinancierService implements FinancierUseCase {
     private static Financier updateFinancierDetails(Financier financier, Financier existingFinancier) {
         existingFinancier.setInvestmentVehicleId(financier.getInvestmentVehicleId());
         existingFinancier.setInvestmentVehicleDesignation(financier.getInvestmentVehicleDesignation());
-
+        existingFinancier.setUserIdentity(financier.getUserIdentity());
+        existingFinancier.setName(financier.getName());
         financier = existingFinancier;
         log.info("Updated the financier details without saving {}", financier);
         return financier;
@@ -452,9 +473,11 @@ public class FinancierService implements FinancierUseCase {
         if (userIdentity.getRole().isFinancier()) {
             log.info("User is a financier.");
             if (userIdentity.getRole().isCooperateStaff()) {
+                log.info("User is a cooperate staff");
                 financier = financierOutputPort.findFinancierByCooperateStaffUserId(userIdentity.getId());
             }else {
-                financier = financierOutputPort.findFinancierByUserId(userIdentity.getId());
+                log.info("User is an individual financier with user id  {}", userIdentity.getId());
+                financier = financierOutputPort.findByIdentity(userIdentity.getId());
             }
         } else {
             log.info("User is not a financier");
@@ -466,8 +489,9 @@ public class FinancierService implements FinancierUseCase {
                 financier.setCooperateAdminName(cooperateFinancier.getCooperateAdminName());
                 log.info("cooperate super admin mail {} ==== super admin name {}",financier.getCooperateAdminEmail(),financier.getCooperateAdminName());
             }
-            log.info("found financier {}", financier);
+            log.info("found financier details {}", financier);
         }
+        log.info("found financier before updating values : {}", financier);
         return updateFinancierDetail(financier);
     }
 
@@ -499,6 +523,7 @@ public class FinancierService implements FinancierUseCase {
                 .financier(financier)
                 .investmentVehicleDesignation(financier.getInvestmentVehicleDesignation())
                 .investmentVehicle(investmentVehicle)
+                .dateInvested(LocalDateTime.now())
                 .build();
     }
 
@@ -656,7 +681,7 @@ public class FinancierService implements FinancierUseCase {
             log.info("Financier was only added to the vehicle. {}", investmentVehicle.getName());
             foundInvestmentVehicleFinancier.setAmountInvested(financier.getAmountToInvest());
             log.info("Updated the amount invested in the investment vehicle financier for {} ", foundInvestmentVehicleFinancier.getAmountInvested());
-            foundInvestmentVehicleFinancier.setDateInvested(LocalDate.now());
+            foundInvestmentVehicleFinancier.setDateInvested(LocalDateTime.now());
             investmentVehicleFinancier = foundInvestmentVehicleFinancier;
 
         }else {
@@ -666,7 +691,7 @@ public class FinancierService implements FinancierUseCase {
                         .financier(financier)
                         .investmentVehicleDesignation(financier.getInvestmentVehicleDesignation())
                         .amountInvested(financier.getAmountToInvest())
-                        .dateInvested(LocalDate.now())
+                        .dateInvested(LocalDateTime.now())
                         .build();
             }
 
@@ -686,10 +711,12 @@ public class FinancierService implements FinancierUseCase {
         }else {
             foundFinancier = financierOutputPort.findFinancierByUserId(userIdentity.getId());
         }
+        log.info("THE found financier on kyc ---======> {}", foundFinancier);
         if (foundFinancier.getAccreditationStatus() != null &&
                 foundFinancier.getAccreditationStatus().equals(AccreditationStatus.UNVERIFIED)){
             log.info("Validating for kyc financier service {}", financier);
             financier.validateKyc(foundFinancier.getFinancierType());
+            validateCooperationDoesNotExistWithRcNumber(financier);
             log.info("Financier details in service to use in completing kyc {}", financier);
             mapKycFinancierUpdatedValues(financier, foundFinancier);
             if (financier.getBeneficialOwners() != null){
@@ -711,6 +738,16 @@ public class FinancierService implements FinancierUseCase {
         }else {
             log.info("Financier {} has already completed kyc.", foundFinancier);
             throw new InvestmentException("Kyc already done.");
+        }
+    }
+
+    private void validateCooperationDoesNotExistWithRcNumber(Financier financier) throws MeedlException {
+        if (FinancierType.COOPERATE.equals(financier.getFinancierType())) {
+            Optional<OrganizationIdentity> optionalOrganizationIdentity = organizationIdentityOutputPort.findByRcNumber(financier.getRcNumber());
+            if (optionalOrganizationIdentity.isPresent()) {
+                log.error("Organization with provided Rc number already exist on complete kyc");
+                throw new MeedlException("Cooperation with provided Rc number already exist.");
+            }
         }
     }
 
@@ -780,11 +817,21 @@ public class FinancierService implements FinancierUseCase {
             log.info("Cooperate financier mapping kyc details");
             OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(foundFinancier.getIdentity());
             organizationIdentityMapper.mapCooperateDetailToOrganization(organizationIdentity,financier);
-            organizationIdentity.setOrganizationType(OrganizationType.COOPERATE);
+            organizationIdentity.setNotToValidateOtherOrganizationDetails(Boolean.TRUE);
             organizationIdentity =organizationIdentityOutputPort.save(organizationIdentity);
-            financier.setOrganizationIdentity(organizationIdentity);
-            financier.setId(foundFinancier.getId());
+            updatedCooperateFinancierData(financier, foundFinancier, organizationIdentity);
         }
+    }
+
+    private static void updatedCooperateFinancierData(Financier financier, Financier foundFinancier, OrganizationIdentity organizationIdentity) {
+        financier.setOrganizationIdentity(organizationIdentity);
+        financier.setId(foundFinancier.getId());
+        financier.setName(foundFinancier.getName());
+        financier.setFinancierType(foundFinancier.getFinancierType());
+        financier.setCreatedAt(foundFinancier.getCreatedAt());
+        financier.setTotalAmountInvested(financier.getTotalAmountInvested());
+        financier.setActivationStatus(foundFinancier.getActivationStatus());
+        financier.setIdentity(foundFinancier.getIdentity());
     }
 
     private void mapKycFinancierPreviousData(Financier financier, Financier foundFinancier) {
@@ -796,6 +843,7 @@ public class FinancierService implements FinancierUseCase {
         financier.setTotalIncomeEarned(foundFinancier.getTotalIncomeEarned());
         financier.setCreatedAt(foundFinancier.getCreatedAt());
         financier.setId(foundFinancier.getId());
+        financier.setIdentity(foundFinancier.getIdentity());
     }
 
     private void mapKycUserIdentityDataIndividualFinancier(Financier financier, Financier foundFinancier) throws MeedlException {
@@ -852,6 +900,110 @@ public class FinancierService implements FinancierUseCase {
         investmentVehicle.setDateInvested(investmentVehicleFinancier.getDateInvested());
         investmentVehicle.setDesignations(investmentVehicleFinancier.getInvestmentVehicleDesignation());
         return investmentVehicleMapper.toInvestmentSummary(investmentVehicle);
+    }
+
+    @Override
+    public Financier respondToFinancierInvite(Financier financier) throws MeedlException {
+        MeedlValidator.validateUUID(financier.getId(), FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+        MeedlValidator.validateUUID(financier.getActorId(), UserMessages.INVALID_USER_ID.getMessage());
+        validateFinancierInviteResponse(financier);
+        log.info("About to find actor by id {}",financier.getActorId());
+        UserIdentity actor = userIdentityOutputPort.findById(financier.getActorId());
+        if (actor.getRole().isMeedlSuperAdmin()){
+            Financier financierToApprove = financierOutputPort.findByFinancierId(financier.getId());
+            if (FinancierType.INDIVIDUAL.equals(financierToApprove.getFinancierType())){
+                log.info("Finding individual financier by identity id {} ", financier.getIdentity());
+                UserIdentity userIdentity = userIdentityOutputPort.findById(financierToApprove.getIdentity());
+                financierToApprove.setUserIdentity(userIdentity);
+                financier.setUserIdentity(userIdentity);
+                String response;
+                if (ActivationStatus.APPROVED.equals(financier.getActivationStatus())){
+                    log.info("Approving individual financier invite. {}", financierToApprove.getId());
+                    financierToApprove.setActivationStatus(ActivationStatus.INVITED);
+                    log.info("Sending in-app notification on approval of individual financier");
+                    InvestmentVehicle investmentVehicles = getRecentInvestmentVehicleFinancierIsAddedTo(financierToApprove);
+                    asynchronousMailingOutputPort.sendFinancierInviteEmail(financierToApprove, investmentVehicles);
+                    asynchronousNotificationOutputPort.sendFinancierApprovalOrDeclineNotification(financierToApprove, actor, userIdentity);
+//                     asynchronousMailingOutputPort
+                    response = "Financier invitation has been approved for " + userIdentity.getFullName();
+                }else {
+                    log.info("Declining individual financier invite");
+                    financierToApprove.setActivationStatus(ActivationStatus.DECLINED);
+                    log.info("Sending in-app notification on decline of individual financier");
+                    asynchronousNotificationOutputPort.sendFinancierApprovalOrDeclineNotification(financierToApprove, actor, userIdentity);
+                    response = "Financier invitation has been declined for " + userIdentity.getFullName();
+                }
+                financier.setResponse(response);
+
+            }else if (FinancierType.COOPERATE.equals(financierToApprove.getFinancierType())){
+                log.info("Responding to cooperate financier invite approval");
+                respondToCooperateFinancierInvite(financier, financierToApprove, actor);
+            }
+            log.info("Saving approved financier updates");
+            financierOutputPort.save(financierToApprove);
+        }else {
+            log.error("A {} is attempting to approve financier invite", actor.getRole());
+            throw new MeedlException("Only Meed's super admin can approve financier invite");
+        }
+        return financier;
+    }
+
+    private void respondToCooperateFinancierInvite(Financier financier, Financier financierToApprove, UserIdentity actor) throws MeedlException {
+        log.info("The organization found in viewing cooperate financier is {}", financierToApprove.getIdentity());
+        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(financierToApprove.getIdentity());
+        if (!ActivationStatus.PENDING_APPROVAL.equals(organizationIdentity.getActivationStatus()) &&
+                !ActivationStatus.DECLINED.equals(organizationIdentity.getActivationStatus())){
+            log.error("Cooperate financier is not pending approval. Currently {}", organizationIdentity.getActivationStatus());
+            throw new MeedlException("Only cooperate financier that is pending approval can be "+ financier.getActivationStatus().getStatusName().toLowerCase());
+        }
+        List<OrganizationEmployeeIdentity> organizationEmployeeIdentities = organizationEmployeeIdentityOutputPort.findAllEmployeesInOrganizationByOrganizationIdAndRole(organizationIdentity.getId(), IdentityRole.COOPERATE_FINANCIER_SUPER_ADMIN);
+        OrganizationEmployeeIdentity organizationEmployeeIdentity = organizationEmployeeIdentities.get(0);
+        log.info("The cooperate employee found in viewing cooperate financier is {}", organizationEmployeeIdentity.getId());
+        financier.setUserIdentity(organizationEmployeeIdentity.getMeedlUser());
+        financierToApprove.setUserIdentity(organizationEmployeeIdentity.getMeedlUser());
+        UserIdentity createdBy = userIdentityOutputPort.findById(organizationEmployeeIdentity.getCreatedBy());
+        if (ActivationStatus.APPROVED.equals(financier.getActivationStatus())) {
+            log.info("Approving financier invite");
+            setCooperateFinancierActivationStatus(organizationEmployeeIdentity, ActivationStatus.INVITED, organizationIdentity, financierToApprove);
+            log.info("Sending email for cooperate financier approval");
+            InvestmentVehicle investmentVehicles = getRecentInvestmentVehicleFinancierIsAddedTo(financierToApprove);
+            asynchronousMailingOutputPort.sendFinancierInviteEmail(financierToApprove, investmentVehicles);
+            asynchronousNotificationOutputPort.sendFinancierApprovalOrDeclineNotification(financierToApprove, actor, createdBy);
+            String response = "Financier invitation has been approved for " + organizationEmployeeIdentity.getMeedlUser().getFullName();
+            financier.setResponse(response);
+
+        }else {
+            log.info("Declining financier invite");
+            setCooperateFinancierActivationStatus(organizationEmployeeIdentity, ActivationStatus.DECLINED, organizationIdentity, financierToApprove);
+            log.info("Sending in-app notification for cooperate financier denial");
+            asynchronousNotificationOutputPort.sendFinancierApprovalOrDeclineNotification(financierToApprove, actor, createdBy);
+            String response = "Financier invitation has been declined for " + organizationEmployeeIdentity.getMeedlUser().getFullName();
+            financier.setResponse(response);
+        }
+        organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
+        organizationIdentity.setNotToValidateOtherOrganizationDetails(Boolean.TRUE);
+        organizationIdentityOutputPort.save(organizationIdentity);
+    }
+
+    private InvestmentVehicle getRecentInvestmentVehicleFinancierIsAddedTo(Financier financierToApprove) throws MeedlException {
+        Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findRecentInvestmentVehicleFinancierIsAddedTo(financierToApprove.getId());
+        return optionalInvestmentVehicleFinancier.map(InvestmentVehicleFinancier::getInvestmentVehicle).orElse(null);
+    }
+
+    private static void setCooperateFinancierActivationStatus(OrganizationEmployeeIdentity organizationEmployeeIdentity, ActivationStatus invited, OrganizationIdentity organizationIdentity, Financier financierToApprove) {
+        organizationEmployeeIdentity.setActivationStatus(invited);
+        organizationIdentity.setActivationStatus(invited);
+        financierToApprove.setActivationStatus(invited);
+    }
+
+    private void validateFinancierInviteResponse(Financier financier) throws MeedlException {
+        MeedlValidator.validateObjectInstance(financier.getActivationStatus(), "Invalid activation status");
+        if (!ActivationStatus.APPROVED.equals(financier.getActivationStatus()) &&
+        !ActivationStatus.DECLINED.equals(financier.getActivationStatus())){
+            log.error("Financier activation status on respond to invite is neither approved or declined but is {}", financier.getActivationStatus());
+            throw new MeedlException("You can only approve or decline a financier invite");
+        }
+
     }
 
 
@@ -943,8 +1095,11 @@ public class FinancierService implements FinancierUseCase {
     }
 
 
-    private Financier saveFinancier(Financier financier) throws MeedlException {
-        financier.setActivationStatus(ActivationStatus.INVITED);
+    private Financier saveFinancier(Financier financier, UserIdentity actor) throws MeedlException {
+        financier.setActivationStatus(actor.getRole().isMeedlSuperAdmin()
+                ? ActivationStatus.INVITED
+                : ActivationStatus.PENDING_APPROVAL);
+        financier.setInvitedBy(actor.getId());
         financier.setAccreditationStatus(AccreditationStatus.UNVERIFIED);
         if (financier.getFinancierType() == FinancierType.INDIVIDUAL) {
             UserIdentity userIdentity = financier.getUserIdentity();
@@ -960,7 +1115,7 @@ public class FinancierService implements FinancierUseCase {
             financier.setUserIdentity(userIdentity);
             return financier;
         }else {
-            return inviteCooperateFinancierToPlatform(financier);
+            return inviteCooperateFinancierToPlatform(financier, actor);
         }
     }
 

@@ -253,6 +253,71 @@ public class LoanOfferAdapterTest {
     }
 
 
+    @Order(4)
+    @Test
+    void searchLoanOffer() {
+        loanOffer.setPageNumber(pageNumber);
+        loanOffer.setPageSize(pageSize);
+        loanOffer.setName("john");
+        Page<LoanOffer> loanOffers = Page.empty();
+        try {
+            loanOffers = loanOfferOutputPort.searchLoanOffer(loanOffer);
+        }catch (MeedlException exception){
+            log.info("Failed to search loan Offer {}", exception.getMessage());
+        }
+        assertEquals(1,loanOffers.getTotalElements());
+    }
+
+    @Order(5)
+    @Test
+    void searchLoanOfferByOrganization() {
+        loanOffer.setPageNumber(pageNumber);
+        loanOffer.setPageSize(pageSize);
+        loanOffer.setName("john");
+        loanOffer.setOrganizationId(organizationIdentity.getId());
+        Page<LoanOffer> loanOffers = Page.empty();
+        try {
+            loanOffers = loanOfferOutputPort.searchLoanOffer(loanOffer);
+        }catch (MeedlException exception){
+            log.info("Failed to search loan Offer {}", exception.getMessage());
+        }
+        assertEquals(1,loanOffers.getTotalElements());
+    }
+
+    @Order(6)
+    @Test
+    void searchLoanOfferByOrganizationIdAndProgramId() {
+        loanOffer.setPageNumber(pageNumber);
+        loanOffer.setPageSize(pageSize);
+        loanOffer.setName("john");
+        loanOffer.setOrganizationId(organizationIdentity.getId());
+        loanOffer.setProgramId(program.getId());
+        Page<LoanOffer> loanOffers = Page.empty();
+        try {
+            loanOffers = loanOfferOutputPort.searchLoanOffer(loanOffer);
+        }catch (MeedlException exception){
+            log.info("Failed to search loan Offer {}", exception.getMessage());
+        }
+        assertEquals(1,loanOffers.getTotalElements());
+    }
+
+    @Order(7)
+    @Test
+    void searchLoanOfferByWrongOrganizationId() {
+        loanOffer.setPageNumber(pageNumber);
+        loanOffer.setPageSize(pageSize);
+        loanOffer.setName("john");
+        loanOffer.setOrganizationId(program.getId());
+        Page<LoanOffer> loanOffers = Page.empty();
+        try {
+            loanOffers = loanOfferOutputPort.searchLoanOffer(loanOffer);
+        }catch (MeedlException exception){
+            log.info("Failed to search loan Offer {}", exception.getMessage());
+        }
+        assertEquals(0,loanOffers.getTotalElements());
+    }
+
+
 
     @AfterAll
     void cleanUp() throws MeedlException {

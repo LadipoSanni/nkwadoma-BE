@@ -30,10 +30,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class IdentityManagerController {
     private final UserUseCase userUseCase;
-    private final OrganizationUseCase createOrganizationUseCase;
-    private final FinancierUseCase financierUseCase;
     private final IdentityMapper identityMapper;
-    private final LoaneeUseCase loaneeUseCase;
 
     @PostMapping("auth/login")
     public ResponseEntity<ApiResponse<AccessTokenResponse>> login(@RequestBody @Valid LoginRequest loginRequest) throws MeedlException {

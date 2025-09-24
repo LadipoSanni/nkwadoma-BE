@@ -4,7 +4,6 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.OrganizationType;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanType;
-import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.bankdetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
@@ -15,8 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.math.*;
 import java.time.LocalDateTime;
 import java.util.List;
-
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.INVALID_INDUSTRY_OR_SERVICE_OFFERING;
 
 @Slf4j
 @Setter
@@ -32,6 +29,7 @@ public class OrganizationIdentity {
     private String websiteAddress;
     private String invitedDate;
     private String taxIdentity;
+    private String registrationNumber;
     private String rcNumber;
     private String tin;
     private String phoneNumber;
@@ -68,6 +66,7 @@ public class OrganizationIdentity {
     private String bannerImage;
     private String address;
     private String officeAddress;
+    private boolean isNotToValidateOtherOrganizationDetails;
     private OrganizationType organizationType;
     private String response;
     private List<ServiceOffering> serviceOfferings;
@@ -82,6 +81,8 @@ public class OrganizationIdentity {
         MeedlValidator.validateRCNumber(this.rcNumber);
         MeedlValidator.validateTin(this.tin);
         MeedlValidator.validateDataElement(this.phoneNumber, "Phone number is required");
+        log.info("Validating for organization type ... {}", this.getOrganizationType());
+        MeedlValidator.validateObjectInstance(this.organizationType, "Organization type is not stated. Contact admin.");
     }
 
     public void validateCooperateOrganization() throws MeedlException {

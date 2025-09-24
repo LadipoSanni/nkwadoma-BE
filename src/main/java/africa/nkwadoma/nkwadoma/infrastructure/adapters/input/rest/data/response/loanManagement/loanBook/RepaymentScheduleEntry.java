@@ -16,7 +16,6 @@ public class RepaymentScheduleEntry {
     private BigDecimal principalAmount;
     private BigDecimal expectedMonthlyAmount;
     private BigDecimal totalAmountRepaid;
-    private BigDecimal principalPayment;
     private BigDecimal interest;
     private BigDecimal amountOutstanding;
 

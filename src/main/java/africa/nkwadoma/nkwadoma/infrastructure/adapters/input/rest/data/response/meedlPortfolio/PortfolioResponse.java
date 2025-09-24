@@ -21,6 +21,8 @@ public class PortfolioResponse {
     private int totalNumberOfIndividualFinancier;
     private int totalNumberOfInstitutionalFinancier;
     private int totalNumberOfLoans;
+    private double endowmentVehiclePercentage;
+    private double commercialVehiclePercentage;
     private double loanReferralPercentage;
     private double loanRequestPercentage;
     private double loanDisbursalPercentage;

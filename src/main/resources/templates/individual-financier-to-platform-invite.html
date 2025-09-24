@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta name="x-apple-disable-message-reformatting"/>
+    <title>Email Template</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #FFFFFF;  font-family: 'IBM Plex Sans', Arial, sans-serif; color: #344054;">
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 500px; height: 642px; background-color: #FFFFFF; margin: 20px auto; border: 20px solid #f7f7fc;">
+    <tr>
+        <td style=" padding: 20px; text-align: left;">
+<!--            <img src="https://res.cloudinary.com/dfkxvsiiu/image/upload/v1732709444/Meedle_Logo_Primary_Main_f5tmbe.svg"-->
+<!--                 alt="Meedl Logo"-->
+<!--                 style="display: block; width: 115px; height: 31px;">-->
+            <img src="https://res.cloudinary.com/dfkxvsiiu/image/upload/w_115,h_31,c_limit/v1732709444/Meedle_Logo_Primary_Main_f5tmbe.svg"
+                 alt="Meedl Logo"
+                 width="115"
+                 height="31"
+                 style="display:block;">
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 20px; font-size: 16px; line-height: 24px; color: #344054;">
+            <p>Hi <span th:text="${firstName}"></span>,</p>
+            <p>
+                You have been invited to join the Meedl platform as a financier. <br>
+                Please click the button below to set your password and get started. <br>
+                Once onboarded, you can explore available investment opportunities.
+            </p>
+            <div style="text-align: left; margin: 20px 0;">
+                <a th:href="@{${token}}" target="_blank"
+                   style="display: inline-block; background-color: #142854; color: #FFFFFF; text-decoration: none;
+                    padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 4px; ">
+                    Get Started on Meedl
+                </a>
+            </div>
+            <div style="margin-top: 20px; font-size: 14px; line-height: 20px; color: #344054;">
+                <p>If the button above doesn’t work, click on the link below.</p>
+                <p>
+                    <strong>Link:</strong>
+                    <a th:href="@{${token}}" target="_blank" style="color: #142854; word-break: break-all;">
+                        Get Started on Meedl
+                    </a>
+                </p>
+            </div>
+            <p>Thank you,<br>The Meedl Team</p>
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 20px; border-top: 1px solid #e0e0e0; text-align: left; color: #6a6b6a; font-size: 14px; line-height: 10px;">
+            <p  style="margin-top: 10px;">If you have any questions, please don’t hesitate to </p>
+            <p>contact us at<a href="mailto:help@meedl.africa" style="color:#6A6B6A; text-decoration: none; font-size: 16px"> help@meedl.africa</a>.</p>
+            <div style="margin-top: 25px; text-align: left ; line-height: 24px; font-size: 14px ; font-weight: 400">
+                <a href="https://x.com/trymeedl?s=21" target="_blank" style="margin-right: 10px; color: #142854; text-decoration: underline;">X</a>
+                <a href="https://www.instagram.com/trymeedl/profilecard/?igsh=MWNxZ2hpcDM2ejJ2NA==" target="_blank" style="color: #142854; text-decoration: underline;">Instagram</a>
+            </div>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

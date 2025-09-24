@@ -8,7 +8,7 @@ public enum UserMessages {
     INVALID_EMAIL("Email is invalid"),
     NULL_ACTOR_USER_IDENTITY("User performing this action is unknown."),
     INVALID_ROLE_ASSIGNER_ID("Please provide a valid user identification."),
-    INVALID_USER_ID("Invalid id provided"),
+    INVALID_USER_ID("Invalid user id provided"),
     INVALID_ROLE_ASSIGNEE_ID("Invalid id for user being assigned a new role"),
     INVALID_FIRST_NAME("User first name is required."),
     INVALID_LAST_NAME("User last name is required."),
@@ -19,7 +19,7 @@ public enum UserMessages {
     REFRESH_TOKEN_CANNOT_BE_EMPTY("Refresh token cannot be empty"), INVALID_REFRESH_TOKEN("Invalid refresh token"),
     COOPERATION_MUST_NOT_BE_EMPTY("Cooperation cannot be empty"),
     USER_HAS_BEEN_DEACTIVATED("Account Deactivation"),
-    DEACTIVATED_USER("deactivated-user"),
+    DEACTIVATED_USER("deactivate-user"),
     USER_HAS_BEEN_REACTIVATED("Account Reactivation"),
     REACTIVATED_USER("reactivated-user");
     private final String message;

@@ -4,12 +4,12 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerifi
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
-import africa.nkwadoma.nkwadoma.domain.model.identity.verificationMock.VerificationMock;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyBvnResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyLivelinessResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyNinResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityverificationmanager.mockVerification.VerificationMockData;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityverificationmanager.prembly.PremblyParameter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -70,16 +70,15 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
         identityVerification.validateImageUrl();
         if (isTestIdentityNumber(identityVerification)){
             log.info("Nin is for testing nin: {}", identityVerification.getDecryptedNin());
-            return VerificationMock.createPremblyNinTestResponse();
+            return VerificationMockData.createPremblyNinTestResponse();
         }
         log.info("Value is meant for actual call to verification service.");
         return getNinDetails(identityVerification);
     }
-
     private boolean isTestIdentityNumber(IdentityVerification identityVerification) {
-        log.info("Checking if identity number is for test : {}", identityVerification.getDecryptedNin().equals("01") && identityVerification.getDecryptedBvn().equals("01"));
-        return identityVerification.getDecryptedNin().startsWith("01") && identityVerification.getDecryptedBvn().startsWith("01");
-    }
+    log.info("Checking if identity number is for test : {}", identityVerification.getDecryptedNin().equals("01") && identityVerification.getDecryptedBvn().equals("01"));
+    return identityVerification.getDecryptedNin().startsWith("01") && identityVerification.getDecryptedBvn().startsWith("01");
+}
 
     public PremblyNinResponse getNinDetails(IdentityVerification identityVerification) {
         PremblyNinResponse premblyNinResponse = getIdentityDetailsByNin(identityVerification);
@@ -138,7 +137,7 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
         identityVerification.validateImageUrl();
         if (isTestIdentityNumber(identityVerification)){
             log.info("Bvn is for testing bvn: {}", identityVerification.getDecryptedNin());
-            return VerificationMock.createPremblyBvnTestResponse();
+            return VerificationMockData.createPremblyBvnTestResponse();
         }
         return getBvnDetails(identityVerification);
     }

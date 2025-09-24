@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.OrganizationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.ViewOrganizationUseCase;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -146,6 +147,8 @@ public class OrganizationController {
             "or hasRole('ORGANIZATION_SUPER_ADMIN')" +
             "or hasRole('ORGANIZATION_ASSOCIATE')" +
             "or hasRole('ORGANIZATION_ADMIN')" +
+            "or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN')" +
+            "or hasRole('COOPERATE_FINANCIER_ADMIN')" +
             "or hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = "View organization details by organization id")
     public ResponseEntity<ApiResponse<?>> viewOrganizationDetails(@RequestParam(required = false) String organizationId,
@@ -242,7 +245,7 @@ public class OrganizationController {
     }
 
     private ResponseEntity<ApiResponse<?>> convertAllOrganizationViewedToResponse(@RequestParam int pageNumber, @RequestParam int pageSize, Page<OrganizationIdentity> organizationIdentities) {
-        List<OrganizationResponse> organizationResponses = organizationIdentities.stream().filter(organizationIdentity -> !organizationIdentity.getName().equalsIgnoreCase("Meedl")).map(organizationRestMapper::toOrganizationResponse).toList();
+        List<OrganizationResponse> organizationResponses = organizationIdentities.stream().filter(organizationIdentity -> !organizationIdentity.getName().equalsIgnoreCase(MeedlConstants.MEEDL)).map(organizationRestMapper::toOrganizationResponse).toList();
         PaginatedResponse<OrganizationResponse> response = new PaginatedResponse<>(
                 organizationResponses, organizationIdentities.hasNext(),
                 organizationIdentities.getTotalPages(), organizationIdentities.getTotalElements(), pageNumber,

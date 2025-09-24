@@ -96,15 +96,16 @@ public class FinancierServiceTest {
     private FinancierPoliticallyExposedPersonOutputPort financierPoliticallyExposedPersonOutputPort;
     @Autowired
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    private UserIdentity actor;
 
 
     @BeforeAll
     void setUp(){
         bankDetail = TestData.buildBankDetail();
-        UserIdentity actor = TestData.createTestUserIdentity(String.format("userforcreatedbyoractor%s7@mail.com", TestUtils.generateName(3)), actorId);
+        actor = TestData.createTestUserIdentity(String.format("userforcreatedbyoractor%s7@mail.com", TestUtils.generateName(3)), actorId);
         actor.setRole(IdentityRole.PORTFOLIO_MANAGER);
         try {
-            userIdentityOutputPort.save(actor);
+           actor = userIdentityOutputPort.save(actor);
         } catch (MeedlException e) {
             log.error("Error saving actor (pm) for invite financier.",e);
             throw new RuntimeException(e);
@@ -188,7 +189,7 @@ public class FinancierServiceTest {
         }
         assertNotNull(response);
         assertEquals("Financier has been added to an investment vehicle", response);
-        assertEquals(ActivationStatus.INVITED, foundFinancier.getActivationStatus());
+        assertEquals(ActivationStatus.PENDING_APPROVAL, foundFinancier.getActivationStatus());
         foundFinancier.setActivationStatus(ActivationStatus.ACTIVE);
         Page<Financier> financiers;
         try {
@@ -339,6 +340,8 @@ public class FinancierServiceTest {
             investmentVehicle = createInvestmentVehicle(publicInvestmentVehicle);
             publicInvestmentVehicleId = investmentVehicle.getId();
             individualFinancier.setInvestmentVehicleId(investmentVehicle.getId());
+            individualFinancier.setActivationStatus(ActivationStatus.ACTIVE);
+            financierOutputPort.save(individualFinancier);
             BigDecimal initialAmount = investmentVehicle.getTotalAvailableAmount();
             assertEquals(new BigDecimal("0.00"), initialAmount);
             if (investmentVehicle.getTotalAvailableAmount() == null) {
@@ -1194,6 +1197,7 @@ public class FinancierServiceTest {
         deleteFinancierData(individualFinancierId);
         identityManagerOutputPort.deleteUser(individualUserIdentity);
         userIdentityOutputPort.deleteUserById(individualUserIdentityId);
+        userIdentityOutputPort.deleteUserById(actor.getId());
         deleteNotification(portfolioManagerId);
         userIdentityOutputPort.deleteUserById(portfolioManagerId);
 

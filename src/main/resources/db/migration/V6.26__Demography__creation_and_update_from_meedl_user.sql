@@ -5,21 +5,21 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE IF NOT EXISTS demography_entity (
                                                  id VARCHAR(255) PRIMARY KEY,
                                                  name VARCHAR(255),
-                                                 male_count INT DEFAULT 0,
-                                                 female_count INT DEFAULT 0,
-                                                 total_gender_count INT DEFAULT 0,
-                                                 age_17_to_25_count INT DEFAULT 0,
-                                                 age_25_to_35_count INT DEFAULT 0,
-                                                 age_35_to_45_count INT DEFAULT 0,
-                                                 south_east_count INT DEFAULT 0,
-                                                 south_west_count INT DEFAULT 0,
-                                                 south_south_count INT DEFAULT 0,
-                                                 north_east_count INT DEFAULT 0,
-                                                 north_west_count INT DEFAULT 0,
-                                                 north_central_count INT DEFAULT 0,
-                                                 non_nigerian INT DEFAULT 0,
-                                                 o_level_count INT DEFAULT 0,
-                                                 tertiary_count INT DEFAULT 0
+                                                 male_count INTEGER DEFAULT 0,
+                                                 female_count INTEGER DEFAULT 0,
+                                                 total_gender_count INTEGER DEFAULT 0,
+                                                 age_17_to_25_count INTEGER DEFAULT 0,
+                                                 age_25_to_35_count INTEGER DEFAULT 0,
+                                                 age_35_to_45_count INTEGER DEFAULT 0,
+                                                 south_east_count INTEGER DEFAULT 0,
+                                                 south_west_count INTEGER DEFAULT 0,
+                                                 south_south_count INTEGER DEFAULT 0,
+                                                 north_east_count INTEGER DEFAULT 0,
+                                                 north_west_count INTEGER DEFAULT 0,
+                                                 north_central_count INTEGER DEFAULT 0,
+                                                 non_nigerian INTEGER DEFAULT 0,
+                                                 o_level_count INTEGER DEFAULT 0,
+                                                 tertiary_count INTEGER DEFAULT 0
 );
 
 -- Create a custom function to try parsing multiple date formats

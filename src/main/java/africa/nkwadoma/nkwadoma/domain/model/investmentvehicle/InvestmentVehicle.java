@@ -58,7 +58,7 @@ public class InvestmentVehicle {
     private BigDecimal amountInvested;
     private int talentFunded;
     private BigDecimal amountFinancierInvested;
-    private LocalDate dateInvested;
+    private LocalDateTime dateInvested;
     private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
 
 

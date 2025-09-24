@@ -37,7 +37,7 @@ public class UserIdentity {
     private boolean enabled;
     private LocalDateTime createdAt;
     private String stateOfResidence;
-    private LevelOfEducation levelOfEduction;
+    private String levelOfEduction;
     private String image;
     private String gender;
     private String dateOfBirth;
@@ -52,7 +52,7 @@ public class UserIdentity {
     private String lgaOfResidence;
     private String nameOnCard;
     //
-    private IdentityRole  role;
+    private IdentityRole role;
     private String createdBy;
     private String alternateEmail;
     private String alternatePhoneNumber;
@@ -81,8 +81,8 @@ public class UserIdentity {
         if (ObjectUtils.isEmpty(this.role)|| StringUtils.isEmpty(this.role.name()))
             throw new IdentityException(INVALID_ROLE.getMessage());
         MeedlValidator.validateEmail(this.email);
-        MeedlValidator.validateDataElement(this.firstName, UserMessages.INVALID_FIRST_NAME.getMessage());
-        MeedlValidator.validateDataElement(this.lastName, UserMessages.INVALID_LAST_NAME.getMessage());
+        MeedlValidator.validateObjectName(this.firstName, UserMessages.INVALID_FIRST_NAME.getMessage(),"First");
+        MeedlValidator.validateObjectName(this.lastName, UserMessages.INVALID_LAST_NAME.getMessage(),"Last");
         MeedlValidator.validateUUID(this.createdBy, MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
         log.info("Creator ID: {}", this.createdBy);
         log.info("Finished validating for user identity in validation");

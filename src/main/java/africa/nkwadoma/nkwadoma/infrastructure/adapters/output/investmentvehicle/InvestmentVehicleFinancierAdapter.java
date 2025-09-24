@@ -192,16 +192,24 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
                 investmentVehicleFinancierRepository.findByFinancierIdAndInvestmentVehicleFinancierId(financierId, investmentVehicleFinancierId);
         return investmentVehicleFinancierMapper.toInvestmentVehicleFinancier(investmentVehicleFinancierEntity);
     }
+    @Override
+    public Optional<InvestmentVehicleFinancier> findRecentInvestmentVehicleFinancierIsAddedTo(String financierId) throws MeedlException {
+        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+        Optional<InvestmentVehicleFinancierEntity> optionalInvestmentVehicleFinancierEntity =
+                investmentVehicleFinancierRepository.findRecentInvestmentVehicleFinancierIsAddedTo(financierId);
+        return optionalInvestmentVehicleFinancierEntity.map(investmentVehicleFinancierMapper::toInvestmentVehicleFinancier);
+
+    }
 
     @Override
-    public Optional<InvestmentVehicleFinancier> findAllByFinancierIdAndInvestmentVehicleId(String financierId, String investmentVehicleId) throws MeedlException {
+    public int checkIfFinancierExistInVehicle(String financierId, String investmentVehicleId) throws MeedlException {
         MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
         log.info("Find all -- financier id {} investment vehicle id {}", financierId, investmentVehicleId);
-        Optional<InvestmentVehicleFinancierEntity> optionalInvestmentVehicleFinancierEntity =
-                investmentVehicleFinancierRepository.findByFinancier_IdAndInvestmentVehicle_Id(financierId, investmentVehicleId);
-        log.info("Found is empty {}", optionalInvestmentVehicleFinancierEntity.isEmpty());
-        return optionalInvestmentVehicleFinancierEntity.map(investmentVehicleFinancierMapper::toInvestmentVehicleFinancier);
+        int count =
+                investmentVehicleFinancierRepository.countByFinancier_IdAndInvestmentVehicle_Id(financierId, investmentVehicleId);
+        log.info("Number of investment in vehicle {}", count);
+       return count;
     }
 
     public void checkIfInvestmentExist(String investmentVehicleFinancierId) throws MeedlException {

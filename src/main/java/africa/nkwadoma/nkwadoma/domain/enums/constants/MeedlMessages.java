@@ -14,7 +14,8 @@ public enum MeedlMessages {
     EMAIL_INVITATION_SUBJECT("Invitation to Meedl"),
     RESET_PASSWORD("Reset Password"),
     ORGANIZATION_INVITATION_TEMPLATE("organization-invitation"),
-    COLLEAGUE_INVITATION_TEMPLATE("colleague-invitation"),
+    ORGANIZATION_COLLEAGUE_INVITATION_TEMPLATE("organization-colleague-invitation"),
+    MEEDL_COLLEAGUE_INVITATION_TEMPLATE("meedl-colleague-invitation"),
     DOMAIN_EMAIL_DOES_NOT_MATCH("Domain email does not match"),
     EMAIL_INDEX("@"),
     INVALID_OBJECT("Object not found"),
@@ -31,7 +32,9 @@ public enum MeedlMessages {
     LOANEE_REFERRAL_INVITATION_SENT("loanee-referral-invitation-sent"),
     INVALID_TIN("Tax identity number must contain 9 - 15 characters and can only have a hyphen special character."),
     TIN_CANNOT_BE_EMPTY("Tax identity number cannot be empty"), CREATED_AT("createdAt"),
-    INVALID_SEARCH_PARAMETER("Please provide a valid search name.");
+    INVALID_SEARCH_PARAMETER("Please provide a valid search name."),
+    DEACTIVATE_ORGANIZATION("Deactivate organization"),
+    DEACTIVATE_ORGANIZATION_TEMPLATE("deactivate-organization"),;
 
 
     private final String message;
