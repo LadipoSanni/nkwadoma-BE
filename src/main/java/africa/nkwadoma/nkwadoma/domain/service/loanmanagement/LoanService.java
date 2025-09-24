@@ -1,6 +1,5 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanmanagement;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.LoanUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
@@ -24,7 +23,6 @@ import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
-import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
@@ -475,6 +473,13 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         MeedlValidator.validatePageSize(request.getPageSize());
         MeedlValidator.validatePageNumber(request.getPageNumber());
         return loanReferralOutputPort.searchLoanReferrals(request);
+    }
+
+    @Override
+    public Page<Loan> searchDisbursedByLoaneeName(Loan loan) throws MeedlException {
+        MeedlValidator.validatePageNumber(loan.getPageNumber());
+        MeedlValidator.validatePageSize(loan.getPageSize());
+        return loanOutputPort.searchLoanByLoaneeName(loan);
     }
 
     private String getLoanAccountId(Loanee foundLoanee) throws MeedlException {

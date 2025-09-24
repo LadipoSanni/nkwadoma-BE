@@ -72,29 +72,32 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
 
 
     @Query("""
-    SELECT le.id AS id,
-           le.startDate as startDate,
-           u.firstName AS firstName,
-           u.lastName AS lastName,
-           lof.dateTimeOffered AS offerDate,
-           cle.loaneeLoanDetail.amountRequested AS loanAmountRequested,
-           cle.loaneeLoanDetail.initialDeposit AS initialDeposit,
-           cle.cohort.name AS cohortName,
-           p.name AS programName
+       select le.id as id,
+          le.startDate as startDate,
+          u.firstName as firstName,
+          u.lastName as lastName,
+          cle.loaneeLoanDetail.initialDeposit as initialDeposit,
+          lr.createdDate as createdDate,
+          lr.loanAmountRequested as loanAmountRequested,
+          c.name as cohortName, c.startDate as cohortStartDate, lo.dateTimeOffered as offerDate,
+          p.name as programName,lr.loanAmountApproved as loanAmountApproved,c.tuitionAmount as tuitionAmount,
+          l.id as loaneeId , c.id as cohortId
     
     FROM LoanEntity le
-    join LoanOfferEntity lo on lo.id = le.id
-    join LoanReferralEntity lfe on lfe.id = lo.id
+    join LoanOfferEntity lo on lo.id = le.loanOfferId
+    join LoanRequestEntity lr on lr.id = lo.id
+    join LoanReferralEntity lfe on lfe.id = lr.id
     join CohortLoaneeEntity cle on cle.id = lfe.cohortLoanee.id
     join LoaneeEntity l on l.id = cle.loanee.id
-    JOIN l.userIdentity u
-    JOIN ProgramEntity p ON p.id = cle.cohort.programId
-    JOIN LoanOfferEntity lof ON lof.id = le.loanOfferId
-    WHERE 
+    join CohortEntity c on c.id = cle.cohort.id
+    JOIN UserEntity u on u.id = l.userIdentity.id
+    JOIN ProgramEntity p ON p.id = c.programId
+    JOIN OrganizationEntity o on o.id = p.organizationIdentity.id
+    WHERE
         (LOWER(u.firstName) LIKE LOWER(CONCAT('%', :name, '%'))
          OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :name, '%')))
-        AND cle.cohort.programId = :programId
-        AND p.organizationIdentity.id = :organizationId
+        and (:programId IS NULL OR p.id = :programId)
+        AND (:organizationId IS NULL OR o.id = :organizationId)
     """)
     Page<LoanProjection> findAllLoanOfferByLoaneeNameInOrganizationAndProgram( @Param("programId") String programId,
                                                                                @Param("organizationId") String organizationId,
