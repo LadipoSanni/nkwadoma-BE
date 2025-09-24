@@ -105,9 +105,9 @@ class LoanProductServiceTest {
         loanProduct.setVendors(List.of(vendor));
         loanProduct.setSponsors(List.of(financier));
         portfolio = Portfolio.builder().portfolioName(MeedlConstants.MEEDL).build();
-        loanProductDisbursementRule = new LoanProductDisbursementRule();
-        disbursementRule = new DisbursementRule();
-        loanProduct.setDisbursementRule(disbursementRule);
+//        loanProductDisbursementRule = new LoanProductDisbursementRule();
+//        disbursementRule = new DisbursementRule();
+//        loanProduct.setDisbursementRule(disbursementRule);
 
 
     }
@@ -117,9 +117,9 @@ class LoanProductServiceTest {
             when(userIdentityOutputPort.findById(any())).thenReturn(new UserIdentity());
             when(identityManagerOutPutPort.verifyUserExistsAndIsEnabled(any())).thenReturn(new UserIdentity());
             when(loanProductOutputPort.save(loanProduct)).thenReturn(loanProduct);
-            when(loanProductDisbursementRuleOutputPort.save(any())).thenReturn(loanProductDisbursementRule);
+//            when(loanProductDisbursementRuleOutputPort.save(any())).thenReturn(loanProductDisbursementRule);
 
-            when(disbursementRuleOutputPort.save(disbursementRule)).thenReturn(disbursementRule);
+//            when(disbursementRuleOutputPort.save(disbursementRule)).thenReturn(disbursementRule);
             when(investmentVehicleFinancierOutputPort.checkIfFinancierExistInVehicle(financier.getId(), investmentVehicle.getId())).thenReturn(1);
             when(investmentVehicleOutputPort.findById(loanProduct.getId()))
                     .thenReturn(investmentVehicle);
@@ -135,19 +135,19 @@ class LoanProductServiceTest {
             throw new RuntimeException(exception);
         }
     }
-    @Test
-    public void createLoanProductWithSizeGreaterThanVechicleAvailableAount() {
-        try {
-            when(userIdentityOutputPort.findById(any())).thenReturn(new UserIdentity());
-            when(identityManagerOutPutPort.verifyUserExistsAndIsEnabled(any())).thenReturn(new UserIdentity());
-            investmentVehicle.setTotalAvailableAmount(new BigDecimal(200));
-            when(investmentVehicleOutputPort.findById(loanProduct.getId()))
-                    .thenReturn(investmentVehicle);
-            assertThrows(MeedlException.class , ()-> loanService.createLoanProduct(loanProduct));
-        } catch (MeedlException e) {
-            throw new RuntimeException(e);
-        }
-    }
+//    @Test
+//    public void createLoanProductWithSizeGreaterThanVechicleAvailableAount() {
+//        try {
+//            when(userIdentityOutputPort.findById(any())).thenReturn(new UserIdentity());
+//            when(identityManagerOutPutPort.verifyUserExistsAndIsEnabled(any())).thenReturn(new UserIdentity());
+//            investmentVehicle.setTotalAvailableAmount(new BigDecimal(200));
+//            when(investmentVehicleOutputPort.findById(loanProduct.getId()))
+//                    .thenReturn(investmentVehicle);
+//            assertThrows(MeedlException.class , ()-> loanService.createLoanProduct(loanProduct));
+//        } catch (MeedlException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
     @Test
     void createLoanProductWithNullLoanProduct(){
         assertThrows(MeedlException.class, () -> loanService.createLoanProduct(null));

@@ -174,10 +174,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
                 investmentVehicleOutputPort.findById(loanProduct.getInvestmentVehicleId());
         log.info("Loan product size is : {}", loanProduct.getLoanProductSize());
         log.info("Investment vehicle available balance is : {}", investmentVehicle.getTotalAvailableAmount());
-//        if (loanProduct.getLoanProductSize().compareTo(investmentVehicle.getTotalAvailableAmount()) > BigInteger.ZERO.intValue()) {
-//            log.warn("Attempt to create loan product that exceeds the investment vehicle available amount.");
-//            throw new MeedlException("Loan product size cannot be greater than investment vehicle available amount.");
-//        }
+        if (loanProduct.getLoanProductSize().compareTo(investmentVehicle.getTotalAvailableAmount()) > BigInteger.ZERO.intValue()) {
+            log.warn("Attempt to create loan product that exceeds the investment vehicle available amount.");
+            throw new MeedlException("Loan product size cannot be greater than investment vehicle available amount.");
+        }
         return investmentVehicle;
     }
 

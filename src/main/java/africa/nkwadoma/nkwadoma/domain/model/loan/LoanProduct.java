@@ -86,7 +86,7 @@ public class LoanProduct {
 
     private void validateDisbursementRule() throws MeedlException {
         if (ObjectUtils.isNotEmpty(this.disbursementRule)){
-            log.info("Validating disbursement terms at the loan product level");
+            log.info("Validating disbursement terms at the loan product level {}", this.disbursementRule);
             disbursementRule.validate();
         }
     }
