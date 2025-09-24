@@ -1,10 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loanManagement.loanBook;
 
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanBook.RepaymentHistoryResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanBook.RepaymentScheduleEntry;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanBook.RepaymentScheduleResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanBook.YearRangeResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanBook.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -29,5 +26,8 @@ public interface RepaymentHistoryRestMapper {
     RepaymentScheduleEntry toRepaymentScheduleEntry(RepaymentHistory repaymentHistory);
 
 
-
+    @Mapping(target = "totalInterestRepayment", source = "interestIncurred")
+    @Mapping(target = "totalRepayment", source = "totalAmountRepaid")
+    @Mapping(target = "monthlyRepayment", source = "principalPayment")
+    SimulateRepaymentResponse toSimulateRepaymentResponse(RepaymentHistory repaymentHistory);
 }
