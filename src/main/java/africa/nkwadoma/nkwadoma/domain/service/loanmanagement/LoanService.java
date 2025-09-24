@@ -159,7 +159,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     public void deleteLoanProductById(LoanProduct loanProduct) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanProduct, LoanMessages.LOAN_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(loanProduct.getId(), LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
-        int offerCount = loanProductOutputPort.countLoanOfferFromLoanProduct(loanProduct.getId());
+        int offerCount = loanProductOutputPort.countLoanOfferFromLoanProduct(loanProduct.getId(), List.of(LoanDecision.OFFERED, LoanDecision.ACCEPTED));
         if (offerCount == 0) {
             LoanProduct foundLoanProduct = loanProductOutputPort.findById(loanProduct.getId());
             log.info("Updating the total available amount on investment vehicle with the size of the loan product");
@@ -198,7 +198,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             log.error("Loan product {} cannot be updated as it has already been loaned out", foundLoanProduct.getName());
             throw new LoanException("Loan product " + foundLoanProduct.getName() + " cannot be updated as it has already been loaned out");
         }
-        int offerCount = loanProductOutputPort.countLoanOfferFromLoanProduct(loanProduct.getId());
+        int offerCount = loanProductOutputPort.countLoanOfferFromLoanProduct(loanProduct.getId(), List.of(LoanDecision.OFFERED, LoanDecision.ACCEPTED));
         if (offerCount == 0) {
             foundLoanProduct = loanProductMapper.updateLoanProduct(foundLoanProduct, loanProduct);
             foundLoanProduct.setUpdatedAt(LocalDateTime.now());
