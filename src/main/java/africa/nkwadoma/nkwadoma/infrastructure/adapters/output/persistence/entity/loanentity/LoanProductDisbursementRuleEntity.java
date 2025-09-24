@@ -10,6 +10,7 @@ import org.hibernate.annotations.UuidGenerator;
 @Getter
 @Setter
 @Entity
+@Table(name = "loan_product_disb_rule")
 public class LoanProductDisbursementRuleEntity {
     @Id
     @UuidGenerator
