@@ -1067,8 +1067,10 @@ class LoaneeServiceTest {
     @Test
     void setEmploymentStatus(){
         try {
+            loaneeCohort.setEmploymentStatus(EmploymentStatus.UNEMPLOYED);
             when(cohortLoaneeOutputPort.findByLoaneeAndCohortId(mockId, mockId)).thenReturn(loaneeCohort);
             when(cohortLoaneeOutputPort.save(loaneeCohort)).thenReturn(loaneeCohort);
+            when(cohortOutputPort.save(any(Cohort.class))).thenReturn(loaneeCohort.getCohort());
             loaneeCohort = loaneeService.setEmploymentStatus(EmploymentStatus.EMPLOYED,mockId,mockId);
         }catch (MeedlException meedlException){
             log.error(meedlException.getMessage());

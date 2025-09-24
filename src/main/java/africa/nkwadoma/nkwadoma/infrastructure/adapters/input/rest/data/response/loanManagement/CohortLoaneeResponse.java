@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement;
 
 
+import africa.nkwadoma.nkwadoma.domain.enums.EmploymentStatus;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,6 +17,7 @@ public class CohortLoaneeResponse {
     private BigDecimal amountReceived;
     private BigDecimal amountRepaid;
     private BigDecimal amountOutstanding;
+    private EmploymentStatus employmentStatus;
     private double interestRate;
     private double debtPercentage;
     private double repaymentPercentage;

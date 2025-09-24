@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOfferOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.FinancialConstants;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortType;
@@ -209,6 +210,14 @@ public class CohortService implements CohortUseCase {
         cohortMapper.mapCohortLoanDetailToCohort(cohort,cohortLoanDetail);
         getLoanPercentage(cohort,cohortLoanDetail);
         log.info("mapped cohort == {}", cohort);
+        log.info("numberOfEmployedLoanee == {} ---- number of loanee in cohort == {}", cohort.getNumberEmployed()
+                ,cohort.getNumberOfLoanees());
+        if (cohort.getNumberOfLoanees() > 0) {
+            double employedRate = (double) cohort.getNumberEmployed() /
+                    cohort.getNumberOfLoanees() * FinancialConstants.PERCENTAGE_BASE_INT;
+            log.info("employedRate == {}", employedRate);
+            cohort.setEmploymentRate(employedRate);
+        }
         int pendingLoanOffers = loanOfferOutputPort.countNumberOfPendingLoanOfferForCohort(cohort.getId());
         log.info("pendingLoanOffers == {}", pendingLoanOffers);
         cohort.setNumberOfPendingLoanOffers(pendingLoanOffers);
