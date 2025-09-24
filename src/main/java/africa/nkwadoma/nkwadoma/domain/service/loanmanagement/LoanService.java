@@ -9,6 +9,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.DisbursementRuleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
@@ -88,6 +89,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final PortfolioOutputPort portfolioOutputPort;
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
     private final FinancierOutputPort financierOutputPort;
+    private final DisbursementRuleOutputPort disbursementRuleOutputPort;
+    private final LoanProductDisbursementRuleOutputPort loanProductDisbursementRuleOutputPort;
 
     @Override
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
@@ -110,11 +113,25 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (ObjectUtils.isEmpty(loanProduct.getTotalOutstandingLoan())) {
             loanProduct.setTotalOutstandingLoan(BigDecimal.ZERO);
         }
+        loanProduct = loanProductOutputPort.save(loanProduct);
         log.info("Loan product to be saved in create loan product service method {}", loanProduct);
         investmentVehicleOutputPort.save(investmentVehicle);
-        loanProduct = loanProductOutputPort.save(loanProduct);
+        setDisbursementRule(loanProduct);
         updateNumberOfLoanProductOnMeedlPortfolio();
         return loanProduct;
+    }
+
+    private void setDisbursementRule(LoanProduct loanProduct) throws MeedlException {
+        log.info("Saving loan product disbursement rules");
+        DisbursementRule disbursementRule = disbursementRuleOutputPort.save(loanProduct.getDisbursementRule());
+        loanProduct.setDisbursementRule(disbursementRule);
+        log.info("Saving loan product disbursement rules from loan product");
+        LoanProductDisbursementRule loanProductDisbursementRule = LoanProductDisbursementRule.builder()
+                .disbursementRule(disbursementRule)
+                .loanProduct(loanProduct)
+                .build();
+        loanProductDisbursementRuleOutputPort.save(loanProductDisbursementRule);
+
     }
 
     private void validateSponsors(LoanProduct loanProduct) throws MeedlException {

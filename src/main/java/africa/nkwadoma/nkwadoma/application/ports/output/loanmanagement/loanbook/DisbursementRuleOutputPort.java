@@ -6,5 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.DisbursementRule;
 public interface DisbursementRuleOutputPort {
     DisbursementRule save(DisbursementRule disbursementRule) throws MeedlException;
 
-    DisbursementRule findById(String id);
+    DisbursementRule findById(String id) throws MeedlException;
+
+    void deleteById(String id) throws MeedlException;
 }

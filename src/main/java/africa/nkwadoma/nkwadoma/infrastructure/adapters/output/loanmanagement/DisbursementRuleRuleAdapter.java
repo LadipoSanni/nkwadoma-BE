@@ -25,14 +25,21 @@ public class DisbursementRuleRuleAdapter implements DisbursementRuleOutputPort {
         disbursementRule.validate();
         DisbursementRuleEntity disbursementRuleEntity = disbursementRuleMapper.map(disbursementRule);
         disbursementRuleEntity = disbursementRuleRepository.save(disbursementRuleEntity);
+        log.info("disbursement rule entity in adapter level. id: {}", disbursementRuleEntity.getId());
         return disbursementRuleMapper.map(disbursementRuleEntity);
     }
 
     @Override
-    public DisbursementRule findById(String id) {
+    public DisbursementRule findById(String id) throws MeedlException {
         MeedlValidator.validateUUID(id, DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE.getMessage());
         DisbursementRuleEntity disbursementRuleEntity = disbursementRuleRepository.findById(id)
-                .orElseThrow();
+                .orElseThrow(()-> new MeedlException(DisbursementRuleMessages.DISBURSEMENT_RULE_NOT_FOUND.getMessage()));
         return disbursementRuleMapper.map(disbursementRuleEntity);
+    }
+
+    @Override
+    public void deleteById(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id, DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE.getMessage());
+        disbursementRuleRepository.deleteById(id);
     }
 }
