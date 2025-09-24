@@ -454,7 +454,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
     }
 
     @Override
-    public void sendFinancierInvitationNotificationToSuperAdmin(List<Financier> financiersToMail, UserIdentity actor, UserIdentity meedlSuperAdmin) {
+    public void sendFinancierInvitationApprovalNotificationToSuperAdmin(List<Financier> financiersToMail, UserIdentity actor, UserIdentity meedlSuperAdmin) {
 
         financiersToMail.forEach(financier -> {
             MeedlNotification meedlNotification = MeedlNotification.builder()
@@ -469,14 +469,15 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                     .build();
 
             if (financier.getFinancierType().equals(FinancierType.COOPERATE)){
-                meedlNotification.setContentDetail("Request for cooperation financier invitation ");
+                meedlNotification.setContentDetail("Request for cooperation financier approval ");
             }else {
-                meedlNotification.setContentDetail("Request for an individual financier invitation ");
+                meedlNotification.setContentDetail("Request for an individual financier approval ");
             }
-            log.info("done building notification for financier invitation colleague invitation{}", meedlNotification);
+            log.info("Done building notification for financier invitation approval request sending next.{}", meedlNotification);
             try {
                 meedlNotificationUsecase.sendNotification(meedlNotification);
             } catch (MeedlException e) {
+                log.error("Error sending approval notification", e);
                 throw new RuntimeException(e);
             }
         });
