@@ -182,6 +182,15 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     @Override
+    public Portfolio setUpMeedlObligorLoanLimit(Portfolio portfolio){
+        MeedlValidator.validateObjectInstance(portfolio, "");
+        portfolio.validateObligorLimitDetail();
+        portfolio.setPortfolioName(MeedlConstants.MEEDL);
+        Portfolio foundPortfolio = portfolioOutputPort.findPortfolio(portfolio);
+
+
+    }
+    @Override
     public Page<LoanProduct> search(String loanProductName, int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validateDataElement(loanProductName, LoanMessages.LOAN_PRODUCT_NAME_REQUIRED.getMessage());
         return loanProductOutputPort.search(loanProductName,pageSize,pageNumber);
