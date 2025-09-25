@@ -177,11 +177,11 @@ public class LoanController {
             @AuthenticationPrincipal Jwt meedlUser,
             @RequestParam @NotBlank(message = "Provide a valid loan product id")
             BigDecimal obligorLoanLimit) throws MeedlException {
-        log.info("Delete loan product by id was called.... {}", loanProductId);
+        log.info("set obligor loan limit for meedl actor id was called.... {}", meedlUser.getClaimAsString("sub"));
         Portfolio portfolio = Portfolio.builder().obligorLoanLimit(obligorLoanLimit).build();
-        loanUseCase.setUpMeedlObligorLoanLimit(loanProduct);
+        loanUseCase.setUpMeedlObligorLoanLimit(portfolio);
         ApiResponse<LoanProductResponse> apiResponse = ApiResponse.<LoanProductResponse>builder()
-                .message(LOAN_PRODUCT_DELETED_SUCCESSFULLY)
+                .message(MEEDL_OBLIGOR_LIMIT_SET_SUCCESSFULLY)
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
