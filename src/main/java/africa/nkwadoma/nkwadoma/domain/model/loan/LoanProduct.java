@@ -14,6 +14,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -79,8 +80,16 @@ public class LoanProduct {
         validateTenor();
         validateMoratorium();
         validateCostOfFund();
+        validateDisbursementRule();
 
         log.info("Ended loan product validation successfully... ");
+    }
+
+    private void validateDisbursementRule() throws MeedlException {
+        if (ObjectUtils.isNotEmpty(this.disbursementRule)){
+            log.info("Validating disbursement terms at the loan product level {}", this.disbursementRule);
+            disbursementRule.validate();
+        }
     }
 
     private void validateMoratorium() throws InvalidInputException {

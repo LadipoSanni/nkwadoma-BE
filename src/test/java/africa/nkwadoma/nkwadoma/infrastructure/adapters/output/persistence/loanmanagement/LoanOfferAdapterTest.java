@@ -36,8 +36,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
 public class LoanOfferAdapterTest {
-    //TOdo Coming back to write proper test
-
     @Autowired
     private CohortLoaneeOutputPort cohortLoaneeOutputPort;
     private CohortLoanee cohortLoanee;
