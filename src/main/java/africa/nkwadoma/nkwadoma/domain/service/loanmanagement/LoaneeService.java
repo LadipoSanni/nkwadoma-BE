@@ -194,6 +194,7 @@ public class LoaneeService implements LoaneeUseCase {
         saveLoaneeLoanBreakdowns(loanee, cohortLoanee);
         updateCohortValues(cohort);
         updateMeedlPortfolio(cohortLoanee.getLoanee());
+        cohortLoanee.getLoanee().setCohortId(cohort.getId());
         return cohortLoanee.getLoanee();
     }
 

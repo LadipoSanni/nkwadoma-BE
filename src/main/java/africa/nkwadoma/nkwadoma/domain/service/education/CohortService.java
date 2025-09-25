@@ -273,6 +273,7 @@ public class CohortService implements CohortUseCase {
         OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(program.getOrganizationId());
         organizationIdentity.setNumberOfCohort(organizationIdentity.getNumberOfCohort() - 1);
         log.info("Rc number in decrease is {}", organizationIdentity.getRcNumber());
+        organizationIdentity.setNotToValidateOtherOrganizationDetails(true);
         organizationIdentityOutputPort.save(organizationIdentity);
     }
 
