@@ -8,6 +8,8 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @Slf4j
@@ -19,4 +21,6 @@ public class VendorEntity {
     private Product product;
     private String vendorName;
     private String termsAndConditions;
+    private BigDecimal costOfService;
+    private int duration;
 }

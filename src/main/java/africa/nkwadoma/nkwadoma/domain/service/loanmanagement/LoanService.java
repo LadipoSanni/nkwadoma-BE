@@ -8,8 +8,10 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.DisbursementRuleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
@@ -86,10 +88,12 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final PortfolioOutputPort portfolioOutputPort;
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
     private final FinancierOutputPort financierOutputPort;
+    private final DisbursementRuleOutputPort disbursementRuleOutputPort;
+    private final LoanProductDisbursementRuleOutputPort loanProductDisbursementRuleOutputPort;
 
     @Override
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanProduct, LoanMessages.INVALID_LOAN_PRODUCT_REQUEST_DETAILS.getMessage());
+        MeedlValidator.validateObjectInstance(loanProduct, LoanProductMessage.INVALID_LOAN_PRODUCT_REQUEST_DETAILS.getMessage());
         loanProduct.validateLoanProductDetails();
         validateSponsors(loanProduct);
         UserIdentity foundUser = userIdentityOutputPort.findById(loanProduct.getCreatedBy());
@@ -108,11 +112,33 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (ObjectUtils.isEmpty(loanProduct.getTotalOutstandingLoan())) {
             loanProduct.setTotalOutstandingLoan(BigDecimal.ZERO);
         }
+        LoanProduct savedLoanProduct = loanProductOutputPort.save(loanProduct);
+        loanProduct.setId(savedLoanProduct.getId());
         log.info("Loan product to be saved in create loan product service method {}", loanProduct);
         investmentVehicleOutputPort.save(investmentVehicle);
-        loanProduct = loanProductOutputPort.save(loanProduct);
+        setDisbursementRule(loanProduct, foundUser);
         updateNumberOfLoanProductOnMeedlPortfolio();
         return loanProduct;
+    }
+
+    private void setDisbursementRule(LoanProduct loanProduct, UserIdentity actor) throws MeedlException {
+        if (ObjectUtils.isNotEmpty(loanProduct.getDisbursementRule())) {
+            log.info("Saving loan product disbursement rules");
+            DisbursementRule disbursementRule = loanProduct.getDisbursementRule();
+            disbursementRule.setActivationStatus(actor.getRole().isMeedlSuperAdmin()
+                    ? ActivationStatus.APPROVED
+                    : ActivationStatus.PENDING_APPROVAL);
+            disbursementRule = disbursementRuleOutputPort.save(disbursementRule);
+            loanProduct.setDisbursementRule(disbursementRule);
+            log.info("Saving loan product disbursement rules from loan product");
+            LoanProductDisbursementRule loanProductDisbursementRule = LoanProductDisbursementRule.builder()
+                    .disbursementRule(disbursementRule)
+                    .loanProduct(loanProduct)
+                    .build();
+            loanProductDisbursementRuleOutputPort.save(loanProductDisbursementRule);
+        }else {
+            log.info("Disbursement rule not provided on creating loan product");
+        }
     }
 
     private void validateSponsors(LoanProduct loanProduct) throws MeedlException {
@@ -159,7 +185,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     public void deleteLoanProductById(LoanProduct loanProduct) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanProduct, LoanMessages.LOAN_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(loanProduct.getId(), LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
-        int offerCount = loanProductOutputPort.countLoanOfferFromLoanProduct(loanProduct.getId());
+        int offerCount = loanProductOutputPort.countLoanOfferFromLoanProduct(loanProduct.getId(), List.of(LoanDecision.OFFERED, LoanDecision.ACCEPTED));
         if (offerCount == 0) {
             LoanProduct foundLoanProduct = loanProductOutputPort.findById(loanProduct.getId());
             log.info("Updating the total available amount on investment vehicle with the size of the loan product");
@@ -191,12 +217,14 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     @Override
     public LoanProduct updateLoanProduct(LoanProduct loanProduct) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanProduct, LoanMessages.LOAN_PRODUCT_REQUIRED.getMessage());
-        MeedlValidator.validateUUID(loanProduct.getId(), LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
+        MeedlValidator.validateObjectInstance(loanProduct, LoanProductMessage.LOAN_PRODUCT_REQUIRED.getMessage());
+        MeedlValidator.validateUUID(loanProduct.getId(), LoanProductMessage.INVALID_LOAN_PRODUCT_ID.getMessage());
         LoanProduct foundLoanProduct = loanProductOutputPort.findById(loanProduct.getId());
         if (foundLoanProduct.getTotalNumberOfLoanee() > BigInteger.ZERO.intValue()) {
+            log.error("Loan product {} cannot be updated as it has already been loaned out", foundLoanProduct.getName());
             throw new LoanException("Loan product " + foundLoanProduct.getName() + " cannot be updated as it has already been loaned out");
         }
+
         boolean isNotEqual = foundLoanProduct.getLoanProductSize()
                 .compareTo(loanProduct.getLoanProductSize()) != 0;
         log.info("is new loan product size greater than the previous ? {} , previous {} , new {}",
@@ -204,11 +232,18 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (isNotEqual){
             validateAndUpdateInvestmentVehicleAmountForLoanProduct(foundLoanProduct, loanProduct);
         }
-        foundLoanProduct = loanProductMapper.updateLoanProduct(foundLoanProduct, loanProduct);
-        foundLoanProduct.setUpdatedAt(LocalDateTime.now());
-        log.info("Loan product updated {}", foundLoanProduct);
 
-        return loanProductOutputPort.save(foundLoanProduct);
+        int offerCount = loanProductOutputPort.countLoanOfferFromLoanProduct(loanProduct.getId(), List.of(LoanDecision.OFFERED, LoanDecision.ACCEPTED));
+        if (offerCount == 0) {
+            foundLoanProduct = loanProductMapper.updateLoanProduct(foundLoanProduct, loanProduct);
+            foundLoanProduct.setUpdatedAt(LocalDateTime.now());
+            log.info("Loan product updated {}", foundLoanProduct);
+
+            return loanProductOutputPort.save(foundLoanProduct);
+        }else {
+            log.error("This loan product cannot be updated because it has been used in a loan offer. {}", loanProduct.getId());
+            throw new MeedlException("This loan product cannot be updated because it has been used in a loan offer");
+        }
     }
 
     private void validateAndUpdateInvestmentVehicleAmountForLoanProduct(LoanProduct foundLoanProduct, LoanProduct loanProduct) throws MeedlException {
