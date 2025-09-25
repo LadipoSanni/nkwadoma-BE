@@ -22,6 +22,8 @@ public class ControllerConstant {
    public static final String  LOAN_PRODUCT_UPDATE = "update loan product";
    public static final String  VIEW_LOAN_PRODUCT_DETAILS = "View loan product details by id.";
    public static final String  DELETE_LOAN_PRODUCT_DETAILS = "Delete loan product by id.";
+   public static final String  SET_OBLIGOR_LIMIT = "Setting of meedl's obligor loan limits.";
+   public static final String  SET_OBLIGOR_LIMIT_DESCRIPTION = "Setting of meedl's general obligor loan limits. This action can only be done by the super admin";
    public static final String  VIEW_LOAN_PRODUCT_DETAILS_DESCRIPTION = "This endpoint is used to view the details of a loan product with unique id";
    public static final String  DELETE_LOAN_PRODUCT_DETAILS_DESCRIPTION = "This endpoint is used to delete a loan product with unique id";
    public static final String  LOAN_PRODUCT_CREATION_DESCRIPTION = "To create a loan product with unique name";

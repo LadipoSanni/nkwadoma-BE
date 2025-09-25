@@ -35,6 +35,7 @@ public class PortfolioEntity {
     private BigDecimal disbursedLoanAmount = BigDecimal.ZERO;
     private BigDecimal netLoanPortfolio = BigDecimal.ZERO;
     private BigDecimal totalAmountEarned = BigDecimal.ZERO;
+    private BigDecimal obligorLoanLimit = BigDecimal.ZERO;
 
 
 }

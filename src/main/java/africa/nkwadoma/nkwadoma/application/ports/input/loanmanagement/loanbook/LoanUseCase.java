@@ -5,12 +5,15 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.Loan;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetailSummary;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
 
 public interface LoanUseCase {
     Loan viewLoanDetails( String loanId) throws MeedlException;
+
+    Portfolio setUpMeedlObligorLoanLimit(Portfolio portfolio) throws MeedlException;
 
     Loan startLoan(Loan loan) throws MeedlException;
 
