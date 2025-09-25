@@ -197,8 +197,11 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (foundLoanProduct.getTotalNumberOfLoanee() > BigInteger.ZERO.intValue()) {
             throw new LoanException("Loan product " + foundLoanProduct.getName() + " cannot be updated as it has already been loaned out");
         }
-        if (foundLoanProduct.getLoanProductSize()
-                .compareTo(loanProduct.getLoanProductSize()) == 0){
+        boolean isNotEqual = foundLoanProduct.getLoanProductSize()
+                .compareTo(loanProduct.getLoanProductSize()) != 0;
+        log.info("is new loan product size greater than the previous ? {} , previous {} , new {}",
+                isNotEqual, foundLoanProduct.getLoanProductSize(), loanProduct.getLoanProductSize() );
+        if (isNotEqual){
             validateAndUpdateInvestmentVehicleAmountForLoanProduct(foundLoanProduct, loanProduct);
         }
         foundLoanProduct = loanProductMapper.updateLoanProduct(foundLoanProduct, loanProduct);
