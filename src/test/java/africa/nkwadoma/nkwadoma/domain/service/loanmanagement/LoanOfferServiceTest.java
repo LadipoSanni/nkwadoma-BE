@@ -31,6 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 
+import java.math.BigDecimal;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -175,6 +176,9 @@ public class LoanOfferServiceTest {
         LoaneeLoanAccount loaneeLoanAccount1 = null;
         Optional<OrganizationIdentity> organizationIdentity =
                 Optional.ofNullable(OrganizationIdentity.builder().id(mockId2).build());
+        loanOffer.setLoanProduct(loanProduct);
+        loanOffer2.setAmountApproved(new BigDecimal("40000"));
+
         try {
             when(loanOfferOutputPort.findLoanOfferById(mockId)).thenReturn(loanOffer);
             when(loaneeOutputPort.findByUserId(mockId)).thenReturn(Optional.ofNullable(loanee));
@@ -187,6 +191,7 @@ public class LoanOfferServiceTest {
                     .thenReturn(Optional.of(loanMetrics));
             when(loanMetricsOutputPort.save(loanMetrics)).thenReturn(loanMetrics);
             when(loanOfferOutputPort.save(loanOffer)).thenReturn(loanOffer);
+            when(loanProductOutputPort.save(loanProduct)).thenReturn(loanProduct);
              loaneeLoanAccount1 = loanService.acceptLoanOffer(loanOffer2, OnboardingMode.EMAIL_REFERRED);
         }catch (MeedlException exception){
             log.error(exception.getMessage());

@@ -23,6 +23,8 @@ LoanProductResponse {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime createdAt;
     private BigDecimal totalAmountAvailable;
+    private BigDecimal availableAmountToBeDisbursed;
+    private BigDecimal availableAmountToBeOffered;
     private BigDecimal totalAmountDisbursed ;
     private BigDecimal obligorLoanLimit;
     private BigDecimal totalOutstandingLoan;

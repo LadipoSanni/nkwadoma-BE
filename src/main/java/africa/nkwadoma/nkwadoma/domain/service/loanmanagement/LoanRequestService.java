@@ -116,6 +116,7 @@ public class LoanRequestService implements LoanRequestUseCase {
         }
         LoanRequest foundLoanRequest = loanRequestOutputPort.findById(loanRequest.getId());
 
+
         log.info("Loan request retrieved: {}", foundLoanRequest);
 
         if (ObjectUtils.isNotEmpty(foundLoanRequest.getStatus())
@@ -134,10 +135,17 @@ public class LoanRequestService implements LoanRequestUseCase {
                 log.error("The loanee for this loan request is not verified. {} \n Onboarding mode is: {}  }", LoanMessages.LOAN_REQUEST_CANNOT_BE_APPROVED.getMessage(), foundLoanRequest.getOnboardingMode());
                 throw new LoanException(LoanMessages.LOAN_REQUEST_CANNOT_BE_APPROVED.getMessage());
             }
+
+
+
+
             updatedLoanRequest = approveLoanRequest(loanRequest, foundLoanRequest);
             updateLoanRequestOnMetrics(foundLoanRequest);
             updateLoaneeLoanDetailInterestRate(updatedLoanRequest);
             LoanOffer loanOffer = loanOfferUseCase.createLoanOffer(updatedLoanRequest);
+
+            subtractAmountOfferFromAmountAvailableToBeOffered(loanOffer);
+
             updatedLoanRequest.setLoanOfferId(loanOffer.getId());
             updatedLoanRequest.setDateTimeOffered(loanOffer.getDateTimeOffered());
 
@@ -164,6 +172,13 @@ public class LoanRequestService implements LoanRequestUseCase {
 
             return loanRequestOutputPort.save(updatedLoanRequest);
         }
+    }
+
+    private void subtractAmountOfferFromAmountAvailableToBeOffered(LoanOffer loanOffer) throws MeedlException {
+        LoanProduct loanProduct = loanOffer.getLoanProduct();
+        loanProduct.setAvailableAmountToBeOffered(loanProduct.getAvailableAmountToBeOffered()
+                .subtract(loanOffer.getAmountApproved()));
+        loanProductOutputPort.save(loanProduct);
     }
 
     private void updateLoaneeLoanDetailInterestRate(LoanRequest updatedLoanRequest) throws MeedlException {
@@ -260,6 +275,11 @@ public class LoanRequestService implements LoanRequestUseCase {
 
         LoanProduct loanProduct = loanProductOutputPort.findById(loanRequest.getLoanProductId());
         log.info("loanProduct is {}", loanProduct);
+
+        if (loanRequest.getLoanAmountApproved().compareTo(loanProduct.getAvailableAmountToBeOffered()) > 0){
+            throw new LoanException("Loan Product amount available to be offered is not enough for the loan request you're approving");
+        }
+
         loanProduct.setTotalNumberOfLoanee(
                 loanProduct.getTotalNumberOfLoanee() + 1
         );

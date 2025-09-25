@@ -253,6 +253,8 @@ class LoanRequestServiceTest {
 
     @Test
     void approveLoanRequest() {
+        loanOffer.setAmountApproved(new BigDecimal("40000"));
+        loanOffer.setLoanProduct(loanProduct);
         try {
             Loanee loanee = Loanee.builder().onboardingMode(OnboardingMode.EMAIL_REFERRED).userIdentity(UserIdentity.builder().build()).build();
             // Setup stubs
@@ -266,6 +268,7 @@ class LoanRequestServiceTest {
             when(loanProductOutputPort.findById(loanRequestBuilt.getLoanProductId())).thenReturn(loanProduct);
             when(loanProductOutputPort.save(any())).thenReturn(loanProduct);
             when(loanOfferUseCase.createLoanOffer(any())).thenReturn(loanOffer);
+            when(loanProductOutputPort.save(loanProduct)).thenReturn(loanProduct);
             when(loanRequestMapper.updateLoanRequest(any(), any())).thenReturn(loanRequestBuilt);
             when(loanRequestOutputPort.save(any())).thenReturn(loanRequestBuilt);
             when(loaneeLoanDetailsOutputPort.findByLoanRequestId(loanRequestBuilt.getId())).thenReturn(new LoaneeLoanDetail());
