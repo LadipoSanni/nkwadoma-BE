@@ -44,6 +44,7 @@ public class Portfolio {
     private BigDecimal totalAvailable;
     private BigDecimal fundManagerFee;
     private BigDecimal trusteeFee;
+    private BigDecimal obligorLoanLimit;
     private double percentageGain;
     private double percentageLoss;
     private PortfolioRiskLevel portfolioRiskLevel;
@@ -55,4 +56,7 @@ public class Portfolio {
                 "portfolio");
     }
 
+    public void validateObligorLimitDetail() throws MeedlException {
+        MeedlValidator.validateBigDecimalDataElement(obligorLoanLimit, "Obligor loan limit cannot be empty");
+    }
 }

@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement;
 
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanDecision;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import org.springframework.data.domain.*;
@@ -29,5 +30,5 @@ public interface LoanProductOutputPort {
 
     LoanProduct findByLoaneeLoanDetailId(String LoaneeLoanDetailId) throws MeedlException;
 
-    int countLoanOfferFromLoanProduct(String loanProductId) throws MeedlException;
+    int countLoanOfferFromLoanProduct(String loanProductId, List<LoanDecision> loanDecisions ) throws MeedlException;
 }

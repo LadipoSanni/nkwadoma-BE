@@ -8,10 +8,12 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanAggregate;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.EditLoaneeDetailRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.UpdateLoaneeProfileRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeDeferRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeStatusRequest;
@@ -428,6 +430,20 @@ public class LoaneeController {
         ApiResponse<EditLoaneeDetailResponse> apiResponse = ApiResponse.<EditLoaneeDetailResponse>builder()
                 .data(editLoaneeDetailResponse)
                 .message(LOANEE_DETAIL_EDITED)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @PostMapping("update/profile")
+    @PreAuthorize("hasRole('LOANEE')")
+    public ResponseEntity<ApiResponse<?>> updateLoaneeProfile(@RequestBody @Valid UpdateLoaneeProfileRequest updateLoaneeProfileRequest,
+                                                        @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
+        Loanee loanee = loaneeRestMapper.mapUpdateLoaneeProfileToLoanee(updateLoaneeProfileRequest);
+        String response = loaneeUseCase.updateLoaneeProfile(loanee,meedlUser.getClaimAsString("sub"));
+        ApiResponse<String> apiResponse = ApiResponse.<String>builder()
+                .data(response)
+                .message(LOANEE_PROFILE_UPDATED)
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);

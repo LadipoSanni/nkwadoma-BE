@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProd
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanOfferMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeLoanDetailMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanDecision;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
@@ -102,9 +103,9 @@ public class LoanProductAdapter implements LoanProductOutputPort {
     }
 
     @Override
-    public int countLoanOfferFromLoanProduct(String loanProductId) throws MeedlException {
+    public int countLoanOfferFromLoanProduct(String loanProductId, List<LoanDecision> loanDecisions) throws MeedlException {
         MeedlValidator.validateUUID(loanProductId, LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
-        return loanProductRepository.countLoanOfferFromLoanProduct(loanProductId);
+        return loanProductRepository.countLoanOfferFromLoanProduct(loanProductId, loanDecisions);
     }
 
     @Transactional

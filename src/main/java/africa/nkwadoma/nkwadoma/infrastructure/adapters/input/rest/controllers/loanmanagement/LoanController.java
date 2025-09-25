@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanOfferStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.PaginatedResponse;
@@ -29,6 +30,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.*;
@@ -160,6 +162,24 @@ public class LoanController {
         log.info("Delete loan product by id was called.... {}", loanProductId);
         LoanProduct loanProduct = loanProductMapper.map(meedlUser.getClaimAsString("sub"), loanProductId);
         createLoanProductUseCase.deleteLoanProductById(loanProduct);
+        ApiResponse<LoanProductResponse> apiResponse = ApiResponse.<LoanProductResponse>builder()
+                .message(LOAN_PRODUCT_DELETED_SUCCESSFULLY)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+
+
+    @DeleteMapping("/obligor/limit/meedl")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN')")
+    @Operation(summary = SET_OBLIGOR_LIMIT,description = SET_OBLIGOR_LIMIT_DESCRIPTION)
+    public ResponseEntity<ApiResponse<?>> deleteLoanProduct (
+            @AuthenticationPrincipal Jwt meedlUser,
+            @RequestParam @NotBlank(message = "Provide a valid loan product id")
+            BigDecimal obligorLoanLimit) throws MeedlException {
+        log.info("Delete loan product by id was called.... {}", loanProductId);
+        Portfolio portfolio = Portfolio.builder().obligorLoanLimit(obligorLoanLimit).build();
+        loanUseCase.setUpMeedlObligorLoanLimit(loanProduct);
         ApiResponse<LoanProductResponse> apiResponse = ApiResponse.<LoanProductResponse>builder()
                 .message(LOAN_PRODUCT_DELETED_SUCCESSFULLY)
                 .statusCode(HttpStatus.OK.toString())
