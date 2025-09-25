@@ -177,7 +177,7 @@ public class LoanOfferServiceTest {
         Optional<OrganizationIdentity> organizationIdentity =
                 Optional.ofNullable(OrganizationIdentity.builder().id(mockId2).build());
         loanOffer.setLoanProduct(loanProduct);
-        loanOffer2.setAmountApproved(new BigDecimal("40000"));
+        loanOffer.setAmountApproved(new BigDecimal("40000"));
 
         try {
             when(loanOfferOutputPort.findLoanOfferById(mockId)).thenReturn(loanOffer);

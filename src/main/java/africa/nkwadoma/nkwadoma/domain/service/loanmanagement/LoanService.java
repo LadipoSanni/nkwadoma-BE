@@ -831,6 +831,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         log.info("Loan offer identity validated : {}", loanOffer);
         LoanOffer foundLoanOffer = loanOfferOutputPort.findLoanOfferById(loanOffer.getId());
         log.info("found Loan offer : {}", foundLoanOffer);
+        if (foundLoanOffer.getLoanOfferStatus().equals(LoanOfferStatus.WITHDRAW)){
+            throw new LoanException("Operation cannot be performed on this loan offer, cause it has been withdraw");
+        }
+
         Optional<Loanee> optionalLoanee = loaneeOutputPort.findByUserId(loanOffer.getUserId());
         log.info("Loan offer: {}", loanOffer);
         if (optionalLoanee.isEmpty()) {
@@ -875,7 +879,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         LoanProduct loanProduct = offer.getLoanProduct();
         log.info("loan product {}",loanProduct);
         loanProduct.setAvailableAmountToBeOffered(loanProduct.getAvailableAmountToBeOffered()
-                .add(loanOffer.getAmountApproved()));
+                .add(offer.getAmountApproved()));
         loanProductOutputPort.save(loanProduct);
 
         notifyPortfolioManager(offer, userIdentity);
@@ -1014,6 +1018,9 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         MeedlValidator.validateUUID(loanOfferId,"Loan offer id cannot be empty ");
         MeedlValidator.validateObjectInstance(loanOfferStatus,"Loan offer status cannot be empty");
         LoanOffer loanOffer = loanOfferOutputPort.findById(loanOfferId);
+        if(loanOffer.getLoaneeResponse().equals(LoanDecision.DECLINED)){
+            throw new LoanException("Operation cannot be performed on this loan offer, cause it has been declined");
+        }
         boolean loanHasStarted = loanOutputPort.checkIfLoanHasBeenDisbursedForLoanOffer(loanOffer.getId());
         if (loanHasStarted){
             throw new LoanException("Loan offer has already been disbursed, it can't be withdraw");
