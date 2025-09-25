@@ -226,6 +226,15 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             log.error("Loan product {} cannot be updated as it has already been loaned out", foundLoanProduct.getName());
             throw new LoanException("Loan product " + foundLoanProduct.getName() + " cannot be updated as it has already been loaned out");
         }
+
+        boolean isNotEqual = foundLoanProduct.getLoanProductSize()
+                .compareTo(loanProduct.getLoanProductSize()) != 0;
+        log.info("is new loan product size greater than the previous ? {} , previous {} , new {}",
+                isNotEqual, foundLoanProduct.getLoanProductSize(), loanProduct.getLoanProductSize() );
+        if (isNotEqual){
+            validateAndUpdateInvestmentVehicleAmountForLoanProduct(foundLoanProduct, loanProduct);
+        }
+
         int offerCount = loanProductOutputPort.countLoanOfferFromLoanProduct(loanProduct.getId(), List.of(LoanDecision.OFFERED, LoanDecision.ACCEPTED));
         if (offerCount == 0) {
             foundLoanProduct = loanProductMapper.updateLoanProduct(foundLoanProduct, loanProduct);
@@ -239,6 +248,32 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }
     }
 
+    private void validateAndUpdateInvestmentVehicleAmountForLoanProduct(LoanProduct foundLoanProduct, LoanProduct loanProduct) throws MeedlException {
+        log.info("Updating loan product size with respect to investment vehicle");
+        InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(foundLoanProduct.getInvestmentVehicleId());
+        BigDecimal investmentVehiclePreviousAmountAvailable = investmentVehicle.getTotalAvailableAmount()
+                .add(foundLoanProduct.getLoanProductSize());
+        if (investmentVehiclePreviousAmountAvailable
+                .compareTo(loanProduct.getLoanProductSize()) < 0) {
+            log.error("Loan product size update failed. Requested size [{}] exceeds available amount [{}] in investment vehicle (after refunding previous allocation).",
+                    loanProduct.getLoanProductSize(), investmentVehiclePreviousAmountAvailable);
+
+            throw new MeedlException(
+                    String.format("The new loan product size (₦%s) is greater than the amount currently available (₦%s) in the investment vehicle, even after refunding the previously allocated amount.",
+                            loanProduct.getLoanProductSize(), investmentVehiclePreviousAmountAvailable)
+            );
+        }
+        log.info("Updated total available amount in investment vehicle to {}", investmentVehicle.getTotalAvailableAmount());
+        investmentVehicle.setTotalAvailableAmount(
+                investmentVehiclePreviousAmountAvailable.subtract(loanProduct.getLoanProductSize())
+        );
+        investmentVehicleOutputPort.save(investmentVehicle);
+    }
+
+    public  boolean isSameAmount(BigDecimal firstAmount, BigDecimal secondAmount) {
+        if (firstAmount == null || secondAmount == null) return false;
+        return firstAmount.compareTo(secondAmount) == 0;
+    }
     @Override
     public Loan startLoan(Loan loan) throws MeedlException {
         log.info("------> loan---> {}", loan);

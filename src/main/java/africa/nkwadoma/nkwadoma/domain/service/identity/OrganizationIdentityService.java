@@ -88,6 +88,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         log.info("OrganizationEmployeeIdentity created on the db {}", organizationEmployeeIdentity);
 
         if (userIdentity.getRole().equals(IdentityRole.MEEDL_SUPER_ADMIN)){
+            log.info("Actor inviting organization is {} email sending initiated", userIdentity.getRole());
             asynchronousMailingOutputPort.sendEmailToInvitedOrganization(organizationEmployeeIdentity.getMeedlUser(), organizationIdentity.getName());
             updateNumberOfOrganizationOnMeedlPortfolio();
             log.info("sent email");
@@ -105,9 +106,11 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
 
         InstituteMetrics instituteMetrics = buildInstituteMetrics(organizationIdentity);
         instituteMetricsOutputPort.save(instituteMetrics);
+        log.info("Saved institute metrics in after inviting organization");
 
         organizationLoanDetailOutputPort.save(organizationLoanDetail);
         if (! userIdentity.getRole().equals(IdentityRole.MEEDL_SUPER_ADMIN)) {
+            log.info("The actor inviting organization is not a meedl super admin but {}", userIdentity.getRole());
             asynchronousNotificationOutputPort.notifySuperAdminOfNewOrganization(
                     userIdentity,organizationIdentity, NotificationFlag.APPROVE_INVITE_ORGANIZATION);
         }
@@ -188,7 +191,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         ClientRepresentation clientRepresentation = identityManagerOutPutPort.getClientRepresentationByName(organizationIdentity.getName());
         if (organizationIdentity.getName().equals(clientRepresentation.getName())) {
             log.error("OrganizationIdentity already exists, before trying to create organization with name {} ", organizationIdentity.getName());
-            throw new IdentityException("Organization already exists");
+            throw new IdentityException("Organization with this name already exists");
         }
     }
 

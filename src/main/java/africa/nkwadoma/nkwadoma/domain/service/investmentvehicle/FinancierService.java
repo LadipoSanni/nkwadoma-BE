@@ -104,6 +104,7 @@ public class FinancierService implements FinancierUseCase {
             updateNumberOfFinancierOnPortfolio(financiers);
         }else {
             UserIdentity meedlSuperAdmin = userIdentityOutputPort.findMeedlSuperAdmin();
+            log.info("Meedl super admin in db {}", meedlSuperAdmin);
             asynchronousNotificationOutputPort.sendFinancierInvitationApprovalNotificationToSuperAdmin(financiersToMail,actor,meedlSuperAdmin);
         }
         return response;
