@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -108,7 +109,7 @@ class AdminInitializerTest {
     void findCreatedFirstOrganizationOnKeycloak(){
         ClientRepresentation clientRepresentation = null;
         try {
-            clientRepresentation = identityManagerOutputPort.getClientRepresentationByClientId("Meedl");
+            clientRepresentation = identityManagerOutputPort.getClientRepresentationByClientId(MeedlConstants.MEEDL);
         } catch (MeedlException e) {
             log.error("Error getting client representation in test: {}", e.getMessage());
         }

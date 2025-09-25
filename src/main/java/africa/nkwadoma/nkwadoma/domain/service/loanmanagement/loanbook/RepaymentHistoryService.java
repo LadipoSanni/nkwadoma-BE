@@ -4,11 +4,12 @@ import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOfferOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.RepaymentHistoryOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.FinancialConstants;
-import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loan;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
@@ -22,7 +23,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.YearMonth;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
@@ -38,47 +38,46 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final LoaneeOutputPort loaneeOutputPort;
     private final LoanOfferOutputPort loanOfferOutputPort;
+    private final LoanOutputPort loanOutputPort;
 
     @Override
     public Page<RepaymentHistory> findAllRepaymentHistory(RepaymentHistory repaymentHistory, int pageSize, int pageNumber) throws MeedlException {
-        log.info("request that got into service, actor =  {}, pageSize = {} , pageNumber = {}",repaymentHistory.getActorId()
-        , pageSize, pageNumber);
-        if(repaymentHistory.getMonth() != null) {
+        log.info("request that got into service, actor =  {}, pageSize = {} , pageNumber = {}", repaymentHistory.getActorId()
+                , pageSize, pageNumber);
+        if (repaymentHistory.getMonth() != null) {
             if (repaymentHistory.getMonth() <= 0 || repaymentHistory.getMonth() > 12) {
                 log.warn("Repayment history is not within 12 month stipulation.");
-                 repaymentHistory.setMonth(null);
+                repaymentHistory.setMonth(null);
             }
         }
         UserIdentity userIdentity = userIdentityOutputPort.findById(repaymentHistory.getActorId());
-        if (userIdentity.getRole().equals(IdentityRole.PORTFOLIO_MANAGER)){
+        if (userIdentity.getRole().isMeedlRole()) {
             log.info("Portfolio manager is viewing repayment history");
-            Page<RepaymentHistory>  repaymentHistories = repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(repaymentHistory,
-                     pageSize, pageNumber);
-             log.info("repayment histories gotten from adapter == {}",repaymentHistories.getContent().stream().toList());
+            Page<RepaymentHistory> repaymentHistories = repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(repaymentHistory,
+                    pageSize, pageNumber);
+            log.info("repayment histories gotten from adapter == {}", repaymentHistories.getContent().stream().toList());
             return repaymentHistories;
         }
-        Optional<Loanee> optionalLoanee =  loaneeOutputPort.findByUserId(userIdentity.getId());
+        Optional<Loanee> optionalLoanee = loaneeOutputPort.findByUserId(userIdentity.getId());
         optionalLoanee.ifPresent(loanee -> repaymentHistory.setLoaneeId(loanee.getId()));
         return repaymentHistoryOutputPort.findRepaymentHistoryAttachedToALoaneeOrAll(repaymentHistory, pageSize, pageNumber);
     }
 
 
-
-
     @Override
     public Page<RepaymentHistory> searchRepaymentHistory(RepaymentHistory repaymentHistory, int pageSize, int pageNumber) throws MeedlException {
-        if(repaymentHistory.getMonth() != null) {
+        if (repaymentHistory.getMonth() != null) {
             if (repaymentHistory.getMonth() <= 0 || repaymentHistory.getMonth() > 12) {
-                 repaymentHistory.setMonth(null);
+                repaymentHistory.setMonth(null);
             }
         }
-        return repaymentHistoryOutputPort.searchRepaymemtHistoryByLoaneeName(repaymentHistory,pageSize,pageNumber);
+        return repaymentHistoryOutputPort.searchRepaymemtHistoryByLoaneeName(repaymentHistory, pageSize, pageNumber);
     }
 
     @Override
-    public RepaymentHistory getFirstRepaymentYearAndLastRepaymentYear(String actorId,String loaneeId) throws MeedlException {
+    public RepaymentHistory getFirstRepaymentYearAndLastRepaymentYear(String actorId, String loaneeId) throws MeedlException {
         UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
-        if (userIdentity.getRole().equals(IdentityRole.PORTFOLIO_MANAGER)){
+        if (userIdentity.getRole().isMeedlRole()) {
             return repaymentHistoryOutputPort.getFirstAndLastYear(loaneeId);
         }
         Loanee loanee = loaneeOutputPort.findByUserId(userIdentity.getId()).get();
@@ -86,13 +85,21 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
     }
 
     @Override
-    public List<RepaymentHistory> generateRepaymentHistory(String loanRequestId) throws MeedlException {
+    public List<RepaymentHistory> generateRepaymentHistory(String id, String actorId) throws MeedlException {
         List<RepaymentHistory> repaymentSchedule = new ArrayList<>();
+        MeedlValidator.validateUUID(id, "id cannot be empty or invalid");
 
-        MeedlValidator.validateUUID(loanRequestId, "Loan request id cannot be null or invalid");
-        LoanOffer loanOffer = loanOfferOutputPort.findById(loanRequestId);
+        LoanOffer loanOffer;
+        UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
+        if (userIdentity.getRole().isMeedlRole()) {
+            loanOffer = loanOfferOutputPort.findById(id);
+        } else {
+            Loan loan = loanOutputPort.findLoanById(id);
+            loanOffer = loanOfferOutputPort.findById(loan.getLoanOfferId());
+            loanOffer.setDateTimeOffered(loan.getStartDate());
+        }
 
-        int totalMonths = loanOffer.getLoanProduct().getTenor();
+        int tenorMonths = loanOffer.getLoanProduct().getTenor();
         int moratoriumMonths = loanOffer.getLoanProduct().getMoratorium();
 
         BigDecimal monthlyRate = getMonthleyRate(loanOffer);
@@ -100,56 +107,88 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
         BigDecimal principal = loanOffer.getAmountApproved().setScale(2, RoundingMode.HALF_UP);
         BigDecimal balance = principal;
         BigDecimal totalRepaid = BigDecimal.ZERO;
-
         BigDecimal expectedMonthlyRepayment =
-                equatedMonthlyInstalment(monthlyRate, totalMonths, moratoriumMonths, principal);
+                equatedMonthlyInstalment(monthlyRate, tenorMonths, moratoriumMonths, principal);
 
-        LocalDateTime offerDateTime = loanOffer.getDateTimeOffered();
-        LocalDate paymentDate = offerDateTime.toLocalDate().with(TemporalAdjusters.lastDayOfMonth());
+        LocalDateTime dateTimeOffered = loanOffer.getDateTimeOffered();
+        LocalDate startDate = dateTimeOffered.toLocalDate();
+        LocalDate endOfMonth = startDate.with(TemporalAdjusters.lastDayOfMonth());
 
-        if (!offerDateTime.toLocalDate().equals(paymentDate)) {
-            long daysInMonth = ChronoUnit.DAYS.between(
-                    offerDateTime.toLocalDate(),
-                    paymentDate.plusDays(1)
-            );
-            long totalDaysInMonth = paymentDate.lengthOfMonth();
-            BigDecimal prorationFactor = BigDecimal.valueOf(daysInMonth)
-                    .divide(BigDecimal.valueOf(totalDaysInMonth), 10, RoundingMode.HALF_UP);
-            BigDecimal proratedInterest = balance.multiply(monthlyRate)
+        if (!startDate.equals(endOfMonth)) {
+            long daysInMonth = ChronoUnit.DAYS.between(startDate.withDayOfMonth(1), endOfMonth.plusDays(1));
+            long daysRemaining = ChronoUnit.DAYS.between(startDate, endOfMonth.plusDays(1));
+            BigDecimal prorationFactor = BigDecimal.valueOf(daysRemaining)
+                    .divide(BigDecimal.valueOf(daysInMonth), 10, RoundingMode.HALF_UP);
+            BigDecimal partialMonthInterest = balance.multiply(monthlyRate)
                     .multiply(prorationFactor)
                     .setScale(2, RoundingMode.HALF_UP);
-            balance = balance.add(proratedInterest).setScale(2, RoundingMode.HALF_UP);
+
+            balance = balance.add(partialMonthInterest).setScale(2, RoundingMode.HALF_UP);
 
             repaymentSchedule.add(
                     RepaymentHistory.builder()
                             .totalAmountRepaid(totalRepaid)
                             .amountOutstanding(balance)
-                            .paymentDate(paymentDate)
+                            .paymentDate(endOfMonth)
                             .amountPaid(BigDecimal.ZERO)
-                            .interestIncurred(proratedInterest)
+                            .interestIncurred(partialMonthInterest)
                             .principalPayment(BigDecimal.ZERO)
                             .build()
             );
-            paymentDate = paymentDate.plusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
         }
 
-        LocalDate previousPaymentDate;
-        if (repaymentSchedule.isEmpty()) {
-            previousPaymentDate = offerDateTime.toLocalDate().minusDays(1);
-        } else {
-            previousPaymentDate = repaymentSchedule.get(repaymentSchedule.size() - 1).getPaymentDate();
-        }
+        LocalDate paymentDate = endOfMonth.plusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
 
         moratoriumAndTenorPeriodInterestAccruedIntoBalance(
-                moratoriumMonths, balance, monthlyRate, repaymentSchedule, totalRepaid,
-                paymentDate, totalMonths, expectedMonthlyRepayment, previousPaymentDate, offerDateTime
+                moratoriumMonths, balance, monthlyRate,
+                repaymentSchedule, totalRepaid, paymentDate,
+                tenorMonths, expectedMonthlyRepayment,
+                startDate.getDayOfMonth()
         );
 
         RepaymentHistory last = repaymentSchedule.get(repaymentSchedule.size() - 1);
-        last.setTenor(totalMonths);
+        last.setTenor(tenorMonths);
         last.setMoratorium(moratoriumMonths);
 
         return repaymentSchedule;
+    }
+
+    @Override
+    public RepaymentHistory simulateRepayment(BigDecimal loanAmount, double interestRate, int repaymentPeriod) throws MeedlException {
+        MeedlValidator.validateNegativeAmount(loanAmount,"Loan");
+        MeedlValidator.validateFloatDataElement((float) interestRate,"Interest Rate cannot be zero or negative");
+        MeedlValidator.validatePositiveNumber(repaymentPeriod,"Repayment period cannot be zero or less than zero");
+        BigDecimal monthlyPayment;
+        BigDecimal totalRepayment;
+        BigDecimal totalInterestPaid;
+
+        if (interestRate == 0) {
+            monthlyPayment = loanAmount.divide(BigDecimal.valueOf(repaymentPeriod), 2, RoundingMode.HALF_UP);
+            totalRepayment = loanAmount;
+            totalInterestPaid = BigDecimal.ZERO;
+        } else {
+
+
+            double monthlyInterestRate = interestRate / FinancialConstants.MONTHS_PER_YEAR /
+                    FinancialConstants.PERCENTAGE_BASE_INT;
+            BigDecimal monthlyRateDecimal = BigDecimal.valueOf(monthlyInterestRate);
+
+            BigDecimal onePlusMonthlyRate = BigDecimal.ONE.add(monthlyRateDecimal);
+            BigDecimal ratePowerTotalMonths = onePlusMonthlyRate.pow(repaymentPeriod);
+
+            BigDecimal paymentNumerator = loanAmount.multiply(monthlyRateDecimal).multiply(ratePowerTotalMonths);
+            BigDecimal paymentDenominator = ratePowerTotalMonths.subtract(BigDecimal.ONE);
+
+            monthlyPayment = paymentNumerator.divide(paymentDenominator, 2, RoundingMode.HALF_UP);
+
+            totalRepayment = monthlyPayment.multiply(BigDecimal.valueOf(repaymentPeriod));
+
+            totalInterestPaid = totalRepayment.subtract(loanAmount);
+        }
+
+        return RepaymentHistory.builder().totalAmountRepaid(totalRepayment)
+                .principalPayment(monthlyPayment).interestIncurred(totalInterestPaid).build();
+
     }
 
     private static BigDecimal getMonthleyRate(LoanOffer loanOffer) {
@@ -167,11 +206,16 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
     }
 
     private static void moratoriumAndTenorPeriodInterestAccruedIntoBalance(
-            int moratoriumMonths, BigDecimal balance, BigDecimal monthlyRate,
-            List<RepaymentHistory> repaymentSchedule, BigDecimal totalRepaid,
-            LocalDate paymentDate, int totalMonths, BigDecimal expectedMonthlyRepayment,
-            LocalDate previousPaymentDate, LocalDateTime offerDateTime) {
-
+            int moratoriumMonths,
+            BigDecimal balance,
+            BigDecimal monthlyRate,
+            List<RepaymentHistory> repaymentSchedule,
+            BigDecimal totalRepaid,
+            LocalDate paymentDate,
+            int totalMonths,
+            BigDecimal expectedMonthlyRepayment,
+            int offerDayOfMonth
+    ) {
         for (int eachMoratoriumMonth = 1; eachMoratoriumMonth <= moratoriumMonths; eachMoratoriumMonth++) {
             BigDecimal interest = balance.multiply(monthlyRate).setScale(2, RoundingMode.HALF_UP);
             balance = balance.add(interest).setScale(2, RoundingMode.HALF_UP);
@@ -187,63 +231,37 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
                             .build()
             );
 
-            previousPaymentDate = paymentDate;
             paymentDate = paymentDate.plusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
         }
 
-        int repaymentMonths = totalMonths - moratoriumMonths;
-        for (int eachTenorMonth = 1; eachTenorMonth <= repaymentMonths; eachTenorMonth++) {
-            boolean isLast = (eachTenorMonth == repaymentMonths);
-            boolean adjustLast = isLast && (offerDateTime.toLocalDate().getDayOfMonth() >= 20);
-
-            if (adjustLast) {
-                int offerDay = offerDateTime.toLocalDate().getDayOfMonth();
-                int daysInMonth = paymentDate.lengthOfMonth();
-                paymentDate = paymentDate.withDayOfMonth(Math.min(offerDay, daysInMonth));
-                log.info("payment date {}", paymentDate);
-            }
-
-            BigDecimal interest;
-            if (adjustLast) {
-                LocalDate periodStart = previousPaymentDate.plusDays(1);
-                long periodDays = ChronoUnit.DAYS.between(periodStart, paymentDate.plusDays(1));
-                long totalDaysInMonth = paymentDate.lengthOfMonth();
-                BigDecimal prorationFactor = BigDecimal.valueOf(periodDays)
-                        .divide(BigDecimal.valueOf(totalDaysInMonth), 10, RoundingMode.HALF_UP);
-                interest = balance.multiply(monthlyRate).multiply(prorationFactor).setScale(2, RoundingMode.HALF_UP);
-            } else {
-                interest = balance.multiply(monthlyRate).setScale(2, RoundingMode.HALF_UP);
-            }
-
+        for (int eachTenorMonth = 1; eachTenorMonth <= totalMonths - moratoriumMonths; eachTenorMonth++) {
+            BigDecimal interest = balance.multiply(monthlyRate).setScale(2, RoundingMode.HALF_UP);
             BigDecimal principalPayment = expectedMonthlyRepayment.subtract(interest).setScale(2, RoundingMode.HALF_UP);
 
-            if (isLast) {
+            if (eachTenorMonth == (totalMonths - moratoriumMonths)) {
                 principalPayment = balance;
                 expectedMonthlyRepayment = principalPayment.add(interest).setScale(2, RoundingMode.HALF_UP);
                 balance = BigDecimal.ZERO;
-            } else {
-                balance = balance.subtract(principalPayment).setScale(2, RoundingMode.HALF_UP);
+
+                paymentDate = paymentDate.withDayOfMonth(
+                        Math.min(offerDayOfMonth, paymentDate.lengthOfMonth())
+                );
             }
 
             BigDecimal amountPaid = expectedMonthlyRepayment;
             totalRepaid = totalRepaid.add(amountPaid).setScale(2, RoundingMode.HALF_UP);
 
-            addScheduleToRepaymentScheduleList(balance, repaymentSchedule, totalRepaid,
-                    paymentDate, amountPaid, interest, principalPayment);
+            addScheduleToRepaymentScheduleList(balance, repaymentSchedule, totalRepaid, paymentDate, amountPaid, interest, principalPayment);
 
-            previousPaymentDate = paymentDate;
-
-            if (!isLast) {
+            if (eachTenorMonth < (totalMonths - moratoriumMonths)) {
                 paymentDate = paymentDate.plusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
             }
         }
     }
 
-    private static void addScheduleToRepaymentScheduleList(
-            BigDecimal balance, List<RepaymentHistory> repaymentSchedule,
-            BigDecimal totalRepaid, LocalDate paymentDate, BigDecimal amountPaid,
-            BigDecimal interest, BigDecimal principalPayment) {
-
+    private static void addScheduleToRepaymentScheduleList(BigDecimal balance, List<RepaymentHistory> repaymentSchedule,
+                                                           BigDecimal totalRepaid, LocalDate paymentDate, BigDecimal amountPaid,
+                                                           BigDecimal interest, BigDecimal principalPayment) {
         repaymentSchedule.add(
                 RepaymentHistory.builder()
                         .totalAmountRepaid(totalRepaid)

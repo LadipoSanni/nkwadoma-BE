@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 @Getter
 public class LoanBreakdownRequest {
 
+    private String loaneeLoanBreakdownId;
     private String itemName;
     private BigDecimal itemAmount;
     private String currency;

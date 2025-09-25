@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan;
 
+import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanDecision;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoanProductEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -7,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface LoanProductRepository extends JpaRepository<LoanProductEntity,String> {
@@ -52,4 +54,13 @@ public interface LoanProductRepository extends JpaRepository<LoanProductEntity,S
     WHERE lle.id = :loaneeLoanDetailId and loe.loanProduct.id = lp.id
 """)
     LoanProductEntity findLoanProductByLoaneeLoanDetailId(@Param("loaneeLoanDetailId") String loaneeLoanDetailId);
+
+    @Query("""
+    SELECT COUNT(lo)
+    FROM LoanOfferEntity lo
+    WHERE lo.loanProduct.id = :loanProductId
+      AND lo.loaneeResponse IN (:loanDecisions)
+    """)
+    int countLoanOfferFromLoanProduct(String loanProductId,
+    @Param("loanDecisions") List<LoanDecision> loanDecisions);
 }

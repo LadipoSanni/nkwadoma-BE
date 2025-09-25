@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education;
 
 
+import africa.nkwadoma.nkwadoma.domain.enums.EmploymentStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.UploadedStatus;
@@ -37,6 +38,9 @@ public class CohortLoaneeEntity {
     private LoaneeStatus loaneeStatus;
     @Enumerated(EnumType.STRING)
     private OnboardingMode onboardingMode;
+    @Enumerated(EnumType.STRING)
+    private EmploymentStatus employmentStatus;
+    private String trainingPerformance;
     private LocalDateTime referralDateTime;
     private String referredBy;
     private String reasonForDropout;

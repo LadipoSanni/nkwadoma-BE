@@ -2,18 +2,24 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.
 
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
+import africa.nkwadoma.nkwadoma.domain.enums.EmploymentStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.UploadedStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanAggregate;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.EditLoaneeDetailRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.UpdateLoaneeProfileRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeDeferRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeStatusRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.EditLoaneeDetailResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.EmploymentStatusResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.CohortLoaneeResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanBeneficiaryResponse;
@@ -374,6 +380,70 @@ public class LoaneeController {
         ApiResponse<PaginatedResponse<LoaneeLoanAggregateResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoaneeLoanAggregateResponse>>builder()
                 .data(loanAggregateResponsePaginatedResponse)
                 .message(LOANEE_RETRIEVED)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+
+    @PostMapping("cohort/employment/status")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('ORGANIZATION_ASSOCIATE')")
+    public ResponseEntity<ApiResponse<?>> setEmploymentStatus(@RequestParam(name = "employmentStatus") EmploymentStatus employmentStatus,
+                                                              @RequestParam(name = "cohortId") String cohortId,
+                                                              @RequestParam(name = "loaneeId") String loaneeId) throws MeedlException{
+
+        CohortLoanee cohortLoanee = loaneeUseCase.setEmploymentStatus(employmentStatus,cohortId,loaneeId);
+        EmploymentStatusResponse employmentStatusResponse = loaneeRestMapper.mapToEmploymentStatusResponse(cohortLoanee);
+        ApiResponse<EmploymentStatusResponse> apiResponse = ApiResponse.<EmploymentStatusResponse>builder()
+                .data(employmentStatusResponse)
+                .message(EMPLOYMENT_STATUS_UPDATED)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+
+    @PostMapping("cohort/training/performance")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('ORGANIZATION_ASSOCIATE')")
+    public ResponseEntity<ApiResponse<?>> updateTrainingPerformance(@RequestParam(name = "trainingPerformance") String trainingPerformance,
+                                                                    @RequestParam(name = "cohortId") String cohortId,
+                                                                    @RequestParam(name = "loaneeId") String loaneeId) throws MeedlException {
+
+       String trainingPerformanceLink =  loaneeUseCase.updateTrainingPerformance(trainingPerformance,cohortId,loaneeId);
+       ApiResponse<String> apiResponse = ApiResponse.<String>builder()
+               .data(trainingPerformanceLink)
+               .message(TRAINING_PERFORMANCE_UPDATED)
+               .statusCode(HttpStatus.OK.toString())
+               .build();
+       return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+
+
+    @PostMapping("edit/detail")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('ORGANIZATION_ASSOCIATE')")
+    public ResponseEntity<ApiResponse<?>> editLoaneeDetail(@RequestBody @Valid EditLoaneeDetailRequest editLoaneeDetailRequest) throws MeedlException {
+
+        Loanee loanee = loaneeRestMapper.mapToCohortLoanee(editLoaneeDetailRequest);
+        loanee = loaneeUseCase.editLoaneeDetail(loanee);
+        EditLoaneeDetailResponse editLoaneeDetailResponse = loaneeRestMapper.maptToEditLoaneeDetailResponse(loanee);
+        ApiResponse<EditLoaneeDetailResponse> apiResponse = ApiResponse.<EditLoaneeDetailResponse>builder()
+                .data(editLoaneeDetailResponse)
+                .message(LOANEE_DETAIL_EDITED)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @PostMapping("update/profile")
+    @PreAuthorize("hasRole('LOANEE')")
+    public ResponseEntity<ApiResponse<?>> updateLoaneeProfile(@RequestBody @Valid UpdateLoaneeProfileRequest updateLoaneeProfileRequest,
+                                                        @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
+        Loanee loanee = loaneeRestMapper.mapUpdateLoaneeProfileToLoanee(updateLoaneeProfileRequest);
+        String response = loaneeUseCase.updateLoaneeProfile(loanee,meedlUser.getClaimAsString("sub"));
+        ApiResponse<String> apiResponse = ApiResponse.<String>builder()
+                .data(response)
+                .message(LOANEE_PROFILE_UPDATED)
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);

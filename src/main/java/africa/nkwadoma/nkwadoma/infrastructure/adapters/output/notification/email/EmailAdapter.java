@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.Emai
 import africa.nkwadoma.nkwadoma.domain.enums.constants.notification.ContextMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.meedlexception.MeedlNotificationException;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.notification.Email;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -55,9 +56,17 @@ public class EmailAdapter implements EmailOutputPort {
 
         return mailMessage;
     }
-
     @Override
-    public Context getNameAndLinkContext(String link, String firstName){
+    public Context getOrganizationNameAndUserNameAndLinkContext(String link, String firstName, String organizationName){
+        Context context = new Context();
+        context.setVariable(ContextMessages.CONTEXT_TOKEN.getMessage(), link);
+        context.setVariable(ContextMessages.CONTEXT_FIRST_NAME.getMessage(), firstName);
+        context.setVariable(ContextMessages.CONTEXT_ORGANIZATION_NAME.getMessage(), organizationName);
+        context.setVariable(ContextMessages.CONTEXT_CURRENT_YEAR.getMessage(), LocalDate.now().getYear());
+        return context;
+    }
+    @Override
+    public Context getUserFirstNameAndLinkContext(String link, String firstName){
         Context context = new Context();
         context.setVariable(ContextMessages.CONTEXT_TOKEN.getMessage(), link);
         context.setVariable(ContextMessages.CONTEXT_FIRST_NAME.getMessage(), firstName);
@@ -76,10 +85,11 @@ public class EmailAdapter implements EmailOutputPort {
     }
 
     @Override
-    public Context getNameAndLinkContextAndIndustryName(String link, String firstName, String organizationName) {
+    public Context getNameAndLinkContextAndIndustryName(String link, UserIdentity userIdentity, String organizationName) {
         Context context = new Context();
         context.setVariable(ContextMessages.CONTEXT_TOKEN.getMessage(), link);
-        context.setVariable(ContextMessages.CONTEXT_FIRST_NAME.getMessage(), firstName);
+        context.setVariable(ContextMessages.CONTEXT_FIRST_NAME.getMessage(), userIdentity.getFirstName());
+        context.setVariable(ContextMessages.CONTEXT_ROLE.getMessage(),userIdentity.getRole().getRoleName());
         context.setVariable(ContextMessages.CONTEXT_ORGANIZATION_NAME.getMessage(),organizationName);
         return context;
     }

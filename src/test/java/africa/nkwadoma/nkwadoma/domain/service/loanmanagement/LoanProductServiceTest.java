@@ -5,12 +5,13 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.DisbursementRuleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
-import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanProductMapper;
@@ -47,6 +48,10 @@ class LoanProductServiceTest {
     @Mock
     private LoanProductOutputPort loanProductOutputPort;
     @Mock
+    private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
+    @Mock
+    private LoanProductDisbursementRuleOutputPort loanProductDisbursementRuleOutputPort;
+    @Mock
     private LoanOutputPort loanOutputPort;
     @Mock
     private InvestmentVehicleOutputPort investmentVehicleOutputPort;
@@ -60,13 +65,15 @@ class LoanProductServiceTest {
     private InvestmentVehicle investmentVehicle;
     private LoaneeLoanBreakdown loaneeLoanBreakdown;
     @Mock
-    private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
+    private DisbursementRuleOutputPort disbursementRuleOutputPort;
     @Mock
     private PortfolioOutputPort portfolioOutputPort;
     private int pageSize = 10;
     private int pageNumber = 10;
     private Portfolio portfolio;
     private Financier financier;
+    private LoanProductDisbursementRule loanProductDisbursementRule;
+    private DisbursementRule disbursementRule;
 
     @BeforeEach
     void setUp() {
@@ -96,7 +103,10 @@ class LoanProductServiceTest {
         loanProduct.setPageNumber(0);
         loanProduct.setVendors(List.of(vendor));
         loanProduct.setSponsors(List.of(financier));
-        portfolio = Portfolio.builder().portfolioName("Meedl").build();
+        portfolio = Portfolio.builder().portfolioName(MeedlConstants.MEEDL).build();
+//        loanProductDisbursementRule = new LoanProductDisbursementRule();
+//        disbursementRule = new DisbursementRule();
+//        loanProduct.setDisbursementRule(disbursementRule);
 
 
     }
@@ -106,6 +116,9 @@ class LoanProductServiceTest {
             when(userIdentityOutputPort.findById(any())).thenReturn(new UserIdentity());
             when(identityManagerOutPutPort.verifyUserExistsAndIsEnabled(any())).thenReturn(new UserIdentity());
             when(loanProductOutputPort.save(loanProduct)).thenReturn(loanProduct);
+//            when(loanProductDisbursementRuleOutputPort.save(any())).thenReturn(loanProductDisbursementRule);
+
+//            when(disbursementRuleOutputPort.save(disbursementRule)).thenReturn(disbursementRule);
             when(investmentVehicleFinancierOutputPort.checkIfFinancierExistInVehicle(financier.getId(), investmentVehicle.getId())).thenReturn(1);
             when(investmentVehicleOutputPort.findById(loanProduct.getId()))
                     .thenReturn(investmentVehicle);
@@ -288,6 +301,9 @@ class LoanProductServiceTest {
     @Test
     void deleteLoanProductWithValidId(){
         try {
+            when(loanProductOutputPort.findById(loanProduct.getId())).thenReturn(loanProduct);
+            when(investmentVehicleOutputPort.findById(anyString())).thenReturn(investmentVehicle);
+            when(investmentVehicleOutputPort.save(investmentVehicle)).thenReturn(investmentVehicle);
             doNothing().when(loanProductOutputPort).deleteById(loanProduct.getId());
             loanService.deleteLoanProductById(loanProduct);
             verify(loanProductOutputPort, times(1)).deleteById(loanProduct.getId());
@@ -304,6 +320,8 @@ class LoanProductServiceTest {
         loan.setLoanee(loanee);
         try {
             when(loanOutputPort.viewLoanById(anyString())).thenReturn(Optional.ofNullable(loan));
+
+            when(loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(any())).thenReturn(List.of(loaneeLoanBreakdown));
             Loan foundLoan = loanService.viewLoanDetails(loan.getId());
 
             assertNotNull(foundLoan.getId());

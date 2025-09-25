@@ -17,7 +17,7 @@
         </td>
     </tr>
     <tr>
-        <td style="padding: 20px; font-size: 16px; line-height: 24px;">
+        <td style="padding: 20px; font-size: 16px; line-height: 24px; color: #344054;">
             <p>Hi <span th:text="${firstName}"></span>,</p>
             <p>Welcome to Meedl! This is where you will access all <br> things related to your loan with <b th:text="${organizationName}"></b>.</p>
             <p>To complete your onboarding process, you need to first <br>accept invite by clicking on the button below.</p>
@@ -27,6 +27,15 @@
                     padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 4px; ">
                     Accept Invite
                 </a>
+            </div>
+            <div style="margin-top: 20px; font-size: 14px; line-height: 20px; color: #344054;">
+                <p>If the button above doesn’t work, click on the link below.</p>
+                <p>
+                    <strong>Link:</strong>
+                    <a th:href="@{${token}}" target="_blank" style="color: #142854; word-break: break-all;">
+                        Accept Invite
+                    </a>
+                </p>
             </div>
             <p>Meedl ensures your information stays safe while<br> providing a seamless experience.</p>
             <p>Thank you,<br>The Meedl Team</p>

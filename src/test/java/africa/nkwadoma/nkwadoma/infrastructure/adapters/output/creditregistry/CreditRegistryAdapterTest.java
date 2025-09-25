@@ -34,7 +34,7 @@ class CreditRegistryAdapterTest {
             String sessionCode = creditRegistryOutputPort.getSessionCode();
             findDetailsResponse = creditRegistryOutputPort.getCustomerDetails(bvnNumber, sessionCode);
         } catch (MeedlException e) {
-            log.info("Could not find customer details {}", e.getMessage());
+            log.error("Could not find customer details {}", e.getMessage());
         }
         assertNotNull(findDetailsResponse);
         assertNotNull(findDetailsResponse.getSearchResult());

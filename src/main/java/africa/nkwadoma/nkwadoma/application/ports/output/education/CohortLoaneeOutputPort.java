@@ -40,4 +40,6 @@ public interface CohortLoaneeOutputPort {
     boolean checkIfLoaneeIsNew(String id) throws MeedlException;
 
     CohortLoanee findCohortLoaneeByLoanId(String id) throws MeedlException;
+
+    CohortLoanee findByLoaneeAndCohortId(String loaneeId, String cohortId) throws MeedlException;
 }

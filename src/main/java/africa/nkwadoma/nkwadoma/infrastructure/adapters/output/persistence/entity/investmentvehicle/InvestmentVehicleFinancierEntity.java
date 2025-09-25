@@ -8,6 +8,7 @@ import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Setter
@@ -34,5 +35,5 @@ public class InvestmentVehicleFinancierEntity {
     @Column(name = "investment_vehicle_designation")
     private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
 
-    private LocalDate dateInvested;
+    private LocalDateTime dateInvested;
 }

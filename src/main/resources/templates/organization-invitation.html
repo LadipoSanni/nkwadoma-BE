@@ -17,10 +17,10 @@
     </td>
   </tr>
   <tr>
-    <td style="padding: 20px; font-size: 16px; line-height: 24px;">
+    <td style="padding: 20px; font-size: 16px; line-height: 24px; color: #344054;">
       <p>Hi <span th:text="${firstName}"></span>,</p>
       <p>
-        Your organization have been invited to join Meedl</p>
+        Your organization <span th:text="${organizationName}"></span> has been invited to join Meedl platform.</p>
       <p>
         By accepting this invitation, you will manage loans,<br> process loans faster, and stay organized.</p>
       <div style="text-align: left; margin: 20px 0;">
@@ -30,6 +30,15 @@
           Accept invite
         </a>
       </div>
+        <div style="margin-top: 20px; font-size: 14px; line-height: 20px; color: #344054;">
+            <p>If the button above doesn’t work, click on the link below.</p>
+            <p>
+                <strong>Link:</strong>
+                <a th:href="@{${token}}" target="_blank" style="color: #142854; word-break: break-all;">
+                    Accept invite
+                </a>
+            </p>
+        </div>
       <p>Thank you,<br>The Meedl Team</p>
     </td>
   </tr>

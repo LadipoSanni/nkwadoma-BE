@@ -35,6 +35,7 @@ public class Cohort {
     private CohortType cohortType;
     private LocalDateTime createdAt;
     private BigDecimal tuitionAmount;
+    private double employmentRate;
     private BigDecimal totalAmountRequested;
     private BigDecimal totalOutstandingAmount;
     private BigDecimal totalAmountReceived;

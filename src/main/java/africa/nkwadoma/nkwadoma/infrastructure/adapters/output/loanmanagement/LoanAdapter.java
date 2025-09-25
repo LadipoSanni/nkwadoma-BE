@@ -84,14 +84,13 @@ public class LoanAdapter implements LoanOutputPort {
     }
 
     @Override
-    public Page<Loan> searchLoan(String programId, String organizationId, String name, int pageSize, int pageNumber) throws MeedlException {
-        MeedlValidator.validateUUID(programId,ProgramMessages.INVALID_PROGRAM_ID.getMessage());
-        MeedlValidator.validateUUID(organizationId,OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-        MeedlValidator.validatePageSize(pageSize);
-        MeedlValidator.validatePageNumber(pageNumber);
-        Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
+    public Page<Loan> searchLoanByLoaneeName(Loan loan) throws MeedlException {
+        MeedlValidator.validatePageSize(loan.getPageSize());
+        MeedlValidator.validatePageNumber(loan.getPageNumber());
+        Pageable pageRequest = PageRequest.of(loan.getPageNumber(),loan.getPageSize());
         Page<LoanProjection> loanProjectionPage =
-                loanRepository.findAllLoanOfferByLoaneeNameInOrganizationAndProgram(programId,organizationId,name,pageRequest);
+                loanRepository.findAllLoanOfferByLoaneeNameInOrganizationAndProgram(loan.getProgramId(),
+                        loan.getOrganizationId(),loan.getName(),pageRequest);
         Page<Loan> loans =  loanProjectionPage.map(loanMapper::mapProjectionToLoan);
         return loans;
     }
