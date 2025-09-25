@@ -8,8 +8,10 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.DisbursementRuleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
@@ -86,6 +88,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final PortfolioOutputPort portfolioOutputPort;
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
     private final FinancierOutputPort financierOutputPort;
+    private final DisbursementRuleOutputPort disbursementRuleOutputPort;
+    private final LoanProductDisbursementRuleOutputPort loanProductDisbursementRuleOutputPort;
 
     @Override
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
@@ -108,11 +112,33 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (ObjectUtils.isEmpty(loanProduct.getTotalOutstandingLoan())) {
             loanProduct.setTotalOutstandingLoan(BigDecimal.ZERO);
         }
+        LoanProduct savedLoanProduct = loanProductOutputPort.save(loanProduct);
+        loanProduct.setId(savedLoanProduct.getId());
         log.info("Loan product to be saved in create loan product service method {}", loanProduct);
         investmentVehicleOutputPort.save(investmentVehicle);
-        loanProduct = loanProductOutputPort.save(loanProduct);
+        setDisbursementRule(loanProduct, foundUser);
         updateNumberOfLoanProductOnMeedlPortfolio();
         return loanProduct;
+    }
+
+    private void setDisbursementRule(LoanProduct loanProduct, UserIdentity actor) throws MeedlException {
+        if (ObjectUtils.isNotEmpty(loanProduct.getDisbursementRule())) {
+            log.info("Saving loan product disbursement rules");
+            DisbursementRule disbursementRule = loanProduct.getDisbursementRule();
+            disbursementRule.setActivationStatus(actor.getRole().isMeedlSuperAdmin()
+                    ? ActivationStatus.APPROVED
+                    : ActivationStatus.PENDING_APPROVAL);
+            disbursementRule = disbursementRuleOutputPort.save(disbursementRule);
+            loanProduct.setDisbursementRule(disbursementRule);
+            log.info("Saving loan product disbursement rules from loan product");
+            LoanProductDisbursementRule loanProductDisbursementRule = LoanProductDisbursementRule.builder()
+                    .disbursementRule(disbursementRule)
+                    .loanProduct(loanProduct)
+                    .build();
+            loanProductDisbursementRuleOutputPort.save(loanProductDisbursementRule);
+        }else {
+            log.info("Disbursement rule not provided on creating loan product");
+        }
     }
 
     private void validateSponsors(LoanProduct loanProduct) throws MeedlException {

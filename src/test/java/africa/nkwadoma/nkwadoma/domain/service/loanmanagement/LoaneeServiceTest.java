@@ -34,6 +34,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DeferProgramRequest;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.UserIdentityMapper;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -144,6 +145,9 @@ class LoaneeServiceTest {
     private LoanBreakdownOutputPort loanBreakdownOutputPort;
     private LoanRequest loanRequest;
     private LoanBreakdown cohortLoanBreakdown;
+    @Mock
+    private UserIdentityMapper userIdentityMapper;
+
 
     @BeforeEach
     void setUpLoanee() {
@@ -1067,8 +1071,10 @@ class LoaneeServiceTest {
     @Test
     void setEmploymentStatus(){
         try {
+            loaneeCohort.setEmploymentStatus(EmploymentStatus.UNEMPLOYED);
             when(cohortLoaneeOutputPort.findByLoaneeAndCohortId(mockId, mockId)).thenReturn(loaneeCohort);
             when(cohortLoaneeOutputPort.save(loaneeCohort)).thenReturn(loaneeCohort);
+            when(cohortOutputPort.save(any(Cohort.class))).thenReturn(loaneeCohort.getCohort());
             loaneeCohort = loaneeService.setEmploymentStatus(EmploymentStatus.EMPLOYED,mockId,mockId);
         }catch (MeedlException meedlException){
             log.error(meedlException.getMessage());
@@ -1146,5 +1152,22 @@ class LoaneeServiceTest {
         when(loanRequestOutputPort.findByCohortLoaneeId(mockId)).thenReturn(loanRequest);
         when(loanBreakdownOutputPort.findByItemName("NonExistentItem")).thenReturn(null);
         assertThrows(ResourceNotFoundException.class, () -> loaneeService.editLoaneeDetail(firstLoanee));
+    }
+
+
+    @Test
+    void updateLoaneeeProfile(){
+        UserIdentity newUserIdentity = UserIdentity.builder().stateOfResidence("Lagos").levelOfEduction("HND").build();
+        Loanee loanee = Loanee.builder().userIdentity(newUserIdentity).build();
+        String response;
+        try {
+            when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
+            when(userIdentityOutputPort.save(any(UserIdentity.class))).thenReturn(userIdentity);
+            response = loaneeService.updateLoaneeProfile(loanee,mockId);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(response);
+        assertEquals("Profile updated successfully",response);
     }
 }

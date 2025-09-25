@@ -14,4 +14,6 @@ public class Vendor {
     private Product product;
     private String vendorName;
     private String termsAndConditions;
+    private BigDecimal costOfService;
+    private int duration;
 }

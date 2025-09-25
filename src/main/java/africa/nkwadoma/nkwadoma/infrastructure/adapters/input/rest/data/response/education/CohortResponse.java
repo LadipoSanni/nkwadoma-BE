@@ -35,6 +35,8 @@ public class CohortResponse {
     private BigDecimal amountOutstanding;
     private BigDecimal amountReceived;
     private BigDecimal totalAmountRepaid;
+    private BigDecimal averageStartingSalary;
+    private double employmentRate;
     private double repaymentRate;
     private double debtPercentage;
     private LocalDateTime createdAt;

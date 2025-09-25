@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanee;
 
+import africa.nkwadoma.nkwadoma.domain.enums.EmploymentStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
@@ -25,6 +26,7 @@ public class LoaneeResponse {
     private LoaneeLoanDetailResponse loaneeLoanDetail;
     private OnboardingMode onboardingMode;
     private UploadedStatus uploadedStatus;
+    private EmploymentStatus employmentStatus;
     private LoaneeStatus loaneeStatus;
     private String highestLevelOfEducation;
     private String nameOfPreviousInstitution;

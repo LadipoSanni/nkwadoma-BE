@@ -194,6 +194,7 @@ public class LoaneeService implements LoaneeUseCase {
         saveLoaneeLoanBreakdowns(loanee, cohortLoanee);
         updateCohortValues(cohort);
         updateMeedlPortfolio(cohortLoanee.getLoanee());
+        cohortLoanee.getLoanee().setCohortId(cohort.getId());
         return cohortLoanee.getLoanee();
     }
 
@@ -275,6 +276,7 @@ public class LoaneeService implements LoaneeUseCase {
                 .cohort(cohort)
                 .loanee(loanee)
                 .loaneeStatus(LoaneeStatus.ADDED)
+                .employmentStatus(EmploymentStatus.UNEMPLOYED)
                 .build();
         LoaneeLoanDetail loaneeLoanDetail = saveLoaneeLoanDetails(loanee.getLoaneeLoanDetail());
         cohortLoanee.setLoaneeLoanDetail(loaneeLoanDetail);
@@ -944,9 +946,24 @@ public class LoaneeService implements LoaneeUseCase {
         MeedlValidator.validateObjectInstance(employmentStatus,"Employment status cannot be empty");
         CohortLoanee cohortLoanee = cohortLoaneeOutputPort.findByLoaneeAndCohortId(loaneeId,cohortId);
         log.info("found cohort loanee === {}",cohortLoanee);
+        if (ObjectUtils.isEmpty(cohortLoanee)) {
+            throw new IdentityException(LoaneeMessages.LOANEE_DOES_NOT_EXIST_IN_COHORT.getMessage());
+        }
+        if (cohortLoanee.getEmploymentStatus().equals(employmentStatus)) {
+            throw new IdentityException("Employment status is already set to "+ employmentStatus.toString().toLowerCase());
+        }
         cohortLoanee.setEmploymentStatus(employmentStatus);
         cohortLoanee = cohortLoaneeOutputPort.save(cohortLoanee);
         log.info("saved cohort loanee employment status === {}",cohortLoanee.getEmploymentStatus());
+        Cohort loaneeCohort = cohortLoanee.getCohort();
+        if (cohortLoanee.getEmploymentStatus().equals(EmploymentStatus.EMPLOYED)) {
+            loaneeCohort.setNumberEmployed(loaneeCohort.getNumberEmployed() + 1);
+            cohortOutputPort.save(loaneeCohort);
+        }else {
+            loaneeCohort.setNumberEmployed(loaneeCohort.getNumberEmployed() - 1);
+            cohortOutputPort.save(loaneeCohort);
+        }
+
         return cohortLoanee;
     }
 
@@ -1001,6 +1018,20 @@ public class LoaneeService implements LoaneeUseCase {
         foundLoanee.setLoaneeLoanDetail(updatedLoaneeLoanDetail);
         foundLoanee.setCohortId(cohort.getId());
         return foundLoanee;
+    }
+
+    @Override
+    public String updateLoaneeProfile(Loanee loanee, String loaneeUserID) throws MeedlException {
+        UserIdentity userIdentity = loanee.getUserIdentity();
+        log.info("Updating profile for user == : {} ",userIdentity);
+        UserIdentity foundUserIdentity = userIdentityOutputPort.findById(loaneeUserID);
+        log.info("found user identity =={}", foundUserIdentity);
+        userIdentityMapper.updateUserIdentity(foundUserIdentity, userIdentity);
+        log.info("user after mapping  identity =={}", userIdentity);
+        userIdentityOutputPort.save(foundUserIdentity);
+        log.info("after saving {}", foundUserIdentity);
+        loanee.setUserIdentity(foundUserIdentity);
+        return "Profile updated successfully";
     }
 
     private BigDecimal calculateAmountRequested(Loanee loanee, Cohort cohort, BigDecimal initialDeposit) throws MeedlException {

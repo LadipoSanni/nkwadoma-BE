@@ -6,10 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.PaginatedResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanBook.RepaymentHistoryResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanBook.RepaymentScheduleEntry;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanBook.RepaymentScheduleResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanBook.YearRangeResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanBook.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loanManagement.loanBook.RepaymentHistoryRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages;
 import lombok.RequiredArgsConstructor;
@@ -25,10 +22,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.REPAYMENT_HISTORY;
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.YEAR_RANGE_RETRIEVED;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.*;
 
 
 @Slf4j
@@ -142,10 +140,27 @@ public class RepaymentHistoryController {
 
         ApiResponse<RepaymentScheduleResponse> apiResponse = ApiResponse.<RepaymentScheduleResponse>builder()
                 .data(repaymentScheduleResponse)
-                .message("Repayment shedule")
+                .message(REPAYMENT_SCHEDULE)
                 .statusCode(HttpStatus.OK.toString())
                 .build();
 
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+
+    @GetMapping("simulate")
+    @PreAuthorize("hasRole('LOANEE')")
+    public ResponseEntity<ApiResponse<?>> simulateRepayment(@RequestParam(name = "loanAmount")BigDecimal loanAmount,
+                                                            @RequestParam(name = "interestRate")double interestRate,
+                                                            @RequestParam(name = "repaymentPeriod")int repaymentPeriod) throws MeedlException {
+
+        RepaymentHistory repaymentHistory = repaymentHistoryUseCase.simulateRepayment(loanAmount,interestRate,repaymentPeriod);
+        SimulateRepaymentResponse simulateRepaymentResponse = repaymentHistoryRestMapper.toSimulateRepaymentResponse(repaymentHistory);
+        ApiResponse<SimulateRepaymentResponse> apiResponse = ApiResponse.<SimulateRepaymentResponse>builder()
+                .data(simulateRepaymentResponse)
+                .message(REPAYMENT_SIMULATION)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }

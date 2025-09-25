@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loanM
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.EditLoaneeDetailRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.UpdateLoaneeProfileRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DeferProgramRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeLoanBreakdownRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeRequest;
@@ -145,4 +146,7 @@ public interface LoaneeRestMapper {
     @Mapping(target = "email"  , source = "userIdentity.email")
     EditLoaneeDetailResponse maptToEditLoaneeDetailResponse(Loanee loanee);
 
+    @Mapping(target = "userIdentity.stateOfResidence", source = "stateOfResidence")
+    @Mapping(target = "userIdentity.levelOfEduction", source = "levelOfEducation")
+    Loanee mapUpdateLoaneeProfileToLoanee(@Valid UpdateLoaneeProfileRequest updateLoaneeProfileRequest);
 }
