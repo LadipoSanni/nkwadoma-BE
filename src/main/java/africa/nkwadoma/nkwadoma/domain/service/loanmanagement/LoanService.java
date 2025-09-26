@@ -473,13 +473,11 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (userIdentity.getRole().equals(IdentityRole.LOANEE)){
             return loanOutputPort.findAllLoanDisburedToLoanee(userIdentity.getId(),loan.getPageNumber(),loan.getPageSize());
         }
-        if (StringUtils.isNotEmpty(loan.getOrganizationId())) {
-            return loanOutputPort.findAllByOrganizationId(loan.getOrganizationId(), loan.getPageSize(), loan.getPageNumber());
-        }if (StringUtils.isNotEmpty(loan.getLoaneeId())){
+        if (StringUtils.isNotEmpty(loan.getLoaneeId())){
             MeedlValidator.validateUUID(loan.getLoaneeId(),LoaneeMessages.LOANEES_ID_CANNOT_BE_EMPTY.getMessage());
             return loanOutputPort.findAllLoanDisburedToLoaneeByLoaneeId(loan.getLoaneeId(),loan.getPageSize(), loan.getPageNumber());
         }else {
-            return loanOutputPort.findAllLoan(loan.getPageSize(), loan.getPageNumber());
+            return loanOutputPort.findAllLoan(loan);
         }
     }
 
