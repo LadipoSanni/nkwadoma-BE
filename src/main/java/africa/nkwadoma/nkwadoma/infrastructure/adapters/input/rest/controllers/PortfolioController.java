@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlportfolio.PortfolioUseCase;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Demography;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
@@ -75,7 +76,10 @@ public class PortfolioController {
             @RequestParam
             BigDecimal obligorLoanLimit) throws MeedlException {
         log.info("set obligor loan limit for meedl actor id was called.... {}", meedlUser.getClaimAsString("sub"));
-        Portfolio portfolio = Portfolio.builder().obligorLoanLimit(obligorLoanLimit).build();
+        Portfolio portfolio = Portfolio.builder()
+                .obligorLoanLimit(obligorLoanLimit)
+                .userIdentity(UserIdentity.builder().id(meedlUser.getClaimAsString("sub")).build())
+                .build();
         portfolioUseCase.setUpMeedlObligorLoanLimit(portfolio);
         ApiResponse<LoanProductResponse> apiResponse = ApiResponse.<LoanProductResponse>builder()
                 .message(MEEDL_OBLIGOR_LIMIT_SET_SUCCESSFULLY)
