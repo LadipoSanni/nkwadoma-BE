@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanMetr
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.DemographyOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PlatformRequestOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -13,6 +14,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Demography;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.PlatformRequest;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
+import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.PortfolioMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanMetricsProjection;
@@ -35,6 +37,7 @@ public class PortfolioService implements PortfolioUseCase {
     private final DemographyOutputPort demographyOutputPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final PlatformRequestOutputPort platformRequestOutputPort;
+    private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
 
 
     @Override
@@ -79,6 +82,9 @@ public class PortfolioService implements PortfolioUseCase {
                     .createdBy(actor.getId())
                     .build();
             platformRequest = platformRequestOutputPort.save(platformRequest);
+
+
+            asynchronousNotificationOutputPort.notifySuperAdminOfMeedlObligorLoanLimitChange(platformRequest);
         }
     }
     @Override

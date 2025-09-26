@@ -13,6 +13,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.DisbursementRule;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.PlatformRequest;
 import org.springframework.scheduling.annotation.Async;
 
 import java.util.List;
@@ -86,4 +87,7 @@ public interface AsynchronousNotificationOutputPort {
 
     @Async
     void notifyAdminOfDisbursementRuleApproval(DisbursementRule disbursementRule) throws MeedlException;
+
+    @Async
+    void notifySuperAdminOfMeedlObligorLoanLimitChange(PlatformRequest platformRequest);
 }
