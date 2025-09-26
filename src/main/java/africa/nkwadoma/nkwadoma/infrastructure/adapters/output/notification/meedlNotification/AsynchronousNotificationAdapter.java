@@ -17,6 +17,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdenti
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
+import africa.nkwadoma.nkwadoma.domain.model.loan.DisbursementRule;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
@@ -278,7 +279,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
         for (UserIdentity userIdentity : allActorsForFailureNotification){
             meedlNotification.setUser(userIdentity);
             meedlNotification.setSenderFullName(userIdentity.getFirstName() + " "+userIdentity.getLastName());
-            meedlNotification.setContentDetail("The user " + foundActor.getFirstName() + " " + foundActor.getFirstName() + " and email "+foundActor.getEmail()+ " encountered error on file upload. \n\n" +meedlNotification.getContentDetail());
+            meedlNotification.setContentDetail("The user " + foundActor.getFullName() + " and email "+foundActor.getEmail()+ " encountered error on file upload. \n\n" +meedlNotification.getContentDetail());
             meedlNotification.setSenderMail(userIdentity.getEmail());
             meedlNotificationUsecase.sendNotification(meedlNotification);
         }
@@ -508,6 +509,25 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                 """)
                 .build();
         meedlNotificationUsecase.sendNotification(meedlNotification);
+    }
+
+    @Override
+    public void notifyAdminOfDisbursementRuleApproval(DisbursementRule disbursementRule) throws MeedlException {
+
+        List<UserIdentity> meedlSuperAdmin = userIdentityOutputPort
+                .findAllByRoles(Set.of(IdentityRole.MEEDL_SUPER_ADMIN));
+        MeedlNotification meedlNotification = new MeedlNotification();
+        for (UserIdentity userIdentity : meedlSuperAdmin){
+            meedlNotification.setUser(userIdentity);
+            meedlNotification.setTitle("Approve disbursement rule ");
+            meedlNotification.setSenderFullName(userIdentity.getFirstName() + " "+userIdentity.getLastName());
+            meedlNotification.setContentDetail("The user " + disbursementRule.getUserIdentity().getFullName()
+                    + " and email "+disbursementRule.getUserIdentity().getEmail()
+                    + " is requesting disbursement rule approval \n");
+            meedlNotification.setSenderMail(userIdentity.getEmail());
+            meedlNotificationUsecase.sendNotification(meedlNotification);
+        }
+
     }
 
     @Override

@@ -118,30 +118,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanProduct.setId(savedLoanProduct.getId());
         log.info("Loan product to be saved in create loan product service method {}", loanProduct);
         investmentVehicleOutputPort.save(investmentVehicle);
-        setDisbursementRule(loanProduct, foundUser);
         updateNumberOfLoanProductOnMeedlPortfolio();
         return loanProduct;
     }
 
-    private void setDisbursementRule(LoanProduct loanProduct, UserIdentity actor) throws MeedlException {
-        if (ObjectUtils.isNotEmpty(loanProduct.getDisbursementRule())) {
-            log.info("Saving loan product disbursement rules");
-            DisbursementRule disbursementRule = loanProduct.getDisbursementRule();
-            disbursementRule.setActivationStatus(actor.getRole().isMeedlSuperAdmin()
-                    ? ActivationStatus.APPROVED
-                    : ActivationStatus.PENDING_APPROVAL);
-            disbursementRule = disbursementRuleOutputPort.save(disbursementRule);
-            loanProduct.setDisbursementRule(disbursementRule);
-            log.info("Saving loan product disbursement rules from loan product");
-            LoanProductDisbursementRule loanProductDisbursementRule = LoanProductDisbursementRule.builder()
-                    .disbursementRule(disbursementRule)
-                    .loanProduct(loanProduct)
-                    .build();
-            loanProductDisbursementRuleOutputPort.save(loanProductDisbursementRule);
-        }else {
-            log.info("Disbursement rule not provided on creating loan product");
-        }
-    }
 
     private void validateSponsors(LoanProduct loanProduct) throws MeedlException {
         if (MeedlValidator.isEmptyCollection(loanProduct.getSponsors())){
