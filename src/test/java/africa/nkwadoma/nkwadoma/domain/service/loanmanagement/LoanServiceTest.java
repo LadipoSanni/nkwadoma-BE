@@ -468,13 +468,13 @@ class LoanServiceTest {
         loan.setOrganizationId(testId);
         loan.setPageNumber(pageNumber);
         loan.setPageSize(pageSize);
+        loan.setLoaneeId(null);
         Page<Loan> loans = Page.empty();
 
         try {
             userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
             when(userIdentityOutputPort.findById(loan.getActorId())).thenReturn(userIdentity);
-            when(loanOutputPort.findAllByOrganizationId(anyString(), anyInt(), anyInt()))
-                    .thenReturn(new PageImpl<>(List.of(loan)));
+            when(loanOutputPort.findAllLoan(loan)).thenReturn(new PageImpl<>(List.of(loan)));
             loans = loanService.viewAllLoans(loan);
         } catch (MeedlException e) {
             log.error("Error viewing all loans: ", e);
