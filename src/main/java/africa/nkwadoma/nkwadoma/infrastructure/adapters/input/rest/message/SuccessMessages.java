@@ -14,6 +14,7 @@ public class SuccessMessages {
     public static final String LOAN_PRODUCT_FOUND_SUCCESSFULLY = "Loan product found successfully";
     public static final String LOAN_PRODUCT_DELETED_SUCCESSFULLY = "Loan product deleted successfully";
     public static final String MEEDL_OBLIGOR_LIMIT_SET_SUCCESSFULLY = "Meedl's obligor loan limit set successfully.";
+    public static final String MEEDL_OBLIGOR_LIMIT_VIEW_SUCCESSFULLY = "Meedl's obligor loan limit viewed successfully.";
     public static final String LOAN_REFERRAL_FOUND_SUCCESSFULLY = "Loan referral found successfully";
     public static final String LOAN_START_SUCCESS = "Loan has started successfully";
     public static final String LOAN_REQUESTS_FOUND_SUCCESSFULLY = "Loan requests found successfully";
