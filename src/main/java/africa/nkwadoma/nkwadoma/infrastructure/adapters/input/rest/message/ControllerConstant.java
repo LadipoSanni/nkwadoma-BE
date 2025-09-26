@@ -20,6 +20,7 @@ public class ControllerConstant {
    public static final String LOAN_BOOK_USER_DATA_CREATION_VIA_FILE_UPLOAD = "Loan book: Uploading users bio data via file upload.";
    public static final String LOAN_BOOK_REPAYMENT_RECORD_CREATION_VIA_FILE_UPLOAD = "Loan book: Uploading users repayment record via file upload.";
    public static final String  CREATE_DISBURSEMENT_RULE = "Create disbursement rule";
+   public static final String  VIEW_DISBURSEMENT_RULE = "View disbursement rule";
    public static final String  LOAN_PRODUCT_UPDATE = "update loan product";
    public static final String  VIEW_LOAN_PRODUCT_DETAILS = "View loan product details by id.";
    public static final String  DELETE_LOAN_PRODUCT_DETAILS = "Delete loan product by id.";
@@ -32,6 +33,7 @@ public class ControllerConstant {
    public static final String LOAN_BOOK_REPAYMENT_RECORD_CREATION_DESCRIPTION = "To create a loan book via file upload of users repayment records. Either an excel file or a csv file upload.";
    public static final String  LOAN_PRODUCT_UPDATE_DESCRIPTION = "To update a loan product with unique name. The id of the loan product must be provided";
    public static final String  CREATE_DISBURSEMENT_RULE_DESCRIPTION = "To create a disbursement rule with unique name.";
+   public static final String  VIEW_DISBURSEMENT_RULE_DESCRIPTION = "To view a disbursement rule detail by unique id.";
    public static final String  LOAN_PRODUCT_VIEW_ALL_DESCRIPTION = "Fetch all loan product in the application using pagination. I.e page number and size.";
    public static final String  LOAN_PRODUCT_VIEW_ALL = "View all loan product";
    public static final String  LOAN_CONTROLLER = "Loan Controller";

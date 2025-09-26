@@ -133,6 +133,11 @@ class DisbursementRuleServiceTest {
 
         assertThat(result.getContent()).hasSize(1);
     }
+    @Test
+    void  viewDisbursementRuleWithInvalidId(){
+        disbursementRule.setId("");
+        assertThrows(MeedlException.class, ()-> disbursementRuleService.viewDisbursementRule(disbursementRule));
+    }
 
     @Test
     void deleteDisbursementRuleById() throws MeedlException {
