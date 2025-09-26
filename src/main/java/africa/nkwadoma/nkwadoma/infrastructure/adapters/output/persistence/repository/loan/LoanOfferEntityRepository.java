@@ -137,7 +137,7 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
       JOIN OrganizationEntity o ON o.id = p.organizationIdentity.id
       LEFT JOIN LoanProductEntity lp ON lo.loanProduct.id = lp.id
       WHERE (:programId IS NULL OR p.id = :programId)
-        AND (:organizationId IS NULL OR o.id = :organizationId)
+                AND (:organizationId IS NULL OR o.id = :organizationId)
         AND (:name IS NULL OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :name, '%'))
                            OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :name, '%')))
       AND NOT EXISTS (

@@ -63,18 +63,16 @@ public class LoanRequestService implements LoanRequestUseCase {
         MeedlValidator.validateObjectInstance(loanRequest, LoanMessages.LOAN_REQUEST_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validatePageNumber(loanRequest.getPageNumber());
         MeedlValidator.validatePageSize(loanRequest.getPageSize());
+        log.info("Request that got into service organizationId == {} programID == {} pageNumber == {} pageSize == {}",
+                loanRequest.getOrganizationId(),loanRequest.getProgramId(),
+                loanRequest.getPageNumber(),loanRequest.getPageSize());
         Page<LoanRequest> loanRequests;
         if (userIdentityOutputPort.findById(userId).getRole().equals(IdentityRole.LOANEE)){
             return loanRequestOutputPort.viewAllLoanRequestForLoanee(userId, loanRequest.getPageNumber(), loanRequest.getPageSize());
+        } else {
+            loanRequests = loanRequestOutputPort.viewAllLoanRequest(loanRequest);
         }
-        if (StringUtils.isNotEmpty(loanRequest.getOrganizationId())) {
-            loanRequests = loanRequestOutputPort.viewAll
-                    (loanRequest.getOrganizationId(), loanRequest.getPageNumber(), loanRequest.getPageSize());
-        }
-        else {
-            loanRequests = loanRequestOutputPort.viewAll(loanRequest.getPageNumber(), loanRequest.getPageSize());
-        }
-        log.info("Loan requests from repository: {}", loanRequests.getContent());
+        log.info("Loan requests from adapter: {}", loanRequests.getContent());
         return loanRequests;
     }
 

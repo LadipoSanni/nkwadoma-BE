@@ -88,7 +88,8 @@ class LoanRequestServiceTest {
     private CohortOutputPort cohortOutputPort;
     private CohortLoanDetail cohortLoanDetail;
     private Cohort cohort;
-
+    int pageSize = 10;
+    int pageNumber = 0;
 
     @BeforeEach
     void setUp() {
@@ -155,13 +156,15 @@ class LoanRequestServiceTest {
 
     @Test
     void viewAllLoanRequests() {
+        loanRequest.setPageNumber(pageNumber);
+        loanRequest.setPageSize(pageSize);
         try {
-            when(loanRequestOutputPort.viewAll(0, 10)).
+            when(loanRequestOutputPort.viewAllLoanRequest(loanRequest)).
                     thenReturn(new PageImpl<>(List.of(loanRequest)));
             when(userIdentityOutputPort.findById(testId)).thenReturn(UserIdentity.builder().id(testId).role(IdentityRole.PORTFOLIO_MANAGER).isIdentityVerified(true).build());
             Page<LoanRequest> loanRequests = loanRequestService.viewAllLoanRequests(loanRequest, testId);
 
-            verify(loanRequestOutputPort, times(1)).viewAll(0, 10);
+            verify(loanRequestOutputPort, times(1)).viewAllLoanRequest(loanRequest);
             assertNotNull(loanRequests.getContent());
         } catch (MeedlException e) {
             log.error(e.getMessage(), e);
@@ -233,16 +236,18 @@ class LoanRequestServiceTest {
 
     @Test
     void viewAllLoanRequestsByOrganizationId() {
+        loanRequest.setPageNumber(pageNumber);
+        loanRequest.setPageSize(pageSize);
         Page<LoanRequest> loanRequests = Page.empty();
         try {
             loanRequest.setOrganizationId("b95805d1-2e2d-47f8-a037-7bcd264914fc");
             when(userIdentityOutputPort.findById(testId)).thenReturn(UserIdentity.builder().id(testId).role(IdentityRole.PORTFOLIO_MANAGER).isIdentityVerified(true).build());
-            when(loanRequestOutputPort.viewAll(loanRequest.getOrganizationId(), 0, 10)).
+            when(loanRequestOutputPort.viewAllLoanRequest(loanRequest)).
                     thenReturn(new PageImpl<>(List.of(loanRequest)));
             loanRequests = loanRequestService.viewAllLoanRequests(loanRequest, testId);
 
         verify(loanRequestOutputPort, times(1)).
-                viewAll(loanRequest.getOrganizationId(),0, 10);
+                viewAllLoanRequest(loanRequest);
         } catch (MeedlException e) {
             log.error(e.getMessage(), e);
         }

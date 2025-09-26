@@ -37,17 +37,25 @@ public class LoanRequestController {
     private final LoanRequestRestMapper loanRequestRestMapper;
 
     @GetMapping("/loan-requests")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('LOANEE') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') " +
+            "or hasRole('PORTFOLIO_MANAGER') or hasRole('LOANEE') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE') or hasRole('MEEDL_ADMIN')")
     public ResponseEntity<ApiResponse<?>> viewAllLoanRequests(
+            @RequestParam(required = false) String organizationId,
+            @RequestParam(required = false) String programId,
             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
-            @RequestParam(required = false) String organizationId,
             @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
         String userId = meedlUser.getClaimAsString("sub");
         LoanRequest loanRequest = new LoanRequest();
         loanRequest.setPageNumber(pageNumber);
         loanRequest.setPageSize(pageSize);
+        loanRequest.setProgramId(programId);
         loanRequest.setOrganizationId(organizationId);
+
+        log.info("Request that got into controller organizationId == {} programID == {} pageNumber == {} pageSize == {}",
+                loanRequest.getOrganizationId(),loanRequest.getProgramId(),
+                loanRequest.getPageNumber(),loanRequest.getPageSize());
+
         Page<LoanRequest> loanRequests = loanRequestUseCase.viewAllLoanRequests(loanRequest, userId);
         log.info("Loan requests: {}", loanRequests.getContent());
         List<LoanRequestResponse> loanRequestResponses = loanRequests.stream().map(loanRequestRestMapper::toLoanRequestResponse).toList();
