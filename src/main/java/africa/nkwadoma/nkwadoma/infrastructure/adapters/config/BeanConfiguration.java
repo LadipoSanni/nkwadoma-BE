@@ -17,6 +17,12 @@ import africa.nkwadoma.nkwadoma.domain.service.identity.UserIdentityService;
 import africa.nkwadoma.nkwadoma.domain.service.investmentvehicle.InvestmentVehicleService;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.StringTrimMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.education.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.education.CohortMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.education.ProgramCohortMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanBreakdownMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanDetailMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanee.LoaneeLoanDetailMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanee.LoaneeMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.notification.email.EmailAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identitymanager.KeycloakAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityverificationmanager.PremblyAdapter;
@@ -29,10 +35,8 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identitymanager.U
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement.LoanBreakdownPersistenceAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement.LoaneeLoanDetailPersistenceAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement.LoaneePersistenceAdapter;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentvehicle.VehicleOperationMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentvehicle.InvestmentVehicleMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.UserIdentityMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.identity.UserIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentvehicle.InvestmentVehicleEntityRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.identity.UserEntityRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
@@ -169,7 +173,7 @@ public class BeanConfiguration {
 
     @Bean
     public ProgramCohortPersistenceAdapter programCohortPersistenceAdapter(ProgramCohortRepository programCohortRepository,
-    ProgramCohortMapper programCohortMapper,ProgramOutputPort programOutputPort){
+                                                                           ProgramCohortMapper programCohortMapper, ProgramOutputPort programOutputPort){
         return new ProgramCohortPersistenceAdapter(programCohortRepository,programCohortMapper,programOutputPort);
     }
 

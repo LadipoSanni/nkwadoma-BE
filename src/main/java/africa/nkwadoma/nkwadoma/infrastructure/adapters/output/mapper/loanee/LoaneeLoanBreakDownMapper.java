@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanee;
 
 
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanBreakdown;

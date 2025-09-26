@@ -5,7 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Demography;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.meedlportfolio.DemographyEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.DemographyMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.DemographyMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.meedlportfolio.DemographyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

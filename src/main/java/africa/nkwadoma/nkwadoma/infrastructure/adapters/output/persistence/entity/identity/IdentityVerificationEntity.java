@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity;
 
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.IdentityVerificationStatus;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.IdentityVerificationStatus;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.Getter;
