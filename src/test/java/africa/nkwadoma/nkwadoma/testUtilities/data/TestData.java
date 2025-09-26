@@ -218,6 +218,9 @@ public class TestData {
         loanProduct.setObligorLoanLimit(new BigDecimal("100.00"));
         loanProduct.setTermsAndCondition("Test: A new loan for test and terms and conditions");
         loanProduct.setLoanProductSize(new BigDecimal("1000000"));
+        loanProduct.setAvailableAmountToBeDisbursed(new BigDecimal("1000000"));
+        loanProduct.setTotalAmountAvailable(new BigDecimal("1000000"));
+        loanProduct.setAvailableAmountToBeOffered(new BigDecimal("1000000"));
         loanProduct.setPageSize(pageSize);
         loanProduct.setPageNumber(pageNumber);
         loanProduct.setVendors(List.of(vendor));

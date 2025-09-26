@@ -258,7 +258,7 @@ public class AdminInitializer {
     }
 
     private Portfolio getPortfolio(){
-        return Portfolio.builder().portfolioName(MeedlConstants.MEEDL).build();
+        return Portfolio.builder().portfolioName(MeedlConstants.MEEDL).disbursedLoanAmount(BigDecimal.ZERO).build();
     }
 
     public Portfolio createMeedlPortfolio(Portfolio portfolio) throws MeedlException {

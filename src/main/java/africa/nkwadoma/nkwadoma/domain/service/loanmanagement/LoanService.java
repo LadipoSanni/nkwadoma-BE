@@ -109,6 +109,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         investmentVehicle.setTotalAvailableAmount(investmentVehicle.getTotalAvailableAmount().subtract(loanProduct.getLoanProductSize()));
         loanProduct.addInvestmentVehicleValues(investmentVehicle);
         loanProduct.setTotalAmountAvailable(loanProduct.getLoanProductSize());
+        loanProduct.setTotalAmountDisbursed(loanProduct.getLoanProductSize());
+        loanProduct.setAvailableAmountToBeOffered(loanProduct.getLoanProductSize());
         if (ObjectUtils.isEmpty(loanProduct.getTotalOutstandingLoan())) {
             loanProduct.setTotalOutstandingLoan(BigDecimal.ZERO);
         }
@@ -315,6 +317,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }
         loanProduct.setTotalOutstandingLoan(loanProduct.getTotalOutstandingLoan()
                 .add(loanOffer.getAmountApproved()));
+        loanProduct.setTotalAmountAvailable(loanProduct.getTotalAmountAvailable()
+                .subtract(loanOffer.getAmountApproved()));
+        loanProduct.setAvailableAmountToBeDisbursed(loanProduct.getAvailableAmountToBeDisbursed()
+                .subtract(loanOffer.getAmountApproved()));
         loanProductOutputPort.save(loanProduct);
     }
 
@@ -849,6 +855,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         log.info("Loan offer identity validated : {}", loanOffer);
         LoanOffer foundLoanOffer = loanOfferOutputPort.findLoanOfferById(loanOffer.getId());
         log.info("found Loan offer : {}", foundLoanOffer);
+        if (foundLoanOffer.getLoanOfferStatus().equals(LoanOfferStatus.WITHDRAW)){
+            throw new LoanException("Operation cannot be performed on this loan offer, cause it has been withdraw");
+        }
+
         Optional<Loanee> optionalLoanee = loaneeOutputPort.findByUserId(loanOffer.getUserId());
         log.info("Loan offer: {}", loanOffer);
         if (optionalLoanee.isEmpty()) {
@@ -889,7 +899,13 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     private void declineLoanOffer(UserIdentity userIdentity, LoanOffer loanOffer, LoanOffer offer) throws MeedlException {
         loanOfferMapper.updateLoanOffer(offer, loanOffer);
-        loanOfferOutputPort.save(offer);
+        offer = loanOfferOutputPort.save(offer);
+        LoanProduct loanProduct = offer.getLoanProduct();
+        log.info("loan product {}",loanProduct);
+        loanProduct.setAvailableAmountToBeOffered(loanProduct.getAvailableAmountToBeOffered()
+                .add(offer.getAmountApproved()));
+        loanProductOutputPort.save(loanProduct);
+
         notifyPortfolioManager(offer, userIdentity);
     }
 
@@ -1026,12 +1042,22 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         MeedlValidator.validateUUID(loanOfferId,"Loan offer id cannot be empty ");
         MeedlValidator.validateObjectInstance(loanOfferStatus,"Loan offer status cannot be empty");
         LoanOffer loanOffer = loanOfferOutputPort.findById(loanOfferId);
+        if(loanOffer.getLoaneeResponse().equals(LoanDecision.DECLINED)){
+            throw new LoanException("Operation cannot be performed on this loan offer, cause it has been declined");
+        }
         boolean loanHasStarted = loanOutputPort.checkIfLoanHasBeenDisbursedForLoanOffer(loanOffer.getId());
         if (loanHasStarted){
             throw new LoanException("Loan offer has already been disbursed, it can't be withdraw");
         }
         loanOffer.setLoanOfferStatus(loanOfferStatus);
-        return  loanOfferOutputPort.save(loanOffer);
+        loanOffer = loanOfferOutputPort.save(loanOffer);
+        if (loanOfferStatus.equals(LoanOfferStatus.WITHDRAW)){
+            LoanProduct loanProduct = loanOffer.getLoanProduct();
+            loanProduct.setAvailableAmountToBeOffered(loanProduct.getAvailableAmountToBeOffered()
+                    .add(loanOffer.getAmountApproved()));
+            loanProductOutputPort.save(loanProduct);
+        }
+        return loanOffer;
     }
 
     private Page<LoanDetail> filterResult(LoanOffer loanOffer) throws MeedlException {

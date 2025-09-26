@@ -39,6 +39,8 @@ public class LoanProductEntity {
     private BigDecimal obligorLoanLimit;
     private BigDecimal loanProductSize = BigDecimal.ZERO;
     private BigDecimal totalAmountAvailable = BigDecimal.ZERO;
+    private BigDecimal availableAmountToBeDisbursed = BigDecimal.ZERO;
+    private BigDecimal availableAmountToBeOffered = BigDecimal.ZERO;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private BigDecimal totalAmountEarned = BigDecimal.ZERO;
