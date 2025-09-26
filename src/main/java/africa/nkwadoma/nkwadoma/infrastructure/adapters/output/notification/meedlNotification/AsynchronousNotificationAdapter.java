@@ -519,11 +519,12 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
         MeedlNotification meedlNotification = new MeedlNotification();
         for (UserIdentity userIdentity : meedlSuperAdmin){
             meedlNotification.setUser(userIdentity);
+            meedlNotification.setContentId(disbursementRule.getId());
             meedlNotification.setTitle("Approve disbursement rule ");
             meedlNotification.setSenderFullName(userIdentity.getFirstName() + " "+userIdentity.getLastName());
             meedlNotification.setContentDetail("The user " + disbursementRule.getUserIdentity().getFullName()
-                    + " and email "+disbursementRule.getUserIdentity().getEmail()
-                    + " is requesting disbursement rule approval \n");
+                    + " with email "+disbursementRule.getUserIdentity().getEmail()
+                    + " is requesting disbursement rule approval. \n");
             meedlNotification.setSenderMail(userIdentity.getEmail());
             meedlNotificationUsecase.sendNotification(meedlNotification);
         }
