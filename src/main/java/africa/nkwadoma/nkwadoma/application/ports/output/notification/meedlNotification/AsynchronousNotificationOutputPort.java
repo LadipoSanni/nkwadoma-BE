@@ -89,5 +89,5 @@ public interface AsynchronousNotificationOutputPort {
     void notifyAdminOfDisbursementRuleApproval(DisbursementRule disbursementRule) throws MeedlException;
 
     @Async
-    void notifySuperAdminOfMeedlObligorLoanLimitChange(PlatformRequest platformRequest);
+    void notifySuperAdminOfMeedlObligorLoanLimitChange(UserIdentity actor, PlatformRequest platformRequest) throws MeedlException;
 }

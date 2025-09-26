@@ -83,8 +83,7 @@ public class PortfolioService implements PortfolioUseCase {
                     .build();
             platformRequest = platformRequestOutputPort.save(platformRequest);
 
-
-            asynchronousNotificationOutputPort.notifySuperAdminOfMeedlObligorLoanLimitChange(platformRequest);
+            asynchronousNotificationOutputPort.notifySuperAdminOfMeedlObligorLoanLimitChange(actor, platformRequest);
         }
     }
     @Override
