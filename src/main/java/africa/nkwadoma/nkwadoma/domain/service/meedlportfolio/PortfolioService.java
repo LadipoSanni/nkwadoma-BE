@@ -7,7 +7,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.Portfoli
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Demography;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.PortfolioMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.PortfolioMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanMetricsProjection;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
