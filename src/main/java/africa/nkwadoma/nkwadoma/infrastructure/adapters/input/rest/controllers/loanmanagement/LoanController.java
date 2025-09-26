@@ -466,7 +466,8 @@ public class LoanController {
 
         LoanReferral request = LoanReferral.builder().name(name).programId(programId).organizationId(organizationId)
                 .pageNumber(pageNumber).pageSize(pageSize).build();
-        log.info("request that got in ----- ProgramID == {}  organizationID == {}",request.getProgramId(),request.getOrganizationId());
+        log.info("request that got in ----- name == {} ProgramID == {}  organizationID == {}",request.getName(),
+                request.getProgramId(),request.getOrganizationId());
         Page<LoanReferral> loanReferrals = loanUseCase.searchLoanReferrals(request);
         Page<AllLoanReferralResponse> allLoanReferralResponses =
                 loanReferrals.map(loanReferralRestMapper::allLoanReferralResponse);
