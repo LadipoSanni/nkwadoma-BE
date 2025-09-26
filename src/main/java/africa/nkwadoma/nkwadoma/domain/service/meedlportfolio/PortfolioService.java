@@ -4,16 +4,17 @@ import africa.nkwadoma.nkwadoma.application.ports.input.meedlportfolio.Portfolio
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanMetricsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.DemographyOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Demography;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.PortfolioMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanMetricsProjection;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants.MEEDL;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.loan.FinancialConstants.PERCENTAGE_BASE_INT;
 
 @Slf4j
@@ -29,7 +30,7 @@ public class PortfolioService implements PortfolioUseCase {
 
     @Override
     public Portfolio viewPortfolio() throws MeedlException {
-        Portfolio portfolio = Portfolio.builder().portfolioName(MEEDL).build();
+        Portfolio portfolio = Portfolio.builder().portfolioName(MeedlConstants.MEEDL).build();
         portfolio = portfolioOutputPort.findPortfolio(portfolio);
         LoanMetricsProjection loanMetricsProjection = loanMetricsOutputPort.calculateAllMetrics();
         portfolioMapper.updateLoanMetricsOnPortfolio(portfolio,loanMetricsProjection);
@@ -49,10 +50,25 @@ public class PortfolioService implements PortfolioUseCase {
         portfolio.setCommercialVehiclePercentage(commercialPercentage);
         return portfolio;
     }
+    @Override
+    public Portfolio setUpMeedlObligorLoanLimit(Portfolio portfolio) throws MeedlException {
+        MeedlValidator.validateObjectInstance(portfolio, "Request cannot be empty to set obligor loan limits");
+        portfolio.validateObligorLimitDetail();
+        portfolio.setPortfolioName(MeedlConstants.MEEDL);
+        Portfolio foundPortfolio = portfolioOutputPort.findPortfolio(portfolio);
+        foundPortfolio.setObligorLoanLimit(portfolio.getObligorLoanLimit());
+        return portfolioOutputPort.save(foundPortfolio);
+    }
+    @Override
+    public Portfolio viewMeedlObligorLoanLimit() throws MeedlException {
+        return portfolioOutputPort.findPortfolio(
+                Portfolio.builder().portfolioName(MeedlConstants.MEEDL).build());
+
+    }
 
     @Override
     public Demography viewLoaneeDemography() throws MeedlException {
-        Demography demography = demographyOutputPort.findDemographyByName(MEEDL);
+        Demography demography = demographyOutputPort.findDemographyByName(MeedlConstants.MEEDL);
 
         calculateGenderPercentage(demography);
 

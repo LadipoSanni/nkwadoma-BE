@@ -188,23 +188,11 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     public Page<LoanProduct> viewAllLoanProduct(LoanProduct loanProduct) {
         return loanProductOutputPort.findAllLoanProduct(loanProduct);
     }
-
-    @Override
-    public Portfolio setUpMeedlObligorLoanLimit(Portfolio portfolio) throws MeedlException {
-        MeedlValidator.validateObjectInstance(portfolio, "Request cannot be empty to set obligor loan limits");
-        portfolio.validateObligorLimitDetail();
-        portfolio.setPortfolioName(MeedlConstants.MEEDL);
-        Portfolio foundPortfolio = portfolioOutputPort.findPortfolio(portfolio);
-        foundPortfolio.setObligorLoanLimit(portfolio.getObligorLoanLimit());
-        return portfolioOutputPort.save(foundPortfolio);
-    }
     @Override
     public Page<LoanProduct> search(String loanProductName, int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validateDataElement(loanProductName, LoanMessages.LOAN_PRODUCT_NAME_REQUIRED.getMessage());
         return loanProductOutputPort.search(loanProductName,pageSize,pageNumber);
     }
-
-
 
     @Override
     public LoanProduct updateLoanProduct(LoanProduct loanProduct) throws MeedlException {

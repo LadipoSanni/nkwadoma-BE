@@ -170,24 +170,6 @@ public class LoanController {
     }
 
 
-    @DeleteMapping("/obligor/limit/meedl")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN')")
-    @Operation(summary = SET_OBLIGOR_LIMIT,description = SET_OBLIGOR_LIMIT_DESCRIPTION)
-    public ResponseEntity<ApiResponse<?>> setUpMeedlObligorLoanLimit (
-            @AuthenticationPrincipal Jwt meedlUser,
-            @RequestParam @NotBlank(message = "Provide a valid loan product id")
-            BigDecimal obligorLoanLimit) throws MeedlException {
-        log.info("set obligor loan limit for meedl actor id was called.... {}", meedlUser.getClaimAsString("sub"));
-        Portfolio portfolio = Portfolio.builder().obligorLoanLimit(obligorLoanLimit).build();
-        loanUseCase.setUpMeedlObligorLoanLimit(portfolio);
-        ApiResponse<LoanProductResponse> apiResponse = ApiResponse.<LoanProductResponse>builder()
-                .message(MEEDL_OBLIGOR_LIMIT_SET_SUCCESSFULLY)
-                .statusCode(HttpStatus.OK.toString())
-                .build();
-        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
-    }
-
-
     @GetMapping("/loan-disbursals/{loanId}")
     public ResponseEntity<ApiResponse<?>> viewLoanDetailsById (
             @PathVariable @NotBlank(message = "Provide a valid loan ID")
