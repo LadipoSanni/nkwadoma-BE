@@ -496,7 +496,7 @@ class LoanServiceTest {
             loan.setLoaneeId(null);
             userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
             when(userIdentityOutputPort.findById(loan.getActorId())).thenReturn(userIdentity);
-            when(loanOutputPort.findAllLoan(pageSize,pageNumber))
+            when(loanOutputPort.findAllLoan(loan))
                     .thenReturn(new PageImpl<>(List.of(loan)));
             loans = loanService.viewAllLoans(loan);
         }catch (MeedlException e){

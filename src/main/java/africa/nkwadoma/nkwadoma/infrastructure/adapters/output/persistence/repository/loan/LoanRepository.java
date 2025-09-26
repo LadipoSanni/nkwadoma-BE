@@ -129,7 +129,8 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           join OrganizationEntity o on o.id = p.organizationIdentity.id
           order by le.startDate desc
     """)
-    Page<LoanProjection> findAllLoan(Pageable pageRequest);
+    Page<LoanProjection> findAllLoan(@Param("organizationId") String organizationId,
+                                     @Param("programId") String programId,Pageable pageRequest);
 
     @Query("""
           select

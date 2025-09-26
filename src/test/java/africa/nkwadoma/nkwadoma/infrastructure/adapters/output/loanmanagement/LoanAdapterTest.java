@@ -228,9 +228,11 @@ class LoanAdapterTest {
     @Order(4)
     void findAllLoan(){
 
+        loan.setPageNumber(0);
+        loan.setPageSize(10);
         Page<Loan> loans = Page.empty();
         try{
-            loans = loanOutputPort.findAllLoan(pageSize,pageNumber);
+            loans = loanOutputPort.findAllLoan(loan);
         }catch (MeedlException e){
             log.error("Error finding loans : {}", e.getMessage());
         }
