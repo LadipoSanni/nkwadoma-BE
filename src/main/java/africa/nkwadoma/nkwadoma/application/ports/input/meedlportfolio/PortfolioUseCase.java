@@ -7,7 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 public interface PortfolioUseCase {
     Portfolio viewPortfolio() throws MeedlException;
 
-    Portfolio setUpMeedlObligorLoanLimit(Portfolio portfolio) throws MeedlException;
+    void setUpMeedlObligorLoanLimit(Portfolio portfolio) throws MeedlException;
 
     Portfolio viewMeedlObligorLoanLimit() throws MeedlException;
 
