@@ -12,4 +12,6 @@ public interface DisbursementRuleOutputPort {
     void deleteById(String id) throws MeedlException;
 
     Page<DisbursementRule> findAllDisbursementRule(DisbursementRule disbursementRule) throws MeedlException;
+
+    Boolean existByName(String name) throws MeedlException;
 }

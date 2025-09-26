@@ -25,8 +25,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class DisbursementRuleService  implements DisbursementRuleUseCase {
     private final DisbursementRuleOutputPort disbursementRuleOutputPort;
-    private final LoanProductDisbursementRuleOutputPort loanProductDisbursementRuleOutputPort;
-    private final LoanProductOutputPort loanProductOutputPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
 
@@ -34,8 +32,14 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
     @Override
     public DisbursementRule createDisbursementRule(DisbursementRule disbursementRule) throws MeedlException {
         MeedlValidator.validateObjectInstance(disbursementRule, DisbursementRuleMessages.EMPTY_DISBURSEMENT_RULE.getMessage());
+        MeedlValidator.validateObjectInstance(disbursementRule.getUserIdentity(), UserMessages.USER_IDENTITY_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(disbursementRule.getUserIdentity().getId(), UserMessages.INVALID_USER_ID.getMessage());
         disbursementRule.validate();
+        Boolean ruleExist = disbursementRuleOutputPort.existByName(disbursementRule.getName());
+        if (ruleExist){
+            log.error("Disbursement rule already exist with this name"+ disbursementRule.getName());
+            throw new MeedlException("Disbursement rule already exist with this name"+ disbursementRule.getName());
+        }
         UserIdentity actor = userIdentityOutputPort.findById(disbursementRule.getUserIdentity().getId());
         disbursementRule.setUserIdentity(actor);
         DisbursementRule savedDisbursementRule;

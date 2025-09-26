@@ -17,4 +17,6 @@ public interface DisbursementRuleRepository extends JpaRepository<DisbursementRu
            OR d.activationStatus IN :activationStatuses)
 """)
     Page<DisbursementRuleEntity> findAllDisbursementRuleByActivationStatuses(Set<ActivationStatus> activationStatuses, Pageable pageRequest);
+
+    Boolean existsByName(String name);
 }

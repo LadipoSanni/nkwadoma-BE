@@ -59,4 +59,10 @@ public class DisbursementRuleAdapter implements DisbursementRuleOutputPort {
 
         return disbursementRuleEntities.map(disbursementRuleMapper::map);
     }
+
+    @Override
+    public Boolean existByName(String name) throws MeedlException {
+        MeedlValidator.validateDataElement(name, DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE_NAME.getMessage());
+        return disbursementRuleRepository.existsByName(name);
+    }
 }

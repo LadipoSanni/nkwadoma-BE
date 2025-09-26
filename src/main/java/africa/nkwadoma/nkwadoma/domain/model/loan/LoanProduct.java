@@ -63,7 +63,6 @@ public class LoanProduct {
 
     private int pageSize;
     private int pageNumber;
-    private DisbursementRule disbursementRule;
 
     public void validateCostOfFund() throws MeedlException{
         if (costOfFund > 100) throw new MeedlException("Cost of fund cannot be greater than 100");
@@ -80,17 +79,10 @@ public class LoanProduct {
         validateTenor();
         validateMoratorium();
         validateCostOfFund();
-        validateDisbursementRule();
 
         log.info("Ended loan product validation successfully... ");
     }
 
-    private void validateDisbursementRule() throws MeedlException {
-        if (ObjectUtils.isNotEmpty(this.disbursementRule)){
-            log.info("Validating disbursement terms at the loan product level {}", this.disbursementRule);
-            disbursementRule.validate();
-        }
-    }
 
     private void validateMoratorium() throws InvalidInputException {
         if (moratorium < BigInteger.ONE.intValue()) {
