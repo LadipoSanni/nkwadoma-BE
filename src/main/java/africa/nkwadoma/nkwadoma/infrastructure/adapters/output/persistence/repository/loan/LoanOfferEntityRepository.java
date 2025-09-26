@@ -102,14 +102,18 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
     join UserEntity u on u.id = l.userIdentity.id
     join CohortEntity c on cle.cohort.id = c.id
     join ProgramEntity p on c.programId = p.id
+    join OrganizationEntity o on o.id = p.organizationIdentity.id
     left join LoanProductEntity lp on lo.loanProduct.id = lp.id
-
        where not exists (
                  select 1 from LoanEntity loan where loan.loanOfferId = lo.id
-             )
+             )    AND (:programId IS NULL OR p.id = :programId)
+        AND (:organizationId IS NULL OR o.id = :organizationId)
+
        order by lo.dateTimeOffered desc
     """)
-    Page<LoanOfferProjection> findAllLoanOffer(Pageable pageRequest);
+    Page<LoanOfferProjection> findAllLoanOffer(@Param("organizationId") String organizationId,
+                                               @Param("programId") String programId,
+                                               Pageable pageRequest);
 
 
     @Query("""
