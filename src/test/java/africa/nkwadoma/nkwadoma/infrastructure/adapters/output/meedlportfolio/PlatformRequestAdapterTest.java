@@ -3,10 +3,12 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.meedlportfolio;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PlatformRequestOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.PlatformRequest;
+import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -29,13 +31,8 @@ class PlatformRequestAdapterTest {
     @BeforeAll
     void setUp() {
         // Build a valid request
-        platformRequest = PlatformRequest.builder()
-                .obligorLoanLimit(BigDecimal.TEN)
-                .createdBy("test-user")
-                .requestTime(LocalDateTime.now())
-                .pageNumber(0)
-                .pageSize(10)
-                .build();
+        platformRequest = TestData.buildPlatformRequest();
+
         log.info("Setup complete for PlatformRequestAdapterTest");
     }
 

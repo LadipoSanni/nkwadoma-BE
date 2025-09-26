@@ -18,7 +18,7 @@ public class PlatformRequest {
     private String createdBy;
     private LocalDateTime requestTime;
     private int pageNumber;
-    private int PageSize;
+    private int pageSize;
 
     public void validateObligorLoanLimitData() throws MeedlException {
         MeedlValidator.validateBigDecimalDataElement(obligorLoanLimit, "Obligor loan limit cannot be empty");

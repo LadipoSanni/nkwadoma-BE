@@ -19,6 +19,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.*;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Demography;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.PlatformRequest;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
@@ -111,6 +112,16 @@ public class TestData {
                 .imageUrl("https://res.cloudinary.com/drhrd1xkn/image/upload/v1732027769/.jpg")
                 .build();
     }
+    public static PlatformRequest buildPlatformRequest() {
+        return PlatformRequest.builder()
+                .createdBy(UUID.randomUUID().toString())
+                .obligorLoanLimit(BigDecimal.TEN)
+                .requestTime(LocalDateTime.now())
+                .pageNumber(0)
+                .pageSize(10)
+                .build();
+    }
+
 
     public static Loanee createTestLoanee(UserIdentity userIdentity, LoaneeLoanDetail loaneeLoanDetail){
         return Loanee.builder()
@@ -822,7 +833,6 @@ public class TestData {
                 .name("Demo")
                 .build();
     }
-
 
     private void mockValues(){
         //          if (isTestIdentityNumber(identityVerification)){
