@@ -7,7 +7,6 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProductDisbursementRule;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanProductDisbursementRuleMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.DisbursementRuleEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoanProductDisbursementRuleEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanProductDisbursementRuleRuleRepository;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +32,7 @@ public class LoanProductDisbursementRuleAdapter implements LoanProductDisburseme
 
     @Override
     public LoanProductDisbursementRule findById(String loanProductDisbursementRuleId) throws MeedlException {
-        MeedlValidator.validateUUID(loanProductDisbursementRuleId, DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE.getMessage());
+        MeedlValidator.validateUUID(loanProductDisbursementRuleId, DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE_ID.getMessage());
         LoanProductDisbursementRuleEntity loanProductDisbursementRuleEntity = loanProductDisbursementRuleRuleRepository.findById(loanProductDisbursementRuleId)
                 .orElseThrow(()-> new MeedlException(LoanProductDisbursementRuleMessages.LOAN_PRODUCT_DISBURSEMENT_RULE_NOT_FOUND.getMessage()));
         return loanProductDisbursementRuleMapper.map(loanProductDisbursementRuleEntity);

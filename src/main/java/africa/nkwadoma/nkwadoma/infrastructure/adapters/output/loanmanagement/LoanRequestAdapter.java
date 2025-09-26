@@ -64,11 +64,15 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
     }
 
     @Override
-    public Page<LoanRequest> viewAll(int pageNumber, int pageSize) throws MeedlException {
-        MeedlValidator.validatePageNumber(pageNumber);
-        MeedlValidator.validatePageSize(pageSize);
-        Page<LoanRequestProjection> loanRequests = loanRequestRepository.findAllLoanRequests(
-                PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.desc("createdDate"))));
+    public Page<LoanRequest> viewAllLoanRequest(LoanRequest loanRequest) throws MeedlException {
+        MeedlValidator.validatePageNumber(loanRequest.getPageNumber());
+        MeedlValidator.validatePageSize(loanRequest.getPageSize());
+        log.info("Request that got into adapter organizationId == {} programID == {} pageNumber == {} pageSize == {}",
+                loanRequest.getOrganizationId(),loanRequest.getProgramId(),
+                loanRequest.getPageNumber(),loanRequest.getPageSize());
+        Pageable pageRequest = PageRequest.of(loanRequest.getPageNumber(), loanRequest.getPageSize(),Sort.by(Sort.Order.desc("createdDate")));
+        Page<LoanRequestProjection> loanRequests = loanRequestRepository.findAllLoanRequests(loanRequest.getOrganizationId(),
+                loanRequest.getProgramId(),pageRequest);
         log.info("Loan requests retrieved from DB: {}", loanRequests.getContent());
         return loanRequests.map(loanRequestMapper::mapProjectionToLoanRequest);
     }
@@ -91,16 +95,6 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
         return loanRequestMapper.toLoanRequest(loanRequestEntity);
     }
 
-    @Override
-    public Page<LoanRequest> viewAll(String organizationId, int pageNumber, int pageSize) throws MeedlException {
-        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-        MeedlValidator.validatePageNumber(pageNumber);
-        MeedlValidator.validatePageSize(pageSize);
-        Page<LoanRequestProjection> loanRequests = loanRequestRepository.findAllLoanRequestsByOrganizationId
-                (PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.desc("createdDate"))), organizationId);
-        log.info("Loan requests retrieved: {}", loanRequests.getContent());
-        return loanRequests.map(loanRequestMapper::mapProjectionToLoanRequest);
-    }
 
     @Override
     public Page<LoanRequest> searchLoanRequest(LoanRequest loanRequest) throws MeedlException {

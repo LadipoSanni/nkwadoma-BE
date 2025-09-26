@@ -52,8 +52,6 @@ public class LoanProductRequest {
     @Max(value = 999, message = "Tenor cannot exceed three digits.")
     private BigInteger tenor;
     private BigDecimal minRepaymentAmount;
-    private DisbursementRuleRequest disbursementRule;
-
     @NotBlank(message = LOAN_PRODUCT_TERMS_AND_CONDITIONS_REQUIRED)
     private String termsAndCondition;
     private List<Vendor> vendors;

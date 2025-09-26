@@ -2,6 +2,8 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.enti
 
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,5 +18,6 @@ public class DisbursementRuleEntity {
     private String id;
     private String name;
     private String query;
+    @Enumerated(EnumType.STRING)
     private ActivationStatus activationStatus;
 }

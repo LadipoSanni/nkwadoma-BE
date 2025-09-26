@@ -13,8 +13,8 @@ public interface LoanRequestOutputPort {
 
     Optional<LoanRequest> findLoanRequestById(String loanRequestId) throws MeedlException;
     void deleteLoanRequestById(String id) throws MeedlException;
-    Page<LoanRequest> viewAll(int pageNumber, int pageSize) throws MeedlException;
-    Page<LoanRequest> viewAll(String organizationId, int pageNumber, int pageSize) throws MeedlException;
+    Page<LoanRequest> viewAllLoanRequest(LoanRequest loanRequest) throws MeedlException;
+
 
     Page<LoanRequest> searchLoanRequest(LoanRequest loanRequest) throws MeedlException;
 
