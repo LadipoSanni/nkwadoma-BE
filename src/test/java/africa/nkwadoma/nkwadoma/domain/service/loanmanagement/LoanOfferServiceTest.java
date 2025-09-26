@@ -218,7 +218,7 @@ public class LoanOfferServiceTest {
             loanOffer1.setUserId(mockId);
             userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
             when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
-            when(loanOfferOutputPort.findAllLoanOffer(loanOffer1.getPageSize(),loanOffer1.getPageNumber())).
+            when(loanOfferOutputPort.findAllLoanOffer(loanOffer1)).
                     thenReturn(new PageImpl<>(List.of(loanOffer)));
             loanOffers = loanService.viewAllLoanOffers(loanOffer1);
         }catch (MeedlException exception){
