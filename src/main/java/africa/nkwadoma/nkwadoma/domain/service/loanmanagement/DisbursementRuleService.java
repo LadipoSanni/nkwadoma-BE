@@ -38,7 +38,7 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
         Boolean ruleExist = disbursementRuleOutputPort.existByName(disbursementRule.getName());
         if (ruleExist){
             log.error("Disbursement rule already exist with this name"+ disbursementRule.getName());
-            throw new MeedlException("Disbursement rule already exist with this name"+ disbursementRule.getName());
+            throw new MeedlException("Disbursement rule already exist with this name "+ disbursementRule.getName());
         }
         UserIdentity actor = userIdentityOutputPort.findById(disbursementRule.getUserIdentity().getId());
         disbursementRule.setUserIdentity(actor);
