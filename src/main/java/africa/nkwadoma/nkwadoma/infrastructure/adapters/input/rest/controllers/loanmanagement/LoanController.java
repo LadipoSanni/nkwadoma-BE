@@ -234,14 +234,20 @@ public class LoanController {
             " or hasRole('LOANEE') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> viewLoanOffers(@AuthenticationPrincipal Jwt meedlUser,
                                                          @RequestParam(required = false) String organizationId ,
+                                                         @RequestParam(required = false) String programId,
                                                          @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                                          @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
 
         LoanOffer loanOffer = new LoanOffer();
         loanOffer.setUserId(meedlUser.getClaimAsString("sub"));
                 loanOffer.setOrganizationId(organizationId);
+                loanOffer.setProgramId(programId);
         loanOffer.setPageNumber(pageNumber);
         loanOffer.setPageSize(pageSize);
+
+        log.info("Request that got into controller organizationId == {} programID == {} pageNumber == {} pageSize == {}",
+                loanOffer.getOrganizationId(),loanOffer.getProgramId(),
+                loanOffer.getPageNumber(),loanOffer.getPageSize());
         Page<LoanOffer> loanOffers = loanOfferUseCase.viewAllLoanOffers(loanOffer);
         List<AllLoanOfferResponse> loanOfferResponses =  loanOfferRestMapper.toLoanOfferResponses(loanOffers);
         PaginatedResponse<AllLoanOfferResponse> paginatedResponse = new PaginatedResponse<>(

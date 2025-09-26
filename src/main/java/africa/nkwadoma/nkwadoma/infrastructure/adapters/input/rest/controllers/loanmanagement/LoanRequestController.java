@@ -160,7 +160,7 @@ public class LoanRequestController {
 
 
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
-    @PostMapping("/search/loan-request")
+    @GetMapping("/search/loan-request")
     public ResponseEntity<ApiResponse<?>> searchLoanRequest(@RequestParam(name = "name") String name,
                                                             @RequestParam(name = "organizationId", required = false) String organizationId,
                                                             @RequestParam(name = "programId", required = false) String programId,

@@ -11,7 +11,6 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.DisbursementRuleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
@@ -960,6 +959,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     @Override
     public Page<LoanOffer> viewAllLoanOffers(LoanOffer loanOffer) throws MeedlException {
+
+        log.info("Request that got into service organizationId == {} programID == {} pageNumber == {} pageSize == {}",
+                loanOffer.getOrganizationId(),loanOffer.getProgramId(),
+                loanOffer.getPageNumber(),loanOffer.getPageSize());
         UserIdentity userIdentity = userIdentityOutputPort.findById(loanOffer.getUserId());
         if (userIdentity.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)){
            OrganizationEmployeeIdentity organizationEmployeeIdentity =
@@ -969,11 +972,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }if (userIdentity.getRole().equals(IdentityRole.LOANEE)){
             return loanOfferOutputPort.findAllLoanOfferAssignedToLoanee(userIdentity.getId(),loanOffer.getPageSize(),
                     loanOffer.getPageNumber());
-        }if (ObjectUtils.isNotEmpty(loanOffer.getOrganizationId())){
-            return loanOfferOutputPort.findAllLoanOfferedToLoaneesInOrganization(loanOffer.getOrganizationId(),
-                    loanOffer.getPageSize(),loanOffer.getPageNumber());
         }
-        return loanOfferOutputPort.findAllLoanOffer(loanOffer.getPageSize(),loanOffer.getPageNumber());
+        return loanOfferOutputPort.findAllLoanOffer(loanOffer);
     }
 
 
