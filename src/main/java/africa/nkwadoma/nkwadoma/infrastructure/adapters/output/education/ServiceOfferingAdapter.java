@@ -3,7 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.education;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ServiceOfferingOutputPort;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.ServiceOfferingEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.ServiceOfferingMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.ServiceOfferingMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.ServiceOfferEntityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

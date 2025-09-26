@@ -12,7 +12,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.PlatformRequest;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.PortfolioMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.PortfolioMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanMetricsProjection;
 import africa.nkwadoma.nkwadoma.testUtilities.TestUtils;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;

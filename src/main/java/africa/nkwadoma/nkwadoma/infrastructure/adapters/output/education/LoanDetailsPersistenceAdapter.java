@@ -4,7 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.LoanDetailsOu
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.LoanDetailEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanDetailMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanDetailMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.LoanDetailRepository;
 import lombok.RequiredArgsConstructor;
 

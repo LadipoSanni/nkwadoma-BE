@@ -1,10 +1,11 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.identity;
 
 
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.ServiceOfferingMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import org.mapstruct.*;
 
