@@ -37,7 +37,7 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
         disbursementRule.validate();
         Boolean ruleExist = disbursementRuleOutputPort.existByNameIgnoreCase(disbursementRule.getName().trim());
         if (ruleExist){
-            log.error("Disbursement rule already exist with this name"+ disbursementRule.getName());
+            log.error("Disbursement rule already exist with this name{}", disbursementRule.getName());
             throw new MeedlException("Disbursement rule already exist with this name "+ disbursementRule.getName());
         }
         UserIdentity actor = userIdentityOutputPort.findById(disbursementRule.getUserIdentity().getId());
@@ -58,23 +58,6 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
 
         return savedDisbursementRule;
     }
-
-//    @Override
-//    public DisbursementRule setUpLoanProductDisbursementRule(DisbursementRule disbursementRule) throws MeedlException {
-//        log.info("Saving loan product disbursement rules");
-//        disbursementRule.setActivationStatus(disbursementRule.getUserIdentity().getRole().isMeedlSuperAdmin()
-//                ? ActivationStatus.APPROVED
-//                : ActivationStatus.PENDING_APPROVAL);
-//        DisbursementRule savedDisbursementRule = disbursementRuleOutputPort.save(disbursementRule);
-//        disbursementRule.setId(savedDisbursementRule.getId());
-//        log.info("Saving loan product disbursement rules from loan product");
-//        LoanProductDisbursementRule loanProductDisbursementRule = LoanProductDisbursementRule.builder()
-//                .disbursementRule(savedDisbursementRule)
-//                .loanProduct(disbursementRule.getLoanProduct())
-//                .build();
-//        loanProductDisbursementRuleOutputPort.save(loanProductDisbursementRule);
-//       return disbursementRule;
-//    }
 
     @Override
     public DisbursementRule viewDisbursementRule(DisbursementRule disbursementRule) throws MeedlException {

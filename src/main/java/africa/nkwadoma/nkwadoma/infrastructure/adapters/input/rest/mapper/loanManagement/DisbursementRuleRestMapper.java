@@ -14,4 +14,7 @@ public interface DisbursementRuleRestMapper {
     DisbursementRule map(String userId, DisbursementRuleRequest request);
 
     DisbursementRuleResponse map(DisbursementRule savedDisbursementRule);
+
+    @Mapping(target = "userIdentity.id", source = "userId")
+    DisbursementRule map(String userId, String id);
 }

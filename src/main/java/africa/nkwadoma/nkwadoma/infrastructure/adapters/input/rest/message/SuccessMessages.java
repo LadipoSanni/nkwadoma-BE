@@ -10,13 +10,13 @@ public class SuccessMessages {
     public static final String REPAYMENT_RECORD_BOOK_UPLOADED_SUCCESS = "Repayment histories upload Processing...";
     public static final String UPDATED_LOAN_PRODUCT_SUCCESS = "Loan product updated successfully";
     public static final String DISBURSEMENT_RULE_CREATED_SUCCESS = "Disbursement rule created successfully";
+    public static final String DISBURSEMENT_RULE_VIEW_DETAIL_SUCCESS = "Disbursement rule details viewed successfully";
     public static final String LOAN_PRODUCT_FOUND_SUCCESSFULLY = "Loan product found successfully";
     public static final String LOAN_PRODUCT_DELETED_SUCCESSFULLY = "Loan product deleted successfully";
     public static final String MEEDL_OBLIGOR_LIMIT_SET_SUCCESSFULLY = "Meedl's obligor loan limit set successfully.";
     public static final String LOAN_REFERRAL_FOUND_SUCCESSFULLY = "Loan referral found successfully";
     public static final String LOAN_START_SUCCESS = "Loan has started successfully";
     public static final String LOAN_REQUESTS_FOUND_SUCCESSFULLY = "Loan requests found successfully";
-    public static final String SUCCESSFUL_RESPONSE = "Successful response";
     public static final String ORGANIZATION_ADMINS_RETURNED_SUCCESSFULLY = "Organization Admins returned successfully";
     public static final String LOAN_REFERRAL_UPDATED_SUCCESSFULLY = "Loan Referral updated successfully";
     public static final String LOAN_DISBURSALS_RETURNED_SUCCESSFULLY = "Loan disbursals returned successfully";
