@@ -165,7 +165,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
                 log.error("Investment vehicle financier not found for financier with id {} and vehicle with id {}", financier.getId(), investmentVehicle.getId());
                 throw new MeedlException("Apparently financier with name %s is not part of %s".formatted( financier.getName(),  investmentVehicle.getName()));
             }
-            sponsorsIds.add(financier.getId());
+             sponsorsIds.add(financier.getId());
         }
         loanProduct.setSponsorIds(sponsorsIds);
         log.info("Done verifying if financiers are part of the select vehicle {}", investmentVehicle.getId());
@@ -173,7 +173,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     private InvestmentVehicle checkProductSizeNotMoreThanAvailableInvestmentAmount(LoanProduct loanProduct) throws MeedlException {
         InvestmentVehicle investmentVehicle =
-                investmentVehicleOutputPort.findById(loanProduct.getInvestmentVehicleId());
+                 investmentVehicleOutputPort.findById(loanProduct.getInvestmentVehicleId());
         log.info("Loan product size is : {}", loanProduct.getLoanProductSize());
         log.info("Investment vehicle available balance is : {}", investmentVehicle.getTotalAvailableAmount());
         if (loanProduct.getLoanProductSize().compareTo(investmentVehicle.getTotalAvailableAmount()) > BigInteger.ZERO.intValue()) {
