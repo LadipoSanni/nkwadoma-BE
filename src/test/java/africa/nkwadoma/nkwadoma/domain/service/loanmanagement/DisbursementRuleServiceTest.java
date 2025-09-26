@@ -65,7 +65,7 @@ class DisbursementRuleServiceTest {
     void createDisbursementRuleWithExistingName() throws MeedlException {
         disbursementRule.setUserIdentity(superAdminUser);
 
-        when(disbursementRuleOutputPort.existByName(anyString())).thenReturn(true);
+        when(disbursementRuleOutputPort.existByNameIgnoreCase(anyString())).thenReturn(true);
 
         assertThrows(MeedlException.class, () -> disbursementRuleService.createDisbursementRule(disbursementRule));
 
@@ -76,7 +76,7 @@ class DisbursementRuleServiceTest {
     void superAdminCreateAutomaticallyApprovedDisbursementRule() throws MeedlException {
         disbursementRule.setUserIdentity(superAdminUser);
 
-        when(disbursementRuleOutputPort.existByName(anyString())).thenReturn(false);
+        when(disbursementRuleOutputPort.existByNameIgnoreCase(anyString())).thenReturn(false);
         when(userIdentityOutputPort.findById(anyString())).thenReturn(superAdminUser);
         when(disbursementRuleOutputPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
@@ -89,7 +89,7 @@ class DisbursementRuleServiceTest {
     @Test
     void createDisbursementRuleWithNoneSuperAdminRequireApproval() throws MeedlException {
         disbursementRule.setUserIdentity(normalUser);
-        when(disbursementRuleOutputPort.existByName(anyString())).thenReturn(false);
+        when(disbursementRuleOutputPort.existByNameIgnoreCase(anyString())).thenReturn(false);
         when(userIdentityOutputPort.findById(anyString())).thenReturn(normalUser);
         when(disbursementRuleOutputPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
@@ -104,7 +104,7 @@ class DisbursementRuleServiceTest {
         disbursementRule.setUserIdentity(superAdminUser);
         disbursementRule.setActivationStatus(ActivationStatus.INVITED);
 
-        when(disbursementRuleOutputPort.existByName(anyString())).thenReturn(false);
+        when(disbursementRuleOutputPort.existByNameIgnoreCase(anyString())).thenReturn(false);
         when(userIdentityOutputPort.findById(anyString())).thenReturn(normalUser);
         when(disbursementRuleOutputPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
 

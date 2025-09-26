@@ -35,21 +35,23 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
         MeedlValidator.validateObjectInstance(disbursementRule.getUserIdentity(), UserMessages.USER_IDENTITY_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(disbursementRule.getUserIdentity().getId(), UserMessages.INVALID_USER_ID.getMessage());
         disbursementRule.validate();
-        Boolean ruleExist = disbursementRuleOutputPort.existByName(disbursementRule.getName());
+        Boolean ruleExist = disbursementRuleOutputPort.existByNameIgnoreCase(disbursementRule.getName().trim());
         if (ruleExist){
             log.error("Disbursement rule already exist with this name"+ disbursementRule.getName());
             throw new MeedlException("Disbursement rule already exist with this name "+ disbursementRule.getName());
         }
         UserIdentity actor = userIdentityOutputPort.findById(disbursementRule.getUserIdentity().getId());
+        log.info("The role of the user creating disbursement rule is {} email {} disbursement status {}",actor.getRole(), actor.getEmail(), disbursementRule.getActivationStatus());
         disbursementRule.setUserIdentity(actor);
-        DisbursementRule savedDisbursementRule;
+        disbursementRule.setName(disbursementRule.getName().trim());
             disbursementRule.setActivationStatus(
                     disbursementRule.getUserIdentity().getRole().isMeedlSuperAdmin()
                             ? ActivationStatus.APPROVED
                             : ActivationStatus.PENDING_APPROVAL.equals(disbursementRule.getActivationStatus())
                             ? ActivationStatus.PENDING_APPROVAL
                             : ActivationStatus.INACTIVE);
-            savedDisbursementRule = disbursementRuleOutputPort.save(disbursementRule);
+        DisbursementRule savedDisbursementRule = disbursementRuleOutputPort.save(disbursementRule);
+            disbursementRule.setId(savedDisbursementRule.getId());
         if (ActivationStatus.PENDING_APPROVAL.equals(savedDisbursementRule.getActivationStatus())){
             asynchronousNotificationOutputPort.notifyAdminOfDisbursementRuleApproval(disbursementRule);
         }

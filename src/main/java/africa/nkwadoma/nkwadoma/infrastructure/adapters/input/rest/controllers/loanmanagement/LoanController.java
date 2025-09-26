@@ -173,7 +173,7 @@ public class LoanController {
     @DeleteMapping("/obligor/limit/meedl")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN')")
     @Operation(summary = SET_OBLIGOR_LIMIT,description = SET_OBLIGOR_LIMIT_DESCRIPTION)
-    public ResponseEntity<ApiResponse<?>> deleteLoanProduct (
+    public ResponseEntity<ApiResponse<?>> setUpMeedlObligorLoanLimit (
             @AuthenticationPrincipal Jwt meedlUser,
             @RequestParam @NotBlank(message = "Provide a valid loan product id")
             BigDecimal obligorLoanLimit) throws MeedlException {
