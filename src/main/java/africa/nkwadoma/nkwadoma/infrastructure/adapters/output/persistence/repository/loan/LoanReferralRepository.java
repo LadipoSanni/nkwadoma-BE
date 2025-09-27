@@ -141,8 +141,7 @@ public interface LoanReferralRepository extends JpaRepository<LoanReferralEntity
         JOIN UserEntity user ON user.id = loanee.userIdentity.id
         WHERE (:organizationId IS NULL OR organization.id = :organizationId)
         AND (:programId IS NULL OR program.id = :programId) AND lre.loanReferralStatus != 'AUTHORIZED'
-        AND (LOWER(user.firstName) LIKE LOWER(CONCAT('%', :name, '%'))
-            OR LOWER(user.lastName) LIKE LOWER(CONCAT('%', :name, '%')))
+        AND LOWER(CONCAT(user.firstName, ' ', user.lastName)) LIKE LOWER(CONCAT('%', :name, '%'))
         ORDER BY cle.referralDateTime DESC
 """)
     Page<LoanReferralProjection> searchLoanReferrals(@Param("name") String name,
