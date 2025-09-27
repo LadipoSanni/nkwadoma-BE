@@ -142,7 +142,7 @@ class DisbursementRuleServiceTest {
     void respondToDisbursementRuleWithInvalidActivationStatus() throws MeedlException {
         disbursementRule.setUserIdentity(normalUser);
         disbursementRule.setId(UUID.randomUUID().toString());
-        disbursementRule.setActivationStatus(ActivationStatus.PENDING_APPROVAL); // not APPROVED or DECLINED
+        disbursementRule.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
 
         assertThrows(MeedlException.class,
                 () -> disbursementRuleService.respondToDisbursementRule(disbursementRule));

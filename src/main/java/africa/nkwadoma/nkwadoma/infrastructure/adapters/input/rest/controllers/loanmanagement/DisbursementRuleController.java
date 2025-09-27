@@ -70,7 +70,7 @@ public class DisbursementRuleController {
         return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
     }
 
-    @PostMapping("/respond")
+    @PutMapping("/respond")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN')")
     @Operation(summary = RESPOND_TO_DISBURSEMENT_RULE,description = RESPOND_TO_DISBURSEMENT_RULE_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> respondToDisbursementRule (
