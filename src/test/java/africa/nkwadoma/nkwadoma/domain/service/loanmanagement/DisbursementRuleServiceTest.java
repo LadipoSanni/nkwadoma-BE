@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -137,6 +137,56 @@ class DisbursementRuleServiceTest {
     void  viewDisbursementRuleWithInvalidId(){
         disbursementRule.setId("");
         assertThrows(MeedlException.class, ()-> disbursementRuleService.viewDisbursementRule(disbursementRule));
+    }
+    @Test
+    void respondToDisbursementRuleWithInvalidActivationStatus() throws MeedlException {
+        disbursementRule.setUserIdentity(normalUser);
+        disbursementRule.setId(UUID.randomUUID().toString());
+        disbursementRule.setActivationStatus(ActivationStatus.PENDING_APPROVAL); // not APPROVED or DECLINED
+
+        assertThrows(MeedlException.class,
+                () -> disbursementRuleService.respondToDisbursementRule(disbursementRule));
+
+        verify(disbursementRuleOutputPort, never()).save(any());
+    }
+
+    @Test
+    void respondToDisbursementRuleApprove() throws MeedlException {
+        disbursementRule.setUserIdentity(normalUser);
+        disbursementRule.setId(UUID.randomUUID().toString());
+        disbursementRule.setActivationStatus(ActivationStatus.APPROVED);
+
+        when(disbursementRuleOutputPort.findById(disbursementRule.getId())).thenReturn(disbursementRule);
+        when(disbursementRuleOutputPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        DisbursementRule result = disbursementRuleService.respondToDisbursementRule(disbursementRule);
+
+        assertNotNull(result);
+        assertEquals(ActivationStatus.APPROVED, result.getActivationStatus());
+        verify(disbursementRuleOutputPort).save(disbursementRule);
+    }
+
+    @Test
+    void respondToDisbursementRuleDecline() throws MeedlException {
+        disbursementRule.setUserIdentity(normalUser);
+        disbursementRule.setId(UUID.randomUUID().toString());
+        disbursementRule.setActivationStatus(ActivationStatus.DECLINED);
+
+        when(disbursementRuleOutputPort.findById(disbursementRule.getId())).thenReturn(disbursementRule);
+        when(disbursementRuleOutputPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        DisbursementRule result = disbursementRuleService.respondToDisbursementRule(disbursementRule);
+
+        assertNotNull(result);
+        assertEquals(ActivationStatus.DECLINED, result.getActivationStatus());
+        verify(disbursementRuleOutputPort).save(disbursementRule);
+    }
+
+    @Test
+    void respondToDisbursementRuleWithNullRule() throws MeedlException {
+        assertThrows(MeedlException.class,
+                () -> disbursementRuleService.respondToDisbursementRule(null));
+        verify(disbursementRuleOutputPort, never()).save(any());
     }
 
     @Test
