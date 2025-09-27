@@ -55,10 +55,8 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
         if (ActivationStatus.PENDING_APPROVAL.equals(savedDisbursementRule.getActivationStatus())){
             asynchronousNotificationOutputPort.notifyAdminOfDisbursementRuleApproval(disbursementRule);
         }
-
         return savedDisbursementRule;
     }
-
     @Override
     public DisbursementRule viewDisbursementRule(DisbursementRule disbursementRule) throws MeedlException {
         MeedlValidator.validateObjectInstance(disbursementRule, DisbursementRuleMessages.EMPTY_DISBURSEMENT_RULE.getMessage());
