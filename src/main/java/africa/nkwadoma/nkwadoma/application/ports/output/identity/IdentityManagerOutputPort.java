@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.identity;
 
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -20,6 +21,8 @@ public interface IdentityManagerOutputPort {
     void deleteUser(UserIdentity userIdentity) throws MeedlException;
 
     Optional<UserIdentity> getUserByEmail(String email) throws MeedlException;
+
+    IdentityRole getUserRoles(UserIdentity userIdentity) throws MeedlException;
 
     OrganizationIdentity createKeycloakClient(OrganizationIdentity organizationIdentity) throws MeedlException;
     UserIdentity createPassword(UserIdentity userIdentity) throws MeedlException;

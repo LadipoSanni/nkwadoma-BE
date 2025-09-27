@@ -3,7 +3,9 @@ package africa.nkwadoma.nkwadoma.domain.enums.identity;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;
 
+import java.util.Arrays;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Getter
 public enum IdentityRole {
@@ -86,6 +88,11 @@ public enum IdentityRole {
 
     public static boolean isMeedlStaffOrInstituteOrganizationStaff(IdentityRole role) {
         return isMeedlStaff(role) || isOrganizationStaff(role);
+    }
+
+    public static boolean isValidRole(String roleToCheck) {
+        return Arrays.stream(IdentityRole.values())
+                .anyMatch(role -> role.name().equalsIgnoreCase(roleToCheck));
     }
 
 
