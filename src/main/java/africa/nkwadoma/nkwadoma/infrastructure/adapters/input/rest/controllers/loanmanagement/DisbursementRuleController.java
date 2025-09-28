@@ -52,7 +52,25 @@ public class DisbursementRuleController {
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
     }
-    @PostMapping("/view/detail")
+
+    @PostMapping("/update")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @Operation(summary = UPDATE_DISBURSEMENT_RULE,description = UPDATE_DISBURSEMENT_RULE_DESCRIPTION)
+    public ResponseEntity<ApiResponse<?>> updateDisbursementRule (
+            @AuthenticationPrincipal Jwt meedlUser,
+            @RequestBody DisbursementRuleRequest request) throws MeedlException {
+        log.info("Update disbursement rule details called with id .... {}", request);
+        DisbursementRule disbursementRule = disbursementRuleUseMapper.map(meedlUser.getClaim("sub"), request);
+        DisbursementRule savedDisbursementRule = disbursementRuleUseCase.updateDisbursementRule(disbursementRule);
+        DisbursementRuleResponse disbursementRuleResponse = disbursementRuleUseMapper.map(savedDisbursementRule);
+        ApiResponse<DisbursementRuleResponse> apiResponse = ApiResponse.<DisbursementRuleResponse>builder()
+                .data(disbursementRuleResponse)
+                .message(DISBURSEMENT_RULE_UPDATE_SUCCESS)
+                .statusCode(HttpStatus.CREATED.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
+    }
+    @GetMapping("/view/detail")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = VIEW_DISBURSEMENT_RULE,description = VIEW_DISBURSEMENT_RULE_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> viewDisbursementRuleDetail (
@@ -61,6 +79,24 @@ public class DisbursementRuleController {
         log.info("View disbursement rule details called with id .... {}", id);
         DisbursementRule disbursementRule = disbursementRuleUseMapper.map(meedlUser.getClaim("sub"), id);
         DisbursementRule savedDisbursementRule = disbursementRuleUseCase.viewDisbursementRule(disbursementRule);
+        DisbursementRuleResponse disbursementRuleResponse = disbursementRuleUseMapper.map(savedDisbursementRule);
+        ApiResponse<DisbursementRuleResponse> apiResponse = ApiResponse.<DisbursementRuleResponse>builder()
+                .data(disbursementRuleResponse)
+                .message(DISBURSEMENT_RULE_VIEW_DETAIL_SUCCESS)
+                .statusCode(HttpStatus.CREATED.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
+    }
+
+    @PutMapping("/respond")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN')")
+    @Operation(summary = RESPOND_TO_DISBURSEMENT_RULE,description = RESPOND_TO_DISBURSEMENT_RULE_DESCRIPTION)
+    public ResponseEntity<ApiResponse<?>> respondToDisbursementRule (
+            @AuthenticationPrincipal Jwt meedlUser,
+            @RequestBody DisbursementRuleRequest disbursementRuleRequest) throws MeedlException {
+        log.info("Respond to disbursement rule called with id .... {}", disbursementRuleRequest.getId());
+        DisbursementRule disbursementRule = disbursementRuleUseMapper.map(meedlUser.getClaim("sub"), disbursementRuleRequest);
+        DisbursementRule savedDisbursementRule = disbursementRuleUseCase.respondToDisbursementRule(disbursementRule);
         DisbursementRuleResponse disbursementRuleResponse = disbursementRuleUseMapper.map(savedDisbursementRule);
         ApiResponse<DisbursementRuleResponse> apiResponse = ApiResponse.<DisbursementRuleResponse>builder()
                 .data(disbursementRuleResponse)
