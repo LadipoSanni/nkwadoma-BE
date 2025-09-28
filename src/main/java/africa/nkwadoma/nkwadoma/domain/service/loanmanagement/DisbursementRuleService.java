@@ -2,8 +2,6 @@ package africa.nkwadoma.nkwadoma.domain.service.loanmanagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.DisbursementRuleUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductDisbursementRuleOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.DisbursementRuleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
@@ -56,6 +54,19 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
             asynchronousNotificationOutputPort.notifyAdminOfDisbursementRuleApproval(disbursementRule);
         }
         return savedDisbursementRule;
+    }
+    @Override
+    public DisbursementRule updateDisbursementRule(DisbursementRule disbursementRule) throws MeedlException {
+        MeedlValidator.validateObjectInstance(disbursementRule, DisbursementRuleMessages.EMPTY_DISBURSEMENT_RULE.getMessage());
+        MeedlValidator.validateUUID(disbursementRule.getId(), DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE_ID.getMessage());
+        DisbursementRule foundDIsbursementRule = disbursementRuleOutputPort.findById(disbursementRule.getId());
+        if (!ActivationStatus.APPROVED.equals(foundDIsbursementRule.getActivationStatus())) {
+            log.info("Updating disbursement rule ");
+            foundDIsbursementRule.setName(disbursementRule.getName());
+            foundDIsbursementRule.setQuery(disbursementRule.getQuery());
+            return disbursementRuleOutputPort.save(foundDIsbursementRule);
+        }
+        return foundDIsbursementRule;
     }
     @Override
     public DisbursementRule viewDisbursementRule(DisbursementRule disbursementRule) throws MeedlException {

@@ -11,6 +11,7 @@ public class SuccessMessages {
     public static final String UPDATED_LOAN_PRODUCT_SUCCESS = "Loan product updated successfully";
     public static final String DISBURSEMENT_RULE_CREATED_SUCCESS = "Disbursement rule created successfully";
     public static final String DISBURSEMENT_RULE_VIEW_DETAIL_SUCCESS = "Disbursement rule details viewed successfully";
+    public static final String DISBURSEMENT_RULE_UPDATE_SUCCESS = "Disbursement rule update successfully";
     public static final String LOAN_PRODUCT_FOUND_SUCCESSFULLY = "Loan product found successfully";
     public static final String LOAN_PRODUCT_DELETED_SUCCESSFULLY = "Loan product deleted successfully";
     public static final String MEEDL_OBLIGOR_LIMIT_SET_SUCCESSFULLY = "Meedl's obligor loan limit set successfully.";
