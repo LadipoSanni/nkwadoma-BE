@@ -24,6 +24,8 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -60,6 +62,51 @@ class DisbursementRuleServiceTest {
 
         disbursementRule.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
     }
+
+    @Test
+    void updateDisbursementRuleWhenNotApproved() throws MeedlException {
+        disbursementRule.setId(UUID.randomUUID().toString());
+        disbursementRule.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
+
+        DisbursementRule existingRule = TestData.buildDisbursementRule();
+        existingRule.setId(disbursementRule.getId());
+        existingRule.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
+        existingRule.setName("Old Name");
+        existingRule.setQuery("Old Query");
+
+        when(disbursementRuleOutputPort.findById(disbursementRule.getId()))
+                .thenReturn(existingRule);
+        when(disbursementRuleOutputPort.save(any(DisbursementRule.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        DisbursementRule updated = disbursementRuleService.updateDisbursementRule(disbursementRule);
+
+        assertEquals(disbursementRule.getName(), updated.getName());
+        assertEquals(disbursementRule.getQuery(), updated.getQuery());
+        verify(disbursementRuleOutputPort).save(existingRule);
+    }
+
+    @Test
+    void attemptToUpdateApprovedDisbursementRule() throws MeedlException {
+        disbursementRule.setId(UUID.randomUUID().toString());
+        disbursementRule.setActivationStatus(ActivationStatus.APPROVED);
+
+        DisbursementRule existingRule = TestData.buildDisbursementRule();
+        existingRule.setId(disbursementRule.getId());
+        existingRule.setActivationStatus(ActivationStatus.APPROVED);
+        existingRule.setName("Approved Rule");
+        existingRule.setQuery("Approved Query");
+
+        when(disbursementRuleOutputPort.findById(disbursementRule.getId()))
+                .thenReturn(existingRule);
+
+        DisbursementRule result = disbursementRuleService.updateDisbursementRule(disbursementRule);
+
+        assertEquals("Approved Rule", result.getName());
+        assertEquals("Approved Query", result.getQuery());
+        verify(disbursementRuleOutputPort, never()).save(any());
+    }
+
 
     @Test
     void createDisbursementRuleWithExistingName() throws MeedlException {

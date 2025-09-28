@@ -53,10 +53,21 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
         if (ActivationStatus.PENDING_APPROVAL.equals(savedDisbursementRule.getActivationStatus())){
             asynchronousNotificationOutputPort.notifyAdminOfDisbursementRuleApproval(disbursementRule);
         }
-
         return savedDisbursementRule;
     }
-
+    @Override
+    public DisbursementRule updateDisbursementRule(DisbursementRule disbursementRule) throws MeedlException {
+        MeedlValidator.validateObjectInstance(disbursementRule, DisbursementRuleMessages.EMPTY_DISBURSEMENT_RULE.getMessage());
+        MeedlValidator.validateUUID(disbursementRule.getId(), DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE_ID.getMessage());
+        DisbursementRule foundDIsbursementRule = disbursementRuleOutputPort.findById(disbursementRule.getId());
+        if (!ActivationStatus.APPROVED.equals(foundDIsbursementRule.getActivationStatus())) {
+            log.info("Updating disbursement rule ");
+            foundDIsbursementRule.setName(disbursementRule.getName());
+            foundDIsbursementRule.setQuery(disbursementRule.getQuery());
+            return disbursementRuleOutputPort.save(foundDIsbursementRule);
+        }
+        return foundDIsbursementRule;
+    }
     @Override
     public DisbursementRule respondToDisbursementRule(DisbursementRule disbursementRule) throws MeedlException {
         MeedlValidator.validateObjectInstance(disbursementRule, DisbursementRuleMessages.EMPTY_DISBURSEMENT_RULE.getMessage());
