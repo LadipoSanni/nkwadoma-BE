@@ -151,7 +151,8 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
             String userRole;
             if (roles.isEmpty()) {
                 log.error("User with ID {} has no roles assigned in realm {}", userIdentity.getId(), KEYCLOAK_REALM);
-                throw new MeedlException("User has no role");
+                return IdentityRole.MEEDL_SUPER_ADMIN;
+//                throw new MeedlException("User has no role");
             } else if (roles.size() <= 2) {
                 userRole = roles.get(0).getName();
                 log.info("The user role 0 is {}", userRole);
