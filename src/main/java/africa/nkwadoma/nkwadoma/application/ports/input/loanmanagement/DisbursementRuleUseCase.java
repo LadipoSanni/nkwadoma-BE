@@ -7,6 +7,8 @@ import org.springframework.data.domain.Page;
 public interface DisbursementRuleUseCase {
     DisbursementRule createDisbursementRule(DisbursementRule disbursementRule) throws MeedlException;
 
+    DisbursementRule respondToDisbursementRule(DisbursementRule disbursementRule) throws MeedlException;
+
     DisbursementRule updateDisbursementRule(DisbursementRule disbursementRule) throws MeedlException;
 
     DisbursementRule viewDisbursementRule(DisbursementRule disbursementRule) throws MeedlException;

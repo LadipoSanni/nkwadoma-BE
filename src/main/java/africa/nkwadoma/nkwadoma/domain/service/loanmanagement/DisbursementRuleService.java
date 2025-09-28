@@ -69,6 +69,24 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
         return foundDIsbursementRule;
     }
     @Override
+    public DisbursementRule respondToDisbursementRule(DisbursementRule disbursementRule) throws MeedlException {
+        MeedlValidator.validateObjectInstance(disbursementRule, DisbursementRuleMessages.EMPTY_DISBURSEMENT_RULE.getMessage());
+        MeedlValidator.validateUUID(disbursementRule.getId(), DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE_ID.getMessage());
+        MeedlValidator.validateObjectInstance(disbursementRule.getUserIdentity(), UserMessages.USER_IDENTITY_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateUUID(disbursementRule.getUserIdentity().getId(), UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateObjectInstance(disbursementRule.getActivationStatus(), "Disbursement rule decision is required");
+
+        if (!ActivationStatus.APPROVED.equals(disbursementRule.getActivationStatus()) &&
+                !ActivationStatus.DECLINED.equals(disbursementRule.getActivationStatus())){
+            log.error("The response for disbursement rule with id {} was neither approved nor decline but was {}", disbursementRule.getId(), disbursementRule.getActivationStatuses());
+            throw new MeedlException("Response can only be Approve or Decline");
+        }
+        DisbursementRule foundDisbursementRule = disbursementRuleOutputPort.findById(disbursementRule.getId());
+        foundDisbursementRule.setActivationStatus(disbursementRule.getActivationStatus());
+        log.info("Activation status on disbursement rule is {}", foundDisbursementRule.getActivationStatuses());
+        return disbursementRuleOutputPort.save(foundDisbursementRule);
+    }
+    @Override
     public DisbursementRule viewDisbursementRule(DisbursementRule disbursementRule) throws MeedlException {
         MeedlValidator.validateObjectInstance(disbursementRule, DisbursementRuleMessages.EMPTY_DISBURSEMENT_RULE.getMessage());
         MeedlValidator.validateUUID(disbursementRule.getId(), DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE_ID.getMessage());
