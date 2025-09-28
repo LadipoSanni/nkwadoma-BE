@@ -127,8 +127,7 @@ public interface LoanRequestRepository extends JpaRepository<LoanRequestEntity, 
       AND u.isIdentityVerified = true
       AND (:organizationId IS NULL OR o.id = :organizationId)
       AND (:programId IS NULL OR p.id = :programId)
-       AND (LOWER(u.firstName) LIKE LOWER(CONCAT('%', :name, '%'))
-            OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :name, '%')))
+               AND LOWER(CONCAT(u.firstName, ' ', u.lastName)) LIKE LOWER(CONCAT('%', :name, '%'))
        ORDER BY lr.createdDate DESC
     """)
     Page<LoanRequestProjection> findAllLoanRequestByLoaneeNameInOrganizationAndProgram(@Param("programId") String programId,
