@@ -51,9 +51,10 @@ public class LoanBreakdownPersistenceAdapter implements LoanBreakdownOutputPort 
     }
 
     @Override
-    public LoanBreakdown findByItemName(String itemName) throws MeedlException {
+    public LoanBreakdown findByItemNameAndCohortId(String itemName,String cohortId) throws MeedlException {
         MeedlValidator.validateObjectInstance(itemName,"Item name cannot be empty");
-        LoanBreakdownEntity loanBreakdownEntity = loanBreakdownRepository.findByItemName(itemName);
+        MeedlValidator.validateUUID(cohortId,"Cohort id cannot be empty");
+        LoanBreakdownEntity loanBreakdownEntity = loanBreakdownRepository.findByItemNameIgnoreCaseAndCohortId(itemName,cohortId);
         return loanBreakdownMapper.toLoanBreakDown(loanBreakdownEntity);
     }
 
