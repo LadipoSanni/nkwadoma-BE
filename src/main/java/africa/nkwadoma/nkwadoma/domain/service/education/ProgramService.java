@@ -181,6 +181,7 @@ public class ProgramService implements AddProgramUseCase {
                 organizationIdentityOutputPort.findById(foundProgram.getOrganizationId());
         organizationIdentity.setNumberOfPrograms(organizationIdentity.getNumberOfPrograms() - 1);
         organizationIdentity.setNumberOfCohort(organizationIdentity.getNumberOfCohort() - numberOfDeletedCohort);
+        organizationIdentity.setNotToValidateOtherOrganizationDetails(true);
         organizationIdentityOutputPort.save(organizationIdentity);
     }
 
