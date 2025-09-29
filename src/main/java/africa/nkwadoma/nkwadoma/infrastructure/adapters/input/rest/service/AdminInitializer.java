@@ -167,10 +167,14 @@ public class AdminInitializer {
 
     public UserIdentity inviteFirstUser(UserIdentity userIdentity) throws MeedlException {
         userIdentity.setCreatedAt(LocalDateTime.now());
-        userIdentity = saveUserToKeycloak(userIdentity);
-        userIdentity.setCreatedBy(userIdentity.getId());
+        saveUserToKeycloak(userIdentity);
+        savedSuperAdminToDb(userIdentity);
+        removeDuplicateSuperAdmin(userIdentity);
+        return userIdentity;
+    }
+
+    private void savedSuperAdminToDb(UserIdentity userIdentity) throws MeedlException {
         UserIdentity foundUserIdentity = null;
-        log.info("First user, after saving on keycloak: {}", userIdentity);
         try {
             foundUserIdentity = userIdentityOutputPort.findByEmail(userIdentity.getEmail());
             foundUserIdentity.setCreatedBy(foundUserIdentity.getId());
@@ -189,8 +193,6 @@ public class AdminInitializer {
                 userIdentityOutputPort.changeUserRole(userIdentity.getId(), IdentityRole.MEEDL_SUPER_ADMIN);
             }
         }
-        removeDuplicateSuperAdmin(userIdentity);
-        return userIdentity;
     }
 
     private void removeDuplicateSuperAdmin(UserIdentity userIdentity) {
@@ -240,7 +242,7 @@ public class AdminInitializer {
             }
     }
 
-    private UserIdentity saveUserToKeycloak(UserIdentity userIdentity) {
+    private void saveUserToKeycloak(UserIdentity userIdentity) {
         try {
             userIdentity = identityManagerOutPutPort.createUser(userIdentity);
             log.info("User created successfully on keycloak sending email to user");
@@ -268,7 +270,8 @@ public class AdminInitializer {
                 throw new RuntimeException(ex);
             }
         }
-        return userIdentity;
+        log.info("First user, after saving on keycloak: {}", userIdentity);
+        userIdentity.setCreatedBy(userIdentity.getId());
     }
 
     private Portfolio getPortfolio(){
