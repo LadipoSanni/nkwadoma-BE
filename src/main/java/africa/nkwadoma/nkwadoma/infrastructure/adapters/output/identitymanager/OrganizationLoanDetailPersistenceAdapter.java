@@ -6,7 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationLoanDetailEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationLoanDetailMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.identity.OrganizationLoanDetailMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.identity.OrganizationLoanDetailRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -10,7 +10,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.ProgramCohort;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.ProgramCohortEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.ProgramCohortMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.education.ProgramCohortMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.ProgramCohortRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

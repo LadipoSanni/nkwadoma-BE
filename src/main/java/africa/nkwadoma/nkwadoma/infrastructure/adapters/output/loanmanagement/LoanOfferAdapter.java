@@ -8,11 +8,10 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanOfferMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.loan.Loan;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoanOfferEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanOfferMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanOfferMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanOfferEntityRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanOfferProjection;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanException;
@@ -69,12 +68,16 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
     }
 
     @Override
-    public Page<LoanOffer> findAllLoanOffer(int pageSize, int pageNumber) throws MeedlException {
-        MeedlValidator.validatePageSize(pageSize);
-        MeedlValidator.validatePageNumber(pageNumber);
-        Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
+    public Page<LoanOffer> findAllLoanOffer(LoanOffer loanOffer) throws MeedlException {
+
+        log.info("Request that got into adapter organizationId == {} programID == {} pageNumber == {} pageSize == {}",
+                loanOffer.getOrganizationId(),loanOffer.getProgramId(),
+                loanOffer.getPageNumber(),loanOffer.getPageSize());
+        MeedlValidator.validatePageSize(loanOffer.getPageSize());
+        MeedlValidator.validatePageNumber(loanOffer.getPageNumber());
+        Pageable pageRequest = PageRequest.of(loanOffer.getPageNumber(),loanOffer.getPageSize());
         Page<LoanOfferProjection> loanOfferProjections =
-                loanOfferEntityRepository.findAllLoanOffer(pageRequest);
+                loanOfferEntityRepository.findAllLoanOffer(loanOffer.getOrganizationId(),loanOffer.getProgramId(),pageRequest);
         log.info("Loan offers found: {}", loanOfferProjections);
         Page<LoanOffer> mappedloanOffers = loanOfferProjections.map(loanOfferMapper::mapProjectionToLoanOffer);
         log.info("Mapped loans offers: {}", mappedloanOffers);

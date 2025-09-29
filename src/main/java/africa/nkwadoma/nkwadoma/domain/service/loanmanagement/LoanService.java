@@ -11,7 +11,6 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.DisbursementRuleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
@@ -30,9 +29,9 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanOfferMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanOfferMapper;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanException;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoaneeLoanAggregateMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanee.LoaneeLoanAggregateMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -188,23 +187,11 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     public Page<LoanProduct> viewAllLoanProduct(LoanProduct loanProduct) {
         return loanProductOutputPort.findAllLoanProduct(loanProduct);
     }
-
-    @Override
-    public Portfolio setUpMeedlObligorLoanLimit(Portfolio portfolio) throws MeedlException {
-        MeedlValidator.validateObjectInstance(portfolio, "Request cannot be empty to set obligor loan limits");
-        portfolio.validateObligorLimitDetail();
-        portfolio.setPortfolioName(MeedlConstants.MEEDL);
-        Portfolio foundPortfolio = portfolioOutputPort.findPortfolio(portfolio);
-        foundPortfolio.setObligorLoanLimit(portfolio.getObligorLoanLimit());
-        return portfolioOutputPort.save(foundPortfolio);
-    }
     @Override
     public Page<LoanProduct> search(String loanProductName, int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validateDataElement(loanProductName, LoanMessages.LOAN_PRODUCT_NAME_REQUIRED.getMessage());
         return loanProductOutputPort.search(loanProductName,pageSize,pageNumber);
     }
-
-
 
     @Override
     public LoanProduct updateLoanProduct(LoanProduct loanProduct) throws MeedlException {
@@ -473,13 +460,11 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (userIdentity.getRole().equals(IdentityRole.LOANEE)){
             return loanOutputPort.findAllLoanDisburedToLoanee(userIdentity.getId(),loan.getPageNumber(),loan.getPageSize());
         }
-        if (StringUtils.isNotEmpty(loan.getOrganizationId())) {
-            return loanOutputPort.findAllByOrganizationId(loan.getOrganizationId(), loan.getPageSize(), loan.getPageNumber());
-        }if (StringUtils.isNotEmpty(loan.getLoaneeId())){
+        if (StringUtils.isNotEmpty(loan.getLoaneeId())){
             MeedlValidator.validateUUID(loan.getLoaneeId(),LoaneeMessages.LOANEES_ID_CANNOT_BE_EMPTY.getMessage());
             return loanOutputPort.findAllLoanDisburedToLoaneeByLoaneeId(loan.getLoaneeId(),loan.getPageSize(), loan.getPageNumber());
         }else {
-            return loanOutputPort.findAllLoan(loan.getPageSize(), loan.getPageNumber());
+            return loanOutputPort.findAllLoan(loan);
         }
     }
 
@@ -974,6 +959,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     @Override
     public Page<LoanOffer> viewAllLoanOffers(LoanOffer loanOffer) throws MeedlException {
+
+        log.info("Request that got into service organizationId == {} programID == {} pageNumber == {} pageSize == {}",
+                loanOffer.getOrganizationId(),loanOffer.getProgramId(),
+                loanOffer.getPageNumber(),loanOffer.getPageSize());
         UserIdentity userIdentity = userIdentityOutputPort.findById(loanOffer.getUserId());
         if (userIdentity.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)){
            OrganizationEmployeeIdentity organizationEmployeeIdentity =
@@ -983,11 +972,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }if (userIdentity.getRole().equals(IdentityRole.LOANEE)){
             return loanOfferOutputPort.findAllLoanOfferAssignedToLoanee(userIdentity.getId(),loanOffer.getPageSize(),
                     loanOffer.getPageNumber());
-        }if (ObjectUtils.isNotEmpty(loanOffer.getOrganizationId())){
-            return loanOfferOutputPort.findAllLoanOfferedToLoaneesInOrganization(loanOffer.getOrganizationId(),
-                    loanOffer.getPageSize(),loanOffer.getPageNumber());
         }
-        return loanOfferOutputPort.findAllLoanOffer(loanOffer.getPageSize(),loanOffer.getPageNumber());
+        return loanOfferOutputPort.findAllLoanOffer(loanOffer);
     }
 
 

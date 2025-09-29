@@ -21,6 +21,8 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.DisbursementRule;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.PlatformRequest;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -519,12 +521,31 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
         MeedlNotification meedlNotification = new MeedlNotification();
         for (UserIdentity userIdentity : meedlSuperAdmin){
             meedlNotification.setUser(userIdentity);
+            meedlNotification.setContentId(disbursementRule.getId());
             meedlNotification.setTitle("Approve disbursement rule ");
             meedlNotification.setSenderFullName(userIdentity.getFirstName() + " "+userIdentity.getLastName());
             meedlNotification.setContentDetail("The user " + disbursementRule.getUserIdentity().getFullName()
-                    + " and email "+disbursementRule.getUserIdentity().getEmail()
-                    + " is requesting disbursement rule approval \n");
+                    + " with email "+disbursementRule.getUserIdentity().getEmail()
+                    + " is requesting disbursement rule approval. \n");
             meedlNotification.setSenderMail(userIdentity.getEmail());
+            meedlNotificationUsecase.sendNotification(meedlNotification);
+        }
+
+    }
+
+    @Override
+    public void notifySuperAdminOfMeedlObligorLoanLimitChange(UserIdentity actor, PlatformRequest platformRequest) throws MeedlException {
+        log.info("Sending Meedl super admin notification to change obligor loan limit on Meedl");
+        List<UserIdentity> meedlSuperAdmin = userIdentityOutputPort
+                .findAllByRoles(Set.of(IdentityRole.MEEDL_SUPER_ADMIN));
+        for (UserIdentity userIdentity : meedlSuperAdmin){
+            MeedlNotification meedlNotification = MeedlNotification.builder()
+                    .contentId(platformRequest.getId())
+                    .senderMail(actor.getEmail())
+                    .user(userIdentity)
+                    .contentDetail("A request is made by "+actor.getFirstName()+" to set Meedl's obligor loan limit to "+ platformRequest.getObligorLoanLimit())
+                    .senderFullName(actor.getFullName())
+                    .build();
             meedlNotificationUsecase.sendNotification(meedlNotification);
         }
 

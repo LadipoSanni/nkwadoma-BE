@@ -18,7 +18,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoaneeLoanAggregateMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanee.LoaneeLoanAggregateMapper;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
@@ -468,13 +468,13 @@ class LoanServiceTest {
         loan.setOrganizationId(testId);
         loan.setPageNumber(pageNumber);
         loan.setPageSize(pageSize);
+        loan.setLoaneeId(null);
         Page<Loan> loans = Page.empty();
 
         try {
             userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
             when(userIdentityOutputPort.findById(loan.getActorId())).thenReturn(userIdentity);
-            when(loanOutputPort.findAllByOrganizationId(anyString(), anyInt(), anyInt()))
-                    .thenReturn(new PageImpl<>(List.of(loan)));
+            when(loanOutputPort.findAllLoan(loan)).thenReturn(new PageImpl<>(List.of(loan)));
             loans = loanService.viewAllLoans(loan);
         } catch (MeedlException e) {
             log.error("Error viewing all loans: ", e);
@@ -496,7 +496,7 @@ class LoanServiceTest {
             loan.setLoaneeId(null);
             userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
             when(userIdentityOutputPort.findById(loan.getActorId())).thenReturn(userIdentity);
-            when(loanOutputPort.findAllLoan(pageSize,pageNumber))
+            when(loanOutputPort.findAllLoan(loan))
                     .thenReturn(new PageImpl<>(List.of(loan)));
             loans = loanService.viewAllLoans(loan);
         }catch (MeedlException e){

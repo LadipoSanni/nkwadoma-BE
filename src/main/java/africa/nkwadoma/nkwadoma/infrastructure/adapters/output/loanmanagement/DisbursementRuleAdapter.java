@@ -61,8 +61,8 @@ public class DisbursementRuleAdapter implements DisbursementRuleOutputPort {
     }
 
     @Override
-    public Boolean existByName(String name) throws MeedlException {
+    public Boolean existByNameIgnoreCase(String name) throws MeedlException {
         MeedlValidator.validateDataElement(name, DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE_NAME.getMessage());
-        return disbursementRuleRepository.existsByName(name);
+        return disbursementRuleRepository.existsByNameIgnoreCase(name);
     }
 }

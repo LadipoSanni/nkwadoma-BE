@@ -45,7 +45,7 @@ import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.aes.TokenUtils;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanException;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.UserIdentityMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.identity.UserIdentityMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -1010,7 +1010,11 @@ public class LoaneeService implements LoaneeUseCase {
             throw new LoanException("Loanee detail can't be edited because a decision has been made on the loan request");
         }
 
-        BigDecimal newAmountRequested = calculateAmountRequested(loanee, cohort, initialDeposit);
+        BigDecimal previousInitialDeposit = loaneeRepresentationInCohort.getLoaneeLoanDetail().getInitialDeposit();
+
+        BigDecimal newAmountRequested = calculateNewAmountRequested(loanee, cohort,initialDeposit,
+                previousInitialDeposit,loaneeRepresentationInCohort.getId());
+
 
         updateUserIdentityIfPresent(loanee, foundLoanee);
 
@@ -1039,18 +1043,23 @@ public class LoaneeService implements LoaneeUseCase {
         return "Profile updated successfully";
     }
 
-    private BigDecimal calculateAmountRequested(Loanee loanee, Cohort cohort, BigDecimal initialDeposit) throws MeedlException {
+    private BigDecimal calculateNewAmountRequested(Loanee loanee, Cohort cohort, BigDecimal initialDeposit,
+                                                   BigDecimal previousInitialDeposit,String cohortLoaneeId)
+            throws MeedlException {
         BigDecimal loanBreakdownTotal = BigDecimal.ZERO;
+        BigDecimal tuitionAmount = cohort.getTuitionAmount();
+        BigDecimal deposit = (initialDeposit != null) ? initialDeposit : previousInitialDeposit;
+
         if (!ObjectUtils.isEmpty(loanee.getLoanBreakdowns())) {
             for (LoaneeLoanBreakdown loaneeLoanBreakdown : loanee.getLoanBreakdowns()) {
                 LoanBreakdown loanBreakdown = checkIfLoanBreakdownExistsInCohort(loaneeLoanBreakdown);
                 checkIfItemAmountIsValid(loaneeLoanBreakdown, loanBreakdown);
                 loanBreakdownTotal = loanBreakdownTotal.add(loaneeLoanBreakdown.getItemAmount());
             }
+            return loanBreakdownTotal.add(tuitionAmount).subtract(deposit);
+        }else {
+            return tuitionAmount.subtract(deposit);
         }
-        BigDecimal tuitionAmount = cohort.getTuitionAmount();
-        BigDecimal deposit = (initialDeposit != null) ? initialDeposit : BigDecimal.ZERO;
-        return loanBreakdownTotal.add(tuitionAmount).subtract(deposit);
     }
 
     private void updateUserIdentityIfPresent(Loanee loanee, Loanee foundLoanee) throws MeedlException {
@@ -1060,10 +1069,10 @@ public class LoaneeService implements LoaneeUseCase {
         UserIdentity newIdentity = loanee.getUserIdentity();
         UserIdentity existingIdentity = foundLoanee.getUserIdentity();
         if (ObjectUtils.isNotEmpty(newIdentity.getFirstName())) {
-            existingIdentity.setFirstName(newIdentity.getFirstName());
+            existingIdentity.setFirstName(newIdentity.getFirstName().trim());
         }
         if (ObjectUtils.isNotEmpty(newIdentity.getLastName())) {
-            existingIdentity.setLastName(newIdentity.getLastName());
+            existingIdentity.setLastName(newIdentity.getLastName().trim());
         }
         if (ObjectUtils.isNotEmpty(newIdentity.getEmail())) {
             existingIdentity.setEmail(newIdentity.getEmail());
@@ -1074,11 +1083,10 @@ public class LoaneeService implements LoaneeUseCase {
 
     private LoaneeLoanDetail updateLoanDetailsIfPresent(Loanee loanee, CohortLoanee loaneeRepresentationInCohort,
                                             BigDecimal newAmountRequested, LoanRequest loanRequest) throws MeedlException {
-        if (ObjectUtils.isEmpty(loanee.getLoaneeLoanDetail().getInitialDeposit())) {
-            return null;
-        }
         LoaneeLoanDetail loaneeLoanDetail = loaneeRepresentationInCohort.getLoaneeLoanDetail();
-        loaneeLoanDetail.setInitialDeposit(loanee.getLoaneeLoanDetail().getInitialDeposit());
+        if (!ObjectUtils.isEmpty(loanee.getLoaneeLoanDetail().getInitialDeposit())) {
+            loaneeLoanDetail.setInitialDeposit(loanee.getLoaneeLoanDetail().getInitialDeposit());
+        }
         loaneeLoanDetail.setAmountRequested(newAmountRequested);
         loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
         if (loanRequest != null) {
@@ -1091,6 +1099,7 @@ public class LoaneeService implements LoaneeUseCase {
     private List<LoaneeLoanBreakdown> updateLoanBreakdownsIfPresent(Loanee loanee, CohortLoanee loaneeRepresentationInCohort,
                                                BigDecimal newAmountRequested, LoanRequest loanRequest) throws MeedlException {
         if (ObjectUtils.isEmpty(loanee.getLoanBreakdowns())) {
+            loaneeLoanBreakDownOutputPort.deleteByCohortLoaneeid(loaneeRepresentationInCohort.getId());
             return null;
         }
         loaneeLoanBreakDownOutputPort.deleteByCohortLoaneeid(loaneeRepresentationInCohort.getId());
@@ -1128,7 +1137,7 @@ public class LoaneeService implements LoaneeUseCase {
         if (!ObjectUtils.isEmpty(loanee.getLoanBreakdowns())) {
             for (LoaneeLoanBreakdown breakdown : loanee.getLoanBreakdowns()) {
                 MeedlValidator.validateUUID(breakdown.getLoaneeLoanBreakdownId(),
-                        "Loanee breakdown ID cannot be empty");
+                        "Loanee breakdown Id cannot be empty or invalid");
                 breakdown.validate();
             }
         }

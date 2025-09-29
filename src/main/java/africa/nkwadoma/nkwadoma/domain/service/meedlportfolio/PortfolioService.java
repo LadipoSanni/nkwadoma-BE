@@ -1,19 +1,29 @@
 package africa.nkwadoma.nkwadoma.domain.service.meedlportfolio;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlportfolio.PortfolioUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanMetricsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.DemographyOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PlatformRequestOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Demography;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.PlatformRequest;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.PortfolioMapper;
+
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.PortfolioMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanMetricsProjection;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants.MEEDL;
+import java.time.LocalDateTime;
+
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.loan.FinancialConstants.PERCENTAGE_BASE_INT;
 
 @Slf4j
@@ -25,11 +35,14 @@ public class PortfolioService implements PortfolioUseCase {
     private final LoanMetricsOutputPort loanMetricsOutputPort;
     private final PortfolioMapper portfolioMapper;
     private final DemographyOutputPort demographyOutputPort;
+    private final UserIdentityOutputPort userIdentityOutputPort;
+    private final PlatformRequestOutputPort platformRequestOutputPort;
+    private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
 
 
     @Override
     public Portfolio viewPortfolio() throws MeedlException {
-        Portfolio portfolio = Portfolio.builder().portfolioName(MEEDL).build();
+        Portfolio portfolio = Portfolio.builder().portfolioName(MeedlConstants.MEEDL).build();
         portfolio = portfolioOutputPort.findPortfolio(portfolio);
         LoanMetricsProjection loanMetricsProjection = loanMetricsOutputPort.calculateAllMetrics();
         portfolioMapper.updateLoanMetricsOnPortfolio(portfolio,loanMetricsProjection);
@@ -49,10 +62,40 @@ public class PortfolioService implements PortfolioUseCase {
         portfolio.setCommercialVehiclePercentage(commercialPercentage);
         return portfolio;
     }
+    @Override
+    public void setUpMeedlObligorLoanLimit(Portfolio portfolio) throws MeedlException {
+        MeedlValidator.validateObjectInstance(portfolio, "Request cannot be empty to set obligor loan limits");
+        portfolio.validateObligorLimitDetail();
+        portfolio.setPortfolioName(MeedlConstants.MEEDL);
+        UserIdentity actor = userIdentityOutputPort.findById(portfolio.getUserIdentity().getId());
+
+        if (IdentityRole.MEEDL_SUPER_ADMIN.equals(actor.getRole())){
+            Portfolio foundPortfolio = portfolioOutputPort.findPortfolio(portfolio);
+            log.info("Meedl super admin is setting Meedl's obligor loan limit from {} --- > to {}", foundPortfolio.getObligorLoanLimit(), portfolio.getObligorLoanLimit());
+            foundPortfolio.setObligorLoanLimit(portfolio.getObligorLoanLimit());
+            portfolioOutputPort.save(foundPortfolio);
+        }else {
+            log.info("User with role {} is requesting to set Meedl obligor loan limit to {}", actor.getRole(), portfolio.getObligorLoanLimit());
+            PlatformRequest platformRequest = PlatformRequest.builder()
+                    .obligorLoanLimit(portfolio.getObligorLoanLimit())
+                    .requestTime(LocalDateTime.now())
+                    .createdBy(actor.getId())
+                    .build();
+            platformRequest = platformRequestOutputPort.save(platformRequest);
+
+            asynchronousNotificationOutputPort.notifySuperAdminOfMeedlObligorLoanLimitChange(actor, platformRequest);
+        }
+    }
+    @Override
+    public Portfolio viewMeedlObligorLoanLimit() throws MeedlException {
+        return portfolioOutputPort.findPortfolio(
+                Portfolio.builder().portfolioName(MeedlConstants.MEEDL).build());
+
+    }
 
     @Override
     public Demography viewLoaneeDemography() throws MeedlException {
-        Demography demography = demographyOutputPort.findDemographyByName(MEEDL);
+        Demography demography = demographyOutputPort.findDemographyByName(MeedlConstants.MEEDL);
 
         calculateGenderPercentage(demography);
 

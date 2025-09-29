@@ -2,8 +2,6 @@ package africa.nkwadoma.nkwadoma.domain.service.loanmanagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.DisbursementRuleUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductDisbursementRuleOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.DisbursementRuleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
@@ -35,45 +33,59 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
         MeedlValidator.validateObjectInstance(disbursementRule.getUserIdentity(), UserMessages.USER_IDENTITY_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(disbursementRule.getUserIdentity().getId(), UserMessages.INVALID_USER_ID.getMessage());
         disbursementRule.validate();
-        Boolean ruleExist = disbursementRuleOutputPort.existByName(disbursementRule.getName());
+        Boolean ruleExist = disbursementRuleOutputPort.existByNameIgnoreCase(disbursementRule.getName().trim());
         if (ruleExist){
-            log.error("Disbursement rule already exist with this name"+ disbursementRule.getName());
+            log.error("Disbursement rule already exist with this name{}", disbursementRule.getName());
             throw new MeedlException("Disbursement rule already exist with this name "+ disbursementRule.getName());
         }
         UserIdentity actor = userIdentityOutputPort.findById(disbursementRule.getUserIdentity().getId());
+        log.info("The role of the user creating disbursement rule is {} email {} disbursement status {}",actor.getRole(), actor.getEmail(), disbursementRule.getActivationStatus());
         disbursementRule.setUserIdentity(actor);
-        DisbursementRule savedDisbursementRule;
+        disbursementRule.setName(disbursementRule.getName().trim());
             disbursementRule.setActivationStatus(
                     disbursementRule.getUserIdentity().getRole().isMeedlSuperAdmin()
                             ? ActivationStatus.APPROVED
                             : ActivationStatus.PENDING_APPROVAL.equals(disbursementRule.getActivationStatus())
                             ? ActivationStatus.PENDING_APPROVAL
                             : ActivationStatus.INACTIVE);
-            savedDisbursementRule = disbursementRuleOutputPort.save(disbursementRule);
+        DisbursementRule savedDisbursementRule = disbursementRuleOutputPort.save(disbursementRule);
+            disbursementRule.setId(savedDisbursementRule.getId());
         if (ActivationStatus.PENDING_APPROVAL.equals(savedDisbursementRule.getActivationStatus())){
             asynchronousNotificationOutputPort.notifyAdminOfDisbursementRuleApproval(disbursementRule);
         }
-
         return savedDisbursementRule;
     }
+    @Override
+    public DisbursementRule updateDisbursementRule(DisbursementRule disbursementRule) throws MeedlException {
+        MeedlValidator.validateObjectInstance(disbursementRule, DisbursementRuleMessages.EMPTY_DISBURSEMENT_RULE.getMessage());
+        MeedlValidator.validateUUID(disbursementRule.getId(), DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE_ID.getMessage());
+        DisbursementRule foundDIsbursementRule = disbursementRuleOutputPort.findById(disbursementRule.getId());
+        if (!ActivationStatus.APPROVED.equals(foundDIsbursementRule.getActivationStatus())) {
+            log.info("Updating disbursement rule ");
+            foundDIsbursementRule.setName(disbursementRule.getName());
+            foundDIsbursementRule.setQuery(disbursementRule.getQuery());
+            return disbursementRuleOutputPort.save(foundDIsbursementRule);
+        }
+        return foundDIsbursementRule;
+    }
+    @Override
+    public DisbursementRule respondToDisbursementRule(DisbursementRule disbursementRule) throws MeedlException {
+        MeedlValidator.validateObjectInstance(disbursementRule, DisbursementRuleMessages.EMPTY_DISBURSEMENT_RULE.getMessage());
+        MeedlValidator.validateUUID(disbursementRule.getId(), DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE_ID.getMessage());
+        MeedlValidator.validateObjectInstance(disbursementRule.getUserIdentity(), UserMessages.USER_IDENTITY_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateUUID(disbursementRule.getUserIdentity().getId(), UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateObjectInstance(disbursementRule.getActivationStatus(), "Disbursement rule decision is required");
 
-//    @Override
-//    public DisbursementRule setUpLoanProductDisbursementRule(DisbursementRule disbursementRule) throws MeedlException {
-//        log.info("Saving loan product disbursement rules");
-//        disbursementRule.setActivationStatus(disbursementRule.getUserIdentity().getRole().isMeedlSuperAdmin()
-//                ? ActivationStatus.APPROVED
-//                : ActivationStatus.PENDING_APPROVAL);
-//        DisbursementRule savedDisbursementRule = disbursementRuleOutputPort.save(disbursementRule);
-//        disbursementRule.setId(savedDisbursementRule.getId());
-//        log.info("Saving loan product disbursement rules from loan product");
-//        LoanProductDisbursementRule loanProductDisbursementRule = LoanProductDisbursementRule.builder()
-//                .disbursementRule(savedDisbursementRule)
-//                .loanProduct(disbursementRule.getLoanProduct())
-//                .build();
-//        loanProductDisbursementRuleOutputPort.save(loanProductDisbursementRule);
-//       return disbursementRule;
-//    }
-
+        if (!ActivationStatus.APPROVED.equals(disbursementRule.getActivationStatus()) &&
+                !ActivationStatus.DECLINED.equals(disbursementRule.getActivationStatus())){
+            log.error("The response for disbursement rule with id {} was neither approved nor decline but was {}", disbursementRule.getId(), disbursementRule.getActivationStatuses());
+            throw new MeedlException("Response can only be Approve or Decline");
+        }
+        DisbursementRule foundDisbursementRule = disbursementRuleOutputPort.findById(disbursementRule.getId());
+        foundDisbursementRule.setActivationStatus(disbursementRule.getActivationStatus());
+        log.info("Activation status on disbursement rule is {}", foundDisbursementRule.getActivationStatuses());
+        return disbursementRuleOutputPort.save(foundDisbursementRule);
+    }
     @Override
     public DisbursementRule viewDisbursementRule(DisbursementRule disbursementRule) throws MeedlException {
         MeedlValidator.validateObjectInstance(disbursementRule, DisbursementRuleMessages.EMPTY_DISBURSEMENT_RULE.getMessage());

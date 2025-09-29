@@ -170,24 +170,6 @@ public class LoanController {
     }
 
 
-    @DeleteMapping("/obligor/limit/meedl")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN')")
-    @Operation(summary = SET_OBLIGOR_LIMIT,description = SET_OBLIGOR_LIMIT_DESCRIPTION)
-    public ResponseEntity<ApiResponse<?>> deleteLoanProduct (
-            @AuthenticationPrincipal Jwt meedlUser,
-            @RequestParam @NotBlank(message = "Provide a valid loan product id")
-            BigDecimal obligorLoanLimit) throws MeedlException {
-        log.info("set obligor loan limit for meedl actor id was called.... {}", meedlUser.getClaimAsString("sub"));
-        Portfolio portfolio = Portfolio.builder().obligorLoanLimit(obligorLoanLimit).build();
-        loanUseCase.setUpMeedlObligorLoanLimit(portfolio);
-        ApiResponse<LoanProductResponse> apiResponse = ApiResponse.<LoanProductResponse>builder()
-                .message(MEEDL_OBLIGOR_LIMIT_SET_SUCCESSFULLY)
-                .statusCode(HttpStatus.OK.toString())
-                .build();
-        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
-    }
-
-
     @GetMapping("/loan-disbursals/{loanId}")
     public ResponseEntity<ApiResponse<?>> viewLoanDetailsById (
             @PathVariable @NotBlank(message = "Provide a valid loan ID")
@@ -252,14 +234,20 @@ public class LoanController {
             " or hasRole('LOANEE') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> viewLoanOffers(@AuthenticationPrincipal Jwt meedlUser,
                                                          @RequestParam(required = false) String organizationId ,
+                                                         @RequestParam(required = false) String programId,
                                                          @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                                          @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
 
         LoanOffer loanOffer = new LoanOffer();
         loanOffer.setUserId(meedlUser.getClaimAsString("sub"));
                 loanOffer.setOrganizationId(organizationId);
+                loanOffer.setProgramId(programId);
         loanOffer.setPageNumber(pageNumber);
         loanOffer.setPageSize(pageSize);
+
+        log.info("Request that got into controller organizationId == {} programID == {} pageNumber == {} pageSize == {}",
+                loanOffer.getOrganizationId(),loanOffer.getProgramId(),
+                loanOffer.getPageNumber(),loanOffer.getPageSize());
         Page<LoanOffer> loanOffers = loanOfferUseCase.viewAllLoanOffers(loanOffer);
         List<AllLoanOfferResponse> loanOfferResponses =  loanOfferRestMapper.toLoanOfferResponses(loanOffers);
         PaginatedResponse<AllLoanOfferResponse> paginatedResponse = new PaginatedResponse<>(
@@ -318,14 +306,15 @@ public class LoanController {
     @GetMapping("/view-all-disbursal")
     @PreAuthorize("hasRole('LOANEE') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> viewAllDisbursedLoan(@RequestParam(required = false) String organizationId,
+                                                               @RequestParam(required = false) String programId,
                                                                @RequestParam(required = false) String loaneeId,
                                                                @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                                                @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
                                                                @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
 
         log.info("page number == {} pageSize == {} ", pageNumber, pageSize);
-        Loan loan = Loan.builder().actorId(meedlUser.getClaimAsString("sub")).organizationId(organizationId).loaneeId(loaneeId)
-                .pageNumber(pageNumber).pageSize(pageSize).build();
+        Loan loan = Loan.builder().actorId(meedlUser.getClaimAsString("sub")).organizationId(organizationId).programId(programId).
+                loaneeId(loaneeId).pageNumber(pageNumber).pageSize(pageSize).build();
         Page<Loan> loans = loanUseCase.viewAllLoans(loan);
         log.info("Mapped Loan responses: {}", loans.getContent().toArray());
         Page<LoanQueryResponse> loanResponses = loans.map(loanRestMapper::toLoanQueryResponse);

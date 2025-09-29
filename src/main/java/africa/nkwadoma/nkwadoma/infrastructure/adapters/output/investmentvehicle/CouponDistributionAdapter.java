@@ -5,7 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.CouponDistribution;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentvehicle.CouponDistributionEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.CouponDistributionMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.CouponDistributionMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentvehicle.CouponDistributionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

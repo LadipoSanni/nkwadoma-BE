@@ -15,7 +15,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanMetricsMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanOfferMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanOfferMapper;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanException;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
@@ -218,7 +218,7 @@ public class LoanOfferServiceTest {
             loanOffer1.setUserId(mockId);
             userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
             when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
-            when(loanOfferOutputPort.findAllLoanOffer(loanOffer1.getPageSize(),loanOffer1.getPageNumber())).
+            when(loanOfferOutputPort.findAllLoanOffer(loanOffer1)).
                     thenReturn(new PageImpl<>(List.of(loanOffer)));
             loanOffers = loanService.viewAllLoanOffers(loanOffer1);
         }catch (MeedlException exception){

@@ -13,8 +13,6 @@ import java.util.List;
 public interface LoanUseCase {
     Loan viewLoanDetails( String loanId) throws MeedlException;
 
-    Portfolio setUpMeedlObligorLoanLimit(Portfolio portfolio) throws MeedlException;
-
     Loan startLoan(Loan loan) throws MeedlException;
 
     Page<Loan> viewAllLoans(Loan loan) throws MeedlException;

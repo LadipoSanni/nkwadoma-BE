@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio;
 
 import africa.nkwadoma.nkwadoma.domain.enums.meedlportfolio.PortfolioRiskLevel;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.Builder;
@@ -47,6 +48,7 @@ public class Portfolio {
     private BigDecimal obligorLoanLimit;
     private double percentageGain;
     private double percentageLoss;
+    private UserIdentity userIdentity;
     private PortfolioRiskLevel portfolioRiskLevel;
     private List<InvestmentVehicle> topPerformingInvestmentVehicles;
     private List<InvestmentVehicle> underPerformingInvestmentVehicles;
