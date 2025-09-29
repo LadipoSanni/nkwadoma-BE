@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -132,6 +133,58 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
         UserIdentity userIdentity = mapper.mapUserRepresentationToUserIdentity(userRepresentation);
         log.info("Found user with email {} ", email);
         return Optional.of(userIdentity);
+    }
+    @Override
+    public IdentityRole getUserRoles(UserIdentity userIdentity) throws MeedlException {
+        log.info("Getting user roles");
+        try {
+            UserResource userResource = keycloak
+                    .realm(KEYCLOAK_REALM)
+                    .users()
+                    .get(userIdentity.getId());
+
+            List<RoleRepresentation> roles = userResource
+                    .roles()
+                    .realmLevel()
+                    .listAll();
+
+            String userRole;
+            if (roles.isEmpty()) {
+                log.error("User with ID {} has no roles assigned in realm {}", userIdentity.getId(), KEYCLOAK_REALM);
+                return IdentityRole.MEEDL_SUPER_ADMIN;
+//                throw new MeedlException("User has no role");
+            } else if (roles.size() <= 2) {
+                userRole = roles.get(0).getName();
+                log.info("The user role 0 is {}", userRole);
+                IdentityRole identityRole = checkIfUserRoleIsMeedlRole(userRole);
+                log.info("First role checked is {}", identityRole);
+                if (!ObjectUtils.isEmpty(identityRole)){
+                    return identityRole;
+                }
+                userRole = roles.get(1).getName();
+                log.info("The user role 1 is {}", userRole);
+                identityRole = checkIfUserRoleIsMeedlRole(userRole);
+                log.info("Second role checked is {}", identityRole);
+                return identityRole;
+            } else {
+                roles.forEach(role ->
+                        log.info("User with ID {} has role: {}", userIdentity.getId(), role.getName())
+                );
+                throw new MeedlException("User has more than one role");
+            }
+        } catch (Exception e) {
+            log.error("Failed to fetch roles for user {}: {}", userIdentity.getId(), e.getMessage(), e);
+            throw new MeedlException("Failed to fetch roles for user");
+        }
+    }
+
+    private IdentityRole checkIfUserRoleIsMeedlRole(String role) {
+        if(IdentityRole.isValidRole(role)){
+            log.info("The role matched {}", role.toUpperCase());
+            return IdentityRole.fromString(role.toUpperCase());
+        }else {
+            return null;
+        }
     }
 
     @Override

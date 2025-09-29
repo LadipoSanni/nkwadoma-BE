@@ -38,7 +38,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole.MEEDL_SUPER_ADMIN;
 
 @Component
 @RequiredArgsConstructor
@@ -69,7 +68,7 @@ public class AdminInitializer {
                 .email(SUPER_ADMIN_EMAIL)
                 .firstName(SUPER_ADMIN_FIRST_NAME)
                 .lastName(SUPER_ADMIN_LAST_NAME)
-                .role(MEEDL_SUPER_ADMIN)
+                .role(IdentityRole.MEEDL_SUPER_ADMIN)
                 .createdBy(UUID.randomUUID().toString())
                 .build();
     }
@@ -168,11 +167,14 @@ public class AdminInitializer {
 
     public UserIdentity inviteFirstUser(UserIdentity userIdentity) throws MeedlException {
         userIdentity.setCreatedAt(LocalDateTime.now());
-        userIdentity = saveUserToKeycloak(userIdentity);
-        userIdentity.setCreatedBy(userIdentity.getId());
-        UserIdentity foundUserIdentity = null;
-        log.info("First user, after saving on keycloak: {}", userIdentity);
+        saveUserToKeycloak(userIdentity);
+        savedSuperAdminToDb(userIdentity);
         removeDuplicateSuperAdmin(userIdentity);
+        return userIdentity;
+    }
+
+    private void savedSuperAdminToDb(UserIdentity userIdentity) throws MeedlException {
+        UserIdentity foundUserIdentity = null;
         try {
             foundUserIdentity = userIdentityOutputPort.findByEmail(userIdentity.getEmail());
             foundUserIdentity.setCreatedBy(foundUserIdentity.getId());
@@ -186,8 +188,11 @@ public class AdminInitializer {
                 userIdentity = foundUserIdentity;
                 log.info("First user already exists in db {}", foundUserIdentity);
             }
+            if (!IdentityRole.MEEDL_SUPER_ADMIN.equals(userIdentity.getRole())){
+                log.info("Changing the first user role to meedl super admin. User previous role was {}", userIdentity.getRole());
+                userIdentityOutputPort.changeUserRole(userIdentity.getId(), IdentityRole.MEEDL_SUPER_ADMIN);
+            }
         }
-        return userIdentity;
     }
 
     private void removeDuplicateSuperAdmin(UserIdentity userIdentity) {
@@ -237,7 +242,7 @@ public class AdminInitializer {
             }
     }
 
-    private UserIdentity saveUserToKeycloak(UserIdentity userIdentity) {
+    private void saveUserToKeycloak(UserIdentity userIdentity) {
         try {
             userIdentity = identityManagerOutPutPort.createUser(userIdentity);
             log.info("User created successfully on keycloak sending email to user");
@@ -251,10 +256,22 @@ public class AdminInitializer {
                 log.error("unable to get first user from keycloak although i got user already exist on keycloak {}", userIdentity);
                 throw new RuntimeException(ex);
             }
-            log.info("user representation email in admin initializer {} , id : {}", userRepresentation.getEmail(), userRepresentation.getId() );
+            log.info("user representation email in admin initializer {} , id : {} role {}", userRepresentation.getEmail(), userRepresentation.getId() , userRepresentation.getRealmRoles());
             userIdentity.setId(userRepresentation.getId());
+            try {
+                IdentityRole identityRole = identityManagerOutPutPort.getUserRoles(userIdentity);
+                log.info("Identity role found is {}", identityRole);
+                if (!IdentityRole.MEEDL_SUPER_ADMIN.equals(identityRole)) {
+                    identityManagerOutPutPort.changeUserRole(userIdentity, IdentityRole.MEEDL_SUPER_ADMIN.name());
+                    log.info("The user role has been updated");
+                }
+            } catch (MeedlException ex) {
+                log.error("Error finding user role {}", ex.getMessage());
+                throw new RuntimeException(ex);
+            }
         }
-        return userIdentity;
+        log.info("First user, after saving on keycloak: {}", userIdentity);
+        userIdentity.setCreatedBy(userIdentity.getId());
     }
 
     private Portfolio getPortfolio(){
