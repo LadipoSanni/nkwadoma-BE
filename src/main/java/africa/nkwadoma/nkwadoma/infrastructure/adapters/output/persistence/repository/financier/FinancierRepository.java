@@ -144,12 +144,20 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
         CASE 
             WHEN f.financierType = 'INDIVIDUAL' THEN CONCAT(inviteeUser.firstName, ' ', inviteeUser.lastName)
             WHEN f.financierType = 'COOPERATE' THEN CONCAT(inviteeOrg.firstName, ' ', inviteeOrg.lastName)
-        END AS invitedBy
+        END AS invitedBy,
+        CASE 
+            WHEN f.financierType = 'INDIVIDUAL' THEN user.email
+            WHEN f.financierType = 'COOPERATE' THEN superAdmin.email
+        END AS email    
     FROM FinancierEntity f
     LEFT JOIN UserEntity user 
         ON f.financierType = 'INDIVIDUAL' AND user.id = f.identity
     LEFT JOIN OrganizationEntity organization 
         ON f.financierType = 'COOPERATE' AND organization.id = f.identity 
+    LEFT JOIN OrganizationEmployeeEntity organizationEmployee
+        ON f.financierType = 'COOPERATE' AND organizationEmployee.organization = organization.id
+    LEFT JOIN UserEntity superAdmin 
+        ON f.financierType = 'COOPERATE' AND superAdmin.id = organizationEmployee.meedlUser.id 
     LEFT JOIN UserEntity inviteeUser 
         ON f.financierType = 'INDIVIDUAL' AND inviteeUser.id = user.createdBy
     LEFT JOIN UserEntity inviteeOrg 
