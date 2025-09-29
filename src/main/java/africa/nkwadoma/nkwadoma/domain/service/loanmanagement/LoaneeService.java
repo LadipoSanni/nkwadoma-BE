@@ -403,7 +403,13 @@ public class LoaneeService implements LoaneeUseCase {
     @Override
     public Page<CohortLoanee> viewAllLoaneeInCohort(Loanee loanee, int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validateUUID(loanee.getCohortId(), CohortMessages.INVALID_COHORT_ID.getMessage());
-        return cohortLoaneeOutputPort.findAllLoaneeInCohort(loanee,pageSize,pageNumber);
+        Page<CohortLoanee> cohortLoanees = cohortLoaneeOutputPort.findAllLoaneeInCohort(loanee,pageSize,pageNumber);
+        for (CohortLoanee cohortLoanee : cohortLoanees) {
+            List<LoaneeLoanBreakdown>  loanBreakdowns =
+                    loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(cohortLoanee.getId());
+            cohortLoanee.setLoanBreakdowns(loanBreakdowns);
+        }
+        return cohortLoanees;
     }
 
     private LoaneeLoanDetail saveLoaneeLoanDetails(LoaneeLoanDetail loaneeLoanDetail) throws MeedlException {
