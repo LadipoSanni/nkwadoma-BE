@@ -160,10 +160,13 @@ public class ProgramService implements AddProgramUseCase {
         Program foundProgram = programOutputPort.findProgramById(program.getId());
 
         boolean loaneeExistInProgram = programOutputPort.checkIfLoaneeExistInProgram(foundProgram.getId());
+        log.info("does loanee exist in program {}", loaneeExistInProgram);
                 if (loaneeExistInProgram) {
+                    log.info("Loanee exist in program so it's gonna throw exception ------");
                     throw new EducationException(ProgramMessages.PROGRAM_WITH_LOANEE_CANNOT_BE_DELETED.getMessage());
                 }
                 else {
+                    log.info("Loanee dosen't exist in program {} so it's gonna delete the program directly", foundProgram.getId());
                     loanBreakdownOutputPort.deleteAllBreakDownAssociateWithProgram(foundProgram.getId());
                     cohortLoanDetailOutputPort.deleteAllCohortLoanDetailAssociateWithProgram(foundProgram.getId());
                     int numberOfDeletedCohort = cohortOutputPort.deleteAllCohortAssociateWithProgram(foundProgram.getId());
