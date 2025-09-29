@@ -16,6 +16,7 @@ import java.util.List;
 public class FinancierResponse {
     private String id;
     private String name;
+    private String email;
     private FinancierType financierType;
     private ActivationStatus activationStatus;
     private BigDecimal totalAmountInvested;
