@@ -107,9 +107,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         verifyFinanciersExistInVehicle(loanProduct, investmentVehicle);
         investmentVehicle.setTotalAvailableAmount(investmentVehicle.getTotalAvailableAmount().subtract(loanProduct.getLoanProductSize()));
         loanProduct.addInvestmentVehicleValues(investmentVehicle);
-        loanProduct.setTotalAmountAvailable(loanProduct.getLoanProductSize());
-        loanProduct.setAvailableAmountToBeOffered(loanProduct.getLoanProductSize());
-        loanProduct.setAvailableAmountToBeDisbursed(loanProduct.getTotalAmountAvailable());
+        initializeAvailableAmounts(loanProduct);
         if (ObjectUtils.isEmpty(loanProduct.getTotalOutstandingLoan())) {
             loanProduct.setTotalOutstandingLoan(BigDecimal.ZERO);
         }
@@ -120,6 +118,12 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         investmentVehicleOutputPort.save(investmentVehicle);
         updateNumberOfLoanProductOnMeedlPortfolio();
         return loanProduct;
+    }
+
+    private static void initializeAvailableAmounts(LoanProduct loanProduct) {
+        loanProduct.setTotalAmountAvailable(loanProduct.getLoanProductSize());
+        loanProduct.setAvailableAmountToBeOffered(loanProduct.getLoanProductSize());
+        loanProduct.setAvailableAmountToBeDisbursed(loanProduct.getTotalAmountAvailable());
     }
 
 
@@ -216,8 +220,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
                 validateAndUpdateInvestmentVehicleAmountForLoanProduct(foundLoanProduct, loanProduct);
                 log.info("setting other loan product values that depends on the size...");
-                loanProduct.setTotalAmountAvailable(loanProduct.getLoanProductSize());
-                loanProduct.setAvailableAmountToBeDisbursed(loanProduct.getLoanProductSize());
+                initializeAvailableAmounts(loanProduct);
             }
             foundLoanProduct = loanProductMapper.updateLoanProduct(foundLoanProduct, loanProduct);
             foundLoanProduct.setUpdatedAt(LocalDateTime.now());
