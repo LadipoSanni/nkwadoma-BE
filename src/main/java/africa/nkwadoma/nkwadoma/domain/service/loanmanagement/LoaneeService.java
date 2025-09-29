@@ -904,7 +904,12 @@ public class LoaneeService implements LoaneeUseCase {
     public CohortLoanee viewLoaneeDetailInCohort(String cohortId, String loaneeId) throws MeedlException {
         MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
         MeedlValidator.validateUUID(cohortId,CohortMessages.INVALID_COHORT_ID.getMessage());
-        return cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(loaneeId,cohortId);
+        CohortLoanee cohortLoanee =  cohortLoaneeOutputPort.findCohortLoaneeByLoaneeIdAndCohortId(loaneeId,cohortId);
+        List<LoaneeLoanBreakdown> loanBreakdowns =
+                loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(cohortLoanee.getId());
+        log.info("laon break downs size is = {}",loanBreakdowns.size());
+        cohortLoanee.setLoanBreakdowns(loanBreakdowns);
+        return cohortLoanee;
     }
 
     @Override
