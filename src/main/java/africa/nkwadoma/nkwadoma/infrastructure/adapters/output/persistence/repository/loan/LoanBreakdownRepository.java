@@ -20,5 +20,5 @@ public interface LoanBreakdownRepository extends JpaRepository<LoanBreakdownEnti
     @Query("DELETE FROM LoanBreakdownEntity lb WHERE lb.cohort.programId = :id")
     void deleteAllLoanBreakdownByProgramId(@Param("id") String id);
 
-    LoanBreakdownEntity findByItemName(String itemName);
+    LoanBreakdownEntity findByItemNameIgnoreCaseAndCohortId(String itemName, String cohortId);
 }

@@ -1047,7 +1047,7 @@ public class LoaneeService implements LoaneeUseCase {
 
         if (!ObjectUtils.isEmpty(loanee.getLoanBreakdowns())) {
             for (LoaneeLoanBreakdown loaneeLoanBreakdown : loanee.getLoanBreakdowns()) {
-                LoanBreakdown loanBreakdown = checkIfLoanBreakdownExistsInCohort(loaneeLoanBreakdown);
+                LoanBreakdown loanBreakdown = checkIfLoanBreakdownExistsInCohort(loaneeLoanBreakdown,cohort.getId());
                 checkIfItemAmountIsValid(loaneeLoanBreakdown, loanBreakdown);
                 loanBreakdownTotal = loanBreakdownTotal.add(loaneeLoanBreakdown.getItemAmount());
             }
@@ -1113,8 +1113,8 @@ public class LoaneeService implements LoaneeUseCase {
         }
     }
 
-    private LoanBreakdown checkIfLoanBreakdownExistsInCohort(LoaneeLoanBreakdown loaneeLoanBreakdown) throws MeedlException {
-        LoanBreakdown loanBreakdown = loanBreakdownOutputPort.findByItemName(loaneeLoanBreakdown.getItemName());
+    private LoanBreakdown checkIfLoanBreakdownExistsInCohort(LoaneeLoanBreakdown loaneeLoanBreakdown,String cohortId) throws MeedlException {
+        LoanBreakdown loanBreakdown = loanBreakdownOutputPort.findByItemNameAndCohortId(loaneeLoanBreakdown.getItemName(),cohortId);
         if (loanBreakdown == null) {
             throw new ResourceNotFoundException(String.format("%s isn't part of the loan breakdown in this cohort",
                     loaneeLoanBreakdown.getItemName()));

@@ -1102,7 +1102,7 @@ class LoaneeServiceTest {
         when(cohortLoaneeOutputPort.findByLoaneeAndCohortId(mockId, mockId)).thenReturn(loaneeCohort);
         loaneeCohort.setId(mockId);
         when(loanRequestOutputPort.findByCohortLoaneeId(mockId)).thenReturn(loanRequest);
-        when(loanBreakdownOutputPort.findByItemName("juno")).thenReturn(cohortLoanBreakdown);
+        when(loanBreakdownOutputPort.findByItemNameAndCohortId("juno",mockId)).thenReturn(cohortLoanBreakdown);
         when(userIdentityOutputPort.save(any(UserIdentity.class))).thenReturn(userIdentity);
         when(loaneeLoanDetailsOutputPort.save(any(LoaneeLoanDetail.class))).thenReturn(loaneeLoanDetails);
         when(loaneeLoanBreakDownOutputPort.saveAll(anyList(), any(CohortLoanee.class))).thenReturn(firstLoanee.getLoanBreakdowns());
@@ -1149,7 +1149,7 @@ class LoaneeServiceTest {
         when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
         when(cohortLoaneeOutputPort.findByLoaneeAndCohortId(mockId, mockId)).thenReturn(loaneeCohort);
         when(loanRequestOutputPort.findByCohortLoaneeId(mockId)).thenReturn(loanRequest);
-        when(loanBreakdownOutputPort.findByItemName("NonExistentItem")).thenReturn(null);
+        when(loanBreakdownOutputPort.findByItemNameAndCohortId("NonExistentItem",mockId)).thenReturn(null);
         assertThrows(ResourceNotFoundException.class, () -> loaneeService.editLoaneeDetail(firstLoanee));
     }
 
