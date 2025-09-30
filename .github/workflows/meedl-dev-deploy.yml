@@ -48,7 +48,7 @@ jobs:
 
       - name: Tag Docker image
         run: |
-          DOCKER_TAG=${{ env.REPO_URL }}:alpha
+          DOCKER_TAG=${{ env.REPO_URL }}:alpha-latest
           docker tag meedl-dev:$GITHUB_SHA $DOCKER_TAG
           echo "DOCKER_TAG=$DOCKER_TAG" >> $GITHUB_ENV
 
@@ -73,7 +73,7 @@ jobs:
 
       - name: Pull latest Docker image
         run: |
-          docker pull ${{ env.REPO_URL }}:alpha
+          docker pull ${{ env.REPO_URL }}:alpha-latest
 
       - name: Download .env file from S3 (DEV)
         run: |
