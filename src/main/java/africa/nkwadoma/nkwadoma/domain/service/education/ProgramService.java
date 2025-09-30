@@ -144,12 +144,9 @@ public class ProgramService implements AddProgramUseCase {
     private Page<Program> getPrograms(Program program) throws MeedlException {
         UserIdentity foundCreator = userIdentityOutputPort.findById(program.getCreatedBy());
         log.info("Found User identity: {}", foundCreator);
-        if (ObjectUtils.isNotEmpty(foundCreator) && foundCreator.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)) {
-            OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.findByCreatedBy(foundCreator.getId());
-            log.info("Found Organization Employee: {}", employeeIdentity);
-            return programOutputPort.findProgramByNameWithinOrganization(program, employeeIdentity.getOrganization());
-        }
-        return programOutputPort.findProgramByName(program.getName(),program.getPageNumber(),program.getPageSize());
+        OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.findByCreatedBy(foundCreator.getId());
+        log.info("Found Organization Employee: {}", employeeIdentity);
+        return programOutputPort.findProgramByNameWithinOrganization(program, employeeIdentity.getOrganization());
     }
 
     @Transactional

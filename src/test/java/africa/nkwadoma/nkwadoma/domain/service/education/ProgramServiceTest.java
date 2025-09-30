@@ -247,24 +247,6 @@ class ProgramServiceTest {
     }
 
     @Test
-    void searchProgramAcrossPlatform() {
-        try {
-            program.setPageNumber(pageNumber);
-            program.setPageSize(pageSize);
-            userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
-            when(userIdentityOutputPort.findById(program.getCreatedBy())).thenReturn(userIdentity);
-            when(programOutputPort.findProgramByName(program.getName(),program.getPageNumber(),program.getPageSize()))
-                    .thenReturn(new PageImpl<>(List.of(program)));
-                    Page<Program> foundProgram = programService.searchProgramByName(program);
-            assertNotNull(foundProgram);
-            verify(programOutputPort, times(1)).findProgramByName(program.getName(),program.getPageNumber(),program.getPageSize());
-        } catch (MeedlException e) {
-            log.error("Error viewing program by name", e);
-        }
-    }
-
-
-    @Test
     void deleteProgramWithActiveLoaneeInCohort() throws MeedlException {
         when(programOutputPort.findProgramById(program.getId())).thenReturn(program);
         when(programOutputPort.checkIfLoaneeExistInProgram(program.getId())).thenReturn(true);
