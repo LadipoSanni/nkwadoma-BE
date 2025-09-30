@@ -586,7 +586,22 @@ public class FinancierService implements FinancierUseCase {
     public Financier investInVehicle(Financier financier) throws MeedlException {
         MeedlValidator.validateObjectInstance(financier, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
         financier.validateInvestInVehicleDetails();
-        Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getUserIdentity().getId());
+
+        Financier foundFinancier;
+
+        UserIdentity userIdentity = userIdentityOutputPort.findById(financier.getUserIdentity().getId());
+        if (userIdentity.getRole().isCooperateStaff()){
+            Optional<OrganizationIdentity> organizationIdentity = organizationIdentityOutputPort.findByUserId(userIdentity.getId());
+            if (organizationIdentity.isPresent()){
+                foundFinancier = financierOutputPort.findFinancierByOrganizationId(organizationIdentity.get().getId());
+            }else {
+                log.info("Financier cooperation not found {}", false);
+                throw new InvestmentException("Financier cooperation not found");
+            }
+        }else {
+            foundFinancier = financierOutputPort.findFinancierByUserId(financier.getUserIdentity().getId());
+        }
+
         financier.setId(foundFinancier.getId());
         InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(financier.getInvestmentVehicleId());
         log.info("Investment vehicle found is {}" ,foundInvestmentVehicle);

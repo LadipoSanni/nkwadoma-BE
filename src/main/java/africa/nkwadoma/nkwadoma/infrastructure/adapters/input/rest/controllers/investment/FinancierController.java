@@ -106,7 +106,7 @@ public class FinancierController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
     @PostMapping("financier/vehicle/invest")
-    @PreAuthorize("hasRole('FINANCIER')")
+    @PreAuthorize("hasRole('FINANCIER') or hasRole('COOPERATE_FINANCIER_SUPER_ADMIN') or hasRole('COOPERATE_FINANCIER_ADMIN')")
     @Operation(
             summary = SwaggerDocumentation.INVEST_IN_VEHICLE_SUMMARY,
             description = SwaggerDocumentation.INVEST_IN_VEHICLE_DESCRIPTION
