@@ -20,7 +20,6 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Demography;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -113,12 +112,14 @@ public class AdminInitializer {
             log.warn("Failed to create organization identity on db for first organization {}", exception.getMessage());
             savedOrganizationIdentity = organizationIdentityOutputPort.findByEmail(organizationIdentity.getEmail());
         }
-        OrganizationLoanDetail organizationLoanDetail = organizationLoanDetailOutputPort.findByOrganizationId(organizationIdentity.getId());
-        if (ObjectUtils.isEmpty(organizationLoanDetail)){
-            log.info("No organization loan details was found for this first organization. \n------> Saving a new organization loan detail.");
-            organizationLoanDetail = buildOrganizationLoanDetail(organizationIdentity);
-            organizationLoanDetailOutputPort.save(organizationLoanDetail);
-        }
+        saveOrganizationLoanDetails(organizationIdentity);
+        saveFirstEmployee(organizationIdentity, savedOrganizationIdentity);
+
+        log.info("Created organization identity: {} , employee is : {}", organizationIdentity, savedOrganizationIdentity.getOrganizationEmployees().get(0));
+        return savedOrganizationIdentity;
+    }
+
+    private void saveFirstEmployee(OrganizationIdentity organizationIdentity, OrganizationIdentity savedOrganizationIdentity) throws MeedlException {
         OrganizationEmployeeIdentity employeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
         employeeIdentity.setOrganization(organizationIdentity.getId());
         employeeIdentity.setActivationStatus(ActivationStatus.ACTIVE);
@@ -137,9 +138,15 @@ public class AdminInitializer {
             log.warn("Employee for first organization {} already exists wth error message: {}", organizationIdentity.getId(), dataIntegrityViolationException.getMessage() );
         }
         savedOrganizationIdentity.setOrganizationEmployees(List.of(employeeIdentity));
+    }
 
-        log.info("Created organization identity: {} , employee is : {}", organizationIdentity, savedOrganizationIdentity.getOrganizationEmployees().get(0));
-        return savedOrganizationIdentity;
+    private void saveOrganizationLoanDetails(OrganizationIdentity organizationIdentity) throws MeedlException {
+        OrganizationLoanDetail organizationLoanDetail = organizationLoanDetailOutputPort.findByOrganizationId(organizationIdentity.getId());
+        if (ObjectUtils.isEmpty(organizationLoanDetail)){
+            log.info("No organization loan details was found for this first organization. \n------> Saving a new organization loan detail.");
+            organizationLoanDetail = buildOrganizationLoanDetail(organizationIdentity);
+            organizationLoanDetailOutputPort.save(organizationLoanDetail);
+        }
     }
 
     private OrganizationIdentity getKeycloakOrganizationIdentity(OrganizationIdentity organizationIdentity, Optional<OrganizationIdentity> foundOrganization) throws MeedlException {
@@ -256,22 +263,26 @@ public class AdminInitializer {
                 log.error("unable to get first user from keycloak although i got user already exist on keycloak {}", userIdentity);
                 throw new RuntimeException(ex);
             }
-            log.info("user representation email in admin initializer {} , id : {} role {}", userRepresentation.getEmail(), userRepresentation.getId() , userRepresentation.getRealmRoles());
-            userIdentity.setId(userRepresentation.getId());
-            try {
-                IdentityRole identityRole = identityManagerOutPutPort.getUserRoles(userIdentity);
-                log.info("Identity role found is {}", identityRole);
-                if (!IdentityRole.MEEDL_SUPER_ADMIN.equals(identityRole)) {
-                    identityManagerOutPutPort.changeUserRole(userIdentity, IdentityRole.MEEDL_SUPER_ADMIN.name());
-                    log.info("The user role has been updated");
-                }
-            } catch (MeedlException ex) {
-                log.error("Error finding user role {}", ex.getMessage());
-                throw new RuntimeException(ex);
-            }
+            assignSuperAdminRoleIfNotSuperAdmin(userIdentity, userRepresentation);
         }
         log.info("First user, after saving on keycloak: {}", userIdentity);
         userIdentity.setCreatedBy(userIdentity.getId());
+    }
+
+    private void assignSuperAdminRoleIfNotSuperAdmin(UserIdentity userIdentity, UserRepresentation userRepresentation) {
+        log.info("user representation email in admin initializer {} , id : {} role {}", userRepresentation.getEmail(), userRepresentation.getId() , userRepresentation.getRealmRoles());
+        userIdentity.setId(userRepresentation.getId());
+        try {
+            IdentityRole identityRole = identityManagerOutPutPort.getUserRoles(userIdentity);
+            log.info("Identity role found is {}", identityRole);
+            if (!IdentityRole.MEEDL_SUPER_ADMIN.equals(identityRole)) {
+                identityManagerOutPutPort.changeUserRole(userIdentity, IdentityRole.MEEDL_SUPER_ADMIN.name());
+                log.info("The user role has been updated");
+            }
+        } catch (MeedlException ex) {
+            log.error("Error finding user role {}", ex.getMessage());
+            throw new RuntimeException(ex);
+        }
     }
 
     private Portfolio getPortfolio(){
