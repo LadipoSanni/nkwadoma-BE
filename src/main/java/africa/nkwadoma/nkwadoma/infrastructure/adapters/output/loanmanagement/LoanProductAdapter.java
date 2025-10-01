@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -53,17 +54,25 @@ public class LoanProductAdapter implements LoanProductOutputPort {
         loanProduct.setVendors(vendors);
         return loanProduct;
     }
-    private List<LoanProductVendor> savedLoanProductVendors(List<Vendor> vendors, LoanProductEntity savedLoanProductEntity) {
+    private void savedLoanProductVendors(List<Vendor> vendors, LoanProductEntity savedLoanProductEntity) {
         if (vendors != null) {
-            return vendors.stream()
+             vendors.stream()
                     .map(loanProductMapper::mapVendorToVendorEntity)
-                    .map(vendorEntity -> loanProductVendorRepository.save(LoanProductVendor.builder()
-                            .loanProductEntity(savedLoanProductEntity)
-                            .vendorEntity(vendorEntity)
-                            .build()))
-                    .collect(Collectors.toList());
+                    .forEach(vendorEntity -> {
+                        Optional<LoanProductVendor> foundLoanProductVendor = loanProductVendorRepository.findByLoanProductEntityAndVendorEntity(savedLoanProductEntity, vendorEntity);
+                        String loanProductVendorId = null;
+                        if (foundLoanProductVendor.isPresent()) {
+                            loanProductVendorId = foundLoanProductVendor.get().getId();
+                            log.info("Loan product vendor found with id {}", loanProductVendorId);
+                        }
+
+                        loanProductVendorRepository.save(LoanProductVendor.builder()
+                                .loanProductEntity(savedLoanProductEntity)
+                                .id(loanProductVendorId)
+                                .vendorEntity(vendorEntity)
+                                .build());
+                    });
         }
-        return List.of();
     }
 
     private List<Vendor> saveVendors(LoanProduct loanProduct) {

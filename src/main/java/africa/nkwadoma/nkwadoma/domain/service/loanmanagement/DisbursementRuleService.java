@@ -39,22 +39,27 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
             throw new MeedlException("Disbursement rule already exist with this name "+ disbursementRule.getName());
         }
         UserIdentity actor = userIdentityOutputPort.findById(disbursementRule.getUserIdentity().getId());
-        log.info("The role of the user creating disbursement rule is {} email {} disbursement status {}",actor.getRole(), actor.getEmail(), disbursementRule.getActivationStatus());
-        disbursementRule.setUserIdentity(actor);
-        disbursementRule.setName(disbursementRule.getName().trim());
-            disbursementRule.setActivationStatus(
-                    disbursementRule.getUserIdentity().getRole().isMeedlSuperAdmin()
-                            ? ActivationStatus.APPROVED
-                            : ActivationStatus.PENDING_APPROVAL.equals(disbursementRule.getActivationStatus())
-                            ? ActivationStatus.PENDING_APPROVAL
-                            : ActivationStatus.INACTIVE);
-        DisbursementRule savedDisbursementRule = disbursementRuleOutputPort.save(disbursementRule);
-            disbursementRule.setId(savedDisbursementRule.getId());
+        DisbursementRule savedDisbursementRule = saveDisbursementRule(disbursementRule, actor);
+        disbursementRule.setId(savedDisbursementRule.getId());
         if (ActivationStatus.PENDING_APPROVAL.equals(savedDisbursementRule.getActivationStatus())){
             asynchronousNotificationOutputPort.notifyAdminOfDisbursementRuleApproval(disbursementRule);
         }
         return savedDisbursementRule;
     }
+
+    private DisbursementRule saveDisbursementRule(DisbursementRule disbursementRule, UserIdentity actor) throws MeedlException {
+        log.info("The role of the user creating disbursement rule is {} email {} disbursement status {}", actor.getRole(), actor.getEmail(), disbursementRule.getActivationStatus());
+        disbursementRule.setUserIdentity(actor);
+        disbursementRule.setName(disbursementRule.getName().trim());
+        disbursementRule.setActivationStatus(
+                disbursementRule.getUserIdentity().getRole().isMeedlSuperAdmin()
+                        ? ActivationStatus.APPROVED
+                        : ActivationStatus.PENDING_APPROVAL.equals(disbursementRule.getActivationStatus())
+                        ? ActivationStatus.PENDING_APPROVAL
+                        : ActivationStatus.INACTIVE);
+        return disbursementRuleOutputPort.save(disbursementRule);
+    }
+
     @Override
     public DisbursementRule updateDisbursementRule(DisbursementRule disbursementRule) throws MeedlException {
         MeedlValidator.validateObjectInstance(disbursementRule, DisbursementRuleMessages.EMPTY_DISBURSEMENT_RULE.getMessage());
