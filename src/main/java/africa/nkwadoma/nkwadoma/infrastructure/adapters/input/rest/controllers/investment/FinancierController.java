@@ -332,4 +332,19 @@ public class FinancierController {
         );
     }
 
+    @GetMapping("financier/{email}")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
+    public ResponseEntity<ApiResponse<?>> viewFinancierByEmail(@PathVariable String email) throws MeedlException {
+        Financier financier = financierUseCase.viewFinancierByEmail(email);
+        FinancierResponse financierResponse = financierRestMapper.map(financier);
+
+        ApiResponse<FinancierResponse> apiResponse = ApiResponse.<FinancierResponse>builder()
+                .data(financierResponse)
+                .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage())
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+
 }
