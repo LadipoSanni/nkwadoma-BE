@@ -1037,9 +1037,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         MeedlValidator.validateUUID(loanOfferId,"Loan offer id cannot be empty ");
         MeedlValidator.validateObjectInstance(loanOfferStatus,"Loan offer status cannot be empty");
         LoanOffer loanOffer = loanOfferOutputPort.findById(loanOfferId);
-        if(loanOffer.getLoaneeResponse().equals(LoanDecision.DECLINED)){
-            throw new LoanException("Operation cannot be performed on this loan offer, cause it has been declined");
-        }
+        operationCannotBePerformOnDeclinedLoanOffer(loanOffer);
+        loanOfferAlreadyWithdraw(loanOffer);
         boolean loanHasStarted = loanOutputPort.checkIfLoanHasBeenDisbursedForLoanOffer(loanOffer.getId());
         if (loanHasStarted){
             throw new LoanException("Loan offer has already been disbursed, it can't be withdraw");
@@ -1053,6 +1052,22 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             loanProductOutputPort.save(loanProduct);
         }
         return loanOffer;
+    }
+
+    private static void loanOfferAlreadyWithdraw(LoanOffer loanOffer) throws LoanException {
+        if (loanOffer.getLoanOfferStatus() != null){
+            if (loanOffer.getLoanOfferStatus().equals(LoanOfferStatus.WITHDRAW)){
+                throw new LoanException("Loan offer has already been withdraw ");
+            }
+        }
+    }
+
+    private static void operationCannotBePerformOnDeclinedLoanOffer(LoanOffer loanOffer) throws LoanException {
+        if(loanOffer.getLoaneeResponse() != null) {
+            if (loanOffer.getLoaneeResponse().equals(LoanDecision.DECLINED)) {
+                throw new LoanException("Operation cannot be performed on this loan offer, cause it has been declined");
+            }
+        }
     }
 
     private Page<LoanDetail> filterResult(LoanOffer loanOffer) throws MeedlException {
