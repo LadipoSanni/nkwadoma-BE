@@ -79,13 +79,8 @@ public class LoanBookServiceTest {
     private CohortOutputPort cohortOutputPort;
     @Autowired
     private LoanProductOutputPort loanProductOutputPort;
-    @Autowired
-    private LoanProductVendorRepository loanProductVendorRepository;
-    @Autowired
-    private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     private LoanProduct loanProduct;
-    @Autowired
-    private VendorEntityRepository vendorEntityRepository;
+
     @Autowired
     private InstituteMetricsOutputPort instituteMetricsOutputPort;
 
@@ -270,10 +265,6 @@ public class LoanBookServiceTest {
 
     @AfterAll
     void tearDown() throws MeedlException {
-        VendorEntity foundGemsVendorEntity = vendorEntityRepository.findByVendorName(loanProduct.getVendors().get(0).getVendorName());
-
-        loanProductVendorRepository.deleteByVendorEntityId((foundGemsVendorEntity.getId()));
-
         LoanProduct foundGoldLoanProduct = loanProductOutputPort.findByName(loanProduct.getName());
         loanProductOutputPort.deleteById(foundGoldLoanProduct.getId());
 

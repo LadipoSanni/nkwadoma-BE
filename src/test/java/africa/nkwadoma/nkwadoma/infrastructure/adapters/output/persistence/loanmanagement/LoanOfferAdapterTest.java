@@ -79,10 +79,6 @@ public class LoanOfferAdapterTest {
     private LoanProduct loanProduct;
     @Autowired
     private LoanProductOutputPort loanProductOutputPort;
-    @Autowired
-    private VendorEntityRepository vendorEntityRepository;
-    @Autowired
-    private LoanProductVendorRepository loanProductVendorRepository;
     private int pageSize = 10;
     private int pageNumber = 0;
 
@@ -320,9 +316,6 @@ public class LoanOfferAdapterTest {
 
     @AfterAll
     void cleanUp() throws MeedlException {
-        VendorEntity foundGemsVendorEntity = vendorEntityRepository.findByVendorName(loanProduct.getVendors().get(0).getVendorName());
-        loanProductVendorRepository.deleteByVendorEntityId((foundGemsVendorEntity.getId()));
-        vendorEntityRepository.deleteById(foundGemsVendorEntity.getId());
         loanOfferOutputPort.deleteLoanOfferById(loanReferralId);
         loanProductOutputPort.deleteById(loanProduct.getId());
 

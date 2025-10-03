@@ -5,6 +5,8 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanProduct.LoanProductOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanProduct.LoanProductVendorOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanProduct.VendorOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.DisbursementRuleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants;
@@ -43,6 +45,8 @@ class LoanProductServiceTest {
     @Mock
     private UserIdentityOutputPort userIdentityOutputPort;
     @Mock
+    private VendorOutputPort vendorOutputPort;
+    @Mock
     private LoanProductMapper loanProductMapper;
     @Mock
     private IdentityManagerOutputPort identityManagerOutPutPort;
@@ -50,6 +54,8 @@ class LoanProductServiceTest {
     private LoanProductOutputPort loanProductOutputPort;
     @Mock
     private InvestmentVehicleOutputPort investmentVehicleOutputPort;
+    @Mock
+    private LoanProductVendorOutputPort loanProductVendorOutputPort;
     @Mock
     private InvestmentVehicleFinancierOutputPort investmentVehicleFinancierOutputPort;
     private Loan loan;
@@ -60,6 +66,7 @@ class LoanProductServiceTest {
     private DisbursementRuleOutputPort disbursementRuleOutputPort;
     @Mock
     private PortfolioOutputPort portfolioOutputPort;
+   private List<Vendor> vendors = new ArrayList<>();
     private int pageSize = 10;
     private int pageNumber = 10;
     private Portfolio portfolio;
@@ -79,6 +86,7 @@ class LoanProductServiceTest {
 
         financier = Financier.builder().id(UUID.randomUUID().toString()).name("walker").build();
         Vendor vendor = new Vendor();
+        vendors.add(vendor);
         loanProduct = new LoanProduct();
         loanProduct.setId("3a6d1124-1349-4f5b-831a-ac269369a90f");
         loanProduct.setInvestmentVehicleId("3a6d1124-1349-4f5b-831a-ac269369a90f");
@@ -92,7 +100,7 @@ class LoanProductServiceTest {
         loanProduct.setLoanProductSize(new BigDecimal("1000"));
         loanProduct.setPageSize(10);
         loanProduct.setPageNumber(0);
-        loanProduct.setVendors(List.of(vendor));
+        loanProduct.setVendors(vendors);
         loanProduct.setSponsors(List.of(financier));
         portfolio = Portfolio.builder().portfolioName(MeedlConstants.MEEDL).build();
 //        loanProductDisbursementRule = new LoanProductDisbursementRule();
@@ -110,6 +118,8 @@ class LoanProductServiceTest {
 //            when(loanProductDisbursementRuleOutputPort.save(any())).thenReturn(loanProductDisbursementRule);
 
 //            when(disbursementRuleOutputPort.save(disbursementRule)).thenReturn(disbursementRule);
+
+            when(vendorOutputPort.saveVendors(anyList())).thenReturn(vendors);
             when(investmentVehicleFinancierOutputPort.checkIfFinancierExistInVehicle(financier.getId(), investmentVehicle.getId())).thenReturn(1);
             when(investmentVehicleOutputPort.findById(loanProduct.getId()))
                     .thenReturn(investmentVehicle);
@@ -206,6 +216,7 @@ class LoanProductServiceTest {
     void viewLoanProductDetailsWithValidId(){
         try {
             when(loanProductOutputPort.findById(loanProduct.getId())).thenReturn(loanProduct);
+            when(loanProductVendorOutputPort.getVendorsByLoanProductId(loanProduct.getId())).thenReturn(vendors);
             LoanProduct foundLoanProduct = loanProductService.viewLoanProductDetailsById(loanProduct.getId());
             assertEquals(foundLoanProduct.getName() , loanProduct.getName());
             assertEquals(foundLoanProduct.getMandate() , loanProduct.getMandate());
