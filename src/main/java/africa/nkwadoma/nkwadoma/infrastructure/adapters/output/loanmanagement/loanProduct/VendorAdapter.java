@@ -33,4 +33,10 @@ public class VendorAdapter implements VendorOutputPort {
         MeedlValidator.validateUUID(vendorId, "Vendor id is required");
         vendorEntityRepository.deleteById(vendorId);
     }
+
+    @Override
+    public void deleteMultipleById(List<String> vendorIds) throws MeedlException {
+        MeedlValidator.validateCollection(vendorIds, "Vendors id is required before deleting");
+        vendorEntityRepository.deleteAllById(vendorIds);
+    }
 }

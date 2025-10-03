@@ -10,4 +10,6 @@ public interface VendorOutputPort {
     List<Vendor> saveVendors(List<Vendor> vendors) throws MeedlException;
 
     void deleteById(String vendorId) throws MeedlException;
+
+    void deleteMultipleById(List<String> vendorIds) throws MeedlException;
 }

@@ -36,6 +36,7 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -199,26 +200,48 @@ public class LoanProductService implements CreateLoanProductUseCase, ViewLoanPro
 
         int offerCount = loanProductOutputPort.countLoanOfferFromLoanProduct(loanProduct.getId(), List.of(LoanDecision.OFFERED, LoanDecision.ACCEPTED));
         if (offerCount == 0) {
-            boolean isNotEqual = foundLoanProduct.getLoanProductSize()
-                    .compareTo(loanProduct.getLoanProductSize()) != 0;
-            log.info("is new loan product size greater than the previous ? {} , previous {} , new {}",
-                    isNotEqual, foundLoanProduct.getLoanProductSize(), loanProduct.getLoanProductSize() );
-            if (isNotEqual){
-
-                validateAndUpdateInvestmentVehicleAmountForLoanProduct(foundLoanProduct, loanProduct);
-                log.info("setting other loan product values that depends on the size...");
-                initializeAvailableAmounts(loanProduct);
-            }
-//            loanProductOutputPort
-            foundLoanProduct = loanProductMapper.updateLoanProduct(foundLoanProduct, loanProduct);
-            foundLoanProduct.setUpdatedAt(LocalDateTime.now());
-            log.info("Loan product updated {}", foundLoanProduct);
-
-            return loanProductOutputPort.save(foundLoanProduct);
+            return updateLoanProduct(loanProduct, foundLoanProduct);
         }else {
             log.error("This loan product cannot be updated because it has been used in a loan offer. {}", loanProduct.getId());
             throw new MeedlException("This loan product cannot be updated because it has been used in a loan offer");
         }
+    }
+
+    private LoanProduct updateLoanProduct(LoanProduct loanProduct, LoanProduct foundLoanProduct) throws MeedlException {
+        boolean isNotEqual = foundLoanProduct.getLoanProductSize()
+                .compareTo(loanProduct.getLoanProductSize()) != 0;
+        log.info("is new loan product size greater than the previous ? {} , previous {} , new {}",
+                isNotEqual, foundLoanProduct.getLoanProductSize(), loanProduct.getLoanProductSize() );
+        if (isNotEqual){
+
+            validateAndUpdateInvestmentVehicleAmountForLoanProduct(foundLoanProduct, loanProduct);
+            log.info("setting other loan product values that depends on the size...");
+            initializeAvailableAmounts(loanProduct);
+        }
+//            loanProductOutputPort
+        foundLoanProduct = loanProductMapper.updateLoanProduct(foundLoanProduct, loanProduct);
+        foundLoanProduct.setUpdatedAt(LocalDateTime.now());
+
+        log.info("Loan product updated {}", foundLoanProduct);
+        updateVendorDetails(loanProduct);
+        return loanProductOutputPort.save(foundLoanProduct);
+    }
+
+    private void updateVendorDetails(LoanProduct loanProduct) throws MeedlException {
+        List<Vendor> vendors = loanProductVendorOutputPort.getVendorsByLoanProductId(loanProduct.getId());
+        List<String> vendorIds = getVendorIds(vendors);
+        vendorOutputPort.deleteMultipleById(vendorIds);
+        vendors = vendorOutputPort.saveVendors(vendors);
+        loanProductVendorOutputPort.save(vendors,loanProduct);
+    }
+
+    private static List<String> getVendorIds(List<Vendor> vendors) {
+        return vendors.stream()
+                .filter(Objects::nonNull)
+                .map(Vendor::getId)
+                .filter(MeedlValidator::isNotEmptyString)
+                .toList();
+
     }
 
     private void validateAndUpdateInvestmentVehicleAmountForLoanProduct(LoanProduct foundLoanProduct, LoanProduct loanProduct) throws MeedlException {
