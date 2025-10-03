@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanProduct.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlportfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants;
@@ -17,7 +18,7 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanManagement.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanee.LoaneeLoanAggregateMapper;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.*;
@@ -89,6 +90,9 @@ class LoanServiceTest {
     private CohortLoanDetail cohortLoanDetail;
     private Cohort cohort;
     @Mock
+    private LoanProductDisbursementRuleOutputPort loanProductDisbursementRuleOutputPort;
+    private LoaneeLoanBreakdown loaneeLoanBreakdown;
+    @Mock
     private ProgramLoanDetailOutputPort programLoanDetailOutputPort;
     @Mock
     private OrganizationLoanDetailOutputPort organizationLoanDetailOutputPort;
@@ -136,7 +140,8 @@ class LoanServiceTest {
         LoanProduct loanProduct = TestData.buildTestLoanProduct();
 
 
-
+        loaneeLoanBreakdown = TestData.createTestLoaneeLoanBreakdown
+                ("1886df42-1f75-4d17-bdef-e0b016707885");
         loanMetrics = LoanMetrics.builder()
                 .organizationId(organizationIdentity.getId())
                 .loanRequestCount(1)
@@ -728,6 +733,29 @@ class LoanServiceTest {
         when(loanOfferOutputPort.findLoanOfferById(loan.getLoanOfferId())).thenReturn(loanOffer);
         assertThrows(MeedlException.class, () -> loanService.startLoan(loan));
     }
+    @Test
+    void viewLoanDetailsWithValidId(){
+        loan = new Loan();
+        loan.setId("4dced61b-acff-4487-87f7-587977fd146a");
 
+        loan.setLoanee(loanee);
+        try {
+            when(loanOutputPort.viewLoanById(anyString())).thenReturn(Optional.ofNullable(loan));
+
+            when(loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByCohortLoaneeId(any())).thenReturn(List.of(loaneeLoanBreakdown));
+            Loan foundLoan = loanService.viewLoanDetails(loan.getId());
+
+            assertNotNull(foundLoan.getId());
+            verify(loanOutputPort, times(1)).viewLoanById(loan.getId());
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.EMPTY})
+    void viewLoanDetailsWithInvalidId(String loanId){
+        assertThrows(MeedlException.class,()-> loanService.viewLoanDetails(loanId));
+    }
 
 }

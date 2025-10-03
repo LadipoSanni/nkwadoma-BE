@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.loanBook;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanManagement.loanBook;
 
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.MonthlyInterest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.MonthlyInterestEntity;

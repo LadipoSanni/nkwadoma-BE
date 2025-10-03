@@ -19,8 +19,8 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.String
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.education.CohortMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.education.ProgramCohortMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanBreakdownMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanDetailMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanManagement.LoanBreakdownMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanManagement.LoanDetailMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanee.LoaneeLoanDetailMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanee.LoaneeMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.notification.email.EmailAdapter;

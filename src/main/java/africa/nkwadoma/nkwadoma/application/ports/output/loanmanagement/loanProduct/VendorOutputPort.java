@@ -1,0 +1,13 @@
+package africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanProduct;
+
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
+
+import java.util.List;
+
+public interface VendorOutputPort {
+
+    List<Vendor> saveVendors(List<Vendor> vendors) throws MeedlException;
+
+    void deleteById(String vendorId) throws MeedlException;
+}
