@@ -108,7 +108,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         investmentVehicle.setTotalAvailableAmount(investmentVehicle.getTotalAvailableAmount().subtract(loanProduct.getLoanProductSize()));
         loanProduct.addInvestmentVehicleValues(investmentVehicle);
         loanProduct.setTotalAmountAvailable(loanProduct.getLoanProductSize());
-        loanProduct.setTotalAmountDisbursed(loanProduct.getLoanProductSize());
+        loanProduct.setAvailableAmountToBeDisbursed(loanProduct.getLoanProductSize());
         loanProduct.setAvailableAmountToBeOffered(loanProduct.getLoanProductSize());
         if (ObjectUtils.isEmpty(loanProduct.getTotalOutstandingLoan())) {
             loanProduct.setTotalOutstandingLoan(BigDecimal.ZERO);
@@ -308,6 +308,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
                 .subtract(loanOffer.getAmountApproved()));
         loanProduct.setAvailableAmountToBeDisbursed(loanProduct.getAvailableAmountToBeDisbursed()
                 .subtract(loanOffer.getAmountApproved()));
+        loanProduct.setTotalAmountDisbursed(loanProduct.getTotalAmountDisbursed()
+                .add(loanOffer.getAmountApproved()));
         loanProductOutputPort.save(loanProduct);
     }
 
