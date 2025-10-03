@@ -7,6 +7,8 @@ public interface CohortLoaneeProjection {
     String getId();
     String getFirstName();
     String getLastName();
+    String getEmail();
+    BigDecimal getTuitionAmount();
     BigDecimal getAmountReceived();
     BigDecimal getAmountPaid();
     BigDecimal getAmountOutstanding();
@@ -37,4 +39,7 @@ public interface CohortLoaneeProjection {
     String getLoaneeLoanDetailId();
     String getInterestIncurred();
     String getTrainingPerformance();
+    BigDecimal getInitialDeposit();
+    String getCohortId();
+    String getLoaneeId();
 }

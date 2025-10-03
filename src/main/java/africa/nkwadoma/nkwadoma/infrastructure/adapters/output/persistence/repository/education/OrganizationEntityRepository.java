@@ -185,7 +185,7 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
     JOIN OrganizationEmployeeEntity emp ON emp.organization = org.id
     WHERE emp.meedlUser.id = :userId
 """)
-    Optional<OrganizationEntity> findByUserId(String userId);
+    Optional<OrganizationEntity> findByUserId(@Param("userId") String userId);
 
 
     @Query("""

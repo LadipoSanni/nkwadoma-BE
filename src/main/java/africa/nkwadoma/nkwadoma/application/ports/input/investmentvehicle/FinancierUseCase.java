@@ -36,4 +36,6 @@ public interface FinancierUseCase {
     InvestmentSummary viewInvestmentDetailOfFinancier(String financierId, String investmentVehicleFinancierId, String userId) throws MeedlException;
 
     Financier respondToFinancierInvite(Financier financier) throws MeedlException;
+
+    Financier viewFinancierByEmail(String email) throws MeedlException;
 }

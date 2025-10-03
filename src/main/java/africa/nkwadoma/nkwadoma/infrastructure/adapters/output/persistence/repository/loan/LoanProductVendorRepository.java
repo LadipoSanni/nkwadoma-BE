@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface LoanProductVendorRepository extends JpaRepository<LoanProductVendor,String> {
     void deleteAllByVendorEntity(VendorEntity vendorEntity);
@@ -17,4 +18,6 @@ public interface LoanProductVendorRepository extends JpaRepository<LoanProductVe
     void deleteByVendorEntityId(String id);
 
     List<LoanProductVendor> findAllByLoanProductEntity_Id(String loanProductEntityId);
+
+    Optional<LoanProductVendor> findByLoanProductEntityAndVendorEntity(LoanProductEntity savedLoanProductEntity, VendorEntity vendorEntity);
 }

@@ -90,10 +90,15 @@ public interface LoaneeRestMapper {
     @Mapping(target = "activationStatus", source = "loanee.activationStatus")
     @Mapping(target = "cohortId", source = "cohort.id")
     @Mapping(target = "id", source = "loanee.id")
+    @Mapping(target = "loaneeLoanDetail.loanBreakdown", source = "loanBreakdowns")
+    @Mapping(target = "loaneeLoanDetail.tuitionAmount", source = "loaneeLoanDetail.tuitionAmount")
+    @Mapping(target = "loaneeLoanDetail.initialDeposit", source = "loaneeLoanDetail.initialDeposit")
     LoaneeResponse mapToLoaneeResponse(CohortLoanee cohortLoanee);
 
     @Mapping(target = "firstName", source = "loanee.userIdentity.firstName")
     @Mapping(target = "lastName", source = "loanee.userIdentity.lastName")
+    @Mapping(target = "email", source = "loanee.userIdentity.email")
+    @Mapping(target = "loaneeId", source = "loanee.id")
     @Mapping(target = "gender", source = "loanee.userIdentity.gender")
     @Mapping(target = "dateOfBirth", source = "loanee.userIdentity.dateOfBirth")
     @Mapping(target = "stateOfOrigin", source = "loanee.userIdentity.stateOfOrigin")
@@ -112,11 +117,15 @@ public interface LoaneeRestMapper {
     @Mapping(target = "amountReceived", source = "loanee.loaneeLoanDetail.amountReceived")
     @Mapping(target = "amountRepaid", source = "loanee.loaneeLoanDetail.amountRepaid")
     @Mapping(target = "amountOutstanding", source = "loanee.loaneeLoanDetail.amountOutstanding")
+    @Mapping(target = "initialDeposit", source = "loanee.loaneeLoanDetail.initialDeposit")
     @Mapping(target = "debtPercentage", source = "debtPercentage")
     @Mapping(target = "interestRate", source = "interestRate")
     @Mapping(target = "repaymentPercentage", source = "repaymentPercentage")
     @Mapping(target = "cohortName", source = "cohort.name")
+    @Mapping(target = "cohortId", source = "cohort.id")
+    @Mapping(target = "tuitionAmount", source = "cohort.tuitionAmount")
     @Mapping(target = "interestIncurred", source = "interestIncurred")
+    @Mapping(target = "loanBreakdownResponses", source = "loanBreakdowns")
     CohortLoaneeResponse toCohortLoaneeResponse(CohortLoanee cohortLoanee);
 
     LoaneeLoanDetailResponse toLoaneeLoanDetail(LoaneeLoanDetail loaneeLoanDetail);

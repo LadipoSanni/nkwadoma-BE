@@ -107,18 +107,23 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         verifyFinanciersExistInVehicle(loanProduct, investmentVehicle);
         investmentVehicle.setTotalAvailableAmount(investmentVehicle.getTotalAvailableAmount().subtract(loanProduct.getLoanProductSize()));
         loanProduct.addInvestmentVehicleValues(investmentVehicle);
-        loanProduct.setTotalAmountAvailable(loanProduct.getLoanProductSize());
-        loanProduct.setAvailableAmountToBeDisbursed(loanProduct.getLoanProductSize());
-        loanProduct.setAvailableAmountToBeOffered(loanProduct.getLoanProductSize());
+        initializeAvailableAmounts(loanProduct);
         if (ObjectUtils.isEmpty(loanProduct.getTotalOutstandingLoan())) {
             loanProduct.setTotalOutstandingLoan(BigDecimal.ZERO);
         }
+        log.info("About to save loan product to db on create... {}", loanProduct);
         LoanProduct savedLoanProduct = loanProductOutputPort.save(loanProduct);
         loanProduct.setId(savedLoanProduct.getId());
         log.info("Loan product to be saved in create loan product service method {}", loanProduct);
         investmentVehicleOutputPort.save(investmentVehicle);
         updateNumberOfLoanProductOnMeedlPortfolio();
         return loanProduct;
+    }
+
+    private static void initializeAvailableAmounts(LoanProduct loanProduct) {
+        loanProduct.setTotalAmountAvailable(loanProduct.getLoanProductSize());
+        loanProduct.setAvailableAmountToBeOffered(loanProduct.getLoanProductSize());
+        loanProduct.setAvailableAmountToBeDisbursed(loanProduct.getTotalAmountAvailable());
     }
 
 
@@ -197,22 +202,26 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     public LoanProduct updateLoanProduct(LoanProduct loanProduct) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanProduct, LoanProductMessage.LOAN_PRODUCT_REQUIRED.getMessage());
         MeedlValidator.validateUUID(loanProduct.getId(), LoanProductMessage.INVALID_LOAN_PRODUCT_ID.getMessage());
+        log.info("In update loan product details, finding loan product by id === {}", loanProduct.getId());
         LoanProduct foundLoanProduct = loanProductOutputPort.findById(loanProduct.getId());
         if (foundLoanProduct.getTotalNumberOfLoanee() > BigInteger.ZERO.intValue()) {
             log.error("Loan product {} cannot be updated as it has already been loaned out", foundLoanProduct.getName());
             throw new LoanException("Loan product " + foundLoanProduct.getName() + " cannot be updated as it has already been loaned out");
         }
 
-        boolean isNotEqual = foundLoanProduct.getLoanProductSize()
-                .compareTo(loanProduct.getLoanProductSize()) != 0;
-        log.info("is new loan product size greater than the previous ? {} , previous {} , new {}",
-                isNotEqual, foundLoanProduct.getLoanProductSize(), loanProduct.getLoanProductSize() );
-        if (isNotEqual){
-            validateAndUpdateInvestmentVehicleAmountForLoanProduct(foundLoanProduct, loanProduct);
-        }
 
         int offerCount = loanProductOutputPort.countLoanOfferFromLoanProduct(loanProduct.getId(), List.of(LoanDecision.OFFERED, LoanDecision.ACCEPTED));
         if (offerCount == 0) {
+            boolean isNotEqual = foundLoanProduct.getLoanProductSize()
+                    .compareTo(loanProduct.getLoanProductSize()) != 0;
+            log.info("is new loan product size greater than the previous ? {} , previous {} , new {}",
+                    isNotEqual, foundLoanProduct.getLoanProductSize(), loanProduct.getLoanProductSize() );
+            if (isNotEqual){
+
+                validateAndUpdateInvestmentVehicleAmountForLoanProduct(foundLoanProduct, loanProduct);
+                log.info("setting other loan product values that depends on the size...");
+                initializeAvailableAmounts(loanProduct);
+            }
             foundLoanProduct = loanProductMapper.updateLoanProduct(foundLoanProduct, loanProduct);
             foundLoanProduct.setUpdatedAt(LocalDateTime.now());
             log.info("Loan product updated {}", foundLoanProduct);
@@ -235,7 +244,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
                     loanProduct.getLoanProductSize(), investmentVehiclePreviousAmountAvailable);
 
             throw new MeedlException(
-                    String.format("The new loan product size (₦%s) is greater than the amount currently available (₦%s) in the investment vehicle, even after refunding the previously allocated amount.",
+                    String.format("The new loan product size (%s) is greater than the amount currently available (%s) in the investment vehicle, even after refunding the previously allocated amount.",
                             loanProduct.getLoanProductSize(), investmentVehiclePreviousAmountAvailable)
             );
         }
@@ -1030,9 +1039,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         MeedlValidator.validateUUID(loanOfferId,"Loan offer id cannot be empty ");
         MeedlValidator.validateObjectInstance(loanOfferStatus,"Loan offer status cannot be empty");
         LoanOffer loanOffer = loanOfferOutputPort.findById(loanOfferId);
-        if(loanOffer.getLoaneeResponse().equals(LoanDecision.DECLINED)){
-            throw new LoanException("Operation cannot be performed on this loan offer, cause it has been declined");
-        }
+        operationCannotBePerformOnDeclinedLoanOffer(loanOffer);
+        loanOfferAlreadyWithdraw(loanOffer);
         boolean loanHasStarted = loanOutputPort.checkIfLoanHasBeenDisbursedForLoanOffer(loanOffer.getId());
         if (loanHasStarted){
             throw new LoanException("Loan offer has already been disbursed, it can't be withdraw");
@@ -1046,6 +1054,22 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             loanProductOutputPort.save(loanProduct);
         }
         return loanOffer;
+    }
+
+    private static void loanOfferAlreadyWithdraw(LoanOffer loanOffer) throws LoanException {
+        if (loanOffer.getLoanOfferStatus() != null){
+            if (loanOffer.getLoanOfferStatus().equals(LoanOfferStatus.WITHDRAW)){
+                throw new LoanException("Loan offer has already been withdraw ");
+            }
+        }
+    }
+
+    private static void operationCannotBePerformOnDeclinedLoanOffer(LoanOffer loanOffer) throws LoanException {
+        if(loanOffer.getLoaneeResponse() != null) {
+            if (loanOffer.getLoaneeResponse().equals(LoanDecision.DECLINED)) {
+                throw new LoanException("Operation cannot be performed on this loan offer, cause it has been declined");
+            }
+        }
     }
 
     private Page<LoanDetail> filterResult(LoanOffer loanOffer) throws MeedlException {

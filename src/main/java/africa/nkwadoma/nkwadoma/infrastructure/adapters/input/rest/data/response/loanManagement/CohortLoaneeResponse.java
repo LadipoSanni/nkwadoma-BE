@@ -6,14 +6,21 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Setter
 @Getter
 public class CohortLoaneeResponse {
 
 
+    private String cohortId;
+    private String loaneeId;
     private String firstName;
     private String lastName;
+    private String email;
+    private BigDecimal initialDeposit;
+    private BigDecimal tuitionAmount;
+    List<LoanBreakdownResponse> loanBreakdownResponses;
     private BigDecimal amountReceived;
     private BigDecimal amountRepaid;
     private BigDecimal amountOutstanding;
