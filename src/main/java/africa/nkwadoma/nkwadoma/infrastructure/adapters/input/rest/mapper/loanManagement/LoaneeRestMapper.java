@@ -14,6 +14,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanBreakdownResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoaneeLoanAggregateResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanee.LoaneeLoanDetailResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanee.LoaneeProfileResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanee.LoaneeReferralResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanee.LoaneeResponse;
 import jakarta.validation.Valid;
@@ -158,4 +159,9 @@ public interface LoaneeRestMapper {
     @Mapping(target = "userIdentity.stateOfResidence", source = "stateOfResidence")
     @Mapping(target = "userIdentity.levelOfEduction", source = "levelOfEducation")
     Loanee mapUpdateLoaneeProfileToLoanee(@Valid UpdateLoaneeProfileRequest updateLoaneeProfileRequest);
+
+    @Mapping(target = "firstName"  , source = "userIdentity.firstName")
+    @Mapping(target = "lastName"  , source = "userIdentity.lastName")
+    @Mapping(target = "email"  , source = "userIdentity.email")
+    LoaneeProfileResponse toLoaneeProfileResponse(Loanee loanee);
 }

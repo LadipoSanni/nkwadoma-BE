@@ -337,7 +337,6 @@ public class LoaneeService implements LoaneeUseCase {
             }
             loanee = optionalLoanee.get();
         }
-
         return updateLoaneeCreditScore(loanee);
     }
 
@@ -356,24 +355,6 @@ public class LoaneeService implements LoaneeUseCase {
                 loanee = updateCreditScore(loanee);
             }
         }
-
-        log.info("Credit score for loanee with id {} has already been updated within the last month", loanee.getId());
-
-        Cohort cohort = cohortOutputPort.findCohortById(loanee.getCohortId());
-        loanee.setCohortName(cohort.getName());
-        loanee.setCohortStartDate(cohort.getStartDate());
-        Program program = programOutputPort.findProgramById(cohort.getProgramId());
-        loanee.setProgramName(program.getName());
-
-        LoanOffer loanOffer = loanOfferOutputPort.findLoanOfferByLoaneeId(loanee.getId());
-        if (loanOffer != null){
-            loanee.setTenor(loanOffer.getLoanProduct().getTenor());
-            loanee.setTermsAndConditions(loanOffer.getLoanProduct().getTermsAndCondition());
-            loanee.setInterestRate(loanOffer.getLoanProduct().getInterestRate());
-            loanee.setPaymentMoratoriumPeriod(loanOffer.getLoanProduct().getMoratorium());
-        }
-        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(cohort.getOrganizationId());
-        loanee.setInstitutionName(organizationIdentity.getName());
         return loanee;
     }
 
@@ -383,7 +364,6 @@ public class LoaneeService implements LoaneeUseCase {
         log.info("Encrypted Loanee BVN: {}", loanee.getUserIdentity().getBvn());
         String decryptedBVN = aesOutputPort.decryptAES(loanee.getUserIdentity().getBvn(), "Error processing identity verification");
         log.info("Decrypted Loanee BVN: {}", decryptedBVN);
-
         try {
             int creditScoreWithBvn = creditRegistryOutputPort.getCreditScoreWithBvn(decryptedBVN);
             loanee.setCreditScore(creditScoreWithBvn);

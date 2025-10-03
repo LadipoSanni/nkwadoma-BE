@@ -25,6 +25,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanBeneficiaryResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoaneeLoanAggregateResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanee.LoaneeLoanDetailResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanee.LoaneeProfileResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanee.LoaneeResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loanManagement.LoaneeRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.constants.ControllerConstant;
@@ -90,17 +91,17 @@ public class LoaneeController {
         return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
     }
 
-    @GetMapping("{loaneeId}")
+    @GetMapping("/profile")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')  or hasRole('PORTFOLIO_MANAGER')  or hasRole('LOANEE') or hasRole('ORGANIZATION_SUPER_ADMIN')" +
             "or hasRole('MEEDL_SUPER_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('MEEDL_ADMIN')")
-    public ResponseEntity<ApiResponse<?>> viewLoaneeDetails(@PathVariable String loaneeId,
+    public ResponseEntity<ApiResponse<?>> viewLoaneeDetails(@RequestParam(required = false) String loaneeId,
                                                             @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
         String userId = meedlUser.getClaimAsString("sub");
         Loanee loanee = loaneeUseCase.viewLoaneeDetails(loaneeId, userId);
-        LoaneeResponse loaneeResponse =
-                loaneeRestMapper.toLoaneeResponse(loanee);
+        LoaneeProfileResponse loaneeResponse =
+                loaneeRestMapper.toLoaneeProfileResponse(loanee);
         log.info("Loanee response: {}", loaneeResponse);
-        ApiResponse<LoaneeResponse> apiResponse = ApiResponse.<LoaneeResponse>builder()
+        ApiResponse<LoaneeProfileResponse> apiResponse = ApiResponse.<LoaneeProfileResponse>builder()
                 .data(loaneeResponse)
                 .message(LOANEE_VIEWED )
                 .statusCode(HttpStatus.OK.name())
