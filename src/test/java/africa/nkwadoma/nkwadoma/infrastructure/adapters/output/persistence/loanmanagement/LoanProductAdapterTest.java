@@ -32,9 +32,17 @@ class LoanProductAdapterTest {
 
     @BeforeAll
     void setUp() {
-
-        gemsLoanProduct = TestData.buildTestLoanProduct();
-        goldLoanProduct = TestData.buildTestLoanProduct();
+        gemsLoanProduct = TestData.buildTestLoanProduct("gems");
+        goldLoanProduct = TestData.buildTestLoanProduct("gold");
+        Page<LoanProduct> loanProducts = loanProductOutputPort.findAllLoanProduct(gemsLoanProduct);
+        loanProducts
+                .forEach(loanProduct -> {
+                    try {
+                        loanProductOutputPort.deleteById(loanProduct.getId());
+                    } catch (MeedlException e) {
+                        log.error("Error------> : ",e);
+                    }
+                });
     }
 
     @Test
@@ -227,11 +235,11 @@ class LoanProductAdapterTest {
         Page<LoanProduct> loanProducts  = Page.empty();
         try{
             loanProducts  =
-                    loanProductOutputPort.search("test",pageSize,pageNumber);
+                    loanProductOutputPort.search("gem",pageSize,pageNumber);
         }catch (MeedlException exception){
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-        assertEquals(2,loanProducts.getContent().size());
+        assertEquals(1,loanProducts.getContent().size());
     }
     @Test
     @Order(8)

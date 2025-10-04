@@ -409,9 +409,6 @@ class LoanAdapterTest {
 
     @AfterAll
     void cleanUp() throws MeedlException {
-        VendorEntity foundGemsVendorEntity = vendorEntityRepository.findByVendorName(loanProduct.getVendors().get(0).getVendorName());
-        loanProductVendorRepository.deleteByVendorEntityId((foundGemsVendorEntity.getId()));
-        vendorEntityRepository.deleteById(foundGemsVendorEntity.getId());
         loanOutputPort.deleteById(loanId);
 
         loanOfferOutputPort.deleteLoanOfferById(loanReferralId);

@@ -80,7 +80,6 @@ public class LoanService implements  ViewLoanReferralsUseCase,
     private final LoaneeLoanAggregateMapper loaneeLoanAggregateMapper;
     private final PortfolioOutputPort portfolioOutputPort;
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
-    private final FinancierOutputPort financierOutputPort;
 
     @Override
     public Loan startLoan(Loan loan) throws MeedlException {

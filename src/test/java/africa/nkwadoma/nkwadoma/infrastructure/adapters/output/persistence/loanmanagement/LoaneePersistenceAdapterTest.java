@@ -53,7 +53,7 @@ class LoaneePersistenceAdapterTest {
 
 
     @BeforeAll
-    void setUpUserIdentity(){
+    void setUpUserIdentity() throws MeedlException {
         userIdentity = UserIdentity.builder().id(id).email("lekan@gmail.com").firstName("qudus").lastName("lekan")
                 .createdBy(id).role(IdentityRole.LOANEE).build();
         try {
@@ -67,6 +67,14 @@ class LoaneePersistenceAdapterTest {
         } catch (MeedlException e) {
             log.error(e.getMessage());
         }
+        Page<Loanee> loanees = loaneeOutputPort.findAllLoanee(100, 0);
+        loanees.forEach(loanee -> {
+            try {
+                loaneeOutputPort.deleteLoanee(loanee.getId());
+            } catch (MeedlException e) {
+                log.error("Error -----> ", e);
+            }
+        });
     }
 
 
