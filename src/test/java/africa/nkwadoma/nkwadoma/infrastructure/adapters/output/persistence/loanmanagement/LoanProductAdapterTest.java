@@ -34,15 +34,6 @@ class LoanProductAdapterTest {
     void setUp() {
         gemsLoanProduct = TestData.buildTestLoanProduct("gems");
         goldLoanProduct = TestData.buildTestLoanProduct("gold");
-        Page<LoanProduct> loanProducts = loanProductOutputPort.findAllLoanProduct(gemsLoanProduct);
-        loanProducts
-                .forEach(loanProduct -> {
-                    try {
-                        loanProductOutputPort.deleteById(loanProduct.getId());
-                    } catch (MeedlException e) {
-                        log.error("Error------> : ",e);
-                    }
-                });
     }
 
     @Test

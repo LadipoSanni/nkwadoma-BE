@@ -72,7 +72,7 @@ class LoaneePersistenceAdapterTest {
             log.error(e.getMessage());
         }
         Page<Loanee> loanees = loaneeOutputPort.findAllLoanee(100, 0);
-        cohortLoaneeOutputPort.deleteAll();
+
         loanees.forEach(loanee -> {
             try {
                 loaneeOutputPort.deleteLoanee(loanee.getId());
