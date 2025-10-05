@@ -45,6 +45,7 @@ class OrganizationEmployeeIdentityAdapterTest {
 
     @BeforeAll
     void init() {
+        organizationEmployeeIdentityOutputPort.deleteAllEmployee();
         joel = TestData.createTestUserIdentity("joel54@johnson.com");
         joel.setRole(IdentityRole.ORGANIZATION_ADMIN);
         List<OrganizationEmployeeIdentity> employees = List.of(OrganizationEmployeeIdentity

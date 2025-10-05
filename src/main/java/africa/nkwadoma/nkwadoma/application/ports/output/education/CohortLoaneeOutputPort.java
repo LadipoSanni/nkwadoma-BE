@@ -42,4 +42,7 @@ public interface CohortLoaneeOutputPort {
     CohortLoanee findCohortLoaneeByLoanId(String id) throws MeedlException;
 
     CohortLoanee findByLoaneeAndCohortId(String loaneeId, String cohortId) throws MeedlException;
+
+    void deleteAll();
+
 }
