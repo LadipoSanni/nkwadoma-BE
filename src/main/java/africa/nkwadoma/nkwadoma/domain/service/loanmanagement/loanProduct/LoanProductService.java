@@ -213,18 +213,20 @@ public class LoanProductService implements CreateLoanProductUseCase, ViewLoanPro
                 .compareTo(loanProduct.getLoanProductSize()) != 0;
         log.info("is new loan product size greater than the previous ? {} , previous {} , new {}",
                 isNotEqual, foundLoanProduct.getLoanProductSize(), loanProduct.getLoanProductSize() );
+        InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(foundLoanProduct.getInvestmentVehicleId());
+        verifyFinanciersExistInVehicle(loanProduct, investmentVehicle);
         if (isNotEqual){
-
-            validateAndUpdateInvestmentVehicleAmountForLoanProduct(foundLoanProduct, loanProduct);
+            validateAndUpdateInvestmentVehicleAmountForLoanProduct(foundLoanProduct, loanProduct, investmentVehicle);
             log.info("setting other loan product values that depends on the size...");
             initializeAvailableAmounts(loanProduct);
         }
-//            loanProductOutputPort
         foundLoanProduct = loanProductMapper.updateLoanProduct(foundLoanProduct, loanProduct);
         foundLoanProduct.setUpdatedAt(LocalDateTime.now());
+        log.info("Loan product sponsors id to be updated -----> {}", loanProduct.getSponsorIds());
+
         foundLoanProduct.setSponsors(loanProduct.getSponsors());
 
-        log.info("Loan product updated {}", foundLoanProduct);
+        log.info("About to save the updated loan product ...");
         updateVendorDetails(loanProduct);
         return loanProductOutputPort.save(foundLoanProduct);
     }
@@ -264,9 +266,8 @@ public class LoanProductService implements CreateLoanProductUseCase, ViewLoanPro
 
     }
 
-    private void validateAndUpdateInvestmentVehicleAmountForLoanProduct(LoanProduct foundLoanProduct, LoanProduct loanProduct) throws MeedlException {
+    private void validateAndUpdateInvestmentVehicleAmountForLoanProduct(LoanProduct foundLoanProduct, LoanProduct loanProduct, InvestmentVehicle investmentVehicle) throws MeedlException {
         log.info("Updating loan product size with respect to investment vehicle");
-        InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(foundLoanProduct.getInvestmentVehicleId());
         BigDecimal investmentVehiclePreviousAmountAvailable = investmentVehicle.getTotalAvailableAmount()
                 .add(foundLoanProduct.getLoanProductSize());
         if (investmentVehiclePreviousAmountAvailable
