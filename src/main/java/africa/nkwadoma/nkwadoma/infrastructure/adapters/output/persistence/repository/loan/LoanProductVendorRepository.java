@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan;
 
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoanProductEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoanProductVendor;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoanProductVendorEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.VendorEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-public interface LoanProductVendorRepository extends JpaRepository<LoanProductVendor,String> {
+public interface LoanProductVendorRepository extends JpaRepository<LoanProductVendorEntity,String> {
     void deleteAllByVendorEntity(VendorEntity vendorEntity);
 
     void deleteAllByLoanProductEntity(LoanProductEntity loanProductEntity);
@@ -17,7 +17,7 @@ public interface LoanProductVendorRepository extends JpaRepository<LoanProductVe
     @Transactional
     void deleteByVendorEntityId(String id);
 
-    List<LoanProductVendor> findAllByLoanProductEntity_Id(String loanProductEntityId);
+    List<LoanProductVendorEntity> findAllByLoanProductEntity_Id(String loanProductEntityId);
 
-    Optional<LoanProductVendor> findByLoanProductEntityAndVendorEntity(LoanProductEntity savedLoanProductEntity, VendorEntity vendorEntity);
+    Optional<LoanProductVendorEntity> findByLoanProductEntityAndVendorEntity(LoanProductEntity savedLoanProductEntity, VendorEntity vendorEntity);
 }

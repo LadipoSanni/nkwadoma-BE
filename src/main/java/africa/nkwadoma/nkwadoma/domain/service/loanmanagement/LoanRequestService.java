@@ -10,6 +10,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationId
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanProduct.LoanProductOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanProduct.LoanProductVendorOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
@@ -26,6 +27,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement.loanProduct.LoanProductVendorAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanManagement.*;
 import lombok.*;
 import lombok.extern.slf4j.*;
@@ -33,6 +35,7 @@ import org.apache.commons.lang3.*;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.*;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages.*;
@@ -58,6 +61,7 @@ public class LoanRequestService implements LoanRequestUseCase {
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
     private final LoanReferralOutputPort loanReferralOutputPort;
     private final LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
+    private final LoanProductVendorOutputPort loanProductVendorOutputPort;
 
     @Override
     public Page<LoanRequest> viewAllLoanRequests(LoanRequest loanRequest, String userId) throws MeedlException {
@@ -288,11 +292,24 @@ public class LoanRequestService implements LoanRequestUseCase {
         String loaneeId = foundLoanRequest.getLoaneeId();
 //        foundLoanRequest.setLoaneeId(foundLoanRequest.getLoaneeId());
         foundLoanRequest = loanRequestMapper.updateLoanRequest(loanRequest, foundLoanRequest);
+
+        //additionalVendorFee(foundLoanRequest, loanProduct);
+
         loanRequestOutputPort.save(foundLoanRequest);
         setLoaneeLoanDetailInterestRate(foundLoanRequest, loanProduct);
         foundLoanRequest.setLoanProduct(loanProduct);
         foundLoanRequest.setLoaneeId(loaneeId);
         return foundLoanRequest;
+    }
+
+    private void additionalVendorFee(LoanRequest foundLoanRequest, LoanProduct loanProduct) throws MeedlException {
+        BigDecimal vendorsFee  =
+                loanProductVendorOutputPort.getVendorsByLoanProductId(loanProduct.getId()).stream()
+                        .map(Vendor::getCostOfService)
+                        .reduce(BigDecimal.ZERO,BigDecimal::add);
+        foundLoanRequest.setLoanAmountApproved(foundLoanRequest.getLoanAmountApproved().add(vendorsFee));
+
+        log.info("vendor fees {}",vendorsFee);
     }
 
     private void setLoaneeLoanDetailInterestRate(LoanRequest foundLoanRequest, LoanProduct loanProduct) throws MeedlException {
