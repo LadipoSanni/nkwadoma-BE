@@ -147,7 +147,11 @@ public class CohortLoanDetailPersistenceAdapterTest {
         log.info("program id = {}", program.getId());
         programOutputPort.deleteProgram(program.getId());
         log.info("org id = {}", organizationIdentity.getId());
-        organizationIdentityOutputPort.delete(organizationIdentity.getId());
+        try {
+            organizationIdentityOutputPort.delete(organizationIdentity.getId());
+        }catch (MeedlException exception){
+            log.error("Unable to delete organization ",exception);
+        }
         log.info("org empoyee  = {}", employeeIdentity.getId());
         organizationEmployeeIdentityOutputPort.delete(employeeIdentity.getId());
         log.info("meedl id = {}", meedleUser.getId());

@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanManagement.loanProduct;
 
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
@@ -17,15 +17,13 @@ public interface LoanProductMapper {
     @Mapping(source = "totalAmountDisbursed", target = "totalAmountDisbursed", defaultValue = "0.0")
     @Mapping(source = "minRepaymentAmount", target = "minRepaymentAmount", defaultValue = "0.0")
     @Mapping(source = "obligorLoanLimit", target = "obligorLoanLimit", defaultValue = "0.0")
-    LoanProductEntity mapLoanProductToEntity(LoanProduct loanProduct);
+    LoanProductEntity map(LoanProduct loanProduct);
 
-    LoanProduct mapEntityToLoanProduct(LoanProductEntity entity);
+    LoanProduct map(LoanProductEntity entity);
 
-    LoanProduct mapLoanProductToLoanProduct(LoanProduct loanProduct);
 
     VendorEntity mapVendorToVendorEntity(Vendor vendor);
 
-    Vendor mapVendorEntityToVendor(VendorEntity vendorEntity);
 
     LoanProduct updateLoanProduct(@MappingTarget LoanProduct loanProduct, LoanProduct product);
 

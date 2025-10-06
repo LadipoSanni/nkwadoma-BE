@@ -9,7 +9,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.aes.AesOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanProduct.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanReferralOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanAggregateOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoaneeLoanDetailsOutputPort;

@@ -32,7 +32,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.EMPT
 @Slf4j
 @Component
 public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployeeIdentityOutputPort {
-    private final EmployeeAdminEntityRepository employeeAdminEntityRepository;
+    private final EmployeeAdminEntityRepository organizationEmployeeRepository;
     private final IdentityManagerOutputPort identityManagerOutputPort;
     private final OrganizationEmployeeIdentityMapper organizationEmployeeIdentityMapper;
 
@@ -41,21 +41,21 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
         log.info("Organization employee identity before map {}", organizationEmployeeIdentity);
         OrganizationEmployeeEntity organizationEmployeeEntity = organizationEmployeeIdentityMapper.toOrganizationEmployeeEntity(organizationEmployeeIdentity);
         log.info("Organization employee entity before saving in out put port {}", organizationEmployeeEntity);
-        organizationEmployeeEntity = employeeAdminEntityRepository.save(organizationEmployeeEntity);
+        organizationEmployeeEntity = organizationEmployeeRepository.save(organizationEmployeeEntity);
         return organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(organizationEmployeeEntity);
     }
 
     @Override
     public OrganizationEmployeeIdentity findById(String id)throws MeedlException {
         MeedlValidator.validateUUID(id, "Please provide a valid employee identification");
-        OrganizationEmployeeEntityProjection organizationEmployeeEntityProjection = employeeAdminEntityRepository.findEmployeeById(id).orElseThrow(()->new IdentityException(USER_NOT_FOUND.getMessage()));
+        OrganizationEmployeeEntityProjection organizationEmployeeEntityProjection = organizationEmployeeRepository.findEmployeeById(id).orElseThrow(()->new IdentityException(USER_NOT_FOUND.getMessage()));
         return organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(organizationEmployeeEntityProjection);
     }
 
     @Override
     public OrganizationEmployeeIdentity  findByEmployeeId(String employeeId) throws IdentityException {
       if(!StringUtils.isEmpty(employeeId)){
-          OrganizationEmployeeEntity organizationEmployee = employeeAdminEntityRepository.findByMeedlUserId(employeeId);
+          OrganizationEmployeeEntity organizationEmployee = organizationEmployeeRepository.findByMeedlUserId(employeeId);
           if (organizationEmployee == null){
               log.error("{} : ---- while search for employee by employee id : {}", ORGANIZATION_EMPLOYEE_NOT_FOUND.getMessage(), employeeId);
               throw new IdentityException(ORGANIZATION_EMPLOYEE_NOT_FOUND.getMessage());
@@ -74,7 +74,7 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
         MeedlValidator.validatePageNumber(pageNumber);
         MeedlValidator.validatePageSize(pageSize);
         Page<OrganizationEmployeeProjection> organizationEmployees =
-                employeeAdminEntityRepository.findAllByOrganization(
+                organizationEmployeeRepository.findAllByOrganization(
                         organizationId, PageRequest.of(pageNumber, pageSize));
         if (organizationEmployees.isEmpty()) {
             return Page.empty();
@@ -88,7 +88,7 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
     @Override
     public OrganizationEmployeeIdentity findByCreatedBy(String createdBy) throws MeedlException {
         MeedlValidator.validateUUID(createdBy, MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
-        OrganizationEmployeeEntity employeeEntity = employeeAdminEntityRepository.findByMeedlUserId(createdBy);
+        OrganizationEmployeeEntity employeeEntity = organizationEmployeeRepository.findByMeedlUserId(createdBy);
         if(ObjectUtils.isEmpty(employeeEntity)){
             log.error("creator not found : ---- while search for organization by createdBy : {}", createdBy);
             UserIdentity foundUser = identityManagerOutputPort.getUserById(createdBy);
@@ -106,9 +106,9 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
     @Override
     public void delete(String id) throws MeedlException {
         MeedlValidator.validateUUID(id, "Please provide a valid organization employee identification");
-        OrganizationEmployeeEntity employeeEntity = employeeAdminEntityRepository.findById(id).
+        OrganizationEmployeeEntity employeeEntity = organizationEmployeeRepository.findById(id).
                 orElseThrow(()-> new IdentityException(USER_NOT_FOUND.getMessage()));
-        employeeAdminEntityRepository.delete(employeeEntity);
+        organizationEmployeeRepository.delete(employeeEntity);
     }
 
     @Transactional
@@ -117,20 +117,20 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
         if (StringUtils.isEmpty(id)){
             throw new IdentityException(EMPTY_INPUT_FIELD_ERROR.getMessage());
         }
-        employeeAdminEntityRepository.deleteByMeedlUserId(id);
+        organizationEmployeeRepository.deleteByMeedlUserId(id);
     }
 
     @Override
     public List<OrganizationEmployeeIdentity> findAllByOrganization(String organizationId) throws MeedlException {
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-        List<OrganizationEmployeeEntity> employeeEntities = employeeAdminEntityRepository.findAllByOrganization(organizationId);
+        List<OrganizationEmployeeEntity> employeeEntities = organizationEmployeeRepository.findAllByOrganization(organizationId);
         return employeeEntities.stream()
                 .map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity)
                 .toList();
     }
     @Override
     public List<OrganizationEmployeeIdentity> findAllOrganizationEmployees(String organizationId) {
-        List<OrganizationEmployeeEntity> organizationEmployeeEntities = employeeAdminEntityRepository.findByOrganization(organizationId);
+        List<OrganizationEmployeeEntity> organizationEmployeeEntities = organizationEmployeeRepository.findByOrganization(organizationId);
         return organizationEmployeeEntities.stream().map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity).toList();
     }
 
@@ -148,13 +148,13 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
         if (MeedlValidator.isNotEmptyString(organizationEmployeeIdentity.getName())){
             log.info("output port search for employee with name {}", organizationEmployeeIdentity.getName());
             organizationEmployeeEntities =
-                    employeeAdminEntityRepository.findAdminsByNameFilters(organizationId,
+                    organizationEmployeeRepository.findAdminsByNameFilters(organizationId,
                             organizationEmployeeIdentity.getName(),
                             organizationEmployeeIdentity.getIdentityRoles(),
                             organizationEmployeeIdentity.getActivationStatuses(), null, pageRequest);
         }else {
             organizationEmployeeEntities =
-                    employeeAdminEntityRepository
+                    organizationEmployeeRepository
                             .findAllByOrgIdRoleInAndOptionalFilters(organizationId,
                                     organizationEmployeeIdentity.getIdentityRoles(),
                                     organizationEmployeeIdentity.getActivationStatuses(), null, pageRequest);
@@ -169,14 +169,14 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
         MeedlValidator.validatePageSize(pageSize);
         Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
         Page<OrganizationEmployeeEntity> organizationEmployeeEntities =
-                employeeAdminEntityRepository.findEmployeeInOrganizationbByIdAndName(organizationId,name,pageRequest);
+                organizationEmployeeRepository.findEmployeeInOrganizationbByIdAndName(organizationId,name,pageRequest);
         return organizationEmployeeEntities.map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity);
     }
 
     @Override
     public Optional<OrganizationEmployeeIdentity> findByMeedlUserId(String meedlUserId) throws MeedlException {
         MeedlValidator.validateUUID(meedlUserId, MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
-        OrganizationEmployeeEntity employeeEntity = employeeAdminEntityRepository.findByMeedlUserId(meedlUserId);
+        OrganizationEmployeeEntity employeeEntity = organizationEmployeeRepository.findByMeedlUserId(meedlUserId);
         if(!ObjectUtils.isEmpty(employeeEntity)){
             log.info("The employee found using the meedl user id:  {}", employeeEntity.getId());
             return Optional.of(organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(employeeEntity));
@@ -190,7 +190,7 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
         MeedlValidator.validateObjectInstance(identityRole, IdentityMessages.INVALID_ROLE.getMessage());
 
         List<OrganizationEmployeeEntity> organizationEmployeeEntities =
-                employeeAdminEntityRepository.findOrganizationEmployeeEntityByOrganizationAndMeedlUserRole(organizationId,identityRole);
+                organizationEmployeeRepository.findOrganizationEmployeeEntityByOrganizationAndMeedlUserRole(organizationId,identityRole);
         return organizationEmployeeEntities.stream().map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity).toList();
     }
 
@@ -200,10 +200,9 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
         MeedlValidator.validateObjectInstance(identityRole, IdentityMessages.INVALID_ROLE.getMessage());
 
         OrganizationEmployeeEntity organizationEmployeeEntity =
-                employeeAdminEntityRepository.findByMeedlUserRoleAndOrganization(identityRole,organizationId)
+                organizationEmployeeRepository.findByMeedlUserRoleAndOrganization(identityRole,organizationId)
                         .orElseThrow(()->new IdentityException(USER_NOT_FOUND.getMessage()));
         return organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(organizationEmployeeEntity);
     }
-
 
 }

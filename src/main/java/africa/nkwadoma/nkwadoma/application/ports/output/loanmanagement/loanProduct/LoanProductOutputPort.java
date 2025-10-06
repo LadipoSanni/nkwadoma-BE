@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement;
+package africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanProduct;
 
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanDecision;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
@@ -23,8 +23,6 @@ public interface LoanProductOutputPort {
     Page<LoanProduct> search(String loanProductName, int pageSize, int pageNumber) throws MeedlException;
 
     LoanProduct findByCohortLoaneeId(String id) throws MeedlException;
-
-    List<Vendor> getVendorsByLoanProductId(String loanProductId) throws MeedlException;
 
     LoanProduct findLoanProductByLoanOfferId(String loanOfferId) throws MeedlException;
 

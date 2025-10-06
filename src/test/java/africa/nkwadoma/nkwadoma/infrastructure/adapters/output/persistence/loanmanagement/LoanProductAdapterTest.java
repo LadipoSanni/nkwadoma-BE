@@ -1,11 +1,8 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loanmanagement;
 
-import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanProduct.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.VendorEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanProductVendorRepository;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.VendorEntityRepository;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -15,7 +12,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -29,10 +25,6 @@ import static org.junit.jupiter.api.Assertions.*;
 class LoanProductAdapterTest {
     @Autowired
     private LoanProductOutputPort loanProductOutputPort;
-    @Autowired
-    private LoanProductVendorRepository loanProductVendorRepository;
-    @Autowired
-    private VendorEntityRepository vendorEntityRepository;
     private LoanProduct gemsLoanProduct;
     private LoanProduct goldLoanProduct;
     private int pageSize = 10;
@@ -40,9 +32,8 @@ class LoanProductAdapterTest {
 
     @BeforeAll
     void setUp() {
-
-        gemsLoanProduct = TestData.buildTestLoanProduct();
-        goldLoanProduct = TestData.buildTestLoanProduct();
+        gemsLoanProduct = TestData.buildTestLoanProduct("gems");
+        goldLoanProduct = TestData.buildTestLoanProduct("gold");
     }
 
     @Test
@@ -59,9 +50,6 @@ class LoanProductAdapterTest {
             assertNotNull(foundLoanProduct);
             assertEquals(foundLoanProduct.getName(),gemsLoanProduct.getName());
             assertEquals(foundLoanProduct.getTermsAndCondition(), gemsLoanProduct.getTermsAndCondition());
-            assertNotNull(createdLoanProduct.getVendors());
-            assertEquals(createdLoanProduct.getVendors().get(0).getVendorName(), gemsLoanProduct.getVendors().get(0).getVendorName());
-            assertNotNull(createdLoanProduct.getVendors().get(0).getId());
         } catch (MeedlException exception) {
             log.error("{} {}", exception.getClass().getName(), exception.getMessage());
         }
@@ -238,11 +226,11 @@ class LoanProductAdapterTest {
         Page<LoanProduct> loanProducts  = Page.empty();
         try{
             loanProducts  =
-                    loanProductOutputPort.search("test",pageSize,pageNumber);
+                    loanProductOutputPort.search("gem",pageSize,pageNumber);
         }catch (MeedlException exception){
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-        assertEquals(2,loanProducts.getContent().size());
+        assertEquals(1,loanProducts.getContent().size());
     }
     @Test
     @Order(8)
@@ -263,18 +251,8 @@ class LoanProductAdapterTest {
     @AfterAll
     void cleanUp() {
         try {
-            VendorEntity foundGemsVendorEntity = vendorEntityRepository.findByVendorName(gemsLoanProduct.getVendors().get(0).getVendorName());
-            VendorEntity foundGoldVendorEntity = vendorEntityRepository.findByVendorName(goldLoanProduct.getVendors().get(0).getVendorName());
-            log.info("Found GemsVendorEntity: {}", foundGemsVendorEntity.getId());
-            log.info("Found GoldVendorEntity: {}", foundGoldVendorEntity.getId());
-            loanProductVendorRepository.deleteByVendorEntityId((foundGemsVendorEntity.getId()));
-            loanProductVendorRepository.deleteByVendorEntityId(foundGoldVendorEntity.getId());
-            vendorEntityRepository.deleteById(foundGemsVendorEntity.getId());
-            vendorEntityRepository.deleteById(foundGoldVendorEntity.getId());
-//            LoanProduct foundGemsLoanProduct = loanProductOutputPort.findByName(gemsLoanProduct.getName());
             log.info("gold loan product name == {}",goldLoanProduct.getName());
             LoanProduct foundGoldLoanProduct = loanProductOutputPort.findByName(goldLoanProduct.getName());
-//            loanProductOutputPort.deleteById(foundGemsLoanProduct.getId());
             log.info("Found Gold Loan Product: {}", foundGoldLoanProduct.getId());
             loanProductOutputPort.deleteById(foundGoldLoanProduct.getId());
         } catch (MeedlException e) {

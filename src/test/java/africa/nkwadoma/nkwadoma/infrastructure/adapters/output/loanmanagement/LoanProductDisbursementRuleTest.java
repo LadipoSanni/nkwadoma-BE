@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductDisbursementRuleOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanProductOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanProduct.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.DisbursementRuleOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.DisbursementRule;

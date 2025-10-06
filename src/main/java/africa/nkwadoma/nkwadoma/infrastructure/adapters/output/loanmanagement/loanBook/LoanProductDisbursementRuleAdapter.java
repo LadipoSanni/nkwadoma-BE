@@ -6,7 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanProductDisbursem
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProductDisbursementRule;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanProductDisbursementRuleMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanManagement.loanProduct.LoanProductDisbursementRuleMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoanProductDisbursementRuleEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanProductDisbursementRuleRuleRepository;
 import lombok.RequiredArgsConstructor;

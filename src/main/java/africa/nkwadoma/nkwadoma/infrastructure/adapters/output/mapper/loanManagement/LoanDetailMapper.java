@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanManagement;
 
 
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanDetail;
