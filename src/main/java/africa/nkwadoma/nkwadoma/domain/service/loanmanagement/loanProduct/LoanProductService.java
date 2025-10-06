@@ -222,6 +222,7 @@ public class LoanProductService implements CreateLoanProductUseCase, ViewLoanPro
 //            loanProductOutputPort
         foundLoanProduct = loanProductMapper.updateLoanProduct(foundLoanProduct, loanProduct);
         foundLoanProduct.setUpdatedAt(LocalDateTime.now());
+        foundLoanProduct.setSponsors(loanProduct.getSponsors());
 
         log.info("Loan product updated {}", foundLoanProduct);
         updateVendorDetails(loanProduct);
