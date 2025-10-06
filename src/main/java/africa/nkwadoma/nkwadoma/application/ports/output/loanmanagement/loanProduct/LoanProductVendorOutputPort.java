@@ -2,8 +2,9 @@ package africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanPro
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProductVendor;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoanProductVendor;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoanProductVendorEntity;
 
 import java.util.List;
 
@@ -15,4 +16,5 @@ public interface LoanProductVendorOutputPort {
 //    LoanProductVendor findByLoanProductVendorId(String loanProductVendorId) throws MeedlException;
 
     List<Vendor> getVendorsByLoanProductId(String loanProductId) throws MeedlException;
+
 }

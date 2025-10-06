@@ -4,9 +4,9 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanProd
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanProduct.VendorOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProductVendor;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement.loanProduct.LoanProductVendorAdapter;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoanProductVendor;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanProductVendorRepository;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import org.junit.jupiter.api.*;
@@ -60,11 +60,11 @@ class LoanProductVendorAdapterTest {
     @Test
     @Order(1)
     void saveVendorsToLoanProduct() throws MeedlException {
-        List<LoanProductVendor> savedLoanProductVendor = loanProductVendorAdapter.save(List.of(vendorJuno), loanProduct);
-        junoLoanProductVendorId = savedLoanProductVendor.get(0).getId();
-        assertNotNull(savedLoanProductVendor);
-        assertEquals(1, savedLoanProductVendor.size());
-        assertTrue(savedLoanProductVendor.stream().allMatch(v -> v.getLoanProductEntity().getId().equals(loanProduct.getId())));
+        List<LoanProductVendor> savedLoanProductVendorEntity = loanProductVendorAdapter.save(List.of(vendorJuno), loanProduct);
+        junoLoanProductVendorId = savedLoanProductVendorEntity.get(0).getId();
+        assertNotNull(savedLoanProductVendorEntity);
+        assertEquals(1, savedLoanProductVendorEntity.size());
+        assertTrue(savedLoanProductVendorEntity.stream().allMatch(v -> v.getLoanProduct().getId().equals(loanProduct.getId())));
     }
 
     @Test

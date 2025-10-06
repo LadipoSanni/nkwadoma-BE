@@ -3,7 +3,6 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.enti
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
@@ -13,7 +12,7 @@ import org.hibernate.annotations.UuidGenerator;
 @Builder
 @AllArgsConstructor
 @RequiredArgsConstructor
-public class LoanProductVendor {
+public class LoanProductVendorEntity {
     @Id
     @UuidGenerator
     private String id;
