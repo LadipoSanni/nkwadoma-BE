@@ -37,6 +37,7 @@ public class LoanProductAdapter implements LoanProductOutputPort {
     public LoanProduct save(LoanProduct loanProduct) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanProduct, LoanMessages.LOAN_CANNOT_BE_EMPTY.getMessage());
         loanProduct.validateLoanProductDetails();
+        log.info("Loan product sponsors before saving {}", loanProduct.getSponsors());
         LoanProductEntity loanProductEntity = loanProductMapper.map(loanProduct);
         loanProductEntity.setCreatedAt(LocalDateTime.now());
         loanProductEntity.setTotalNumberOfLoanProduct(loanProductEntity.getTotalNumberOfLoanProduct() +BigInteger.ONE.intValue());

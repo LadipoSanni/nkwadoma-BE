@@ -12,6 +12,6 @@ public interface LoanProductVendorMapper {
 
     @Mapping(source = "vendorEntity", target = "vendor")
     @Mapping(source = "loanProductEntity", target = "loanProduct")
-    LoanProductVendor mapLoanProductVendorEntityToLoanProductVendor(LoanProductVendorEntity loanProductVendor);
+    LoanProductVendor map(LoanProductVendorEntity loanProductVendor);
 
 }

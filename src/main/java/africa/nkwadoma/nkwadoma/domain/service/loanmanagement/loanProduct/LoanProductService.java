@@ -20,6 +20,7 @@ import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProductVendor;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -212,28 +213,49 @@ public class LoanProductService implements CreateLoanProductUseCase, ViewLoanPro
                 .compareTo(loanProduct.getLoanProductSize()) != 0;
         log.info("is new loan product size greater than the previous ? {} , previous {} , new {}",
                 isNotEqual, foundLoanProduct.getLoanProductSize(), loanProduct.getLoanProductSize() );
+        InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(foundLoanProduct.getInvestmentVehicleId());
+        verifyFinanciersExistInVehicle(loanProduct, investmentVehicle);
         if (isNotEqual){
-
-            validateAndUpdateInvestmentVehicleAmountForLoanProduct(foundLoanProduct, loanProduct);
+            validateAndUpdateInvestmentVehicleAmountForLoanProduct(foundLoanProduct, loanProduct, investmentVehicle);
             log.info("setting other loan product values that depends on the size...");
             initializeAvailableAmounts(loanProduct);
         }
-//            loanProductOutputPort
         foundLoanProduct = loanProductMapper.updateLoanProduct(foundLoanProduct, loanProduct);
         foundLoanProduct.setUpdatedAt(LocalDateTime.now());
+        log.info("Loan product sponsors id to be updated -----> {}", loanProduct.getSponsorIds());
 
-        log.info("Loan product updated {}", foundLoanProduct);
+        foundLoanProduct.setSponsors(loanProduct.getSponsors());
+
+        log.info("About to save the updated loan product ...");
         updateVendorDetails(loanProduct);
         return loanProductOutputPort.save(foundLoanProduct);
     }
 
     private void updateVendorDetails(LoanProduct loanProduct) throws MeedlException {
+        log.info("Finding all loan product vendors to update by loan product id {}", loanProduct.getId());
         List<Vendor> vendors = loanProductVendorOutputPort.getVendorsByLoanProductId(loanProduct.getId());
+        List<LoanProductVendor> loanProductVendors = loanProductVendorOutputPort.findAllByLoanProductId(loanProduct.getId());
+
+        List<String> loanProductVendorIds = getLoanProductVendorIds(loanProductVendors);
         List<String> vendorIds = getVendorIds(vendors);
+
+        log.info("About to delete existing loan product vendors in update flow");
+        loanProductVendorOutputPort.deleteMultipleById(loanProductVendorIds);
         vendorOutputPort.deleteMultipleById(vendorIds);
+
+        log.info("Saving vendor and loan product vendor details in update loan product");
         vendors = vendorOutputPort.saveVendors(vendors);
         loanProductVendorOutputPort.save(vendors,loanProduct);
     }
+
+    private List<String> getLoanProductVendorIds(List<LoanProductVendor> loanProductVendors) {
+        return loanProductVendors.stream()
+                .filter(Objects::nonNull)
+                .map(LoanProductVendor::getId)
+                .filter(MeedlValidator::isNotEmptyString)
+                .toList();
+    }
+
 
     private static List<String> getVendorIds(List<Vendor> vendors) {
         return vendors.stream()
@@ -244,9 +266,8 @@ public class LoanProductService implements CreateLoanProductUseCase, ViewLoanPro
 
     }
 
-    private void validateAndUpdateInvestmentVehicleAmountForLoanProduct(LoanProduct foundLoanProduct, LoanProduct loanProduct) throws MeedlException {
+    private void validateAndUpdateInvestmentVehicleAmountForLoanProduct(LoanProduct foundLoanProduct, LoanProduct loanProduct, InvestmentVehicle investmentVehicle) throws MeedlException {
         log.info("Updating loan product size with respect to investment vehicle");
-        InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(foundLoanProduct.getInvestmentVehicleId());
         BigDecimal investmentVehiclePreviousAmountAvailable = investmentVehicle.getTotalAvailableAmount()
                 .add(foundLoanProduct.getLoanProductSize());
         if (investmentVehiclePreviousAmountAvailable

@@ -17,4 +17,7 @@ public interface LoanProductVendorOutputPort {
 
     List<Vendor> getVendorsByLoanProductId(String loanProductId) throws MeedlException;
 
+    List<LoanProductVendor> findAllByLoanProductId(String loanProductId) throws MeedlException;
+
+    void deleteMultipleById(List<String> loanProductVendorIds) throws MeedlException;
 }
