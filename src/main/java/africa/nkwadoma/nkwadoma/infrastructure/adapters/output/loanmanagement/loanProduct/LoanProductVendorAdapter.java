@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanManagement.loanProduct.LoanProductMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanManagement.loanProduct.LoanProductVendorMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanManagement.loanProduct.VendorMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoanProductEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoanProductVendor;
@@ -26,6 +27,7 @@ public class LoanProductVendorAdapter implements LoanProductVendorOutputPort {
     private final VendorMapper vendorMapper;
     private final LoanProductVendorRepository loanProductVendorRepository;
     private final LoanProductMapper loanProductMapper;
+    private final LoanProductVendorMapper loanProductVendorMapper;
 
     @Override
     public List<LoanProductVendor> save(List<Vendor> vendors, LoanProduct loanProduct) throws MeedlException {
@@ -78,6 +80,24 @@ public class LoanProductVendorAdapter implements LoanProductVendorOutputPort {
                 .map(LoanProductVendor::getVendorEntity)
                 .map(vendorMapper::map)
                 .toList();
+    }
+
+    @Override
+    public List<LoanProductVendor> findAllByLoanProductId(String loanProductId) throws MeedlException {
+        MeedlValidator.validateUUID(loanProductId, LoanProductMessage.INVALID_LOAN_PRODUCT_ID.getMessage());
+
+        List<LoanProductVendor> loanProductVendorEntities =
+                loanProductVendorRepository.findAllByLoanProductEntity_Id(loanProductId);
+
+        return loanProductVendorEntities.stream()
+                .map(loanProductVendorMapper::map)
+                .toList();
+    }
+
+    @Override
+    public void deleteMultipleById(List<String> loanProductVendorIds) throws MeedlException {
+        MeedlValidator.validateCollection(loanProductVendorIds, "Loan product vendor ids required");
+        loanProductVendorRepository.deleteAllById(loanProductVendorIds);
     }
 
 }

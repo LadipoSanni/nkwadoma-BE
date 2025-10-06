@@ -229,16 +229,30 @@ public class LoanProductService implements CreateLoanProductUseCase, ViewLoanPro
     }
 
     private void updateVendorDetails(LoanProduct loanProduct) throws MeedlException {
+        log.info("Finding all loan product vendors to update by loan product id {}", loanProduct.getId());
         List<Vendor> vendors = loanProductVendorOutputPort.getVendorsByLoanProductId(loanProduct.getId());
-        List<LoanProductVendor> loanProductVendors = loanProductVendorOutputPort.ge(loanProduct.getId());
-        log.info("Found all the vendors for this loan product");
+        List<LoanProductVendor> loanProductVendors = loanProductVendorOutputPort.findAllByLoanProductId(loanProduct.getId());
+
+        List<String> loanProductVendorIds = getLoanProductVendorIds(loanProductVendors);
         List<String> vendorIds = getVendorIds(vendors);
+
+        log.info("About to delete existing loan product vendors in update flow");
+        loanProductVendorOutputPort.deleteMultipleById(loanProductVendorIds);
         vendorOutputPort.deleteMultipleById(vendorIds);
-        log.info("Deleted all existing vendors for this loan product");
+
+        log.info("Saving vendor and loan product vendor details in update loan product");
         vendors = vendorOutputPort.saveVendors(vendors);
         loanProductVendorOutputPort.save(vendors,loanProduct);
-        log.info("Saved vendors for this loan product ");
     }
+
+    private List<String> getLoanProductVendorIds(List<LoanProductVendor> loanProductVendors) {
+        return loanProductVendors.stream()
+                .filter(Objects::nonNull)
+                .map(LoanProductVendor::getId)
+                .filter(MeedlValidator::isNotEmptyString)
+                .toList();
+    }
+
 
     private static List<String> getVendorIds(List<Vendor> vendors) {
         return vendors.stream()
