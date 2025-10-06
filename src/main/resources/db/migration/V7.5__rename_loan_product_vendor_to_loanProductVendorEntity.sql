@@ -1,0 +1,1 @@
+ALTER TABLE loan_product_vendor RENAME TO loan_product_vendor_entity;
