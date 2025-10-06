@@ -237,9 +237,8 @@ class LoanProductServiceTest {
         loanProduct.setDisbursementTerms("Updated Gemini Loan Product");
         loanProduct.setId("80123f3b-b8d9-4e7f-876b-df442bfa02c4");
         try {
-            when(loanProductOutputPort.save(loanProduct)).thenReturn(loanProduct);
-            when(loanProductMapper.updateLoanProduct(any(), any())).thenReturn(loanProduct);
             when(loanProductOutputPort.findById(loanProduct.getId())).thenReturn(loanProduct);
+            when(investmentVehicleOutputPort.findById(anyString())).thenReturn(investmentVehicle);
             loanProduct = loanProductService.updateLoanProduct(loanProduct);
             LoanProduct updatedLoanProduct = loanProductOutputPort.findById(loanProduct.getId());
             assertNotNull(updatedLoanProduct);
