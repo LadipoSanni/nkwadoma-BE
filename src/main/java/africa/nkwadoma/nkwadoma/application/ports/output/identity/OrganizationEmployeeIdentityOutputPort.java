@@ -37,5 +37,4 @@ public interface OrganizationEmployeeIdentityOutputPort {
 
     OrganizationEmployeeIdentity findByRoleAndOrganizationId(String organization, IdentityRole identityRole) throws MeedlException;
 
-    void deleteAllEmployee();
 }

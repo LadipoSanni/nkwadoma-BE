@@ -154,9 +154,5 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
         return loanReferralProjections.map(loanReferralMapper::mapProjectionToLoanReferral);
     }
 
-    @Override
-    public void deleteAll() {
-        loanReferralRepository.deleteAll();
-    }
 }
 

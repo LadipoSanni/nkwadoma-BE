@@ -195,8 +195,4 @@ public class CohortLoaneePersistenceAdapter implements CohortLoaneeOutputPort {
         return cohortLoaneeMapper.toCohortLoanee(cohortLoaneeEntity);
     }
 
-    @Override
-    public void deleteAll() {
-        cohortLoaneeRepository.deleteAll();
-    }
 }

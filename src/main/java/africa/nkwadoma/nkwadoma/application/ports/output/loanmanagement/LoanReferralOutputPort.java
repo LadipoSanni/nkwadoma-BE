@@ -34,5 +34,4 @@ public interface LoanReferralOutputPort {
 
     Page<LoanReferral> searchLoanReferrals(LoanReferral request) throws MeedlException;
 
-    void deleteAll();
 }

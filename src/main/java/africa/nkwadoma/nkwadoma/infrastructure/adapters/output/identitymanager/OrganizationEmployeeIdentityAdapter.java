@@ -205,10 +205,4 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
         return organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(organizationEmployeeEntity);
     }
 
-    @Override
-    public void deleteAllEmployee() {
-        organizationEmployeeRepository.deleteAll();
-    }
-
-
 }
