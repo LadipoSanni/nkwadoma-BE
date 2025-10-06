@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanManagement.loanProduct;
 
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProductVendor;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoanProductVendor;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoanProductVendorEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
