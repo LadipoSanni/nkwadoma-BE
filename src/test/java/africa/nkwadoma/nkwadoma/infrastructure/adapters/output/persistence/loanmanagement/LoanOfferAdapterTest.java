@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEm
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanProduct.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -78,10 +79,6 @@ public class LoanOfferAdapterTest {
     private LoanProduct loanProduct;
     @Autowired
     private LoanProductOutputPort loanProductOutputPort;
-    @Autowired
-    private VendorEntityRepository vendorEntityRepository;
-    @Autowired
-    private LoanProductVendorRepository loanProductVendorRepository;
     private int pageSize = 10;
     private int pageNumber = 0;
 
@@ -319,9 +316,6 @@ public class LoanOfferAdapterTest {
 
     @AfterAll
     void cleanUp() throws MeedlException {
-        VendorEntity foundGemsVendorEntity = vendorEntityRepository.findByVendorName(loanProduct.getVendors().get(0).getVendorName());
-        loanProductVendorRepository.deleteByVendorEntityId((foundGemsVendorEntity.getId()));
-        vendorEntityRepository.deleteById(foundGemsVendorEntity.getId());
         loanOfferOutputPort.deleteLoanOfferById(loanReferralId);
         loanProductOutputPort.deleteById(loanProduct.getId());
 

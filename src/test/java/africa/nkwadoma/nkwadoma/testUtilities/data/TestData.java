@@ -216,6 +216,11 @@ public class TestData {
                 .build();
 
     }
+    public static LoanProduct buildTestLoanProduct(String name) {
+        LoanProduct loanProduct = buildTestLoanProduct();
+        loanProduct.setName(name);
+        return loanProduct;
+    }
     public static LoanProduct buildTestLoanProduct() {
         Vendor vendor = TestData.createTestVendor(TestUtils.generateName(6));
         LoanProduct loanProduct = new LoanProduct();

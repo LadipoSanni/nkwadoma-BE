@@ -194,4 +194,5 @@ public class CohortLoaneePersistenceAdapter implements CohortLoaneeOutputPort {
         CohortLoaneeEntity cohortLoaneeEntity = cohortLoaneeRepository.findByCohortIdAndLoaneeId(loaneeId,cohortId);
         return cohortLoaneeMapper.toCohortLoanee(cohortLoaneeEntity);
     }
+
 }

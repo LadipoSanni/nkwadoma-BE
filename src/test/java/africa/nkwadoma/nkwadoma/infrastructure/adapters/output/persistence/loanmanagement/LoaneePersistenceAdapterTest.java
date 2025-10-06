@@ -1,11 +1,13 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loanmanagement;
 
 
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeRepository;
@@ -50,10 +52,12 @@ class LoaneePersistenceAdapterTest {
     private IdentityManagerOutputPort identityManagerOutputPort;
     private String userId;
     private String otherUserId;
+    @Autowired
+    private CohortLoaneeOutputPort cohortLoaneeOutputPort;
 
 
     @BeforeAll
-    void setUpUserIdentity(){
+    void setUpUserIdentity() throws MeedlException {
         userIdentity = UserIdentity.builder().id(id).email("lekan@gmail.com").firstName("qudus").lastName("lekan")
                 .createdBy(id).role(IdentityRole.LOANEE).build();
         try {
@@ -67,6 +71,15 @@ class LoaneePersistenceAdapterTest {
         } catch (MeedlException e) {
             log.error(e.getMessage());
         }
+        Page<Loanee> loanees = loaneeOutputPort.findAllLoanee(100, 0);
+
+        loanees.forEach(loanee -> {
+            try {
+                loaneeOutputPort.deleteLoanee(loanee.getId());
+            } catch (MeedlException e) {
+                log.error("Error -----> ", e);
+            }
+        });
     }
 
 

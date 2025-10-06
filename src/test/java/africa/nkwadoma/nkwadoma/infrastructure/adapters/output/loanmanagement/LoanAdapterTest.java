@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanProduct.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -408,9 +409,6 @@ class LoanAdapterTest {
 
     @AfterAll
     void cleanUp() throws MeedlException {
-        VendorEntity foundGemsVendorEntity = vendorEntityRepository.findByVendorName(loanProduct.getVendors().get(0).getVendorName());
-        loanProductVendorRepository.deleteByVendorEntityId((foundGemsVendorEntity.getId()));
-        vendorEntityRepository.deleteById(foundGemsVendorEntity.getId());
         loanOutputPort.deleteById(loanId);
 
         loanOfferOutputPort.deleteLoanOfferById(loanReferralId);

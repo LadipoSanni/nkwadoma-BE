@@ -1,26 +1,18 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanManagement;
 
-import africa.nkwadoma.nkwadoma.domain.model.loan.Loan;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetailSummary;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoanEntity;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.*;
-import org.mapstruct.InheritInverseConfiguration;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.*;
 
-import java.math.BigDecimal;
-
-@Mapper(componentModel = "spring",nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-public interface LoanMapper {
-    LoanEntity mapToLoanEntity(Loan loan);
+@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+public interface LoanRequestMapper {
+//    @Mapping(target = "loaneeEntity", source = "loanee")
+    LoanRequestEntity toLoanRequestEntity(LoanRequest loanRequest);
 
     @InheritInverseConfiguration
-    Loan mapToLoan(LoanEntity loanEntity);
+    LoanRequest toLoanRequest(LoanRequestEntity loanRequestEntity);
 
-    @Mapping(target = "loanAmountRequested", source = "loanAmountRequested")
-    @Mapping(target = "loaneeId", source = "loaneeId")
-    @Mapping(target = "cohortId", source = "cohortId")
     @Mapping(target = "nextOfKin.id", source = "nextOfKinId")
     @Mapping(target = "nextOfKin.firstName", source = "nextOfKinFirstName")
     @Mapping(target = "nextOfKin.lastName", source = "nextOfKinLastName")
@@ -30,10 +22,10 @@ public interface LoanMapper {
     @Mapping(target = "nextOfKin.nextOfKinRelationship", source = "nextOfKinRelationship")
     @Mapping(target = "userIdentity.firstName", source = "firstName")
     @Mapping(target = "userIdentity.lastName", source = "lastName")
-    @Mapping(target = "userIdentity.email", source = "email")
-    @Mapping(target = "userIdentity.gender", source = "gender")
     @Mapping(target = "userIdentity.phoneNumber", source = "phoneNumber")
     @Mapping(target = "userIdentity.image", source = "loaneeImage")
+    @Mapping(target = "userIdentity.email", source = "email")
+    @Mapping(target = "userIdentity.gender", source = "gender")
     @Mapping(target = "userIdentity.dateOfBirth", source = "dateOfBirth")
     @Mapping(target = "userIdentity.nationality", source = "nationality")
     @Mapping(target = "userIdentity.stateOfResidence", source = "stateOfResidence")
@@ -43,17 +35,21 @@ public interface LoanMapper {
     @Mapping(target = "userIdentity.alternateEmail", source = "alternateEmail")
     @Mapping(target = "userIdentity.alternatePhoneNumber", source = "alternatePhoneNumber")
     @Mapping(target = "userIdentity.alternateContactAddress", source = "alternateContactAddress")
-    @Mapping(target = "loanAmountApproved", source = "loanAmountApproved")
-    @Mapping(target = "tuitionAmount", source = "tuitionAmount")
+    @Mapping(target = "loanAmountRequested", source = "loanAmountRequested")
     @Mapping(target = "status", source = "status")
+    @Mapping(target = "onboardingMode", source = "onboardingMode")
+    @Mapping(target = "isVerified", source = "isVerified")
     @Mapping(target = "cohortLoaneeId", source = "cohortLoaneeId")
-    @Mapping(target = "organizationName", source = "referredBy")
-    @Mapping(target = "loanAmountOutstanding", source = "amountOutstanding")
-    @Mapping(target = "loanAmountRepaid", source = "amountRepaid")
-    @Mapping(target = "interestRate", source = "interestRate")
-    @Mapping(target = "interestIncurred", source = "interestIncurred")
-    Loan mapProjectionToLoan(LoanProjection loanProjection);
+    @Mapping(target = "cohortId", source = "cohortId")
+    @Mapping(target = "loaneeId", source = "loaneeId")
+    LoanRequest mapProjectionToLoanRequest(LoanRequestProjection loanRequestProjection);
 
-    LoanDetailSummary toLoanDetailSummary(LoanSummaryProjection loanSummaryProjection);
+    @Mapping(target = "loanAmountRequested", source = "cohortLoanee.loaneeLoanDetail.amountRequested")
+    @Mapping(target = "id", source = "id")
+    @Mapping(target = "createdDate", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "referredBy", source = "cohortLoanee.referredBy")
+    LoanRequest mapLoanReferralToLoanRequest(LoanReferral updatedLoanReferral);
 
+    @Mapping(target = "dateTimeApproved", expression = "java(java.time.LocalDateTime.now())")
+    LoanRequest updateLoanRequest(LoanRequest updatedLoanRequest, @MappingTarget LoanRequest foundLoanRequest);
 }

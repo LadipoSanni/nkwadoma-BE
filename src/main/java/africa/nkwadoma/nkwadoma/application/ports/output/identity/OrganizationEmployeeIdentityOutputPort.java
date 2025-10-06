@@ -36,4 +36,5 @@ public interface OrganizationEmployeeIdentityOutputPort {
     List<OrganizationEmployeeIdentity> findAllEmployeesInOrganizationByOrganizationIdAndRole(String organizationId, IdentityRole identityRole) throws MeedlException;
 
     OrganizationEmployeeIdentity findByRoleAndOrganizationId(String organization, IdentityRole identityRole) throws MeedlException;
+
 }

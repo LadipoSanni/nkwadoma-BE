@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanProduct.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
@@ -14,8 +15,8 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanMetricsMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanOfferMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanManagement.LoanMetricsMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanManagement.LoanOfferMapper;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanException;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
@@ -86,7 +87,7 @@ public class LoanOfferServiceTest {
     @Mock
     private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
     @Mock
-    private  LoanProductOutputPort loanProductOutputPort;
+    private LoanProductOutputPort loanProductOutputPort;
     @Mock
     private  ProgramOutputPort programOutputPort;
     @Mock

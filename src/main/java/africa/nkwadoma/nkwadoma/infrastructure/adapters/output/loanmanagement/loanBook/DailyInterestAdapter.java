@@ -4,7 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.DailyInterest;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.loanBook.DailyInterestMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanManagement.loanBook.DailyInterestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.DailyInterestEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.loanBook.DailyInterestRepository;
 import lombok.RequiredArgsConstructor;

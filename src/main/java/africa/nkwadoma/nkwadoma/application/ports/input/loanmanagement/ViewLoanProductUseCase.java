@@ -11,5 +11,4 @@ public interface ViewLoanProductUseCase {
 
     Page<LoanProduct> search(String loanProductName, int pageSize, int pageNumber) throws MeedlException;
 
-
 }
