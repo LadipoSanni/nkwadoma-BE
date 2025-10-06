@@ -244,8 +244,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
                 loanReferralOutputPort.findAllLoanReferralsByUserIdAndStatus(userIdentity.getId(),
                         LoanReferralStatus.AUTHORIZED);
         log.info("Found {} loanReferrals", loanReferrals.size());
-        log.info("Loan referrals found {}",loanReferrals);
-        updateLoanRequestCountForEachLoanReferralThatHasBeenAccepted(loanReferrals);
+        log.info("Loan referrals found {}",loanReferrals);updateLoanRequestCountForEachLoanReferralThatHasBeenAccepted(loanReferrals);
     }
 
     private void updateLoanRequestCountForEachLoanReferralThatHasBeenAccepted(List<LoanReferral> loanReferrals) throws MeedlException {

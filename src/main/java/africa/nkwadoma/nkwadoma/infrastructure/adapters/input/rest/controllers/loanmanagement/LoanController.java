@@ -325,7 +325,7 @@ public class LoanController {
                         .body(loanResponses.getContent())
                         .pageSize(pageSize)
                         .pageNumber(pageNumber)
-                        .totalPages(loanResponses.getTotalPages())
+                        .totalElement(loanResponses.getTotalElements())
                         .hasNextPage(loanResponses.hasNext())
                         .build();
         ApiResponse<PaginatedResponse<LoanQueryResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoanQueryResponse>>builder()
@@ -401,7 +401,7 @@ public class LoanController {
                         .body(loanResponses.getContent())
                         .pageSize(pageSize)
                         .pageNumber(pageNumber)
-                        .totalPages(loanResponses.getTotalPages())
+                        .totalElement(loanResponses.getTotalElements())
                         .hasNextPage(loanResponses.hasNext())
                         .build();
         ApiResponse<PaginatedResponse<LoanQueryResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoanQueryResponse>>builder()
@@ -433,7 +433,7 @@ public class LoanController {
                         .body(allLoanReferralResponses.getContent())
                         .pageSize(pageSize)
                         .pageNumber(pageNumber)
-                        .totalPages(allLoanReferralResponses.getTotalPages())
+                        .totalElement(allLoanReferralResponses.getTotalElements())
                         .hasNextPage(allLoanReferralResponses.hasNext())
                         .build();
         ApiResponse<PaginatedResponse<AllLoanReferralResponse>> apiResponse = ApiResponse.<PaginatedResponse<AllLoanReferralResponse>>builder()
@@ -466,7 +466,7 @@ public class LoanController {
                         .body(allLoanReferralResponses.getContent())
                         .pageSize(pageSize)
                         .pageNumber(pageNumber)
-                        .totalPages(allLoanReferralResponses.getTotalPages())
+                        .totalElement(allLoanReferralResponses.getTotalElements())
                         .hasNextPage(allLoanReferralResponses.hasNext())
                         .build();
         ApiResponse<PaginatedResponse<AllLoanReferralResponse>> apiResponse = ApiResponse.<PaginatedResponse<AllLoanReferralResponse>>builder()
@@ -515,7 +515,7 @@ public class LoanController {
                         .body(loanResponses.getContent())
                         .pageSize(pageSize)
                         .pageNumber(pageNumber)
-                        .totalPages(loanResponses.getTotalPages())
+                        .totalElement(loanResponses.getTotalElements())
                         .hasNextPage(loanResponses.hasNext())
                         .build();
         ApiResponse<PaginatedResponse<LoanQueryResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoanQueryResponse>>builder()
