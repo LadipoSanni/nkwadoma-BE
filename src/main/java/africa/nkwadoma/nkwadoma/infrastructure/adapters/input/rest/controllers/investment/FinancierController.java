@@ -198,8 +198,8 @@ public class FinancierController {
                                                             @RequestParam int pageSize,
                                                             @RequestParam(required = false) String investmentVehicleId,
                                                             @RequestParam(required = false) FinancierType financierType,
-                                                            @RequestParam(required = false) ActivationStatus activationStatus) throws MeedlException {
-        Financier financier = Financier.builder().pageNumber(pageNumber).pageSize(pageSize).investmentVehicleId(investmentVehicleId).financierType(financierType).activationStatus(activationStatus).build();
+                                                            @RequestParam(required = false) List<ActivationStatus> activationStatuses) throws MeedlException {
+        Financier financier = Financier.builder().pageNumber(pageNumber).pageSize(pageSize).investmentVehicleId(investmentVehicleId).financierType(financierType).activationStatus(activationStatuses.get(0)).build();
         Page<Financier> financiers = financierUseCase.viewAllFinancier(financier);
         List<FinancierResponse > financierResponses = financiers.stream().map(financierRestMapper::map).toList();
         log.info("financiers mapped for view all financiers on the platform: {}", financierResponses);
