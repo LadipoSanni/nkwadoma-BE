@@ -141,6 +141,7 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
         f.financierType AS financierType,
         f.activationStatus AS activationStatus,
         f.totalAmountInvested AS amountInvested,
+        f AS amountInvested,
         CASE 
             WHEN f.financierType = 'INDIVIDUAL' THEN CONCAT(inviteeUser.firstName, ' ', inviteeUser.lastName)
             WHEN f.financierType = 'COOPERATE' THEN CONCAT(inviteeOrg.firstName, ' ', inviteeOrg.lastName)
