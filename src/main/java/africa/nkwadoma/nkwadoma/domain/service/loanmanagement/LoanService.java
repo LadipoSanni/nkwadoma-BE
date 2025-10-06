@@ -139,6 +139,8 @@ public class LoanService implements  ViewLoanReferralsUseCase,
                 .subtract(loanOffer.getAmountApproved()));
         loanProduct.setAvailableAmountToBeDisbursed(loanProduct.getAvailableAmountToBeDisbursed()
                 .subtract(loanOffer.getAmountApproved()));
+        loanProduct.setTotalAmountDisbursed(loanProduct.getTotalAmountDisbursed()
+                .add(loanOffer.getAmountApproved()));
         loanProductOutputPort.save(loanProduct);
     }
 

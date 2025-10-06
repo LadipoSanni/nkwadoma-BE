@@ -430,6 +430,7 @@ class LoanServiceTest {
                     .thenReturn(Optional.of(loanMetrics));
             when(loanMetricsOutputPort.save(loanMetrics)).thenReturn(loanMetrics);
             LoanProduct loanProduct = TestData.buildTestLoanProduct();
+            loanProduct.setTotalAmountDisbursed(BigDecimal.ZERO);
             loanProduct.setTotalOutstandingLoan(BigDecimal.ZERO);
             when(loanProductOutputPort.save(loanProduct)).thenReturn(loanProduct);
             when(cohortLoaneeOutputPort.findCohortLoaneeByLoanId(any())).thenReturn(cohortLoanee);
