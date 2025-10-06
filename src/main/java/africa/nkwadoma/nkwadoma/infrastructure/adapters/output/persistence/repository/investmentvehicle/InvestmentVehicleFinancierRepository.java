@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentvehicle;
 
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.financier.FinancierEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentvehicle.InvestmentVehicleFinancierEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.financier.FinancierWithDesignationProjection;
@@ -29,6 +28,10 @@ public interface InvestmentVehicleFinancierRepository extends JpaRepository<Inve
             Pageable pageable
     );
 
+
+
+    void deleteByInvestmentVehicleIdAndFinancierId(String investmentId, String id);
+
     @Query(value = """
     WITH financier_investments AS (
         SELECT 
@@ -46,7 +49,9 @@ public interface InvestmentVehicleFinancierRepository extends JpaRepository<Inve
         LEFT JOIN organization o ON o.id = fe.identity
         LEFT JOIN meedl_user u ON u.id = fe.identity
         WHERE ivf.investment_vehicle_id = :investmentVehicleId
-        AND (:activationStatus IS NULL OR fe.activation_status = :activationStatus)
+           AND (
+           :activationStatuses IS NULL
+            OR fe.activation_status IN (:activationStatuses))
     ),
     financier_designations AS (
         SELECT 
@@ -75,18 +80,19 @@ public interface InvestmentVehicleFinancierRepository extends JpaRepository<Inve
     FROM investment_vehicle_financier_entity ivf
     JOIN financier_entity fe ON fe.id = ivf.financier_id
     WHERE ivf.investment_vehicle_id = :investmentVehicleId
-    AND (:activationStatus IS NULL OR fe.activation_status = :activationStatus)
+        AND (
+           :activationStatuses IS NULL
+            OR fe.activation_status IN (:activationStatuses))
+
 """,
             nativeQuery = true)
-    Page<FinancierWithDesignationProjection> findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatus(
+    Page<FinancierWithDesignationProjection> findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatuses(
             @Param("investmentVehicleId") String investmentVehicleId,
-            @Param("activationStatus") String activationStatus,
+            @Param("activationStatuses") List<String> activationStatuses,
             Pageable pageable
     );
+//    AND (:activationStatus IS NULL OR fe.activation_status = :activationStatus)
 
-
-
-    void deleteByInvestmentVehicleIdAndFinancierId(String investmentId, String id);
 
     @Query("SELECT ivf FROM InvestmentVehicleFinancierEntity ivf " +
             "JOIN FETCH ivf.investmentVehicle iv " +

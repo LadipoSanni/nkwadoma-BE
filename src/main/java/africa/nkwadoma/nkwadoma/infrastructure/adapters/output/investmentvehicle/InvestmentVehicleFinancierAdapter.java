@@ -63,18 +63,22 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
     }
 
     @Override
-    public Page<Financier> viewAllFinancierInAnInvestmentVehicle(String investmentVehicleId,ActivationStatus activationStatus, Pageable pageRequest) throws MeedlException {
+    public Page<Financier> viewAllFinancierInAnInvestmentVehicle(String investmentVehicleId,List<ActivationStatus> activationStatuses, Pageable pageRequest) throws MeedlException {
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
-        log.info("request investment vehicle id {} ==== activation status {}", investmentVehicleId, activationStatus);
+        log.info("request investment vehicle id {} ==== activation status {}", investmentVehicleId, activationStatuses);
         Page<FinancierWithDesignationProjection> financiersWithDesignationProjection;
-        if (ObjectUtils.isNotEmpty(activationStatus)) {
-            log.info("request investment vehicle activation status is {}", activationStatus);
+        if (ObjectUtils.isNotEmpty(activationStatuses)) {
+            log.info("request investment vehicle activation status is {}", activationStatuses);
             financiersWithDesignationProjection = investmentVehicleFinancierRepository
-                            .findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatus(investmentVehicleId, activationStatus.getStatusName(), pageRequest);
+                            .findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatuses(investmentVehicleId,
+                                    activationStatuses.stream()
+                                            .filter(Objects::nonNull)
+                                            .map(Enum::name)
+                                            .toList(), pageRequest);
         } else {
-            log.info("request investment vehicle activation status is {}", activationStatus);
+            log.info("request investment vehicle activation status is {}", activationStatuses);
             financiersWithDesignationProjection = investmentVehicleFinancierRepository
-                    .findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatus(investmentVehicleId, null, pageRequest);
+                    .findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatuses(investmentVehicleId, null, pageRequest);
         }
 
         return financiersWithDesignationProjection.map(projection -> {

@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface FinancierRepository extends JpaRepository<FinancierEntity,String> {
@@ -163,12 +164,14 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
     LEFT JOIN UserEntity inviteeOrg 
         ON f.financierType = 'COOPERATE' AND inviteeOrg.id = organization.createdBy
     WHERE (:financierType IS NULL OR f.financierType = :financierType)
-    AND (:activationStatus IS NULL OR f.activationStatus = :activationStatus)
+         AND (:activationStatuses IS NULL OR f.activationStatus IN (:activationStatuses))
     ORDER BY f.createdAt DESC
 """)
+//    AND (:activationStatus IS NULL OR f.activationStatus = :activationStatuses)
+
     Page<FinancierProjection> findAllByFinancierTypeOrderByUserCreatedAt(
             @Param("financierType") FinancierType financierType,
-            @Param("activationStatus") ActivationStatus activationStatus,
+            @Param("activationStatuses") List<ActivationStatus> activationStatuses,
             Pageable pageable
     );
 

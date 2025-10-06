@@ -15,7 +15,7 @@ public interface InvestmentVehicleFinancierOutputPort {
 
     void deleteInvestmentVehicleFinancier(String id) throws MeedlException;
 
-    Page<Financier> viewAllFinancierInAnInvestmentVehicle(String investmentVehicleId, ActivationStatus activationStatus, Pageable pageRequest) throws MeedlException;
+    Page<Financier> viewAllFinancierInAnInvestmentVehicle(String investmentVehicleId, List<ActivationStatus> activationStatuses, Pageable pageRequest) throws MeedlException;
 
     void deleteByInvestmentVehicleIdAndFinancierId(String investmentId, String id) throws MeedlException;
 
