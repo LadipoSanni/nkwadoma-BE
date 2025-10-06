@@ -141,7 +141,6 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
         f.financierType AS financierType,
         f.activationStatus AS activationStatus,
         f.totalAmountInvested AS amountInvested,
-        f AS amountInvested,
         CASE 
             WHEN f.financierType = 'INDIVIDUAL' THEN CONCAT(inviteeUser.firstName, ' ', inviteeUser.lastName)
             WHEN f.financierType = 'COOPERATE' THEN CONCAT(inviteeOrg.firstName, ' ', inviteeOrg.lastName)
@@ -178,7 +177,8 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
     @Query("""
     SELECT f.id as id , organization.name as name , f.totalAmountInvested as totalAmountInvested,
         f.activationStatus as activationStatus , f.financierType as financierType,
-        f.accreditationStatus as accreditationStatus, f.identity as identity, f.createdAt as createdAt
+        f.accreditationStatus as accreditationStatus, f.identity as identity,
+        f.createdAt as createdAt
 
          FROM FinancierEntity f
         JOIN OrganizationEntity  organization on  organization.id = f.identity
@@ -198,6 +198,7 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
            f.identity AS identity,
            user.email AS cooperateAdminEmail,
            CONCAT(user.firstName, ' ', user.lastName) AS cooperateAdminName,
+           CONCAT(user.firstName, ' ', user.lastName) AS invitedBy,
            organization.phoneNumber AS phoneNumber,
            organization.address AS address
     FROM FinancierEntity f

@@ -107,6 +107,7 @@ public class FinancierAdapter implements FinancierOutputPort {
     public Financier findFinancierByCooperateStaffUserId(String id) throws MeedlException {
         MeedlValidator.validateUUID(id, UserMessages.INVALID_USER_ID.getMessage());
         FinancierProjection financierEntity = financierRepository.findByCooperateStaffUserId(id);
+        log.info("THe projection invited by {}", financierEntity.getInvitedBy());
         return financierMapper.mapProjectionToFinancier(financierEntity);
     }
 
