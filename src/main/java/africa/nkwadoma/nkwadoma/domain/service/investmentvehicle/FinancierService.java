@@ -486,6 +486,8 @@ public class FinancierService implements FinancierUseCase {
             financier = financierOutputPort.findById(financierId);
             if (financier.getFinancierType().equals(COOPERATE)) {
                 Financier cooperateFinancier = financierOutputPort.findCooperateFinancierById(financier.getId());
+
+                financier.setInvitedBy(cooperateFinancier.getInvitedBy());
                 financier.setCooperateAdminEmail(cooperateFinancier.getCooperateAdminEmail());
                 financier.setCooperateAdminName(cooperateFinancier.getCooperateAdminName());
                 log.info("cooperate super admin mail {} ==== super admin name {}",financier.getCooperateAdminEmail(),financier.getCooperateAdminName());
