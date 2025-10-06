@@ -24,6 +24,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanManagement.loanProduct.LoanProductMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoanProductVendor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -229,10 +230,14 @@ public class LoanProductService implements CreateLoanProductUseCase, ViewLoanPro
 
     private void updateVendorDetails(LoanProduct loanProduct) throws MeedlException {
         List<Vendor> vendors = loanProductVendorOutputPort.getVendorsByLoanProductId(loanProduct.getId());
+        List<LoanProductVendor> loanProductVendors = loanProductVendorOutputPort.ge(loanProduct.getId());
+        log.info("Found all the vendors for this loan product");
         List<String> vendorIds = getVendorIds(vendors);
         vendorOutputPort.deleteMultipleById(vendorIds);
+        log.info("Deleted all existing vendors for this loan product");
         vendors = vendorOutputPort.saveVendors(vendors);
         loanProductVendorOutputPort.save(vendors,loanProduct);
+        log.info("Saved vendors for this loan product ");
     }
 
     private static List<String> getVendorIds(List<Vendor> vendors) {
