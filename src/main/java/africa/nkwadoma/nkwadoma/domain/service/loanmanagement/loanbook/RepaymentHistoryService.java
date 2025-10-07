@@ -5,12 +5,14 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputP
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOfferOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanProduct.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.RepaymentHistoryOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.FinancialConstants;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loan;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -39,6 +41,7 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
     private final LoaneeOutputPort loaneeOutputPort;
     private final LoanOfferOutputPort loanOfferOutputPort;
     private final LoanOutputPort loanOutputPort;
+    private final LoanProductOutputPort loanProductOutputPort;
 
     @Override
     public Page<RepaymentHistory> findAllRepaymentHistory(RepaymentHistory repaymentHistory, int pageSize, int pageNumber) throws MeedlException {
@@ -85,23 +88,32 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
     }
 
     @Override
-    public List<RepaymentHistory> generateRepaymentHistory(String id, String actorId) throws MeedlException {
+    public List<RepaymentHistory> generateRepaymentHistory(BigDecimal amountApproved, String loanProductId, String loanId) throws MeedlException {
         List<RepaymentHistory> repaymentSchedule = new ArrayList<>();
-        MeedlValidator.validateUUID(id, "id cannot be empty or invalid");
+        LoanOffer loanOffer = new LoanOffer();
 
-        LoanOffer loanOffer;
-        UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
-        if (userIdentity.getRole().isMeedlRole()) {
-            loanOffer = loanOfferOutputPort.findById(id);
-        } else {
-            Loan loan = loanOutputPort.findLoanById(id);
+        int tenorMonths;
+        int moratoriumMonths;
+        if (amountApproved != null || loanProductId != null) {
+            validateRequestForRepaymentSchedulingBeforeCreatingLoanOffer(amountApproved, loanProductId);
+            LoanProduct loanProduct = loanProductOutputPort.findById(loanProductId);
+            log.info("found loan product name {}", loanProduct.getName());
+            setUpLoanOfferForScheduling(amountApproved, loanOffer, loanProduct);
+            tenorMonths = loanProduct.getTenor();
+            moratoriumMonths = loanProduct.getMoratorium();
+
+        }else {
+            log.info("setting up schedule generation in view loan details");
+            MeedlValidator.validateUUID(loanId,"Loan id cannot be empty or invalid");
+            Loan loan = loanOutputPort.findLoanById(loanId);
             loanOffer = loanOfferOutputPort.findById(loan.getLoanOfferId());
             loanOffer.setDateTimeOffered(loan.getStartDate());
+
+            tenorMonths = loanOffer.getLoanProduct().getTenor();
+            moratoriumMonths = loanOffer.getLoanProduct().getMoratorium();
         }
 
-        int tenorMonths = loanOffer.getLoanProduct().getTenor();
-        int moratoriumMonths = loanOffer.getLoanProduct().getMoratorium();
-
+        log.info("scheduling about to start ------");
         BigDecimal monthlyRate = getMonthleyRate(loanOffer);
 
         BigDecimal principal = loanOffer.getAmountApproved().setScale(2, RoundingMode.HALF_UP);
@@ -125,16 +137,7 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
 
             balance = balance.add(partialMonthInterest).setScale(2, RoundingMode.HALF_UP);
 
-            repaymentSchedule.add(
-                    RepaymentHistory.builder()
-                            .totalAmountRepaid(totalRepaid)
-                            .amountOutstanding(balance)
-                            .paymentDate(endOfMonth)
-                            .amountPaid(BigDecimal.ZERO)
-                            .interestIncurred(partialMonthInterest)
-                            .principalPayment(BigDecimal.ZERO)
-                            .build()
-            );
+            addScheduleToRepaymentScheduleList(repaymentSchedule, totalRepaid, balance, endOfMonth, partialMonthInterest);
         }
 
         LocalDate paymentDate = endOfMonth.plusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
@@ -151,6 +154,34 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
         last.setMoratorium(moratoriumMonths);
 
         return repaymentSchedule;
+    }
+
+    private static void validateRequestForRepaymentSchedulingBeforeCreatingLoanOffer(BigDecimal amountApproved, String loanProductId) throws MeedlException {
+        log.info("setting up schedule generation before creating loan offer");
+        MeedlValidator.validateUUID(loanProductId,"Loan product id cannot be empty or invalid");
+        if (amountApproved == null) {
+            throw new MeedlException("Amount approved cannot be empty");
+        }
+        MeedlValidator.validateNegativeAmount(amountApproved,"Approved ");
+    }
+
+    private static void setUpLoanOfferForScheduling(BigDecimal amountApproved, LoanOffer loanOffer, LoanProduct loanProduct) {
+        loanOffer.setAmountApproved(amountApproved);
+        loanOffer.setDateTimeOffered(LocalDateTime.now());
+        loanOffer.setLoanProduct(loanProduct);
+    }
+
+    private static void addScheduleToRepaymentScheduleList(List<RepaymentHistory> repaymentSchedule, BigDecimal totalRepaid, BigDecimal balance, LocalDate endOfMonth, BigDecimal partialMonthInterest) {
+        repaymentSchedule.add(
+                RepaymentHistory.builder()
+                        .totalAmountRepaid(totalRepaid)
+                        .amountOutstanding(balance)
+                        .paymentDate(endOfMonth)
+                        .amountPaid(BigDecimal.ZERO)
+                        .interestIncurred(partialMonthInterest)
+                        .principalPayment(BigDecimal.ZERO)
+                        .build()
+        );
     }
 
     @Override

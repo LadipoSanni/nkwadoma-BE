@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import org.springframework.data.domain.Page;
 
@@ -16,7 +15,7 @@ public interface RepaymentHistoryUseCase {
 
     RepaymentHistory getFirstRepaymentYearAndLastRepaymentYear(String actorId,String loaneeId) throws MeedlException;
 
-    List<RepaymentHistory> generateRepaymentHistory(String id,String actorId) throws MeedlException;
+    List<RepaymentHistory> generateRepaymentHistory(BigDecimal amountApproved, String loanProductId, String loanId) throws MeedlException;
 
     RepaymentHistory simulateRepayment(BigDecimal loanAmount, double interestRate, int repaymentPeriod) throws MeedlException;
 }
