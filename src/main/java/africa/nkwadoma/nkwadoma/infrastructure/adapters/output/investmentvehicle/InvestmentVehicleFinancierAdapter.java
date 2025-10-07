@@ -78,7 +78,7 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
         } else {
             log.info("request investment vehicle activation status is {}", activationStatuses);
             financiersWithDesignationProjection = investmentVehicleFinancierRepository
-                    .findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatuses(investmentVehicleId, null, pageRequest);
+                    .findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatuses(investmentVehicleId, List.of(), pageRequest);
         }
 
         return financiersWithDesignationProjection.map(projection -> {

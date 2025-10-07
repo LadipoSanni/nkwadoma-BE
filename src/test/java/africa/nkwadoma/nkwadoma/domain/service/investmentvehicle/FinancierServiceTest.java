@@ -712,7 +712,7 @@ public class FinancierServiceTest {
     void viewAllActiveFinancier(){
         Page<Financier> financiersPage = null;
         try{
-            individualFinancier.setActivationStatus(ActivationStatus.ACTIVE);
+            individualFinancier.setActivationStatuses(List.of(ActivationStatus.ACTIVE));
             financiersPage = financierUseCase.viewAllFinancier(individualFinancier);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
