@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanmanagement.loanProduct;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.CreateLoanProductUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.ViewLoanProductUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanProduct.CreateLoanProductUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanProduct.ViewLoanProductUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleFinancierOutputPort;
@@ -230,7 +230,6 @@ public class LoanProductService implements CreateLoanProductUseCase, ViewLoanPro
         updateVendorDetails(loanProduct);
         return loanProductOutputPort.save(foundLoanProduct);
     }
-
     private void updateVendorDetails(LoanProduct loanProduct) throws MeedlException {
         log.info("Finding all loan product vendors to update by loan product id {}", loanProduct.getId());
         List<Vendor> vendors = loanProductVendorOutputPort.getVendorsByLoanProductId(loanProduct.getId());

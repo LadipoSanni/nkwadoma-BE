@@ -15,9 +15,13 @@ public class Vendor {
     private String id;
     private Product product;
     private String vendorName;
+    private String createdAt;
     private String termsAndConditions;
     private BigDecimal costOfService;
     private int duration;
+
+    private int pageSize;
+    private int pageNumber;
 
     public void validateId() throws MeedlException {
         MeedlValidator.validateUUID(id, "Vendor id is required");
