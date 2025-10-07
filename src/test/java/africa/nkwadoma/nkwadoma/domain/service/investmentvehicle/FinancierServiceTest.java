@@ -712,7 +712,7 @@ public class FinancierServiceTest {
     void viewAllActiveFinancier(){
         Page<Financier> financiersPage = null;
         try{
-            individualFinancier.setActivationStatus(ActivationStatus.ACTIVE);
+            individualFinancier.setActivationStatuses(List.of(ActivationStatus.ACTIVE));
             financiersPage = financierUseCase.viewAllFinancier(individualFinancier);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
@@ -729,7 +729,7 @@ public class FinancierServiceTest {
             individualFinancier.setActivationStatus(ActivationStatus.INVITED);
             Financier foundFinancier = financierOutputPort.findById(individualFinancierId);
             assertNotNull(foundFinancier);
-            foundFinancier.setActivationStatus(ActivationStatus.INVITED);
+            foundFinancier.setActivationStatuses(List.of(ActivationStatus.INVITED));
             financierOutputPort.save(foundFinancier);
             financiersPage = financierOutputPort.viewAllFinancier(individualFinancier);
         } catch (MeedlException e) {
@@ -849,7 +849,7 @@ public class FinancierServiceTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ervkdldd"})
     void viewAllFinancierInVehicleWithStatusAndInvalidVehicleId(String invalidId) {
-        assertThrows(MeedlException.class, ()-> investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(invalidId, ActivationStatus.INVITED, pageRequest));
+        assertThrows(MeedlException.class, ()-> investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(invalidId, List.of(ActivationStatus.INVITED), pageRequest));
     }
 //    @Test
 //    @Order(17)

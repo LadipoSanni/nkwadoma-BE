@@ -40,6 +40,7 @@ public class Financier {
 
     private FinancierType financierType;
     private ActivationStatus activationStatus;
+    private List<ActivationStatus> activationStatuses;
     private AccreditationStatus accreditationStatus;
     private String investmentVehicleId;
     private BigDecimal amountToInvest;

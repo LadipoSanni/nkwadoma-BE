@@ -220,7 +220,7 @@ class InvestmentVehicleFinancierAdapterTest {
         @ParameterizedTest
         @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ervkdldd"})
         void viewAllFinancierInVehicleWithStatusAndInvalidVehicleId(String invalidId) {
-            assertThrows(MeedlException.class, ()-> investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(invalidId, ActivationStatus.INVITED, pageRequest));
+            assertThrows(MeedlException.class, ()-> investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(invalidId, List.of(ActivationStatus.INVITED), pageRequest));
         }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invalid-id"})

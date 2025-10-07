@@ -548,7 +548,7 @@ public class FinancierService implements FinancierUseCase {
         log.info("View all financiers in a vehicle with id {}. Page number: {}, page size: {} and activation status {}",
                 financier.getInvestmentVehicleId(), financier.getPageNumber(), financier.getPageSize(), financier.getActivationStatus());
         Page<Financier> foundFinanciers = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(
-                financier.getInvestmentVehicleId(), financier.getActivationStatus(), pageRequest);
+                financier.getInvestmentVehicleId(), financier.getActivationStatuses(), pageRequest);
         log.info("Found financiers with activation status {} in db: {}",financier.getActivationStatus(), foundFinanciers.get());
         return foundFinanciers;
     }
