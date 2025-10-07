@@ -90,16 +90,14 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
     AND (
         :financierType IS NULL OR f.financierType = :financierType
     )
-    AND (
-        :activationStatus IS NULL OR f.activationStatus = :activationStatus
-    )
+       AND (:activationStatuses IS NULL OR f.activationStatus IN :activationStatuses)
     ORDER BY f.createdAt DESC
 """)
-    Page<FinancierProjection> findByFinancierByNameFragmentOptionalInvestmentVehicleIdFinancierTypeActivationStatus(
+    Page<FinancierProjection> findByFinancierByNameFragmentOptionalInvestmentVehicleIdFinancierTypeActivationStatuses(
             @Param("nameFragment") String nameFragment,
             @Param("investmentVehicleId") String investmentVehicleId,
             @Param("financierType") FinancierType financierType,
-            @Param("activationStatus") ActivationStatus activationStatus,
+            @Param("activationStatuses") List<ActivationStatus> activationStatuses,
             Pageable pageable
     );
 
