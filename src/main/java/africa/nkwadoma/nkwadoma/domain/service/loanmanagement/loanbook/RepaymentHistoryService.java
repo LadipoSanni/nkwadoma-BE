@@ -95,17 +95,10 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
         int tenorMonths;
         int moratoriumMonths;
         if (amountApproved != null || loanProductId != null) {
-            log.info("setting up schedule generation before creating loan offer");
-            MeedlValidator.validateUUID(loanProductId,"Loan product id cannot be empty or invalid");
-            if (amountApproved == null) {
-                throw new MeedlException("Amount approved cannot be empty");
-            }
-            MeedlValidator.validateNegativeAmount(amountApproved,"Approved ");
+            validateRequestForRepaymentSchedulingBeforeCreatingLoanOffer(amountApproved, loanProductId);
             LoanProduct loanProduct = loanProductOutputPort.findById(loanProductId);
             log.info("found loan product name {}", loanProduct.getName());
-            loanOffer.setAmountApproved(amountApproved);
-            loanOffer.setDateTimeOffered(LocalDateTime.now());
-            loanOffer.setLoanProduct(loanProduct);
+            setUpLoanOfferForScheduling(amountApproved, loanOffer, loanProduct);
             tenorMonths = loanProduct.getTenor();
             moratoriumMonths = loanProduct.getMoratorium();
 
@@ -161,6 +154,21 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
         last.setMoratorium(moratoriumMonths);
 
         return repaymentSchedule;
+    }
+
+    private static void validateRequestForRepaymentSchedulingBeforeCreatingLoanOffer(BigDecimal amountApproved, String loanProductId) throws MeedlException {
+        log.info("setting up schedule generation before creating loan offer");
+        MeedlValidator.validateUUID(loanProductId,"Loan product id cannot be empty or invalid");
+        if (amountApproved == null) {
+            throw new MeedlException("Amount approved cannot be empty");
+        }
+        MeedlValidator.validateNegativeAmount(amountApproved,"Approved ");
+    }
+
+    private static void setUpLoanOfferForScheduling(BigDecimal amountApproved, LoanOffer loanOffer, LoanProduct loanProduct) {
+        loanOffer.setAmountApproved(amountApproved);
+        loanOffer.setDateTimeOffered(LocalDateTime.now());
+        loanOffer.setLoanProduct(loanProduct);
     }
 
     private static void addScheduleToRepaymentScheduleList(List<RepaymentHistory> repaymentSchedule, BigDecimal totalRepaid, BigDecimal balance, LocalDate endOfMonth, BigDecimal partialMonthInterest) {
