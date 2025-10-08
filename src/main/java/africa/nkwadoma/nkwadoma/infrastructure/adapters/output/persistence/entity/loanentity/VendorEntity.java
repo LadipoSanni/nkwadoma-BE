@@ -1,17 +1,14 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity;
 
-import africa.nkwadoma.nkwadoma.domain.enums.Product;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.UuidGenerator;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -21,8 +18,15 @@ public class VendorEntity {
     @Id
     @UuidGenerator
     private String id;
-    private Product product;
     private LocalDateTime createdAt;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "vendor_provider_services",
+            joinColumns = @JoinColumn(name = "vendor_id")
+    )
+    @Column(name = "provider_service")
+    private Set<String> providerServices;
+
     private String vendorName;
     private String termsAndConditions;
     private BigDecimal costOfService;

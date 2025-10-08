@@ -25,8 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ControllerConstant.VENDOR_VIEW_ALL;
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ControllerConstant.VENDOR_VIEW_ALL_DESCRIPTION;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ControllerConstant.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.VENDOR;
 
 @RequestMapping( VENDOR)
@@ -52,6 +51,30 @@ public class VendorController {
         PaginatedResponse<VendorResponse> paginatedResponse = new PaginatedResponse<>(
                 vendorResponses, vendorPage.hasNext(), vendorPage.getTotalPages(),vendorPage.getTotalElements() , pageNumber,pageSize);
         log.info("View all vendor called successfully.");
+
+        return new ResponseEntity<>(ApiResponse.builder().
+                statusCode(HttpStatus.FOUND.toString()).
+                data(paginatedResponse).
+                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL).
+                build(), HttpStatus.FOUND
+
+        );
+    }
+
+    @GetMapping("/provider-service/all")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
+    @Operation(summary = PROVIDER_SERVICE_VIEW_ALL, description = PROVIDER_SERVICE_VIEW_ALL_DESCRIPTION )
+    public ResponseEntity<ApiResponse<?>> viewAllProviderService(@AuthenticationPrincipal Jwt meedl,
+                                                             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
+        Vendor vendor = new Vendor();
+        vendor.setPageSize(pageSize);
+        vendor.setPageNumber(pageNumber);
+        Page<String> providerServicePage = vendorUseCase.viewAllProviderService(vendor);
+        List<String> providerServiceResponse = providerServicePage.stream().toList();
+        PaginatedResponse<String> paginatedResponse = new PaginatedResponse<>(
+                providerServiceResponse, providerServicePage.hasNext(), providerServicePage.getTotalPages(),providerServicePage.getTotalElements() , pageNumber,pageSize);
+        log.info("View all provider service called successfully.");
 
         return new ResponseEntity<>(ApiResponse.builder().
                 statusCode(HttpStatus.FOUND.toString()).

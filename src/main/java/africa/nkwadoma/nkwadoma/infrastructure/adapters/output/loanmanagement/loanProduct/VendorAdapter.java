@@ -42,6 +42,14 @@ public class VendorAdapter implements VendorOutputPort {
         return vendorEntities.map(vendorMapper::map);
 
     }
+    @Override
+    public Page<String> viewAllProviderService(Vendor vendor) throws MeedlException {
+        MeedlValidator.validatePageSize(vendor.getPageSize());
+        MeedlValidator.validatePageNumber(vendor.getPageNumber());
+        Pageable pageRequest = PageRequest.of(vendor.getPageNumber(), vendor.getPageSize());
+
+        return vendorEntityRepository.findAllProviderService(pageRequest);
+    }
 
     @Override
     public void deleteById(String vendorId) throws MeedlException {
@@ -54,4 +62,6 @@ public class VendorAdapter implements VendorOutputPort {
         MeedlValidator.validateCollection(vendorIds, "Vendors id is required before deleting");
         vendorEntityRepository.deleteAllById(vendorIds);
     }
+
+
 }
