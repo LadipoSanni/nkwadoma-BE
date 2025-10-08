@@ -14,4 +14,6 @@ public interface DisbursementRuleOutputPort {
     Page<DisbursementRule> findAllDisbursementRule(DisbursementRule disbursementRule) throws MeedlException;
 
     Boolean existByNameIgnoreCase(String name) throws MeedlException;
+
+    Page<DisbursementRule> search(DisbursementRule disbursementRule) throws MeedlException;
 }

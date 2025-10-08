@@ -15,6 +15,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.Set;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -64,5 +67,21 @@ public class DisbursementRuleAdapter implements DisbursementRuleOutputPort {
     public Boolean existByNameIgnoreCase(String name) throws MeedlException {
         MeedlValidator.validateDataElement(name, DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE_NAME.getMessage());
         return disbursementRuleRepository.existsByNameIgnoreCase(name);
+    }
+
+    @Override
+    public Page<DisbursementRule> search(DisbursementRule disbursementRule) throws MeedlException {
+        MeedlValidator.validateObjectInstance(disbursementRule, DisbursementRuleMessages.EMPTY_DISBURSEMENT_RULE.getMessage());
+        MeedlValidator.validateDataElement(disbursementRule.getName(), DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE_NAME.getMessage());
+
+        Pageable pageRequest = PageRequest.of(disbursementRule.getPageNumber(), disbursementRule.getPageSize());
+        if (MeedlValidator.isEmptyCollection(disbursementRule.getActivationStatuses())){
+            disbursementRule.setActivationStatuses(Set.of());
+        }
+
+        Page<DisbursementRuleEntity> disbursementRuleEntities =
+                disbursementRuleRepository.searchByNameAndActivationStatuses(disbursementRule.getName(), disbursementRule.getActivationStatuses(), pageRequest);
+
+        return disbursementRuleEntities.map(disbursementRuleMapper::map);
     }
 }

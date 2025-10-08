@@ -114,4 +114,12 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
 
         disbursementRuleOutputPort.deleteById(disbursementRule.getId());
     }
+
+    @Override
+    public Page<DisbursementRule> search(DisbursementRule disbursementRule) throws MeedlException {
+        MeedlValidator.validateObjectInstance(disbursementRule, DisbursementRuleMessages.EMPTY_DISBURSEMENT_RULE.getMessage());
+        MeedlValidator.validateDataElement(disbursementRule.getName(), DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE_NAME.getMessage());
+
+        return disbursementRuleOutputPort.search(disbursementRule);
+    }
 }

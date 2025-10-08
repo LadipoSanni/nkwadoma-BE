@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -20,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -244,5 +247,60 @@ class DisbursementRuleServiceTest {
 
         verify(disbursementRuleOutputPort).deleteById(disbursementRule.getId());
     }
+
+    // =============================
+    // NEW SEARCH TESTS
+    // =============================
+
+    @Test
+    void searchWithValidDisbursementRule() throws MeedlException {
+        // given
+        Page<DisbursementRule> expectedPage = new PageImpl<>(List.of(disbursementRule));
+        when(disbursementRuleOutputPort.search(any(DisbursementRule.class)))
+                .thenReturn(expectedPage);
+
+        // when
+        Page<DisbursementRule> result = disbursementRuleService.search(disbursementRule);
+
+        // then
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertEquals("Test Rule", result.getContent().get(0).getName());
+        verify(disbursementRuleOutputPort).search(disbursementRule);
+    }
+
+    @Test
+    void searchWithNullDisbursementRule() throws MeedlException {
+        assertThrows(MeedlException.class, () -> disbursementRuleService.search(null));
+        verify(disbursementRuleOutputPort, never()).search(any());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "", " ", "\t" })
+    void searchWithInvalidName(String invalidName) throws MeedlException {
+        disbursementRule.setName(invalidName);
+
+        assertThrows(MeedlException.class, () -> disbursementRuleService.search(disbursementRule));
+        verify(disbursementRuleOutputPort, never()).search(any());
+    }
+
+    @Test
+    void searchWithEmptyStatuses() throws MeedlException {
+        // given
+        disbursementRule.setActivationStatuses(Set.of()); // no statuses
+        Page<DisbursementRule> expectedPage = new PageImpl<>(List.of(disbursementRule));
+
+        when(disbursementRuleOutputPort.search(any(DisbursementRule.class)))
+                .thenReturn(expectedPage);
+
+        // when
+        Page<DisbursementRule> result = disbursementRuleService.search(disbursementRule);
+
+        // then
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+        verify(disbursementRuleOutputPort).search(disbursementRule);
+    }
+
 }
 
