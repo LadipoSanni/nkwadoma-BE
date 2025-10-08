@@ -12,8 +12,11 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanProductResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loanManagement.DisbursementRuleRestMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -85,8 +88,32 @@ public class DisbursementRuleController {
                 .message(DISBURSEMENT_RULE_VIEW_DETAIL_SUCCESS)
                 .statusCode(HttpStatus.CREATED.toString())
                 .build();
-        return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
+        return new ResponseEntity<>(apiResponse,HttpStatus.FOUND);
     }
+
+    @GetMapping("/search")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
+    public ResponseEntity<ApiResponse<?>> searchDisbursementRule (
+            @Valid @RequestParam(name = "name") @NotBlank(message = "Disbursement rule name is required") String name,
+            @AuthenticationPrincipal Jwt meedlUser,
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber
+    ) throws MeedlException {
+        DisbursementRule disbursementRule = DisbursementRule.builder()
+                .name(name)
+                .pageNumber(pageNumber)
+                .pageSize(pageSize)
+                .build();
+        Page<DisbursementRule> disbursementRulePage = disbursementRuleUseCase.search(disbursementRule);
+        DisbursementRuleResponse disbursementRuleResponse = disbursementRuleUseMapper.map(disbursementRule);
+        ApiResponse<DisbursementRuleResponse> apiResponse = ApiResponse.<DisbursementRuleResponse>builder()
+                .data(disbursementRuleResponse)
+                .message(DISBURSEMENT_RULE_VIEW_DETAIL_SUCCESS)
+                .statusCode(HttpStatus.CREATED.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.FOUND);
+    }
+
 
     @PutMapping("/respond")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN')")
@@ -103,6 +130,6 @@ public class DisbursementRuleController {
                 .message(DISBURSEMENT_RULE_VIEW_DETAIL_SUCCESS)
                 .statusCode(HttpStatus.CREATED.toString())
                 .build();
-        return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
 }

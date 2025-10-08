@@ -51,6 +51,7 @@ public class TestData {
                 .query("query")
                 .activationStatus(ActivationStatus.APPROVED)
                 .name(TestUtils.generateName(5))
+                .activationStatuses(Set.of(ActivationStatus.APPROVED))
                 .build();
     }
     public static UserIdentity createTestUserIdentity(String email){
