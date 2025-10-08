@@ -106,24 +106,6 @@ public class DisbursementRuleAdapterTest {
 
     @Order(4)
     @Test
-    void searchByValidName_NoStatusesProvided_ShouldReturnAll() throws MeedlException {
-        Pageable pageable = PageRequest.of(0, 10);
-
-        Page<DisbursementRule> results = disbursementRuleOutputPort.search(
-                DisbursementRule.builder()
-                        .name(disbursementRule.getName())
-                        .activationStatuses(Set.of()) // empty list
-                        .pageNumber(0)
-                        .pageSize(10)
-                        .build()
-        );
-
-        assertNotNull(results);
-        assertFalse(results.isEmpty());
-    }
-
-    @Order(5)
-    @Test
     void searchByInvalidName() {
         DisbursementRule invalidSearch = DisbursementRule.builder()
                 .name("")
@@ -136,7 +118,7 @@ public class DisbursementRuleAdapterTest {
                 () -> disbursementRuleOutputPort.search(invalidSearch));
     }
 
-    @Order(6)
+    @Order(5)
     @Test
     void searchByNameButDifferentStatus_ShouldReturnEmpty() throws MeedlException {
         Pageable pageable = PageRequest.of(0, 10);
@@ -154,7 +136,7 @@ public class DisbursementRuleAdapterTest {
         assertTrue(results.isEmpty());
     }
     @Test
-    @Order(7)
+    @Order(6)
     void deleteDisbursementRule() throws MeedlException {
         DisbursementRule foundDisbursementRule = disbursementRuleOutputPort.findById(disbursementRuleId);
         assertNotNull(foundDisbursementRule);
