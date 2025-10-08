@@ -22,4 +22,8 @@ public class VendorService implements VendorUseCase {
         return vendorOutputPort.viewAllVendor(vendor);
     }
 
+    @Override
+    public Page<String> viewAllProviderService(Vendor vendor){
+        return vendorOutputPort.viewAllProviderService(vendor);
+    }
 }

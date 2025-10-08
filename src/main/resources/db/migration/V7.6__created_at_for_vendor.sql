@@ -1,4 +1,0 @@
-
-
-ALTER TABLE vendor_entity
-    ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITHOUT TIME ZONE ;

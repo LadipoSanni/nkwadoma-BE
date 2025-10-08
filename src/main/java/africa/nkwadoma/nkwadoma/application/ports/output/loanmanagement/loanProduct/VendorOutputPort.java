@@ -15,4 +15,6 @@ public interface VendorOutputPort {
     void deleteById(String vendorId) throws MeedlException;
 
     void deleteMultipleById(List<String> vendorIds) throws MeedlException;
+
+    Page<String> viewAllProviderService(Vendor vendor);
 }

@@ -14,7 +14,6 @@ import java.util.Set;
 @Slf4j
 public class Vendor {
     private String id;
-//    private Product product;
     private String vendorName;
     private Set<String> providerServices;
     private String createdAt;

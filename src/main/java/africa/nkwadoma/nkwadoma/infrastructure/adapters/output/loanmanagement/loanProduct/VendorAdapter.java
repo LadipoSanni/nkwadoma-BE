@@ -54,4 +54,9 @@ public class VendorAdapter implements VendorOutputPort {
         MeedlValidator.validateCollection(vendorIds, "Vendors id is required before deleting");
         vendorEntityRepository.deleteAllById(vendorIds);
     }
+
+    @Override
+    public Page<String> viewAllProviderService(Vendor vendor) {
+        return null;
+    }
 }
