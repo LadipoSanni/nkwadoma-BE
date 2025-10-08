@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanmanagement.loanbook;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.RepaymentHistoryUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOfferOutputPort;
@@ -8,6 +9,8 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOutp
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.RepaymentHistoryOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.FinancialConstants;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loan;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
@@ -189,6 +192,14 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
         return RepaymentHistory.builder().totalAmountRepaid(totalRepayment)
                 .principalPayment(monthlyPayment).interestIncurred(totalInterestPaid).build();
 
+    }
+
+    @Override
+    public Page<RepaymentHistory> findAllRepaymentHistoryByLoanId(String loanId, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(loanId,"Loan id cannot be empty");
+        MeedlValidator.validatePageNumber(pageNumber);
+        MeedlValidator.validatePageSize(pageSize);
+        return repaymentHistoryOutputPort.findAllRepaymentHistoryByLoanId(loanId,pageSize,pageNumber);
     }
 
     private static BigDecimal getMonthleyRate(LoanOffer loanOffer) {

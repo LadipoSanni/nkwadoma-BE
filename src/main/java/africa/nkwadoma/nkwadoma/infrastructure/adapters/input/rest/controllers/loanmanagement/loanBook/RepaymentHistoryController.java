@@ -165,5 +165,27 @@ public class RepaymentHistoryController {
     }
 
 
-//    @
+    @GetMapping("/loan")
+    @PreAuthorize("hasRole('LOANEE') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')" +
+            "or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('ORGANIZATION_ASSOCIATE') or hasRole('ORGANIZATION_ADMIN') ")
+    public ResponseEntity<ApiResponse<?>> viewAllRepaymentForALoan(@RequestParam(name = "loanId")String loanId,
+                                                                   @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                                   @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
+
+        Page<RepaymentHistory>  repaymentHistories = repaymentHistoryUseCase.findAllRepaymentHistoryByLoanId(loanId,pageSize,pageNumber);
+        log.info("repayment histories gotten from service {} , total element gotten  : {}",
+                repaymentHistories.getContent().stream().toList(),repaymentHistories.getTotalElements());
+        List<RepaymentHistoryResponse> repaymentHistoryResponse = repaymentHistories.stream()
+                .map(repaymentHistoryRestMapper::toRepaymentResponse).toList();
+        PaginatedResponse<RepaymentHistoryResponse> paginatedResponse = new PaginatedResponse<>(
+                repaymentHistoryResponse,repaymentHistories.hasNext(),repaymentHistories.getTotalPages(),
+                repaymentHistories.getTotalElements() ,pageNumber,pageSize
+        );
+        ApiResponse<PaginatedResponse<RepaymentHistoryResponse>> apiResponse = ApiResponse.<PaginatedResponse<RepaymentHistoryResponse>>builder()
+                .data(paginatedResponse)
+                .message(SuccessMessages.PAYMENT_HISTORY_FOR_A_LOAN)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
 }

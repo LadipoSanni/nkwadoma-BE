@@ -161,4 +161,18 @@ public class RepaymentHistoryAdapter implements RepaymentHistoryOutputPort {
         return repaymentHistoryRepository.checkIfLoaneeHaveAnyRepayment(id,cohortId);
     }
 
+    @Override
+    public Page<RepaymentHistory> findAllRepaymentHistoryByLoanId(String loanId, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(loanId,"Loan id cannot be empty");
+        MeedlValidator.validatePageNumber(pageNumber);
+        MeedlValidator.validatePageSize(pageSize);
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("paymentDateTime").descending());
+
+        Page<RepaymentHistoryEntity> repaymentHistoryEntities =
+                repaymentHistoryRepository.findAllByLoanId(loanId,pageable);
+
+        return repaymentHistoryEntities.map(repaymentHistoryMapper::map);
+    }
+
 }

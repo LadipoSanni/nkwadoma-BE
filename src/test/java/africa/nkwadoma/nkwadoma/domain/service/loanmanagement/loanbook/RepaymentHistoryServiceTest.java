@@ -164,6 +164,19 @@ class RepaymentHistoryServiceTest {
         }
     }
 
+
+    @Test
+    void viewAllRepaymentHistoryForALoan(){
+        Page<RepaymentHistory> repaymentHistoryPage = Page.empty();
+        try{
+            when(repaymentHistoryOutputPort.findAllRepaymentHistoryByLoanId(actorId,pageSize,pageNumber)).thenReturn(new PageImpl<>(repaymentHistories));
+            repaymentHistoryPage = repaymentHistoryService.findAllRepaymentHistoryByLoanId(actorId,pageSize,pageNumber);
+        }catch (MeedlException meedlException) {
+            log.info("error {}", meedlException);
+        }
+        assertEquals(repaymentHistoryPage.getContent().size(),repaymentHistories.size());
+    }
+
     @AfterEach
     void tearDown() {
     }

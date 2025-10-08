@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.loanBook;
 
+import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.RepaymentHistoryEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -121,5 +122,18 @@ public interface RepaymentHistoryRepository extends JpaRepository<RepaymentHisto
                     where r.loanee.id = :id and r.cohortId = :cohortId               
         """)
     boolean checkIfLoaneeHaveAnyRepayment( @Param("id") String id, @Param("cohortId") String cohortId);
+
+
+    @Query("""
+    select repayment from RepaymentHistoryEntity repayment
+        join CohortLoaneeEntity cohortLoanee on cohortLoanee.cohort.id = repayment.cohortId and  cohortLoanee.loanee.id = repayment.loanee.id
+        join LoanReferralEntity loanReferral on loanReferral.cohortLoanee.id = cohortLoanee.id
+        join LoanRequestEntity loanRequest on loanRequest.id = loanReferral.id
+        join LoanOfferEntity loanOffer on loanOffer.id = loanRequest.id
+        join LoanEntity loan on loan.loanOfferId = loanOffer.id
+ 
+    where loan.id = :loanId
+    """)
+    Page<RepaymentHistoryEntity> findAllByLoanId(@Param("loanId") String loanId, Pageable pageable);
 }
 
