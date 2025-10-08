@@ -1,14 +1,14 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.CreateLoanProductUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.ViewLoanProductUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanProduct.CreateLoanProductUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanProduct.ViewLoanProductUseCase;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.loanmanagement.LoanController;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoanProductRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanProductResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loanManagement.LoanProductRestMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanProduct.LoanProductResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loanManagement.loanProduct.LoanProductRestMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;

@@ -40,8 +40,10 @@ public class ControllerConstant {
    public static final String  VIEW_DISBURSEMENT_RULE_DESCRIPTION = "To view a disbursement rule detail by unique id.";
    public static final String  RESPOND_TO_DISBURSEMENT_RULE_DESCRIPTION = "Respond to a disbursement rule with unique id. Only the Meedl super admin can perform this action";
    public static final String  UPDATE_DISBURSEMENT_RULE_DESCRIPTION = "To update a disbursement rule detail by unique id.";
-   public static final String  LOAN_PRODUCT_VIEW_ALL_DESCRIPTION = "Fetch all loan product in the application using pagination. I.e page number and size.";
+   public static final String  LOAN_PRODUCT_VIEW_ALL_DESCRIPTION = "Fetches all loan product in the application using pagination. I.e page number and size.";
+   public static final String  VENDOR_VIEW_ALL_DESCRIPTION = "Fetches all vendors in the application using pagination. I.e page number and size.";
    public static final String  LOAN_PRODUCT_VIEW_ALL = "View all loan product";
+   public static final String VENDOR_VIEW_ALL = "View all vendor";
    public static final String  LOAN_CONTROLLER = "Loan Controller";
    public static final String  LOAN_BOOK_CONTROLLER = "Loan Book Controller";
    public static final String  LOAN_CONTROLLER_DESCRIPTION = "Manage loans and loan product on the platform";

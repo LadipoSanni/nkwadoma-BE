@@ -1,13 +1,12 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loanManagement;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loanManagement.loanProduct;
 
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loan;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.SponsorsRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoanProductRequest;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanProductResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanProduct.LoanProductResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.StartLoanResponse;
-import jakarta.validation.constraints.NotBlank;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;

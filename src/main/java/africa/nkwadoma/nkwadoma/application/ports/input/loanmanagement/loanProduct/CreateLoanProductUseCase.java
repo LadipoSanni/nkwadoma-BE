@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement;
+package africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanProduct;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
