@@ -165,7 +165,7 @@ public class RepaymentHistoryController {
     }
 
 
-    @GetMapping("/loan")
+    @GetMapping("loan")
     @PreAuthorize("hasRole('LOANEE') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')" +
             "or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('ORGANIZATION_ASSOCIATE') or hasRole('ORGANIZATION_ADMIN') ")
     public ResponseEntity<ApiResponse<?>> viewAllRepaymentForALoan(@RequestParam(name = "loanId")String loanId,
