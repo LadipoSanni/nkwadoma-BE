@@ -45,14 +45,11 @@ class VendorServiceTest {
 
     @Test
     void testViewAllVendors_Success() throws MeedlException {
-        // given
         Page<Vendor> vendorPage = new PageImpl<>(List.of(sampleVendor), PageRequest.of(0, 10), 1);
         when(vendorOutputPort.viewAllVendor(sampleVendor)).thenReturn(vendorPage);
 
-        // when
         Page<Vendor> result = vendorService.viewAllVendors(sampleVendor);
 
-        // then
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().get(0).getVendorName()).isEqualTo("Test Vendor");
