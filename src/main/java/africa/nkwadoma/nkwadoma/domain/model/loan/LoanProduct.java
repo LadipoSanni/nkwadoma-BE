@@ -14,7 +14,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -157,5 +156,12 @@ public class LoanProduct {
 
     public void addInvestmentVehicleValues(InvestmentVehicle investmentVehicle){
         setInvestmentVehicleName(investmentVehicle.getName());
+    }
+
+    public void validateProviderServices() throws MeedlException {
+        log.info("The validation of provider services throws exception at runtime. Sneaky throws");
+        for (Vendor vendor : vendors) {
+            vendor.validateProviderServices();
+        }
     }
 }
