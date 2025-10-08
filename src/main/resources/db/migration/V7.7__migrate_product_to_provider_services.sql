@@ -1,8 +1,5 @@
 
 
-ALTER TABLE vendor_entity
-    ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITHOUT TIME ZONE ;
-
 -- Create the new collection table if not already created
 CREATE TABLE IF NOT EXISTS vendor_provider_services (
                                                         vendor_id VARCHAR(255) NOT NULL,
