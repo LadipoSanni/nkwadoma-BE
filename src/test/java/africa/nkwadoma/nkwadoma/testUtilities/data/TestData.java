@@ -370,6 +370,7 @@ public class TestData {
         return Financier.builder()
                 .investmentVehicleDesignation(investmentVehicleDesignations)
                 .accreditationStatus(AccreditationStatus.UNVERIFIED)
+                .activationStatuses(List.of(ActivationStatus.INVITED, ActivationStatus.ACTIVE))
                 .activationStatus(ActivationStatus.INVITED)
                 .pageNumber(pageNumber)
                 .pageSize(pageSize)

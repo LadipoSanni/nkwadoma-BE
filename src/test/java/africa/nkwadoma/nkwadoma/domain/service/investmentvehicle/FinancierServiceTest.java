@@ -744,7 +744,7 @@ public class FinancierServiceTest {
     void viewAllInactiveFinancier(){
         Page<Financier> financiersPage = null;
         try{
-            individualFinancier.setActivationStatus(ActivationStatus.INACTIVE);
+            individualFinancier.setActivationStatuses(List.of(ActivationStatus.INACTIVE));
             Financier foundFinancier = financierOutputPort.findById(individualFinancierId);
             assertNotNull(foundFinancier);
             foundFinancier.setActivationStatus(ActivationStatus.INACTIVE);
@@ -762,7 +762,7 @@ public class FinancierServiceTest {
     void viewAllDeactivatedFinancier(){
         Page<Financier> financiersPage = null;
         try{
-            individualFinancier.setActivationStatus(ActivationStatus.DEACTIVATED);
+            individualFinancier.setActivationStatuses(List.of(ActivationStatus.DEACTIVATED));
             Financier foundFinancier = financierOutputPort.findById(individualFinancierId);
             assertNotNull(foundFinancier);
             foundFinancier.setActivationStatus(ActivationStatus.DEACTIVATED);
