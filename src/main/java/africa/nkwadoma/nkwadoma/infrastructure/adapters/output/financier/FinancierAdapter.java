@@ -2,10 +2,10 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.financier;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
@@ -16,13 +16,14 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.financier.FinancierRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -126,9 +127,12 @@ public class FinancierAdapter implements FinancierOutputPort {
         log.info("Search financier parameters: name {}, page size {}, page number {}, financier type {}, activation status {}, investment vehicle id {}",
                 name, financier.getPageSize(), financier.getPageNumber(), financier.getFinancierType(), financier.getActivationStatus(), financier.getInvestmentVehicleId());
         Pageable pageRequest = PageRequest.of(financier.getPageNumber(), financier.getPageSize());
+        if (MeedlValidator.isEmptyCollection(financier.getActivationStatuses())){
+            financier.setActivationStatuses(List.of());
+        }
         Page<FinancierProjection> financierEntities =
-                financierRepository.findByFinancierByNameFragmentOptionalInvestmentVehicleIdFinancierTypeActivationStatus(
-                        name, financier.getInvestmentVehicleId(), financier.getFinancierType(), financier.getActivationStatus(), pageRequest);
+                financierRepository.findByFinancierByNameFragmentOptionalInvestmentVehicleIdFinancierTypeActivationStatuses(
+                        name, financier.getInvestmentVehicleId(), financier.getFinancierType(), financier.getActivationStatuses(), pageRequest);
         log.info("Financiers found on Entity search : {} {}", name, financierEntities );
         return financierEntities.map(financierMapper::mapProjectionToFinancier);
     }

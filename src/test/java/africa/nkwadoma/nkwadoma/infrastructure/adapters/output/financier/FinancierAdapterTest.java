@@ -37,22 +37,13 @@ class FinancierAdapterTest {
     @Autowired
     private FinancierOutputPort financierOutputPort;
     private Financier individualFinancier;
-    private Financier cooperateFinancier;
     private UserIdentity individualUserIdentity;
     private String financierId;
-    private String nextOfKinId;
-    private String bankDetailId;
-    private String cooperateFinancierId;
     private InvestmentVehicle investmentVehicle;
     private BankDetail bankDetail;
-    private NextOfKin nextOfKin;
 
     @Autowired
     private InvestmentVehicleOutputPort investmentVehicleOutputPort;
-    @Autowired
-    private NextOfKinOutputPort nextOfKinOutputPort;
-    @Autowired
-    private BankDetailOutputPort bankDetailOutputPort;
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
     private final String userEmail = TestUtils.generateEmail("financierindividualemailadapterstest", 5);
@@ -71,7 +62,6 @@ class FinancierAdapterTest {
         investmentVehicle = createInvestmentVehicle(investmentVehicle);
         individualFinancier.setInvestmentVehicleId(investmentVehicle.getId());
 
-        nextOfKin = TestData.createNextOfKinData(individualFinancier.getUserIdentity());
     }
 
     private UserIdentity savedUserToDb(String userEmail, String userId) {

@@ -6,4 +6,6 @@ import org.springframework.data.domain.Page;
 
 public interface VendorUseCase {
     Page<Vendor> viewAllVendors(Vendor vendor) throws MeedlException;
+
+    Page<String> viewAllProviderService(Vendor vendor);
 }

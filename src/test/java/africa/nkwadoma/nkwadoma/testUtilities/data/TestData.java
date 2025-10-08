@@ -51,6 +51,7 @@ public class TestData {
                 .query("query")
                 .activationStatus(ActivationStatus.APPROVED)
                 .name(TestUtils.generateName(5))
+                .activationStatuses(Set.of(ActivationStatus.APPROVED))
                 .build();
     }
     public static UserIdentity createTestUserIdentity(String email){
@@ -369,6 +370,7 @@ public class TestData {
         return Financier.builder()
                 .investmentVehicleDesignation(investmentVehicleDesignations)
                 .accreditationStatus(AccreditationStatus.UNVERIFIED)
+                .activationStatuses(List.of(ActivationStatus.INVITED, ActivationStatus.ACTIVE))
                 .activationStatus(ActivationStatus.INVITED)
                 .pageNumber(pageNumber)
                 .pageSize(pageSize)

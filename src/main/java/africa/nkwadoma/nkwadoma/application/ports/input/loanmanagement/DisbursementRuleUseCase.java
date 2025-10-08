@@ -16,4 +16,6 @@ public interface DisbursementRuleUseCase {
     Page<DisbursementRule> viewAllDisbursementRule(DisbursementRule disbursementRule) throws MeedlException;
 
     void deleteDisbursementRuleById(DisbursementRule disbursementRule) throws MeedlException;
+
+    Page<DisbursementRule> search(DisbursementRule disbursementRule) throws MeedlException;
 }

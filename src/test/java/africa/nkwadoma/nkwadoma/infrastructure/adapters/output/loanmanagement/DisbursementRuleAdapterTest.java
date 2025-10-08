@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.DisbursementRuleOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.VendorEntity;
@@ -14,6 +15,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -31,6 +36,7 @@ public class DisbursementRuleAdapterTest {
     @BeforeAll
     void setUpLoanOffer() {
         disbursementRule = TestData.buildDisbursementRule();
+
     }
 
 
@@ -65,7 +71,6 @@ public class DisbursementRuleAdapterTest {
         assertThrows(MeedlException.class, () -> disbursementRuleOutputPort.deleteById(id));
     }
 
-
     @Order(2)
     @Test
     void findDisbursementRuleById(){
@@ -78,13 +83,64 @@ public class DisbursementRuleAdapterTest {
         assertNotNull(foundDisbursementRule);
     }
 
-    @Test
+
     @Order(3)
+    @Test
+    void searchByValidNameAndStatus() throws MeedlException {
+        DisbursementRule savedRule = disbursementRuleOutputPort.save(disbursementRule);
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<DisbursementRule> results = disbursementRuleOutputPort.search(
+                DisbursementRule.builder()
+                        .name(disbursementRule.getName())
+                        .activationStatuses(Set.of(ActivationStatus.APPROVED))
+                        .pageNumber(0)
+                        .pageSize(10)
+                        .build()
+        );
+
+        assertNotNull(results);
+        assertFalse(results.isEmpty());
+        assertTrue(results.stream().anyMatch(r -> r.getId().equals(savedRule.getId())));
+    }
+
+    @Order(4)
+    @Test
+    void searchByInvalidName() {
+        DisbursementRule invalidSearch = DisbursementRule.builder()
+                .name("")
+                .activationStatuses(Set.of(ActivationStatus.APPROVED))
+                .pageNumber(0)
+                .pageSize(10)
+                .build();
+
+        assertThrows(MeedlException.class,
+                () -> disbursementRuleOutputPort.search(invalidSearch));
+    }
+
+    @Order(5)
+    @Test
+    void searchByNameButDifferentStatus_ShouldReturnEmpty() throws MeedlException {
+        Pageable pageable = PageRequest.of(0, 10);
+
+        Page<DisbursementRule> results = disbursementRuleOutputPort.search(
+                DisbursementRule.builder()
+                        .name(disbursementRule.getName())
+                        .activationStatuses(Set.of(ActivationStatus.INACTIVE)) // different status
+                        .pageNumber(0)
+                        .pageSize(10)
+                        .build()
+        );
+
+        assertNotNull(results);
+        assertTrue(results.isEmpty());
+    }
+    @Test
+    @Order(6)
     void deleteDisbursementRule() throws MeedlException {
         DisbursementRule foundDisbursementRule = disbursementRuleOutputPort.findById(disbursementRuleId);
         assertNotNull(foundDisbursementRule);
         disbursementRuleOutputPort.deleteById(disbursementRuleId);
         assertThrows(MeedlException.class, ()->disbursementRuleOutputPort.findById(disbursementRuleId));
     }
-
 }

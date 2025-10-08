@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Set;
 
@@ -19,4 +20,15 @@ public interface DisbursementRuleRepository extends JpaRepository<DisbursementRu
     Page<DisbursementRuleEntity> findAllDisbursementRuleByActivationStatuses(Set<ActivationStatus> activationStatuses, Pageable pageRequest);
 
     Boolean existsByNameIgnoreCase(String name);
+
+    @Query("""
+    SELECT d FROM DisbursementRuleEntity d
+    WHERE LOWER(d.name) LIKE LOWER(CONCAT('%', :name, '%'))
+      AND (COALESCE(:activationStatuses, NULL) IS NULL OR d.activationStatus IN :activationStatuses)
+    """)
+    Page<DisbursementRuleEntity> searchByNameAndActivationStatuses(
+            @Param("name") String name,
+            @Param("activationStatuses") Set<ActivationStatus> activationStatuses,
+            Pageable pageable
+    );
 }
