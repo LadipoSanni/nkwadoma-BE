@@ -17,6 +17,8 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanManagement.loanProduct.LoanProductMapper;
+import africa.nkwadoma.nkwadoma.testUtilities.TestUtils;
+import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -85,7 +87,7 @@ class LoanProductServiceTest {
         loanee.setCohortId("e4fda779-3c21-4dd6-b66a-3a8742f6ecb1");
 
         financier = Financier.builder().id(UUID.randomUUID().toString()).name("walker").build();
-        Vendor vendor = new Vendor();
+        Vendor vendor = TestData.createTestVendor(TestUtils.generateName(7));
         vendors.add(vendor);
         loanProduct = new LoanProduct();
         loanProduct.setId("3a6d1124-1349-4f5b-831a-ac269369a90f");

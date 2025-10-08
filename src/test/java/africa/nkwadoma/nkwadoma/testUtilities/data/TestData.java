@@ -247,6 +247,7 @@ public class TestData {
     public static Vendor createTestVendor(String name) {
         Vendor vendor = new Vendor();
         vendor.setVendorName(name);
+        vendor.setProviderServices(Set.of(TestUtils.generateName(9)));
         vendor.setTermsAndConditions("Test: A new vendor for test with terms and condition imaginary");
         return vendor;
     }
