@@ -41,8 +41,13 @@ public class ControllerConstant {
    public static final String  RESPOND_TO_DISBURSEMENT_RULE_DESCRIPTION = "Respond to a disbursement rule with unique id. Only the Meedl super admin can perform this action";
    public static final String  UPDATE_DISBURSEMENT_RULE_DESCRIPTION = "To update a disbursement rule detail by unique id.";
    public static final String  LOAN_PRODUCT_VIEW_ALL_DESCRIPTION = "Fetches all loan product in the application using pagination. I.e page number and size.";
+    public static final String PROVIDER_SERVICE_VIEW_ALL_DESCRIPTION =
+            "Fetches all unique provider services added to the platform using pagination (page number and size). "
+                    + "Duplicate services across vendors are removed. For example, if Vendor A offers XYZ and Vendor B offers ABX, "
+                    + "the result will be ABXYZ as the complete set of services on the platform.";
    public static final String  VENDOR_VIEW_ALL_DESCRIPTION = "Fetches all vendors in the application using pagination. I.e page number and size.";
    public static final String  LOAN_PRODUCT_VIEW_ALL = "View all loan product";
+   public static final String PROVIDER_SERVICE_VIEW_ALL = "View all provider service";
    public static final String VENDOR_VIEW_ALL = "View all vendor";
    public static final String  LOAN_CONTROLLER = "Loan Controller";
    public static final String  LOAN_BOOK_CONTROLLER = "Loan Book Controller";

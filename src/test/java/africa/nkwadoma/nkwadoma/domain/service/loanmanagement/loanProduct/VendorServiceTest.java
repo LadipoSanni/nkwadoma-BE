@@ -1,7 +1,5 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanmanagement.loanProduct;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanProduct.VendorOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
@@ -44,7 +42,7 @@ class VendorServiceTest {
     }
 
     @Test
-    void testViewAllVendors_Success() throws MeedlException {
+    void viewAllVendors() throws MeedlException {
         Page<Vendor> vendorPage = new PageImpl<>(List.of(sampleVendor), PageRequest.of(0, 10), 1);
         when(vendorOutputPort.viewAllVendor(sampleVendor)).thenReturn(vendorPage);
 
@@ -58,8 +56,21 @@ class VendorServiceTest {
     }
 
     @Test
-    void testViewAllVendors_NullVendor_ThrowsException() {
-        // when / then
+    void viewAllProviderServices() throws MeedlException {
+        Page<String> providerServicePage = new PageImpl<>(List.of("Provider service"), PageRequest.of(0, 10), 1);
+        when(vendorOutputPort.viewAllProviderService(sampleVendor)).thenReturn(providerServicePage);
+
+        Page<String> result = vendorService.viewAllProviderService(sampleVendor);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).equals("Test Vendor"));
+
+        verify(vendorOutputPort, times(1)).viewAllProviderService(sampleVendor);
+    }
+
+    @Test
+    void viewAllVendorsWithNullVendor() {
         MeedlException ex = assertThrows(MeedlException.class,
                 () -> vendorService.viewAllVendors(null));
 
@@ -68,8 +79,8 @@ class VendorServiceTest {
     }
 
     @Test
-    void testViewAllVendors_InvalidPageSize_ThrowsException() {
-        sampleVendor.setPageSize(0); // invalid page size
+    void testViewAllVendorsWithInvalidPageSize() {
+        sampleVendor.setPageSize(0);
 
         MeedlException ex = assertThrows(MeedlException.class,
                 () -> vendorService.viewAllVendors(sampleVendor));
@@ -79,7 +90,7 @@ class VendorServiceTest {
     }
 
     @Test
-    void testViewAllVendors_InvalidPageNumber_ThrowsException() {
+    void testViewAllVendorsWithInvalidPageNumber() {
         sampleVendor.setPageNumber(-1); // invalid page number
 
         MeedlException ex = assertThrows(MeedlException.class,

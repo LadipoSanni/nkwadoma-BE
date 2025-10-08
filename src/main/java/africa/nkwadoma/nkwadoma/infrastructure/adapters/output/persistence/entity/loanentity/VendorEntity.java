@@ -19,7 +19,7 @@ public class VendorEntity {
     @UuidGenerator
     private String id;
     private LocalDateTime createdAt;
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
             name = "vendor_provider_services",
             joinColumns = @JoinColumn(name = "vendor_id")
