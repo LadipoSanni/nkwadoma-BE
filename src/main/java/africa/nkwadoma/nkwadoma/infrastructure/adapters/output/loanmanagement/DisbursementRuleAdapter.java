@@ -77,7 +77,7 @@ public class DisbursementRuleAdapter implements DisbursementRuleOutputPort {
         Pageable pageRequest = PageRequest.of(disbursementRule.getPageNumber(), disbursementRule.getPageSize());
         if (MeedlValidator.isEmptyCollection(disbursementRule.getActivationStatuses())){
             log.info("No activation status was provided");
-            disbursementRule.setActivationStatuses(Set.of());
+            disbursementRule.setActivationStatuses(null);
         }
         log.info("About to make db search disbursement rule");
         Page<DisbursementRuleEntity> disbursementRuleEntities =

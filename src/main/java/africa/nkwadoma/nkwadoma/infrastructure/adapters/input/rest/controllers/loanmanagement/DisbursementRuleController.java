@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.loanmanagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.DisbursementRuleUseCase;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.DisbursementRule;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DisbursementRuleRequest;
@@ -25,6 +26,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ControllerConstant.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.*;
@@ -97,11 +99,13 @@ public class DisbursementRuleController {
     public ResponseEntity<ApiResponse<?>> searchDisbursementRule (
             @AuthenticationPrincipal Jwt meedlUser,
             @RequestParam(name = "name") String name,
+            @RequestParam(required = false, name = "activationStatuses") Set<ActivationStatus> activationStatuses,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber
     ) throws MeedlException {
         DisbursementRule disbursementRule = DisbursementRule.builder()
                 .name(name)
+                .activationStatuses(activationStatuses)
                 .pageNumber(pageNumber)
                 .pageSize(pageSize)
                 .build();
@@ -136,5 +140,29 @@ public class DisbursementRuleController {
                 .statusCode(HttpStatus.CREATED.toString())
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+    @GetMapping("/view/all")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
+    public ResponseEntity<ApiResponse<?>> searchDisbursementRule (
+            @AuthenticationPrincipal Jwt meedlUser,
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber
+    ) throws MeedlException {
+        DisbursementRule disbursementRule = DisbursementRule.builder()
+                .pageNumber(pageNumber)
+                .pageSize(pageSize)
+                .build();
+        Page<DisbursementRule> disbursementRulePage = disbursementRuleUseCase.viewAllDisbursementRule(disbursementRule);
+        List<DisbursementRuleResponse> disbursementRuleResponse = disbursementRulePage.stream().map(disbursementRuleUseMapper::map).toList();
+        PaginatedResponse<DisbursementRuleResponse> paginatedResponse = new PaginatedResponse<>(
+                disbursementRuleResponse, disbursementRulePage.hasNext(), disbursementRulePage.getTotalPages(),disbursementRulePage.getTotalElements() , pageNumber,pageSize);
+        log.info("View all disbursement rule called successfully.");
+
+        return new ResponseEntity<>(ApiResponse.builder().
+                statusCode(HttpStatus.FOUND.toString()).
+                data(paginatedResponse).
+                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL).
+                build(), HttpStatus.FOUND
+        );
     }
 }
