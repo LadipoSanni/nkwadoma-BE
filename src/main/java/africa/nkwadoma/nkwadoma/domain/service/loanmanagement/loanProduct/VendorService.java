@@ -21,4 +21,5 @@ public class VendorService implements VendorUseCase {
         MeedlValidator.validatePageNumber(vendor.getPageNumber());
         return vendorOutputPort.viewAllVendor(vendor);
     }
+
 }
