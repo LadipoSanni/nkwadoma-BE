@@ -76,12 +76,13 @@ public class DisbursementRuleAdapter implements DisbursementRuleOutputPort {
 
         Pageable pageRequest = PageRequest.of(disbursementRule.getPageNumber(), disbursementRule.getPageSize());
         if (MeedlValidator.isEmptyCollection(disbursementRule.getActivationStatuses())){
-            disbursementRule.setActivationStatuses(Set.of());
+            log.info("No activation status was provided");
+            disbursementRule.setActivationStatuses(null);
         }
-
+        log.info("About to make db search disbursement rule");
         Page<DisbursementRuleEntity> disbursementRuleEntities =
                 disbursementRuleRepository.searchByNameAndActivationStatuses(disbursementRule.getName(), disbursementRule.getActivationStatuses(), pageRequest);
-
+        log.info("Found disbursement rules in search {}", disbursementRuleEntities);
         return disbursementRuleEntities.map(disbursementRuleMapper::map);
     }
 }

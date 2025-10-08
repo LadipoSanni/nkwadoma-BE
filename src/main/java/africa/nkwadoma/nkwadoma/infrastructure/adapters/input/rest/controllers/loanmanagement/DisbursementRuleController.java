@@ -1,13 +1,17 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.loanmanagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.DisbursementRuleUseCase;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.DisbursementRule;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DisbursementRuleRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.QAResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.DisbursementRuleResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanProduct.VendorResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loanManagement.DisbursementRuleRestMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ControllerConstant;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -20,6 +24,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Set;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ControllerConstant.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.*;
@@ -90,24 +97,30 @@ public class DisbursementRuleController {
     @GetMapping("/search")
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> searchDisbursementRule (
-            @Valid @RequestParam(name = "name") @NotBlank(message = "Disbursement rule name is required") String name,
             @AuthenticationPrincipal Jwt meedlUser,
+            @RequestParam(name = "name") String name,
+            @RequestParam(required = false, name = "activationStatuses") Set<ActivationStatus> activationStatuses,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber
     ) throws MeedlException {
         DisbursementRule disbursementRule = DisbursementRule.builder()
                 .name(name)
+                .activationStatuses(activationStatuses)
                 .pageNumber(pageNumber)
                 .pageSize(pageSize)
                 .build();
         Page<DisbursementRule> disbursementRulePage = disbursementRuleUseCase.search(disbursementRule);
-        DisbursementRuleResponse disbursementRuleResponse = disbursementRuleUseMapper.map(disbursementRule);
-        ApiResponse<DisbursementRuleResponse> apiResponse = ApiResponse.<DisbursementRuleResponse>builder()
-                .data(disbursementRuleResponse)
-                .message(DISBURSEMENT_RULE_VIEW_DETAIL_SUCCESS)
-                .statusCode(HttpStatus.CREATED.toString())
-                .build();
-        return new ResponseEntity<>(apiResponse,HttpStatus.FOUND);
+        List<DisbursementRuleResponse> disbursementRuleResponse = disbursementRulePage.stream().map(disbursementRuleUseMapper::map).toList();
+        PaginatedResponse<DisbursementRuleResponse> paginatedResponse = new PaginatedResponse<>(
+                disbursementRuleResponse, disbursementRulePage.hasNext(), disbursementRulePage.getTotalPages(),disbursementRulePage.getTotalElements() , pageNumber,pageSize);
+        log.info("Search disbursement rule called successfully.");
+
+        return new ResponseEntity<>(ApiResponse.builder().
+                statusCode(HttpStatus.FOUND.toString()).
+                data(paginatedResponse).
+                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL).
+                build(), HttpStatus.FOUND
+        );
     }
 
 
@@ -127,5 +140,29 @@ public class DisbursementRuleController {
                 .statusCode(HttpStatus.CREATED.toString())
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+    @GetMapping("/view/all")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
+    public ResponseEntity<ApiResponse<?>> searchDisbursementRule (
+            @AuthenticationPrincipal Jwt meedlUser,
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber
+    ) throws MeedlException {
+        DisbursementRule disbursementRule = DisbursementRule.builder()
+                .pageNumber(pageNumber)
+                .pageSize(pageSize)
+                .build();
+        Page<DisbursementRule> disbursementRulePage = disbursementRuleUseCase.viewAllDisbursementRule(disbursementRule);
+        List<DisbursementRuleResponse> disbursementRuleResponse = disbursementRulePage.stream().map(disbursementRuleUseMapper::map).toList();
+        PaginatedResponse<DisbursementRuleResponse> paginatedResponse = new PaginatedResponse<>(
+                disbursementRuleResponse, disbursementRulePage.hasNext(), disbursementRulePage.getTotalPages(),disbursementRulePage.getTotalElements() , pageNumber,pageSize);
+        log.info("View all disbursement rule called successfully.");
+
+        return new ResponseEntity<>(ApiResponse.builder().
+                statusCode(HttpStatus.FOUND.toString()).
+                data(paginatedResponse).
+                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL).
+                build(), HttpStatus.FOUND
+        );
     }
 }

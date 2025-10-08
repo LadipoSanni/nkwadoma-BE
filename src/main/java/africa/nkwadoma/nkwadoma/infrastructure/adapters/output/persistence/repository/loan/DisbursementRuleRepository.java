@@ -24,7 +24,7 @@ public interface DisbursementRuleRepository extends JpaRepository<DisbursementRu
     @Query("""
     SELECT d FROM DisbursementRuleEntity d
     WHERE LOWER(d.name) LIKE LOWER(CONCAT('%', :name, '%'))
-      AND (COALESCE(:activationStatuses, NULL) IS NULL OR d.activationStatus IN :activationStatuses)
+      AND ( :activationStatuses IS NULL OR d.activationStatus IN :activationStatuses )
     """)
     Page<DisbursementRuleEntity> searchByNameAndActivationStatuses(
             @Param("name") String name,

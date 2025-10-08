@@ -57,6 +57,7 @@ public class VendorController {
                 data(paginatedResponse).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL).
                 build(), HttpStatus.FOUND
+
         );
     }
 
