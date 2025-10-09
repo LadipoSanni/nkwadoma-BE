@@ -13,6 +13,7 @@ import java.util.List;
 public class CohortLoaneeResponse {
 
 
+    private String loanId;
     private String cohortId;
     private String loaneeId;
     private String firstName;

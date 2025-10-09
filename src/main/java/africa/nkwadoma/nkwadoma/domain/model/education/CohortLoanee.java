@@ -63,6 +63,7 @@ public class CohortLoanee {
     private String programName;
     private String organizationName;
     private String interestIncurred;
+    private String loanId;
     private List<LoaneeLoanBreakdown> loanBreakdowns;
 
 
