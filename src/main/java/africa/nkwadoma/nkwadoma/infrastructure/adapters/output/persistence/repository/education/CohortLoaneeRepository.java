@@ -45,7 +45,7 @@ public interface CohortLoaneeRepository extends JpaRepository<CohortLoaneeEntity
                 left join NextOfKinEntity next_of_kin on next_of_kin.id = user.nextOfKinEntity.id
                 left join CohortEntity cohort on cohort.id = cohort_loanee.cohort.id
                 left join ProgramEntity program on program.id = cohort.programId
-                left join OrganizationEntity organization on organization.id = program.organizationIdentity.id      
+                left join OrganizationEntity organization on organization.id = program.organizationIdentity.id
                 left join LoanReferralEntity  loan_referral on loan_referral.cohortLoanee.id = cohort_loanee.id
                 left join LoanRequestEntity loan_request on loan_request.id = loan_referral.id 
                 left join LoanOfferEntity loan_offer on loan_offer.id = loan_request.id

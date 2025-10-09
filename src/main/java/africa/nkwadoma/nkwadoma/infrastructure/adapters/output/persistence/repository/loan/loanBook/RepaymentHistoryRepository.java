@@ -125,15 +125,19 @@ public interface RepaymentHistoryRepository extends JpaRepository<RepaymentHisto
 
 
     @Query("""
-    select repayment from RepaymentHistoryEntity repayment
-        join CohortLoaneeEntity cohortLoanee on cohortLoanee.cohort.id = repayment.cohortId and  cohortLoanee.loanee.id = repayment.loanee.id
-        join LoanReferralEntity loanReferral on loanReferral.cohortLoanee.id = cohortLoanee.id
-        join LoanRequestEntity loanRequest on loanRequest.id = loanReferral.id
-        join LoanOfferEntity loanOffer on loanOffer.id = loanRequest.id
-        join LoanEntity loan on loan.loanOfferId = loanOffer.id
- 
-    where loan.id = :loanId
-    """)
-    Page<RepaymentHistoryEntity> findAllByLoanId(@Param("loanId") String loanId, Pageable pageable);
+    SELECT repayment FROM RepaymentHistoryEntity repayment
+        JOIN CohortLoaneeEntity cohortLoanee ON cohortLoanee.cohort.id = repayment.cohortId AND cohortLoanee.loanee.id = repayment.loanee.id
+        JOIN LoanReferralEntity loanReferral ON loanReferral.cohortLoanee.id = cohortLoanee.id
+        JOIN LoanRequestEntity loanRequest ON loanRequest.id = loanReferral.id
+        JOIN LoanOfferEntity loanOffer ON loanOffer.id = loanRequest.id
+        JOIN LoanEntity loan ON loan.loanOfferId = loanOffer.id
+    WHERE loan.id = :loanId
+        AND (:year IS NULL OR YEAR(repayment.paymentDateTime) = :year)
+        AND (:month IS NULL OR MONTH(repayment.paymentDateTime) = :month)
+""")
+    Page<RepaymentHistoryEntity> findAllByLoanId(@Param("loanId") String loanId,
+                                                 @Param("month") Integer month,
+                                                 @Param("year") Integer year,
+                                                 Pageable pageable);
 }
 

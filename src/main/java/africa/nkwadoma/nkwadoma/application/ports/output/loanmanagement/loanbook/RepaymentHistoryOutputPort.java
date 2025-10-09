@@ -29,5 +29,5 @@ public interface RepaymentHistoryOutputPort {
 
     boolean checkIfLoaneeHasMadeAnyRepayment(String id, String cohortId) throws MeedlException;
 
-    Page<RepaymentHistory> findAllRepaymentHistoryByLoanId(String loanId, int pageSize, int pageNumber) throws MeedlException;
+    Page<RepaymentHistory> findAllRepaymentHistoryByLoanId(RepaymentHistory repaymentHistory, int pageSize, int pageNumber) throws MeedlException;
 }
