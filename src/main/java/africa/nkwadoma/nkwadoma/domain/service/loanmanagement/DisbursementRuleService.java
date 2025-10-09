@@ -72,7 +72,6 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
         if (!ActivationStatus.APPROVED.equals(foundDIsbursementRule.getActivationStatus())) {
             log.info("Updating disbursement rule ");
             foundDIsbursementRule.setName(disbursementRule.getName());
-            foundDIsbursementRule.setQuery(disbursementRule.getQuery());
             return disbursementRuleOutputPort.save(foundDIsbursementRule);
         }
         return foundDIsbursementRule;

@@ -26,7 +26,6 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.loan.FinancialCons
 public class DisbursementRule {
     private String id;
     private String name;
-    private String query;
     private DisbursementInterval interval;
     private List<Double> percentageDistribution;
     private LocalDateTime startDate;
