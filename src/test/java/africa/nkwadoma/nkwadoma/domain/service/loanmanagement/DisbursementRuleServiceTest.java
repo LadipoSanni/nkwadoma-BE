@@ -75,7 +75,6 @@ class DisbursementRuleServiceTest {
         existingRule.setId(disbursementRule.getId());
         existingRule.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
         existingRule.setName("Old Name");
-        existingRule.setQuery("Old Query");
 
         when(disbursementRuleOutputPort.findById(disbursementRule.getId()))
                 .thenReturn(existingRule);
@@ -85,7 +84,6 @@ class DisbursementRuleServiceTest {
         DisbursementRule updated = disbursementRuleService.updateDisbursementRule(disbursementRule);
 
         assertEquals(disbursementRule.getName(), updated.getName());
-        assertEquals(disbursementRule.getQuery(), updated.getQuery());
         verify(disbursementRuleOutputPort).save(existingRule);
     }
 
@@ -98,7 +96,6 @@ class DisbursementRuleServiceTest {
         existingRule.setId(disbursementRule.getId());
         existingRule.setActivationStatus(ActivationStatus.APPROVED);
         existingRule.setName("Approved Rule");
-        existingRule.setQuery("Approved Query");
 
         when(disbursementRuleOutputPort.findById(disbursementRule.getId()))
                 .thenReturn(existingRule);
@@ -106,7 +103,6 @@ class DisbursementRuleServiceTest {
         DisbursementRule result = disbursementRuleService.updateDisbursementRule(disbursementRule);
 
         assertEquals("Approved Rule", result.getName());
-        assertEquals("Approved Query", result.getQuery());
         verify(disbursementRuleOutputPort, never()).save(any());
     }
 

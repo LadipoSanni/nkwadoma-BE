@@ -48,7 +48,8 @@ public class TestData {
     }
     public static DisbursementRule buildDisbursementRule() {
         return  DisbursementRule.builder()
-                .query("query")
+                .percentageDistribution(List.of(100.00))
+                .interval(DisbursementInterval.MONTHLY)
                 .activationStatus(ActivationStatus.APPROVED)
                 .name(TestUtils.generateName(5))
                 .activationStatuses(Set.of(ActivationStatus.APPROVED))

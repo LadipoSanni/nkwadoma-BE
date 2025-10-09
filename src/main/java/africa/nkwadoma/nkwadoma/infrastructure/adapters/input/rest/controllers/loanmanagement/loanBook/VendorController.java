@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ControllerConstant.*;
@@ -76,11 +77,12 @@ public class VendorController {
                 providerServiceResponse, providerServicePage.hasNext(), providerServicePage.getTotalPages(),providerServicePage.getTotalElements() , pageNumber,pageSize);
         log.info("View all provider service called successfully.");
 
-        return new ResponseEntity<>(ApiResponse.builder().
-                statusCode(HttpStatus.FOUND.toString()).
-                data(paginatedResponse).
-                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL).
-                build(), HttpStatus.FOUND
+        return new ResponseEntity<>(ApiResponse.builder()
+                .statusCode(HttpStatus.FOUND.toString())
+                .data(paginatedResponse)
+                .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL)
+                .timeStamp(LocalDateTime.now())
+                .build(), HttpStatus.FOUND
         );
     }
 }
