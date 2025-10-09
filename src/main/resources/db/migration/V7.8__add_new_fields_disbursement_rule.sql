@@ -4,6 +4,7 @@ ALTER TABLE disbursement_rule_entity
     ADD COLUMN IF NOT EXISTS interval VARCHAR(70),
     ADD COLUMN IF NOT EXISTS start_date TIMESTAMP,
     ADD COLUMN IF NOT EXISTS end_date TIMESTAMP,
+    ADD COLUMN IF NOT EXISTS number_of_usage INT DEFAULT 0,
     ADD COLUMN IF NOT EXISTS date_created TIMESTAMP;
 
 -- Create a separate table for the percentage_distribution list (since List<Double> requires element collection)

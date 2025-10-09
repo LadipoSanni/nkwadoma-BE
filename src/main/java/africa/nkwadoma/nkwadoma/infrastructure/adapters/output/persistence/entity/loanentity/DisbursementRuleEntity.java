@@ -31,6 +31,7 @@ public class DisbursementRuleEntity {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private LocalDateTime dateCreated;
+    private int numberOfUsage;
     @Enumerated(EnumType.STRING)
     private ActivationStatus activationStatus;
 }

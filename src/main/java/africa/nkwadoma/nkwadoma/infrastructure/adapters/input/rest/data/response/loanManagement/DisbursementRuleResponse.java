@@ -16,6 +16,7 @@ public class DisbursementRuleResponse {
     private String id;
     private String name;
     private DisbursementInterval interval;
+    private int numberOfUsage;
     private List<Double> percentageDistribution;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
