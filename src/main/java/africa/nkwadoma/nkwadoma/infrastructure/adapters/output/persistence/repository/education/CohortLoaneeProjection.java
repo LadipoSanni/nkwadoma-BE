@@ -42,4 +42,5 @@ public interface CohortLoaneeProjection {
     BigDecimal getInitialDeposit();
     String getCohortId();
     String getLoaneeId();
+    String getLoanId();
 }

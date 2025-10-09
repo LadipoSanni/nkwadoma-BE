@@ -28,4 +28,6 @@ public interface RepaymentHistoryOutputPort {
     List<RepaymentHistory> saveAllRepaymentHistory(List<RepaymentHistory> currentRepaymentHistories);
 
     boolean checkIfLoaneeHasMadeAnyRepayment(String id, String cohortId) throws MeedlException;
+
+    Page<RepaymentHistory> findAllRepaymentHistoryByLoanId(String loanId, int pageSize, int pageNumber) throws MeedlException;
 }

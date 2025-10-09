@@ -36,12 +36,13 @@ public interface CohortLoaneeRepository extends JpaRepository<CohortLoaneeEntity
                 (CASE WHEN loan_offer.amountApproved = 0 THEN NULL
                 ELSE ROUND(((loan_offer.amountApproved - COALESCE(SUM(repayment_history.amountPaid), 0)) / loan_offer.amountApproved * 100), 8) END) AS debtPercentage,
                 cohort.name as cohortName , cohort.tuitionAmount as tuitionAmount , loaneeLoanDetail.id as loaneeLoanDetailId, loaneeLoanDetail.interestIncurred as interestIncurred,cohort_loanee.
-                trainingPerformance as trainingPerformance, loaneeLoanDetail.initialDeposit as initialDeposit , loanee.id as loaneeId, cohort.id as cohortId
+                trainingPerformance as trainingPerformance, loaneeLoanDetail.initialDeposit as initialDeposit , loanee.id as loaneeId, cohort.id as cohortId,
+                loan.id as loanId
                 from CohortLoaneeEntity cohort_loanee
     
                 left join LoaneeEntity loanee on loanee.id = cohort_loanee.loanee.id
                 left join UserEntity user on user.id = loanee.userIdentity.id
-                left join NextOfKinEntity next_of_kin on next_of_kin.id = user.nextOfKinEntity.id    
+                left join NextOfKinEntity next_of_kin on next_of_kin.id = user.nextOfKinEntity.id
                 left join CohortEntity cohort on cohort.id = cohort_loanee.cohort.id
                 left join ProgramEntity program on program.id = cohort.programId
                 left join OrganizationEntity organization on organization.id = program.organizationIdentity.id      
@@ -51,6 +52,7 @@ public interface CohortLoaneeRepository extends JpaRepository<CohortLoaneeEntity
                 left join LoanProductEntity loan_product on loan_product.id = loan_offer.loanProduct.id
                 left join RepaymentHistoryEntity repayment_history on repayment_history.loanee.id = loanee.id
                 left join LoaneeLoanDetailEntity loaneeLoanDetail on loaneeLoanDetail.id = cohort_loanee.loaneeLoanDetail.id
+                left join LoanEntity loan on loan.loanOfferId = loan_offer.id
                 
                 where loanee.id = :loaneeId and cohort.id = :cohortId   
                GROUP BY cohort_loanee.id,
@@ -62,7 +64,7 @@ public interface CohortLoaneeRepository extends JpaRepository<CohortLoaneeEntity
                         next_of_kin.phoneNumber,next_of_kin.firstName,next_of_kin.lastName,
                         next_of_kin.contactAddress, program.name,
                         organization.name,loan_offer.amountApproved, loan_product.interestRate,cohort.name, 
-                        loaneeLoanDetail.id, loaneeLoanDetail.interestIncurred ,cohort.tuitionAmount ,loanee.id,cohort.id ,loaneeLoanDetail.initialDeposit
+                        loaneeLoanDetail.id, loaneeLoanDetail.interestIncurred ,cohort.tuitionAmount ,loanee.id,cohort.id ,loaneeLoanDetail.initialDeposit,loan.id
     """)
     CohortLoaneeProjection findCohortLoaneeEntityByLoanee_IdAndCohort_Id(@Param("loaneeId") String loaneeId,@Param("cohortId") String cohortId);
 

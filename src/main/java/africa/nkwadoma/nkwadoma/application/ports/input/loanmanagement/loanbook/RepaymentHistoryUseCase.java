@@ -18,4 +18,6 @@ public interface RepaymentHistoryUseCase {
     List<RepaymentHistory> generateRepaymentHistory(BigDecimal amountApproved, String loanProductId, String loanId) throws MeedlException;
 
     RepaymentHistory simulateRepayment(BigDecimal loanAmount, double interestRate, int repaymentPeriod) throws MeedlException;
+
+    Page<RepaymentHistory> findAllRepaymentHistoryByLoanId(String loanId,  int pageSize, int pageNumber) throws MeedlException;
 }
