@@ -39,7 +39,6 @@ class VendorAdapterIntegrationTest {
 
     @BeforeAll
     void setup() {
-        vendorEntityRepository.deleteAll();
         vendorName = TestUtils.generateName(9);
         providerServiceName = TestUtils.generateName(9);
         Set<String> providerServices = new HashSet<>();
