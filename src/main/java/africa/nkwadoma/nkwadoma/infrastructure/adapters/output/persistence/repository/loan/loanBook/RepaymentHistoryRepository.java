@@ -139,5 +139,37 @@ public interface RepaymentHistoryRepository extends JpaRepository<RepaymentHisto
                                                  @Param("month") Integer month,
                                                  @Param("year") Integer year,
                                                  Pageable pageable);
+
+
+    @Query("""
+        SELECT
+            COALESCE((
+                SELECT CAST(EXTRACT(YEAR FROM repayment.paymentDateTime) AS INTEGER)
+                FROM RepaymentHistoryEntity repayment
+                 join CohortLoaneeEntity cohortLoanee on cohortLoanee.cohort.id = repayment.cohortId and  cohortLoanee.loanee.id = repayment.loanee.id
+                 join LoanReferralEntity loanReferral on loanReferral.cohortLoanee.id = cohortLoanee.id
+                 join LoanRequestEntity loanRequest on loanRequest.id = loanReferral.id
+                 join LoanOfferEntity loanOffer on loanOffer.id = loanRequest.id
+                 join LoanEntity loan on loan.loanOfferId = loanOffer.id
+
+                WHERE loan.id = :loanId
+                ORDER BY repayment.paymentDateTime ASC
+                LIMIT 1
+            ), 0) as firstYear,
+            COALESCE((
+                SELECT CAST(EXTRACT(YEAR FROM repayment.paymentDateTime) AS INTEGER)
+                FROM RepaymentHistoryEntity repayment
+                 join CohortLoaneeEntity cohortLoanee on cohortLoanee.cohort.id = repayment.cohortId and  cohortLoanee.loanee.id = repayment.loanee.id
+                 join LoanReferralEntity loanReferral on loanReferral.cohortLoanee.id = cohortLoanee.id
+                 join LoanRequestEntity loanRequest on loanRequest.id = loanReferral.id
+                 join LoanOfferEntity loanOffer on loanOffer.id = loanRequest.id
+                 join LoanEntity loan on loan.loanOfferId = loanOffer.id
+
+                WHERE loan.id = :loanId
+                ORDER BY repayment.paymentDateTime DESC
+                LIMIT 1
+            ), 0) as lastYear
+    """)
+    Map<String, Integer> getFirstAndLastYearForLoanRepayment(@Param("loanId")String loanId);
 }
 

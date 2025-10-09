@@ -13,7 +13,7 @@ public interface RepaymentHistoryUseCase {
 
     Page<RepaymentHistory> searchRepaymentHistory(RepaymentHistory repaymentHistory, int pageSize, int pageNumber) throws MeedlException;
 
-    RepaymentHistory getFirstRepaymentYearAndLastRepaymentYear(String actorId,String loaneeId) throws MeedlException;
+    RepaymentHistory getFirstRepaymentYearAndLastRepaymentYear(String actorId,String loaneeId,String loanId) throws MeedlException;
 
     List<RepaymentHistory> generateRepaymentHistory(BigDecimal amountApproved, String loanProductId, String loanId) throws MeedlException;
 

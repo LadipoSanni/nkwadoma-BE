@@ -104,11 +104,12 @@ public class RepaymentHistoryController {
     @PreAuthorize("hasRole('LOANEE') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     public ResponseEntity<ApiResponse<?>> getFirstAndLastYear(
             @AuthenticationPrincipal Jwt meedlUser,
-            @RequestParam(name = "loaneeId", required = false) String loaneeId) throws MeedlException {
-        log.info("Request to get first and last year for loaneeId : {}, actorId : {}", loaneeId, meedlUser.getClaimAsString("sub"));
+            @RequestParam(name = "loaneeId", required = false) String loaneeId,
+            @RequestParam(name = "loanId", required = false) String loanId) throws MeedlException {
+        log.info("Request to get first and last year for loaneeId : {}, actorId : {} , loanId : {}", loaneeId, meedlUser.getClaimAsString("sub"),loanId);
 
         RepaymentHistory repaymentHistory = repaymentHistoryUseCase
-                .getFirstRepaymentYearAndLastRepaymentYear(meedlUser.getClaimAsString("sub"), loaneeId);
+                .getFirstRepaymentYearAndLastRepaymentYear(meedlUser.getClaimAsString("sub"), loaneeId,loanId);
         YearRangeResponse yearRangeResponse = repaymentHistoryRestMapper.toYearRange(repaymentHistory);
 
         ApiResponse<YearRangeResponse> apiResponse = ApiResponse.<YearRangeResponse>builder()
