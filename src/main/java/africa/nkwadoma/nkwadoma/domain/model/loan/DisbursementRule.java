@@ -50,8 +50,6 @@ public class DisbursementRule {
         MeedlValidator.validateObjectInstance(activationStatus, DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE_ACTIVATION_STATUS.getMessage() );
     }
 
-    private static final BigDecimal TOTAL = BigDecimal.valueOf(100);
-
     public static void validatePercentageDistribution(List<Double> distribution) throws MeedlException {
         if (distribution == null || distribution.isEmpty()) {
             throw new MeedlException("Percentage distribution cannot be empty");
