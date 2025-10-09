@@ -21,7 +21,7 @@ public class DisbursementRuleEntity {
     private String createdBy;
     @Enumerated(EnumType.STRING)
     private DisbursementInterval interval;
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
             name = "disbursement_rule_entity_percentage_distribution",
             joinColumns = @JoinColumn(name = "disbursement_rule_entity_id")
