@@ -4,7 +4,8 @@ import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.Disbursem
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.disbursement.DisbursementRule;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DisbursementRuleRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.disbursement.ApplyDisbursementRuleRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.disbursement.DisbursementRuleRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.QAResponse;
@@ -162,4 +163,22 @@ public class DisbursementRuleController {
                 build(), HttpStatus.OK
         );
     }
+    @PostMapping("/loan/apply")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN')")
+    @Operation(summary = RESPOND_TO_DISBURSEMENT_RULE,description = RESPOND_TO_DISBURSEMENT_RULE_DESCRIPTION)
+    public ResponseEntity<ApiResponse<?>> applyDisbursementRuleToLoan (
+            @AuthenticationPrincipal Jwt meedlUser,
+            @RequestBody ApplyDisbursementRuleRequest applyDisbursementRuleRequest) throws MeedlException {
+        log.info("Respond to disbursement rule called with id .... {}", applyDisbursementRuleRequest.getId());
+        DisbursementRule disbursementRule = disbursementRuleUseMapper.map(meedlUser.getClaim("sub"), applyDisbursementRuleRequest);
+        DisbursementRule savedDisbursementRule = disbursementRuleUseCase.applyDisbursementRuleToLoans(disbursementRule);
+        DisbursementRuleResponse disbursementRuleResponse = disbursementRuleUseMapper.map(savedDisbursementRule);
+        ApiResponse<DisbursementRuleResponse> apiResponse = ApiResponse.<DisbursementRuleResponse>builder()
+                .data(disbursementRuleResponse)
+                .message(DISBURSEMENT_RULE_VIEW_DETAIL_SUCCESS)
+                .statusCode(HttpStatus.CREATED.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+
 }

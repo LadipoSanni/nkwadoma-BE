@@ -1,7 +1,8 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loanManagement;
 
 import africa.nkwadoma.nkwadoma.domain.model.loan.disbursement.DisbursementRule;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DisbursementRuleRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.disbursement.ApplyDisbursementRuleRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.disbursement.DisbursementRuleRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.DisbursementRuleResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -16,4 +17,7 @@ public interface DisbursementRuleRestMapper {
 
     @Mapping(target = "userIdentity.id", source = "userId")
     DisbursementRule map(String userId, String id);
+
+    @Mapping(target = "userIdentity.id", source = "userId")
+    DisbursementRule map(String userId, ApplyDisbursementRuleRequest applyDisbursementRuleRequest);
 }
