@@ -38,6 +38,7 @@ public class RepaymentHistory {
     private String loaneeName;
     private Integer firstYear;
     private Integer lastYear;
+    private String loanId;
     private int tenor;
     private int moratorium;
 
