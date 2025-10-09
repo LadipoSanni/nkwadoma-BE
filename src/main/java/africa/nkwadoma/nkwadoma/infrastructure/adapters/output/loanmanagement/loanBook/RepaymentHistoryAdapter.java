@@ -162,15 +162,16 @@ public class RepaymentHistoryAdapter implements RepaymentHistoryOutputPort {
     }
 
     @Override
-    public Page<RepaymentHistory> findAllRepaymentHistoryByLoanId(String loanId, int pageSize, int pageNumber) throws MeedlException {
-        MeedlValidator.validateUUID(loanId,"Loan id cannot be empty");
+    public Page<RepaymentHistory> findAllRepaymentHistoryByLoanId(RepaymentHistory repaymentHistory, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(repaymentHistory.getLoanId(),"Loan id cannot be empty");
         MeedlValidator.validatePageNumber(pageNumber);
         MeedlValidator.validatePageSize(pageSize);
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("paymentDateTime").descending());
 
         Page<RepaymentHistoryEntity> repaymentHistoryEntities =
-                repaymentHistoryRepository.findAllByLoanId(loanId,pageable);
+                repaymentHistoryRepository.findAllByLoanId(repaymentHistory.getLoanId(),
+                        repaymentHistory.getMonth(),repaymentHistory.getYear(),pageable);
 
         return repaymentHistoryEntities.map(repaymentHistoryMapper::map);
     }

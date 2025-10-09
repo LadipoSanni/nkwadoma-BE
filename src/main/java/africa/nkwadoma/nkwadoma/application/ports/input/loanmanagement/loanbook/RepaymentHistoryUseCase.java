@@ -19,5 +19,5 @@ public interface RepaymentHistoryUseCase {
 
     RepaymentHistory simulateRepayment(BigDecimal loanAmount, double interestRate, int repaymentPeriod) throws MeedlException;
 
-    Page<RepaymentHistory> findAllRepaymentHistoryByLoanId(String loanId,  int pageSize, int pageNumber) throws MeedlException;
+    Page<RepaymentHistory> findAllRepaymentHistoryByLoanId(RepaymentHistory repaymentHistory,  int pageSize, int pageNumber) throws MeedlException;
 }

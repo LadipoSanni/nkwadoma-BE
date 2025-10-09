@@ -171,10 +171,18 @@ public class RepaymentHistoryController {
     @PreAuthorize("hasRole('LOANEE') or hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')" +
             "or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('ORGANIZATION_ASSOCIATE') or hasRole('ORGANIZATION_ADMIN') ")
     public ResponseEntity<ApiResponse<?>> viewAllRepaymentForALoan(@RequestParam(name = "loanId")String loanId,
+                                                                   @RequestParam(name = "month", required = false) Integer month,
+                                                                   @RequestParam(name = "year", required = false) Integer year,
                                                                    @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                                                    @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
 
-        Page<RepaymentHistory>  repaymentHistories = repaymentHistoryUseCase.findAllRepaymentHistoryByLoanId(loanId,pageSize,pageNumber);
+        log.info("Request that got in ---- loan id {} ----- month {} ----- year {} --- pageSize {} ---- pageNumber {}",
+                loanId,month,year,pageSize,pageNumber);
+
+        RepaymentHistory repaymentHistory =
+                RepaymentHistory.builder().loanId(loanId)
+                        .month(month).year(year).build();
+        Page<RepaymentHistory>  repaymentHistories = repaymentHistoryUseCase.findAllRepaymentHistoryByLoanId(repaymentHistory,pageSize,pageNumber);
         log.info("repayment histories gotten from service {} , total element gotten  : {}",
                 repaymentHistories.getContent().stream().toList(),repaymentHistories.getTotalElements());
         List<RepaymentHistoryResponse> repaymentHistoryResponse = repaymentHistories.stream()
