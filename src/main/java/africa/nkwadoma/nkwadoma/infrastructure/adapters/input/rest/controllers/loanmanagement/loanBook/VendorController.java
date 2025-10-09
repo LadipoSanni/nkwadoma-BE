@@ -42,9 +42,11 @@ public class VendorController {
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     @Operation(summary = VENDOR_VIEW_ALL, description = VENDOR_VIEW_ALL_DESCRIPTION )
     public ResponseEntity<ApiResponse<?>> viewAllLoanProduct(@AuthenticationPrincipal Jwt meedl,
+                                                             @RequestParam(required = false, name = "name") String name,
                                                              @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                                              @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
         Vendor vendor = new Vendor();
+        vendor.setVendorName(name);
         vendor.setPageSize(pageSize);
         vendor.setPageNumber(pageNumber);
         Page<Vendor> vendorPage = vendorUseCase.viewAllVendors(vendor);
@@ -66,9 +68,11 @@ public class VendorController {
     @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
     @Operation(summary = PROVIDER_SERVICE_VIEW_ALL, description = PROVIDER_SERVICE_VIEW_ALL_DESCRIPTION )
     public ResponseEntity<ApiResponse<?>> viewAllProviderService(@AuthenticationPrincipal Jwt meedl,
+                                                                 @RequestParam(required = false, name = "name") String name,
                                                              @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                                              @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
         Vendor vendor = new Vendor();
+        vendor.setVendorName(name);
         vendor.setPageSize(pageSize);
         vendor.setPageNumber(pageNumber);
         Page<String> providerServicePage = vendorUseCase.viewAllProviderService(vendor);
