@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS disbursement_rule_entity_percentage_distribution (
     );
 
 ALTER TABLE disbursement_rule_entity
-DROP COLUMN query;
+    DROP COLUMN IF EXISTS query;
 
 UPDATE vendor_entity
 SET duration = 0
