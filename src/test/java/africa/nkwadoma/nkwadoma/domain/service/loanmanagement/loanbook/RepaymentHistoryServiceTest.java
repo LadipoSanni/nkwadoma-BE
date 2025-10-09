@@ -168,9 +168,26 @@ class RepaymentHistoryServiceTest {
     @Test
     void viewAllRepaymentHistoryForALoan(){
         Page<RepaymentHistory> repaymentHistoryPage = Page.empty();
+        repaymentHistory.setLoanId(actorId);
         try{
-            when(repaymentHistoryOutputPort.findAllRepaymentHistoryByLoanId(actorId,pageSize,pageNumber)).thenReturn(new PageImpl<>(repaymentHistories));
-            repaymentHistoryPage = repaymentHistoryService.findAllRepaymentHistoryByLoanId(actorId,pageSize,pageNumber);
+            when(repaymentHistoryOutputPort.findAllRepaymentHistoryByLoanId(repaymentHistory,pageSize,pageNumber)).thenReturn(new PageImpl<>(repaymentHistories));
+            repaymentHistoryPage = repaymentHistoryService.findAllRepaymentHistoryByLoanId(repaymentHistory,pageSize,pageNumber);
+        }catch (MeedlException meedlException) {
+            log.info("error {}", meedlException);
+        }
+        assertEquals(repaymentHistoryPage.getContent().size(),repaymentHistories.size());
+    }
+
+
+    @Test
+    void viewAllRepaymentHistoryForALoanWithYearAndMonth(){
+        Page<RepaymentHistory> repaymentHistoryPage = Page.empty();
+        repaymentHistory.setLoanId(actorId);
+        repaymentHistory.setYear(2025);
+        repaymentHistory.setMonth(10);
+        try{
+            when(repaymentHistoryOutputPort.findAllRepaymentHistoryByLoanId(repaymentHistory,pageSize,pageNumber)).thenReturn(new PageImpl<>(repaymentHistories));
+            repaymentHistoryPage = repaymentHistoryService.findAllRepaymentHistoryByLoanId(repaymentHistory,pageSize,pageNumber);
         }catch (MeedlException meedlException) {
             log.info("error {}", meedlException);
         }
