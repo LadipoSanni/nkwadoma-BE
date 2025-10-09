@@ -81,13 +81,18 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
     }
 
     @Override
-    public RepaymentHistory getFirstRepaymentYearAndLastRepaymentYear(String actorId, String loaneeId) throws MeedlException {
+    public RepaymentHistory getFirstRepaymentYearAndLastRepaymentYear(String actorId, String loaneeId,String loanId) throws MeedlException {
         UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
-        if (userIdentity.getRole().isMeedlRole()) {
+        if (userIdentity.getRole().isMeedlRole() && loanId == null) {
             return repaymentHistoryOutputPort.getFirstAndLastYear(loaneeId);
+        }if (loaneeId != null) {
+            MeedlValidator.validateUUID(loaneeId,"Loanee id cannot be empty or invalid");
+            Loanee loanee = loaneeOutputPort.findByUserId(userIdentity.getId()).get();
+            return repaymentHistoryOutputPort.getFirstAndLastYear(loanee.getId());
         }
-        Loanee loanee = loaneeOutputPort.findByUserId(userIdentity.getId()).get();
-        return repaymentHistoryOutputPort.getFirstAndLastYear(loanee.getId());
+        log.info("fetching first repayment year and last repayment year for a particular loan");
+        MeedlValidator.validateUUID(loanId,"Loan Id cannot be empty or invalid");
+        return repaymentHistoryOutputPort.getFirstAndLastYearOfLoanRepayment(loanId);
     }
 
     @Override

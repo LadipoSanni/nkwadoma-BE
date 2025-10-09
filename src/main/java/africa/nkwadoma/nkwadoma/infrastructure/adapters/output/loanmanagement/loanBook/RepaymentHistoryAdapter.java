@@ -175,4 +175,12 @@ public class RepaymentHistoryAdapter implements RepaymentHistoryOutputPort {
         return repaymentHistoryEntities.map(repaymentHistoryMapper::map);
     }
 
+    @Override
+    public RepaymentHistory getFirstAndLastYearOfLoanRepayment(String loanId) throws MeedlException {
+        MeedlValidator.validateUUID(loanId,"Loan Id cannot be empty or invalid");
+        Map<String, Integer> years = repaymentHistoryRepository.getFirstAndLastYearForLoanRepayment(loanId);
+        log.info("Retrieved years: firstYear = {}, lastYear = {}", years.get("firstYear"), years.get("lastYear"));
+        return RepaymentHistory.builder().firstYear(years.get("firstYear")).lastYear(years.get("lastYear")).build();
+    }
+
 }
