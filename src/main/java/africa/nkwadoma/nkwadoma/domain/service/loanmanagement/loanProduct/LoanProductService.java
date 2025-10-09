@@ -244,8 +244,9 @@ public class LoanProductService implements CreateLoanProductUseCase, ViewLoanPro
         vendorOutputPort.deleteMultipleById(vendorIds);
 
         log.info("Saving vendor and loan product vendor details in update loan product");
-        vendors = vendorOutputPort.saveVendors(vendors);
-        loanProductVendorOutputPort.save(vendors,loanProduct);
+        vendors = vendorOutputPort.saveVendors(loanProduct.getVendors());
+        loanProduct.setVendors(vendors);
+        loanProductVendorOutputPort.save(loanProduct.getVendors(),loanProduct);
     }
 
     private List<String> getLoanProductVendorIds(List<LoanProductVendor> loanProductVendors) {
