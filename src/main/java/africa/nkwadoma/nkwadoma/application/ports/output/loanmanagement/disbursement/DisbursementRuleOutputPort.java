@@ -1,7 +1,7 @@
-package africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook;
+package africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.disbursement;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.loan.DisbursementRule;
+import africa.nkwadoma.nkwadoma.domain.model.loan.disbursement.DisbursementRule;
 import org.springframework.data.domain.Page;
 
 public interface DisbursementRuleOutputPort {

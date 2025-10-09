@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProductDisbursementRule;
+import africa.nkwadoma.nkwadoma.domain.model.loan.disbursement.LoanProductDisbursementRule;
 
 public interface LoanProductDisbursementRuleOutputPort {
     LoanProductDisbursementRule save(LoanProductDisbursementRule loanProductDisbursementRule) throws MeedlException;

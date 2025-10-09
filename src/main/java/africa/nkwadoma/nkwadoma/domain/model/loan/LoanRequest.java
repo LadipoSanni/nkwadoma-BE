@@ -65,7 +65,7 @@ public class LoanRequest {
 
     public void validateLoanProductIdAndAmountApproved() throws MeedlException {
         MeedlValidator.validateUUID(this.id, "Please provide a valid loan request identification");
-        MeedlValidator.validateUUID(this.loanProductId, LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
+        MeedlValidator.validateUUID(this.loanProductId, LoanProductMessage.INVALID_LOAN_PRODUCT_ID.getMessage());
         MeedlValidator.validateBigDecimalDataElement(this.loanAmountApproved);
     }
 

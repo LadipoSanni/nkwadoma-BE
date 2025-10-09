@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.domain.enums.constants.loan;
+package africa.nkwadoma.nkwadoma.domain.enums.constants.loan.disbursement;
 
 import lombok.Getter;
 

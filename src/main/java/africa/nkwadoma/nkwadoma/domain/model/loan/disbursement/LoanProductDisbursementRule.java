@@ -1,5 +1,6 @@
-package africa.nkwadoma.nkwadoma.domain.model.loan;
+package africa.nkwadoma.nkwadoma.domain.model.loan.disbursement;
 
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import lombok.*;
 
 @Getter
