@@ -91,7 +91,7 @@ public class DisbursementRuleController {
                 .message(DISBURSEMENT_RULE_VIEW_DETAIL_SUCCESS)
                 .statusCode(HttpStatus.CREATED.toString())
                 .build();
-        return new ResponseEntity<>(apiResponse,HttpStatus.FOUND);
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
 
     @GetMapping("/search")
@@ -116,10 +116,10 @@ public class DisbursementRuleController {
         log.info("Search disbursement rule called successfully.");
 
         return new ResponseEntity<>(ApiResponse.builder().
-                statusCode(HttpStatus.FOUND.toString()).
+                statusCode(HttpStatus.OK.toString()).
                 data(paginatedResponse).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL).
-                build(), HttpStatus.FOUND
+                build(), HttpStatus.OK
         );
     }
 
@@ -159,10 +159,10 @@ public class DisbursementRuleController {
         log.info("View all disbursement rule called successfully.");
 
         return new ResponseEntity<>(ApiResponse.builder().
-                statusCode(HttpStatus.FOUND.toString()).
+                statusCode(HttpStatus.OK.toString()).
                 data(paginatedResponse).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL).
-                build(), HttpStatus.FOUND
+                build(), HttpStatus.OK
         );
     }
 }

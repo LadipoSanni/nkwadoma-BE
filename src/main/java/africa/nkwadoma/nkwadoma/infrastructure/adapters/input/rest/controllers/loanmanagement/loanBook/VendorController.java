@@ -54,10 +54,10 @@ public class VendorController {
         log.info("View all vendor called successfully.");
 
         return new ResponseEntity<>(ApiResponse.builder().
-                statusCode(HttpStatus.FOUND.toString()).
+                statusCode(HttpStatus.OK.toString()).
                 data(paginatedResponse).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL).
-                build(), HttpStatus.FOUND
+                build(), HttpStatus.OK
 
         );
     }
@@ -78,11 +78,11 @@ public class VendorController {
         log.info("View all provider service called successfully.");
 
         return new ResponseEntity<>(ApiResponse.builder()
-                .statusCode(HttpStatus.FOUND.toString())
+                .statusCode(HttpStatus.OK.toString())
                 .data(paginatedResponse)
                 .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL)
                 .timeStamp(LocalDateTime.now())
-                .build(), HttpStatus.FOUND
+                .build(), HttpStatus.OK
         );
     }
 }
