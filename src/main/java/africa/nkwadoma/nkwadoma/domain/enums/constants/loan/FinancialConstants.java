@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 public class FinancialConstants {
 
     public static final int NUMBER_OF_DECIMAL_PLACES = 8;
+    public static final int TWO_DECIMAL_PLACE = 2;
 
     public static final int ADDITIONAL_PRECISION_SCALE = 4;
 
@@ -24,6 +25,8 @@ public class FinancialConstants {
     public static final double MONTHS_PER_YEAR_DOUBLE = 12.0;
 
     private static final int DAYS_IN_MONTH = 30;
+    public static final BigDecimal HUNDRED_PERCENT = BigDecimal.valueOf(100);
+
 
 
 }

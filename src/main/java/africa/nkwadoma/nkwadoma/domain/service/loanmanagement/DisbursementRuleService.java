@@ -17,6 +17,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @RequiredArgsConstructor
 @Slf4j
 @EnableAsync
@@ -50,6 +52,7 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
     private DisbursementRule saveDisbursementRule(DisbursementRule disbursementRule, UserIdentity actor) throws MeedlException {
         log.info("The role of the user creating disbursement rule is {} email {} disbursement status {}", actor.getRole(), actor.getEmail(), disbursementRule.getActivationStatus());
         disbursementRule.setUserIdentity(actor);
+        disbursementRule.setCreatedBy(actor.getId());
         disbursementRule.setName(disbursementRule.getName().trim());
         disbursementRule.setActivationStatus(
                 disbursementRule.getUserIdentity().getRole().isMeedlSuperAdmin()
@@ -57,6 +60,7 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
                         : ActivationStatus.PENDING_APPROVAL.equals(disbursementRule.getActivationStatus())
                         ? ActivationStatus.PENDING_APPROVAL
                         : ActivationStatus.INACTIVE);
+        disbursementRule.setDateCreated(LocalDateTime.now());
         return disbursementRuleOutputPort.save(disbursementRule);
     }
 
