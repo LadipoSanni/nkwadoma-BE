@@ -245,9 +245,16 @@ public class TestData {
         loanProduct.setSponsors(List.of(Financier.builder().id(UUID.randomUUID().toString()).name("ifnf").build()));
         return loanProduct;
     }
+    public static Vendor createTestVendor(String name, Set<String> providerServices) {
+        Vendor vendor = createTestVendor(name);
+        vendor.setProviderServices(providerServices);
+        return vendor;
+    }
     public static Vendor createTestVendor(String name) {
         Vendor vendor = new Vendor();
         vendor.setVendorName(name);
+        vendor.setPageSize(10);
+        vendor.setPageNumber(0);
         vendor.setProviderServices(Set.of(TestUtils.generateName(9)));
         vendor.setTermsAndConditions("Test: A new vendor for test with terms and condition imaginary");
         return vendor;

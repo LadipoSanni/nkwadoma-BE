@@ -51,6 +51,7 @@ public class VendorAdapter implements VendorOutputPort {
             log.info("Vendor name is an empty string or blank {}, size {}", vendor.getVendorName(), vendor.getVendorName().length());
             vendorEntities = Page.empty();
         }
+        log.info("Vendor entities found {}", vendorEntities);
         return vendorEntities.map(vendorMapper::map);
 
     }
