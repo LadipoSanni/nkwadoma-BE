@@ -85,9 +85,7 @@ public class LoanDisbursementRuleAdapterTest {
         LoanDisbursementRule savedLoandisbursementRule = loanDisbursementRuleOutputPort.save(loanDisbursementRule);
 
         assertNotNull(savedLoandisbursementRule.getId());
-//        assertEquals(loanDisbursementRule.getLoan().getId(), savedLoandisbursementRule.getLoan().getId());
-//        assertNotNull(savedLoandisbursementRule);
-//        assertNotNull(savedLoandisbursementRule.getLoan());
+
         loanDisbursementRuleId = savedLoandisbursementRule.getId();
     }
 
@@ -131,8 +129,6 @@ public class LoanDisbursementRuleAdapterTest {
         List<LoanDisbursementRule> results = loanDisbursementRuleOutputPort
                 .findAllByLoanIdAndDisbursementRuleId(loanId, disbursementRuleId);
 
-//        assertFalse(results.isEmpty());
-//        assertEquals(1, results.size());
     }
 
     @Test
