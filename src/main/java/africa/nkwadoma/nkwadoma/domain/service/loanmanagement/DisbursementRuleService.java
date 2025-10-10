@@ -15,6 +15,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.disbursement.DisbursementRule;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loan;
 import africa.nkwadoma.nkwadoma.domain.model.loan.disbursement.LoanDisbursementRule;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanManagement.disbursement.DisbursementRuleMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -35,6 +36,7 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
     private final LoanOutputPort loanOutputPort;
     private final LoanDisbursementRuleOutputPort loanDisbursementRuleOutputPort;
+    private final DisbursementRuleMapper disbursementRuleMapper;
 
 
     @Override
@@ -73,17 +75,33 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
     }
 
     @Override
-    public DisbursementRule updateDisbursementRule(DisbursementRule disbursementRule) throws MeedlException {
+    public DisbursementRule editDisbursementRule(DisbursementRule disbursementRule) throws MeedlException {
         MeedlValidator.validateObjectInstance(disbursementRule, DisbursementRuleMessages.EMPTY_DISBURSEMENT_RULE.getMessage());
         MeedlValidator.validateUUID(disbursementRule.getId(), DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE_ID.getMessage());
+        disbursementRule.validate();
         DisbursementRule foundDIsbursementRule = disbursementRuleOutputPort.findById(disbursementRule.getId());
         if (!ActivationStatus.APPROVED.equals(foundDIsbursementRule.getActivationStatus())) {
             log.info("Updating disbursement rule ");
-            foundDIsbursementRule.setName(disbursementRule.getName());
+
+            validateRuleNameToUpdate(disbursementRule, foundDIsbursementRule);
+            ActivationStatus activationStatus = foundDIsbursementRule.getActivationStatus();
+            disbursementRuleMapper.edit(foundDIsbursementRule, disbursementRule);
+            foundDIsbursementRule.setActivationStatus(activationStatus);
             return disbursementRuleOutputPort.save(foundDIsbursementRule);
         }
         return foundDIsbursementRule;
     }
+
+    private void validateRuleNameToUpdate(DisbursementRule disbursementRule, DisbursementRule foundDIsbursementRule) throws MeedlException {
+        if (!disbursementRule.getName().equalsIgnoreCase(foundDIsbursementRule.getName())) {
+            boolean ruleExist = disbursementRuleOutputPort.existByNameIgnoreCase(disbursementRule.getName());
+            if (ruleExist) {
+                log.error("Cannot update disbursement rule to {} from {} because rule with this name already exist", disbursementRule.getName(), foundDIsbursementRule.getName());
+                throw new MeedlException("Disbursement rule already exist with this name " + foundDIsbursementRule.getName());
+            }
+        }
+    }
+
     @Override
     public DisbursementRule respondToDisbursementRule(DisbursementRule disbursementRule) throws MeedlException {
         MeedlValidator.validateObjectInstance(disbursementRule, DisbursementRuleMessages.EMPTY_DISBURSEMENT_RULE.getMessage());

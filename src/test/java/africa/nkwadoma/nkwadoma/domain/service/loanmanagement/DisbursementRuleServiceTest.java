@@ -67,7 +67,7 @@ class DisbursementRuleServiceTest {
     }
 
     @Test
-    void updateDisbursementRuleWhenNotApproved() throws MeedlException {
+    void editDisbursementRuleWhenNotApproved() throws MeedlException {
         disbursementRule.setId(UUID.randomUUID().toString());
         disbursementRule.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
 
@@ -81,7 +81,7 @@ class DisbursementRuleServiceTest {
         when(disbursementRuleOutputPort.save(any(DisbursementRule.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        DisbursementRule updated = disbursementRuleService.updateDisbursementRule(disbursementRule);
+        DisbursementRule updated = disbursementRuleService.editDisbursementRule(disbursementRule);
 
         assertEquals(disbursementRule.getName(), updated.getName());
         verify(disbursementRuleOutputPort).save(existingRule);
@@ -100,7 +100,7 @@ class DisbursementRuleServiceTest {
         when(disbursementRuleOutputPort.findById(disbursementRule.getId()))
                 .thenReturn(existingRule);
 
-        DisbursementRule result = disbursementRuleService.updateDisbursementRule(disbursementRule);
+        DisbursementRule result = disbursementRuleService.editDisbursementRule(disbursementRule);
 
         assertEquals("Approved Rule", result.getName());
         verify(disbursementRuleOutputPort, never()).save(any());

@@ -2,7 +2,8 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loanM
 
 import africa.nkwadoma.nkwadoma.domain.model.loan.disbursement.DisbursementRule;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.disbursement.ApplyDisbursementRuleRequest;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.disbursement.DisbursementRuleRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.disbursement.CreateDisbursementRuleRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.disbursement.EditDisbursementRuleRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.DisbursementRuleResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -11,7 +12,10 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface DisbursementRuleRestMapper {
     @Mapping(target = "userIdentity.id", source = "userId")
-    DisbursementRule map(String userId, DisbursementRuleRequest request);
+    DisbursementRule map(String userId, CreateDisbursementRuleRequest request);
+
+    @Mapping(target = "userIdentity.id", source = "userId")
+    DisbursementRule map(String userId, EditDisbursementRuleRequest request);
 
     DisbursementRuleResponse map(DisbursementRule savedDisbursementRule);
 

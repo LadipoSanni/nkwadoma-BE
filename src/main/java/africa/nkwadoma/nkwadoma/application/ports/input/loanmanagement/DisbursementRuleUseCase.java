@@ -9,7 +9,7 @@ public interface DisbursementRuleUseCase {
 
     DisbursementRule respondToDisbursementRule(DisbursementRule disbursementRule) throws MeedlException;
 
-    DisbursementRule updateDisbursementRule(DisbursementRule disbursementRule) throws MeedlException;
+    DisbursementRule editDisbursementRule(DisbursementRule disbursementRule) throws MeedlException;
 
     DisbursementRule viewDisbursementRule(DisbursementRule disbursementRule) throws MeedlException;
 
