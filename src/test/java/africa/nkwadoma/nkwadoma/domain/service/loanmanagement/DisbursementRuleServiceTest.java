@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.disbursement.DisbursementRule;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanManagement.disbursement.DisbursementRuleMapper;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,6 +43,8 @@ class DisbursementRuleServiceTest {
     @Mock
     private DisbursementRuleOutputPort disbursementRuleOutputPort;
     @Mock
+    private DisbursementRuleMapper disbursementRuleMapper;
+    @Mock
     private UserIdentityOutputPort userIdentityOutputPort;
     @Mock
     private AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
@@ -70,22 +73,80 @@ class DisbursementRuleServiceTest {
     void editDisbursementRuleWhenNotApproved() throws MeedlException {
         disbursementRule.setId(UUID.randomUUID().toString());
         disbursementRule.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
+        disbursementRule.setPercentageDistribution(List.of(50.0, 50.0)); // must sum to 100
 
         DisbursementRule existingRule = TestData.buildDisbursementRule();
         existingRule.setId(disbursementRule.getId());
         existingRule.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
         existingRule.setName("Old Name");
+        existingRule.setPercentageDistribution(List.of(60.0, 40.0)); // valid too
 
         when(disbursementRuleOutputPort.findById(disbursementRule.getId()))
                 .thenReturn(existingRule);
         when(disbursementRuleOutputPort.save(any(DisbursementRule.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
-
+        existingRule.setName(disbursementRule.getName());
+        doNothing().when(disbursementRuleMapper)
+                .edit(existingRule, disbursementRule);
         DisbursementRule updated = disbursementRuleService.editDisbursementRule(disbursementRule);
 
         assertEquals(disbursementRule.getName(), updated.getName());
         verify(disbursementRuleOutputPort).save(existingRule);
     }
+    @Test
+    void editDisbursementRuleWhenApproved() throws MeedlException {
+        disbursementRule.setId(UUID.randomUUID().toString());
+        disbursementRule.setActivationStatus(ActivationStatus.APPROVED);
+        disbursementRule.setPercentageDistribution(List.of(50.0, 50.0));
+
+        DisbursementRule existingRule = TestData.buildDisbursementRule();
+        existingRule.setId(disbursementRule.getId());
+        existingRule.setActivationStatus(ActivationStatus.APPROVED);
+        existingRule.setName("Old Name");
+        existingRule.setPercentageDistribution(List.of(60.0, 40.0));
+
+        when(disbursementRuleOutputPort.findById(disbursementRule.getId()))
+                .thenReturn(existingRule);
+
+        DisbursementRule result = disbursementRuleService.editDisbursementRule(disbursementRule);
+
+        // should just return the found rule, no update
+        assertEquals(existingRule, result);
+        verify(disbursementRuleOutputPort, never()).save(any());
+    }
+    @Test
+    void editDisbursementRuleWithInvalidDistributionThrows() {
+        disbursementRule.setId(UUID.randomUUID().toString());
+        disbursementRule.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
+        disbursementRule.setPercentageDistribution(List.of(40.0, 40.0)); // sum != 100
+
+        assertThrows(MeedlException.class, () ->
+                disbursementRuleService.editDisbursementRule(disbursementRule)
+        );
+    }
+    @Test
+    void editDisbursementRuleWhenNameAlreadyExistsThrows() throws MeedlException {
+        disbursementRule.setId(UUID.randomUUID().toString());
+        disbursementRule.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
+        disbursementRule.setName("New Rule");
+        disbursementRule.setPercentageDistribution(List.of(70.0, 30.0));
+
+        DisbursementRule existingRule = TestData.buildDisbursementRule();
+        existingRule.setId(disbursementRule.getId());
+        existingRule.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
+        existingRule.setName("Old Rule");
+        existingRule.setPercentageDistribution(List.of(60.0, 40.0));
+
+        when(disbursementRuleOutputPort.findById(disbursementRule.getId()))
+                .thenReturn(existingRule);
+        when(disbursementRuleOutputPort.existByNameIgnoreCase("New Rule"))
+                .thenReturn(true);
+
+        assertThrows(MeedlException.class, () ->
+                disbursementRuleService.editDisbursementRule(disbursementRule)
+        );
+    }
+
 
     @Test
     void attemptToUpdateApprovedDisbursementRule() throws MeedlException {
