@@ -152,7 +152,7 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
             Loan loan = loanOutputPort.findLoanById(loanId);
             List<LoanDisbursementRule> loanDisbursementRules =  loanDisbursementRuleOutputPort.findAllByLoanIdAndDisbursementRuleId(loanId, foundDisbursementRule.getId());
             if(ObjectUtils.isEmpty(loanDisbursementRules)) {
-                LoanDisbursementRule loanDisbursementRule = createLoanDisbursementRule(loan, disbursementRule);
+                LoanDisbursementRule loanDisbursementRule = createLoanDisbursementRule(loan, foundDisbursementRule);
             }
 
         }
