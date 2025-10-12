@@ -184,13 +184,13 @@ public class LoanOfferServiceTest {
             when(loanOfferOutputPort.findLoanOfferById(mockId)).thenReturn(loanOffer);
             when(loaneeOutputPort.findByUserId(mockId)).thenReturn(Optional.ofNullable(loanee));
             loanOffer2.setLoaneeResponse(LoanDecision.DECLINED);
-            loanOffer.setReferredBy("referredBy");
-            when(organizationIdentityOutputPort.findOrganizationByName(loanOffer.getReferredBy()))
-                    .thenReturn(organizationIdentity);
+//            loanOffer.setReferredBy("referredBy");
+//            when(organizationIdentityOutputPort.findOrganizationByName(loanOffer.getReferredBy()))
+//                    .thenReturn(organizationIdentity);
             doNothing().when(asynchronousNotificationOutputPort).notifyPortfolioManagerOfNewLoanOfferWithDecision(any(), any());
-            when(loanMetricsOutputPort.findByOrganizationId(organizationIdentity.get().getId()))
-                    .thenReturn(Optional.of(loanMetrics));
-            when(loanMetricsOutputPort.save(loanMetrics)).thenReturn(loanMetrics);
+//            when(loanMetricsOutputPort.findByOrganizationId(organizationIdentity.get().getId()))
+//                    .thenReturn(Optional.of(loanMetrics));
+//            when(loanMetricsOutputPort.save(loanMetrics)).thenReturn(loanMetrics);
             when(loanOfferOutputPort.save(loanOffer)).thenReturn(loanOffer);
             when(loanProductOutputPort.save(loanProduct)).thenReturn(loanProduct);
              loaneeLoanAccount1 = loanService.acceptLoanOffer(loanOffer2, OnboardingMode.EMAIL_REFERRED);

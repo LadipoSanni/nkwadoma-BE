@@ -252,6 +252,9 @@ public class LoanService implements  ViewLoanReferralsUseCase,
         loanMetrics.get().setLoanDisbursalCount(
                 loanMetrics.get().getLoanDisbursalCount() + 1
         );
+        loanMetrics.get().setLoanOfferCount(
+                loanMetrics.get().getLoanOfferCount() - 1
+        );
         if (onboardingMode.equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)){
             loanMetrics.get().setUploadedLoanCount(
                     loanMetrics.get().getUploadedLoanCount() + 1
@@ -672,7 +675,7 @@ public class LoanService implements  ViewLoanReferralsUseCase,
         if (ObjectUtils.isNotEmpty(loaneeLoanAccount)){
             return loaneeLoanAccount;
         }
-        decreaseLoanOfferOnLoanMetrics(foundLoanOffer.getReferredBy());
+//        decreaseLoanOfferOnLoanMetrics(foundLoanOffer.getReferredBy());
         declineLoanOffer(loanee.getUserIdentity(), loanOffer, foundLoanOffer);
         return loaneeLoanAccount;
     }
@@ -720,7 +723,7 @@ public class LoanService implements  ViewLoanReferralsUseCase,
             loaneeLoanAccount = createLoaneeLoanAccount(foundLoanOffer.getLoaneeId());
             log.info("Loanee account is created : {}", loaneeLoanAccount);
         }
-        decreaseLoanOfferOnLoanMetrics(foundLoanOffer.getReferredBy());
+//        decreaseLoanOfferOnLoanMetrics(foundLoanOffer.getReferredBy());
         log.info("done decreasing  : {}", foundLoanOffer);
         return loaneeLoanAccount;
     }

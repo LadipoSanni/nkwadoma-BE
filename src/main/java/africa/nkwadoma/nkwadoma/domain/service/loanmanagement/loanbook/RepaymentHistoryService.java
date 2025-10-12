@@ -266,7 +266,7 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
         for (int eachMoratoriumMonth = 1; eachMoratoriumMonth <= moratoriumMonths; eachMoratoriumMonth++) {
             BigDecimal interest = balance.multiply(monthlyRate).setScale(2, RoundingMode.HALF_UP);
             balance = balance.add(interest).setScale(2, RoundingMode.HALF_UP);
-
+            log.info("balance during moratorium period {} , ==== interest incurred {}", balance, interest);
             repaymentSchedule.add(
                     RepaymentHistory.builder()
                             .totalAmountRepaid(totalRepaid)
@@ -284,6 +284,8 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
         for (int eachTenorMonth = 1; eachTenorMonth <= totalMonths - moratoriumMonths; eachTenorMonth++) {
             BigDecimal interest = balance.multiply(monthlyRate).setScale(2, RoundingMode.HALF_UP);
             BigDecimal principalPayment = expectedMonthlyRepayment.subtract(interest).setScale(2, RoundingMode.HALF_UP);
+            log.info("balance during tenor period {} , ==== interest incurred {}", balance, interest);
+
 
             if (eachTenorMonth == (totalMonths - moratoriumMonths)) {
                 principalPayment = balance;

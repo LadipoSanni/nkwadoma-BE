@@ -166,7 +166,7 @@ public class LoaneeController {
 
     @GetMapping("cohorts/loanee")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_SUPER_ADMIN') " +
-            "or hasRole('ORGANIZATION_SUPER_ADMIN')or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
+            "or hasRole('ORGANIZATION_SUPER_ADMIN')or hasRole('MEEDL_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE') or hasRole('LOANEE') ")
     public ResponseEntity<ApiResponse<?>> viewLoaneeInCohort(@RequestParam("cohortId")String cohortId,
                                                              @RequestParam("loaneeId") String loaneeId) throws MeedlException {
         log.info("request that came in cohortID == {} , loaneeId == {}", cohortId, loaneeId);
