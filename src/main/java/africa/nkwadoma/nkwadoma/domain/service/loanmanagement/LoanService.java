@@ -3,7 +3,6 @@ package africa.nkwadoma.nkwadoma.domain.service.loanmanagement;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.loanbook.LoanUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
-import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentvehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.*;
@@ -45,7 +44,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages.LOAN_DECISION;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages.LOAN_DECISION_NOT_MADE;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -98,7 +97,7 @@ public class LoanService implements  ViewLoanReferralsUseCase,
         log.info("-----> offer response ----> {}", loanOffer.getLoaneeResponse());
         if (loanOffer.getLoaneeResponse() == null) {
             log.info("Loanee response is null");
-            throw new LoanException(LOAN_DECISION.getMessage());
+            throw new LoanException(LOAN_DECISION_NOT_MADE.getMessage());
         }
         if (loanOffer.getLoaneeResponse().equals(LoanDecision.DECLINED)){
             log.error("{}", LoanMessages.CANNOT_START_LOAN_FOR_LOAN_OFFER_THAT_AS_BEEN_DECLINED.getMessage());

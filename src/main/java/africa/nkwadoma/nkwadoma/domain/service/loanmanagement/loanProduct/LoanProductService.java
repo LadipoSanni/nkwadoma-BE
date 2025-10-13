@@ -145,7 +145,7 @@ public class LoanProductService implements CreateLoanProductUseCase, ViewLoanPro
     }
     @Override
     public LoanProduct viewLoanProductDetailsById(String loanProductId) throws MeedlException {
-        MeedlValidator.validateUUID(loanProductId, LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
+        MeedlValidator.validateUUID(loanProductId, LoanProductMessage.INVALID_LOAN_PRODUCT_ID.getMessage());
         log.info("Service level of view loan product {}", loanProductId);
         LoanProduct loanProduct = loanProductOutputPort.findById(loanProductId);
         log.info("Updating loan product vendors on the view ");
@@ -170,7 +170,7 @@ public class LoanProductService implements CreateLoanProductUseCase, ViewLoanPro
     @Override
     public void deleteLoanProductById(LoanProduct loanProduct) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanProduct, LoanMessages.LOAN_CANNOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateUUID(loanProduct.getId(), LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
+        MeedlValidator.validateUUID(loanProduct.getId(), LoanProductMessage.INVALID_LOAN_PRODUCT_ID.getMessage());
         int offerCount = loanProductOutputPort.countLoanOfferFromLoanProduct(loanProduct.getId(), List.of(LoanDecision.OFFERED, LoanDecision.ACCEPTED));
         if (offerCount == 0) {
             LoanProduct foundLoanProduct = loanProductOutputPort.findById(loanProduct.getId());

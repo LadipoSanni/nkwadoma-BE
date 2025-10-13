@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.testUtilities.data;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlConstants;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.*;
@@ -17,6 +16,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentvehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.loan.disbursement.DisbursementRule;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.*;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Demography;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.PlatformRequest;

@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity;
 
-import africa.nkwadoma.nkwadoma.domain.model.loan.DisbursementRule;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.disbursement.DisbursementRuleEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

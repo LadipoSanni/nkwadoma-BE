@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.domain.enums.constants.loan;
+package africa.nkwadoma.nkwadoma.domain.enums.constants.loan.disbursement;
 
 import lombok.Getter;
 
@@ -8,7 +8,6 @@ public enum DisbursementRuleMessages {
     INVALID_DISBURSEMENT_RULE_NAME("Disbursement rule name cannot be empty"),
       DISBURSEMENT_RULE_NOT_FOUND("Disbursement rule not found"),
       INVALID_DISBURSEMENT_RULE_ACTIVATION_STATUS("Activation status of disbursement rule cannot be empty"),
-      DISBURSEMENT_RULE_QUERY_CANNOT_BE_EMPTY("Disbursement rule query cannot be empty"),
       INVALID_DISBURSEMENT_RULE_ID("Disbursement rule id cannot be invalid");
 
     private final String message;

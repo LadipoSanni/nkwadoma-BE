@@ -1,22 +1,19 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement.disbursement;
 
-import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanbook.DisbursementRuleOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.DisbursementRuleMessages;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.disbursement.DisbursementRuleOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.disbursement.DisbursementRuleMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.loan.DisbursementRule;
+import africa.nkwadoma.nkwadoma.domain.model.loan.disbursement.DisbursementRule;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanManagement.DisbursementRuleMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.DisbursementRuleEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.DisbursementRuleRepository;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanManagement.disbursement.DisbursementRuleMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.disbursement.DisbursementRuleEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.disbursement.DisbursementRuleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Set;
 
 @Component
 @RequiredArgsConstructor

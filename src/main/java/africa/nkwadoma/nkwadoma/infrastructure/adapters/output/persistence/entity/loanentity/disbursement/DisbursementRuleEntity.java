@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.disbursement;
 
 import africa.nkwadoma.nkwadoma.domain.enums.DisbursementInterval;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;

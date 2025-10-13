@@ -19,8 +19,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class TokenUtilsTest {
     @Autowired
     private AesOutputPort tokenUtils;
-    public static final String ENCRYPTED_DATA = "etlGGJ4BSGNxBkqfv3rPqw==";
-    public static final String DECRYPTED_DATA = "93289238223";
+    public static final String ENCRYPTED_DATA = "kaoWRzP2rrur7CcVB/3f5A==";
+    public static final String DECRYPTED_DATA = "01289238223";
     @Autowired
     private EmailTokenOutputPort emailTokenManager;
 
