@@ -80,7 +80,7 @@ public class Loan {
     public Loan buildLoan(Loanee foundLoanee, String loanAccountId, String loanOfferId, LoanOffer loanOffer) {
         LocalDateTime startDate = LocalDateTime.now();
         if (!ObjectUtils.isEmpty(loanOffer.getStartDate())){
-            log.warn("Cohort start date is provided");
+            log.warn("Cohort start date is provided {}", loanOffer.getStartDate());
             startDate = loanOffer.getStartDate().atStartOfDay();
         }
         return Loan.builder().loanee(foundLoanee).loanAccountId(loanAccountId).loanOfferId(loanOfferId).
