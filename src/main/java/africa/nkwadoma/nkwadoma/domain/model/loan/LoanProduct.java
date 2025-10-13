@@ -116,7 +116,7 @@ public class LoanProduct {
     }
 
     private void validateLoanProductSize() throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanProductSize, LoanMessages.LOAN_PRODUCT_SIZE_REQUIRED.getMessage());
+        MeedlValidator.validateObjectInstance(loanProductSize, LoanProductMessage.LOAN_PRODUCT_SIZE_REQUIRED.getMessage());
         if (loanProductSize.compareTo(BigDecimal.ZERO) <= BigDecimal.ZERO.intValue()){
             throw new LoanException(LoanProductMessage.INVALID_LOAN_PRODUCT_SIZE.getMessage());
         }

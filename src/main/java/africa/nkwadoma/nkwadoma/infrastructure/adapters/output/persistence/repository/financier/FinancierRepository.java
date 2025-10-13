@@ -118,13 +118,21 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
             WHEN f.financierType = 'COOPERATE' THEN organization.email
             ELSE NULL
         END AS email,
+        CASE\s
+                WHEN f.financierType = 'INDIVIDUAL' THEN CONCAT(individualInviter.firstName, ' ', individualInviter.lastName)
+                ELSE NULL
+            END AS invitedBy,
         f.totalAmountInvested AS totalAmountInvested,
         f.activationStatus AS activationStatus,
         f.financierType AS financierType,
         f.identity AS identity
     FROM FinancierEntity f
     left JOIN OrganizationEntity organization ON organization.id = f.identity AND f.financierType = 'COOPERATE'
-    left JOIN UserEntity user ON user.id = f.identity AND f.financierType = 'INDIVIDUAL'
+    left JOIN UserEntity user ON user.id = f.identity
+     AND f.financierType = 'INDIVIDUAL'
+     LEFT JOIN UserEntity individualInviter\s
+             ON individualInviter.id = user.createdBy\s
+             AND f.financierType = 'INDIVIDUAL'
     WHERE f.id = :financierId
 """)
     Optional<FinancierProjection> findByFinancierId(@Param("financierId") String financierId);

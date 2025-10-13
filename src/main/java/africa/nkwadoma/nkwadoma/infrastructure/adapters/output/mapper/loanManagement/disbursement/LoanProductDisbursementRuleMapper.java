@@ -1,6 +1,6 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanManagement.loanProduct;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanManagement.disbursement;
 
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProductDisbursementRule;
+import africa.nkwadoma.nkwadoma.domain.model.loan.disbursement.LoanProductDisbursementRule;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoanProductDisbursementRuleEntity;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;

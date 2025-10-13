@@ -1,7 +1,7 @@
-package africa.nkwadoma.nkwadoma.domain.model.loan;
+package africa.nkwadoma.nkwadoma.domain.model.loan.disbursement;
 
 import africa.nkwadoma.nkwadoma.domain.enums.DisbursementInterval;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.DisbursementRuleMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.disbursement.DisbursementRuleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -37,14 +37,14 @@ public class DisbursementRule {
     private Set<ActivationStatus> activationStatuses;
     private UserIdentity userIdentity;
 
+    private List<String> loanIds;
+
     private int pageNumber;
     private int pageSize;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateDataElement(name, DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE_NAME.getMessage());
         validatePercentageDistribution(this.percentageDistribution);
-
-//        MeedlValidator.validateDataElement(query, DisbursementRuleMessages.DISBURSEMENT_RULE_QUERY_CANNOT_BE_EMPTY.getMessage());
     }
     public void validateActivationStatus() throws MeedlException {
         MeedlValidator.validateObjectInstance(activationStatus, DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE_ACTIVATION_STATUS.getMessage() );
@@ -65,6 +65,12 @@ public class DisbursementRule {
         if (sum.compareTo(HUNDRED_PERCENT) != BigDecimal.ZERO.intValue()) {
             throw new MeedlException(
                     "Invalid distribution: percentages must sum up to 100%. Current total = " + sum);
+        }
+    }
+
+    public void validateLoanIds() throws MeedlException {
+        for (String id : loanIds){
+            MeedlValidator.validateUUID(id, "Loan to apply disbursement rule to is invalid");
         }
     }
 }

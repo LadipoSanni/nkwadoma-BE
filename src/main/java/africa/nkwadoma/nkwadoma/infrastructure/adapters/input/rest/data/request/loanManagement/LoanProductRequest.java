@@ -1,14 +1,12 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement;
 
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlPatterns;
-import africa.nkwadoma.nkwadoma.domain.model.loan.DisbursementRule;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.SponsorsRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ErrorMessages;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

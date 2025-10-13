@@ -1,7 +1,7 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.disbursement;
 
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.DisbursementRuleEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.disbursement.DisbursementRuleEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

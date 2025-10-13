@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement.l
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.loanProduct.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanOfferMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanProductMessage;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeLoanDetailMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanDecision;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -64,14 +65,14 @@ public class LoanProductAdapter implements LoanProductOutputPort {
 
     @Override
     public int countLoanOfferFromLoanProduct(String loanProductId, List<LoanDecision> loanDecisions) throws MeedlException {
-        MeedlValidator.validateUUID(loanProductId, LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
+        MeedlValidator.validateUUID(loanProductId, LoanProductMessage.INVALID_LOAN_PRODUCT_ID.getMessage());
         return loanProductRepository.countLoanOfferFromLoanProduct(loanProductId, loanDecisions);
     }
 
     @Transactional
     @Override
     public void deleteById(String id) throws MeedlException {
-        MeedlValidator.validateUUID(id, LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
+        MeedlValidator.validateUUID(id, LoanProductMessage.INVALID_LOAN_PRODUCT_ID.getMessage());
         LoanProductEntity loanProductEntity = loanProductRepository.findById(id).orElseThrow(()-> new LoanException("Loan product doesn't exist"));
         loanProductVendorRepository.deleteAllByLoanProductEntity(loanProductEntity);
         loanProductRepository.deleteById(id);
@@ -86,7 +87,7 @@ public class LoanProductAdapter implements LoanProductOutputPort {
 
     @Override
     public LoanProduct findById(String id) throws MeedlException {
-        MeedlValidator.validateUUID(id, LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
+        MeedlValidator.validateUUID(id, LoanProductMessage.INVALID_LOAN_PRODUCT_ID.getMessage());
         LoanProductEntity entity = loanProductRepository.findById(id).orElseThrow(()-> new LoanException("Loan product not found"));
         log.info("loan product sponsors {}",entity);
         return loanProductMapper.map(entity);
@@ -122,7 +123,7 @@ public class LoanProductAdapter implements LoanProductOutputPort {
 
     @Override
     public LoanProduct findByCohortLoaneeId(String id) throws MeedlException {
-        MeedlValidator.validateUUID(id, LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
+        MeedlValidator.validateUUID(id, LoanProductMessage.INVALID_LOAN_PRODUCT_ID.getMessage());
 
         LoanProductEntity loanProductEntity = loanProductRepository.findByCohortLoaneeId(id);
 

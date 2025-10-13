@@ -89,8 +89,6 @@ class LoanServiceTest {
     private CohortLoanDetailOutputPort cohortLoanDetailOutputPort;
     private CohortLoanDetail cohortLoanDetail;
     private Cohort cohort;
-    @Mock
-    private LoanProductDisbursementRuleOutputPort loanProductDisbursementRuleOutputPort;
     private LoaneeLoanBreakdown loaneeLoanBreakdown;
     @Mock
     private ProgramLoanDetailOutputPort programLoanDetailOutputPort;
