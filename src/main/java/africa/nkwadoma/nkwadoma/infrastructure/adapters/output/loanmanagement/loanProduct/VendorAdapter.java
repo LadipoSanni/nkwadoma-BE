@@ -9,7 +9,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.VendorEntityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -43,7 +42,7 @@ public class VendorAdapter implements VendorOutputPort {
         Page<VendorEntity> vendorEntities;
         if (MeedlValidator.isNotEmptyString(vendor.getVendorName())) {
             log.info("Vendor search initiated at the adapter for {}", vendor.getVendorName());
-            vendorEntities = vendorEntityRepository.findAllByVendorName(vendor.getVendorName(), pageRequest);
+            vendorEntities = vendorEntityRepository.findAllByVendorNameContainingIgnoreCase(vendor.getVendorName(), pageRequest);
         } else if (vendor.getVendorName() == null){
             log.info("Viewing all vendors at the adapter");
             vendorEntities = vendorEntityRepository.findAll(pageRequest);
