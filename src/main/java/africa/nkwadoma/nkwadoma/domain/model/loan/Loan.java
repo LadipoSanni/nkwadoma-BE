@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 
 import java.math.*;
 import java.time.*;
@@ -76,8 +77,13 @@ public class Loan {
         return Loan.builder().loanee(foundLoanee).loanAccountId(loanAccountId).loanOfferId(loanOfferId).
                 startDate(startDate).loanStatus(LoanStatus.PERFORMING).build();
     }
-    public Loan buildLoan(Loanee foundLoanee, String loanAccountId, String loanOfferId) {
+    public Loan buildLoan(Loanee foundLoanee, String loanAccountId, String loanOfferId, LoanOffer loanOffer) {
+        LocalDateTime startDate = LocalDateTime.now();
+        if (!ObjectUtils.isEmpty(loanOffer.getStartDate())){
+            log.warn("Cohort start date is provided");
+            startDate = loanOffer.getStartDate().atStartOfDay();
+        }
         return Loan.builder().loanee(foundLoanee).loanAccountId(loanAccountId).loanOfferId(loanOfferId).
-                startDate(LocalDateTime.now()).loanStatus(LoanStatus.PERFORMING).build();
+                startDate(startDate).loanStatus(LoanStatus.PERFORMING).build();
     }
 }

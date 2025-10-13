@@ -114,7 +114,7 @@ public class LoanService implements  ViewLoanReferralsUseCase,
             loan = loan.buildLoan(foundLoanee, getLoanAccountId(foundLoanee),loan.getLoanOfferId(), loan.getStartDate());
         }else {
             log.info("Loan start date wasn't provided");
-            loan = loan.buildLoan(foundLoanee, getLoanAccountId(foundLoanee), loan.getLoanOfferId());
+            loan = loan.buildLoan(foundLoanee, getLoanAccountId(foundLoanee), loan.getLoanOfferId(), loanOffer);
         }
 
         Loan savedLoan = loanOutputPort.save(loan);
