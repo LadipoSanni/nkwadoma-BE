@@ -98,4 +98,22 @@ public interface LoaneeLoanDetailRepository extends JpaRepository<LoaneeLoanDeta
     group by old.amountReceived, old.amountRepaid,old.outstandingAmount
 """)
     LoanSummaryProjection getOrganizationLoanSummary(@Param("organizationId") String organizationId);
+
+
+    @Query("""
+    SELECT
+        lld.amountReceived AS totalAmountReceived,
+        lld.amountRepaid AS totalAmountRepaid,
+        lld.amountOutstanding AS totalAmountOutstanding
+    FROM LoaneeLoanDetailEntity lld
+    JOIN CohortLoaneeEntity cle ON cle.loaneeLoanDetail.id = lld.id
+    JOIN LoaneeEntity l ON l.id = cle.loanee.id
+    JOIN UserEntity u ON u.id = l.userIdentity.id
+    JOIN CohortEntity  c ON c.id = cle.cohort.id
+    JOIN ProgramEntity  p ON p.id = c.programId
+    JOIN OrganizationEntity  o ON o.id = p.organizationIdentity.id
+    WHERE o.id = :organizationId and l.id = :loaneeId
+    """)
+    LoanSummaryProjection getLoaneeLoanSummaryInOrganization(@Param("organizationId")String organizationId,
+                                                             @Param("loaneeId") String loaneeId);
 }

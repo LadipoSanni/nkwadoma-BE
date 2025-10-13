@@ -326,7 +326,13 @@ public class LoanService implements  ViewLoanReferralsUseCase,
             OrganizationEmployeeIdentity organizationEmployeeIdentity =
                     organizationEmployeeIdentityOutputPort.findByMeedlUserId(actorId)
                             .orElseThrow(() -> new IdentityException("User is not an employee of this organization"));
-            loanDetailSummary = loaneeLoanDetailsOutputPort.getOrganizationLoanSummary(organizationEmployeeIdentity.getOrganization());
+            if (ObjectUtils.isNotEmpty(loaneeId)) {
+                MeedlValidator.validateUUID(loaneeId,LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+                loanDetailSummary = loaneeLoanDetailsOutputPort.getLoaneeLoanSummaryInOrganization(
+                        organizationEmployeeIdentity.getOrganization(),loaneeId);
+            }else {
+                loanDetailSummary = loaneeLoanDetailsOutputPort.getOrganizationLoanSummary(organizationEmployeeIdentity.getOrganization());
+            }
             log.info("Found organization loan summary {}", loanDetailSummary);
         }
         return loanDetailSummary;
