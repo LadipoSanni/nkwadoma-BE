@@ -134,7 +134,7 @@ public class LoanProductService implements CreateLoanProductUseCase, ViewLoanPro
         log.info("Loan product size is : {}", loanProduct.getLoanProductSize());
         log.info("Investment vehicle available balance is : {}", investmentVehicle.getTotalAvailableAmount());
         if (loanProduct.getLoanProductSize().compareTo(investmentVehicle.getTotalAvailableAmount()) > BigInteger.ZERO.intValue()) {
-            log.warn("Attempt to create loan product that exceeds the investment vehicle available amount.");
+            log.warn("Attempt to create loan product that exceeds the investment vehicle available amount. Loan product size {}, vehicle available amount {}", loanProduct.getLoanProductSize(), investmentVehicle.getTotalAvailableAmount());
             throw new MeedlException("Loan product size cannot be greater than investment vehicle available amount.");
         }
         log.info("Validation of loan product size in relation to available amount on investment vehicle.");
@@ -229,23 +229,26 @@ public class LoanProductService implements CreateLoanProductUseCase, ViewLoanPro
     }
 
     private void updateLoanProductInvestmentVehicleDetails(LoanProduct loanProduct, LoanProduct foundLoanProduct) throws MeedlException {
+        log.info("previous investment vehicle id ---> {} current investment vehicle id {}, are they the same {} ", foundLoanProduct.getInvestmentVehicleId(), loanProduct.getInvestmentVehicleId(), loanProduct.getInvestmentVehicleId().equals(foundLoanProduct.getInvestmentVehicleId()));
         if (!loanProduct.getInvestmentVehicleId().equals(foundLoanProduct.getInvestmentVehicleId())){
+            log.info("Update loan product based on new investment vehicle in use ");
             setUpLoanProductSizeWithDifferentInvestmentVehicle(loanProduct);
             refundPreviousVehicleAvailableAmount(foundLoanProduct);
-        }
-        boolean isNotEqual = foundLoanProduct.getLoanProductSize()
-                .compareTo(loanProduct.getLoanProductSize()) != 0;
-        log.info("is new loan product size greater than the previous ? {} , previous {} , new {}",
-                isNotEqual, foundLoanProduct.getLoanProductSize(), loanProduct.getLoanProductSize() );
-        if (isNotEqual){
-            log.info("The vehicle is the same but the amount selected is different");
-            InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(foundLoanProduct.getInvestmentVehicleId());
-            verifyFinanciersExistInVehicle(loanProduct, investmentVehicle);
-            validateAndUpdateInvestmentVehicleAmountForLoanProduct(foundLoanProduct, loanProduct, investmentVehicle);
-            log.info("setting other loan product values that depends on the size...");
-            initializeAvailableAmounts(loanProduct);
-            investmentVehicleOutputPort.save(investmentVehicle);
+        }else {
+            boolean isNotEqual = foundLoanProduct.getLoanProductSize()
+                    .compareTo(loanProduct.getLoanProductSize()) != 0;
+            log.info("is new loan product size greater than the previous ? {} , previous {} , new {}",
+                    isNotEqual, foundLoanProduct.getLoanProductSize(), loanProduct.getLoanProductSize());
+            if (isNotEqual) {
+                log.info("The vehicle is the same but the amount selected is different");
+                InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(foundLoanProduct.getInvestmentVehicleId());
+                verifyFinanciersExistInVehicle(loanProduct, investmentVehicle);
+                validateAndUpdateInvestmentVehicleAmountForLoanProduct(foundLoanProduct, loanProduct, investmentVehicle);
+                log.info("setting other loan product values that depends on the size...");
+                initializeAvailableAmounts(loanProduct);
+                investmentVehicleOutputPort.save(investmentVehicle);
 
+            }
         }
     }
 
