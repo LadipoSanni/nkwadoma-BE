@@ -25,4 +25,6 @@ public interface LoaneeLoanDetailsOutputPort {
     List<LoaneeLoanDetail> findAllWithDailyInterestByMonthAndYear(Month month, int year);
 
     LoanDetailSummary getOrganizationLoanSummary(String organization) throws MeedlException;
+
+    LoanDetailSummary getLoaneeLoanSummaryInOrganization(String organization, String loaneeId) throws MeedlException;
 }

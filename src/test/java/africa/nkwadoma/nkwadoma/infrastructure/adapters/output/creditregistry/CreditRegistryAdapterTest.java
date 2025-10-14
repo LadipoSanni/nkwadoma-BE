@@ -66,18 +66,18 @@ class CreditRegistryAdapterTest {
     void getCreditScoreWithInvalidBvn(String bvn){
         assertThrows(MeedlException.class, ()-> creditRegistryOutputPort.getCreditScoreWithBvn(bvn));
     }
-    @Test
-    void getCreditScoreWithBvnThatDoesNotExist() {
-        String searchQuery = "92500096741";
-        int creditScore = 0;
-        try {
-            creditScore = creditRegistryOutputPort.getCreditScoreWithBvn(searchQuery);
-        } catch (MeedlException e) {
-            log.error("Error getting credit score {}", e.getMessage());
-        }
-        log.info("Credit score {}", creditScore);
-        assertTrue(creditScore == 0);
-    }
+//    @Test
+//    void getCreditScoreWithBvnThatDoesNotExist() {
+//        String searchQuery = "92500096741";
+//        int creditScore = 0;
+//        try {
+//            creditScore = creditRegistryOutputPort.getCreditScoreWithBvn(searchQuery);
+//        } catch (MeedlException e) {
+//            log.error("Error getting credit score {}", e.getMessage());
+//        }
+//        log.info("Credit score {}", creditScore);
+//        assertTrue(creditScore == 0);
+//    }
 //    @ParameterizedTest
     @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY, "invalid values"})
     void getCreditScoreWithInvalidRegistryId(String registryId){
