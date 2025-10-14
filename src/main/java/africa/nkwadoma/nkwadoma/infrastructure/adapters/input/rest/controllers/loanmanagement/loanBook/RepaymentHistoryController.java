@@ -101,7 +101,8 @@ public class RepaymentHistoryController {
     }
 
     @GetMapping("years")
-    @PreAuthorize("hasRole('LOANEE') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
+    @PreAuthorize("hasRole('LOANEE') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')" +
+            "or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('ORGANIZATION_ASSOCIATE') or hasRole('ORGANIZATION_ADMIN') ")
     public ResponseEntity<ApiResponse<?>> getFirstAndLastYear(
             @AuthenticationPrincipal Jwt meedlUser,
             @RequestParam(name = "loaneeId", required = false) String loaneeId,
@@ -122,7 +123,8 @@ public class RepaymentHistoryController {
 
 
     @GetMapping("generate/repayment/schedule")
-    @PreAuthorize("hasRole('LOANEE') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
+    @PreAuthorize("hasRole('LOANEE') or hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')" +
+            " or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('ORGANIZATION_ASSOCIATE') or hasRole('ORGANIZATION_ADMIN') ")
     public ResponseEntity<ApiResponse<?>> generateRepaymentSchedule(@RequestParam(name = "amountApproved",required = false) BigDecimal amountApproved,
                                                                     @RequestParam(name = "loanProductId",required = false) String loanProductId,
                                                                     @RequestParam(name = "loanId",required = false)String loanId) throws MeedlException {
