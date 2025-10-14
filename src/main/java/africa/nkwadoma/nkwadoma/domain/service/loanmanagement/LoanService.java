@@ -251,6 +251,9 @@ public class LoanService implements  ViewLoanReferralsUseCase,
         loanMetrics.get().setLoanDisbursalCount(
                 loanMetrics.get().getLoanDisbursalCount() + 1
         );
+        loanMetrics.get().setLoanOfferCount(
+                loanMetrics.get().getLoanOfferCount() - 1
+        );
         if (onboardingMode.equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)){
             loanMetrics.get().setUploadedLoanCount(
                     loanMetrics.get().getUploadedLoanCount() + 1
@@ -322,7 +325,13 @@ public class LoanService implements  ViewLoanReferralsUseCase,
             OrganizationEmployeeIdentity organizationEmployeeIdentity =
                     organizationEmployeeIdentityOutputPort.findByMeedlUserId(actorId)
                             .orElseThrow(() -> new IdentityException("User is not an employee of this organization"));
-            loanDetailSummary = loaneeLoanDetailsOutputPort.getOrganizationLoanSummary(organizationEmployeeIdentity.getOrganization());
+            if (ObjectUtils.isNotEmpty(loaneeId)) {
+                MeedlValidator.validateUUID(loaneeId,LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+                loanDetailSummary = loaneeLoanDetailsOutputPort.getLoaneeLoanSummaryInOrganization(
+                        organizationEmployeeIdentity.getOrganization(),loaneeId);
+            }else {
+                loanDetailSummary = loaneeLoanDetailsOutputPort.getOrganizationLoanSummary(organizationEmployeeIdentity.getOrganization());
+            }
             log.info("Found organization loan summary {}", loanDetailSummary);
         }
         return loanDetailSummary;
@@ -671,7 +680,7 @@ public class LoanService implements  ViewLoanReferralsUseCase,
         if (ObjectUtils.isNotEmpty(loaneeLoanAccount)){
             return loaneeLoanAccount;
         }
-        decreaseLoanOfferOnLoanMetrics(foundLoanOffer.getReferredBy());
+//        decreaseLoanOfferOnLoanMetrics(foundLoanOffer.getReferredBy());
         declineLoanOffer(loanee.getUserIdentity(), loanOffer, foundLoanOffer);
         return loaneeLoanAccount;
     }
@@ -719,7 +728,7 @@ public class LoanService implements  ViewLoanReferralsUseCase,
             loaneeLoanAccount = createLoaneeLoanAccount(foundLoanOffer.getLoaneeId());
             log.info("Loanee account is created : {}", loaneeLoanAccount);
         }
-        decreaseLoanOfferOnLoanMetrics(foundLoanOffer.getReferredBy());
+//        decreaseLoanOfferOnLoanMetrics(foundLoanOffer.getReferredBy());
         log.info("done decreasing  : {}", foundLoanOffer);
         return loaneeLoanAccount;
     }

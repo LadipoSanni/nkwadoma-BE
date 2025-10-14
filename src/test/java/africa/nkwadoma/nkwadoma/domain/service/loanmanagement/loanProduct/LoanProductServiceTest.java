@@ -65,6 +65,7 @@ class LoanProductServiceTest {
     private Loan loan;
     private LoanProduct loanProduct;
     private Loanee loanee;
+    private final String testId = "80123f3b-b8d9-4e7f-876b-df442bfa02c4";
     private InvestmentVehicle investmentVehicle;
     @Mock
     private DisbursementRuleOutputPort disbursementRuleOutputPort;
@@ -239,12 +240,13 @@ class LoanProductServiceTest {
     void updateLoanProduct(){
 
         loanProduct.setDisbursementTerms("Updated Gemini Loan Product");
-        loanProduct.setId("80123f3b-b8d9-4e7f-876b-df442bfa02c4");
+        loanProduct.setId(testId);
         try {
             when(loanProductOutputPort.findById(loanProduct.getId())).thenReturn(loanProduct);
-            when(investmentVehicleOutputPort.findById(anyString())).thenReturn(investmentVehicle);
+            when(loanProductMapper.updateLoanProduct(loanProduct, loanProduct)).thenReturn(loanProduct);
+//            when(investmentVehicleOutputPort.findById(anyString())).thenReturn(investmentVehicle);
             loanProduct = loanProductService.updateLoanProduct(loanProduct);
-            LoanProduct updatedLoanProduct = loanProductOutputPort.findById(loanProduct.getId());
+            LoanProduct updatedLoanProduct = loanProductOutputPort.findById(testId);
             assertNotNull(updatedLoanProduct);
             assertEquals("Updated Gemini Loan Product", updatedLoanProduct.getDisbursementTerms());
         } catch (MeedlException e) {

@@ -606,6 +606,29 @@ class LoanServiceTest {
 
 
     @Test
+    void viewAParticularLoaneeLoanDetailsTotalByByOrganizationStaff(){
+        try {
+            userIdentity.setRole(IdentityRole.ORGANIZATION_SUPER_ADMIN);
+        when(userIdentityOutputPort.findById(testId)).thenReturn(userIdentity);
+        when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(anyString())).thenReturn(Optional.ofNullable(organizationEmployeeIdentity));
+        when(loaneeLoanDetailsOutputPort.getLoaneeLoanSummaryInOrganization(organizationEmployeeIdentity.getOrganization(),testId)).thenReturn(loanDetailSummary);
+        loanDetailSummary = loanService.viewLoanTotal(testId,testId);
+    }catch (MeedlException exception){
+        log.error(exception.getMessage(), exception);
+    }
+        assertNotNull(loanDetailSummary);
+    }
+
+    @Test
+    void viewAParticularLoaneeLoanDetailsTotalByByOrganizationStaffWithInvalidoanId() throws MeedlException {
+        userIdentity.setRole(IdentityRole.ORGANIZATION_SUPER_ADMIN);
+        when(userIdentityOutputPort.findById(testId)).thenReturn(userIdentity);
+        when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(anyString())).thenReturn(Optional.ofNullable(organizationEmployeeIdentity));
+        assertThrows(MeedlException.class, ()-> loanService.viewLoanTotal(testId, "in-valid"));
+    }
+
+
+    @Test
     void viewLoanReferralForLoanee_Success() throws MeedlException {
         String userId = testId;
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
