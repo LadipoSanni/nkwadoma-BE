@@ -69,14 +69,9 @@ public class LoanProductService implements CreateLoanProductUseCase, ViewLoanPro
             throw new LoanException("Loan product " + loanProduct.getName() + " already exists");
         }
         log.info("Searching for investment vehicle with id {} ", loanProduct.getInvestmentVehicleId());
-        InvestmentVehicle investmentVehicle = checkProductSizeNotMoreThanAvailableInvestmentAmount(loanProduct);
-        verifyFinanciersExistInVehicle(loanProduct, investmentVehicle);
-        investmentVehicle.setTotalAvailableAmount(investmentVehicle.getTotalAvailableAmount().subtract(loanProduct.getLoanProductSize()));
-        loanProduct.addInvestmentVehicleValues(investmentVehicle);
-        initializeAvailableAmounts(loanProduct);
-        if (ObjectUtils.isEmpty(loanProduct.getTotalOutstandingLoan())) {
-            loanProduct.setTotalOutstandingLoan(BigDecimal.ZERO);
-        }
+        InvestmentVehicle investmentVehicle =
+                investmentVehicleOutputPort.findById(loanProduct.getInvestmentVehicleId());
+        setUpLoanProductInvestmentVehicleDetails(loanProduct, investmentVehicle);
         log.info("Saving vendors for this loan product");
         List<Vendor> vendors = vendorOutputPort.saveVendors(loanProduct.getVendors());
         log.info("About to save loan product to db on create... {}", loanProduct);
@@ -90,6 +85,18 @@ public class LoanProductService implements CreateLoanProductUseCase, ViewLoanPro
         updateNumberOfLoanProductOnMeedlPortfolio();
         return loanProduct;
     }
+
+    private void setUpLoanProductInvestmentVehicleDetails(LoanProduct loanProduct, InvestmentVehicle investmentVehicle) throws MeedlException {
+        checkProductSizeNotMoreThanAvailableInvestmentAmount(loanProduct, investmentVehicle);
+        verifyFinanciersExistInVehicle(loanProduct, investmentVehicle);
+        investmentVehicle.setTotalAvailableAmount(investmentVehicle.getTotalAvailableAmount().subtract(loanProduct.getLoanProductSize()));
+        loanProduct.addInvestmentVehicleValues(investmentVehicle);
+        initializeAvailableAmounts(loanProduct);
+        if (ObjectUtils.isEmpty(loanProduct.getTotalOutstandingLoan())) {
+            loanProduct.setTotalOutstandingLoan(BigDecimal.ZERO);
+        }
+    }
+
     private void updateNumberOfLoanProductOnMeedlPortfolio() throws MeedlException {
         Portfolio portfolio = Portfolio.builder().portfolioName(MeedlConstants.MEEDL).build();
         portfolio = portfolioOutputPort.findPortfolio(portfolio);
@@ -122,16 +129,15 @@ public class LoanProductService implements CreateLoanProductUseCase, ViewLoanPro
         log.info("Done verifying if financiers are part of the select vehicle {}", investmentVehicle.getId());
     }
 
-    private InvestmentVehicle checkProductSizeNotMoreThanAvailableInvestmentAmount(LoanProduct loanProduct) throws MeedlException {
-        InvestmentVehicle investmentVehicle =
-                investmentVehicleOutputPort.findById(loanProduct.getInvestmentVehicleId());
+    private void checkProductSizeNotMoreThanAvailableInvestmentAmount(LoanProduct loanProduct, InvestmentVehicle investmentVehicle) throws MeedlException {
+
         log.info("Loan product size is : {}", loanProduct.getLoanProductSize());
         log.info("Investment vehicle available balance is : {}", investmentVehicle.getTotalAvailableAmount());
         if (loanProduct.getLoanProductSize().compareTo(investmentVehicle.getTotalAvailableAmount()) > BigInteger.ZERO.intValue()) {
-            log.warn("Attempt to create loan product that exceeds the investment vehicle available amount.");
+            log.warn("Attempt to create loan product that exceeds the investment vehicle available amount. Loan product size {}, vehicle available amount {}", loanProduct.getLoanProductSize(), investmentVehicle.getTotalAvailableAmount());
             throw new MeedlException("Loan product size cannot be greater than investment vehicle available amount.");
         }
-        return investmentVehicle;
+        log.info("Validation of loan product size in relation to available amount on investment vehicle.");
     }
 
     @Override
@@ -210,17 +216,7 @@ public class LoanProductService implements CreateLoanProductUseCase, ViewLoanPro
     }
 
     private LoanProduct updateLoanProduct(LoanProduct loanProduct, LoanProduct foundLoanProduct) throws MeedlException {
-        boolean isNotEqual = foundLoanProduct.getLoanProductSize()
-                .compareTo(loanProduct.getLoanProductSize()) != 0;
-        log.info("is new loan product size greater than the previous ? {} , previous {} , new {}",
-                isNotEqual, foundLoanProduct.getLoanProductSize(), loanProduct.getLoanProductSize() );
-        InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(foundLoanProduct.getInvestmentVehicleId());
-        verifyFinanciersExistInVehicle(loanProduct, investmentVehicle);
-        if (isNotEqual){
-            validateAndUpdateInvestmentVehicleAmountForLoanProduct(foundLoanProduct, loanProduct, investmentVehicle);
-            log.info("setting other loan product values that depends on the size...");
-            initializeAvailableAmounts(loanProduct);
-        }
+        updateLoanProductInvestmentVehicleDetails(loanProduct, foundLoanProduct);
         foundLoanProduct = loanProductMapper.updateLoanProduct(foundLoanProduct, loanProduct);
         foundLoanProduct.setUpdatedAt(LocalDateTime.now());
         log.info("Loan product sponsors id to be updated -----> {}", loanProduct.getSponsorIds());
@@ -231,6 +227,46 @@ public class LoanProductService implements CreateLoanProductUseCase, ViewLoanPro
         updateVendorDetails(loanProduct);
         return loanProductOutputPort.save(foundLoanProduct);
     }
+
+    private void updateLoanProductInvestmentVehicleDetails(LoanProduct loanProduct, LoanProduct foundLoanProduct) throws MeedlException {
+        log.info("previous investment vehicle id ---> {} current investment vehicle id {}, are they the same {} ", foundLoanProduct.getInvestmentVehicleId(), loanProduct.getInvestmentVehicleId(), loanProduct.getInvestmentVehicleId().equals(foundLoanProduct.getInvestmentVehicleId()));
+        if (!loanProduct.getInvestmentVehicleId().equals(foundLoanProduct.getInvestmentVehicleId())){
+            log.info("Update loan product based on new investment vehicle in use ");
+            setUpLoanProductSizeWithDifferentInvestmentVehicle(loanProduct);
+            refundPreviousVehicleAvailableAmount(foundLoanProduct);
+        }else {
+            boolean isNotEqual = foundLoanProduct.getLoanProductSize()
+                    .compareTo(loanProduct.getLoanProductSize()) != 0;
+            log.info("is new loan product size greater than the previous ? {} , previous {} , new {}",
+                    isNotEqual, foundLoanProduct.getLoanProductSize(), loanProduct.getLoanProductSize());
+            if (isNotEqual) {
+                log.info("The vehicle is the same but the amount selected is different");
+                InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(foundLoanProduct.getInvestmentVehicleId());
+                verifyFinanciersExistInVehicle(loanProduct, investmentVehicle);
+                validateAndUpdateInvestmentVehicleAmountForLoanProduct(foundLoanProduct, loanProduct, investmentVehicle);
+                log.info("setting other loan product values that depends on the size...");
+                initializeAvailableAmounts(loanProduct);
+                investmentVehicleOutputPort.save(investmentVehicle);
+
+            }
+        }
+    }
+
+    private void setUpLoanProductSizeWithDifferentInvestmentVehicle(LoanProduct loanProduct) throws MeedlException {
+        InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(loanProduct.getInvestmentVehicleId());
+        setUpLoanProductInvestmentVehicleDetails(loanProduct, investmentVehicle);
+        investmentVehicleOutputPort.save(investmentVehicle);
+    }
+
+    private void refundPreviousVehicleAvailableAmount(LoanProduct foundLoanProduct) throws MeedlException {
+        InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(foundLoanProduct.getInvestmentVehicleId());
+        investmentVehicle.setTotalAvailableAmount(
+                investmentVehicle.getTotalAvailableAmount()
+                        .add(foundLoanProduct.getLoanProductSize())
+        );
+        investmentVehicleOutputPort.save(investmentVehicle);
+    }
+
     private void updateVendorDetails(LoanProduct loanProduct) throws MeedlException {
         log.info("Finding all loan product vendors to update by loan product id {}", loanProduct.getId());
         List<Vendor> vendors = loanProductVendorOutputPort.getVendorsByLoanProductId(loanProduct.getId());
@@ -285,7 +321,6 @@ public class LoanProductService implements CreateLoanProductUseCase, ViewLoanPro
         investmentVehicle.setTotalAvailableAmount(
                 investmentVehiclePreviousAmountAvailable.subtract(loanProduct.getLoanProductSize())
         );
-        investmentVehicleOutputPort.save(investmentVehicle);
     }
 
 }
