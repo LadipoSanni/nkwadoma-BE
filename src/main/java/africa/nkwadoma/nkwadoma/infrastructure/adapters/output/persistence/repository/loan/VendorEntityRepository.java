@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface VendorEntityRepository extends JpaRepository<VendorEntity,String> {
 
-    Page<VendorEntity> findAllByVendorName(String vendorName, Pageable pageRequest);
+    Page<VendorEntity> findAllByVendorNameContainingIgnoreCase(String vendorName, Pageable pageRequest);
 
     @Query("SELECT DISTINCT ps FROM VendorEntity v JOIN v.providerServices ps")
     Page<String> findAllProviderService(Pageable pageRequest);
