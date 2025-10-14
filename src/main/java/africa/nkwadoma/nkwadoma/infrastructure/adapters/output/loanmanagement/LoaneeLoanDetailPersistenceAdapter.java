@@ -93,4 +93,13 @@ public class LoaneeLoanDetailPersistenceAdapter implements LoaneeLoanDetailsOutp
         LoanSummaryProjection loanSummaryProjection = loaneeLoanDetailRepository.getOrganizationLoanSummary(organizationId);
         return loaneeLoanDetailMapper.mapLoanSummaryProjectionToLOanSummary(loanSummaryProjection);
     }
+
+    @Override
+    public LoanDetailSummary getLoaneeLoanSummaryInOrganization(String organization, String loaneeId) throws MeedlException {
+        MeedlValidator.validateUUID(organization, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+        MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+        LoanSummaryProjection loanSummaryProjection = loaneeLoanDetailRepository.getLoaneeLoanSummaryInOrganization
+                (organization,loaneeId);
+        return loaneeLoanDetailMapper.mapLoanSummaryProjectionToLOanSummary(loanSummaryProjection);
+    }
 }
