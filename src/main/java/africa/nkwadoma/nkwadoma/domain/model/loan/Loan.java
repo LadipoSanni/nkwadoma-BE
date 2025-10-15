@@ -58,6 +58,7 @@ public class Loan {
     private int pageNumber;
     private int pageSize;
     private String organizationName;
+    private String loanTermsAndCondition;
     private LoanDetailSummary loanDetailSummary;
     private BigDecimal repaymentRate;
     private BigDecimal debtPercentage;

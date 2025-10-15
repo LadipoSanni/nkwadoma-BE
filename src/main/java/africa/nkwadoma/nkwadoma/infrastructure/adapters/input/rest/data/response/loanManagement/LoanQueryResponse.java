@@ -38,6 +38,7 @@ public class LoanQueryResponse {
     private String referredBy;
     private LoanRequestStatus status;
     private String image;
+    private String loanTermsAndCondition;
     private int creditScore;
     private BigDecimal loanAmountRequested;
     private BigDecimal loanAmountApproved;
