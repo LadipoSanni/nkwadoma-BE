@@ -205,7 +205,6 @@ public class LoanProductService implements CreateLoanProductUseCase, ViewLoanPro
             throw new LoanException("Loan product " + foundLoanProduct.getName() + " cannot be updated as it has already been loaned out");
         }
 
-
         int offerCount = loanProductOutputPort.countLoanOfferFromLoanProduct(loanProduct.getId(), List.of(LoanDecision.OFFERED, LoanDecision.ACCEPTED));
         if (offerCount == 0) {
             return updateLoanProduct(loanProduct, foundLoanProduct);
@@ -269,15 +268,16 @@ public class LoanProductService implements CreateLoanProductUseCase, ViewLoanPro
 
     private void updateVendorDetails(LoanProduct loanProduct) throws MeedlException {
         log.info("Finding all loan product vendors to update by loan product id {}", loanProduct.getId());
-        List<Vendor> vendors = loanProductVendorOutputPort.getVendorsByLoanProductId(loanProduct.getId());
+        List<Vendor> vendors = null;
+//        loanProductVendorOutputPort.getVendorsByLoanProductId(loanProduct.getId());
         List<LoanProductVendor> loanProductVendors = loanProductVendorOutputPort.findAllByLoanProductId(loanProduct.getId());
 
         List<String> loanProductVendorIds = getLoanProductVendorIds(loanProductVendors);
-        List<String> vendorIds = getVendorIds(vendors);
+//        List<String> vendorIds = getVendorIds(vendors);
 
         log.info("About to delete existing loan product vendors in update flow");
         loanProductVendorOutputPort.deleteMultipleById(loanProductVendorIds);
-        vendorOutputPort.deleteMultipleById(vendorIds);
+//        vendorOutputPort.deleteMultipleById(vendorIds);
 
         log.info("Saving vendor and loan product vendor details in update loan product");
         vendors = vendorOutputPort.saveVendors(loanProduct.getVendors());
