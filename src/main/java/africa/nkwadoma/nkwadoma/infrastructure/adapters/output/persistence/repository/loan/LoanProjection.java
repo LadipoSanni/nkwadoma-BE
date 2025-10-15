@@ -49,4 +49,5 @@ public interface LoanProjection {
     BigDecimal getAmountRepaid();
     Double getInterestRate();
     BigDecimal getInterestIncurred();
+    String getLoanTermsAndCondition();
 }

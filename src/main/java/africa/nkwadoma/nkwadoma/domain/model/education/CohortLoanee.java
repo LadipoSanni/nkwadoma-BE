@@ -59,6 +59,7 @@ public class CohortLoanee {
     private double interestRate;
     private double debtPercentage;
     private double repaymentPercentage;
+    private String loanTermsAndCondition;
     private String highestLevelOfEducation;
     private String programName;
     private String organizationName;
