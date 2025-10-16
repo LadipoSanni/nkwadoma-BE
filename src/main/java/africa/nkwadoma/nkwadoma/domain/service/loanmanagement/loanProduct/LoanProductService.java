@@ -72,18 +72,25 @@ public class LoanProductService implements CreateLoanProductUseCase, ViewLoanPro
         InvestmentVehicle investmentVehicle =
                 investmentVehicleOutputPort.findById(loanProduct.getInvestmentVehicleId());
         setUpLoanProductInvestmentVehicleDetails(loanProduct, investmentVehicle);
-        log.info("Saving vendors for this loan product");
-        List<Vendor> vendors = vendorOutputPort.saveVendors(loanProduct.getVendors());
         log.info("About to save loan product to db on create... {}", loanProduct);
         LoanProduct savedLoanProduct = loanProductOutputPort.save(loanProduct);
+        log.info("Saving vendors for this loan product");
+        saveVendors(loanProduct, savedLoanProduct);
         loanProduct.setId(savedLoanProduct.getId());
-        loanProduct.setVendors(vendors);
         log.info("Saving loan product vendors");
-        loanProductVendorOutputPort.save(vendors, savedLoanProduct);
         log.info("Loan product to be saved in create loan product service method {}", loanProduct);
         investmentVehicleOutputPort.save(investmentVehicle);
         updateNumberOfLoanProductOnMeedlPortfolio();
         return loanProduct;
+    }
+
+    private void saveVendors(LoanProduct loanProduct, LoanProduct savedLoanProduct) throws MeedlException {
+        if (MeedlValidator.isEmptyCollection(loanProduct.getVendors())) {
+            log.info("{} Vendors was provided to save", loanProduct.getVendors().size());
+            List<Vendor> vendors = vendorOutputPort.saveVendors(loanProduct.getVendors());
+            loanProduct.setVendors(vendors);
+            loanProductVendorOutputPort.save(vendors, savedLoanProduct);
+        }
     }
 
     private void setUpLoanProductInvestmentVehicleDetails(LoanProduct loanProduct, InvestmentVehicle investmentVehicle) throws MeedlException {

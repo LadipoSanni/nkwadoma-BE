@@ -124,7 +124,7 @@ class LoanProductServiceTest {
 
 //            when(disbursementRuleOutputPort.save(disbursementRule)).thenReturn(disbursementRule);
 
-            when(vendorOutputPort.saveVendors(anyList())).thenReturn(vendors);
+//            when(vendorOutputPort.saveVendors(anyList())).thenReturn(vendors);
             when(investmentVehicleFinancierOutputPort.checkIfFinancierExistInVehicle(financier.getId(), investmentVehicle.getId())).thenReturn(1);
             when(investmentVehicleOutputPort.findById(loanProduct.getId()))
                     .thenReturn(investmentVehicle);
