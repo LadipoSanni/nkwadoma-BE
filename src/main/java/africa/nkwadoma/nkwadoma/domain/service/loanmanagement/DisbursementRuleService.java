@@ -25,6 +25,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -167,18 +169,37 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
             throw new MeedlException("Disbursement rule must be approved to be applied");
         }
         int totalNumberApplied = 0;
+
+        List<Loan> loans = getAllLoansToApplyDisbursementTo(disbursementRule);
+        checkIfDisbursementRuleCanBeAppliedToLoan(loans, foundDisbursementRule);
         for (String loanId : disbursementRule.getLoanIds()){
             Loan loan = loanOutputPort.findLoanById(loanId);
             List<LoanDisbursementRule> loanDisbursementRules =  loanDisbursementRuleOutputPort.findAllByLoanIdAndDisbursementRuleId(loanId, foundDisbursementRule.getId());
             if(ObjectUtils.isEmpty(loanDisbursementRules)) {
                 LoanDisbursementRule loanDisbursementRule = createLoanDisbursementRule(loan, foundDisbursementRule);
                 totalNumberApplied++;
-            }else {
-
             }
         }
-        foundDisbursementRule.st
+//        foundDisbursementRule.st
         return disbursementRuleOutputPort.save(foundDisbursementRule);
+    }
+
+    private List<Loan> getAllLoansToApplyDisbursementTo(DisbursementRule disbursementRule) {
+        List<Loan> loans = disbursementRule.getLoanIds().stream()
+                .map(loanId -> {
+                    try {
+                        return loanOutputPort.findLoanById(loanId);
+                    } catch (MeedlException e) {
+                        log.info("Unable to find loan with id {} while applying disbursement rule", loanId, e);
+                        throw new RuntimeException(e);
+                    }
+                })
+                .toList();
+        return loans;
+    }
+
+    private void checkIfDisbursementRuleCanBeAppliedToLoan(List<Loan> loans, DisbursementRule foundDisbursementRule) {
+
     }
 
     private LoanDisbursementRule createLoanDisbursementRule(Loan loan, DisbursementRule disbursementRule) throws MeedlException {
