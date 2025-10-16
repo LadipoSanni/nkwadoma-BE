@@ -81,8 +81,10 @@ public class LoanProductVendorAdapter implements LoanProductVendorOutputPort {
     public List<Vendor> getVendorsByLoanProductId(String loanProductId) throws MeedlException {
         MeedlValidator.validateUUID(loanProductId, LoanProductMessage.INVALID_LOAN_PRODUCT_ID.getMessage());
         List<LoanProductVendorEntity> loanProductVendorEntities = loanProductVendorRepository.findAllByLoanProductEntity_Id(loanProductId);
+
         return loanProductVendorEntities.stream()
                 .map(LoanProductVendorEntity::getVendorEntity)
+                .peek(vendorEntity -> log.info("The vendor name : {}, cost {}", vendorEntity.getVendorName(), vendorEntity.getCostOfService()))
                 .map(vendorMapper::map)
                 .toList();
     }

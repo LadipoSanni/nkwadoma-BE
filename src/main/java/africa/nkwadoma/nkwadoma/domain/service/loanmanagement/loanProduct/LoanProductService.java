@@ -167,6 +167,7 @@ public class LoanProductService implements CreateLoanProductUseCase, ViewLoanPro
         getLoanProductSponsors(loanProduct);
         return loanProduct;
     }
+
     private void getLoanProductSponsors(LoanProduct loanProduct) throws MeedlException {
         if (ObjectUtils.isEmpty(loanProduct.getSponsorIds())){
             log.warn("Loan product has no sponsors");
