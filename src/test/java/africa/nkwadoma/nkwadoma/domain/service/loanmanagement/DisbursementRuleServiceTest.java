@@ -22,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -74,12 +75,14 @@ class DisbursementRuleServiceTest {
         disbursementRule.setId(UUID.randomUUID().toString());
         disbursementRule.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
         disbursementRule.setPercentageDistribution(List.of(50.0, 50.0)); // must sum to 100
+        disbursementRule.setDistributionDates(List.of(LocalDateTime.now(), LocalDateTime.now()));
 
         DisbursementRule existingRule = TestData.buildDisbursementRule();
         existingRule.setId(disbursementRule.getId());
         existingRule.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
         existingRule.setName("Old Name");
         existingRule.setPercentageDistribution(List.of(60.0, 40.0)); // valid too
+        existingRule.setDistributionDates(List.of(LocalDateTime.now(), LocalDateTime.now()));
 
         when(disbursementRuleOutputPort.findById(disbursementRule.getId()))
                 .thenReturn(existingRule);
@@ -98,12 +101,14 @@ class DisbursementRuleServiceTest {
         disbursementRule.setId(UUID.randomUUID().toString());
         disbursementRule.setActivationStatus(ActivationStatus.APPROVED);
         disbursementRule.setPercentageDistribution(List.of(50.0, 50.0));
+        disbursementRule.setDistributionDates(List.of(LocalDateTime.now(), LocalDateTime.now()));
 
         DisbursementRule existingRule = TestData.buildDisbursementRule();
         existingRule.setId(disbursementRule.getId());
         existingRule.setActivationStatus(ActivationStatus.APPROVED);
         existingRule.setName("Old Name");
         existingRule.setPercentageDistribution(List.of(60.0, 40.0));
+        existingRule.setDistributionDates(List.of(LocalDateTime.now(), LocalDateTime.now()));
 
         when(disbursementRuleOutputPort.findById(disbursementRule.getId()))
                 .thenReturn(existingRule);
@@ -130,12 +135,14 @@ class DisbursementRuleServiceTest {
         disbursementRule.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
         disbursementRule.setName("New Rule");
         disbursementRule.setPercentageDistribution(List.of(70.0, 30.0));
+        disbursementRule.setDistributionDates(List.of(LocalDateTime.now(), LocalDateTime.now()));
 
         DisbursementRule existingRule = TestData.buildDisbursementRule();
         existingRule.setId(disbursementRule.getId());
         existingRule.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
         existingRule.setName("Old Rule");
         existingRule.setPercentageDistribution(List.of(60.0, 40.0));
+        existingRule.setDistributionDates(List.of(LocalDateTime.now(), LocalDateTime.now()));
 
         when(disbursementRuleOutputPort.findById(disbursementRule.getId()))
                 .thenReturn(existingRule);
@@ -169,12 +176,12 @@ class DisbursementRuleServiceTest {
 
 
     @Test
-    void createDisbursementRuleWithExistingName() throws MeedlException {
+    void setUpDisbursementRuleWithExistingName() throws MeedlException {
         disbursementRule.setUserIdentity(superAdminUser);
 
         when(disbursementRuleOutputPort.existByNameIgnoreCase(anyString())).thenReturn(true);
 
-        assertThrows(MeedlException.class, () -> disbursementRuleService.createDisbursementRule(disbursementRule));
+        assertThrows(MeedlException.class, () -> disbursementRuleService.setUpDisbursementRule(disbursementRule));
 
         verify(disbursementRuleOutputPort, never()).save(any());
     }
@@ -187,20 +194,20 @@ class DisbursementRuleServiceTest {
         when(userIdentityOutputPort.findById(anyString())).thenReturn(superAdminUser);
         when(disbursementRuleOutputPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        DisbursementRule result = disbursementRuleService.createDisbursementRule(disbursementRule);
+        DisbursementRule result = disbursementRuleService.setUpDisbursementRule(disbursementRule);
 
         assertThat(result.getActivationStatus()).isEqualTo(ActivationStatus.APPROVED);
         verify(asynchronousNotificationOutputPort, never()).notifyAdminOfDisbursementRuleApproval(any());
     }
 
     @Test
-    void createDisbursementRuleWithNoneSuperAdminRequireApproval() throws MeedlException {
+    void setUpDisbursementRuleWithNoneSuperAdminRequireApproval() throws MeedlException {
         disbursementRule.setUserIdentity(normalUser);
         when(disbursementRuleOutputPort.existByNameIgnoreCase(anyString())).thenReturn(false);
         when(userIdentityOutputPort.findById(anyString())).thenReturn(normalUser);
         when(disbursementRuleOutputPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        DisbursementRule result = disbursementRuleService.createDisbursementRule(disbursementRule);
+        DisbursementRule result = disbursementRuleService.setUpDisbursementRule(disbursementRule);
 
         assertThat(result.getActivationStatus()).isEqualTo(ActivationStatus.PENDING_APPROVAL);
         verify(asynchronousNotificationOutputPort).notifyAdminOfDisbursementRuleApproval(any());
@@ -215,7 +222,7 @@ class DisbursementRuleServiceTest {
         when(userIdentityOutputPort.findById(anyString())).thenReturn(normalUser);
         when(disbursementRuleOutputPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        DisbursementRule result = disbursementRuleService.createDisbursementRule(disbursementRule);
+        DisbursementRule result = disbursementRuleService.setUpDisbursementRule(disbursementRule);
 
         assertThat(result.getActivationStatus()).isEqualTo(ActivationStatus.INACTIVE);
     }

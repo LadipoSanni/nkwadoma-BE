@@ -7,6 +7,8 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -17,6 +19,7 @@ import java.util.Set;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.loan.FinancialConstants.HUNDRED_PERCENT;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.loan.FinancialConstants.TWO_DECIMAL_PLACE;
 
+@Slf4j
 @Setter
 @Getter
 @ToString
@@ -29,6 +32,7 @@ public class DisbursementRule {
     private DisbursementInterval interval;
     private int numberOfUsage;
     private List<Double> percentageDistribution;
+    private List<LocalDateTime> distributionDates;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private LocalDateTime dateCreated;
@@ -44,18 +48,41 @@ public class DisbursementRule {
 
     public void validate() throws MeedlException {
         MeedlValidator.validateDataElement(name, DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE_NAME.getMessage());
-        validatePercentageDistribution(this.percentageDistribution);
+        validatePercentageDistributionAndDate(this.percentageDistribution);
     }
     public void validateActivationStatus() throws MeedlException {
         MeedlValidator.validateObjectInstance(activationStatus, DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE_ACTIVATION_STATUS.getMessage() );
     }
 
-    public static void validatePercentageDistribution(List<Double> distribution) throws MeedlException {
-        if (distribution == null || distribution.isEmpty()) {
+    public void validatePercentageDistributionAndDate(List<Double> distributions) throws MeedlException {
+        if (distributions == null || distributions.isEmpty()) {
+            log.info("Percentage distribution cannot be empty");
             throw new MeedlException("Percentage distribution cannot be empty");
         }
+        if (this.distributionDates == null || this.distributionDates.isEmpty()){
+            log.info("Distribution dates is required {}", this.distributionDates);
+            throw new MeedlException("Distribution dates is required");
+        }
+        if (this.distributionDates.size() != this.percentageDistribution.size()){
+            log.info("Ensure that each distribution date aligns with its corresponding percentage distribution\"");
+            throw new MeedlException("Ensure that each distribution date aligns with its corresponding percentage distribution");
+        }
 
-        BigDecimal sum = distribution.stream()
+        for (Double distribution: distributions){
+            if (ObjectUtils.isEmpty(distribution)){
+                log.info("Distribution percentage is required {}", distribution);
+                throw new MeedlException("Distribution percentage is required");
+            }
+        }
+
+        for (LocalDateTime distributionDate: this.distributionDates){
+            if (ObjectUtils.isEmpty(distributionDate)){
+                log.info("Distribution date is required {}", distributionDate);
+                throw new MeedlException("Distribution date is required");
+            }
+        }
+
+        BigDecimal sum = distributions.stream()
                 .map(BigDecimal::valueOf)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 

@@ -5,7 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.disbursement.DisbursementRule;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.disbursement.ApplyDisbursementRuleRequest;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.disbursement.CreateDisbursementRuleRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.disbursement.SetUpDisbursementRuleRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.disbursement.EditDisbursementRuleRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.PaginatedResponse;
@@ -40,15 +40,15 @@ public class DisbursementRuleController {
     private final DisbursementRuleUseCase disbursementRuleUseCase;
     private final DisbursementRuleRestMapper disbursementRuleUseMapper;
 
-//    @PostMapping("/create")
+//    @PostMapping("/set-up")
 //    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
 //    @Operation(summary = CREATE_DISBURSEMENT_RULE,description = CREATE_DISBURSEMENT_RULE_DESCRIPTION)
-//    public ResponseEntity<ApiResponse<?>> createDisbursementRule (
+//    public ResponseEntity<ApiResponse<?>> setUpDisbursementRule(
 //            @AuthenticationPrincipal Jwt meedlUser,
-//            @RequestBody CreateDisbursementRuleRequest request) throws MeedlException {
+//            @RequestBody SetUpDisbursementRuleRequest request) throws MeedlException {
 //        log.info("Create disbursement rule called with id .... {}", request.getName());
 //        DisbursementRule disbursementRule = disbursementRuleUseMapper.map(meedlUser.getClaim("sub"), request);
-//        DisbursementRule savedDisbursementRule = disbursementRuleUseCase.createDisbursementRule(disbursementRule);
+//        DisbursementRule savedDisbursementRule = disbursementRuleUseCase.setUpDisbursementRule(disbursementRule);
 //        DisbursementRuleResponse disbursementRuleResponse = disbursementRuleUseMapper.map(savedDisbursementRule);
 //        ApiResponse<QAResponse> apiResponse = ApiResponse.<QAResponse>builder()
 //                .data(QAResponse.builder().id(disbursementRuleResponse.getId()).build())
@@ -128,9 +128,9 @@ public class DisbursementRuleController {
 //    @Operation(summary = RESPOND_TO_DISBURSEMENT_RULE,description = RESPOND_TO_DISBURSEMENT_RULE_DESCRIPTION)
 //    public ResponseEntity<ApiResponse<?>> respondToDisbursementRule (
 //            @AuthenticationPrincipal Jwt meedlUser,
-//            @RequestBody CreateDisbursementRuleRequest createDisbursementRuleRequest) throws MeedlException {
-//        log.info("Respond to disbursement rule called with id .... {}", createDisbursementRuleRequest.getId());
-//        DisbursementRule disbursementRule = disbursementRuleUseMapper.map(meedlUser.getClaim("sub"), createDisbursementRuleRequest);
+//            @RequestBody SetUpDisbursementRuleRequest setUpDisbursementRuleRequest) throws MeedlException {
+//        log.info("Respond to disbursement rule called with id .... {}", setUpDisbursementRuleRequest.getId());
+//        DisbursementRule disbursementRule = disbursementRuleUseMapper.map(meedlUser.getClaim("sub"), setUpDisbursementRuleRequest);
 //        DisbursementRule savedDisbursementRule = disbursementRuleUseCase.respondToDisbursementRule(disbursementRule);
 //        DisbursementRuleResponse disbursementRuleResponse = disbursementRuleUseMapper.map(savedDisbursementRule);
 //        ApiResponse<DisbursementRuleResponse> apiResponse = ApiResponse.<DisbursementRuleResponse>builder()
