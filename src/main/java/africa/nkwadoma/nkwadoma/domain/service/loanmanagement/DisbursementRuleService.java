@@ -166,15 +166,19 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
             log.error("Disbursement rule cannot be apply due to status {}", disbursementRule.getActivationStatus());
             throw new MeedlException("Disbursement rule must be approved to be applied");
         }
+        int totalNumberApplied = 0;
         for (String loanId : disbursementRule.getLoanIds()){
             Loan loan = loanOutputPort.findLoanById(loanId);
             List<LoanDisbursementRule> loanDisbursementRules =  loanDisbursementRuleOutputPort.findAllByLoanIdAndDisbursementRuleId(loanId, foundDisbursementRule.getId());
             if(ObjectUtils.isEmpty(loanDisbursementRules)) {
                 LoanDisbursementRule loanDisbursementRule = createLoanDisbursementRule(loan, foundDisbursementRule);
-            }
+                totalNumberApplied++;
+            }else {
 
+            }
         }
-        return disbursementRule;
+        foundDisbursementRule.st
+        return disbursementRuleOutputPort.save(foundDisbursementRule);
     }
 
     private LoanDisbursementRule createLoanDisbursementRule(Loan loan, DisbursementRule disbursementRule) throws MeedlException {
