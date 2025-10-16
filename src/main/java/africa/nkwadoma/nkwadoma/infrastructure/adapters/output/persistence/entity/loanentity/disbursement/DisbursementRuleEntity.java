@@ -28,9 +28,18 @@ public class DisbursementRuleEntity {
     )
     @Column(name = "percentage_distribution")
     private List<Double> percentageDistribution;
-    private LocalDateTime startDate;
-    private LocalDateTime endDate;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "disbursement_rule_entity_distribution_dates",
+            joinColumns = @JoinColumn(name = "disbursement_rule_entity_id")
+    )
+    @Column(name = "distribution_dates")
+    private List<LocalDateTime> distributionDates;
+    private LocalDateTime dateUpdated;
+//    private LocalDateTime endDate;
     private LocalDateTime dateCreated;
+    private int numberOfTimesApplied;
+    private int numberOfTimesAdjusted;
     private int numberOfUsage;
     @Enumerated(EnumType.STRING)
     private ActivationStatus activationStatus;

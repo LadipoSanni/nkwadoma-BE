@@ -42,7 +42,7 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
 
 
     @Override
-    public DisbursementRule createDisbursementRule(DisbursementRule disbursementRule) throws MeedlException {
+    public DisbursementRule setUpDisbursementRule(DisbursementRule disbursementRule) throws MeedlException {
         MeedlValidator.validateObjectInstance(disbursementRule, DisbursementRuleMessages.EMPTY_DISBURSEMENT_RULE.getMessage());
         MeedlValidator.validateObjectInstance(disbursementRule.getUserIdentity(), UserMessages.USER_IDENTITY_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(disbursementRule.getUserIdentity().getId(), UserMessages.INVALID_USER_ID.getMessage());
