@@ -29,7 +29,7 @@ public class DisbursementRuleAdapter implements DisbursementRuleOutputPort {
         disbursementRule.validateActivationStatus();
         DisbursementRuleEntity disbursementRuleEntity = disbursementRuleMapper.map(disbursementRule);
         disbursementRuleEntity = disbursementRuleRepository.save(disbursementRuleEntity);
-        log.info("disbursement rule entity in adapter level. id: {}", disbursementRuleEntity);
+        log.info("disbursement rule entity in adapter level. id: {}", disbursementRuleEntity.getId());
         return disbursementRuleMapper.map(disbursementRuleEntity);
     }
 
