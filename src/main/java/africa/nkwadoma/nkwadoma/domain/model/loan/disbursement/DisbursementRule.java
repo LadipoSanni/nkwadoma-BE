@@ -32,8 +32,6 @@ public class DisbursementRule {
     private DisbursementInterval interval;
     private List<Double> percentageDistribution;
     private List<LocalDateTime> distributionDates;
-//    private LocalDateTime startDate;
-//    private LocalDateTime endDate;
     private String createdBy;
     private LocalDateTime dateUpdated;
     private LocalDateTime dateCreated;

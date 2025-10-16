@@ -35,9 +35,6 @@ public class LoanDisbursementRule {
     private int numberOfTimesAdjusted;
     private LocalDateTime dateLastAdjusted;
     private LocalDateTime dateApplied;
-    //    private LocalDateTime startDate;
-    //    private LocalDateTime endDate;
-
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(this.loan, LoanMessages.LOAN_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateObjectInstance(this.disbursementRule, DisbursementRuleMessages.EMPTY_DISBURSEMENT_RULE.getMessage());

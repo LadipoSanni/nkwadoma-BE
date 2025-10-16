@@ -14,7 +14,6 @@ import java.util.List;
 @Entity
 @Setter
 @Getter
-@ToString
 public class DisbursementRuleEntity {
     @Id
     @UuidGenerator
@@ -38,7 +37,6 @@ public class DisbursementRuleEntity {
     @Column(name = "distribution_dates")
     private List<LocalDateTime> distributionDates;
     private LocalDateTime dateUpdated;
-//    private LocalDateTime endDate;
     private LocalDateTime dateCreated;
     private int numberOfTimesApplied;
     private int numberOfTimesAdjusted;
