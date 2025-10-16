@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDateTime;
@@ -13,6 +14,7 @@ import java.util.List;
 @Entity
 @Setter
 @Getter
+@ToString
 public class DisbursementRuleEntity {
     @Id
     @UuidGenerator

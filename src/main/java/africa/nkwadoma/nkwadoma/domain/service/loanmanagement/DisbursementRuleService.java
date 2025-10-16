@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.loanmanagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.DisbursementRuleUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOfferOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.disbursement.DisbursementRuleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.disbursement.LoanDisbursementRuleOutputPort;
@@ -11,6 +12,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.disbursement.Disburs
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
 import africa.nkwadoma.nkwadoma.domain.model.loan.disbursement.DisbursementRule;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loan;
 import africa.nkwadoma.nkwadoma.domain.model.loan.disbursement.LoanDisbursementRule;
@@ -19,11 +21,13 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanManage
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.bouncycastle.util.MemoableResetException;
 import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.chrono.ChronoLocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -39,6 +43,7 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
     private final LoanOutputPort loanOutputPort;
     private final LoanDisbursementRuleOutputPort loanDisbursementRuleOutputPort;
     private final DisbursementRuleMapper disbursementRuleMapper;
+    private final LoanOfferOutputPort loanOfferOutputPort;
 
 
     @Override
@@ -162,30 +167,37 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
         MeedlValidator.validateUUID(disbursementRule.getUserIdentity().getId(), UserMessages.INVALID_USER_ID.getMessage());
         disbursementRule.validateLoanIds();
         UserIdentity actor = userIdentityOutputPort.findById(disbursementRule.getUserIdentity().getId());
-        disbursementRule.setUserIdentity(actor);
         DisbursementRule foundDisbursementRule = disbursementRuleOutputPort.findById(disbursementRule.getId());
+        foundDisbursementRule.setUserIdentity(actor);
         if (!ActivationStatus.APPROVED.equals(foundDisbursementRule.getActivationStatus())){
             log.error("Disbursement rule cannot be apply due to status {}", disbursementRule.getActivationStatus());
             throw new MeedlException("Disbursement rule must be approved to be applied");
         }
-        int totalNumberApplied = 0;
 
         List<Loan> loans = getAllLoansToApplyDisbursementTo(disbursementRule);
         checkIfDisbursementRuleCanBeAppliedToLoan(loans, foundDisbursementRule);
-        for (String loanId : disbursementRule.getLoanIds()){
-            Loan loan = loanOutputPort.findLoanById(loanId);
-            List<LoanDisbursementRule> loanDisbursementRules =  loanDisbursementRuleOutputPort.findAllByLoanIdAndDisbursementRuleId(loanId, foundDisbursementRule.getId());
+        applyDisbursementRuleToLoans(loans, foundDisbursementRule);
+        return disbursementRule;
+    }
+
+    private void applyDisbursementRuleToLoans(List<Loan> loans, DisbursementRule foundDisbursementRule) throws MeedlException {
+        int totalNumberApplied = 0;
+        for (Loan loan : loans){
+            List<LoanDisbursementRule> loanDisbursementRules =  loanDisbursementRuleOutputPort.findAllByLoanIdAndDisbursementRuleId(loan.getId(), foundDisbursementRule.getId());
             if(ObjectUtils.isEmpty(loanDisbursementRules)) {
+                log.info("Applying disbursement rule to loan ...");
                 LoanDisbursementRule loanDisbursementRule = createLoanDisbursementRule(loan, foundDisbursementRule);
                 totalNumberApplied++;
             }
         }
-//        foundDisbursementRule.st
-        return disbursementRuleOutputPort.save(foundDisbursementRule);
+        log.info("updating number of times disbursement rule hase been applied. Previous count is  {}", foundDisbursementRule.getNumberOfTimesApplied());
+        foundDisbursementRule.setNumberOfTimesApplied(foundDisbursementRule.getNumberOfTimesApplied() + totalNumberApplied);
+        disbursementRuleOutputPort.save(foundDisbursementRule);
+        log.info("new number of times disbursement rule hase been applied is {}", foundDisbursementRule.getNumberOfTimesApplied());
     }
 
     private List<Loan> getAllLoansToApplyDisbursementTo(DisbursementRule disbursementRule) {
-        List<Loan> loans = disbursementRule.getLoanIds().stream()
+        return disbursementRule.getLoanIds().stream()
                 .map(loanId -> {
                     try {
                         return loanOutputPort.findLoanById(loanId);
@@ -195,11 +207,23 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
                     }
                 })
                 .toList();
-        return loans;
     }
 
-    private void checkIfDisbursementRuleCanBeAppliedToLoan(List<Loan> loans, DisbursementRule foundDisbursementRule) {
+    private void checkIfDisbursementRuleCanBeAppliedToLoan(List<Loan> loans, DisbursementRule foundDisbursementRule) throws MeedlException {
+        LocalDateTime latestDateInList = foundDisbursementRule.getDistributionDates().stream()
+                .max(LocalDateTime::compareTo)
+                .orElseThrow(() -> new MeedlException("No valid dates found on disbursement distribution"));
 
+        for (Loan loan : loans){
+            LoanOffer loanOffer = loanOfferOutputPort.findLoanOfferById(loan.getLoanOfferId());
+
+            if (loanOffer.getStartDate().isAfter(ChronoLocalDate.from(latestDateInList))) {
+                throw new MeedlException(String.format(
+                        "The cohort start date %s is beyond the latest allowed date %s.",
+                        loanOffer.getStartDate(), latestDateInList
+                ));
+            }
+        }
     }
 
     private LoanDisbursementRule createLoanDisbursementRule(Loan loan, DisbursementRule disbursementRule) throws MeedlException {
@@ -211,8 +235,7 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
                 .dateApplied(LocalDateTime.now())
                 .interval(disbursementRule.getInterval())
                 .percentageDistribution(disbursementRule.getPercentageDistribution())
-                .startDate(disbursementRule.getStartDate())
-                .endDate(disbursementRule.getEndDate())
+                .distributionDates(disbursementRule.getDistributionDates())
                 .name(disbursementRule.getName())
                 .build();
 
