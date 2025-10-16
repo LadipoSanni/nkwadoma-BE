@@ -49,6 +49,7 @@ public class TestData {
     public static DisbursementRule buildDisbursementRule() {
         return  DisbursementRule.builder()
                 .percentageDistribution(List.of(100.00))
+                .distributionDates(List.of(LocalDateTime.now()))
                 .interval(DisbursementInterval.MONTHLY)
                 .activationStatus(ActivationStatus.APPROVED)
                 .name(TestUtils.generateName(5))

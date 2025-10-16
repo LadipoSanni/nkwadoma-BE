@@ -40,3 +40,45 @@ CREATE TABLE IF NOT EXISTS disbursement_rule_entity_distribution_dates (
     REFERENCES disbursement_rule_entity(id)
     ON DELETE CASCADE
     );
+
+-- 1️⃣ Add number_of_times_applied if it doesn't exist
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'disbursement_rule_entity'
+          AND column_name = 'number_of_times_applied'
+    ) THEN
+ALTER TABLE disbursement_rule_entity
+    ADD COLUMN number_of_times_applied INT DEFAULT 0;
+END IF;
+END $$;
+
+-- 2️⃣ Add number_of_times_adjusted if it doesn't exist
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'disbursement_rule_entity'
+          AND column_name = 'number_of_times_adjusted'
+    ) THEN
+ALTER TABLE disbursement_rule_entity
+    ADD COLUMN number_of_times_adjusted INT DEFAULT 0;
+END IF;
+END $$;
+
+-- 3️⃣ Add number_of_usage if it doesn't exist
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'disbursement_rule_entity'
+          AND column_name = 'number_of_usage'
+    ) THEN
+ALTER TABLE disbursement_rule_entity
+    ADD COLUMN number_of_usage INT DEFAULT 0;
+END IF;
+END $$;

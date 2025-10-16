@@ -38,6 +38,8 @@ public class DisbursementRuleEntity {
     private LocalDateTime dateUpdated;
 //    private LocalDateTime endDate;
     private LocalDateTime dateCreated;
+    private int numberOfTimesApplied;
+    private int numberOfTimesAdjusted;
     private int numberOfUsage;
     @Enumerated(EnumType.STRING)
     private ActivationStatus activationStatus;
