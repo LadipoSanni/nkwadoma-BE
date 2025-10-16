@@ -10,11 +10,12 @@ import java.util.List;
 
 @Getter
 @Setter
-public class CreateDisbursementRuleRequest {
+public class SetUpDisbursementRuleRequest {
     private String id;
     private String name;
     private DisbursementInterval interval;
     private List<Double> percentageDistribution;
+    private List<LocalDateTime> distributionDates;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private ActivationStatus activationStatus;

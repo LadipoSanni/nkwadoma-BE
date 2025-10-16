@@ -5,7 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.disbursement.DisbursementRule;
 import org.springframework.data.domain.Page;
 
 public interface DisbursementRuleUseCase {
-    DisbursementRule createDisbursementRule(DisbursementRule disbursementRule) throws MeedlException;
+    DisbursementRule setUpDisbursementRule(DisbursementRule disbursementRule) throws MeedlException;
 
     DisbursementRule respondToDisbursementRule(DisbursementRule disbursementRule) throws MeedlException;
 

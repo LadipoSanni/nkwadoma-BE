@@ -169,12 +169,12 @@ class DisbursementRuleServiceTest {
 
 
     @Test
-    void createDisbursementRuleWithExistingName() throws MeedlException {
+    void setUpDisbursementRuleWithExistingName() throws MeedlException {
         disbursementRule.setUserIdentity(superAdminUser);
 
         when(disbursementRuleOutputPort.existByNameIgnoreCase(anyString())).thenReturn(true);
 
-        assertThrows(MeedlException.class, () -> disbursementRuleService.createDisbursementRule(disbursementRule));
+        assertThrows(MeedlException.class, () -> disbursementRuleService.setUpDisbursementRule(disbursementRule));
 
         verify(disbursementRuleOutputPort, never()).save(any());
     }
@@ -187,20 +187,20 @@ class DisbursementRuleServiceTest {
         when(userIdentityOutputPort.findById(anyString())).thenReturn(superAdminUser);
         when(disbursementRuleOutputPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        DisbursementRule result = disbursementRuleService.createDisbursementRule(disbursementRule);
+        DisbursementRule result = disbursementRuleService.setUpDisbursementRule(disbursementRule);
 
         assertThat(result.getActivationStatus()).isEqualTo(ActivationStatus.APPROVED);
         verify(asynchronousNotificationOutputPort, never()).notifyAdminOfDisbursementRuleApproval(any());
     }
 
     @Test
-    void createDisbursementRuleWithNoneSuperAdminRequireApproval() throws MeedlException {
+    void setUpDisbursementRuleWithNoneSuperAdminRequireApproval() throws MeedlException {
         disbursementRule.setUserIdentity(normalUser);
         when(disbursementRuleOutputPort.existByNameIgnoreCase(anyString())).thenReturn(false);
         when(userIdentityOutputPort.findById(anyString())).thenReturn(normalUser);
         when(disbursementRuleOutputPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        DisbursementRule result = disbursementRuleService.createDisbursementRule(disbursementRule);
+        DisbursementRule result = disbursementRuleService.setUpDisbursementRule(disbursementRule);
 
         assertThat(result.getActivationStatus()).isEqualTo(ActivationStatus.PENDING_APPROVAL);
         verify(asynchronousNotificationOutputPort).notifyAdminOfDisbursementRuleApproval(any());
@@ -215,7 +215,7 @@ class DisbursementRuleServiceTest {
         when(userIdentityOutputPort.findById(anyString())).thenReturn(normalUser);
         when(disbursementRuleOutputPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        DisbursementRule result = disbursementRuleService.createDisbursementRule(disbursementRule);
+        DisbursementRule result = disbursementRuleService.setUpDisbursementRule(disbursementRule);
 
         assertThat(result.getActivationStatus()).isEqualTo(ActivationStatus.INACTIVE);
     }
