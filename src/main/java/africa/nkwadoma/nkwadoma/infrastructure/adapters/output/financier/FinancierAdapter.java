@@ -155,7 +155,7 @@ public class FinancierAdapter implements FinancierOutputPort {
 
     @Override
     public Page<Financier> viewAllFinancier(Financier financier) throws MeedlException {
-        log.info("Searching for all financier on the platform at adapter level.");
+        log.info("Viewing/Searching for all financier on the platform at adapter level.");
         MeedlValidator.validateObjectInstance(financier, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
         MeedlValidator.validatePageSize(financier.getPageSize());
         MeedlValidator.validatePageNumber(financier.getPageNumber());
