@@ -30,13 +30,14 @@ public class DisbursementRule {
     private String id;
     private String name;
     private DisbursementInterval interval;
-    private int numberOfUsage;
     private List<Double> percentageDistribution;
     private List<LocalDateTime> distributionDates;
-    private LocalDateTime startDate;
-    private LocalDateTime endDate;
-    private LocalDateTime dateCreated;
     private String createdBy;
+    private LocalDateTime dateUpdated;
+    private LocalDateTime dateCreated;
+    private int numberOfUsage;
+    private int numberOfTimesApplied;
+    private int numberOfTimesAdjusted;
     private ActivationStatus activationStatus;
     private Set<ActivationStatus> activationStatuses;
     private UserIdentity userIdentity;

@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDateTime;
@@ -36,7 +37,6 @@ public class DisbursementRuleEntity {
     @Column(name = "distribution_dates")
     private List<LocalDateTime> distributionDates;
     private LocalDateTime dateUpdated;
-//    private LocalDateTime endDate;
     private LocalDateTime dateCreated;
     private int numberOfTimesApplied;
     private int numberOfTimesAdjusted;
