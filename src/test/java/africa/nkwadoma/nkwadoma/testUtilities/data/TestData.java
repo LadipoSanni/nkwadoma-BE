@@ -256,6 +256,7 @@ public class TestData {
         vendor.setVendorName(name);
         vendor.setPageSize(10);
         vendor.setPageNumber(0);
+        vendor.setCostOfService(new BigDecimal(9));
         vendor.setProviderServices(Set.of(TestUtils.generateName(9)));
         vendor.setTermsAndConditions("Test: A new vendor for test with terms and condition imaginary");
         return vendor;
