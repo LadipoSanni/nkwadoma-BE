@@ -29,13 +29,12 @@ public class LoanDisbursementRule {
     private String name;
     private String appliedBy;
     private DisbursementInterval interval;
-    private List<Double> percentageDistribution;
-    private LocalDateTime startDate;
-    private LocalDateTime endDate;
     private ActivationStatus activationStatus;
-
+    private List<Double> percentageDistribution;
+    private List<LocalDateTime> distributionDates;
+    private int numberOfTimesAdjusted;
+    private LocalDateTime dateLastAdjusted;
     private LocalDateTime dateApplied;
-
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(this.loan, LoanMessages.LOAN_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateObjectInstance(this.disbursementRule, DisbursementRuleMessages.EMPTY_DISBURSEMENT_RULE.getMessage());

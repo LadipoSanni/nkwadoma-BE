@@ -34,9 +34,17 @@ public class LoanDisbursementRuleEntity {
     )
     @Column(name = "percentage_distribution")
     private List<Double> percentageDistribution;
-
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "loan_disbursement_rule_distribution_dates",
+            joinColumns = @JoinColumn(name = "loan_disbursement_rule_entity_id")
+    )
+    @Column(name = "distribution_dates")
+    private List<LocalDateTime> distributionDates;
     @Enumerated(EnumType.STRING)
     private ActivationStatus activationStatus;
-
     private LocalDateTime dateApplied;
+
+    private int numberOfTimesAdjusted;
+    private LocalDateTime dateLastAdjusted;
 }
