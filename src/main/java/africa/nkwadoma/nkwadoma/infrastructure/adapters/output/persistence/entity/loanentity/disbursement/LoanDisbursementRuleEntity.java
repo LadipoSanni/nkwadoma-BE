@@ -34,8 +34,8 @@ public class LoanDisbursementRuleEntity {
     )
     @Column(name = "percentage_distribution")
     private List<Double> percentageDistribution;
-    private LocalDateTime startDate;
-    private LocalDateTime endDate;
+//    private LocalDateTime startDate;
+//    private LocalDateTime endDate;
     @Enumerated(EnumType.STRING)
     private ActivationStatus activationStatus;
 
