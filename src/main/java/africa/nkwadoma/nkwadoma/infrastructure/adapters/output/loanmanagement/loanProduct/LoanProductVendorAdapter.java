@@ -39,7 +39,7 @@ public class LoanProductVendorAdapter implements LoanProductVendorOutputPort {
         validateVendorsId(vendors);
         LoanProductEntity loanProductEntity = loanProductMapper.map(loanProduct);
 
-
+        log.info("Started saving loan product vendors ");
         return vendors.stream()
                     .map(vendorMapper::map)
                     .map(vendorEntity -> {
