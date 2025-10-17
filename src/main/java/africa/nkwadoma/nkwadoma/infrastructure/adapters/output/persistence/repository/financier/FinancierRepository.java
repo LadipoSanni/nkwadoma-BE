@@ -48,6 +48,8 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
             WHEN f.financierType = 'INDIVIDUAL' THEN CONCAT(user.firstName, ' ', user.lastName)
             WHEN f.financierType = 'COOPERATE' THEN organization.name
         END AS name,
+
+        
         f.financierType AS financierType,
         f.activationStatus AS activationStatus,
         f.totalAmountInvested AS amountInvested,
@@ -55,7 +57,11 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
         CASE 
             WHEN f.financierType = 'INDIVIDUAL' THEN CONCAT(inviteeUser.firstName, ' ', inviteeUser.lastName)
             WHEN f.financierType = 'COOPERATE' THEN CONCAT(inviteeOrg.firstName, ' ', inviteeOrg.lastName)
-        END AS inviteeName
+        END AS invitedBy,
+     CASE\s
+                WHEN f.financierType = 'INDIVIDUAL' THEN user.email
+                WHEN f.financierType = 'COOPERATE' THEN superAdmin.email
+            END AS email
     FROM FinancierEntity f
     LEFT JOIN UserEntity user 
         ON f.financierType = 'INDIVIDUAL' AND user.id = f.identity
@@ -65,6 +71,12 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
         ON f.financierType = 'INDIVIDUAL' AND inviteeUser.id = user.createdBy
     LEFT JOIN UserEntity inviteeOrg 
         ON f.financierType = 'COOPERATE' AND inviteeOrg.id = organization.createdBy
+    
+    LEFT JOIN OrganizationEmployeeEntity organizationEmployee
+        ON f.financierType = 'COOPERATE' AND organizationEmployee.organization = organization.id
+    LEFT JOIN UserEntity superAdmin 
+        ON f.financierType = 'COOPERATE' AND superAdmin.id = organizationEmployee.meedlUser.id 
+
     WHERE (
         :nameFragment IS NULL OR (
             (f.financierType = 'INDIVIDUAL' AND (
