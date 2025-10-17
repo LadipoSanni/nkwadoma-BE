@@ -61,6 +61,7 @@ public class LoanProductService implements CreateLoanProductUseCase, ViewLoanPro
         loanProduct.validateLoanProductDetails();
         validateSponsors(loanProduct);
         loanProduct.validateProviderServices();
+
         UserIdentity foundUser = userIdentityOutputPort.findById(loanProduct.getCreatedBy());
         identityManagerOutPutPort.verifyUserExistsAndIsEnabled(foundUser);
         log.info("The user with {} email has been verified ", foundUser.getEmail());
