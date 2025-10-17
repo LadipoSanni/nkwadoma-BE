@@ -24,6 +24,13 @@ public class Vendor {
     private int pageSize;
     private int pageNumber;
 
+    public void validate() throws MeedlException {
+        validateProviderServices();
+        log.info("Validating vendor cost of funds");
+        MeedlValidator.validateNegativeAmount(this.costOfService, "Cost of fund cannot be negative");
+
+    }
+
     public void validateId() throws MeedlException {
         MeedlValidator.validateUUID(id, "Vendor id is required");
     }

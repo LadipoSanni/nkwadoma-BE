@@ -159,9 +159,10 @@ public class LoanProduct {
     }
 
     public void validateProviderServices() throws MeedlException {
-        log.info("The validation of provider services throws exception at runtime. Sneaky throws");
+        log.info("Started validation of provider services");
         for (Vendor vendor : vendors) {
-            vendor.validateProviderServices();
+            vendor.validate();
         }
+        log.info("Done validating vendors");
     }
 }

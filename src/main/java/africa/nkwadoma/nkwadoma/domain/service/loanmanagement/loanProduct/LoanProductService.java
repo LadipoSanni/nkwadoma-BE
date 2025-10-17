@@ -61,6 +61,7 @@ public class LoanProductService implements CreateLoanProductUseCase, ViewLoanPro
         loanProduct.validateLoanProductDetails();
         validateSponsors(loanProduct);
         loanProduct.validateProviderServices();
+
         UserIdentity foundUser = userIdentityOutputPort.findById(loanProduct.getCreatedBy());
         identityManagerOutPutPort.verifyUserExistsAndIsEnabled(foundUser);
         log.info("The user with {} email has been verified ", foundUser.getEmail());
@@ -85,9 +86,11 @@ public class LoanProductService implements CreateLoanProductUseCase, ViewLoanPro
     }
 
     private void saveVendors(LoanProduct loanProduct, LoanProduct savedLoanProduct) throws MeedlException {
-        if (MeedlValidator.isEmptyCollection(loanProduct.getVendors())) {
+        log.info("Vendors in create loan product {}", loanProduct.getVendors());
+        if (!MeedlValidator.isEmptyCollection(loanProduct.getVendors())) {
             log.info("{} Vendors was provided to save", loanProduct.getVendors().size());
             List<Vendor> vendors = vendorOutputPort.saveVendors(loanProduct.getVendors());
+            log.info("Vendors in create loan product {}",vendors);
             loanProduct.setVendors(vendors);
             loanProductVendorOutputPort.save(vendors, savedLoanProduct);
         }
