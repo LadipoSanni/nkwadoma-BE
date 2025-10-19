@@ -147,7 +147,11 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
         MeedlValidator.validateObjectInstance(disbursementRule, DisbursementRuleMessages.EMPTY_DISBURSEMENT_RULE.getMessage());
         MeedlValidator.validateUUID(disbursementRule.getId(), DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE_ID.getMessage());
         log.info("Delete disbursement rule by id ");
-
+        DisbursementRule foundDisbursementRule = disbursementRuleOutputPort.findById(disbursementRule.getId());
+        if (foundDisbursementRule.getNumberOfTimesApplied() > 0){
+            log.error("Disbursement rule cannot be deleted, already applied. Number of times {}", foundDisbursementRule.getNumberOfTimesApplied());
+            throw new MeedlException("Disbursement rule cannot be deleted, already applied.");
+        }
         disbursementRuleOutputPort.deleteById(disbursementRule.getId());
     }
 
@@ -194,6 +198,9 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
         foundDisbursementRule.setNumberOfTimesApplied(foundDisbursementRule.getNumberOfTimesApplied() + totalNumberApplied);
         disbursementRuleOutputPort.save(foundDisbursementRule);
         log.info("new number of times disbursement rule hase been applied is {}", foundDisbursementRule.getNumberOfTimesApplied());
+    }
+    public void removeDisbursementRule(DisbursementRule disbursementRule){
+
     }
 
     private List<Loan> getAllLoansToApplyDisbursementTo(DisbursementRule disbursementRule) {
