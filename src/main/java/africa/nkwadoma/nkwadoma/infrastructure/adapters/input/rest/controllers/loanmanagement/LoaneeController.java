@@ -364,10 +364,10 @@ public class LoaneeController {
     @GetMapping("all/search")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')" +
                   "or hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('ORGANIZATION_ASSOCIATE')")
-    public ResponseEntity<ApiResponse<?>> searchAllLoanees(@AuthenticationPrincipal Jwt meedlUser,
-                                                          @RequestParam(name = "name") String name,
-                                                          @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
-                                                          @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException{
+    public ResponseEntity<ApiResponse<?>> searchAllLoaneeWithLoan(@AuthenticationPrincipal Jwt meedlUser,
+                                                                  @RequestParam(name = "name") String name,
+                                                                  @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                                  @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException{
         Loanee loanee = Loanee.builder().loaneeName(name).id(meedlUser.getClaimAsString("sub")).build();
 
         Page<LoaneeLoanAggregate> loaneeLoanAggregate  = loaneeUseCase.searchLoanAggregate(loanee,pageSize,pageNumber);
