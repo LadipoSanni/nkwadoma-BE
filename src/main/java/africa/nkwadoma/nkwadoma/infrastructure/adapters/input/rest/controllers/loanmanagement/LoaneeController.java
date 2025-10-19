@@ -8,7 +8,6 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanenums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanAggregate;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
@@ -344,10 +343,10 @@ public class LoaneeController {
     @GetMapping("all")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('MEEDL_ADMIN')  or hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')" +
                   "or hasRole('ORGANIZATION_ADMIN') or hasRole('ORGANIZATION_SUPER_ADMIN') or hasRole('ORGANIZATION_ASSOCIATE')")
-    public ResponseEntity<ApiResponse<?>> viewAllLoanees( @AuthenticationPrincipal Jwt meedlUser,
-                                                          @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
-                                                          @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException{
-        Page<LoaneeLoanAggregate> loaneeLoanAggregate  = loaneeUseCase.viewAllLoanee(meedlUser.getClaimAsString("sub"),pageSize,pageNumber);
+    public ResponseEntity<ApiResponse<?>> viewAllLoaneeWithLoan(@AuthenticationPrincipal Jwt meedlUser,
+                                                                @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                                @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException{
+        Page<LoaneeLoanAggregate> loaneeLoanAggregate  = loaneeUseCase.viewAllLoaneeWithLoan(meedlUser.getClaimAsString("sub"),pageSize,pageNumber);
         List<LoaneeLoanAggregateResponse> loaneeLoanAggregateResponses =
                 loaneeLoanAggregate.map(loaneeRestMapper::toLoaneeLoanAggregateResponse).stream().toList();
 
