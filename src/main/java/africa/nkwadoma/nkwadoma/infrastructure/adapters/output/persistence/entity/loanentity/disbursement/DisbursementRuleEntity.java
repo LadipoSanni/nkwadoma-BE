@@ -1,11 +1,10 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.disbursement;
 
 import africa.nkwadoma.nkwadoma.domain.enums.DisbursementInterval;
-import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.disbursement.DisbursementRuleStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDateTime;
@@ -42,5 +41,5 @@ public class DisbursementRuleEntity {
     private int numberOfTimesAdjusted;
     private int numberOfUsage;
     @Enumerated(EnumType.STRING)
-    private ActivationStatus activationStatus;
+    private DisbursementRuleStatus disbursementRuleStatus;
 }

@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.disbursement;
 
 import africa.nkwadoma.nkwadoma.domain.enums.DisbursementInterval;
-import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.disbursement.DisbursementRuleStatus;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.LoanEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -42,7 +42,7 @@ public class LoanDisbursementRuleEntity {
     @Column(name = "distribution_dates")
     private List<LocalDateTime> distributionDates;
     @Enumerated(EnumType.STRING)
-    private ActivationStatus activationStatus;
+    private DisbursementRuleStatus disbursementRuleStatus;
     private LocalDateTime dateApplied;
 
     private int numberOfTimesAdjusted;

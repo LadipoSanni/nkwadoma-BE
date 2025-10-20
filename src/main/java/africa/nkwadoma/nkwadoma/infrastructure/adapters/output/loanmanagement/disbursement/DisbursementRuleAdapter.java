@@ -51,11 +51,11 @@ public class DisbursementRuleAdapter implements DisbursementRuleOutputPort {
     public Page<DisbursementRule> findAllDisbursementRule(DisbursementRule disbursementRule) throws MeedlException {
         MeedlValidator.validateObjectInstance(disbursementRule, DisbursementRuleMessages.EMPTY_DISBURSEMENT_RULE.getMessage());
 
-        log.info("View all disbursement rules at service. With activation status {}", disbursementRule.getActivationStatuses());
+        log.info("View all disbursement rules at service. With activation status {}", disbursementRule.getDisbursementRuleStatuses());
         Pageable pageRequest = PageRequest.of(disbursementRule.getPageNumber(), disbursementRule.getPageSize());
 
         Page<DisbursementRuleEntity> disbursementRuleEntities =
-                disbursementRuleRepository.findAllDisbursementRuleByActivationStatuses(disbursementRule.getActivationStatuses(), pageRequest);
+                disbursementRuleRepository.findAllDisbursementRuleByDisbursementRuleStatuses(disbursementRule.getDisbursementRuleStatuses(), pageRequest);
 
         return disbursementRuleEntities.map(disbursementRuleMapper::map);
     }
@@ -72,13 +72,13 @@ public class DisbursementRuleAdapter implements DisbursementRuleOutputPort {
         MeedlValidator.validateDataElement(disbursementRule.getName(), DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE_NAME.getMessage());
 
         Pageable pageRequest = PageRequest.of(disbursementRule.getPageNumber(), disbursementRule.getPageSize());
-        if (MeedlValidator.isEmptyCollection(disbursementRule.getActivationStatuses())){
+        if (MeedlValidator.isEmptyCollection(disbursementRule.getDisbursementRuleStatuses())){
             log.info("No activation status was provided");
-            disbursementRule.setActivationStatuses(null);
+            disbursementRule.setDisbursementRuleStatuses(null);
         }
         log.info("About to make db search disbursement rule");
         Page<DisbursementRuleEntity> disbursementRuleEntities =
-                disbursementRuleRepository.searchByNameAndActivationStatuses(disbursementRule.getName(), disbursementRule.getActivationStatuses(), pageRequest);
+                disbursementRuleRepository.searchByNameAndDisbursementRuleStatuses(disbursementRule.getName(), disbursementRule.getDisbursementRuleStatuses(), pageRequest);
         log.info("Found disbursement rules in search {}", disbursementRuleEntities);
         return disbursementRuleEntities.map(disbursementRuleMapper::map);
     }

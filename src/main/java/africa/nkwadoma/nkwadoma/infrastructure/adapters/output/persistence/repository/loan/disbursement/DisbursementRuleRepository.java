@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.disbursement;
 
-import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.disbursement.DisbursementRuleStatus;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanentity.disbursement.DisbursementRuleEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,20 +15,20 @@ public interface DisbursementRuleRepository extends JpaRepository<DisbursementRu
     SELECT d
     FROM DisbursementRuleEntity d 
     WHERE (:#{#statuses == null || #statuses.isEmpty()} = true 
-           OR d.activationStatus IN :activationStatuses)
+           OR d.disbursementRuleStatus IN :disbursementRuleStatus)
 """)
-    Page<DisbursementRuleEntity> findAllDisbursementRuleByActivationStatuses(Set<ActivationStatus> activationStatuses, Pageable pageRequest);
+    Page<DisbursementRuleEntity> findAllDisbursementRuleByDisbursementRuleStatuses(Set<DisbursementRuleStatus> disbursementRuleStatus, Pageable pageRequest);
 
     Boolean existsByNameIgnoreCase(String name);
 
     @Query("""
     SELECT d FROM DisbursementRuleEntity d
     WHERE LOWER(d.name) LIKE LOWER(CONCAT('%', :name, '%'))
-      AND ( :activationStatuses IS NULL OR d.activationStatus IN :activationStatuses )
+      AND ( :disbursementRuleStatuses IS NULL OR d.disbursementRuleStatus IN :disbursementRuleStatuses )
     """)
-    Page<DisbursementRuleEntity> searchByNameAndActivationStatuses(
+    Page<DisbursementRuleEntity> searchByNameAndDisbursementRuleStatuses(
             @Param("name") String name,
-            @Param("activationStatuses") Set<ActivationStatus> activationStatuses,
+            @Param("disbursementRuleStatuses") Set<DisbursementRuleStatus> disbursementRuleStatus,
             Pageable pageable
     );
 }

@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.model.loan.disbursement;
 
 import africa.nkwadoma.nkwadoma.domain.enums.DisbursementInterval;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.disbursement.DisbursementRuleMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.disbursement.DisbursementRuleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -38,10 +39,12 @@ public class DisbursementRule {
     private int numberOfUsage;
     private int numberOfTimesApplied;
     private int numberOfTimesAdjusted;
-    private ActivationStatus activationStatus;
-    private Set<ActivationStatus> activationStatuses;
+    private DisbursementRuleStatus disbursementRuleStatus;
+    private Set<DisbursementRuleStatus> disbursementRuleStatuses;
+//    private Set<DisbursementRuleStatus> activationStatuses;
     private UserIdentity userIdentity;
 
+    private String loanId;
     private List<String> loanIds;
 
     private int pageNumber;
@@ -52,7 +55,7 @@ public class DisbursementRule {
         validatePercentageDistributionAndDate(this.percentageDistribution);
     }
     public void validateActivationStatus() throws MeedlException {
-        MeedlValidator.validateObjectInstance(activationStatus, DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE_ACTIVATION_STATUS.getMessage() );
+        MeedlValidator.validateObjectInstance(disbursementRuleStatus, DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE_ACTIVATION_STATUS.getMessage() );
     }
 
     public void validatePercentageDistributionAndDate(List<Double> distributions) throws MeedlException {

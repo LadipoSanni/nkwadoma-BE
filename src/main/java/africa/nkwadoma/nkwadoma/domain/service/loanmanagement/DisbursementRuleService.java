@@ -8,7 +8,9 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.disburse
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.disbursement.LoanDisbursementRuleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.disbursement.DisbursementRuleMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.disbursement.DisbursementRuleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -21,7 +23,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanManage
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
-import org.bouncycastle.util.MemoableResetException;
 import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
@@ -29,8 +30,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.chrono.ChronoLocalDate;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -60,23 +59,23 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
         UserIdentity actor = userIdentityOutputPort.findById(disbursementRule.getUserIdentity().getId());
         DisbursementRule savedDisbursementRule = saveDisbursementRule(disbursementRule, actor);
         disbursementRule.setId(savedDisbursementRule.getId());
-        if (ActivationStatus.PENDING_APPROVAL.equals(savedDisbursementRule.getActivationStatus())){
+        if (DisbursementRuleStatus.PENDING_APPROVAL.equals(savedDisbursementRule.getDisbursementRuleStatus())){
             asynchronousNotificationOutputPort.notifyAdminOfDisbursementRuleApproval(disbursementRule);
         }
         return savedDisbursementRule;
     }
 
     private DisbursementRule saveDisbursementRule(DisbursementRule disbursementRule, UserIdentity actor) throws MeedlException {
-        log.info("The role of the user creating disbursement rule is {} email {} disbursement status {}", actor.getRole(), actor.getEmail(), disbursementRule.getActivationStatus());
+        log.info("The role of the user creating disbursement rule is {} email {} disbursement status {}", actor.getRole(), actor.getEmail(), disbursementRule.getDisbursementRuleStatus());
         disbursementRule.setUserIdentity(actor);
         disbursementRule.setCreatedBy(actor.getId());
         disbursementRule.setName(disbursementRule.getName().trim());
-        disbursementRule.setActivationStatus(
+        disbursementRule.setDisbursementRuleStatus(
                 disbursementRule.getUserIdentity().getRole().isMeedlSuperAdmin()
-                        ? ActivationStatus.APPROVED
-                        : ActivationStatus.PENDING_APPROVAL.equals(disbursementRule.getActivationStatus())
-                        ? ActivationStatus.PENDING_APPROVAL
-                        : ActivationStatus.INACTIVE);
+                        ? DisbursementRuleStatus.APPROVED
+                        : DisbursementRuleStatus.PENDING_APPROVAL.equals(disbursementRule.getDisbursementRuleStatus())
+                        ? DisbursementRuleStatus.PENDING_APPROVAL
+                        : DisbursementRuleStatus.INACTIVE);
         disbursementRule.setDateCreated(LocalDateTime.now());
         return disbursementRuleOutputPort.save(disbursementRule);
     }
@@ -87,13 +86,13 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
         MeedlValidator.validateUUID(disbursementRule.getId(), DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE_ID.getMessage());
         disbursementRule.validate();
         DisbursementRule foundDIsbursementRule = disbursementRuleOutputPort.findById(disbursementRule.getId());
-        if (!ActivationStatus.APPROVED.equals(foundDIsbursementRule.getActivationStatus())) {
+        if (!DisbursementRuleStatus.APPROVED.equals(foundDIsbursementRule.getDisbursementRuleStatus())) {
             log.info("Updating disbursement rule ");
 
             validateRuleNameToUpdate(disbursementRule, foundDIsbursementRule);
-            ActivationStatus activationStatus = foundDIsbursementRule.getActivationStatus();
+            DisbursementRuleStatus disbursementRuleStatus = foundDIsbursementRule.getDisbursementRuleStatus();
             disbursementRuleMapper.edit(foundDIsbursementRule, disbursementRule);
-            foundDIsbursementRule.setActivationStatus(activationStatus);
+            foundDIsbursementRule.setDisbursementRuleStatus(disbursementRuleStatus);
             return disbursementRuleOutputPort.save(foundDIsbursementRule);
         }
         return foundDIsbursementRule;
@@ -115,16 +114,16 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
         MeedlValidator.validateUUID(disbursementRule.getId(), DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE_ID.getMessage());
         MeedlValidator.validateObjectInstance(disbursementRule.getUserIdentity(), UserMessages.USER_IDENTITY_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(disbursementRule.getUserIdentity().getId(), UserMessages.INVALID_USER_ID.getMessage());
-        MeedlValidator.validateObjectInstance(disbursementRule.getActivationStatus(), "Disbursement rule decision is required");
+        MeedlValidator.validateObjectInstance(disbursementRule.getDisbursementRuleStatus(), "Disbursement rule decision is required");
 
-        if (!ActivationStatus.APPROVED.equals(disbursementRule.getActivationStatus()) &&
-                !ActivationStatus.DECLINED.equals(disbursementRule.getActivationStatus())){
-            log.error("The response for disbursement rule with id {} was neither approved nor decline but was {}", disbursementRule.getId(), disbursementRule.getActivationStatuses());
+        if (!DisbursementRuleStatus.APPROVED.equals(disbursementRule.getDisbursementRuleStatus()) &&
+                !DisbursementRuleStatus.DECLINED.equals(disbursementRule.getDisbursementRuleStatus())){
+            log.error("The response for disbursement rule with id {} was neither approved nor decline but was {}", disbursementRule.getId(), disbursementRule.getDisbursementRuleStatuses());
             throw new MeedlException("Response can only be Approve or Decline");
         }
         DisbursementRule foundDisbursementRule = disbursementRuleOutputPort.findById(disbursementRule.getId());
-        foundDisbursementRule.setActivationStatus(disbursementRule.getActivationStatus());
-        log.info("Activation status on disbursement rule is {}", foundDisbursementRule.getActivationStatuses());
+        foundDisbursementRule.setDisbursementRuleStatus(disbursementRule.getDisbursementRuleStatus());
+        log.info("Disbursement rule status on disbursement rule is {}", foundDisbursementRule.getDisbursementRuleStatuses());
         return disbursementRuleOutputPort.save(foundDisbursementRule);
     }
     @Override
@@ -138,10 +137,24 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
     public Page<DisbursementRule> viewAllDisbursementRule(DisbursementRule disbursementRule) throws MeedlException {
         MeedlValidator.validateObjectInstance(disbursementRule, DisbursementRuleMessages.EMPTY_DISBURSEMENT_RULE.getMessage());
 
-        log.info("View all disbursement rules at service. With activation status {}", disbursementRule.getActivationStatuses());
+        log.info("View all disbursement rules at service. With activation status {}", disbursementRule.getDisbursementRuleStatus());
         return disbursementRuleOutputPort.findAllDisbursementRule(disbursementRule);
     }
 
+    @Override
+    public void removeDisbursementRuleFromLoan(DisbursementRule disbursementRule) throws MeedlException {
+        MeedlValidator.validateObjectInstance(disbursementRule, DisbursementRuleMessages.EMPTY_DISBURSEMENT_RULE.getMessage());
+        MeedlValidator.validateUUID(disbursementRule.getId(), DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE_ID.getMessage());
+        MeedlValidator.validateUUID(disbursementRule.getLoanId(), LoanMessages.INVALID_LOAN_ID.getMessage());
+
+        Loan loan = loanOutputPort.findLoanById(disbursementRule.getLoanId());
+        List<LoanDisbursementRule> loanDisbursementRules = loanDisbursementRuleOutputPort
+                .findLoanDisbursementRuleByStatus(loan.getId(), DisbursementRuleStatus.ACTIVE);
+        log.info("Removing disbursement rules");
+        loanDisbursementRuleOutputPort.deleteAllLoanDisbursementRule(loan.getId());
+
+
+    }
      @Override
     public void deleteDisbursementRuleById(DisbursementRule disbursementRule) throws MeedlException {
         MeedlValidator.validateObjectInstance(disbursementRule, DisbursementRuleMessages.EMPTY_DISBURSEMENT_RULE.getMessage());
@@ -173,8 +186,8 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
         UserIdentity actor = userIdentityOutputPort.findById(disbursementRule.getUserIdentity().getId());
         DisbursementRule foundDisbursementRule = disbursementRuleOutputPort.findById(disbursementRule.getId());
         foundDisbursementRule.setUserIdentity(actor);
-        if (!ActivationStatus.APPROVED.equals(foundDisbursementRule.getActivationStatus())){
-            log.error("Disbursement rule cannot be apply due to status {}", disbursementRule.getActivationStatus());
+        if (!DisbursementRuleStatus.APPROVED.equals(foundDisbursementRule.getDisbursementRuleStatus())){
+            log.error("Disbursement rule cannot be apply due to status {}", disbursementRule.getDisbursementRuleStatus());
             throw new MeedlException("Disbursement rule must be approved to be applied");
         }
 
@@ -238,7 +251,7 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
                 .disbursementRule(disbursementRule)
                 .loan(loan)
                 .appliedBy(disbursementRule.getUserIdentity().getId())
-                .activationStatus(ActivationStatus.ACTIVE)
+                .disbursementRuleStatus(DisbursementRuleStatus.ACTIVE)
                 .dateApplied(LocalDateTime.now())
                 .interval(disbursementRule.getInterval())
                 .percentageDistribution(disbursementRule.getPercentageDistribution())

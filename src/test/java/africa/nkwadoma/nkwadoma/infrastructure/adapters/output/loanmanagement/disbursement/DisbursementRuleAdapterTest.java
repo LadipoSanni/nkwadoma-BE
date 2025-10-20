@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement.disbursement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.disbursement.DisbursementRuleOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.disbursement.DisbursementRuleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.disbursement.DisbursementRule;
@@ -91,7 +92,7 @@ public class DisbursementRuleAdapterTest {
         Page<DisbursementRule> results = disbursementRuleOutputPort.search(
                 DisbursementRule.builder()
                         .name(disbursementRule.getName())
-                        .activationStatuses(Set.of(ActivationStatus.APPROVED))
+                        .disbursementRuleStatuses(Set.of(DisbursementRuleStatus.APPROVED))
                         .pageNumber(0)
                         .pageSize(10)
                         .build()
@@ -107,7 +108,7 @@ public class DisbursementRuleAdapterTest {
     void searchByInvalidName() {
         DisbursementRule invalidSearch = DisbursementRule.builder()
                 .name("")
-                .activationStatuses(Set.of(ActivationStatus.APPROVED))
+                .disbursementRuleStatuses(Set.of(DisbursementRuleStatus.APPROVED))
                 .pageNumber(0)
                 .pageSize(10)
                 .build();
@@ -124,7 +125,7 @@ public class DisbursementRuleAdapterTest {
         Page<DisbursementRule> results = disbursementRuleOutputPort.search(
                 DisbursementRule.builder()
                         .name(disbursementRule.getName())
-                        .activationStatuses(Set.of(ActivationStatus.INACTIVE)) // different status
+                        .disbursementRuleStatuses(Set.of(DisbursementRuleStatus.DECLINED)) // different status
                         .pageNumber(0)
                         .pageSize(10)
                         .build()

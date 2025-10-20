@@ -3,8 +3,11 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanmanagement.d
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.disbursement.LoanDisbursementRuleOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.disbursement.DisbursementRuleMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.disbursement.DisbursementRuleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.disbursement.LoanDisbursementRuleMessage;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loan;
 import africa.nkwadoma.nkwadoma.domain.model.loan.disbursement.LoanDisbursementRule;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanManagement.disbursement.LoanDisbursementRuleMapper;
@@ -59,6 +62,24 @@ public class LoanDisbursementRuleAdapter implements LoanDisbursementRuleOutputPo
     public void deleteById(String loanDisbursementRuleId) throws MeedlException {
         MeedlValidator.validateUUID(loanDisbursementRuleId, LoanDisbursementRuleMessage.INVALID_LOAN_DISBURSEMENT_RULE_ID.getMessage());
         loanDisbursementRuleRepository.deleteById(loanDisbursementRuleId);
+    }
+
+    @Override
+    public List<LoanDisbursementRule> findLoanDisbursementRuleByStatus(String loanId, DisbursementRuleStatus disbursementRuleStatus) throws MeedlException {
+        MeedlValidator.validateUUID(loanId, LoanMessages.INVALID_LOAN_ID.getMessage());
+//        MeedlValidator.validateActivationSatus(disbursementRuleStatus);
+
+        List<LoanDisbursementRuleEntity> loanDisbursementRuleEntities = loanDisbursementRuleRepository.findByLoanEntity_IdAndDisbursementRuleStatus(loanId, disbursementRuleStatus);
+        return loanDisbursementRuleEntities.stream()
+                .map(loanDisbursementRuleMapper::map)
+                .toList();
+    }
+
+    @Override
+    public void deleteAllLoanDisbursementRule(String loanId) throws MeedlException {
+        MeedlValidator.validateUUID(loanId, LoanMessages.INVALID_LOAN_ID.getMessage());
+
+        loanDisbursementRuleRepository.deleteAllByLoanEntity_Id(loanId);
     }
 
 

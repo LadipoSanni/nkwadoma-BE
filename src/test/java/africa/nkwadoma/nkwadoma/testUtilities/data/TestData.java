@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.testUtilities.data;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.disbursement.DisbursementRuleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentvehicle.*;
@@ -51,9 +52,9 @@ public class TestData {
                 .percentageDistribution(List.of(100.00))
                 .distributionDates(List.of(LocalDateTime.now()))
                 .interval(DisbursementInterval.MONTHLY)
-                .activationStatus(ActivationStatus.APPROVED)
+                .disbursementRuleStatus(DisbursementRuleStatus.APPROVED)
                 .name(TestUtils.generateName(5))
-                .activationStatuses(Set.of(ActivationStatus.APPROVED))
+                .disbursementRuleStatuses(Set.of(DisbursementRuleStatus.APPROVED))
                 .build();
     }
     public static UserIdentity createTestUserIdentity(String email){

@@ -1,13 +1,18 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanmanagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.LoanOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.disbursement.DisbursementRuleOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanmanagement.disbursement.LoanDisbursementRuleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.disbursement.DisbursementRuleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loan;
 import africa.nkwadoma.nkwadoma.domain.model.loan.disbursement.DisbursementRule;
+import africa.nkwadoma.nkwadoma.domain.model.loan.disbursement.LoanDisbursementRule;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loanManagement.disbursement.DisbursementRuleMapper;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +53,10 @@ class DisbursementRuleServiceTest {
     @Mock
     private UserIdentityOutputPort userIdentityOutputPort;
     @Mock
+    private LoanDisbursementRuleOutputPort loanDisbursementRuleOutputPort;
+    @Mock
+    private LoanOutputPort loanOutputPort;
+    @Mock
     private AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
 
     private DisbursementRule disbursementRule;
@@ -67,19 +76,19 @@ class DisbursementRuleServiceTest {
         disbursementRule = TestData.buildDisbursementRule();
         disbursementRule.setName("Test Rule");
 
-        disbursementRule.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
+        disbursementRule.setDisbursementRuleStatus(DisbursementRuleStatus.PENDING_APPROVAL);
     }
 
     @Test
     void editDisbursementRuleWhenNotApproved() throws MeedlException {
         disbursementRule.setId(UUID.randomUUID().toString());
-        disbursementRule.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
+        disbursementRule.setDisbursementRuleStatus(DisbursementRuleStatus.PENDING_APPROVAL);
         disbursementRule.setPercentageDistribution(List.of(50.0, 50.0)); // must sum to 100
         disbursementRule.setDistributionDates(List.of(LocalDateTime.now(), LocalDateTime.now()));
 
         DisbursementRule existingRule = TestData.buildDisbursementRule();
         existingRule.setId(disbursementRule.getId());
-        existingRule.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
+        existingRule.setDisbursementRuleStatus(DisbursementRuleStatus.PENDING_APPROVAL);
         existingRule.setName("Old Name");
         existingRule.setPercentageDistribution(List.of(60.0, 40.0)); // valid too
         existingRule.setDistributionDates(List.of(LocalDateTime.now(), LocalDateTime.now()));
@@ -99,13 +108,13 @@ class DisbursementRuleServiceTest {
     @Test
     void editDisbursementRuleWhenApproved() throws MeedlException {
         disbursementRule.setId(UUID.randomUUID().toString());
-        disbursementRule.setActivationStatus(ActivationStatus.APPROVED);
+        disbursementRule.setDisbursementRuleStatus(DisbursementRuleStatus.APPROVED);
         disbursementRule.setPercentageDistribution(List.of(50.0, 50.0));
         disbursementRule.setDistributionDates(List.of(LocalDateTime.now(), LocalDateTime.now()));
 
         DisbursementRule existingRule = TestData.buildDisbursementRule();
         existingRule.setId(disbursementRule.getId());
-        existingRule.setActivationStatus(ActivationStatus.APPROVED);
+        existingRule.setDisbursementRuleStatus(DisbursementRuleStatus.APPROVED);
         existingRule.setName("Old Name");
         existingRule.setPercentageDistribution(List.of(60.0, 40.0));
         existingRule.setDistributionDates(List.of(LocalDateTime.now(), LocalDateTime.now()));
@@ -122,7 +131,7 @@ class DisbursementRuleServiceTest {
     @Test
     void editDisbursementRuleWithInvalidDistributionThrows() {
         disbursementRule.setId(UUID.randomUUID().toString());
-        disbursementRule.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
+        disbursementRule.setDisbursementRuleStatus(DisbursementRuleStatus.PENDING_APPROVAL);
         disbursementRule.setPercentageDistribution(List.of(40.0, 40.0)); // sum != 100
 
         assertThrows(MeedlException.class, () ->
@@ -132,14 +141,14 @@ class DisbursementRuleServiceTest {
     @Test
     void editDisbursementRuleWhenNameAlreadyExistsThrows() throws MeedlException {
         disbursementRule.setId(UUID.randomUUID().toString());
-        disbursementRule.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
+        disbursementRule.setDisbursementRuleStatus(DisbursementRuleStatus.PENDING_APPROVAL);
         disbursementRule.setName("New Rule");
         disbursementRule.setPercentageDistribution(List.of(70.0, 30.0));
         disbursementRule.setDistributionDates(List.of(LocalDateTime.now(), LocalDateTime.now()));
 
         DisbursementRule existingRule = TestData.buildDisbursementRule();
         existingRule.setId(disbursementRule.getId());
-        existingRule.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
+        existingRule.setDisbursementRuleStatus(DisbursementRuleStatus.PENDING_APPROVAL);
         existingRule.setName("Old Rule");
         existingRule.setPercentageDistribution(List.of(60.0, 40.0));
         existingRule.setDistributionDates(List.of(LocalDateTime.now(), LocalDateTime.now()));
@@ -158,11 +167,11 @@ class DisbursementRuleServiceTest {
     @Test
     void attemptToUpdateApprovedDisbursementRule() throws MeedlException {
         disbursementRule.setId(UUID.randomUUID().toString());
-        disbursementRule.setActivationStatus(ActivationStatus.APPROVED);
+        disbursementRule.setDisbursementRuleStatus(DisbursementRuleStatus.APPROVED);
 
         DisbursementRule existingRule = TestData.buildDisbursementRule();
         existingRule.setId(disbursementRule.getId());
-        existingRule.setActivationStatus(ActivationStatus.APPROVED);
+        existingRule.setDisbursementRuleStatus(DisbursementRuleStatus.APPROVED);
         existingRule.setName("Approved Rule");
 
         when(disbursementRuleOutputPort.findById(disbursementRule.getId()))
@@ -196,7 +205,7 @@ class DisbursementRuleServiceTest {
 
         DisbursementRule result = disbursementRuleService.setUpDisbursementRule(disbursementRule);
 
-        assertThat(result.getActivationStatus()).isEqualTo(ActivationStatus.APPROVED);
+        assertThat(result.getDisbursementRuleStatus()).isEqualTo(DisbursementRuleStatus.APPROVED);
         verify(asynchronousNotificationOutputPort, never()).notifyAdminOfDisbursementRuleApproval(any());
     }
 
@@ -209,14 +218,14 @@ class DisbursementRuleServiceTest {
 
         DisbursementRule result = disbursementRuleService.setUpDisbursementRule(disbursementRule);
 
-        assertThat(result.getActivationStatus()).isEqualTo(ActivationStatus.PENDING_APPROVAL);
+        assertThat(result.getDisbursementRuleStatus()).isEqualTo(DisbursementRuleStatus.PENDING_APPROVAL);
         verify(asynchronousNotificationOutputPort).notifyAdminOfDisbursementRuleApproval(any());
     }
 
     @Test
     void createInactiveDisbursementRule() throws MeedlException {
         disbursementRule.setUserIdentity(superAdminUser);
-        disbursementRule.setActivationStatus(ActivationStatus.INVITED);
+        disbursementRule.setDisbursementRuleStatus(DisbursementRuleStatus.INACTIVE);
 
         when(disbursementRuleOutputPort.existByNameIgnoreCase(anyString())).thenReturn(false);
         when(userIdentityOutputPort.findById(anyString())).thenReturn(normalUser);
@@ -224,7 +233,7 @@ class DisbursementRuleServiceTest {
 
         DisbursementRule result = disbursementRuleService.setUpDisbursementRule(disbursementRule);
 
-        assertThat(result.getActivationStatus()).isEqualTo(ActivationStatus.INACTIVE);
+        assertThat(result.getDisbursementRuleStatus()).isEqualTo(DisbursementRuleStatus.INACTIVE);
     }
 
     @Test
@@ -256,7 +265,7 @@ class DisbursementRuleServiceTest {
     void respondToDisbursementRuleWithInvalidActivationStatus() throws MeedlException {
         disbursementRule.setUserIdentity(normalUser);
         disbursementRule.setId(UUID.randomUUID().toString());
-        disbursementRule.setActivationStatus(ActivationStatus.PENDING_APPROVAL);
+        disbursementRule.setDisbursementRuleStatus(DisbursementRuleStatus.PENDING_APPROVAL);
 
         assertThrows(MeedlException.class,
                 () -> disbursementRuleService.respondToDisbursementRule(disbursementRule));
@@ -268,7 +277,7 @@ class DisbursementRuleServiceTest {
     void respondToDisbursementRuleApprove() throws MeedlException {
         disbursementRule.setUserIdentity(normalUser);
         disbursementRule.setId(UUID.randomUUID().toString());
-        disbursementRule.setActivationStatus(ActivationStatus.APPROVED);
+        disbursementRule.setDisbursementRuleStatus(DisbursementRuleStatus.APPROVED);
 
         when(disbursementRuleOutputPort.findById(disbursementRule.getId())).thenReturn(disbursementRule);
         when(disbursementRuleOutputPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -276,7 +285,7 @@ class DisbursementRuleServiceTest {
         DisbursementRule result = disbursementRuleService.respondToDisbursementRule(disbursementRule);
 
         assertNotNull(result);
-        assertEquals(ActivationStatus.APPROVED, result.getActivationStatus());
+        assertEquals(DisbursementRuleStatus.APPROVED, result.getDisbursementRuleStatus());
         verify(disbursementRuleOutputPort).save(disbursementRule);
     }
 
@@ -284,7 +293,7 @@ class DisbursementRuleServiceTest {
     void respondToDisbursementRuleDecline() throws MeedlException {
         disbursementRule.setUserIdentity(normalUser);
         disbursementRule.setId(UUID.randomUUID().toString());
-        disbursementRule.setActivationStatus(ActivationStatus.DECLINED);
+        disbursementRule.setDisbursementRuleStatus(DisbursementRuleStatus.DECLINED);
 
         when(disbursementRuleOutputPort.findById(disbursementRule.getId())).thenReturn(disbursementRule);
         when(disbursementRuleOutputPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -292,7 +301,7 @@ class DisbursementRuleServiceTest {
         DisbursementRule result = disbursementRuleService.respondToDisbursementRule(disbursementRule);
 
         assertNotNull(result);
-        assertEquals(ActivationStatus.DECLINED, result.getActivationStatus());
+        assertEquals(DisbursementRuleStatus.DECLINED, result.getDisbursementRuleStatus());
         verify(disbursementRuleOutputPort).save(disbursementRule);
     }
 
@@ -306,6 +315,8 @@ class DisbursementRuleServiceTest {
     @Test
     void deleteDisbursementRuleById() throws MeedlException {
         disbursementRule.setId(UUID.randomUUID().toString());
+        when(disbursementRuleOutputPort.findById(disbursementRule.getId()))
+                .thenReturn(disbursementRule);
 
         disbursementRuleService.deleteDisbursementRuleById(disbursementRule);
 
@@ -351,7 +362,7 @@ class DisbursementRuleServiceTest {
     @Test
     void searchWithEmptyStatuses() throws MeedlException {
         // given
-        disbursementRule.setActivationStatuses(Set.of()); // no statuses
+        disbursementRule.setDisbursementRuleStatuses(Set.of()); // no statuses
         Page<DisbursementRule> expectedPage = new PageImpl<>(List.of(disbursementRule));
 
         when(disbursementRuleOutputPort.search(any(DisbursementRule.class)))
@@ -364,6 +375,48 @@ class DisbursementRuleServiceTest {
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
         verify(disbursementRuleOutputPort).search(disbursementRule);
+    }
+
+    @Test
+    void removeDisbursementRuleFromLoanSuccessfully() throws MeedlException {
+        // Arrange
+        String loanId = UUID.randomUUID().toString();
+        String disbursementRuleId = UUID.randomUUID().toString();
+
+        DisbursementRule disbursementRule = new DisbursementRule();
+        disbursementRule.setId(disbursementRuleId);
+        disbursementRule.setLoanId(loanId);
+
+        Loan loan = new Loan();
+        loan.setId(loanId);
+
+        List<LoanDisbursementRule> activeRules = List.of(LoanDisbursementRule.builder().build());
+
+        when(loanOutputPort.findLoanById(loanId)).thenReturn(loan);
+        when(loanDisbursementRuleOutputPort.findLoanDisbursementRuleByStatus(loanId, DisbursementRuleStatus.ACTIVE))
+                .thenReturn(activeRules);
+        doNothing().when(loanDisbursementRuleOutputPort).deleteAllLoanDisbursementRule(loanId);
+
+        // Act
+        disbursementRuleService.removeDisbursementRuleFromLoan(disbursementRule);
+
+        // Assert
+        verify(loanOutputPort).findLoanById(loanId);
+        verify(loanDisbursementRuleOutputPort).findLoanDisbursementRuleByStatus(loanId, DisbursementRuleStatus.ACTIVE);
+        verify(loanDisbursementRuleOutputPort).deleteAllLoanDisbursementRule(loanId);
+    }
+
+    @Test
+    void removeDisbursementRuleFromLoanWithInvalidIdsThrowsException() {
+        DisbursementRule disbursementRule = new DisbursementRule();
+        disbursementRule.setId("invalid-uuid");
+        disbursementRule.setLoanId("invalid-loan-id");
+
+        assertThrows(MeedlException.class, () ->
+                disbursementRuleService.removeDisbursementRuleFromLoan(disbursementRule)
+        );
+
+        verifyNoInteractions(loanOutputPort, loanDisbursementRuleOutputPort);
     }
 
 }
