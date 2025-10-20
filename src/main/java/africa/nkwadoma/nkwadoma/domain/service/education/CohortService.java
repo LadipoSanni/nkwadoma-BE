@@ -222,6 +222,8 @@ public class CohortService implements CohortUseCase {
         log.info("pendingLoanOffers == {}", pendingLoanOffers);
         cohort.setNumberOfPendingLoanOffers(pendingLoanOffers);
         cohort.setExpectedEndDate(cohort.getStartDate().plusMonths(program.getDuration()));
+        List<LoanBreakdown> loanBreakdowns = loanBreakdownOutputPort.findAllByCohortId(cohortId);
+        cohort.setLoanBreakdowns(loanBreakdowns);
         return cohort;
     }
 
