@@ -588,7 +588,7 @@ public class TestData {
                 .totalNumberOfInstitutionalFinancier(2)
                 .totalNumberOfIndividualFinancier(2)
                 .totalNumberOfLoans(33)
-                .obligorLoanLimit(new BigDecimal(30000))
+                .obligorLoanLimit(new BigDecimal("0.1"))
                 .loanReferralPercentage(27.2727)
                 .loanRequestPercentage(18.1818)
                 .loanDisbursalPercentage(15.1515)

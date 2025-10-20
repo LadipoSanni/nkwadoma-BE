@@ -311,7 +311,7 @@ class LoaneeServiceTest {
 
 
     @Test
-    void viewAllLoaneeInCohort() throws MeedlException {
+    void viewAllLoaneeWithLoanInCohort() throws MeedlException {
         when(cohortLoaneeOutputPort.findAllLoaneeInCohort(cohortLoanee,pageSize,pageNumber)).
                 thenReturn(new PageImpl<>(List.of(loaneeCohort)));
         Page<CohortLoanee> loanees = loaneeService.viewAllLoaneeInCohort(cohortLoanee,pageSize,pageNumber);
@@ -319,21 +319,21 @@ class LoaneeServiceTest {
     }
 
     @Test
-    void viewAllLoaneeInCohortWithNullId() {
+    void viewAllLoaneeWithLoanInCohortWithNullId() {
         cohortLoanee.setCohortId(null);
         assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(cohortLoanee,pageSize,pageNumber));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY,StringUtils.SPACE})
-    void viewAllLoaneeInCohortWithEmptyId(String cohortId) {
+    void viewAllLoaneeWithLoanInCohortWithEmptyId(String cohortId) {
         cohortLoanee.setCohortId(cohortId);
         assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(cohortLoanee,pageSize,pageNumber));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"invalid-id"})
-    void viewAllLoaneeInCohortWithInvalidId(String cohortId) {
+    void viewAllLoaneeWithLoanInCohortWithInvalidId(String cohortId) {
         cohortLoanee.setCohortId(cohortId);
         assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(cohortLoanee,pageSize,pageNumber));
     }
@@ -923,7 +923,7 @@ class LoaneeServiceTest {
     }
 
     @Test
-    void viewAllLoaneeInCohortWithUploadedStatusAdded() throws MeedlException {
+    void viewAllLoaneeWithLoanInCohortWithUploadedStatusAdded() throws MeedlException {
         loaneeCohort.setUploadedStatus(UploadedStatus.ADDED);
         Page<CohortLoanee> expectedPage = new PageImpl<>(List.of(loaneeCohort));
         when(cohortLoaneeOutputPort.findAllLoaneeInCohort(cohortLoanee,pageSize,pageNumber)).
@@ -959,7 +959,7 @@ class LoaneeServiceTest {
 
 
     @Test
-    void viewAllLoaneeInCohortWithUploadedInvited() throws MeedlException {
+    void viewAllLoaneeWithLoanInCohortWithUploadedInvited() throws MeedlException {
         loaneeCohort.setUploadedStatus(UploadedStatus.INVITED);
         Page<CohortLoanee> expectedPage = new PageImpl<>(List.of(loaneeCohort));
         when(cohortLoaneeOutputPort.findAllLoaneeInCohort(cohortLoanee,pageSize,pageNumber)).
@@ -1023,7 +1023,7 @@ class LoaneeServiceTest {
             when(userIdentityOutputPort.findById(any())).thenReturn(userIdentity);
             when(loaneeLoanAggregateOutputPort.findAllLoanAggregate(pageSize,pageNumber))
                     .thenReturn(loanAggregatePage);
-            loanAggregatePage = loaneeService.viewAllLoanee(mockId,pageSize,pageNumber);
+            loanAggregatePage = loaneeService.viewAllLoaneeWithLoan(mockId,pageSize,pageNumber);
         }catch (MeedlException exception){
             log.error(exception.getMessage());
         }
@@ -1040,7 +1040,7 @@ class LoaneeServiceTest {
             when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId())).thenReturn(Optional.ofNullable(organizationEmployeeIdentity));
             when(loaneeLoanAggregateOutputPort.findAllLoanAggregateByOrganizationId(organizationEmployeeIdentity.getOrganization(),pageSize,pageNumber))
                     .thenReturn(loanAggregatePage);
-            loanAggregatePage = loaneeService.viewAllLoanee(mockId,pageSize,pageNumber);
+            loanAggregatePage = loaneeService.viewAllLoaneeWithLoan(mockId,pageSize,pageNumber);
         }catch (MeedlException exception){
             log.error(exception.getMessage());
         }

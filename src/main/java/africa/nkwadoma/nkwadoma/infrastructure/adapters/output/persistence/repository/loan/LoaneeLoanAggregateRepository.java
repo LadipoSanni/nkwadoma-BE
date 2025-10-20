@@ -16,13 +16,14 @@ public interface LoaneeLoanAggregateRepository extends JpaRepository<LoaneeLoanA
    
         select loaneeLoanAggregate.historicalDebt as historicalDebt ,
                 loaneeLoanAggregate.totalAmountOutstanding as totalAmountOutstanding ,
-                loaneeLoanAggregate.numberOfLoans as numberOfLoans ,  
+                loaneeLoanAggregate.numberOfLoans as numberOfLoans ,
                 loanee.userIdentity.firstName as firstName ,
                 loanee.userIdentity.lastName as lastName ,
                 loanee.userIdentity.email as email,
-                 loanee.id as loaneeId                   
+                 loanee.id as loaneeId
             from LoaneeLoanAggregateEntity loaneeLoanAggregate
             join LoaneeEntity loanee on loanee.id = loaneeLoanAggregate.loanee.id
+            where loaneeLoanAggregate.numberOfLoans > 0
             ORDER BY loaneeLoanAggregate.numberOfLoans DESC, loanee.id ASC
     """)
     Page<LoaneeLoanAggregateProjection> findAllByPagination(Pageable pageRequest);
@@ -39,7 +40,8 @@ public interface LoaneeLoanAggregateRepository extends JpaRepository<LoaneeLoanA
         from LoaneeLoanAggregateEntity loaneeLoanAggregate
         join LoaneeEntity loanee on loanee.id = loaneeLoanAggregate.loanee.id
         where (upper(concat(loanee.userIdentity.firstName, ' ', loanee.userIdentity.lastName)) LIKE upper(concat('%', :nameFragment, '%'))
-        OR upper(concat(loanee.userIdentity.lastName, ' ', loanee.userIdentity.firstName)) LIKE upper(concat('%', :nameFragment, '%')))
+        OR upper(concat(loanee.userIdentity.lastName, ' ', loanee.userIdentity.firstName)) LIKE upper(concat('%', :nameFragment, '%'))) and
+        loaneeLoanAggregate.numberOfLoans > 0
         ORDER BY loaneeLoanAggregate.numberOfLoans DESC, loanee.id ASC
 """)
     Page<LoaneeLoanAggregateProjection> searchLoaneeLoanAggregate(@Param("nameFragment") String nameFragment, Pageable pageRequest);
@@ -51,6 +53,7 @@ public interface LoaneeLoanAggregateRepository extends JpaRepository<LoaneeLoanA
         SUM(l.totalAmountRepaid) AS totalAmountRepaid,
         COUNT(l) AS numberOfLoanee
     FROM LoaneeLoanAggregateEntity l
+        where l.numberOfLoans > 0
     """)
     LoanSummaryProjection getLoanSummary();
 
@@ -81,6 +84,10 @@ public interface LoaneeLoanAggregateRepository extends JpaRepository<LoaneeLoanA
     JOIN CohortEntity cohort ON cohort.id = cohortLoanee.cohort.id
     JOIN ProgramEntity program ON program.id = cohort.programId
     JOIN OrganizationEntity organization ON organization.id = program.organizationIdentity.id
+    JOIN LoanReferralEntity loanReferral ON loanReferral.cohortLoanee.id = cohortLoanee.id
+    JOIN LoanRequestEntity loanRequest ON loanReferral.id = loanReferral.id
+    JOIN LoanOfferEntity loanOffer ON loanOffer.id = loanRequest.id
+    JOIN LoanEntity loan ON loan.loanOfferId = loanOffer.id
     WHERE organization.id = :organizationId
     GROUP BY loanee.userIdentity.firstName, loanee.userIdentity.lastName, loanee.userIdentity.email, loanee.id
     ORDER BY COUNT(CASE WHEN loaneeLoanDetail.amountReceived IS NOT NULL AND loaneeLoanDetail.amountReceived > 0 
@@ -107,7 +114,10 @@ public interface LoaneeLoanAggregateRepository extends JpaRepository<LoaneeLoanA
     join CohortEntity cohort on cohort.id = cohortLoanee.cohort.id
     join ProgramEntity program on program.id = cohort.programId
     join OrganizationEntity organization on organization.id = program.organizationIdentity.id
-
+    JOIN LoanReferralEntity loanReferral ON loanReferral.cohortLoanee.id = cohortLoanee.id
+    JOIN LoanRequestEntity loanRequest ON loanReferral.id = loanReferral.id
+    JOIN LoanOfferEntity loanOffer ON loanOffer.id = loanRequest.id
+    JOIN LoanEntity loan ON loan.loanOfferId = loanOffer.id    
     where (
         lower(loanee.userIdentity.firstName) like lower(concat('%', :nameFragment, '%'))
         or lower(loanee.userIdentity.lastName) like lower(concat('%', :nameFragment, '%'))
