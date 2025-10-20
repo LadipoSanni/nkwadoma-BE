@@ -27,7 +27,7 @@ public class Vendor {
     public void validate() throws MeedlException {
         validateProviderServices();
         log.info("Validating vendor cost of funds");
-        MeedlValidator.validateNegativeAmount(this.costOfService, "Cost of fund cannot be negative");
+        MeedlValidator.validateNegativeAmount(this.costOfService, "Provider cost of service cannot be lesser than zero");
 
     }
 

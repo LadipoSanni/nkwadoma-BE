@@ -111,6 +111,7 @@ public class LoanProduct {
     private void validateObligorLimit() throws MeedlException {
         MeedlValidator.validateObjectInstance(obligorLoanLimit, LoanMessages.OBLIGOR_LOAN_LIMIT_REQUIRED.getMessage());
         if (obligorLoanLimit.compareTo(BigDecimal.ZERO) <= BigDecimal.ZERO.intValue()){
+            log.error("{} ... obligor limit is {}", LoanProductMessage.INVALID_OBLIGOR_LIMIT.getMessage(), obligorLoanLimit);
             throw new LoanException(LoanProductMessage.INVALID_OBLIGOR_LIMIT.getMessage());
         }
     }

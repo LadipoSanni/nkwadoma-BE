@@ -90,7 +90,7 @@ public class PortfolioServiceTest {
         Portfolio invalidPortfolio = Mockito.mock(Portfolio.class);
         doThrow(new MeedlException("Validation failed"))
                 .when(invalidPortfolio).validateObligorLimitDetail();
-
+        portfolioService.setUpMeedlObligorLoanLimit(invalidPortfolio);
         assertThrows(MeedlException.class, () -> portfolioService.setUpMeedlObligorLoanLimit(invalidPortfolio));
     }
 
