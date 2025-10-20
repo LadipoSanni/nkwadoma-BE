@@ -101,6 +101,7 @@ public class LoanProductService implements CreateLoanProductUseCase, ViewLoanPro
         verifyFinanciersExistInVehicle(loanProduct, investmentVehicle);
         investmentVehicle.setTotalAvailableAmount(investmentVehicle.getTotalAvailableAmount().subtract(loanProduct.getLoanProductSize()));
         loanProduct.addInvestmentVehicleValues(investmentVehicle);
+        loanProduct.setCostOfFund(investmentVehicle.getInterestRateOffered());
         initializeAvailableAmounts(loanProduct);
         if (ObjectUtils.isEmpty(loanProduct.getTotalOutstandingLoan())) {
             loanProduct.setTotalOutstandingLoan(BigDecimal.ZERO);
@@ -244,6 +245,7 @@ public class LoanProductService implements CreateLoanProductUseCase, ViewLoanPro
             log.info("Update loan product based on new investment vehicle in use ");
             setUpLoanProductSizeWithDifferentInvestmentVehicle(loanProduct);
             refundPreviousVehicleAvailableAmount(foundLoanProduct);
+            foundLoanProduct.setCostOfFund(loanProduct.getCostOfFund());
         }else {
             boolean isNotEqual = foundLoanProduct.getLoanProductSize()
                     .compareTo(loanProduct.getLoanProductSize()) != 0;

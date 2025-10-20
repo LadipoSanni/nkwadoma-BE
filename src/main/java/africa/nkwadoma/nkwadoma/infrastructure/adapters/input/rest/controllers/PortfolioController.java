@@ -68,7 +68,7 @@ public class PortfolioController {
     }
 
     @PostMapping("/meedl/obligor/limit/set-up")
-    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('MEEDL_ADMIN') or hasRole('PORTFORLIO_MANAGER')")
     @Operation(summary = SET_MEEDL_OBLIGOR_LIMIT,description = SET_MEEDL_OBLIGOR_LIMIT_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> setUpMeedlObligorLoanLimit (
             @AuthenticationPrincipal Jwt meedlUser,
