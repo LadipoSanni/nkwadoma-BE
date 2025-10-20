@@ -84,6 +84,7 @@ class LoanProductServiceTest {
         investmentVehicle = InvestmentVehicle.builder()
                 .size(new BigDecimal(2000))
                 .totalAvailableAmount(new BigDecimal(2000))
+                .interestRateOffered(4.4F)
                 .build();
         loanee = new Loanee();
         loanee.setId("9a4e3b70-3bdb-4676-bcf0-017cd83f6a07");
