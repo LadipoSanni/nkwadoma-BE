@@ -55,7 +55,7 @@ public interface LoaneeUseCase {
 
     CohortLoanee viewLoaneeDetailInCohort(String cohortId, String loaneeId) throws MeedlException;
 
-    Page<LoaneeLoanAggregate> viewAllLoanee(String actorId,int pageSize, int pageNumber) throws MeedlException;
+    Page<LoaneeLoanAggregate> viewAllLoaneeWithLoan(String actorId, int pageSize, int pageNumber) throws MeedlException;
 
     Page<LoaneeLoanAggregate> searchLoanAggregate(Loanee loanee,int pageSize, int pageNumber) throws MeedlException;
 

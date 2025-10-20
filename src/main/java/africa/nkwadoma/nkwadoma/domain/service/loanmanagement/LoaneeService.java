@@ -900,7 +900,7 @@ public class LoaneeService implements LoaneeUseCase {
     }
 
     @Override
-    public Page<LoaneeLoanAggregate> viewAllLoanee(String actorId,int pageSize, int pageNumber) throws MeedlException {
+    public Page<LoaneeLoanAggregate> viewAllLoaneeWithLoan(String actorId, int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validatePageNumber(pageNumber);
         UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
