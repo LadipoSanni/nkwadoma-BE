@@ -3,12 +3,10 @@ name: Java CI with Maven
 on:
   push:
     branches: 
-      - main
-      - dev
       - systest
 
 env:
-  PROFILE: dev
+  PROFILE: systest
   AWS_REGION: "eu-west-1"
   API_VERSIONING: /api/v1
   DEV_FRONTEND_BASE_URL: http://localhost:3000
