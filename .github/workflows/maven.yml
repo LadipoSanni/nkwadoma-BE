@@ -36,11 +36,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 🔧 Install required tools
-      - name: Install PostgreSQL client, curl, and AWS CLI
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y postgresql-client curl awscli
+      # Install PostgreSQL client
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client curl
 
       # 🧩 Start Keycloak
       - name: Start Keycloak container
