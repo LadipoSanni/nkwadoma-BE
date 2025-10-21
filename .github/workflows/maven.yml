@@ -24,7 +24,7 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: meedl-build
+          POSTGRES_DB: meedl_build
         options: >-
           --health-cmd "pg_isready -U postgres"
           --health-interval 10s
@@ -83,8 +83,8 @@ jobs:
           set +a
       
           echo "🧹 Dropping and recreating test DB..."
-          PGPASSWORD=postgres psql -h localhost -U postgres -c "DROP DATABASE IF EXISTS meedl-build;"
-          PGPASSWORD=postgres psql -h localhost -U postgres -c "CREATE DATABASE meedl-build;"
+          PGPASSWORD=postgres psql -h localhost -U postgres -c "DROP DATABASE IF EXISTS meedl_build;"
+          PGPASSWORD=postgres psql -h localhost -U postgres -c "CREATE DATABASE meedl_build;"
           echo "✅ Clean database ready."
       
           echo "🚀 Running Maven tests..."
