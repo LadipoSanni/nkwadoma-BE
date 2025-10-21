@@ -2,7 +2,7 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: ["main", "dev", "prod-support"]
+    branches: ["main", "dev", "systest"]
 
 env:
   PROFILE: dev
