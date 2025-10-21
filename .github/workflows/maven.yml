@@ -36,9 +36,13 @@ jobs:
       # Checkout repo
       - uses: actions/checkout@v4
 
-      # Install tools
       - name: Install PostgreSQL client and curl
-        run: sudo apt-get update && sudo apt-get install -y postgresql-client curl docker.io
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client curl
+      
+      - name: Set up Docker (use GitHub's action)
+        uses: docker/setup-docker@v4
+        with:
+          version: '24.0.6'
 
       # Wait for PostgreSQL
       - name: Wait for PostgreSQL
