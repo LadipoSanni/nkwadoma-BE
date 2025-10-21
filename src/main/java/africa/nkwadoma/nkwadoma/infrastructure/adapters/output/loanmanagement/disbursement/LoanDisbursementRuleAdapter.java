@@ -82,5 +82,12 @@ public class LoanDisbursementRuleAdapter implements LoanDisbursementRuleOutputPo
         loanDisbursementRuleRepository.deleteAllByLoanEntity_Id(loanId);
     }
 
+    @Override
+    public boolean isDisbursementRuleRemoveable(String loanId) throws MeedlException {
+        MeedlValidator.validateUUID(loanId, LoanMessages.INVALID_LOAN_ID.getMessage());
+
+        return loanDisbursementRuleRepository.isDisbursementRuleRemovable(loanId);
+    }
+
 
 }

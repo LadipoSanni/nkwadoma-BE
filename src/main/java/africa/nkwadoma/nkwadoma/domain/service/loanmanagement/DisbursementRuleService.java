@@ -11,7 +11,6 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.identity.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.disbursement.DisbursementRuleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.disbursement.DisbursementRuleStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
@@ -26,6 +25,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.chrono.ChronoLocalDate;
@@ -142,6 +142,7 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
     }
 
     @Override
+    @Transactional
     public void removeDisbursementRuleFromLoan(DisbursementRule disbursementRule) throws MeedlException {
         MeedlValidator.validateObjectInstance(disbursementRule, DisbursementRuleMessages.EMPTY_DISBURSEMENT_RULE.getMessage());
         MeedlValidator.validateUUID(disbursementRule.getId(), DisbursementRuleMessages.INVALID_DISBURSEMENT_RULE_ID.getMessage());
@@ -150,8 +151,13 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
         Loan loan = loanOutputPort.findLoanById(disbursementRule.getLoanId());
         List<LoanDisbursementRule> loanDisbursementRules = loanDisbursementRuleOutputPort
                 .findLoanDisbursementRuleByStatus(loan.getId(), DisbursementRuleStatus.ACTIVE);
-        log.info("Removing disbursement rules");
-        loanDisbursementRuleOutputPort.deleteAllLoanDisbursementRule(loan.getId());
+        boolean isRemovable = loanDisbursementRuleOutputPort.isDisbursementRuleRemoveable(loan.getId());
+        if (isRemovable) {
+            log.info("Removing disbursement rules");
+            loanDisbursementRuleOutputPort.deleteAllLoanDisbursementRule(loan.getId());
+        }else {
+            log.info("Disbursement rule is not removable {}", loanDisbursementRules.size());
+        }
 
 
     }
@@ -186,7 +192,7 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
         UserIdentity actor = userIdentityOutputPort.findById(disbursementRule.getUserIdentity().getId());
         DisbursementRule foundDisbursementRule = disbursementRuleOutputPort.findById(disbursementRule.getId());
         foundDisbursementRule.setUserIdentity(actor);
-        if (!DisbursementRuleStatus.APPROVED.equals(foundDisbursementRule.getDisbursementRuleStatus())){
+        if (!DisbursementRuleStatus.isApplicableDisbursementRule(foundDisbursementRule.getDisbursementRuleStatus())){
             log.error("Disbursement rule cannot be apply due to status {}", disbursementRule.getDisbursementRuleStatus());
             throw new MeedlException("Disbursement rule must be approved to be applied");
         }
@@ -211,9 +217,6 @@ public class DisbursementRuleService  implements DisbursementRuleUseCase {
         foundDisbursementRule.setNumberOfTimesApplied(foundDisbursementRule.getNumberOfTimesApplied() + totalNumberApplied);
         disbursementRuleOutputPort.save(foundDisbursementRule);
         log.info("new number of times disbursement rule hase been applied is {}", foundDisbursementRule.getNumberOfTimesApplied());
-    }
-    public void removeDisbursementRule(DisbursementRule disbursementRule){
-
     }
 
     private List<Loan> getAllLoansToApplyDisbursementTo(DisbursementRule disbursementRule) {

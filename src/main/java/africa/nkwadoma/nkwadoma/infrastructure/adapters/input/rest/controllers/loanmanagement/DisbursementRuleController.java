@@ -1,10 +1,11 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.loanmanagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loanmanagement.DisbursementRuleUseCase;
-import africa.nkwadoma.nkwadoma.domain.enums.identity.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.disbursement.DisbursementRuleStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.disbursement.DisbursementRule;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.disbursement.ApplyDisbursementRuleRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.disbursement.RemoveDisbursementRule;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.disbursement.SetUpDisbursementRuleRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.disbursement.EditDisbursementRuleRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.appResponse.ApiResponse;
@@ -40,146 +41,178 @@ public class DisbursementRuleController {
     private final DisbursementRuleUseCase disbursementRuleUseCase;
     private final DisbursementRuleRestMapper disbursementRuleUseMapper;
 
-//    @PostMapping("/set-up")
-//    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
-//    @Operation(summary = CREATE_DISBURSEMENT_RULE,description = CREATE_DISBURSEMENT_RULE_DESCRIPTION)
-//    public ResponseEntity<ApiResponse<?>> setUpDisbursementRule(
-//            @AuthenticationPrincipal Jwt meedlUser,
-//            @RequestBody SetUpDisbursementRuleRequest request) throws MeedlException {
-//        log.info("Create disbursement rule called with id .... {}", request.getName());
-//        DisbursementRule disbursementRule = disbursementRuleUseMapper.map(meedlUser.getClaim("sub"), request);
-//        DisbursementRule savedDisbursementRule = disbursementRuleUseCase.setUpDisbursementRule(disbursementRule);
-//        DisbursementRuleResponse disbursementRuleResponse = disbursementRuleUseMapper.map(savedDisbursementRule);
-//        ApiResponse<QAResponse> apiResponse = ApiResponse.<QAResponse>builder()
-//                .data(QAResponse.builder().id(disbursementRuleResponse.getId()).build())
-//                .message(DISBURSEMENT_RULE_CREATED_SUCCESS)
-//                .statusCode(HttpStatus.CREATED.toString())
-//                .build();
-//        return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
-//    }
-//
-//    @PutMapping("/edit")
-//    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
-//    @Operation(summary = UPDATE_DISBURSEMENT_RULE,description = UPDATE_DISBURSEMENT_RULE_DESCRIPTION)
-//    public ResponseEntity<ApiResponse<?>> editDisbursementRule(
-//            @AuthenticationPrincipal Jwt meedlUser,
-//            @RequestBody EditDisbursementRuleRequest request) throws MeedlException {
-//        log.info("Update disbursement rule details called with id .... {}", request);
-//        DisbursementRule disbursementRule = disbursementRuleUseMapper.map(meedlUser.getClaim("sub"), request);
-//        DisbursementRule savedDisbursementRule = disbursementRuleUseCase.editDisbursementRule(disbursementRule);
-//        DisbursementRuleResponse disbursementRuleResponse = disbursementRuleUseMapper.map(savedDisbursementRule);
-//        ApiResponse<DisbursementRuleResponse> apiResponse = ApiResponse.<DisbursementRuleResponse>builder()
-//                .data(disbursementRuleResponse)
-//                .message(DISBURSEMENT_RULE_UPDATE_SUCCESS)
-//                .statusCode(HttpStatus.CREATED.toString())
-//                .build();
-//        return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
-//    }
-//    @GetMapping("/view/detail")
-//    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
-//    @Operation(summary = VIEW_DISBURSEMENT_RULE,description = VIEW_DISBURSEMENT_RULE_DESCRIPTION)
-//    public ResponseEntity<ApiResponse<?>> viewDisbursementRuleDetail (
-//            @AuthenticationPrincipal Jwt meedlUser,
-//            @RequestParam String id) throws MeedlException {
-//        log.info("View disbursement rule details called with id .... {}", id);
-//        DisbursementRule disbursementRule = disbursementRuleUseMapper.map(meedlUser.getClaim("sub"), id);
-//        DisbursementRule savedDisbursementRule = disbursementRuleUseCase.viewDisbursementRule(disbursementRule);
-//        DisbursementRuleResponse disbursementRuleResponse = disbursementRuleUseMapper.map(savedDisbursementRule);
-//        ApiResponse<DisbursementRuleResponse> apiResponse = ApiResponse.<DisbursementRuleResponse>builder()
-//                .data(disbursementRuleResponse)
-//                .message(DISBURSEMENT_RULE_VIEW_DETAIL_SUCCESS)
-//                .statusCode(HttpStatus.CREATED.toString())
-//                .build();
-//        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
-//    }
-//
-//    @GetMapping("/search")
-//    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
-//    public ResponseEntity<ApiResponse<?>> searchDisbursementRule (
-//            @AuthenticationPrincipal Jwt meedlUser,
-//            @RequestParam(name = "name") String name,
-//            @RequestParam(required = false, name = "activationStatuses") Set<ActivationStatus> activationStatuses,
-//            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
-//            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber
-//    ) throws MeedlException {
-//        DisbursementRule disbursementRule = DisbursementRule.builder()
-//                .name(name)
-//                .activationStatuses(activationStatuses)
-//                .pageNumber(pageNumber)
-//                .pageSize(pageSize)
-//                .build();
-//        Page<DisbursementRule> disbursementRulePage = disbursementRuleUseCase.search(disbursementRule);
-//        List<DisbursementRuleResponse> disbursementRuleResponse = disbursementRulePage.stream().map(disbursementRuleUseMapper::map).toList();
-//        PaginatedResponse<DisbursementRuleResponse> paginatedResponse = new PaginatedResponse<>(
-//                disbursementRuleResponse, disbursementRulePage.hasNext(), disbursementRulePage.getTotalPages(),disbursementRulePage.getTotalElements() , pageNumber,pageSize);
-//        log.info("Search disbursement rule called successfully.");
-//
-//        return new ResponseEntity<>(ApiResponse.builder().
-//                statusCode(HttpStatus.OK.toString()).
-//                data(paginatedResponse).
-//                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL).
-//                build(), HttpStatus.OK
-//        );
-//    }
-//
-//
-//    @PutMapping("/respond")
-//    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN')")
-//    @Operation(summary = RESPOND_TO_DISBURSEMENT_RULE,description = RESPOND_TO_DISBURSEMENT_RULE_DESCRIPTION)
-//    public ResponseEntity<ApiResponse<?>> respondToDisbursementRule (
-//            @AuthenticationPrincipal Jwt meedlUser,
-//            @RequestBody SetUpDisbursementRuleRequest setUpDisbursementRuleRequest) throws MeedlException {
-//        log.info("Respond to disbursement rule called with id .... {}", setUpDisbursementRuleRequest.getId());
-//        DisbursementRule disbursementRule = disbursementRuleUseMapper.map(meedlUser.getClaim("sub"), setUpDisbursementRuleRequest);
-//        DisbursementRule savedDisbursementRule = disbursementRuleUseCase.respondToDisbursementRule(disbursementRule);
-//        DisbursementRuleResponse disbursementRuleResponse = disbursementRuleUseMapper.map(savedDisbursementRule);
-//        ApiResponse<DisbursementRuleResponse> apiResponse = ApiResponse.<DisbursementRuleResponse>builder()
-//                .data(disbursementRuleResponse)
-//                .message(DISBURSEMENT_RULE_VIEW_DETAIL_SUCCESS)
-//                .statusCode(HttpStatus.CREATED.toString())
-//                .build();
-//        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
-//    }
-//    @GetMapping("/view/all")
-//    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
-//    public ResponseEntity<ApiResponse<?>> searchDisbursementRule (
-//            @AuthenticationPrincipal Jwt meedlUser,
-//            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
-//            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber
-//    ) throws MeedlException {
-//        DisbursementRule disbursementRule = DisbursementRule.builder()
-//                .pageNumber(pageNumber)
-//                .pageSize(pageSize)
-//                .build();
-//        Page<DisbursementRule> disbursementRulePage = disbursementRuleUseCase.viewAllDisbursementRule(disbursementRule);
-//        List<DisbursementRuleResponse> disbursementRuleResponse = disbursementRulePage.stream().map(disbursementRuleUseMapper::map).toList();
-//        PaginatedResponse<DisbursementRuleResponse> paginatedResponse = new PaginatedResponse<>(
-//                disbursementRuleResponse, disbursementRulePage.hasNext(), disbursementRulePage.getTotalPages(),disbursementRulePage.getTotalElements() , pageNumber,pageSize);
-//        log.info("View all disbursement rule called successfully.");
-//
-//        return new ResponseEntity<>(ApiResponse.builder().
-//                statusCode(HttpStatus.OK.toString()).
-//                data(paginatedResponse).
-//                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL).
-//                build(), HttpStatus.OK
-//        );
-//    }
-//    @PostMapping("/loan/apply")
-//    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN')")
-//    @Operation(summary = RESPOND_TO_DISBURSEMENT_RULE,description = RESPOND_TO_DISBURSEMENT_RULE_DESCRIPTION)
-//    public ResponseEntity<ApiResponse<?>> applyDisbursementRuleToLoan (
-//            @AuthenticationPrincipal Jwt meedlUser,
-//            @RequestBody ApplyDisbursementRuleRequest applyDisbursementRuleRequest) throws MeedlException {
-//        log.info("Respond to disbursement rule called with id .... {}", applyDisbursementRuleRequest.getId());
-//        DisbursementRule disbursementRule = disbursementRuleUseMapper.map(meedlUser.getClaim("sub"), applyDisbursementRuleRequest);
-//        DisbursementRule savedDisbursementRule = disbursementRuleUseCase.applyDisbursementRuleToLoans(disbursementRule);
-//        DisbursementRuleResponse disbursementRuleResponse = disbursementRuleUseMapper.map(savedDisbursementRule);
-//        ApiResponse<DisbursementRuleResponse> apiResponse = ApiResponse.<DisbursementRuleResponse>builder()
-//                .data(disbursementRuleResponse)
-//                .message(DISBURSEMENT_RULE_VIEW_DETAIL_SUCCESS)
-//                .statusCode(HttpStatus.CREATED.toString())
-//                .build();
-//        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
-//    }
+    @PostMapping("/set-up")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @Operation(summary = CREATE_DISBURSEMENT_RULE,description = CREATE_DISBURSEMENT_RULE_DESCRIPTION)
+    public ResponseEntity<ApiResponse<?>> setUpDisbursementRule(
+            @AuthenticationPrincipal Jwt meedlUser,
+            @RequestBody SetUpDisbursementRuleRequest request) throws MeedlException {
+        log.info("Create disbursement rule called with id .... {}", request.getName());
+        DisbursementRule disbursementRule = disbursementRuleUseMapper.map(meedlUser.getClaim("sub"), request);
+        DisbursementRule savedDisbursementRule = disbursementRuleUseCase.setUpDisbursementRule(disbursementRule);
+        DisbursementRuleResponse disbursementRuleResponse = disbursementRuleUseMapper.map(savedDisbursementRule);
+        ApiResponse<QAResponse> apiResponse = ApiResponse.<QAResponse>builder()
+                .data(QAResponse.builder().id(disbursementRuleResponse.getId()).build())
+                .message(DISBURSEMENT_RULE_CREATED_SUCCESS)
+                .statusCode(HttpStatus.CREATED.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
+    }
 
+    @PutMapping("/edit")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @Operation(summary = UPDATE_DISBURSEMENT_RULE,description = UPDATE_DISBURSEMENT_RULE_DESCRIPTION)
+    public ResponseEntity<ApiResponse<?>> editDisbursementRule(
+            @AuthenticationPrincipal Jwt meedlUser,
+            @RequestBody EditDisbursementRuleRequest request) throws MeedlException {
+        log.info("Update disbursement rule details called with id .... {}", request);
+        DisbursementRule disbursementRule = disbursementRuleUseMapper.map(meedlUser.getClaim("sub"), request);
+        DisbursementRule savedDisbursementRule = disbursementRuleUseCase.editDisbursementRule(disbursementRule);
+        DisbursementRuleResponse disbursementRuleResponse = disbursementRuleUseMapper.map(savedDisbursementRule);
+        ApiResponse<DisbursementRuleResponse> apiResponse = ApiResponse.<DisbursementRuleResponse>builder()
+                .data(disbursementRuleResponse)
+                .message(DISBURSEMENT_RULE_UPDATE_SUCCESS)
+                .statusCode(HttpStatus.CREATED.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
+    }
+    @GetMapping("/view/detail")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @Operation(summary = VIEW_DISBURSEMENT_RULE,description = VIEW_DISBURSEMENT_RULE_DESCRIPTION)
+    public ResponseEntity<ApiResponse<?>> viewDisbursementRuleDetail (
+            @AuthenticationPrincipal Jwt meedlUser,
+            @RequestParam String id) throws MeedlException {
+        log.info("View disbursement rule details called with id .... {}", id);
+        DisbursementRule disbursementRule = disbursementRuleUseMapper.map(meedlUser.getClaim("sub"), id);
+        DisbursementRule savedDisbursementRule = disbursementRuleUseCase.viewDisbursementRule(disbursementRule);
+        DisbursementRuleResponse disbursementRuleResponse = disbursementRuleUseMapper.map(savedDisbursementRule);
+        ApiResponse<DisbursementRuleResponse> apiResponse = ApiResponse.<DisbursementRuleResponse>builder()
+                .data(disbursementRuleResponse)
+                .message(DISBURSEMENT_RULE_VIEW_DETAIL_SUCCESS)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+
+    @GetMapping("/search")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
+    public ResponseEntity<ApiResponse<?>> searchDisbursementRule (
+            @AuthenticationPrincipal Jwt meedlUser,
+            @RequestParam(name = "name") String name,
+            @RequestParam(required = false, name = "disbursementStatuses") Set<DisbursementRuleStatus> disbursementStatuses,
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber
+    ) throws MeedlException {
+        DisbursementRule disbursementRule = DisbursementRule.builder()
+                .name(name)
+                .disbursementRuleStatuses(disbursementStatuses)
+                .pageNumber(pageNumber)
+                .pageSize(pageSize)
+                .build();
+        Page<DisbursementRule> disbursementRulePage = disbursementRuleUseCase.search(disbursementRule);
+        List<DisbursementRuleResponse> disbursementRuleResponse = disbursementRulePage.stream().map(disbursementRuleUseMapper::map).toList();
+        PaginatedResponse<DisbursementRuleResponse> paginatedResponse = new PaginatedResponse<>(
+                disbursementRuleResponse, disbursementRulePage.hasNext(), disbursementRulePage.getTotalPages(),disbursementRulePage.getTotalElements() , pageNumber,pageSize);
+        log.info("Search disbursement rule called successfully.");
+
+        return new ResponseEntity<>(ApiResponse.builder().
+                statusCode(HttpStatus.OK.toString()).
+                data(paginatedResponse).
+                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL).
+                build(), HttpStatus.OK
+        );
+    }
+
+
+    @PutMapping("/respond")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN')")
+    @Operation(summary = RESPOND_TO_DISBURSEMENT_RULE,description = RESPOND_TO_DISBURSEMENT_RULE_DESCRIPTION)
+    public ResponseEntity<ApiResponse<?>> respondToDisbursementRule (
+            @AuthenticationPrincipal Jwt meedlUser,
+            @RequestBody SetUpDisbursementRuleRequest setUpDisbursementRuleRequest) throws MeedlException {
+        log.info("Respond to disbursement rule called with id .... {}", setUpDisbursementRuleRequest.getId());
+        DisbursementRule disbursementRule = disbursementRuleUseMapper.map(meedlUser.getClaim("sub"), setUpDisbursementRuleRequest);
+        DisbursementRule savedDisbursementRule = disbursementRuleUseCase.respondToDisbursementRule(disbursementRule);
+        DisbursementRuleResponse disbursementRuleResponse = disbursementRuleUseMapper.map(savedDisbursementRule);
+        ApiResponse<DisbursementRuleResponse> apiResponse = ApiResponse.<DisbursementRuleResponse>builder()
+                .data(disbursementRuleResponse)
+                .message(DISBURSEMENT_RULE_VIEW_DETAIL_SUCCESS)
+                .statusCode(HttpStatus.CREATED.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+    @GetMapping("/view/all")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER') or hasRole('PORTFOLIO_MANAGER_ASSOCIATE')")
+    public ResponseEntity<ApiResponse<?>> searchDisbursementRule (
+            @AuthenticationPrincipal Jwt meedlUser,
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber
+    ) throws MeedlException {
+        DisbursementRule disbursementRule = DisbursementRule.builder()
+                .pageNumber(pageNumber)
+                .pageSize(pageSize)
+                .build();
+        Page<DisbursementRule> disbursementRulePage = disbursementRuleUseCase.viewAllDisbursementRule(disbursementRule);
+        List<DisbursementRuleResponse> disbursementRuleResponse = disbursementRulePage.stream().map(disbursementRuleUseMapper::map).toList();
+        PaginatedResponse<DisbursementRuleResponse> paginatedResponse = new PaginatedResponse<>(
+                disbursementRuleResponse, disbursementRulePage.hasNext(), disbursementRulePage.getTotalPages(),disbursementRulePage.getTotalElements() , pageNumber,pageSize);
+        log.info("View all disbursement rule called successfully.");
+
+        return new ResponseEntity<>(ApiResponse.builder().
+                statusCode(HttpStatus.OK.toString()).
+                data(paginatedResponse).
+                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL).
+                build(), HttpStatus.OK
+        );
+    }
+    @PostMapping("/loan/apply")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @Operation(summary = RESPOND_TO_DISBURSEMENT_RULE,description = RESPOND_TO_DISBURSEMENT_RULE_DESCRIPTION)
+    public ResponseEntity<ApiResponse<?>> applyDisbursementRuleToLoan (
+            @AuthenticationPrincipal Jwt meedlUser,
+            @RequestBody ApplyDisbursementRuleRequest applyDisbursementRuleRequest) throws MeedlException {
+        log.info("Apply disbursement rule called with id .... {}", applyDisbursementRuleRequest.getId());
+        DisbursementRule disbursementRule = disbursementRuleUseMapper.map(meedlUser.getClaim("sub"), applyDisbursementRuleRequest);
+        DisbursementRule savedDisbursementRule = disbursementRuleUseCase.applyDisbursementRuleToLoans(disbursementRule);
+        DisbursementRuleResponse disbursementRuleResponse = disbursementRuleUseMapper.map(savedDisbursementRule);
+        ApiResponse<DisbursementRuleResponse> apiResponse = ApiResponse.<DisbursementRuleResponse>builder()
+                .data(disbursementRuleResponse)
+                .message(DISBURSEMENT_RULE_APPLY_SUCCESS)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+
+    @DeleteMapping("/remove")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @Operation(summary = RESPOND_TO_DISBURSEMENT_RULE,description = RESPOND_TO_DISBURSEMENT_RULE_DESCRIPTION)
+    public ResponseEntity<ApiResponse<?>> removeDisbursementRuleFromLoan (
+            @AuthenticationPrincipal Jwt meedlUser,
+            @RequestBody RemoveDisbursementRule removeDisbursementRule) throws MeedlException {
+        log.info("Remove  disbursement rule from loan called with id .... {}", removeDisbursementRule.getId());
+        DisbursementRule disbursementRule = disbursementRuleUseMapper.map(meedlUser.getClaim("sub"), removeDisbursementRule);
+        disbursementRuleUseCase.removeDisbursementRuleFromLoan(disbursementRule);
+        ApiResponse<DisbursementRuleResponse> apiResponse = ApiResponse.<DisbursementRuleResponse>builder()
+//                .data(disbursementRuleResponse)
+                .message(DISBURSEMENT_RULE_REMOVE_SUCCESS)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+    @DeleteMapping("/delete")
+    @PreAuthorize("hasRole('MEEDL_SUPER_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    @Operation(summary = RESPOND_TO_DISBURSEMENT_RULE,description = RESPOND_TO_DISBURSEMENT_RULE_DESCRIPTION)
+    public ResponseEntity<ApiResponse<?>> deleteDisbursementRule (
+            @AuthenticationPrincipal Jwt meedlUser,
+            @RequestBody RemoveDisbursementRule removeDisbursementRule) throws MeedlException {
+        log.info("Delete  disbursement rule from loan called with id .... {}", removeDisbursementRule.getId());
+        DisbursementRule disbursementRule = disbursementRuleUseMapper.map(meedlUser.getClaim("sub"), removeDisbursementRule);
+        disbursementRuleUseCase.deleteDisbursementRuleById(disbursementRule);
+        ApiResponse<DisbursementRuleResponse> apiResponse = ApiResponse.<DisbursementRuleResponse>builder()
+//                .data(disbursementRuleResponse)
+                .message(DISBURSEMENT_RULE_DELETE_SUCCESS)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
 }
