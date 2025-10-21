@@ -1,60 +1,16 @@
-## This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
-# just wait
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
 name: Java CI with Maven
 
 on:
   pull_request:
     branches: ["main", "dev", "prod-support"]
-  
 
 env:
-  KEYCLOAK_PASSWORD: ${{ secrets.KEYCLOAK_PASSWORD }}
-  KEYCLOAK_REALM: ${{ secrets.KEYCLOAK_REALM }}
-  KEYCLOAK_SERVER: ${{ secrets.KEYCLOAK_SERVER }}
-  KEYCLOAK_CLIENT_ID: ${{ secrets.KEYCLOAK_CLIENT_ID }}
-  KEYCLOAK_CLIENT_SECRET: ${{ secrets.KEYCLOAK_CLIENT_SECRET }}
-  KEYCLOAK_USERNAME: ${{ secrets.KEYCLOAK_USERNAME }}
-  DATABASE_URL: ${{ secrets.DATABASE_URL }}
-  
-  # DATABASE_URL: jdbc:postgresql://localhost:5432/nkwadoma_db
-  # DATABASE_USERNAME: postgres
-  # DATABASE_PASSWORD: postgres
-  DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
-  DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-  FRONTEND_BASE_URL: ${{ secrets.FRONTEND_BASE_URL }}
-  JWT_SECRET: ${{ secrets.JWT_SECRET }}
-  JWT_EXPIRATION: ${{ secrets.JWT_EXPIRATION }}
   PROFILE: dev
-  SUPER_ADMIN_FIRST_NAME: ${{ secrets.SUPER_ADMIN_FIRST_NAME }}
-  SUPER_ADMIN_LAST_NAME: ${{ secrets.SUPER_ADMIN_LAST_NAME }}
-  SUPER_ADMIN_EMAIL: ${{ secrets.SUPER_ADMIN_EMAIL }}
-  CREATED_BY: ${{ secrets.CREATED_BY }}
-  MAIL_HOST: ${{ secrets.MAIL_HOST }}
-  MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
-  MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
-  MAIL_SENDER: ${{ secrets.MAIL_SENDER }}
-  MAIL_PORT: ${{ secrets.MAIL_PORT }}
-  CREDIT_REGISTRY_EMAIL_ADDRESS: ${{ secrets.CREDIT_REGISTRY_EMAIL_ADDRESS }}
-  CREDIT_REGISTRY_SUBSCRIBERID: ${{ secrets.CREDIT_REGISTRY_SUBSCRIBERID }}
-  CREDIT_REGISTRY_AGENT_PASSWORD: ${{ secrets.CREDIT_REGISTRY_AGENT_PASSWORD }}
-  CREDIT_REGISTRY_URL: ${{ secrets.CREDIT_REGISTRY_URL }}
-  TEST_BVN_VALUE: ${{ secrets.TEST_BVN_VALUE }}
-  IV_AES_KEY: ${{secrets.IV_AES_KEY}}
-  AES_SECRET_KEY: ${{secrets.AES_SECRET_KEY}}
-  AWS_REGION: "eu-west-1"  # Updated to match the S3 region in the URL
+  AWS_REGION: "eu-west-1"
+  API_VERSIONING: /api/v1
   DEV_FRONTEND_BASE_URL: http://localhost:3000
-  DEV_FRONTEND_BASE_URL2: http://localhost:3000
-  API_VERSIONING: /api/v1 
 
-  
 jobs:
-
   test:
     name: Unit Test
     runs-on: ubuntu-24.04
@@ -71,38 +27,56 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+          --mount type=tmpfs,destination=/var/lib/postgresql/data
         ports:
           - 5432:5432
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Wait for Postgres to be ready
+      # Install PostgreSQL client
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      # Wait until Postgres is ready
+      - name: Wait for Postgres
         run: |
+          echo "⏳ Waiting for PostgreSQL to start..."
           for i in {1..30}; do
-            if pg_isready -h localhost -p 5432 -U postgres; then
-              echo "Postgres is ready"
+            if pg_isready -h localhost -U postgres > /dev/null 2>&1; then
+              echo "✅ PostgreSQL is ready!"
               break
             fi
-            echo "Waiting for Postgres..."
-            sleep 1
+            sleep 2
           done
 
-          
+      # Drop and recreate the test database
+      - name: Recreate Test Database
+        run: |
+          echo "Dropping and recreating test DB..."
+          PGPASSWORD=postgres psql -h localhost -U postgres -c "DROP DATABASE IF EXISTS nkwadoma_db;"
+          PGPASSWORD=postgres psql -h localhost -U postgres -c "CREATE DATABASE nkwadoma_db;"
+          echo "✅ Clean database ready."
+
+      # Optionally seed the database
+      - name: Optionally Seed Database
+        if: ${{ hashFiles('src/test/resources/sql/seed.sql') != '' }}
+        run: |
+          echo "Seeding DB..."
+          PGPASSWORD=postgres psql -h localhost -U postgres -d nkwadoma_db -f src/test/resources/sql/seed.sql
+          echo "✅ Seeding complete."
+
+      # Set up Java
       - name: Set up JDK 17
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v4
         with:
           java-version: 17
-          
+          distribution: temurin
 
-      - name: Run Maven Tests with Surefire Report
+      # Run unit tests
+      - name: Run Maven Tests with Surefire
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          # DATABASE_URL: jdbc:postgresql://localhost:5432/nkwadoma_db
-          # DATABASE_USERNAME: postgres
-          # DATABASE_PASSWORD: postgres
           DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
           KEYCLOAK_PASSWORD: ${{ secrets.KEYCLOAK_PASSWORD }}
@@ -114,7 +88,6 @@ jobs:
           FRONTEND_BASE_URL: ${{ secrets.FRONTEND_BASE_URL }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           JWT_EXPIRATION: ${{ secrets.JWT_EXPIRATION }}
-          PROFILE: dev
           SUPER_ADMIN_FIRST_NAME: ${{ secrets.SUPER_ADMIN_FIRST_NAME }}
           SUPER_ADMIN_LAST_NAME: ${{ secrets.SUPER_ADMIN_LAST_NAME }}
           SUPER_ADMIN_EMAIL: ${{ secrets.SUPER_ADMIN_EMAIL }}
@@ -129,105 +102,31 @@ jobs:
           CREDIT_REGISTRY_AGENT_PASSWORD: ${{ secrets.CREDIT_REGISTRY_AGENT_PASSWORD }}
           CREDIT_REGISTRY_URL: ${{ secrets.CREDIT_REGISTRY_URL }}
           TEST_BVN_VALUE: ${{ secrets.TEST_BVN_VALUE }}
-          AWS_REGION: "eu-west-1"  # Updated to match the S3 region in the URL
-          DEV_FRONTEND_BASE_URL: http://localhost:3000
-          DEV_FRONTEND_BASE_URL2: http://localhost:3000
-          API_VERSIONING: /api/v1 
+          IV_AES_KEY: ${{ secrets.IV_AES_KEY }}
+          AES_SECRET_KEY: ${{ secrets.AES_SECRET_KEY }}
         run: mvn -B clean test
-        
 
-      - name: Archive Surefire Test Results
+      # Upload Surefire reports (always runs, even if tests fail)
+      - name: Upload Surefire Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: surefire-reports
-          path: target/surefire-reports
-      
-      # - name: Upload Surefire Report to S3
-      #   if: always()
-      #   env:
-      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
-      #     S3_REPORT_PATH: ${{ secrets.S3_REPORT_PATH }}
-      #     AWS_REGION: eu-west-1
-      #   run: |
-      #     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-      #     unzip awscliv2.zip
-      #     sudo ./aws/install --update
-      #     aws configure set aws_access_key_id "$AWS_ACCESS_KEY_ID"
-      #     aws configure set aws_secret_access_key "$AWS_SECRET_ACCESS_KEY"
-      #     aws configure set region "$AWS_REGION"
-      #     aws s3 cp target/surefire-reports s3://${S3_BUCKET_NAME}/${S3_REPORT_PATH} --recursive
-
+          path: target/surefire-reports/
 
   build:
     name: Build and Analyze
     needs: ["test"]
     runs-on: ubuntu-latest
-   
-    services:
-      postgres:
-        image: postgres:13
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: nkwadoma_db
-        options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Wait for Postgres to be ready
-        run: |
-          for i in {1..30}; do
-            if pg_isready -h localhost -p 5432 -U postgres; then
-              echo "Postgres is ready"
-              break
-            fi
-            echo "Waiting for Postgres..."
-            sleep 1
-          done
-
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for better relevancy of analysis
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: 17
+          distribution: temurin
 
-      - name: Maven Package for Dev
-        if: github.ref == 'refs/heads/dev'
-        run: mvn -B clean package -Dspring.profiles.active=dev
-
-      - name: Cache SonarQube packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-
-      - name: Cache Maven packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-
-      # Uncomment and configure the following step if SonarQube analysis is required
-      # - name: Build and analyze with SonarQube
-      #   run: |
-      #     mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-      #       -Dsonar.projectKey=Nkwadoma-Backend \
-      #       -Dsonar.projectName='Nkwadoma Backend'
+      - name: Build JAR
+        run: mvn -B clean package -DskipTests
