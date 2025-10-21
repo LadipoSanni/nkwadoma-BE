@@ -32,15 +32,29 @@ jobs:
         ports:
           - 5432:5432
 
+      keycloak:
+        image: quay.io/keycloak/keycloak:22.0.5
+        env:
+          KEYCLOAK_ADMIN: admin
+          KEYCLOAK_ADMIN_PASSWORD: admin
+        ports:
+          - 8081:8080
+        options: >-
+          --health-cmd "curl -f http://localhost:8080/auth/realms/master || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+        command: start-dev
+
     steps:
       - uses: actions/checkout@v4
 
       # Install PostgreSQL client
       - name: Install PostgreSQL client
-        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client curl
 
-      # Wait until Postgres is ready
-      - name: Wait for Postgres
+      # Wait for Postgres
+      - name: Wait for PostgreSQL
         run: |
           echo "⏳ Waiting for PostgreSQL to start..."
           for i in {1..30}; do
@@ -51,6 +65,17 @@ jobs:
             sleep 2
           done
 
+      # Wait for Keycloak
+      - name: Wait for Keycloak
+        run: |
+          echo "⏳ Waiting for Keycloak to be ready..."
+          for i in {1..30}; do
+            if curl -s http://localhost:8081/auth/realms/master > /dev/null; then
+              echo "✅ Keycloak is ready!"
+              break
+            fi
+            sleep 2
+          done
 
       # Set up Java
       - name: Set up JDK 17
@@ -59,6 +84,7 @@ jobs:
           java-version: 17
           distribution: temurin
 
+      # Download environment file, override DB and Keycloak, and run tests
       - name: Run Maven Tests with Surefire (with env from S3)
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -73,37 +99,40 @@ jobs:
           grep -E '^[A-Z0-9_]+=' nkwadoma.env > safe_env.sh || true
       
           echo "🩹 Quoting values with spaces..."
-          sed -i 's/^\([^=]*\)=\(.*[[:space:]].*\)$/\1="\2"/' safe_env.sh
+          sed -i 's/^\([^=]*\)=\(.*[[:space:]].*\)$/\1=\"\2\"/' safe_env.sh
       
           echo "📦 Loading valid environment variables..."
           set -a
           source safe_env.sh || true
           set +a
-      
-          echo "🔧 Overriding DB settings for local CI..."
+          
+          echo "🔐 Overriding Keycloak settings for CI..."
+          export KEYCLOAK_REALM=meedl-ci
+          export KEYCLOAK_SERVER_URL=http://localhost:8081/auth
+          export JWT_ISSUER_URI=${KEYCLOAK_SERVER_URL}/realms/${KEYCLOAK_REALM}
+          export SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=$JWT_ISSUER_URI
+          export SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI=${KEYCLOAK_SERVER_URL}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/certs
+          
+          echo "✅ Keycloak overrides set for test realm: $KEYCLOAK_REALM"
+
+          echo "🔧 Overriding DB settings for CI..."
           export DATABASE_URL=jdbc:postgresql://localhost:5432/meedl_build
           export DATABASE_USERNAME=postgres
           export DATABASE_PASSWORD=postgres
-      
-          # Optional: explicitly override Spring Boot datasource
           export SPRING_DATASOURCE_URL=$DATABASE_URL
           export SPRING_DATASOURCE_USERNAME=$DATABASE_USERNAME
           export SPRING_DATASOURCE_PASSWORD=$DATABASE_PASSWORD
           export SPRING_FLYWAY_VALIDATE_ON_MIGRATE=true
       
-          echo "🧹 Dropping and recreating local test DB..."
+          echo "🧹 Resetting local test DB..."
           PGPASSWORD=postgres psql -h localhost -U postgres -c "DROP DATABASE IF EXISTS meedl_build;"
           PGPASSWORD=postgres psql -h localhost -U postgres -c "CREATE DATABASE meedl_build;"
           echo "✅ Fresh local database ready."
-      
+
           echo "🚀 Running Maven tests..."
           mvn -B clean test
 
-
-
-
-
-      # Upload Surefire reports (always runs, even if tests fail)
+      # Upload Surefire reports
       - name: Upload Surefire Reports
         if: always()
         uses: actions/upload-artifact@v4
