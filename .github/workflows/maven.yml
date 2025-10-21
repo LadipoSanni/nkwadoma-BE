@@ -24,7 +24,7 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: nkwadoma_db
+          POSTGRES_DB: meedl-build
         options: >-
           --health-cmd "pg_isready -U postgres"
           --health-interval 10s
@@ -72,8 +72,10 @@ jobs:
           echo "✅ Environment file downloaded."
       
           echo "🧹 Extracting shell-safe environment variables..."
-          # Only keep lines that look like valid Bash env vars (no dots, no Spring placeholders)
-          grep -E '^[A-Z_][A-Z0-9_]*=' nkwadoma.env > safe_env.sh || true
+          grep -E '^[A-Z0-9_]+=' nkwadoma.env > safe_env.sh || true
+      
+          echo "🩹 Quoting values with spaces..."
+          sed -i 's/^\([^=]*\)=\(.*[[:space:]].*\)$/\1="\2"/' safe_env.sh
       
           echo "📦 Loading valid environment variables..."
           set -a
@@ -81,12 +83,13 @@ jobs:
           set +a
       
           echo "🧹 Dropping and recreating test DB..."
-          PGPASSWORD="$DATABASE_PASSWORD" psql -h localhost -U "$DATABASE_USERNAME" -c "DROP DATABASE IF EXISTS nkwadoma_db;"
-          PGPASSWORD="$DATABASE_PASSWORD" psql -h localhost -U "$DATABASE_USERNAME" -c "CREATE DATABASE nkwadoma_db;"
+          PGPASSWORD=postgres psql -h localhost -U postgres -c "DROP DATABASE IF EXISTS nkwadoma_db;"
+          PGPASSWORD=postgres psql -h localhost -U postgres -c "CREATE DATABASE nkwadoma_db;"
           echo "✅ Clean database ready."
       
           echo "🚀 Running Maven tests..."
           mvn -B clean test
+
 
 
 
