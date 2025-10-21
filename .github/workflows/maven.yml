@@ -68,7 +68,7 @@ jobs:
           AWS_REGION: eu-west-1
         run: |
           echo "⬇️ Downloading environment file from S3..."
-          aws s3 cp s3://semicolon-delivery/nkwadoma/backend/systest/nkwadoma.env --region eu-west-1 nkwadoma.env
+          aws s3 cp s3://semicolon-delivery/nkwadoma/backend/dev/nkwadoma.env --region eu-west-1 nkwadoma.env
           echo "✅ Environment file downloaded."
       
           echo "🧹 Extracting shell-safe environment variables..."
@@ -83,8 +83,8 @@ jobs:
           set +a
       
           echo "🧹 Dropping and recreating test DB..."
-          PGPASSWORD=postgres psql -h localhost -U postgres -c "DROP DATABASE IF EXISTS nkwadoma_db;"
-          PGPASSWORD=postgres psql -h localhost -U postgres -c "CREATE DATABASE nkwadoma_db;"
+          PGPASSWORD=postgres psql -h localhost -U postgres -c "DROP DATABASE IF EXISTS meedl-build;"
+          PGPASSWORD=postgres psql -h localhost -U postgres -c "CREATE DATABASE meedl-build;"
           echo "✅ Clean database ready."
       
           echo "🚀 Running Maven tests..."
