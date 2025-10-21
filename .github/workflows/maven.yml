@@ -53,21 +53,6 @@ jobs:
             sleep 2
           done
 
-      # Drop and recreate the test database
-      - name: Recreate Test Database
-        run: |
-          echo "Dropping and recreating test DB..."
-          PGPASSWORD=postgres psql -h localhost -U postgres -c "DROP DATABASE IF EXISTS nkwadoma_db;"
-          PGPASSWORD=postgres psql -h localhost -U postgres -c "CREATE DATABASE nkwadoma_db;"
-          echo "✅ Clean database ready."
-
-      # Optionally seed the database
-      - name: Optionally Seed Database
-        if: ${{ hashFiles('src/test/resources/sql/seed.sql') != '' }}
-        run: |
-          echo "Seeding DB..."
-          PGPASSWORD=postgres psql -h localhost -U postgres -d nkwadoma_db -f src/test/resources/sql/seed.sql
-          echo "✅ Seeding complete."
 
       # Set up Java
       - name: Set up JDK 17
@@ -107,8 +92,14 @@ jobs:
           TEST_BVN_VALUE: ${{ secrets.TEST_BVN_VALUE }}
           IV_AES_KEY: ${{ secrets.IV_AES_KEY }}
           AES_SECRET_KEY: ${{ secrets.AES_SECRET_KEY }}
-        run: mvn -B clean test
-
+          run: |
+            echo "🧹 Dropping and recreating test DB..."
+            PGPASSWORD=postgres psql -h localhost -U postgres -c "DROP DATABASE IF EXISTS nkwadoma_db;"
+            PGPASSWORD=postgres psql -h localhost -U postgres -c "CREATE DATABASE nkwadoma_db;"
+            echo "✅ Clean database ready."
+        
+            echo "🚀 Running Maven tests..."
+            mvn -B clean test
       # Upload Surefire reports (always runs, even if tests fail)
       - name: Upload Surefire Reports
         if: always()
