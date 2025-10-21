@@ -68,7 +68,7 @@ jobs:
           AWS_REGION: eu-west-1
         run: |
           echo "⬇️ Downloading environment file from S3..."
-          aws s3 cp s3://semicolon-delivery/nkwadoma/backend/dev/nkwadoma.env --region eu-west-1 nkwadoma.env
+          aws s3 cp s3://semicolon-delivery/nkwadoma/backend/systest/nkwadoma.env --region eu-west-1 nkwadoma.env
           echo "✅ Environment file downloaded."
       
           echo "🧹 Extracting shell-safe environment variables..."
@@ -82,13 +82,25 @@ jobs:
           source safe_env.sh || true
           set +a
       
-          echo "🧹 Dropping and recreating test DB..."
+          echo "🔧 Overriding DB settings for local CI..."
+          export DATABASE_URL=jdbc:postgresql://localhost:5432/meedl_build
+          export DATABASE_USERNAME=postgres
+          export DATABASE_PASSWORD=postgres
+      
+          # Optional: explicitly override Spring Boot datasource
+          export SPRING_DATASOURCE_URL=$DATABASE_URL
+          export SPRING_DATASOURCE_USERNAME=$DATABASE_USERNAME
+          export SPRING_DATASOURCE_PASSWORD=$DATABASE_PASSWORD
+          export SPRING_FLYWAY_VALIDATE_ON_MIGRATE=false
+      
+          echo "🧹 Dropping and recreating local test DB..."
           PGPASSWORD=postgres psql -h localhost -U postgres -c "DROP DATABASE IF EXISTS meedl_build;"
           PGPASSWORD=postgres psql -h localhost -U postgres -c "CREATE DATABASE meedl_build;"
-          echo "✅ Clean database ready."
+          echo "✅ Fresh local database ready."
       
           echo "🚀 Running Maven tests..."
           mvn -B clean test
+
 
 
 
