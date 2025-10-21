@@ -69,14 +69,15 @@ jobs:
         run: |
           echo "⬇️ Downloading environment file from S3..."
           aws s3 cp s3://semicolon-delivery/nkwadoma/backend/systest/nkwadoma.env --region eu-west-1 nkwadoma.env
-      
           echo "✅ Environment file downloaded."
       
-          echo "🧹 Cleaning and loading environment variables..."
-          # Convert Spring Boot .env style to valid shell exports (ignore invalid ones)
-          grep -E '^[A-Za-z_][A-Za-z0-9_]*=' nkwadoma.env > valid_env.sh
+          echo "🧹 Extracting shell-safe environment variables..."
+          # Only keep lines that look like valid Bash env vars (no dots, no Spring placeholders)
+          grep -E '^[A-Z_][A-Z0-9_]*=' nkwadoma.env > safe_env.sh || true
+      
+          echo "📦 Loading valid environment variables..."
           set -a
-          source valid_env.sh
+          source safe_env.sh || true
           set +a
       
           echo "🧹 Dropping and recreating test DB..."
@@ -86,6 +87,7 @@ jobs:
       
           echo "🚀 Running Maven tests..."
           mvn -B clean test
+
 
 
       # Upload Surefire reports (always runs, even if tests fail)
