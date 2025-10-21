@@ -68,18 +68,20 @@ jobs:
           AWS_REGION: eu-west-1
         run: |
           echo "⬇️ Downloading environment file from S3..."
-          aws s3 cp s3://semicolon-delivery/nkwadoma/backend/dev/nkwadoma.env --region eu-west-1 nkwadoma.env
+          aws s3 cp s3://semicolon-delivery/nkwadoma/backend/systest/nkwadoma.env --region eu-west-1 nkwadoma.env
       
           echo "✅ Environment file downloaded."
       
-          echo "📦 Loading environment variables..."
-          set -a  # export all variables automatically
-          source nkwadoma.env
+          echo "🧹 Cleaning and loading environment variables..."
+          # Convert Spring Boot .env style to valid shell exports (ignore invalid ones)
+          grep -E '^[A-Za-z_][A-Za-z0-9_]*=' nkwadoma.env > valid_env.sh
+          set -a
+          source valid_env.sh
           set +a
       
           echo "🧹 Dropping and recreating test DB..."
-          PGPASSWORD="$DATABASE_PASSWORD" psql -h localhost -U "$DATABASE_USERNAME" -c "DROP DATABASE IF EXISTS meedl-build;"
-          PGPASSWORD="$DATABASE_PASSWORD" psql -h localhost -U "$DATABASE_USERNAME" -c "CREATE DATABASE meedl-build;"
+          PGPASSWORD="$DATABASE_PASSWORD" psql -h localhost -U "$DATABASE_USERNAME" -c "DROP DATABASE IF EXISTS nkwadoma_db;"
+          PGPASSWORD="$DATABASE_PASSWORD" psql -h localhost -U "$DATABASE_USERNAME" -c "CREATE DATABASE nkwadoma_db;"
           echo "✅ Clean database ready."
       
           echo "🚀 Running Maven tests..."
