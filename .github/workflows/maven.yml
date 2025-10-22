@@ -69,7 +69,7 @@ jobs:
           sleep 5
           docker ps -a
           echo "📜 Fetching last 100 lines of Keycloak logs..."
-          docker logs --tail 100 keycloak || tru
+          docker logs --tail 100 keycloak || true
           
           echo "⏳ Waiting for Keycloak (port 8081) to be ready..."
           for i in {1..60}; do
@@ -82,6 +82,7 @@ jobs:
           done
 
           echo "🔍 Confirming Keycloak import contents..."
+          docker ps -a
           docker exec keycloak ls /opt/keycloak/data/import || true
 
       # ☕ Set up Java
