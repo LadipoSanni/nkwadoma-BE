@@ -84,6 +84,8 @@ jobs:
           echo "🔍 Confirming Keycloak import contents..."
           docker ps -a
           docker exec keycloak ls /opt/keycloak/data/import || true
+          echo "📜 Fetching last 100 lines of Keycloak logs..."
+          docker logs --tail 100 keycloak || true
 
       # ☕ Set up Java
       - name: Set up JDK 17
