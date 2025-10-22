@@ -63,11 +63,11 @@ jobs:
             -p 8080:8080 \
             -v $PWD/backend/keycloak/realms/meedl-dev.json:/opt/keycloak/data/import/meedl-dev.json \
             quay.io/keycloak/keycloak:26.2.5 start-dev --import-realm \
-            --spi-scripts-enabled=true \
+            --features=token-exchange,admin-fine-grained-authz,script \
             --spi-theme-static-max-age=-1 \
             --spi-theme-cache-themes=false \
             --spi-theme-cache-templates=false
-          sleep 5
+            sleep 5
             
           # 🧾 Dump Keycloak logs for debugging
           echo "🔍 Checking if Keycloak started properly..."
