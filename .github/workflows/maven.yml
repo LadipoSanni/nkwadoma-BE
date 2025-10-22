@@ -43,25 +43,27 @@ jobs:
       # 🧩 Start Keycloak with mounted meedl-prod realm
       - name: Start Keycloak container (import meedl-prod realm)
         run: |
-          echo "🚀 Starting transient Keycloak container with meedl-prod realm..."
+          echo "🚀 Starting Keycloak with meedl-prod realm import..."
           docker run -d \
             --name keycloak \
             -e KEYCLOAK_ADMIN=admin \
             -e KEYCLOAK_ADMIN_PASSWORD=admin \
             -p 8081:8080 \
             -v $PWD/backend/keycloak/realms/meedl-prod.json:/opt/keycloak/data/import/meedl-prod.json \
-            quay.io/keycloak/keycloak:22.0.5 start-dev \
-              --import-realm
+            quay.io/keycloak/keycloak:22.0.5 start-dev --import-realm
 
-          echo "⏳ Waiting for Keycloak to load meedl-prod realm..."
-          for i in {1..30}; do
-            if curl -fs http://localhost:8081/auth/realms/meedl-prod > /dev/null 2>&1; then
-              echo "✅ Keycloak meedl-prod realm is ready!"
+          echo "⏳ Waiting for Keycloak (port 8081) to be ready..."
+          for i in {1..60}; do
+            if curl -fs http://localhost:8081/realms/meedl-prod > /dev/null 2>&1; then
+              echo "✅ Keycloak realm meedl-prod is available!"
               break
             fi
+            echo "Still waiting... ($i)"
             sleep 5
           done
 
+          echo "🔍 Confirming Keycloak import contents..."
+          docker exec keycloak ls /opt/keycloak/data/import || true
 
       # 🕒 Wait for PostgreSQL
       - name: Wait for PostgreSQL
