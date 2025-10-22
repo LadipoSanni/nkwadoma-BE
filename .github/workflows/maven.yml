@@ -63,7 +63,7 @@ jobs:
             -p 8080:8080 \
             -v $PWD/backend/keycloak/realms/meedl-dev.json:/opt/keycloak/data/import/meedl-dev.json \
             quay.io/keycloak/keycloak:26.2.5 start-dev --import-realm \
-            --features=token-exchange,admin-fine-grained-authz,script \
+            --features=scripts,token-exchange,admin-fine-grained-authz \
             --spi-theme-static-max-age=-1 \
             --spi-theme-cache-themes=false \
             --spi-theme-cache-templates=false
