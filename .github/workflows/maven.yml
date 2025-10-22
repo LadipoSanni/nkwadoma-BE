@@ -62,7 +62,7 @@ jobs:
             -e KEYCLOAK_ADMIN_PASSWORD=admin \
             -p 8080:8080 \
             -v $PWD/backend/keycloak/realms/meedl-dev.json:/opt/keycloak/data/import/meedl-dev.json \
-            quay.io/keycloak/keycloak:22.0.5 start-dev --import-realm
+            quay.io/keycloak/keycloak:26.2.5 start-dev --import-realm
             
           # 🧾 Dump Keycloak logs for debugging
           echo "🔍 Checking if Keycloak started properly..."
