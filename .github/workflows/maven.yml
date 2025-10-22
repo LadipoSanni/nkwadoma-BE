@@ -38,32 +38,7 @@ jobs:
 
       # Install PostgreSQL client
       - name: Install PostgreSQL client
-        run: sudo apt-get update && sudo apt-get install -y postgresql-client curl
-
-      # 🧩 Start Keycloak with mounted meedl-prod realm
-      - name: Start Keycloak container (import meedl-prod realm)
-        run: |
-          echo "🚀 Starting Keycloak with meedl-prod realm import..."
-          docker run -d \
-            --name keycloak \
-            -e KEYCLOAK_ADMIN=admin \
-            -e KEYCLOAK_ADMIN_PASSWORD=admin \
-            -p 8081:8080 \
-            -v $PWD/backend/keycloak/realms/meedl-prod.json:/opt/keycloak/data/import/meedl-prod.json \
-            quay.io/keycloak/keycloak:22.0.5 start-dev --import-realm
-
-          echo "⏳ Waiting for Keycloak (port 8081) to be ready..."
-          for i in {1..60}; do
-            if curl -fs http://localhost:8081/realms/meedl-prod > /dev/null 2>&1; then
-              echo "✅ Keycloak realm meedl-prod is available!"
-              break
-            fi
-            echo "Still waiting... ($i)"
-            sleep 5
-          done
-
-          echo "🔍 Confirming Keycloak import contents..."
-          docker exec keycloak ls /opt/keycloak/data/import || true
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client curl awscli
 
       # 🕒 Wait for PostgreSQL
       - name: Wait for PostgreSQL
@@ -76,6 +51,31 @@ jobs:
             fi
             sleep 2
           done
+
+      # 🧩 Start Keycloak with mounted meedl-prod realm
+      - name: Start Keycloak container (import meedl-dev realm)
+        run: |
+          echo "🚀 Starting Keycloak with meedl-dev realm import..."
+          docker run -d \
+            --name keycloak \
+            -e KEYCLOAK_ADMIN=admin \
+            -e KEYCLOAK_ADMIN_PASSWORD=admin \
+            -p 8081:8080 \
+            -v $PWD/backend/keycloak/realms/meedl-dev.json:/opt/keycloak/data/import/meedl-dev.json \
+            quay.io/keycloak/keycloak:22.0.5 start-dev --import-realm
+
+          echo "⏳ Waiting for Keycloak (port 8081) to be ready..."
+          for i in {1..60}; do
+            if curl -fs http://localhost:8081/realms/meedl-prod > /dev/null 2>&1; then
+              echo "✅ Keycloak realm meedl-dev is available!"
+              break
+            fi
+            echo "Still waiting... ($i)"
+            sleep 5
+          done
+
+          echo "🔍 Confirming Keycloak import contents..."
+          docker exec keycloak ls /opt/keycloak/data/import || true
 
       # ☕ Set up Java
       - name: Set up JDK 17
@@ -94,21 +94,21 @@ jobs:
           echo "⬇️ Downloading environment file from S3..."
           aws s3 cp s3://semicolon-delivery/nkwadoma/backend/systest/nkwadoma.env --region eu-west-1 nkwadoma.env
           echo "✅ Environment file downloaded."
-      
+
           echo "🧹 Extracting shell-safe environment variables..."
           grep -E '^[A-Z0-9_]+=' nkwadoma.env > safe_env.sh || true
-      
+
           echo "🩹 Quoting values with spaces..."
           sed -i 's/^\([^=]*\)=\(.*[[:space:]].*\)$/\1=\"\2\"/' safe_env.sh
-      
+
           echo "📦 Loading valid environment variables..."
           set -a
           source safe_env.sh || true
           set +a
           
           echo "🔐 Overriding Keycloak settings for CI..."
-          export KEYCLOAK_REALM=meedl-prod
-          export KEYCLOAK_SERVER_URL=http://localhost:8081/auth
+          export KEYCLOAK_REALM=meedl-dev
+          export KEYCLOAK_SERVER_URL=http://localhost:8081
           export JWT_ISSUER_URI=${KEYCLOAK_SERVER_URL}/realms/${KEYCLOAK_REALM}
           export SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=$JWT_ISSUER_URI
           export SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI=${KEYCLOAK_SERVER_URL}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/certs
