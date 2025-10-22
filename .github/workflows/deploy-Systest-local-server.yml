@@ -1,7 +1,7 @@
 name: Deploy Nkwadoma Service to Systest and Systest-2 environments
 
 on:
-  push:
+  pull_request:
     branches:
       - 'systest'
 
