@@ -52,7 +52,7 @@ jobs:
             sleep 2
           done
 
-      # 🧩 Start Keycloak with mounted meedl-prod realm
+      # 🧩 Start Keycloak with mounted meedl-dev realm
       - name: Start Keycloak container (import meedl-dev realm)
         run: |
           echo "🚀 Starting Keycloak with meedl-dev realm import..."
@@ -60,44 +60,49 @@ jobs:
             --name keycloak \
             -e KEYCLOAK_ADMIN=admin \
             -e KEYCLOAK_ADMIN_PASSWORD=admin \
-            -p 8080:8080 \
+            -p 8081:8080 \
             -v $PWD/backend/keycloak/realms/meedl-dev.json:/opt/keycloak/data/import/meedl-dev.json \
             quay.io/keycloak/keycloak:26.2.5 start-dev --import-realm \
             --features=scripts,token-exchange,admin-fine-grained-authz \
+            --spi-scripts-scripts-upload-enabled=true \
             --spi-theme-static-max-age=-1 \
             --spi-theme-cache-themes=false \
             --spi-theme-cache-templates=false
-            sleep 5
-            
-          # 🧾 Dump Keycloak logs for debugging
+      
+          echo "🕒 Giving Keycloak a few seconds to initialize..."
+          sleep 10
+      
+          # 🧾 Check container status
           echo "🔍 Checking if Keycloak started properly..."
-          sleep 5
           docker ps -a
-          echo "📜 Fetching last 100 lines of Keycloak logs..."
-          docker logs --tail 100 keycloak || true
-          
+      
+          echo "📜 Fetching initial Keycloak logs (first 50 lines)..."
+          docker logs --tail 50 keycloak || true
+      
           echo "⏳ Waiting for Keycloak (port 8081) to be ready..."
           for i in {1..60}; do
-            if curl -fs http://localhost:8081/realms/meedl-prod > /dev/null 2>&1; then
+            if curl -fs http://localhost:8081/realms/meedl-dev > /dev/null 2>&1; then
               echo "✅ Keycloak realm meedl-dev is available!"
               break
             fi
             echo "Still waiting... ($i)"
             sleep 5
           done
-
+      
+          # 🧩 Final verification
           echo "🔍 Confirming Keycloak import contents..."
-          docker ps -a
           docker exec keycloak ls /opt/keycloak/data/import || true
+      
           echo "📜 Fetching last 100 lines of Keycloak logs..."
           docker logs --tail 100 keycloak || true
-
-      # ☕ Set up Java
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: 17
-          distribution: temurin
+      
+      
+            # ☕ Set up Java
+            - name: Set up JDK 17
+              uses: actions/setup-java@v4
+              with:
+                java-version: 17
+                distribution: temurin
 
       # 🧪 Run tests
       - name: Run Maven Tests with Surefire (with env from S3)
