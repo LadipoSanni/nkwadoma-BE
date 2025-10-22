@@ -40,28 +40,28 @@ jobs:
       - name: Install PostgreSQL client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client curl
 
-      # 🧩 Start Keycloak
-      - name: Start Keycloak container
+      # 🧩 Start Keycloak with mounted meedl-prod realm
+      - name: Start Keycloak container (import meedl-prod realm)
         run: |
-          echo "🚀 Starting Keycloak container..."
+          echo "🚀 Starting transient Keycloak container with meedl-prod realm..."
           docker run -d \
             --name keycloak \
             -e KEYCLOAK_ADMIN=admin \
             -e KEYCLOAK_ADMIN_PASSWORD=admin \
             -p 8081:8080 \
-            quay.io/keycloak/keycloak:22.0.5 start-dev
+            -v $PWD/nkwadoma-BE/backend/keycloak/realms/meedl-prod.json:/opt/keycloak/data/import/meedl-prod.json \
+            quay.io/keycloak/keycloak:22.0.5 start-dev \
+              --import-realm
 
-      # 🕒 Wait for Keycloak to start
-      - name: Wait for Keycloak to be ready
-        run: |
-          echo "⏳ Waiting for Keycloak..."
+          echo "⏳ Waiting for Keycloak to load meedl-prod realm..."
           for i in {1..30}; do
-            if curl -fs http://localhost:8081/auth/realms/master > /dev/null 2>&1; then
-              echo "✅ Keycloak is up!"
+            if curl -fs http://localhost:8081/auth/realms/meedl-prod > /dev/null 2>&1; then
+              echo "✅ Keycloak meedl-prod realm is ready!"
               break
             fi
             sleep 5
           done
+
 
       # 🕒 Wait for PostgreSQL
       - name: Wait for PostgreSQL
@@ -105,7 +105,7 @@ jobs:
           set +a
           
           echo "🔐 Overriding Keycloak settings for CI..."
-          export KEYCLOAK_REALM=meedl-ci
+          export KEYCLOAK_REALM=meedl-prod
           export KEYCLOAK_SERVER_URL=http://localhost:8081/auth
           export JWT_ISSUER_URI=${KEYCLOAK_SERVER_URL}/realms/${KEYCLOAK_REALM}
           export SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=$JWT_ISSUER_URI
