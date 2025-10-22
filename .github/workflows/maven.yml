@@ -60,10 +60,17 @@ jobs:
             --name keycloak \
             -e KEYCLOAK_ADMIN=admin \
             -e KEYCLOAK_ADMIN_PASSWORD=admin \
-            -p 8081:8080 \
+            -p 8080:8080 \
             -v $PWD/backend/keycloak/realms/meedl-dev.json:/opt/keycloak/data/import/meedl-dev.json \
             quay.io/keycloak/keycloak:22.0.5 start-dev --import-realm
-
+            
+          # 🧾 Dump Keycloak logs for debugging
+          echo "🔍 Checking if Keycloak started properly..."
+          sleep 5
+          docker ps -a
+          echo "📜 Fetching last 100 lines of Keycloak logs..."
+          docker logs --tail 100 keycloak || tru
+          
           echo "⏳ Waiting for Keycloak (port 8081) to be ready..."
           for i in {1..60}; do
             if curl -fs http://localhost:8081/realms/meedl-prod > /dev/null 2>&1; then
