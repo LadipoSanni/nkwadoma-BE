@@ -14,8 +14,8 @@ env:
   KEYCLOAK_CONTAINER: keycloak
   KEYCLOAK_PORT: 8080
   KEYCLOAK_REALM: meedl-prod
-  KEYCLOAK_USERNAME: admin
-  KEYCLOAK_PASSWORD: admin
+  KEYCLOAK_ADMIN: admin
+  KEYCLOAK_ADMIN_PASSWORD: admin
   CLIENT_ID: meedl
   
 
@@ -62,8 +62,8 @@ jobs:
           echo "Starting Keycloak (Realm: $KEYCLOAK_REALM)..."
           docker run -d --name $KEYCLOAK_CONTAINER \
             -p $KEYCLOAK_PORT:8080 \
-            -e KEYCLOAK_USERNAME=$KEYCLOAK_USERNAME \
-            -e KEYCLOAK_PASSWORD=$KEYCLOAK_PASSWORD \
+            -e KEYCLOAK_ADMIN=$KEYCLOAK_ADMIN \
+            -e KEYCLOAK_ADMIN_PASSWORD=$KEYCLOAK_ADMIN_PASSWORD \
             -v $PWD/backend/keycloak/realms/$KEYCLOAK_REALM.json:/opt/keycloak/data/import/$KEYCLOAK_REALM.json \
             $KEYCLOAK_IMAGE \
             start-dev --import-realm \
@@ -87,10 +87,10 @@ jobs:
         env:
           KEYCLOAK_CONTAINER: keycloak
           KEYCLOAK_PORT: 8080
-          KEYCLOAK_USERNAME: admin
-          KEYCLOAK_PASSWORD: admin
+          KEYCLOAK_ADMIN: admin
+          KEYCLOAK_ADMIN_PASSWORD: admin
           KEYCLOAK_REALM: meedl-prod
-          CLIENT_ID: meedl-prod
+          CLIENT_ID: meedl
         run: |
           echo "⏳ Waiting for Keycloak to be ready..."
           until curl -s "http://localhost:${KEYCLOAK_PORT}/auth/realms/master" > /dev/null; do
@@ -103,8 +103,8 @@ jobs:
           docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh config credentials \
             --server http://localhost:${KEYCLOAK_PORT} \
             --realm master \
-            --user "$KEYCLOAK_USERNAME" \
-            --password "$KEYCLOAK_PASSWORD"
+            --user "$KEYCLOAK_ADMIN" \
+            --password "$KEYCLOAK_ADMIN_PASSWORD"
       
           echo "🔄 Switching to or applying realm: $KEYCLOAK_REALM"
           # Import the realm if it doesn’t exist
