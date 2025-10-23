@@ -53,9 +53,9 @@ jobs:
           done
 
       # 🧩 Start Keycloak with mounted meedl-dev realm
-      - name: Start Keycloak container (import meedl-dev realm)
+      - name: Start Keycloak container (import meedl-prod realm)
         run: |
-          echo "🚀 Starting Keycloak with meedl-dev realm import..."
+          echo "🚀 Starting Keycloak with meedl-prod realm import..."
           docker run -d \
             --name keycloak \
             -e KEYCLOAK_ADMIN=admin \
@@ -63,9 +63,9 @@ jobs:
             -p 8081:8080 \
             -e KC_FEATURES="scripts,token-exchange,admin-fine-grained-authz" \
             -e KC_SCRIPTS=enabled \
-            -v $PWD/backend/keycloak/realms/meedl-dev.json:/opt/keycloak/data/import/meedl-dev.json \
+            -v $PWD/backend/keycloak/realms/meedl-prod.json:/opt/keycloak/data/import/meedl-prod.json \
             quay.io/keycloak/keycloak:26.2.5 \
-            start-dev \
+            start \
             --import-realm \
             --http-enabled=true \
             --hostname-strict=false \
