@@ -87,7 +87,7 @@ jobs:
           echo "Fetching client secret for client: $CLIENT_ID"
           docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh config credentials \
             --server http://localhost:8080 \
-            --realm meedl-prod \
+            --realm master \
             --user $KEYCLOAK_USERNAME \
             --password $KEYCLOAK_PASSWORD
           CLIENT_SECRET=$(docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh get clients -r $KEYCLOAK_REALM \
@@ -156,6 +156,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Download .env file from S3
+        run: |
+          sudo mkdir -p /home/ubuntu/semicolon/meedl/dev
+          sudo aws s3 cp s3://semicolon-delivery/nkwadoma/backend/dev/nkwadoma.env /home/ubuntu/semicolon/meedl/dev/nkwadoma.env --region eu-west-1
+          sudo chown ubuntu:ubuntu /home/ubuntu/semicolon/meedl/dev/nkwadoma.env
+
 
       - name: ☕ Set up JDK 17
         uses: actions/setup-java@v4
