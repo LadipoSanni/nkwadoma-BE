@@ -111,29 +111,25 @@ jobs:
           docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh get realms/$KEYCLOAK_REALM \
             || docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh create realms -s realm=$KEYCLOAK_REALM -s enabled=true
       
-          echo "🔍 Fetching client secret for client: $CLIENT_ID in realm: $KEYCLOAK_REALM"
-          CLIENT_SECRET=$(docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh get clients -r $KEYCLOAK_REALM \
-            --fields id,clientId,secret | jq -r ".[] | select(.clientId==\"$CLIENT_ID\") | .secret")
+          echo "🔍 Fetching client ID and secret..."
+          CLIENT_UUID=$(docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh get clients -r $KEYCLOAK_REALM --fields id,clientId | jq -r ".[] | select(.clientId==\"$CLIENT_ID\") | .id")
       
-          if [ -z "$CLIENT_SECRET" ] || [ "$CLIENT_SECRET" = "null" ]; then
-            echo "⚠️ Client secret not found — creating or updating client..."
+          if [ -z "$CLIENT_UUID" ]; then
+            echo "⚠️ Client $CLIENT_ID not found, creating..."
             docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh create clients -r $KEYCLOAK_REALM \
               -s clientId=$CLIENT_ID -s enabled=true -s publicClient=false -s 'redirectUris=["*"]'
-            CLIENT_SECRET=$(docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh get clients -r $KEYCLOAK_REALM \
-              --fields id,clientId,secret | jq -r ".[] | select(.clientId==\"$CLIENT_ID\") | .secret")
+            CLIENT_UUID=$(docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh get clients -r $KEYCLOAK_REALM --fields id,clientId | jq -r ".[] | select(.clientId==\"$CLIENT_ID\") | .id")
           fi
       
-          echo "💾 Overriding imported realm client secret and ID with extracted values..."
-          docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh update clients -r $KEYCLOAK_REALM \
-            -s secret="$CLIENT_SECRET" -s clientId="$CLIENT_ID" $(docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh get clients -r $KEYCLOAK_REALM --fields id | jq -r ".[] | select(.clientId==\"$CLIENT_ID\") | .id")
+          CLIENT_SECRET=$(docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh get clients/$CLIENT_UUID/client-secret -r $KEYCLOAK_REALM | jq -r '.value')
       
-          echo "🧩 Exporting to GitHub environment..."
+          echo "💾 Exporting environment..."
           echo "KEYCLOAK_CLIENT_ID=$CLIENT_ID" >> $GITHUB_ENV
           echo "KEYCLOAK_CLIENT_SECRET=$CLIENT_SECRET" >> $GITHUB_ENV
           echo "KEYCLOAK_REALM=$KEYCLOAK_REALM" >> $GITHUB_ENV
-          echo "KEYCLOAK_SERVER=http://localhost:$KEYCLOAK_PORT" >> $GITHUB_ENV
+          echo "KEYCLOAK_SERVER=$SERVER_URL" >> $GITHUB_ENV
       
-          echo "✅ Client secret extracted and synced successfully."
+          echo "✅ Client secret extracted successfully."
 
       - name: 🧠 Confirm exported variables
         run: |
