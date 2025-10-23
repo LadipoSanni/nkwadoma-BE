@@ -131,6 +131,29 @@ jobs:
           PGPASSWORD=postgres psql -h localhost -U postgres -c "DROP DATABASE IF EXISTS meedl_build;"
           PGPASSWORD=postgres psql -h localhost -U postgres -c "CREATE DATABASE meedl_build;"
 
+          echo "🔧 Overriding DB settings for CI..."
+
+          # ✅ Define DB connection values explicitly
+          export DATABASE_HOST=localhost
+          export DATABASE_PORT=5432
+          export DATABASE_NAME=meedl_build
+          export DATABASE_USERNAME=postgres
+          export DATABASE_PASSWORD=postgres
+
+          # ✅ Compose full JDBC URL
+          export DATABASE_URL="jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}"
+
+          # ✅ Let Spring Boot & Flyway know these values
+          export SPRING_DATASOURCE_URL="${DATABASE_URL}"
+          export SPRING_DATASOURCE_USERNAME="${DATABASE_USERNAME}"
+          export SPRING_DATASOURCE_PASSWORD="${DATABASE_PASSWORD}"
+          export SPRING_FLYWAY_URL="${DATABASE_URL}"
+          export SPRING_FLYWAY_USER="${DATABASE_USERNAME}"
+          export SPRING_FLYWAY_PASSWORD="${DATABASE_PASSWORD}"
+          export SPRING_FLYWAY_VALIDATE_ON_MIGRATE=true
+
+          echo "✅ Database URL resolved to: ${DATABASE_URL}"
+
           echo "🚀 Running Maven tests..."
           mvn -B clean test
 
