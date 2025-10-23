@@ -7,7 +7,7 @@ on:
 
 env:
   PROFILE: systest
-  AWS_REGION: "eu-west-1"
+  AWS_REGION: eu-west-1
   API_VERSIONING: /api/v1
   DEV_FRONTEND_BASE_URL: http://localhost:3000
   KEYCLOAK_IMAGE: quay.io/keycloak/keycloak:26.2.5
@@ -17,11 +17,10 @@ env:
   KEYCLOAK_ADMIN: admin
   KEYCLOAK_ADMIN_PASSWORD: admin
   CLIENT_ID: meedl
-  
 
 jobs:
   test:
-    name: Unit Test
+    name: 🧪 Unit & Integration Tests
     runs-on: ubuntu-24.04
 
     services:
@@ -40,6 +39,12 @@ jobs:
         ports:
           - 5432:5432
 
+    outputs:
+      keycloak_client_secret: ${{ steps.keycloak.outputs.client_secret }}
+      keycloak_client_id: ${{ steps.keycloak.outputs.client_id }}
+      keycloak_realm: ${{ steps.keycloak.outputs.realm }}
+      keycloak_server: ${{ steps.keycloak.outputs.server }}
+
     steps:
       - name: 🧩 Checkout repository
         uses: actions/checkout@v4
@@ -57,7 +62,8 @@ jobs:
             fi
             sleep 2
           done
-      - name: 🚀 Start Keycloak with meedl-prod realm import
+
+      - name: 🚀 Start Keycloak (Realm Import)
         run: |
           echo "Starting Keycloak (Realm: $KEYCLOAK_REALM)..."
           docker run -d --name $KEYCLOAK_CONTAINER \
@@ -73,7 +79,8 @@ jobs:
               --spi-theme-cache-themes=false \
               --spi-theme-cache-templates=false \
               --features=scripts,token-exchange,admin-fine-grained-authz
-          echo "⏳ Waiting for Keycloak to start on port $KEYCLOAK_PORT..."
+
+          echo "⏳ Waiting for Keycloak..."
           for i in {1..60}; do
             if curl -fs "http://localhost:$KEYCLOAK_PORT/realms/$KEYCLOAK_REALM" > /dev/null; then
               echo "✅ Keycloak is up and realm is available!"
@@ -82,61 +89,35 @@ jobs:
             echo "Still waiting... ($i/60)"
             sleep 5
           done
-          
+
       - name: 🔐 Extract and Sync Keycloak Client Secret
-        env:
-          KEYCLOAK_CONTAINER: keycloak
-          KEYCLOAK_PORT: 8080
-          KEYCLOAK_ADMIN: admin
-          KEYCLOAK_ADMIN_PASSWORD: admin
-          KEYCLOAK_REALM: meedl-prod
-          CLIENT_ID: meedl
+        id: keycloak
         run: |
-          echo "⏳ Waiting for Keycloak to be ready..."
-          until curl -s "http://localhost:${KEYCLOAK_PORT}/auth/realms/master" > /dev/null; do
-            echo "🔁 Waiting for Keycloak..."
-            sleep 5
-          done
-          echo "✅ Keycloak is up and running."
-      
           echo "🔑 Logging into Keycloak (master realm)..."
           docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh config credentials \
             --server http://localhost:${KEYCLOAK_PORT} \
             --realm master \
             --user "$KEYCLOAK_ADMIN" \
             --password "$KEYCLOAK_ADMIN_PASSWORD"
-      
-          echo "🔄 Switching to or applying realm: $KEYCLOAK_REALM"
-          # Import the realm if it doesn’t exist
-          docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh get realms/$KEYCLOAK_REALM \
-            || docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh create realms -s realm=$KEYCLOAK_REALM -s enabled=true
-      
-          echo "🔍 Fetching client ID and secret..."
+
+          echo "🔍 Fetching client UUID for realm $KEYCLOAK_REALM..."
           CLIENT_UUID=$(docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh get clients -r $KEYCLOAK_REALM --fields id,clientId | jq -r ".[] | select(.clientId==\"$CLIENT_ID\") | .id")
-      
+
           if [ -z "$CLIENT_UUID" ]; then
             echo "⚠️ Client $CLIENT_ID not found, creating..."
             docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh create clients -r $KEYCLOAK_REALM \
               -s clientId=$CLIENT_ID -s enabled=true -s publicClient=false -s 'redirectUris=["*"]'
             CLIENT_UUID=$(docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh get clients -r $KEYCLOAK_REALM --fields id,clientId | jq -r ".[] | select(.clientId==\"$CLIENT_ID\") | .id")
           fi
-      
-          CLIENT_SECRET=$(docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh get clients/$CLIENT_UUID/client-secret -r $KEYCLOAK_REALM | jq -r '.value')
-      
-          echo "💾 Exporting environment..."
-          echo "KEYCLOAK_CLIENT_ID=$CLIENT_ID" >> $GITHUB_ENV
-          echo "KEYCLOAK_CLIENT_SECRET=$CLIENT_SECRET" >> $GITHUB_ENV
-          echo "KEYCLOAK_REALM=$KEYCLOAK_REALM" >> $GITHUB_ENV
-          echo "KEYCLOAK_SERVER=$SERVER_URL" >> $GITHUB_ENV
-      
-          echo "✅ Client secret extracted successfully."
 
-      - name: 🧠 Confirm exported variables
-        run: |
-          echo "KEYCLOAK_CLIENT_ID=$KEYCLOAK_CLIENT_ID"
-          echo "KEYCLOAK_CLIENT_SECRET=$KEYCLOAK_CLIENT_SECRET"
-          echo "KEYCLOAK_REALM=$KEYCLOAK_REALM"
-          echo "KEYCLOAK_SERVER=$KEYCLOAK_SERVER"
+          CLIENT_SECRET=$(docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh get clients/$CLIENT_UUID/client-secret -r $KEYCLOAK_REALM | jq -r '.value')
+
+          echo "✅ Keycloak Client Secret fetched successfully."
+          echo "client_secret=$CLIENT_SECRET" >> $GITHUB_OUTPUT
+          echo "client_id=$CLIENT_ID" >> $GITHUB_OUTPUT
+          echo "realm=$KEYCLOAK_REALM" >> $GITHUB_OUTPUT
+          echo "server=http://localhost:${KEYCLOAK_PORT}" >> $GITHUB_OUTPUT
+
       - name: ☕ Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -145,37 +126,40 @@ jobs:
 
       - name: 🧪 Run Maven Tests
         env:
-          KEYCLOAK_CLIENT_ID: ${{ env.KEYCLOAK_CLIENT_ID }}
-          KEYCLOAK_CLIENT_SECRET: ${{ env.KEYCLOAK_CLIENT_SECRET }}
-          KEYCLOAK_REALM: ${{ env.KEYCLOAK_REALM }}
-          KEYCLOAK_SERVER: ${{ env.KEYCLOAK_SERVER }}
+          DATABASE_HOST: localhost
+          DATABASE_PORT: 5432
+          DATABASE_NAME: meedl_build
+          DATABASE_USERNAME: postgres
+          DATABASE_PASSWORD: postgres
+          DATABASE_URL: jdbc:postgresql://localhost:5432/meedl_build
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/meedl_build
+          SPRING_DATASOURCE_USERNAME: postgres
+          SPRING_DATASOURCE_PASSWORD: postgres
+          KEYCLOAK_SERVER: http://localhost:8080
+          KEYCLOAK_CLIENT_ID: ${{ steps.keycloak.outputs.client_id }}
+          KEYCLOAK_CLIENT_SECRET: ${{ steps.keycloak.outputs.client_secret }}
+          KEYCLOAK_REALM: ${{ steps.keycloak.outputs.realm }}
+          KEYCLOAK_USERNAME: ${{ env.KEYCLOAK_ADMIN }}
+          KEYCLOAK_PASSWORD: ${{ env.KEYCLOAK_ADMIN_PASSWORD }}
+          FRONTEND_BASE_URL: ${{ env.DEV_FRONTEND_BASE_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          JWT_EXPIRATION: ${{ secrets.JWT_EXPIRATION }}
+          SUPER_ADMIN_FIRST_NAME: ${{ secrets.SUPER_ADMIN_FIRST_NAME }}
+          SUPER_ADMIN_LAST_NAME: ${{ secrets.SUPER_ADMIN_LAST_NAME }}
+          SUPER_ADMIN_EMAIL: ${{ secrets.SUPER_ADMIN_EMAIL }}
+          MAIL_HOST: ${{ secrets.MAIL_HOST }}
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          MAIL_SENDER: ${{ secrets.MAIL_SENDER }}
+          MAIL_PORT: ${{ secrets.MAIL_PORT }}
+          AWS_REGION: ${{ env.AWS_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: eu-west-1
         run: |
-          echo "🧹 Resetting local test DB..."
-          PGPASSWORD=postgres psql -h localhost -U postgres -c "DROP DATABASE IF EXISTS meedl_build;"
-          PGPASSWORD=postgres psql -h localhost -U postgres -c "CREATE DATABASE meedl_build;"
-          echo "🔧 Overriding DB settings for CI..."
-          # ✅ Define DB connection values explicitly
-          export DATABASE_HOST=localhost
-          export DATABASE_PORT=5432
-          export DATABASE_NAME=meedl_build
-          export DATABASE_USERNAME=postgres
-          export DATABASE_PASSWORD=postgres
-          # ✅ Compose full JDBC URL
-          export DATABASE_URL="jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}"
-          # ✅ Let Spring Boot & Flyway know these values
-          export SPRING_DATASOURCE_URL="${DATABASE_URL}"
-          export SPRING_DATASOURCE_USERNAME="${DATABASE_USERNAME}"
-          export SPRING_DATASOURCE_PASSWORD="${DATABASE_PASSWORD}"
-          export SPRING_FLYWAY_URL="${DATABASE_URL}"
-          export SPRING_FLYWAY_USER="${DATABASE_USERNAME}"
-          export SPRING_FLYWAY_PASSWORD="${DATABASE_PASSWORD}"
-          export SPRING_FLYWAY_VALIDATE_ON_MIGRATE=true
-          echo "✅ Database URL resolved to: ${DATABASE_URL}"
+          echo "✅ Database initialized at: $DATABASE_URL"
           echo "🚀 Running Maven tests..."
           mvn -B clean test
+
       - name: 📊 Upload Surefire Reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -183,19 +167,28 @@ jobs:
           name: surefire-reports
           path: target/surefire-reports/
 
+      - name: 🧹 Clean up Keycloak container
+        if: always()
+        run: |
+          echo "🧹 Cleaning up Keycloak..."
+          docker stop $KEYCLOAK_CONTAINER || true
+          docker rm $KEYCLOAK_CONTAINER || true
+
+
   build:
-    name: Build and Analyze
+    name: 🏗️ Build & Analyze
     needs: [test]
     runs-on: ubuntu-latest
 
+    env:
+      KEYCLOAK_CLIENT_SECRET: ${{ needs.test.outputs.keycloak_client_secret }}
+      KEYCLOAK_CLIENT_ID: ${{ needs.test.outputs.keycloak_client_id }}
+      KEYCLOAK_REALM: ${{ needs.test.outputs.keycloak_realm }}
+      KEYCLOAK_SERVER: ${{ needs.test.outputs.keycloak_server }}
+      AWS_REGION: eu-west-1
+
     steps:
       - uses: actions/checkout@v4
-      - name: Download .env file from S3
-        run: |
-          sudo mkdir -p /home/ubuntu/semicolon/meedl/dev
-          sudo aws s3 cp s3://semicolon-delivery/nkwadoma/backend/dev/nkwadoma.env /home/ubuntu/semicolon/meedl/dev/nkwadoma.env --region eu-west-1
-          sudo chown ubuntu:ubuntu /home/ubuntu/semicolon/meedl/dev/nkwadoma.env
-
 
       - name: ☕ Set up JDK 17
         uses: actions/setup-java@v4
@@ -203,12 +196,12 @@ jobs:
           java-version: 17
           distribution: temurin
 
+      - name: 🧾 Confirm Keycloak values from previous job
+        run: |
+          echo "Client ID: $KEYCLOAK_CLIENT_ID"
+          echo "Client Secret: $KEYCLOAK_CLIENT_SECRET"
+          echo "Realm: $KEYCLOAK_REALM"
+          echo "Server: $KEYCLOAK_SERVER"
+
       - name: 🏗️ Build JAR
         run: mvn -B clean package -DskipTests
-
-      - name: 🧹 Stop and clean Keycloak container
-        if: always()
-        run: |
-          echo "Cleaning up Keycloak container..."
-          docker stop $KEYCLOAK_CONTAINER || true
-          docker rm $KEYCLOAK_CONTAINER || true
