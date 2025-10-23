@@ -162,6 +162,7 @@ jobs:
           AES_SECRET_KEY: ${{ secrets.AES_SECRET_KEY }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          SYSTEST_FRONTEND_BASE_URL: http://localhost:3000
         run: |
           echo "✅ Database initialized at: $DATABASE_URL"
           echo "🚀 Running Maven tests..."
