@@ -88,21 +88,26 @@ jobs:
         run: |
           echo "Fetching client secret for client: $CLIENT_ID"
 
+          # Log into Keycloak inside the container using admin credentials
           docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh config credentials \
             --server http://localhost:8080 \
             --realm master \
-            --user $KEYCLOAK_USERNAME \
-            --password $KEYCLOAK_PASSWORD
+            --user "$KEYCLOAK_ADMIN" \
+            --password "$KEYCLOAK_ADMIN_PASSWORD"
 
-          CLIENT_SECRET=$(docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh get clients -r $KEYCLOAK_REALM \
+          # Fetch the client secret
+          CLIENT_SECRET=$(docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh get clients -r "$KEYCLOAK_REALM" \
             --fields clientId,secret | jq -r ".[] | select(.clientId==\"$CLIENT_ID\") | .secret")
 
-          echo "KEYCLOAK_CLIENT_ID=$CLIENT_ID" >> $GITHUB_ENV
-          echo "KEYCLOAK_CLIENT_SECRET=$CLIENT_SECRET" >> $GITHUB_ENV
-          echo "KEYCLOAK_REALM=$KEYCLOAK_REALM" >> $GITHUB_ENV
-          echo "KEYCLOAK_SERVER=http://localhost:$KEYCLOAK_PORT" >> $GITHUB_ENV
+          # Export environment variables for downstream steps
+          {
+            echo "KEYCLOAK_CLIENT_ID=$CLIENT_ID"
+            echo "KEYCLOAK_CLIENT_SECRET=$CLIENT_SECRET"
+            echo "KEYCLOAK_REALM=$KEYCLOAK_REALM"
+            echo "KEYCLOAK_SERVER=http://localhost:$KEYCLOAK_PORT"
+          } >> $GITHUB_ENV
 
-          echo "✅ Client secret extracted successfully."
+          echo "✅ Client secret extracted and exported."
 
       - name: 🧠 Confirm exported variables
         run: |
