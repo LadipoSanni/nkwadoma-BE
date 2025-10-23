@@ -3,7 +3,7 @@ name: Systest Build
 on:
   push:
     branches:
-      - systest
+      - dev
   workflow_dispatch:
   schedule:
     - cron: '0 22 * * *'  # Runs at 10 PM UTC daily
