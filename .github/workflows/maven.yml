@@ -14,8 +14,8 @@ env:
   KEYCLOAK_CONTAINER: keycloak
   KEYCLOAK_PORT: 8081
   KEYCLOAK_REALM: meedl-prod
-  KEYCLOAK_ADMIN: admin
-  KEYCLOAK_ADMIN_PASSWORD: admin
+  KEYCLOAK_KEYCLOAK_USERNAME: admin
+  KEYCLOAK_PASSWORD: admin
   CLIENT_ID: meedl
 
 jobs:
@@ -62,8 +62,8 @@ jobs:
           echo "Starting Keycloak (Realm: $KEYCLOAK_REALM)..."
           docker run -d --name $KEYCLOAK_CONTAINER \
             -p $KEYCLOAK_PORT:8080 \
-            -e KEYCLOAK_ADMIN=$KEYCLOAK_ADMIN \
-            -e KEYCLOAK_ADMIN_PASSWORD=$KEYCLOAK_ADMIN_PASSWORD \
+            -e KEYCLOAK_USERNAME=$KEYCLOAK_USERNAME \
+            -e KEYCLOAK_PASSWORD=$KEYCLOAK_PASSWORD \
             -v $PWD/backend/keycloak/realms/$KEYCLOAK_REALM.json:/opt/keycloak/data/import/$KEYCLOAK_REALM.json \
             $KEYCLOAK_IMAGE \
             start-dev --import-realm \
@@ -91,8 +91,8 @@ jobs:
           docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh config credentials \
             --server http://localhost:8080 \
             --realm master \
-            --user $KEYCLOAK_ADMIN \
-            --password $KEYCLOAK_ADMIN_PASSWORD
+            --user $KEYCLOAK_USERNAME \
+            --password $KEYCLOAK_PASSWORD
 
           CLIENT_SECRET=$(docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh get clients -r $KEYCLOAK_REALM \
             --fields clientId,secret | jq -r ".[] | select(.clientId==\"$CLIENT_ID\") | .secret")
