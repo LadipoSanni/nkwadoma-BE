@@ -126,6 +126,11 @@ jobs:
 
       - name: 🧪 Run Maven Tests
         env:
+          CREDIT_REGISTRY_AGENT_PASSWORD: ${{ secrets.CREDIT_REGISTRY_AGENT_PASSWORD }}
+          CREDIT_REGISTRY_EMAIL_ADDRESS: ${{ secrets.CREDIT_REGISTRY_EMAIL_ADDRESS }}
+          CREDIT_REGISTRY_SUBSCRIBERID: ${{ secrets.CREDIT_REGISTRY_SUBSCRIBERID }}
+          CREDIT_REGISTRY_URL: ${{ secrets.CREDIT_REGISTRY_URL }}
+          CREATED_BY: ${{ secrets.CREATED_BY }}
           DATABASE_HOST: localhost
           DATABASE_PORT: 5432
           DATABASE_NAME: meedl_build
