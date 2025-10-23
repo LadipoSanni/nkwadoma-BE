@@ -14,7 +14,7 @@ env:
   KEYCLOAK_CONTAINER: keycloak
   KEYCLOAK_PORT: 8081
   KEYCLOAK_REALM: meedl-prod
-  KEYCLOAK_KEYCLOAK_USERNAME: admin
+  KEYCLOAK_USERNAME: admin
   KEYCLOAK_PASSWORD: admin
   CLIENT_ID: meedl
 
@@ -88,18 +88,31 @@ jobs:
         run: |
           echo "Fetching client secret for client: $CLIENT_ID"
 
-          # Log into Keycloak inside the container using admin credentials
-          docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh config credentials \
-            --server http://localhost:8080 \
-            --realm master \
-            --user "$KEYCLOAK_ADMIN" \
-            --password "$KEYCLOAK_ADMIN_PASSWORD"
+          # Retry login until Keycloak admin API is fully available
+          for i in {1..10}; do
+            echo "Attempting admin login to Keycloak (try $i/10)..."
+            if docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh config credentials \
+              --server http://localhost:8080 \
+              --realm master \
+              --user "$KEYCLOAK_ADMIN" \
+              --password "$KEYCLOAK_ADMIN_PASSWORD"; then
+              echo "✅ Logged into Keycloak successfully."
+              break
+            fi
+            echo "⏳ Keycloak not ready yet, retrying in 5s..."
+            sleep 5
+          done
 
           # Fetch the client secret
           CLIENT_SECRET=$(docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh get clients -r "$KEYCLOAK_REALM" \
             --fields clientId,secret | jq -r ".[] | select(.clientId==\"$CLIENT_ID\") | .secret")
 
-          # Export environment variables for downstream steps
+          if [ -z "$CLIENT_SECRET" ] || [ "$CLIENT_SECRET" = "null" ]; then
+            echo "❌ Failed to extract Keycloak client secret. Exiting."
+            exit 1
+          fi
+
+          # Export environment variables
           {
             echo "KEYCLOAK_CLIENT_ID=$CLIENT_ID"
             echo "KEYCLOAK_CLIENT_SECRET=$CLIENT_SECRET"
