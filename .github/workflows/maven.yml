@@ -12,10 +12,10 @@ env:
   DEV_FRONTEND_BASE_URL: http://localhost:3000
   KEYCLOAK_IMAGE: quay.io/keycloak/keycloak:26.2.5
   KEYCLOAK_CONTAINER: keycloak
-  KEYCLOAK_PORT: 8081
+  KEYCLOAK_PORT: 8080
   KEYCLOAK_REALM: meedl-prod
-  KEYCLOAK_ADMIN: admin
-  KEYCLOAK_ADMIN_PASSWORD: admin
+  KEYCLOAK_USERNAME: admin
+  KEYCLOAK_PASSWORD: admin
   CLIENT_ID: meedl
 
 jobs:
@@ -61,8 +61,8 @@ jobs:
           echo "Starting Keycloak (Realm: $KEYCLOAK_REALM)..."
           docker run -d --name $KEYCLOAK_CONTAINER \
             -p $KEYCLOAK_PORT:8080 \
-            -e KEYCLOAK_ADMIN=$KEYCLOAK_ADMIN \
-            -e KEYCLOAK_ADMIN_PASSWORD=$KEYCLOAK_ADMIN_PASSWORD \
+            -e KEYCLOAK_USERNAME=$KEYCLOAK_USERNAME \
+            -e KEYCLOAK_PASSWORD=$KEYCLOAK_PASSWORD \
             -v $PWD/backend/keycloak/realms/$KEYCLOAK_REALM.json:/opt/keycloak/data/import/$KEYCLOAK_REALM.json \
             $KEYCLOAK_IMAGE \
             start-dev --import-realm \
