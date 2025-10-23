@@ -126,6 +126,7 @@ jobs:
 
       - name: 🧪 Run Maven Tests
         env:
+          BACKEND_BASE_URL: https://api-dev.meedl.africa
           CREDIT_REGISTRY_AGENT_PASSWORD: ${{ secrets.CREDIT_REGISTRY_AGENT_PASSWORD }}
           CREDIT_REGISTRY_EMAIL_ADDRESS: ${{ secrets.CREDIT_REGISTRY_EMAIL_ADDRESS }}
           CREDIT_REGISTRY_SUBSCRIBERID: ${{ secrets.CREDIT_REGISTRY_SUBSCRIBERID }}
@@ -147,6 +148,11 @@ jobs:
           KEYCLOAK_USERNAME: ${{ env.KEYCLOAK_ADMIN }}
           KEYCLOAK_PASSWORD: ${{ env.KEYCLOAK_ADMIN_PASSWORD }}
           FRONTEND_BASE_URL: ${{ env.DEV_FRONTEND_BASE_URL }}
+          FIRST_ORGANIZATION_NAME: ${{ secrets.FIRST_ORGANIZATION_NAME }}
+          FIRST_ORGANIZATION_EMAIL: techops@learnspace.africa
+          FIRST_ORGANIZATION_TIN: ${{ secrets.FIRST_ORGANIZATION_TIN }}
+          FIRST_PHONE_NUMBER: ${{ secrets.FIRST_PHONE_NUMBER }}
+          FIRST_ORGANIZATION_RC_NUMBER: ${{ secrets.FIRST_ORGANIZATION_RC_NUMBER }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           JWT_EXPIRATION: ${{ secrets.JWT_EXPIRATION }}
           SUPER_ADMIN_FIRST_NAME: ${{ secrets.SUPER_ADMIN_FIRST_NAME }}
