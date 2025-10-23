@@ -154,6 +154,7 @@ jobs:
           MAIL_PORT: ${{ secrets.MAIL_PORT }}
           AWS_REGION: ${{ env.AWS_REGION }}
           IV_AES_KEY: ${{ secrets.IV_AES_KEY }}
+          AES_SECRET_KEY: ${{ secrets.AES_SECRET_KEY }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
