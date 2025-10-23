@@ -85,7 +85,7 @@ jobs:
           done
       
           echo "🔍 Checking Keycloak logs..."
-          docker logs --tail 100 keycloak || true
+          docker logs --tail 500 keycloak || true
           echo "🔍 Confirming realm import..."
           docker exec keycloak ls /opt/keycloak/data/import || true
 
