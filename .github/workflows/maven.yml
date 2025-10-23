@@ -67,6 +67,8 @@ jobs:
             quay.io/keycloak/keycloak:26.2.5 \
             start \
             --import-realm \
+            --http-enabled=true \
+            --hostname-strict=false \
             --features=scripts,token-exchange,admin-fine-grained-authz \
             --spi-theme-static-max-age=-1 \
             --spi-theme-cache-themes=false \
