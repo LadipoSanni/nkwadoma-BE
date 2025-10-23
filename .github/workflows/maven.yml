@@ -14,8 +14,8 @@ env:
   KEYCLOAK_CONTAINER: keycloak
   KEYCLOAK_PORT: 8081
   KEYCLOAK_REALM: meedl-prod
-  KEYCLOAK_USERNAME: admin
-  KEYCLOAK_PASSWORD: admin
+  KEYCLOAK_ADMIN: admin
+  KEYCLOAK_ADMIN_PASSWORD: admin
   CLIENT_ID: meedl
 
 jobs:
@@ -56,7 +56,6 @@ jobs:
             fi
             sleep 2
           done
-
       - name: 🚀 Start Keycloak with meedl-prod realm import
         run: |
           echo "Starting Keycloak (Realm: $KEYCLOAK_REALM)..."
@@ -85,69 +84,24 @@ jobs:
       - name: 🔐 Extract Keycloak client secret
         run: |
           echo "Fetching client secret for client: $CLIENT_ID"
-          
-          # First wait for Keycloak to be fully ready using health check
-          for i in {1..30}; do
-            echo "Checking Keycloak health (try $i/30)..."
-            if docker exec $KEYCLOAK_CONTAINER curl -sf http://localhost:8080/health/ready > /dev/null; then
-              echo "✅ Keycloak health check passed."
-              break
-            fi
-            if [ $i -eq 30 ]; then
-              echo "❌ Keycloak health check failed after 30 attempts"
-              exit 1
-            fi
-            echo "⏳ Keycloak not healthy yet, retrying in 3s..."
-            sleep 3
-          done
-          
-          # Additional buffer time for internal services
-          sleep 10
-          
-          # Retry login until Keycloak admin API is fully available
-          for i in {1..10}; do
-            echo "Attempting admin login to Keycloak (try $i/10)..."
-            if docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh config credentials \
-              --server http://localhost:8080 \
-              --realm master \
-              --user "$KEYCLOAK_ADMIN" \
-              --password "$KEYCLOAK_ADMIN_PASSWORD"; then
-              echo "✅ Logged into Keycloak successfully."
-              break
-            fi
-            if [ $i -eq 10 ]; then
-              echo "❌ Failed to login to Keycloak after 10 attempts"
-              exit 1
-            fi
-            echo "⏳ Keycloak login failed, retrying in 5s..."
-            sleep 5
-          done
-          
-          # Fetch the client secret
-          CLIENT_SECRET=$(docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh get clients -r "$KEYCLOAK_REALM" \
+          docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh config credentials \
+            --server http://localhost:8080 \
+            --realm master \
+            --user $KEYCLOAK_ADMIN \
+            --password $KEYCLOAK_ADMIN_PASSWORD
+          CLIENT_SECRET=$(docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh get clients -r $KEYCLOAK_REALM \
             --fields clientId,secret | jq -r ".[] | select(.clientId==\"$CLIENT_ID\") | .secret")
-            
-          if [ -z "$CLIENT_SECRET" ] || [ "$CLIENT_SECRET" = "null" ]; then
-            echo "❌ Failed to extract Keycloak client secret. Exiting."
-            exit 1
-          fi
-          
-          # Export environment variables
-          {
-            echo "KEYCLOAK_CLIENT_ID=$CLIENT_ID"
-            echo "KEYCLOAK_CLIENT_SECRET=$CLIENT_SECRET"
-            echo "KEYCLOAK_REALM=$KEYCLOAK_REALM"
-            echo "KEYCLOAK_SERVER=http://localhost:$KEYCLOAK_PORT"
-          } >> $GITHUB_ENV
-          echo "✅ Client secret extracted and exported."
-      
-            - name: 🧠 Confirm exported variables
-              run: |
-                echo "KEYCLOAK_CLIENT_ID=$KEYCLOAK_CLIENT_ID"
-                echo "KEYCLOAK_CLIENT_SECRET=$KEYCLOAK_CLIENT_SECRET"
-                echo "KEYCLOAK_REALM=$KEYCLOAK_REALM"
-                echo "KEYCLOAK_SERVER=$KEYCLOAK_SERVER"
-
+          echo "KEYCLOAK_CLIENT_ID=$CLIENT_ID" >> $GITHUB_ENV
+          echo "KEYCLOAK_CLIENT_SECRET=$CLIENT_SECRET" >> $GITHUB_ENV
+          echo "KEYCLOAK_REALM=$KEYCLOAK_REALM" >> $GITHUB_ENV
+          echo "KEYCLOAK_SERVER=http://localhost:$KEYCLOAK_PORT" >> $GITHUB_ENV
+          echo "✅ Client secret extracted successfully."
+      - name: 🧠 Confirm exported variables
+        run: |
+          echo "KEYCLOAK_CLIENT_ID=$KEYCLOAK_CLIENT_ID"
+          echo "KEYCLOAK_CLIENT_SECRET=$KEYCLOAK_CLIENT_SECRET"
+          echo "KEYCLOAK_REALM=$KEYCLOAK_REALM"
+          echo "KEYCLOAK_SERVER=$KEYCLOAK_SERVER"
       - name: ☕ Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -167,19 +121,15 @@ jobs:
           echo "🧹 Resetting local test DB..."
           PGPASSWORD=postgres psql -h localhost -U postgres -c "DROP DATABASE IF EXISTS meedl_build;"
           PGPASSWORD=postgres psql -h localhost -U postgres -c "CREATE DATABASE meedl_build;"
-
           echo "🔧 Overriding DB settings for CI..."
-
           # ✅ Define DB connection values explicitly
           export DATABASE_HOST=localhost
           export DATABASE_PORT=5432
           export DATABASE_NAME=meedl_build
           export DATABASE_USERNAME=postgres
           export DATABASE_PASSWORD=postgres
-
           # ✅ Compose full JDBC URL
           export DATABASE_URL="jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}"
-
           # ✅ Let Spring Boot & Flyway know these values
           export SPRING_DATASOURCE_URL="${DATABASE_URL}"
           export SPRING_DATASOURCE_USERNAME="${DATABASE_USERNAME}"
@@ -188,12 +138,9 @@ jobs:
           export SPRING_FLYWAY_USER="${DATABASE_USERNAME}"
           export SPRING_FLYWAY_PASSWORD="${DATABASE_PASSWORD}"
           export SPRING_FLYWAY_VALIDATE_ON_MIGRATE=true
-
           echo "✅ Database URL resolved to: ${DATABASE_URL}"
-
           echo "🚀 Running Maven tests..."
           mvn -B clean test
-
       - name: 📊 Upload Surefire Reports
         if: always()
         uses: actions/upload-artifact@v4
