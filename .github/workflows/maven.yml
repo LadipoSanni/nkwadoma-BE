@@ -17,6 +17,7 @@ env:
   KEYCLOAK_USERNAME: admin
   KEYCLOAK_PASSWORD: admin
   CLIENT_ID: meedl
+  
 
 jobs:
   test:
@@ -87,8 +88,8 @@ jobs:
           docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh config credentials \
             --server http://localhost:8080 \
             --realm meedl-prod \
-            --user $KEYCLOAK_ADMIN \
-            --password $KEYCLOAK_ADMIN_PASSWORD
+            --user $KEYCLOAK_USERNAME \
+            --password $KEYCLOAK_PASSWORD
           CLIENT_SECRET=$(docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh get clients -r $KEYCLOAK_REALM \
             --fields clientId,secret | jq -r ".[] | select(.clientId==\"$CLIENT_ID\") | .secret")
           echo "KEYCLOAK_CLIENT_ID=$CLIENT_ID" >> $GITHUB_ENV
