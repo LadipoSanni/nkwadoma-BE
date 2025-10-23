@@ -86,7 +86,7 @@ jobs:
           echo "Fetching client secret for client: $CLIENT_ID"
           docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh config credentials \
             --server http://localhost:8080 \
-            --realm master \
+            --realm meedl-prod \
             --user $KEYCLOAK_ADMIN \
             --password $KEYCLOAK_ADMIN_PASSWORD
           CLIENT_SECRET=$(docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh get clients -r $KEYCLOAK_REALM \
