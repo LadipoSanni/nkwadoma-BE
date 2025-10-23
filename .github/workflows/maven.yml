@@ -62,8 +62,8 @@ jobs:
           echo "Starting Keycloak (Realm: $KEYCLOAK_REALM)..."
           docker run -d --name $KEYCLOAK_CONTAINER \
             -p $KEYCLOAK_PORT:8080 \
-            -e KEYCLOAK_USERNAME=$KEYCLOAK_USERNAME \
-            -e KEYCLOAK_PASSWORD=$KEYCLOAK_PASSWORD \
+            -e KEYCLOAK_ADMIN=$KEYCLOAK_ADMIN \
+            -e KEYCLOAK_ADMIN_PASSWORD=$KEYCLOAK_ADMIN_PASSWORD \
             -v $PWD/backend/keycloak/realms/$KEYCLOAK_REALM.json:/opt/keycloak/data/import/$KEYCLOAK_REALM.json \
             $KEYCLOAK_IMAGE \
             start-dev --import-realm \
@@ -73,7 +73,6 @@ jobs:
               --spi-theme-cache-themes=false \
               --spi-theme-cache-templates=false \
               --features=scripts,token-exchange,admin-fine-grained-authz
-
           echo "⏳ Waiting for Keycloak to start on port $KEYCLOAK_PORT..."
           for i in {1..60}; do
             if curl -fs "http://localhost:$KEYCLOAK_PORT/realms/$KEYCLOAK_REALM" > /dev/null; then
@@ -83,63 +82,22 @@ jobs:
             echo "Still waiting... ($i/60)"
             sleep 5
           done
-
       - name: 🔐 Extract Keycloak client secret
         run: |
           echo "Fetching client secret for client: $CLIENT_ID"
-          
-          # Function to check if Keycloak is fully ready
-          check_keycloak_ready() {
-            # Check health endpoint
-            docker exec $KEYCLOAK_CONTAINER curl -sf http://localhost:8080/health/ready > /dev/null || return 1
-            
-            # Try to login and list realms to verify API is working
-            docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh config credentials \
-              --server http://localhost:8080 \
-              --realm master \
-              --user "$KEYCLOAK_ADMIN" \
-              --password "$KEYCLOAK_ADMIN_PASSWORD" > /dev/null 2>&1 || return 1
-              
-            # Verify we can actually make API calls
-            docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh get realms > /dev/null 2>&1 || return 1
-            
-            return 0
-          }
-          
-          # Wait for Keycloak to be fully ready
-          for i in {1..25}; do
-            echo "Checking if Keycloak is fully ready (try $i/25)..."
-            if check_keycloak_ready; then
-              echo "✅ Keycloak is fully ready and responsive."
-              break
-            fi
-            if [ $i -eq 25 ]; then
-              echo "❌ Keycloak not ready after 25 attempts"
-              exit 1
-            fi
-            echo "⏳ Keycloak not fully ready, retrying in 4s..."
-            sleep 4
-          done
-          
-          # Fetch the client secret
-          CLIENT_SECRET=$(docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh get clients -r "$KEYCLOAK_REALM" \
+          docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh config credentials \
+            --server http://localhost:8080 \
+            --realm master \
+            --user $KEYCLOAK_ADMIN \
+            --password $KEYCLOAK_ADMIN_PASSWORD
+          CLIENT_SECRET=$(docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh get clients -r $KEYCLOAK_REALM \
             --fields clientId,secret | jq -r ".[] | select(.clientId==\"$CLIENT_ID\") | .secret")
-            
-          if [ -z "$CLIENT_SECRET" ] || [ "$CLIENT_SECRET" = "null" ]; then
-            echo "❌ Failed to extract Keycloak client secret for client: $CLIENT_ID"
-            echo "Available clients:"
-            docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh get clients -r "$KEYCLOAK_REALM" --fields clientId
-            exit 1
-          fi
-          
-          # Export environment variables
-          {
-            echo "KEYCLOAK_CLIENT_ID=$CLIENT_ID"
-            echo "KEYCLOAK_CLIENT_SECRET=$CLIENT_SECRET"
-            echo "KEYCLOAK_REALM=$KEYCLOAK_REALM"
-            echo "KEYCLOAK_SERVER=http://localhost:$KEYCLOAK_PORT"
-          } >> $GITHUB_ENV
-          echo "✅ Client secret extracted and exported."
+          echo "KEYCLOAK_CLIENT_ID=$CLIENT_ID" >> $GITHUB_ENV
+          echo "KEYCLOAK_CLIENT_SECRET=$CLIENT_SECRET" >> $GITHUB_ENV
+          echo "KEYCLOAK_REALM=$KEYCLOAK_REALM" >> $GITHUB_ENV
+          echo "KEYCLOAK_SERVER=http://localhost:$KEYCLOAK_PORT" >> $GITHUB_ENV
+          echo "✅ Client secret extracted successfully."
+
 
       - name: 🧠 Confirm exported variables
         run: |
