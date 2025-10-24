@@ -7,7 +7,7 @@ on:
 
 env:
   PROFILE: systest
-  AWS_REGION: eu-west-1
+  AWS_REGION: "eu-west-1"
   API_VERSIONING: /api/v1
   DEV_FRONTEND_BASE_URL: http://localhost:3000
   KEYCLOAK_IMAGE: quay.io/keycloak/keycloak:26.2.5
@@ -20,7 +20,7 @@ env:
 
 jobs:
   test:
-    name: Unit & Integration Tests
+    name: Unit Test
     runs-on: ubuntu-24.04
 
     services:
@@ -39,20 +39,14 @@ jobs:
         ports:
           - 5432:5432
 
-    outputs:
-      keycloak_client_secret: ${{ steps.keycloak.outputs.client_secret }}
-      keycloak_client_id: ${{ steps.keycloak.outputs.client_id }}
-      keycloak_realm: ${{ steps.keycloak.outputs.realm }}
-      keycloak_server: ${{ steps.keycloak.outputs.server }}
-
     steps:
-      - name: Checkout repository
+      - name: 🧩 Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install PostgreSQL client + jq
+      - name: 🧰 Install PostgreSQL client + jq
         run: sudo apt-get update && sudo apt-get install -y postgresql-client curl jq
 
-      - name: Wait for PostgreSQL
+      - name: 🕒 Wait for PostgreSQL
         run: |
           echo "⏳ Waiting for PostgreSQL to start..."
           for i in {1..30}; do
@@ -63,7 +57,7 @@ jobs:
             sleep 2
           done
 
-      - name: Start Keycloak (Realm Import)
+      - name: 🚀 Start Keycloak with imported realm
         run: |
           echo "Starting Keycloak (Realm: $KEYCLOAK_REALM)..."
           docker run -d --name $KEYCLOAK_CONTAINER \
@@ -80,17 +74,17 @@ jobs:
               --spi-theme-cache-templates=false \
               --features=scripts,token-exchange,admin-fine-grained-authz
 
-          echo "⏳ Waiting for Keycloak..."
+          echo "⏳ Waiting for Keycloak to start..."
           for i in {1..60}; do
             if curl -fs "http://localhost:$KEYCLOAK_PORT/realms/$KEYCLOAK_REALM" > /dev/null; then
-              echo "✅ Keycloak is up and realm is available!"
+              echo "✅ Keycloak and realm are available!"
               break
             fi
             echo "Still waiting... ($i/60)"
             sleep 5
           done
 
-      - name: Extract and Sync Keycloak Client Secret
+      - name: 🔐 Extract Keycloak Client Secret (from imported realm)
         id: keycloak
         run: |
           echo "🔑 Logging into Keycloak (master realm)..."
@@ -100,79 +94,47 @@ jobs:
             --user "$KEYCLOAK_ADMIN" \
             --password "$KEYCLOAK_ADMIN_PASSWORD"
 
-          echo "🔍 Fetching client UUID for realm $KEYCLOAK_REALM..."
+          echo "🔍 Fetching client UUID for realm: $KEYCLOAK_REALM, client: $CLIENT_ID ..."
           CLIENT_UUID=$(docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh get clients -r $KEYCLOAK_REALM --fields id,clientId | jq -r ".[] | select(.clientId==\"$CLIENT_ID\") | .id")
 
           if [ -z "$CLIENT_UUID" ]; then
-            echo "⚠️ Client $CLIENT_ID not found, creating..."
-            docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh create clients -r $KEYCLOAK_REALM \
-              -s clientId=$CLIENT_ID -s enabled=true -s publicClient=false -s 'redirectUris=["*"]'
-            CLIENT_UUID=$(docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh get clients -r $KEYCLOAK_REALM --fields id,clientId | jq -r ".[] | select(.clientId==\"$CLIENT_ID\") | .id")
+            echo "❌ Client '$CLIENT_ID' not found in realm '$KEYCLOAK_REALM'. Please verify your imported realm JSON."
+            exit 1
           fi
 
           CLIENT_SECRET=$(docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh get clients/$CLIENT_UUID/client-secret -r $KEYCLOAK_REALM | jq -r '.value')
 
-          echo "✅ Keycloak Client Secret fetched successfully."
+          echo "✅ Successfully fetched existing client secret."
           echo "client_secret=$CLIENT_SECRET" >> $GITHUB_OUTPUT
           echo "client_id=$CLIENT_ID" >> $GITHUB_OUTPUT
           echo "realm=$KEYCLOAK_REALM" >> $GITHUB_OUTPUT
           echo "server=http://localhost:${KEYCLOAK_PORT}" >> $GITHUB_OUTPUT
 
-      - name: Set up JDK 17
+      - name: ☕ Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: temurin
 
-      - name: Run Maven Tests
+      - name: 🧪 Run Maven Tests
         env:
-          BACKEND_BASE_URL: https://api-dev.meedl.africa
-          CREDIT_REGISTRY_AGENT_PASSWORD: ${{ secrets.CREDIT_REGISTRY_AGENT_PASSWORD }}
-          CREDIT_REGISTRY_EMAIL_ADDRESS: ${{ secrets.CREDIT_REGISTRY_EMAIL_ADDRESS }}
-          CREDIT_REGISTRY_SUBSCRIBERID: ${{ secrets.CREDIT_REGISTRY_SUBSCRIBERID }}
-          CREDIT_REGISTRY_URL: ${{ secrets.CREDIT_REGISTRY_URL }}
-          CREATED_BY: ${{ secrets.CREATED_BY }}
-          DATABASE_HOST: localhost
-          DATABASE_PORT: 5432
-          DATABASE_NAME: meedl_build
+          DATABASE_URL: jdbc:postgresql://localhost:5432/meedl_build
           DATABASE_USERNAME: postgres
           DATABASE_PASSWORD: postgres
-          DATABASE_URL: jdbc:postgresql://localhost:5432/meedl_build
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/meedl_build
-          SPRING_DATASOURCE_USERNAME: postgres
-          SPRING_DATASOURCE_PASSWORD: postgres
-          KEYCLOAK_SERVER: http://localhost:8080
+          KEYCLOAK_REALM: ${{ steps.keycloak.outputs.realm }}
+          KEYCLOAK_SERVER: ${{ steps.keycloak.outputs.server }}
           KEYCLOAK_CLIENT_ID: ${{ steps.keycloak.outputs.client_id }}
           KEYCLOAK_CLIENT_SECRET: ${{ steps.keycloak.outputs.client_secret }}
-          KEYCLOAK_REALM: ${{ steps.keycloak.outputs.realm }}
-          KEYCLOAK_USERNAME: ${{ env.KEYCLOAK_ADMIN }}
-          KEYCLOAK_PASSWORD: ${{ env.KEYCLOAK_ADMIN_PASSWORD }}
           FRONTEND_BASE_URL: ${{ env.DEV_FRONTEND_BASE_URL }}
-          FIRST_ORGANIZATION_NAME: ${{ secrets.FIRST_ORGANIZATION_NAME }}
-          FIRST_ORGANIZATION_EMAIL: techops@learnspace.africa
-          FIRST_ORGANIZATION_TIN: ${{ secrets.FIRST_ORGANIZATION_TIN }}
-          FIRST_PHONE_NUMBER: ${{ secrets.FIRST_PHONE_NUMBER }}
-          FIRST_ORGANIZATION_RC_NUMBER: ${{ secrets.FIRST_ORGANIZATION_RC_NUMBER }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           JWT_EXPIRATION: ${{ secrets.JWT_EXPIRATION }}
-          SUPER_ADMIN_FIRST_NAME: ${{ secrets.SUPER_ADMIN_FIRST_NAME }}
-          SUPER_ADMIN_LAST_NAME: ${{ secrets.SUPER_ADMIN_LAST_NAME }}
-          SUPER_ADMIN_EMAIL: ${{ secrets.SUPER_ADMIN_EMAIL }}
-          MAIL_HOST: ${{ secrets.MAIL_HOST }}
-          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
-          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
-          MAIL_SENDER: ${{ secrets.MAIL_SENDER }}
-          MAIL_PORT: ${{ secrets.MAIL_PORT }}
-          AWS_REGION: ${{ env.AWS_REGION }}
-          IV_AES_KEY: ${{ secrets.IV_AES_KEY }}
-          AES_SECRET_KEY: ${{ secrets.AES_SECRET_KEY }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          SYSTEST_FRONTEND_BASE_URL: http://localhost:3000
-          SYSTEST_FRONTEND_BASE_URL2: http://localhost:3000
-          SYSTEST_SWAGGER_URL: https://api-dev.meedl.africa
+          PROFILE: systest
+          AWS_REGION: "eu-west-1"
         run: |
-          echo "✅ Database initialized at: $DATABASE_URL"
+          echo "🧹 Resetting test database..."
+          PGPASSWORD=postgres psql -h localhost -U postgres -c "DROP DATABASE IF EXISTS meedl_build;"
+          PGPASSWORD=postgres psql -h localhost -U postgres -c "CREATE DATABASE meedl_build;"
+          echo "✅ DB ready at jdbc:postgresql://localhost:5432/meedl_build"
           echo "🚀 Running Maven tests..."
           mvn -B clean test
 
@@ -183,41 +145,31 @@ jobs:
           name: surefire-reports
           path: target/surefire-reports/
 
-      - name: Clean up Keycloak container
-        if: always()
-        run: |
-          echo "🧹 Cleaning up Keycloak..."
-          docker stop $KEYCLOAK_CONTAINER || true
-          docker rm $KEYCLOAK_CONTAINER || true
-
-
   build:
-    name: Build & Analyze
+    name: Build and Analyze
     needs: [test]
     runs-on: ubuntu-latest
-
     env:
       KEYCLOAK_CLIENT_SECRET: ${{ needs.test.outputs.keycloak_client_secret }}
       KEYCLOAK_CLIENT_ID: ${{ needs.test.outputs.keycloak_client_id }}
       KEYCLOAK_REALM: ${{ needs.test.outputs.keycloak_realm }}
       KEYCLOAK_SERVER: ${{ needs.test.outputs.keycloak_server }}
-      AWS_REGION: eu-west-1
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: ☕ Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: temurin
 
-      - name: Confirm Keycloak values from previous job
-        run: |
-          echo "Client ID: $KEYCLOAK_CLIENT_ID"
-          echo "Client Secret: $KEYCLOAK_CLIENT_SECRET"
-          echo "Realm: $KEYCLOAK_REALM"
-          echo "Server: $KEYCLOAK_SERVER"
-
-      - name: Build JAR
+      - name: 🏗️ Build JAR
         run: mvn -B clean package -DskipTests
+
+      - name: 🧹 Clean up Keycloak container
+        if: always()
+        run: |
+          echo "Cleaning up Keycloak container..."
+          docker stop $KEYCLOAK_CONTAINER || true
+          docker rm $KEYCLOAK_CONTAINER || true
