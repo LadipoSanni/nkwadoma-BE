@@ -16,7 +16,7 @@ env:
   KEYCLOAK_REALM: meedl-prod
   KEYCLOAK_ADMIN: admin
   KEYCLOAK_ADMIN_PASSWORD: admin
-  CLIENT_ID: meedl
+  CLIENT_ID: meedl-prod
 
 jobs:
   test:
