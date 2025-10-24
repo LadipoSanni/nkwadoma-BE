@@ -20,7 +20,7 @@ env:
 
 jobs:
   test:
-    name: 🧪 Unit & Integration Tests
+    name: Unit & Integration Tests
     runs-on: ubuntu-24.04
 
     services:
@@ -46,13 +46,13 @@ jobs:
       keycloak_server: ${{ steps.keycloak.outputs.server }}
 
     steps:
-      - name: 🧩 Checkout repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: 🧰 Install PostgreSQL client + jq
+      - name: Install PostgreSQL client + jq
         run: sudo apt-get update && sudo apt-get install -y postgresql-client curl jq
 
-      - name: 🕒 Wait for PostgreSQL
+      - name: Wait for PostgreSQL
         run: |
           echo "⏳ Waiting for PostgreSQL to start..."
           for i in {1..30}; do
@@ -63,7 +63,7 @@ jobs:
             sleep 2
           done
 
-      - name: 🚀 Start Keycloak (Realm Import)
+      - name: Start Keycloak (Realm Import)
         run: |
           echo "Starting Keycloak (Realm: $KEYCLOAK_REALM)..."
           docker run -d --name $KEYCLOAK_CONTAINER \
@@ -90,7 +90,7 @@ jobs:
             sleep 5
           done
 
-      - name: 🔐 Extract and Sync Keycloak Client Secret
+      - name: Extract and Sync Keycloak Client Secret
         id: keycloak
         run: |
           echo "🔑 Logging into Keycloak (master realm)..."
@@ -118,13 +118,13 @@ jobs:
           echo "realm=$KEYCLOAK_REALM" >> $GITHUB_OUTPUT
           echo "server=http://localhost:${KEYCLOAK_PORT}" >> $GITHUB_OUTPUT
 
-      - name: ☕ Set up JDK 17
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: temurin
 
-      - name: 🧪 Run Maven Tests
+      - name: Run Maven Tests
         env:
           BACKEND_BASE_URL: https://api-dev.meedl.africa
           CREDIT_REGISTRY_AGENT_PASSWORD: ${{ secrets.CREDIT_REGISTRY_AGENT_PASSWORD }}
@@ -183,7 +183,7 @@ jobs:
           name: surefire-reports
           path: target/surefire-reports/
 
-      - name: 🧹 Clean up Keycloak container
+      - name: Clean up Keycloak container
         if: always()
         run: |
           echo "🧹 Cleaning up Keycloak..."
@@ -192,7 +192,7 @@ jobs:
 
 
   build:
-    name: 🏗️ Build & Analyze
+    name: Build & Analyze
     needs: [test]
     runs-on: ubuntu-latest
 
@@ -206,18 +206,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: ☕ Set up JDK 17
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: temurin
 
-      - name: 🧾 Confirm Keycloak values from previous job
+      - name: Confirm Keycloak values from previous job
         run: |
           echo "Client ID: $KEYCLOAK_CLIENT_ID"
           echo "Client Secret: $KEYCLOAK_CLIENT_SECRET"
           echo "Realm: $KEYCLOAK_REALM"
           echo "Server: $KEYCLOAK_SERVER"
 
-      - name: 🏗️ Build JAR
+      - name: Build JAR
         run: mvn -B clean package -DskipTests
